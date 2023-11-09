@@ -1,20 +1,20 @@
 import Konva from 'konva'
-import { IPoint } from '~/helper/utils'
+import { IXY } from '~/helper/utils'
 import { EditorService } from '~/service/editor/editor'
-import { ISchema } from '~/service/schema/type'
+import { INode } from '~/service/schema/type'
 import { StageService } from '../stage'
 import { StageStatus } from './status'
 
 export class StageStatusCreate {
-  private _schema?: ISchema
+  private _node?: INode
   private _item?: Konva.Shape
   constructor(
     private status: StageStatus,
     private stage: StageService,
     private editor: EditorService
   ) {}
-  private get schema(): ISchema {
-    return this._schema!
+  private get node(): INode {
+    return this._node!
   }
   private get item(): Konva.Shape {
     return this._item!
@@ -30,15 +30,15 @@ export class StageStatusCreate {
     })
       .onMove(({ absoluteMarquee: { x, y, width, height } }) => {
         if (this.status.createType === 'ellipse') {
-          this.schema.x = x + width / 2
-          this.schema.y = y + height / 2
-          this.schema.width = width
-          this.schema.height = height
+          this.node.x = x + width / 2
+          this.node.y = y + height / 2
+          this.node.width = width
+          this.node.height = height
         } else {
-          this.schema.x = x
-          this.schema.y = y
-          this.schema.width = width
-          this.schema.height = height
+          this.node.x = x
+          this.node.y = y
+          this.node.width = width
+          this.node.height = height
         }
       })
       .onEnd(({ drag }) => {
@@ -47,8 +47,8 @@ export class StageStatusCreate {
       })
   }
   end() {}
-  private createRect(absoluteStart: IPoint) {
-    this._schema = this.editor.Schema.Default.rect({
+  private createRect(absoluteStart: IXY) {
+    this._node = this.editor.Schema.Default.rect({
       x: absoluteStart.x,
       y: absoluteStart.y,
       width: 0,
@@ -57,8 +57,8 @@ export class StageStatusCreate {
     this._item = new Konva.Rect()
     this.add()
   }
-  private createEllipse(absoluteStart: IPoint) {
-    this._schema = this.editor.Schema.Default.ellipse({
+  private createEllipse(absoluteStart: IXY) {
+    this._node = this.editor.Schema.Default.ellipse({
       x: absoluteStart.x,
       y: absoluteStart.y,
       width: 0,
@@ -68,8 +68,8 @@ export class StageStatusCreate {
     this.add()
   }
   private add() {
-    this.editor.Schema.addSchema(this.schema)
-    this.editor.autoSchemaToItem(this.schema, this.item)
+    this.editor.Schema.addNode(this.node)
+    this.editor.autoSchemaToItem(this.node, this.item)
     this.stage.mainLayer.add(this.item)
     this.stage.transformer.nodes([this.item])
   }

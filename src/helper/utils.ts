@@ -1,4 +1,4 @@
-export type IPoint = { x: number; y: number }
+export type IXY = { x: number; y: number }
 
 export function noopFunc() {}
 

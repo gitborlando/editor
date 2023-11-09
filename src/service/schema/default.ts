@@ -6,17 +6,34 @@ import {
   IFillColor,
   IFillImg,
   IFillLinearGradient,
+  IFrame,
   ILine,
+  INodeBase,
+  INodeMeta,
+  IPage,
   IPoint,
   IPolygon,
   IRect,
-  ISchemaBase,
-  ISchemaMeta,
   IText,
 } from './type'
 
 export class DefaultSchema {
   constructor(public schema: SchemaService) {}
+  page(): IPage {
+    return {
+      id: uuidv4(),
+      name: 'page',
+      childIds: [],
+    }
+  }
+  frame(frame?: Partial<IFrame>): IFrame {
+    return observable({
+      type: 'frame',
+      childIds: [],
+      ...this.createSchemaBase(),
+      ...frame,
+    })
+  }
   rect(rect?: Partial<IRect>): IRect {
     return observable({
       type: 'rect',
@@ -65,7 +82,7 @@ export class DefaultSchema {
   fillImg(type: 'img'): IFillImg {
     return { type, url: '' }
   }
-  private createSchemaMeta(): ISchemaMeta {
+  private createSchemaMeta(): INodeMeta {
     return {
       id: uuidv4(),
       name: '',
@@ -75,7 +92,7 @@ export class DefaultSchema {
       hover: false,
     }
   }
-  private createSchemaBase(): ISchemaBase {
+  private createSchemaBase(): INodeBase {
     return {
       ...this.createSchemaMeta(),
       x: 0,

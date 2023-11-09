@@ -1,4 +1,15 @@
-export type ISchemaMeta = {
+export type ISchema = {
+  nodes: Record<string, INode>
+  pages: IPage[]
+}
+
+export type IPage = {
+  id: string
+  name: string
+  childIds: string[]
+}
+
+export type INodeMeta = {
   id: string
   name: string
   lock: boolean
@@ -8,7 +19,7 @@ export type ISchemaMeta = {
   // parent: ISchema
 }
 
-export type ISchemaBase = ISchemaMeta & {
+export type INodeBase = INodeMeta & {
   x: number
   y: number
   width: number
@@ -24,38 +35,38 @@ export type ISchemaBase = ISchemaMeta & {
   strokeWidth: number
 }
 
-export type ISchema = IFrame | IGroup | IRect | IEllipse | IText | ILine | IPolygon
+export type INode = IFrame | IGroup | IRect | IEllipse | IText | ILine | IPolygon
 
-export type IFrame = ISchemaBase & {
+export type IFrame = INodeBase & {
   type: 'frame'
   childIds: string[]
 }
 
-export type IGroup = ISchemaBase & {
+export type IGroup = INodeBase & {
   type: 'group'
   childIds: string[]
 }
 
-export type IRect = ISchemaBase & {
+export type IRect = INodeBase & {
   type: 'rect'
 }
 
-export type IEllipse = ISchemaBase & {
+export type IEllipse = INodeBase & {
   type: 'ellipse'
   radius: number
   angle: number
 }
 
-export type IPolygon = ISchemaBase & {
+export type IPolygon = INodeBase & {
   type: 'polygon'
   sides: number
 }
 
-export type ILine = ISchemaBase & {
+export type ILine = INodeBase & {
   type: 'line'
 }
 
-export type IText = ISchemaBase & {
+export type IText = INodeBase & {
   type: 'text'
   font: {}
 }

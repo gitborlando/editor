@@ -1,47 +1,55 @@
 import autoBind from 'auto-bind'
 import { makeAutoObservable, toJS } from 'mobx'
-import { ISchema } from '~/service/schema/type'
+import { INode, IPage } from '~/service/schema/type'
 import { EditorService } from '../editor/editor'
 import { DefaultSchema } from './default'
 
 export class SchemaService {
+  nodeMap: Record<string, INode> = {}
+  pages: IPage[] = []
+  selectedNodeIds: string[] = []
+  selectedPageId: string = ''
   Default: DefaultSchema
-  schemaMap = new Map<string, ISchema>()
-  selectedSchemas: ISchema[] = []
   constructor(public editor: EditorService) {
     autoBind(this)
     makeAutoObservable(this)
     this.Default = new DefaultSchema(this)
-    window.addEventListener('keydown', (e) => {
-      if (e.altKey && e.key === 'l') console.log({ ...this.getSchemaMap() })
-    })
   }
-  getSchemaMap() {
-    const o: Record<string, ISchema> = {}
-    ;[...this.schemaMap.entries()].forEach(([k, v]) => {
-      o[k] = toJS(v)
-    })
-    return o
+  getSchema() {
+    return {
+      nodes: toJS(this.nodeMap),
+      pages: toJS(this.pages),
+    }
   }
-  setSchemaMap(schemaObj: Record<string, ISchema>) {
-    Object.entries(schemaObj).forEach(([id, schema]) => this.schemaMap.set(id, schema))
+  setSchema(schemaObj: { nodes: Record<string, INode>; pages: IPage[] }) {
+    this.nodeMap = schemaObj.nodes
+    this.pages = schemaObj.pages
   }
-  getSchemaFlat() {
-    return [...this.schemaMap.values()]
+  addNode(schema: INode) {
+    this.nodeMap[schema.id] = schema
+    return this.nodeMap[schema.id]!
   }
-  addSchema(schema: ISchema) {
-    this.schemaMap.set(schema.id, schema)
-    return this.schemaMap.get(schema.id)!
+  deleteNode(id: string) {
+    delete this.nodeMap[id]
   }
-  deleteSchema(id: string) {
-    this.schemaMap.delete(id)
+  copyNode() {}
+  findNode(id: string) {
+    return this.nodeMap[id]
   }
-  copySchema() {}
-  findSchema(id: string) {
-    return this.schemaMap.get(id)
-  }
-  findSchemaThen(id: string, callback: (schema: ISchema) => void) {
-    const schema = this.findSchema(id)
+  findNodeThen(id: string, callback: (schema: INode) => void) {
+    const schema = this.findNode(id)
     schema && callback(schema)
+  }
+  addPage(page: IPage) {
+    this.pages.push(page)
+  }
+  deletePage(id: string) {
+    this.pages = this.pages.filter((page) => page.id !== id)
+  }
+  findPage(id: string) {
+    return this.pages.find((page) => page.id === id)
+  }
+  selectPage(id: string) {
+    this.selectedPageId = id
   }
 }
