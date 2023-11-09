@@ -1,0 +1,8 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "cSpell.words": ["autorun", "dragmove", "Konva", "stagefy", "uuidv"]
+}
