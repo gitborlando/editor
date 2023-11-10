@@ -4,6 +4,7 @@ import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { Editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
+import { Button } from '~/ui/widget/button'
 import { Flex } from '~/ui/widget/flex'
 
 type IHeaderComp = {}
@@ -13,11 +14,11 @@ export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
   return (
     <Flex layout='v' className={classes.Header}>
       <Flex layout='c' className={classes.tools}>
-        <button onClick={() => Editor.Stage.draw.clearAll()}>清除</button>
-        <button onClick={() => Editor.Stage.setStatus()}>选择工具</button>
-        <button onClick={() => Editor.Stage.setStatus('dragStage')}>拖动画布</button>
-        <button onClick={() => Editor.Stage.Status.create.setType('rect')}>矩形</button>
-        <button onClick={() => Editor.Stage.Status.create.setType('ellipse')}>圆形</button>
+        <Button onClick={() => Editor.Stage.draw.clearAll()}>清除</Button>
+        <Button onClick={() => Editor.Stage.setStatus()}>选择</Button>
+        <Button onClick={() => Editor.Stage.setStatus('dragStage')}>拖动</Button>
+        <Button onClick={() => Editor.Stage.Status.create.setType('rect')}>矩形</Button>
+        <Button onClick={() => Editor.Stage.Status.create.setType('ellipse')}>圆形</Button>
       </Flex>
     </Flex>
   )

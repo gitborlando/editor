@@ -11,7 +11,7 @@ export const Button = forwardRef<HTMLDivElement, IButton>(
     const {} = useLocalObservable(() => ({}))
     return (
       <Flex
-        sidePadding={10}
+        sidePadding={8}
         layout='c'
         className={cx(classes.Button, className)}
         {...rest}
@@ -26,7 +26,7 @@ type IButtonStyle = {} /* & Required<Pick<IButton>> */ /* & Pick<IButton> */
 
 const useStyles = makeStyles<IButtonStyle>()((t) => ({
   Button: {
-    ...t.rect('fit-content', '100%'),
+    ...t.rect('fit-content', 30),
     ...t.labelFont,
     ...t.default$.hover.background,
     cursor: 'pointer',
