@@ -17,7 +17,6 @@ export class StageStatusSelect {
     private editor: EditorService
   ) {}
   start() {
-    console.log('start')
     this.mousemove = (e) => {
       this.hoverId = e.target.id()
     }
@@ -25,7 +24,6 @@ export class StageStatusSelect {
     this.mousedown = (e) => {
       this.hoverId = e.target.id()
       this.isOnLayer = true
-      console.log(e.target.name())
     }
     this.stage.instance.on('mousedown', this.mousedown)
 

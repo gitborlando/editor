@@ -13,14 +13,11 @@ export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
   return (
     <Flex layout='v' className={classes.Header}>
       <Flex layout='c' className={classes.tools}>
+        <button onClick={() => Editor.Stage.draw.clearAll()}>清除</button>
         <button onClick={() => Editor.Stage.setStatus()}>选择工具</button>
         <button onClick={() => Editor.Stage.setStatus('dragStage')}>拖动画布</button>
-        <button onClick={() => Editor.Stage.Status.setStatus('create').setCreateType('rect')}>
-          rect
-        </button>
-        <button onClick={() => Editor.Stage.Status.setStatus('create').setCreateType('ellipse')}>
-          circle
-        </button>
+        <button onClick={() => Editor.Stage.Status.create.setType('rect')}>矩形</button>
+        <button onClick={() => Editor.Stage.Status.create.setType('ellipse')}>圆形</button>
       </Flex>
     </Flex>
   )

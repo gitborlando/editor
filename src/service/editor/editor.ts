@@ -11,8 +11,6 @@ export class EditorService {
   Schema: SchemaService
   Drag: DragService
   constructor() {
-    // autoBind(this)
-    // makeAutoObservable(this)
     this.Stage = new StageService(this)
     this.Schema = new SchemaService(this)
     this.Drag = new DragService(this)
@@ -41,7 +39,7 @@ export class EditorService {
     const page = this.Schema.findPage(pageId || this.Schema.pages[0].id)!
     const nodes = page.childIds.map((childId) => this.Schema.nodeMap[childId])
     nodes.forEach((node) => {
-      const item = this.Stage.draw.addRect()
+      const item = this.Stage.draw.rect()
       this.autoSchemaToItem(node, item)
     })
   }
