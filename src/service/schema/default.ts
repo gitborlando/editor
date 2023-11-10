@@ -18,18 +18,20 @@ import {
 } from './type'
 
 export class DefaultSchema {
+  typeIndexMap: Record<string, [string, number]> = {}
   constructor(public schema: SchemaService) {}
   page(): IPage {
     return {
       id: uuidv4(),
-      name: 'page',
       childIds: [],
+      ...this.createNodeName('page'),
     }
   }
   frame(frame?: Partial<IFrame>): IFrame {
     return observable({
       type: 'frame',
       childIds: [],
+      ...this.createNodeName('frame'),
       ...this.createSchemaBase(),
       ...frame,
     })
@@ -37,6 +39,7 @@ export class DefaultSchema {
   rect(rect?: Partial<IRect>): IRect {
     return observable({
       type: 'rect',
+      ...this.createNodeName('rect'),
       ...this.createSchemaBase(),
       ...rect,
     })
@@ -46,6 +49,7 @@ export class DefaultSchema {
       type: 'ellipse',
       radius: 100,
       angle: 0,
+      ...this.createNodeName('ellipse'),
       ...this.createSchemaBase(),
       ...ellipse,
     })
@@ -54,6 +58,7 @@ export class DefaultSchema {
     return observable({
       type: 'polygon',
       sides: 3,
+      ...this.createNodeName('polygon'),
       ...this.createSchemaBase(),
       ...polygon,
     })
@@ -62,6 +67,7 @@ export class DefaultSchema {
     return observable({
       type: 'text',
       font: [],
+      ...this.createNodeName('text'),
       ...this.createSchemaBase(),
       ...text,
     })
@@ -69,6 +75,7 @@ export class DefaultSchema {
   line(line?: Partial<ILine>): ILine {
     return observable({
       type: 'line',
+      ...this.createNodeName('line'),
       ...this.createSchemaBase(),
       ...line,
     })
@@ -109,5 +116,24 @@ export class DefaultSchema {
       stroke: 'black',
       strokeWidth: 1,
     }
+  }
+  private createNodeName(
+    type: 'page' | 'frame' | 'rect' | 'group' | 'ellipse' | 'polygon' | 'text' | 'line' | 'img'
+  ) {
+    this.typeIndexMap = Object.keys(this.typeIndexMap).length
+      ? this.typeIndexMap
+      : {
+          page: ['页面', 1],
+          frame: ['画板', 1],
+          rect: ['矩形', 1],
+          group: ['分组', 1],
+          ellipse: ['椭圆', 1],
+          polygon: ['多边形', 1],
+          text: ['文本', 1],
+          line: ['线段', 1],
+          img: ['图片', 1],
+        }
+    let nameIndex = this.typeIndexMap[type]!
+    return { name: nameIndex[0] + ' ' + (nameIndex[1] as number)++ }
   }
 }
