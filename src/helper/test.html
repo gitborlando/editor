@@ -1,46 +1,76 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <script src="https://unpkg.com/konva@4.0.18/konva.min.js"></script>
-    <meta charset="utf-8" />
-    <title>Konva Circle Demo</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background-color: #f0f0f0;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="container"></div>
-    <script>
-      var width = window.innerWidth
-      var height = window.innerHeight
+<head></head>
+<canvas id="canvas" style="border: 1px solid #ccc" width="500" height="500"></canvas>
+<input id="$endD" type="range" min="0" max="360" value="0" />
+<span id="$endDV"></span>
+<input id="$r" type="range" min="0" max="100" value="0" />
+<style>
+  #canvas {
+    width: 500px;
+    height: 500px;
+  }
+</style>
+<script>
+  const ctx = canvas.getContext('2d')
+  const d = (n) => (n * Math.PI) / 180
 
-      var stage = new Konva.Stage({
-        container: 'container',
-        width: width,
-        height: height,
-      })
+  let width = 200
+  let height = 100
+  let cx = width / 2
+  let cy = height / 2
+  let startD = d(0)
+  let endD = d(120)
+  let r = 0.3
+  let tanSize = Math.sqrt(width ** 2 + height ** 2)
 
-      var layer = new Konva.Layer()
+  $endD.oninput = (e) => {
+    endD = d(+e.target.value)
+    $endDV.innerText = `endD:${e.target.value}`
+  }
+  $r.oninput = (e) => {
+    r = +e.target.value / 100
+  }
 
-      var circle = new Konva.Ellipse({
-        x: 100,
-        y: stage.height() / 2,
-        radius: { x: 70, y: 60 },
-        fill: 'red',
-        stroke: 'black',
-        strokeWidth: 4,
-      })
+  requestAnimationFrame(function render() {
+    canvas.width = canvas.width
+    ctx.ellipse(cx, cy, cx, cy, d(0), startD, endD)
+    ctx.save()
+    ctx.translate(cx, cy)
+    ctx.rotate(startD)
+    ctx.moveTo(calculatePointOnEllipse(cx * r, cy * r, startD, cx, cy), 0)
+    ctx.lineTo(calculatePointOnEllipse(cx, cy, startD, cx, cy), 0)
+    ctx.restore()
+    ctx.ellipse(cx, cy, cx * r, cy * r, d(0), startD, endD)
+    ctx.save()
+    ctx.translate(cx, cy)
+    ctx.rotate(endD)
+    ctx.moveTo(calculatePointOnEllipse(cx * r, cy * r, endD, cx, cy), 0)
+    ctx.lineTo(calculatePointOnEllipse(cx, cy, endD, cx, cy), 0)
+    ctx.restore()
+    ctx.closePath()
+    ctx.stroke()
+    requestAnimationFrame(render)
+  })
 
-      // add the shape to the layer
-      layer.add(circle)
+  ctx.ellipse(cx, cy, cx, cy, d(0), startD, endD)
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.rotate(startD)
+  ctx.moveTo(calculatePointOnEllipse(cx * r, cy * r, startD, cx, cy), 0)
+  ctx.lineTo(calculatePointOnEllipse(cx, cy, startD, cx, cy), 0)
+  ctx.restore()
+  ctx.ellipse(cx, cy, cx * r, cy * r, d(0), startD, endD)
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.rotate(endD)
+  ctx.moveTo(calculatePointOnEllipse(cx * r, cy * r, endD, cx, cy), 0)
+  ctx.lineTo(calculatePointOnEllipse(cx, cy, endD, cx, cy), 0)
+  ctx.restore()
+  ctx.closePath()
+  ctx.stroke()
 
-      // add the layer to the stage
-      stage.add(layer)
-    </script>
-  </body>
-</html>
+  function calculatePointOnEllipse(a, b, theta, h, k) {
+    // 计算极坐标上的距离 r
+    const r = (a * b) / Math.sqrt(b ** 2 * Math.cos(theta) ** 2 + a ** 2 * Math.sin(theta) ** 2)
+    return r
+  }
+</script>
