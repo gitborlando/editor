@@ -1,28 +1,40 @@
 import autoBind from 'auto-bind'
-import { autorun, makeAutoObservable } from 'mobx'
+import { autorun, makeObservable } from 'mobx'
+import { EditorService } from '~/service/editor/editor'
 import { StageService } from '../stage'
 import { StageStatusCreate } from './create'
 import { StageStatusDragStage } from './drag-stage'
 import { StageStatusSelect } from './select'
 
-export type IStageStatusType = 'select' | 'dragStage' | 'create' | 'edit'
-type ICreateType = 'frame' | 'rect' | 'ellipse' | 'line' | 'text' | 'img'
+export type IStageStatusType = 'select' | 'dragStage' | 'create'
 
-type IOperate = StageStatusSelect | StageStatusDragStage | StageStatusCreate
+type IOperate = {
+  start: () => void
+  end: () => void
+}
 
 export class StageStatus {
   status: IStageStatusType = 'select'
   lastStatus: IStageStatusType = 'select'
-  createType: ICreateType = 'rect'
+  select: StageStatusSelect
+  dragStage: StageStatusDragStage
+  create: StageStatusCreate
   private operateMap = new Map<IStageStatusType, IOperate>()
-  constructor(private stage: StageService) {
+  constructor(private stage: StageService, private editor: EditorService) {
     autoBind(this)
-    makeAutoObservable(this, { lastStatus: false })
-    this.operateMap.set('select', new StageStatusSelect(this, this.stage, this.stage.editor))
-    this.operateMap.set('dragStage', new StageStatusDragStage(this.stage, this.stage.editor))
-    this.operateMap.set('create', new StageStatusCreate(this, this.stage, this.stage.editor))
+    makeObservable(this, { status: true })
+    this.select = new StageStatusSelect(this, this.stage, this.editor)
+    this.dragStage = new StageStatusDragStage(this.stage, this.editor)
+    this.create = new StageStatusCreate(this, this.stage, this.editor)
   }
   init() {
+    const statusList = ['select', 'dragStage', 'create'] as IStageStatusType[]
+    statusList.forEach((status) =>
+      this.operateMap.set(status, {
+        start: () => this[status].start(),
+        end: () => this[status].end(),
+      })
+    )
     autorun(() => {
       this.operateMap.get(this.lastStatus)?.end()
       this.operateMap.get(this.status)?.start()
@@ -31,10 +43,6 @@ export class StageStatus {
   }
   setStatus(status: IStageStatusType) {
     this.status = status
-    return this
-  }
-  setCreateType(type: ICreateType) {
-    this.createType = type
     return this
   }
 }
