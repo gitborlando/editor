@@ -1,26 +1,35 @@
 import autoBind from 'auto-bind'
 import Konva from 'konva'
-import { autorun, makeAutoObservable } from 'mobx'
-import { listen } from '~/helper/utils'
+import { autorun, makeObservable } from 'mobx'
+import { INoopFunc, listen } from '~/helper/utils'
 import { EditorService } from '../editor/editor'
+import { StageDraw } from './draw'
 import { IStageStatusType, StageStatus } from './status/status'
 
 export class StageService {
-  private _instance: Konva.Stage | null = null
-  konvaLayers: Konva.Layer[] = [new Konva.Layer(), new Konva.Layer()]
-  mainLayer = this.konvaLayers[0]
-  transformer = new Konva.Transformer()
   cursor = 'auto'
   bound = { width: 0, height: 0, left: 250, right: 250, top: 45 }
   offset = { x: 0, y: 0 }
   zoom = 1
+  konvaLayers: Konva.Layer[] = [new Konva.Layer(), new Konva.Layer()]
+  mainLayer = this.konvaLayers[0]
+  transformer = new Konva.Transformer()
   Status: StageStatus
-  constructor(public editor: EditorService) {
+  draw: StageDraw
+  private _instance: Konva.Stage | null = null
+  private stageLoadCallbacks: INoopFunc[] = []
+  constructor(private editor: EditorService) {
     autoBind(this)
-    makeAutoObservable(this)
+    makeObservable(this, {
+      cursor: true,
+      bound: true,
+      offset: true,
+      zoom: true,
+    })
     this.setStageBound()
     this.konvaLayers[1].add(this.transformer)
-    this.Status = new StageStatus(this)
+    this.Status = new StageStatus(this, this.editor)
+    this.draw = new StageDraw(this, this.editor)
     this.autoCursor()
   }
   get instance() {
@@ -29,11 +38,15 @@ export class StageService {
   get status() {
     return this.Status.status
   }
+  onLoad(callback: INoopFunc) {
+    this.stageLoadCallbacks.push(callback)
+  }
   setInstance(stage: Konva.Stage) {
     if (this._instance) return
     this._instance = stage
     this.instance.add(this.mainLayer).add(this.konvaLayers[1])
     this.Status.init()
+    while (this.stageLoadCallbacks.length) this.stageLoadCallbacks.pop()?.()
     return this
   }
   setStatus(status: IStageStatusType = 'select') {
