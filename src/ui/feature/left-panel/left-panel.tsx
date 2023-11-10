@@ -5,9 +5,9 @@ import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { PageComp } from './page/page'
 
-type ILPanelComp = {}
+type ILeftPanelComp = {}
 
-export const LPanelComp: FC<ILPanelComp> = observer(({}) => {
+export const LeftPanelComp: FC<ILeftPanelComp> = observer(({}) => {
   const { classes } = useStyles({})
   return (
     <Flex layout='v' className={classes.LeftPanel}>
@@ -29,4 +29,4 @@ const useStyles = makeStyles<ILeftPanelCompStyle>()((t) => ({
   },
 }))
 
-LPanelComp.displayName = 'LeftPanelComp'
+LeftPanelComp.displayName = 'LeftPanelComp'

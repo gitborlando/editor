@@ -1,5 +1,3 @@
-import autoBind from 'auto-bind'
-import { makeAutoObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { Editor } from '~/service/editor/editor'
@@ -18,13 +16,6 @@ export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
     </Flex>
   )
 })
-
-const RightPanelState = new (class {
-  public constructor() {
-    autoBind(this)
-    makeAutoObservable(this)
-  }
-})()
 
 type IRightPanelCompStyle = {} /* & Required<Pick<IRightPanelComp>> */ /* & Pick<IRightPanelComp> */
 

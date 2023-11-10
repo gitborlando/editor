@@ -30,9 +30,9 @@ export const Input = observer(
             layout='h'
             className={classes.label}
             onMouseDown={() => {
-              Editor.Drag.onShift(({ shift }) => {
+              Editor.Drag.onSlide(({ shift }) => {
                 changeValue(value + shift.x)
-              })
+              }).setCursor('e-resize')
             }}>
             {label}
           </Flex>
@@ -59,11 +59,9 @@ const useStyles = makeStyles<IInputStyle>()((t) => ({
   Input: {
     ...t.rect('100%', 30),
     ...t.paddingHorizontal(10),
+    ...t.default$.hover.background,
     boxSizing: 'border-box',
     userSelect: 'none',
-    '&:hover': {
-      boxShadow: 'inset 0 0 0px 0.5px #57ADFB',
-    },
   },
   label: {
     width: 44,

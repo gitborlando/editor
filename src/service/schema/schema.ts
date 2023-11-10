@@ -40,8 +40,8 @@ export class SchemaService {
     const schema = this.findNode(id)
     schema && callback(schema)
   }
-  addPage(page: IPage) {
-    this.pages.push(page)
+  newPage() {
+    this.pages.push(this.Default.page())
   }
   deletePage(id: string) {
     this.pages = this.pages.filter((page) => page.id !== id)
