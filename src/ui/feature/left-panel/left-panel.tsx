@@ -1,24 +1,20 @@
-import autoBind from 'auto-bind'
-import { makeAutoObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { Editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
+import { PageComp } from './page/page'
 
-type ILeftPanelComp = {}
+type ILPanelComp = {}
 
-export const LeftPanelComp: FC<ILeftPanelComp> = observer(({}) => {
+export const LPanelComp: FC<ILPanelComp> = observer(({}) => {
   const { classes } = useStyles({})
-  return <Flex layout='v' className={classes.LeftPanel}></Flex>
+  return (
+    <Flex layout='v' className={classes.LeftPanel}>
+      <PageComp />
+    </Flex>
+  )
 })
-
-const LeftPanelState = new (class {
-  public constructor() {
-    autoBind(this)
-    makeAutoObservable(this)
-  }
-})()
 
 type ILeftPanelCompStyle = {} /* & Required<Pick<ILeftPanelComp>> */ /* & Pick<ILeftPanelComp> */
 
@@ -33,4 +29,4 @@ const useStyles = makeStyles<ILeftPanelCompStyle>()((t) => ({
   },
 }))
 
-LeftPanelComp.displayName = 'LeftPanelComp'
+LPanelComp.displayName = 'LeftPanelComp'
