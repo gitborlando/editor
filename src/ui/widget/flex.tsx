@@ -5,7 +5,6 @@ interface IFlexProps extends ComponentPropsWithRef<'div'> {
   layout?: 'c' | 'h' | 'v'
   sidePadding?: number
   spaceBetween?: boolean
-  vif?: boolean
   vshow?: boolean
   onHover?: (isHover: boolean) => void
 }
@@ -16,7 +15,6 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
       layout,
       sidePadding = 0,
       spaceBetween = false,
-      vif = true,
       vshow = true,
       className,
       onHover,
@@ -26,7 +24,6 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
     },
     ref
   ) => {
-    if (!vif) return null
     const { classes, cx } = useStyles({ sidePadding, spaceBetween, vshow })
     return (
       <div
