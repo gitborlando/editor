@@ -1,6 +1,5 @@
-import autoBind from 'auto-bind'
 import Konva from 'konva'
-import { autorun, makeAutoObservable } from 'mobx'
+import { autorun, reaction } from 'mobx'
 import { randomColor } from '~/helper/utils'
 import { SchemaService } from '../schema/schema'
 import { INode } from '../schema/type'
@@ -11,39 +10,40 @@ export class EditorService {
   Stage: StageService
   Schema: SchemaService
   Drag: DragService
-  public constructor() {
-    autoBind(this)
-    makeAutoObservable(this)
-    this.Schema = new SchemaService(this)
+  constructor() {
+    // autoBind(this)
+    // makeAutoObservable(this)
     this.Stage = new StageService(this)
+    this.Schema = new SchemaService(this)
     this.Drag = new DragService(this)
-    this.openFile()
     window.addEventListener('keydown', (e) => {
       if (e.altKey && e.key === 'l') this.exportFile()
     })
+    this.Stage.onLoad(() => {
+      this.openFile()
+      reaction(
+        () => this.Schema.selectedPageId,
+        (selectedPageId) => this.renderPage(selectedPageId),
+        { fireImmediately: true }
+      )
+    })
   }
   openFile() {
-    const json = {
-      nodes: {
-        rect1: this.Schema.Default.rect({ id: 'rect1' }),
-      },
-      pages: [
-        {
-          id: 'page1',
-          name: 'page1',
-          childIds: ['rect1'],
-        },
-      ],
-    }
-    this.Schema.setSchema(json)
+    this.Schema.setSchema(mockFileJson)
+    this.Schema.selectPage(mockFileJson.pages[0].id)
   }
   exportFile() {
     console.log(this.Schema.getSchema())
+    localStorage.setItem('file', JSON.stringify(this.Schema.getSchema()))
   }
-  renderNodes(pageId?: string) {
-    // if (!pageId) pageId = this.Schema.pages[0].id
-    // const page = this.Schema.findPage(pageId) || this.Schema.pages[0]
-    // const nodes = page.childIds.map((childId) => this.Schema.nodeMap[childId])
+  renderPage(pageId?: string) {
+    this.Stage.draw.clearAll()
+    const page = this.Schema.findPage(pageId || this.Schema.pages[0].id)!
+    const nodes = page.childIds.map((childId) => this.Schema.nodeMap[childId])
+    nodes.forEach((node) => {
+      const item = this.Stage.draw.addRect()
+      this.autoSchemaToItem(node, item)
+    })
   }
   autoSchemaToItem(node: INode, item: Konva.Shape) {
     this.autoUpdate(() => item.id(node.id))
@@ -66,3 +66,22 @@ export class EditorService {
 }
 
 export const Editor = new EditorService()
+
+const mockFileJson = {
+  nodes: {
+    rect1: Editor.Schema.Default.rect({ id: 'rect1' }),
+    rect2: Editor.Schema.Default.rect({ id: 'rect1', width: 200, height: 200, x: 200 }),
+  },
+  pages: [
+    {
+      id: 'page1',
+      name: '测试页面1',
+      childIds: ['rect1'],
+    },
+    {
+      id: 'page2',
+      name: '测试页面2',
+      childIds: ['rect2'],
+    },
+  ],
+}

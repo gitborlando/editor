@@ -12,7 +12,10 @@ export class SchemaService {
   Default: DefaultSchema
   constructor(public editor: EditorService) {
     autoBind(this)
-    makeAutoObservable(this)
+    makeAutoObservable(this, {
+      nodeMap: false,
+      Default: false,
+    })
     this.Default = new DefaultSchema(this)
   }
   getSchema() {
@@ -45,6 +48,7 @@ export class SchemaService {
   }
   deletePage(id: string) {
     this.pages = this.pages.filter((page) => page.id !== id)
+    this.selectPage(this.pages[0].id)
   }
   findPage(id: string) {
     return this.pages.find((page) => page.id === id)
