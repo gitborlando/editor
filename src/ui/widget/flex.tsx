@@ -4,31 +4,59 @@ import { makeStyles } from '../theme'
 interface IFlexProps extends ComponentPropsWithRef<'div'> {
   layout?: 'c' | 'h' | 'v'
   sidePadding?: number
+  spaceBetween?: boolean
+  vif?: boolean
+  vshow?: boolean
+  onHover?: (isHover: boolean) => void
 }
 
 export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
-  ({ layout, sidePadding = 0, className, ...rest }, ref) => {
-    const { classes, cx } = useStyles({ sidePadding })
+  (
+    {
+      layout,
+      sidePadding = 0,
+      spaceBetween = false,
+      vif = true,
+      vshow = true,
+      className,
+      onHover,
+      onMouseOver,
+      onMouseLeave,
+      ...rest
+    },
+    ref
+  ) => {
+    if (!vif) return null
+    const { classes, cx } = useStyles({ sidePadding, spaceBetween, vshow })
     return (
       <div
+        ref={ref}
         className={cx(
           layout &&
             classes[({ c: 'center', h: 'horizontalCenter', v: 'verticalCenter' } as const)[layout]],
           classes.Flex,
           className
         )}
-        ref={ref}
+        onMouseOver={(e) => {
+          onHover?.(true)
+          onMouseOver?.(e)
+        }}
+        onMouseLeave={(e) => {
+          onHover?.(false)
+          onMouseLeave?.(e)
+        }}
         {...rest}></div>
     )
   }
 )
 
-type IFlexStyleProps = {} & Required<Pick<IFlexProps, 'sidePadding'>> /* & Pick<IFlexProps> */
+type IFlexStyleProps = {} & Required<
+  Pick<IFlexProps, 'sidePadding' | 'spaceBetween' | 'vshow'>
+> /* & Pick<IFlexProps> */
 
-const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding }) => ({
+const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, spaceBetween, vshow }) => ({
   Flex: {
-    display: 'flex',
-    flex: '0 0 1',
+    display: vshow ? 'flex' : 'none',
   },
   center: {
     justifyContent: 'center',
@@ -37,14 +65,14 @@ const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding }) => ({
   },
   horizontalCenter: {
     alignItems: 'center',
-    paddingLeft: sidePadding,
-    paddingRight: sidePadding,
+    paddingInline: sidePadding,
+    ...(spaceBetween && { justifyContent: 'space-between' }),
   },
   verticalCenter: {
     flexDirection: 'column',
     alignItems: 'center',
-    paddingTop: sidePadding,
-    paddingBottom: sidePadding,
+    paddingBlock: sidePadding,
+    ...(spaceBetween && { justifyContent: 'space-between' }),
   },
 }))
 
