@@ -1,4 +1,5 @@
-import { noopFunc } from '~/helper/utils'
+import { makeObservable } from 'mobx'
+import { ICursor, noopFunc } from '~/helper/utils'
 import { EditorService } from './editor'
 
 export type IPoint = { x: number; y: number }
@@ -17,15 +18,17 @@ type IDragData = {
 }
 
 export class DragService {
+  canMove = false
   private current = { x: 0, y: 0 }
   private start = { x: 0, y: 0 }
   private shift = { x: 0, y: 0 }
   private marquee = { x: 0, y: 0, width: 0, height: 0 }
-  private canMove = false
   private startHandler?: (this: Window, event: MouseEvent) => any
   private moveHandler?: (this: Window, event: MouseEvent) => any
   private endHandler?: (this: Window, event: MouseEvent) => any
-  constructor(private editor: EditorService) {}
+  constructor(private editor: EditorService) {
+    makeObservable(this, { canMove: true })
+  }
   onStart(callback?: (data: IDragData) => void) {
     if (this.startHandler) return this
     window.addEventListener(
@@ -34,6 +37,7 @@ export class DragService {
         this.current = { x: clientX, y: clientY }
         this.start = { x: clientX, y: clientY }
         this.marquee = this.calculateMarquee()
+        this.canMove = true
         callback?.({
           drag: this,
           current: this.current,
@@ -45,7 +49,6 @@ export class DragService {
           absoluteShift: this.editor.Stage.absoluteShift(this.shift),
           absoluteMarquee: this.absoluteMarquee(),
         })
-        this.canMove = true
       })
     )
     return this
@@ -105,10 +108,11 @@ export class DragService {
     )
     return this
   }
-  onShift(callback: (data: IDragData) => void) {
+  onSlide(callback: (data: IDragData) => void) {
     this.onStart()
       .onMove(callback)
       .onEnd(() => this.destroy())
+    return this
   }
   destroy() {
     window.removeEventListener('mousedown', this.startHandler || noopFunc)
@@ -117,6 +121,11 @@ export class DragService {
     this.startHandler = undefined
     this.moveHandler = undefined
     this.endHandler = undefined
+  }
+  setCursor(cursor: ICursor) {
+    const dragMask = document.querySelector<HTMLDivElement>('#dragMask')
+    if (dragMask) dragMask.style.cursor = cursor
+    return this
   }
   private calculateMarquee() {
     this.marquee = { x: this.start.x, y: this.start.y, width: 0, height: 0 }

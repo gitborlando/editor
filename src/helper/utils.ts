@@ -1,6 +1,12 @@
+import { IAutorunOptions, IReactionPublic, autorun } from 'mobx'
+import { useEffect } from 'react'
+
 export type IXY = { x: number; y: number }
 
+export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
+
+export type ICursor = 'auto' | 'n-resize' | 'e-resize' | 'grab' | (string & {})
 
 export const debounce = <F extends (...args: any[]) => any>(func: F, delay: number) => {
   let timeout: NodeJS.Timeout
@@ -40,6 +46,13 @@ export function listen<K extends keyof WindowEventMap>(
     },
     options
   )
+}
+
+export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOptions) {
+  useEffect(() => {
+    const disposer = autorun(view, opts)
+    return () => disposer()
+  }, [])
 }
 
 export function randomColor(): string {
