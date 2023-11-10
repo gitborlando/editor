@@ -43,6 +43,9 @@ export class SchemaService {
     const schema = this.findNode(id)
     schema && callback(schema)
   }
+  selectNode(id: string) {
+    this.selectedNodeIds.push(id)
+  }
   newPage() {
     this.pages.push(this.Default.page())
   }

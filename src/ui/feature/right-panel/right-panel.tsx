@@ -3,7 +3,7 @@ import { FC } from 'react'
 import { Editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
-import { SchemaBaseComp } from './schema-base'
+import { BasePropsComp } from './base-props'
 
 type IRightPanelComp = {}
 
@@ -11,7 +11,7 @@ export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
   const { classes } = useStyles({})
   return (
     <Flex layout='v' className={classes.RightPanel}>
-      <SchemaBaseComp />
+      <BasePropsComp />
       <Flex layout='h' style={{ width: '100%' }}></Flex>
     </Flex>
   )
