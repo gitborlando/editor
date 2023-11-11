@@ -1,10 +1,10 @@
 import autoBind from 'auto-bind'
-import { ISchema } from '../schema/type'
-import { EditorService } from './editor'
+import { EditorService } from '../editor/editor'
+import { SchemaService } from './schema'
 
-export class FileService {
+export class SchemaFile {
   private _inputRef?: HTMLInputElement
-  constructor(private editor: EditorService) {
+  constructor(private schema: SchemaService, private editor: EditorService) {
     autoBind(this)
     window.addEventListener('keydown', (e) => {
       if (e.altKey && e.key === 'l') console.log(this.editor.schema.getSchema())
@@ -23,17 +23,18 @@ export class FileService {
     })
     if (!file) return
     const json = JSON.parse(await this.readAsText(file))
-    this.editor.schema.setSchema(json)
-    this.editor.schema.page.select(json.pages[0].id)
+    this.schema.setSchema(json)
+    this.schema.page.select(json.pages[0].id)
   }
   newFile() {
     const json = this.editor.schema.default.schema()
-    this.editor.schema.setSchema(json)
-    this.editor.schema.page.select(json.pages[0].id)
+    this.schema.setSchema(json)
+    this.schema.page.select(json.pages[0].id)
   }
-  mockFile(json: ISchema) {
-    this.editor.schema.setSchema(json)
-    this.editor.schema.page.select(json.pages[0].id)
+  mockFile() {
+    const json = mockFileJson(this.editor)
+    this.schema.setSchema(json)
+    this.schema.page.select(json.pages[0].id)
   }
   exportFile() {
     console.log(this.editor.schema.getSchema())
@@ -58,3 +59,29 @@ export class FileService {
     })
   }
 }
+
+const mockFileJson = (editor: EditorService) => ({
+  meta: { id: 'mock1', name: '测试文件1' },
+  nodes: {
+    rect1: editor.schema.default.rect({ id: 'rect1', parentId: 'page1' }),
+    rect2: editor.schema.default.rect({
+      id: 'rect1',
+      width: 200,
+      height: 200,
+      x: 200,
+      parentId: 'page2',
+    }),
+  },
+  pages: [
+    {
+      id: 'page1',
+      name: '测试页面1',
+      childIds: ['rect1'],
+    },
+    {
+      id: 'page2',
+      name: '测试页面2',
+      childIds: ['rect2'],
+    },
+  ],
+})

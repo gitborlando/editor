@@ -9,19 +9,20 @@ type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
   const { classes } = useStyles({})
+  const { schema, stage } = editor
   return (
     <Flex layout='v' className={classes.Header}>
       <Flex layout='c' className={classes.tools}>
-        <Button onClick={() => editor.file.openFile()}>上传</Button>
-        <Button onClick={() => editor.file.exportFile()}>下载</Button>
-        <Button onClick={() => editor.file.newFile()}>新建</Button>
-        <Button onClick={() => editor.stage.setStatus()}>选择</Button>
-        <Button onClick={() => editor.stage.setStatus('dragStage')}>拖动</Button>
-        <Button onClick={() => editor.stage.status.create.setType('rect')}>矩形</Button>
-        <Button onClick={() => editor.stage.status.create.setType('ellipse')}>圆形</Button>
+        <Button onClick={() => schema.file.openFile()}>上传</Button>
+        <Button onClick={() => schema.file.exportFile()}>下载</Button>
+        <Button onClick={() => schema.file.newFile()}>新建</Button>
+        <Button onClick={() => stage.setStatus()}>选择</Button>
+        <Button onClick={() => stage.setStatus('dragStage')}>拖动</Button>
+        <Button onClick={() => stage.status.create.setType('rect')}>矩形</Button>
+        <Button onClick={() => stage.status.create.setType('ellipse')}>圆形</Button>
       </Flex>
       <input
-        ref={editor.file.setInputRef}
+        ref={schema.file.setInputRef}
         id='uploader'
         type='file'
         style={{ display: 'none' }}></input>
