@@ -1,6 +1,6 @@
 import autoBind from 'auto-bind'
 import { makeAutoObservable, toJS } from 'mobx'
-import { INode, IPage } from '~/service/schema/type'
+import { INode, IPage, ISchema } from '~/service/schema/type'
 import { EditorService } from '../editor/editor'
 import { DefaultSchema } from './default'
 
@@ -24,13 +24,13 @@ export class SchemaService {
       pages: toJS(this.pages),
     }
   }
-  setSchema(schemaObj: { nodes: Record<string, INode>; pages: IPage[] }) {
+  setSchema(schemaObj: ISchema) {
     this.nodeMap = schemaObj.nodes
     this.pages = schemaObj.pages
   }
-  addNode(schema: INode) {
-    this.nodeMap[schema.id] = schema
-    return this.nodeMap[schema.id]!
+  addNode(node: INode) {
+    this.nodeMap[node.id] = node
+    return this.nodeMap[node.id]!
   }
   deleteNode(id: string) {
     delete this.nodeMap[id]
@@ -40,8 +40,8 @@ export class SchemaService {
     return this.nodeMap[id]
   }
   findNodeThen(id: string, callback: (schema: INode) => void) {
-    const schema = this.findNode(id)
-    schema && callback(schema)
+    const node = this.findNode(id)
+    node && callback(node)
   }
   selectNode(id: string) {
     this.selectedNodeIds.push(id)

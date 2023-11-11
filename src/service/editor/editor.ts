@@ -5,34 +5,26 @@ import { SchemaService } from '../schema/schema'
 import { INode } from '../schema/type'
 import { StageService } from '../stage/stage'
 import { DragService } from './drag'
+import { FileService } from './file'
 
 export class EditorService {
   Stage: StageService
   Schema: SchemaService
   Drag: DragService
+  file: FileService
   constructor() {
     this.Stage = new StageService(this)
     this.Schema = new SchemaService(this)
     this.Drag = new DragService(this)
-    window.addEventListener('keydown', (e) => {
-      if (e.altKey && e.key === 'l') this.exportFile()
-    })
+    this.file = new FileService(this)
     this.Stage.onLoad(() => {
-      this.openFile()
+      this.file.mockFile(mockFileJson)
       reaction(
         () => this.Schema.selectedPageId,
         (selectedPageId) => this.renderPage(selectedPageId),
         { fireImmediately: true }
       )
     })
-  }
-  openFile() {
-    this.Schema.setSchema(mockFileJson)
-    this.Schema.selectPage(mockFileJson.pages[0].id)
-  }
-  exportFile() {
-    console.log(this.Schema.getSchema())
-    localStorage.setItem('file', JSON.stringify(this.Schema.getSchema()))
   }
   renderPage(pageId?: string) {
     this.Stage.draw.clearAll()
@@ -66,6 +58,7 @@ export class EditorService {
 export const Editor = new EditorService()
 
 const mockFileJson = {
+  id: 'mock1',
   nodes: {
     rect1: Editor.Schema.Default.rect({ id: 'rect1' }),
     rect2: Editor.Schema.Default.rect({ id: 'rect1', width: 200, height: 200, x: 200 }),

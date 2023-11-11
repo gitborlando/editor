@@ -14,12 +14,20 @@ import {
   IPoint,
   IPolygon,
   IRect,
+  ISchema,
   IText,
 } from './type'
 
 export class DefaultSchema {
   typeIndexMap: Record<string, [string, number]> = {}
-  constructor(public schema: SchemaService) {}
+  constructor(private _schema: SchemaService) {}
+  schema(): ISchema {
+    return {
+      id: uuidv4(),
+      nodes: {},
+      pages: [this.page()],
+    }
+  }
   page(): IPage {
     return {
       id: uuidv4(),

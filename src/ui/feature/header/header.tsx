@@ -1,5 +1,3 @@
-import autoBind from 'auto-bind'
-import { makeAutoObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { Editor } from '~/service/editor/editor'
@@ -14,22 +12,22 @@ export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
   return (
     <Flex layout='v' className={classes.Header}>
       <Flex layout='c' className={classes.tools}>
-        <Button onClick={() => Editor.Stage.draw.clearAll()}>清除</Button>
+        <Button onClick={() => Editor.file.openFile()}>上传</Button>
+        <Button onClick={() => Editor.file.exportFile()}>下载</Button>
+        <Button onClick={() => Editor.file.newFile()}>新建</Button>
         <Button onClick={() => Editor.Stage.setStatus()}>选择</Button>
         <Button onClick={() => Editor.Stage.setStatus('dragStage')}>拖动</Button>
         <Button onClick={() => Editor.Stage.Status.create.setType('rect')}>矩形</Button>
         <Button onClick={() => Editor.Stage.Status.create.setType('ellipse')}>圆形</Button>
       </Flex>
+      <input
+        ref={Editor.file.setInputRef}
+        id='uploader'
+        type='file'
+        style={{ display: 'none' }}></input>
     </Flex>
   )
 })
-
-const HeaderState = new (class {
-  public constructor() {
-    autoBind(this)
-    makeAutoObservable(this)
-  }
-})()
 
 type IHeaderCompStyle = {} /* & Required<Pick<IHeaderComp>> */ /* & Pick<IHeaderComp> */
 
