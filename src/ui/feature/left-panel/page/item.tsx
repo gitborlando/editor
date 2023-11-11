@@ -19,8 +19,8 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
   return (
     <Flex
       layout='h'
-      spaceBetween={true}
       className={classes.PageItem}
+      style={{ justifyContent: 'space-between' }}
       onHover={(hover) => (state.isHover = hover)}
       onClick={() => editor.schema.page.select(id)}>
       <Flex layout='h' sidePadding={15} className={classes.name}>

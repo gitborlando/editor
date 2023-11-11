@@ -4,7 +4,6 @@ import { makeStyles } from '../theme'
 interface IFlexProps extends ComponentPropsWithRef<'div'> {
   layout?: 'c' | 'h' | 'v'
   sidePadding?: number
-  spaceBetween?: boolean
   vshow?: boolean
   onHover?: (isHover: boolean) => void
 }
@@ -14,7 +13,6 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
     {
       layout,
       sidePadding = 0,
-      spaceBetween = false,
       vshow = true,
       className,
       onHover,
@@ -24,7 +22,7 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
     },
     ref
   ) => {
-    const { classes, cx } = useStyles({ sidePadding, spaceBetween, vshow })
+    const { classes, cx } = useStyles({ sidePadding, vshow })
     return (
       <div
         ref={ref}
@@ -48,10 +46,10 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
 )
 
 type IFlexStyleProps = {} & Required<
-  Pick<IFlexProps, 'sidePadding' | 'spaceBetween' | 'vshow'>
+  Pick<IFlexProps, 'sidePadding' | 'vshow'>
 > /* & Pick<IFlexProps> */
 
-const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, spaceBetween, vshow }) => ({
+const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, vshow }) => ({
   Flex: {
     display: vshow ? 'flex' : 'none',
   },
@@ -63,13 +61,11 @@ const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, spaceBetween,
   horizontalCenter: {
     alignItems: 'center',
     paddingInline: sidePadding,
-    ...(spaceBetween && { justifyContent: 'space-between' }),
   },
   verticalCenter: {
     flexDirection: 'column',
     alignItems: 'center',
     paddingBlock: sidePadding,
-    ...(spaceBetween && { justifyContent: 'space-between' }),
   },
 }))
 
