@@ -15,9 +15,9 @@ export const PageHeaderComp: FC<IPageHeaderComp> = observer(({}) => {
   return (
     <Flex className={classes.PageHeader}>
       <Flex layout='c' className={classes.selectPageName}>
-        {editor.schema.findPage(editor.schema.selectedPageId)?.name}
+        {editor.schema.page.find(editor.schema.page.currentPageId)?.name}
       </Flex>
-      <Button style={{ marginLeft: 'auto' }} onClick={() => editor.schema.newPage()}>
+      <Button style={{ marginLeft: 'auto' }} onClick={() => editor.schema.page.newPage()}>
         新建
       </Button>
       <Button onClick={() => setCollapsed(!collapsed)}>{collapsed ? '展开' : '收起'}</Button>

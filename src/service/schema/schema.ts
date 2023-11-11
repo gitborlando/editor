@@ -1,16 +1,16 @@
 import autoBind from 'auto-bind'
 import { makeObservable, toJS } from 'mobx'
 import { Delete } from '~/helper/utils'
-import { INode, INodeParent, IPage, ISchema } from '~/service/schema/type'
+import { INode, INodeParent, ISchema } from '~/service/schema/type'
 import { EditorService } from '../editor/editor'
 import { DefaultSchema } from './default'
+import { SchemaPage } from './page'
 
 export class SchemaService {
   nodeMap: Record<string, INode> = {}
-  pages: IPage[] = []
   selectedNodeIds: string[] = []
-  selectedPageId: string = ''
   default: DefaultSchema
+  page: SchemaPage
   private _meta?: ISchema['meta']
   get meta() {
     return this._meta!
@@ -18,23 +18,22 @@ export class SchemaService {
   constructor(private editor: EditorService) {
     autoBind(this)
     makeObservable(this, {
-      pages: true,
       selectedNodeIds: true,
-      selectedPageId: true,
     })
     this.default = new DefaultSchema(this)
+    this.page = new SchemaPage(this, this.editor)
   }
   getSchema() {
     return {
       meta: this.meta,
       nodes: this.nodeMap,
-      pages: toJS(this.pages),
+      pages: toJS(this.page.pages),
     }
   }
   setSchema({ meta, nodes, pages }: ISchema) {
     this._meta = meta
     this.nodeMap = nodes
-    this.pages = pages
+    this.page.setPages(pages)
   }
   addNode(node: INode) {
     this.nodeMap[node.id] = node
@@ -59,19 +58,5 @@ export class SchemaService {
   }
   selectNode(id: string) {
     this.selectedNodeIds.push(id)
-  }
-  newPage() {
-    this.pages.push(this.default.page())
-  }
-  deletePage(id: string) {
-    if (this.pages.length <= 1) return
-    this.pages = this.pages.filter((page) => page.id !== id)
-    this.selectPage(this.pages[0].id)
-  }
-  findPage(id: string) {
-    return this.pages.find((page) => page.id === id)
-  }
-  selectPage(id: string) {
-    this.selectedPageId = id
   }
 }

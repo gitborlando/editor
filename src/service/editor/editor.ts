@@ -20,7 +20,7 @@ export class EditorService {
     this.stage.onLoad(() => {
       this.file.mockFile(mockFileJson(this))
       reaction(
-        () => this.schema.selectedPageId,
+        () => this.schema.page.currentPageId,
         (selectedPageId) => this.renderPage(selectedPageId),
         { fireImmediately: true }
       )
@@ -28,7 +28,7 @@ export class EditorService {
   }
   renderPage(pageId?: string) {
     this.stage.draw.clearAll()
-    const page = this.schema.findPage(pageId || this.schema.pages[0].id)!
+    const page = this.schema.page.find(pageId || this.schema.page.pages[0].id)!
     const nodes = page.childIds.map((childId) => this.schema.nodeMap[childId])
     nodes.forEach((node) => {
       const item = this.stage.draw.rect()

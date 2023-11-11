@@ -23,7 +23,7 @@ export const PageComp: FC<IPageComp> = observer(({}) => {
         className={classes.pageList}
         vshow={!collapsed}
         style={{ height: state.height, overflow: 'overlay' }}>
-        {editor.schema.pages.map((page) => (
+        {editor.schema.page.pages.map((page) => (
           <PageItemComp key={page.id} name={page.name} id={page.id} />
         ))}
       </Flex>

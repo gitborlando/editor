@@ -24,16 +24,16 @@ export class FileService {
     if (!file) return
     const json = JSON.parse(await this.readAsText(file))
     this.editor.schema.setSchema(json)
-    this.editor.schema.selectPage(json.pages[0].id)
+    this.editor.schema.page.select(json.pages[0].id)
   }
   newFile() {
     const json = this.editor.schema.default.schema()
     this.editor.schema.setSchema(json)
-    this.editor.schema.selectPage(json.pages[0].id)
+    this.editor.schema.page.select(json.pages[0].id)
   }
   mockFile(json: ISchema) {
     this.editor.schema.setSchema(json)
-    this.editor.schema.selectPage(json.pages[0].id)
+    this.editor.schema.page.select(json.pages[0].id)
   }
   exportFile() {
     console.log(this.editor.schema.getSchema())
