@@ -50,6 +50,7 @@ export class SchemaService {
     this.pages.push(this.Default.page())
   }
   deletePage(id: string) {
+    if (this.pages.length <= 1) return
     this.pages = this.pages.filter((page) => page.id !== id)
     this.selectPage(this.pages[0].id)
   }
