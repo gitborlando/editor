@@ -58,3 +58,14 @@ export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOpt
 export function randomColor(): string {
   return `#${Math.floor(Math.random() * 16777215).toString(16)}`
 }
+
+export function Delete<T>(object: Record<string, T>, key: string): void
+export function Delete<T>(target: T[], find: (value: T) => void): void
+export function Delete<T>(target: Record<string, T> | T[], filter: string | ((value: T) => void)) {
+  if (Array.isArray(target)) {
+    const index = target.findIndex(filter as (value: T) => void)
+    index >= 0 && target.splice(index, 1)
+  } else {
+    delete target[filter as string]
+  }
+}
