@@ -39,8 +39,14 @@ export class SchemaService {
     this.nodeMap[node.id] = node
     return this.nodeMap[node.id]!
   }
-  setNodeParent(id: string, parentId: string) {
+  connectToParent(id: string, parentId: string, isPage = false) {
     this.findNode(id).parentId = parentId
+    if (isPage) {
+      this.page.find(parentId)?.childIds.push(id)
+    } else {
+      const parent = this.findNode(id)
+      if ('childIds' in parent) parent.childIds.push(id)
+    }
   }
   deleteNode(id: string) {
     const node = this.nodeMap[id]

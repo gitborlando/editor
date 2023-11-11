@@ -77,7 +77,9 @@ export class StageStatusCreate {
     this._item = this.stage.draw.ellipse()
   }
   private add() {
-    this.editor.schema.addNode(this.node)
+    const { schema } = this.editor
+    schema.addNode(this.node)
+    schema.connectToParent(this.node.id, schema.page.currentId, true)
     this.editor.autoSchemaToItem(this.node, this.item)
     this.stage.mainLayer.add(this.item)
     //this.stage.transformer.nodes([this.item])
