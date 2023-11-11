@@ -15,7 +15,7 @@ export const PageHeaderComp: FC<IPageHeaderComp> = observer(({}) => {
   return (
     <Flex className={classes.PageHeader}>
       <Flex layout='c' className={classes.selectPageName}>
-        {editor.schema.page.find(editor.schema.page.currentPageId)?.name}
+        {editor.schema.page.find(editor.schema.page.currentId)?.name}
       </Flex>
       <Button style={{ marginLeft: 'auto' }} onClick={() => editor.schema.page.newPage()}>
         新建

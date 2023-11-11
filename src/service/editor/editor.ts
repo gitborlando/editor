@@ -20,7 +20,7 @@ export class EditorService {
     this.stage.onLoad(() => {
       this.file.mockFile(mockFileJson(this))
       reaction(
-        () => this.schema.page.currentPageId,
+        () => this.schema.page.currentId,
         (selectedPageId) => this.renderPage(selectedPageId),
         { fireImmediately: true }
       )

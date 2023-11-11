@@ -11,7 +11,7 @@ type IPageItemComp = {
 }
 
 export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
-  const selected = editor.schema.page.currentPageId === id
+  const selected = editor.schema.page.currentId === id
   const { classes } = useStyles({ selected })
   const state = useLocalObservable(() => ({
     isHover: false,

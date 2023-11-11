@@ -7,12 +7,12 @@ import { IPage } from './type'
 
 export class SchemaPage {
   pages: IPage[] = []
-  currentPageId: string = ''
+  currentId: string = ''
   public constructor(private schema: SchemaService, private editor: EditorService) {
     autoBind(this)
     makeObservable(this, {
       pages: true,
-      currentPageId: true,
+      currentId: true,
     })
   }
   setPages(pages: IPage[]) {
@@ -25,7 +25,7 @@ export class SchemaPage {
     return this.pages.find((page) => page.id === id)
   }
   select(id: string) {
-    this.currentPageId = id
+    this.currentId = id
   }
   delete(id: string) {
     if (this.pages.length <= 1) return
