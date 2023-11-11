@@ -21,9 +21,15 @@ import {
 export class DefaultSchema {
   typeIndexMap: Record<string, [string, number]> = {}
   constructor(private _schema: SchemaService) {}
-  schema(): ISchema {
+  meta(): ISchema['meta'] {
     return {
       id: uuidv4(),
+      name: '无标题',
+    }
+  }
+  schema(): ISchema {
+    return {
+      meta: this.meta(),
       nodes: {},
       pages: [this.page()],
     }

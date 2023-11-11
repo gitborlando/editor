@@ -10,6 +10,10 @@ export class SchemaService {
   selectedNodeIds: string[] = []
   selectedPageId: string = ''
   default: DefaultSchema
+  private _meta?: ISchema['meta']
+  get meta() {
+    return this._meta!
+  }
   constructor(private editor: EditorService) {
     autoBind(this)
     makeObservable(this, {
@@ -21,13 +25,15 @@ export class SchemaService {
   }
   getSchema() {
     return {
-      nodes: toJS(this.nodeMap),
+      meta: this.meta,
+      nodes: this.nodeMap,
       pages: toJS(this.pages),
     }
   }
-  setSchema(schemaObj: ISchema) {
-    this.nodeMap = schemaObj.nodes
-    this.pages = schemaObj.pages
+  setSchema({ meta, nodes, pages }: ISchema) {
+    this._meta = meta
+    this.nodeMap = nodes
+    this.pages = pages
   }
   addNode(node: INode) {
     this.nodeMap[node.id] = node

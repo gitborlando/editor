@@ -58,7 +58,7 @@ export class EditorService {
 export const editor = new EditorService()
 
 const mockFileJson = {
-  id: 'mock1',
+  meta: { id: 'mock1', name: '测试文件1' },
   nodes: {
     rect1: editor.schema.default.rect({ id: 'rect1' }),
     rect2: editor.schema.default.rect({ id: 'rect1', width: 200, height: 200, x: 200 }),

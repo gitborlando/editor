@@ -1,5 +1,5 @@
 export type ISchema = {
-  id: string
+  meta: { id: string; name: string }
   nodes: Record<string, INode>
   pages: IPage[]
 }
