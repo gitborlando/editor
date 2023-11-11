@@ -1,6 +1,7 @@
 import autoBind from 'auto-bind'
 import { makeObservable, toJS } from 'mobx'
-import { INode, IPage, ISchema } from '~/service/schema/type'
+import { Delete } from '~/helper/utils'
+import { INode, INodeParent, IPage, ISchema } from '~/service/schema/type'
 import { EditorService } from '../editor/editor'
 import { DefaultSchema } from './default'
 
@@ -39,8 +40,14 @@ export class SchemaService {
     this.nodeMap[node.id] = node
     return this.nodeMap[node.id]!
   }
+  setNodeParent(id: string, parentId: string) {
+    this.findNode(id).parentId = parentId
+  }
   deleteNode(id: string) {
-    delete this.nodeMap[id]
+    const node = this.nodeMap[id]
+    const parent = this.findNode(node.parentId) as INodeParent
+    Delete(this.nodeMap, node.id)
+    Delete(parent.childIds, (id) => id === node.id)
   }
   copyNode() {}
   findNode(id: string) {

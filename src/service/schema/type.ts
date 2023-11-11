@@ -17,7 +17,7 @@ export type INodeMeta = {
   visible: boolean
   select: boolean
   hover: boolean
-  // parent: ISchema
+  parentId: string
 }
 
 export type INodeBase = INodeMeta & {
@@ -37,6 +37,7 @@ export type INodeBase = INodeMeta & {
 }
 
 export type INode = IFrame | IGroup | IRect | IEllipse | IText | ILine | IPolygon
+export type INodeParent = IFrame | IGroup | IPage
 
 export type IFrame = INodeBase & {
   type: 'frame'

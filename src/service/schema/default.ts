@@ -111,6 +111,7 @@ export class DefaultSchema {
       visible: true,
       select: false,
       hover: false,
+      parentId: '',
     }
   }
   private createSchemaBase(): INodeBase {

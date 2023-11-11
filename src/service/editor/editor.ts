@@ -18,7 +18,7 @@ export class EditorService {
     this.drag = new DragService(this)
     this.file = new FileService(this)
     this.stage.onLoad(() => {
-      this.file.mockFile(mockFileJson)
+      this.file.mockFile(mockFileJson(this))
       reaction(
         () => this.schema.selectedPageId,
         (selectedPageId) => this.renderPage(selectedPageId),
@@ -57,11 +57,17 @@ export class EditorService {
 
 export const editor = new EditorService()
 
-const mockFileJson = {
+const mockFileJson = (editor: EditorService) => ({
   meta: { id: 'mock1', name: '测试文件1' },
   nodes: {
-    rect1: editor.schema.default.rect({ id: 'rect1' }),
-    rect2: editor.schema.default.rect({ id: 'rect1', width: 200, height: 200, x: 200 }),
+    rect1: editor.schema.default.rect({ id: 'rect1', parentId: 'page1' }),
+    rect2: editor.schema.default.rect({
+      id: 'rect1',
+      width: 200,
+      height: 200,
+      x: 200,
+      parentId: 'page2',
+    }),
   },
   pages: [
     {
@@ -75,4 +81,4 @@ const mockFileJson = {
       childIds: ['rect2'],
     },
   ],
-}
+})
