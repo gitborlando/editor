@@ -10,7 +10,7 @@ type IBasePropsComp = {}
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
   const { schema: Schema } = editor
-  const node = Schema.findNode(Schema.selectedNodeIds[0])
+  const node = Schema.node.find(Schema.node.selectedNodeIds[0])
   return (
     <>
       {node && (

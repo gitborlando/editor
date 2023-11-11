@@ -78,8 +78,8 @@ export class StageStatusCreate {
   }
   private add() {
     const { schema } = this.editor
-    schema.addNode(this.node)
-    schema.connectToParent(this.node.id, schema.page.currentId, true)
+    schema.node.add(this.node)
+    schema.node.connect(this.node.id, schema.page.currentId, true)
     this.editor.autoSchemaToItem(this.node, this.item)
     this.stage.mainLayer.add(this.item)
     //this.stage.transformer.nodes([this.item])

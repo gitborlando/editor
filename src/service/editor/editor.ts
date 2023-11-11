@@ -29,7 +29,7 @@ export class EditorService {
   renderPage(pageId?: string) {
     this.stage.draw.clearAll()
     const page = this.schema.page.find(pageId || this.schema.page.pages[0].id)!
-    const nodes = page.childIds.map((childId) => this.schema.nodeMap[childId])
+    const nodes = page.childIds.map((childId) => this.schema.node.map[childId])
     nodes.forEach((node) => {
       const item = this.stage.draw.rect()
       this.autoSchemaToItem(node, item)
