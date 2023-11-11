@@ -7,17 +7,20 @@ import { StageDraw } from './draw'
 import { IStageStatusType, StageStatus } from './status/status'
 
 export class StageService {
-  cursor = 'auto'
-  bound = { width: 0, height: 0, left: 250, right: 250, top: 45 }
-  offset = { x: 0, y: 0 }
   zoom = 1
+  cursor = 'auto'
+  offset = { x: 0, y: 0 }
+  bound = { width: 0, height: 0, left: 250, right: 250, top: 45 }
   konvaLayers: Konva.Layer[] = [new Konva.Layer(), new Konva.Layer()]
   mainLayer = this.konvaLayers[0]
   transformer = new Konva.Transformer()
   status: StageStatus
   draw: StageDraw
-  private _instance: Konva.Stage | null = null
   private stageLoadCallbacks: INoopFunc[] = []
+  private _instance: Konva.Stage | null = null
+  get instance() {
+    return this._instance!
+  }
   constructor(private editor: EditorService) {
     autoBind(this)
     makeObservable(this, {
@@ -31,9 +34,6 @@ export class StageService {
     this.status = new StageStatus(this, this.editor)
     this.draw = new StageDraw(this, this.editor)
     this.autoCursor()
-  }
-  get instance() {
-    return this._instance!
   }
   onLoad(callback: INoopFunc) {
     this.stageLoadCallbacks.push(callback)

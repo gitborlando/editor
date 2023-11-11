@@ -1,39 +1,45 @@
+import autoBind from 'auto-bind'
 import Konva from 'konva'
 import { KonvaEventListener } from 'konva/lib/Node'
+import { makeObservable } from 'mobx'
 import { noopFunc } from '~/helper/utils'
 import { EditorService } from '~/service/editor/editor'
 import { StageService } from '../stage'
 import { StageStatus } from './status'
 
 export class StageStatusSelect {
-  private isOnLayer: boolean = false
   hoverId = ''
-  private select = noopFunc
-  private mousedown?: KonvaEventListener<Konva.Stage, MouseEvent> = noopFunc
-  private mousemove?: KonvaEventListener<Konva.Stage, MouseEvent> = noopFunc
+  private mousemoveHandler?: KonvaEventListener<Konva.Stage, MouseEvent> = noopFunc
+  private marqueeSelectHandler = noopFunc
   constructor(
     private status: StageStatus,
     private stage: StageService,
     private editor: EditorService
-  ) {}
+  ) {
+    autoBind(this)
+    makeObservable(this, { hoverId: true })
+  }
   start() {
-    this.mousemove = (e) => {
+    this.onHover()
+    this.onMarqueeSelect()
+  }
+  end() {
+    this.stage.instance.off('mousemove', this.mousemoveHandler)
+    this.stage.instance.off('mousedown', this.marqueeSelectHandler)
+  }
+  private onHover() {
+    this.mousemoveHandler = (e) => {
       this.hoverId = e.target.id()
     }
-    this.stage.instance.on('mousemove', this.mousemove)
-    this.mousedown = (e) => {
-      this.hoverId = e.target.id()
-      this.isOnLayer = true
-    }
-    this.stage.instance.on('mousedown', this.mousedown)
-
-    this.select = () => {
-      if (this.hoverId) this.editor.drag.destroy()
-      console.log('select', this.hoverId)
-      let item: Konva.Shape
+    this.stage.instance.on('mousemove', this.mousemoveHandler)
+  }
+  private onMarqueeSelect() {
+    this.marqueeSelectHandler = () => {
+      if (this.hoverId) return
+      let marquee: Konva.Shape
       this.editor.drag
         .onStart(({ absoluteStart }) => {
-          item = new Konva.Rect({
+          marquee = new Konva.Rect({
             x: absoluteStart.x,
             y: absoluteStart.y,
             width: 0,
@@ -41,23 +47,20 @@ export class StageStatusSelect {
             stroke: '#57ADFB',
             strokeWidth: 1,
           })
-          item.fill('transparent')
-          this.stage.mainLayer.add(item)
+          marquee.fill('transparent')
+          this.stage.mainLayer.add(marquee)
         })
         .onMove(({ absoluteMarquee: { x, y, width, height } }) => {
-          item.x(x)
-          item.y(y)
-          item.width(width)
-          item.height(height)
+          marquee.x(x)
+          marquee.y(y)
+          marquee.width(width)
+          marquee.height(height)
         })
-        .onEnd(() => item.remove())
+        .onEnd(({ drag }) => {
+          marquee.remove()
+          drag.destroy()
+        })
     }
-    this.stage.instance.on('mousedown', this.select)
-  }
-  end() {
-    this.editor.drag.destroy()
-    this.stage.instance.off('mousemove', this.mousemove)
-    this.stage.instance.off('mousedown', this.mousedown)
-    this.stage.instance.off('mousedown', this.select)
+    this.stage.instance.on('mousedown', this.marqueeSelectHandler)
   }
 }
