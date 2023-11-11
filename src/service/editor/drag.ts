@@ -44,9 +44,9 @@ export class DragService {
           start: this.start,
           shift: this.shift,
           marquee: this.marquee,
-          absoluteCurrent: this.editor.Stage.absoluteXY(this.stagefy(this.current)),
-          absoluteStart: this.editor.Stage.absoluteXY(this.stagefy(this.start)),
-          absoluteShift: this.editor.Stage.absoluteShift(this.shift),
+          absoluteCurrent: this.editor.stage.absoluteXY(this.stagefy(this.current)),
+          absoluteStart: this.editor.stage.absoluteXY(this.stagefy(this.start)),
+          absoluteShift: this.editor.stage.absoluteShift(this.shift),
           absoluteMarquee: this.absoluteMarquee(),
         })
       })
@@ -72,9 +72,9 @@ export class DragService {
           start: this.start,
           shift: this.shift,
           marquee: this.marquee,
-          absoluteCurrent: this.editor.Stage.absoluteXY(this.stagefy(this.current)),
-          absoluteStart: this.editor.Stage.absoluteXY(this.stagefy(this.start)),
-          absoluteShift: this.editor.Stage.absoluteShift(this.shift),
+          absoluteCurrent: this.editor.stage.absoluteXY(this.stagefy(this.current)),
+          absoluteStart: this.editor.stage.absoluteXY(this.stagefy(this.start)),
+          absoluteShift: this.editor.stage.absoluteShift(this.shift),
           absoluteMarquee: this.absoluteMarquee(),
         })
       })
@@ -94,9 +94,9 @@ export class DragService {
           start: this.start,
           shift: this.shift,
           marquee: this.marquee,
-          absoluteCurrent: this.editor.Stage.absoluteXY(this.stagefy(this.current)),
-          absoluteStart: this.editor.Stage.absoluteXY(this.stagefy(this.start)),
-          absoluteShift: this.editor.Stage.absoluteShift(this.shift),
+          absoluteCurrent: this.editor.stage.absoluteXY(this.stagefy(this.current)),
+          absoluteStart: this.editor.stage.absoluteXY(this.stagefy(this.start)),
+          absoluteShift: this.editor.stage.absoluteShift(this.shift),
           absoluteMarquee: this.absoluteMarquee(),
         })
         this.canMove = false
@@ -153,13 +153,13 @@ export class DragService {
     return this.marquee
   }
   private stagefy({ x, y }: { x: number; y: number }) {
-    return { x: x - this.editor.Stage.bound.left, y: y - this.editor.Stage.bound.top }
+    return { x: x - this.editor.stage.bound.left, y: y - this.editor.stage.bound.top }
   }
   private absoluteMarquee() {
-    const { x, y } = this.editor.Stage.absoluteXY(
+    const { x, y } = this.editor.stage.absoluteXY(
       this.stagefy({ x: this.marquee.x, y: this.marquee.y })
     )
-    const { x: width, y: height } = this.editor.Stage.absoluteShift({
+    const { x: width, y: height } = this.editor.stage.absoluteShift({
       x: this.marquee.width,
       y: this.marquee.height,
     })

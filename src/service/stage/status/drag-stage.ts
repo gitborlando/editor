@@ -1,14 +1,20 @@
 import { EditorService } from '~/service/editor/editor'
 import { StageService } from '../stage'
+import { StageStatus } from './status'
 
 export class StageStatusDragStage {
   private startHandler = () => {}
-  constructor(private stage: StageService, private editor: EditorService) {}
+  constructor(
+    private status: StageStatus,
+    private stage: StageService,
+    private editor: EditorService
+  ) {}
   start() {
     this.startHandler = () => {
       let absoluteShift = { x: 0, y: 0 }
       let startXY = { x: this.stage.instance.x(), y: this.stage.instance.y() }
-      this.editor.Drag.onStart()
+      this.editor.drag
+        .onStart()
         .onMove(({ shift }) => {
           absoluteShift = this.stage.absoluteShift(shift)
           this.stage.instance.x(startXY.x + absoluteShift.x)

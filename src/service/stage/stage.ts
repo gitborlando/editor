@@ -14,7 +14,7 @@ export class StageService {
   konvaLayers: Konva.Layer[] = [new Konva.Layer(), new Konva.Layer()]
   mainLayer = this.konvaLayers[0]
   transformer = new Konva.Transformer()
-  Status: StageStatus
+  status: StageStatus
   draw: StageDraw
   private _instance: Konva.Stage | null = null
   private stageLoadCallbacks: INoopFunc[] = []
@@ -28,15 +28,12 @@ export class StageService {
     })
     this.setStageBound()
     this.konvaLayers[1].add(this.transformer)
-    this.Status = new StageStatus(this, this.editor)
+    this.status = new StageStatus(this, this.editor)
     this.draw = new StageDraw(this, this.editor)
     this.autoCursor()
   }
   get instance() {
     return this._instance!
-  }
-  get status() {
-    return this.Status.status
   }
   onLoad(callback: INoopFunc) {
     this.stageLoadCallbacks.push(callback)
@@ -45,12 +42,12 @@ export class StageService {
     if (this._instance) return
     this._instance = stage
     this.instance.add(this.mainLayer).add(this.konvaLayers[1])
-    this.Status.init()
+    this.status.init()
     while (this.stageLoadCallbacks.length) this.stageLoadCallbacks.pop()?.()
     return this
   }
   setStatus(status: IStageStatusType = 'select') {
-    this.Status.setStatus(status)
+    this.status.setStatus(status)
     return this
   }
   setCursor(cursor: string = 'auto') {
@@ -72,9 +69,9 @@ export class StageService {
   }
   autoCursor() {
     autorun(() => {
-      this.status === 'select' && this.setCursor('auto')
-      this.status === 'dragStage' && this.setCursor('grab')
-      this.status === 'create' && this.setCursor('crosshair')
+      this.status.status === 'select' && this.setCursor('auto')
+      this.status.status === 'dragStage' && this.setCursor('grab')
+      this.status.status === 'create' && this.setCursor('crosshair')
     })
   }
   absoluteXY({ x, y }: { x: number; y: number }) {

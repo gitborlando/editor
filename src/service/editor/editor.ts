@@ -8,30 +8,30 @@ import { DragService } from './drag'
 import { FileService } from './file'
 
 export class EditorService {
-  Stage: StageService
-  Schema: SchemaService
-  Drag: DragService
+  stage: StageService
+  schema: SchemaService
+  drag: DragService
   file: FileService
   constructor() {
-    this.Stage = new StageService(this)
-    this.Schema = new SchemaService(this)
-    this.Drag = new DragService(this)
+    this.stage = new StageService(this)
+    this.schema = new SchemaService(this)
+    this.drag = new DragService(this)
     this.file = new FileService(this)
-    this.Stage.onLoad(() => {
+    this.stage.onLoad(() => {
       this.file.mockFile(mockFileJson)
       reaction(
-        () => this.Schema.selectedPageId,
+        () => this.schema.selectedPageId,
         (selectedPageId) => this.renderPage(selectedPageId),
         { fireImmediately: true }
       )
     })
   }
   renderPage(pageId?: string) {
-    this.Stage.draw.clearAll()
-    const page = this.Schema.findPage(pageId || this.Schema.pages[0].id)!
-    const nodes = page.childIds.map((childId) => this.Schema.nodeMap[childId])
+    this.stage.draw.clearAll()
+    const page = this.schema.findPage(pageId || this.schema.pages[0].id)!
+    const nodes = page.childIds.map((childId) => this.schema.nodeMap[childId])
     nodes.forEach((node) => {
-      const item = this.Stage.draw.rect()
+      const item = this.stage.draw.rect()
       this.autoSchemaToItem(node, item)
     })
   }
@@ -50,18 +50,18 @@ export class EditorService {
   private autoUpdate(updateFunc: () => void) {
     autorun(() => {
       updateFunc()
-      this.Stage.mainLayer.batchDraw()
+      this.stage.mainLayer.batchDraw()
     })
   }
 }
 
-export const Editor = new EditorService()
+export const editor = new EditorService()
 
 const mockFileJson = {
   id: 'mock1',
   nodes: {
-    rect1: Editor.Schema.Default.rect({ id: 'rect1' }),
-    rect2: Editor.Schema.Default.rect({ id: 'rect1', width: 200, height: 200, x: 200 }),
+    rect1: editor.schema.default.rect({ id: 'rect1' }),
+    rect2: editor.schema.default.rect({ id: 'rect1', width: 200, height: 200, x: 200 }),
   },
   pages: [
     {

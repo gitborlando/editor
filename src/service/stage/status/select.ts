@@ -28,21 +28,22 @@ export class StageStatusSelect {
     this.stage.instance.on('mousedown', this.mousedown)
 
     this.select = () => {
-      if (this.hoverId) this.editor.Drag.destroy()
+      if (this.hoverId) this.editor.drag.destroy()
       console.log('select', this.hoverId)
       let item: Konva.Shape
-      this.editor.Drag.onStart(({ absoluteStart }) => {
-        item = new Konva.Rect({
-          x: absoluteStart.x,
-          y: absoluteStart.y,
-          width: 0,
-          height: 0,
-          stroke: '#57ADFB',
-          strokeWidth: 1,
+      this.editor.drag
+        .onStart(({ absoluteStart }) => {
+          item = new Konva.Rect({
+            x: absoluteStart.x,
+            y: absoluteStart.y,
+            width: 0,
+            height: 0,
+            stroke: '#57ADFB',
+            strokeWidth: 1,
+          })
+          item.fill('transparent')
+          this.stage.mainLayer.add(item)
         })
-        item.fill('transparent')
-        this.stage.mainLayer.add(item)
-      })
         .onMove(({ absoluteMarquee: { x, y, width, height } }) => {
           item.x(x)
           item.y(y)
@@ -54,7 +55,7 @@ export class StageStatusSelect {
     this.stage.instance.on('mousedown', this.select)
   }
   end() {
-    this.editor.Drag.destroy()
+    this.editor.drag.destroy()
     this.stage.instance.off('mousemove', this.mousemove)
     this.stage.instance.off('mousedown', this.mousedown)
     this.stage.instance.off('mousedown', this.select)

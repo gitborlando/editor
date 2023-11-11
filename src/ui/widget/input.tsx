@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { ComponentPropsWithRef, forwardRef, useRef } from 'react'
-import { Editor } from '~/service/editor/editor'
+import { editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 
@@ -30,9 +30,11 @@ export const Input = observer(
             layout='h'
             className={classes.label}
             onMouseDown={() => {
-              Editor.Drag.onSlide(({ shift }) => {
-                changeValue(value + shift.x)
-              }).setCursor('e-resize')
+              editor.drag
+                .onSlide(({ shift }) => {
+                  changeValue(value + shift.x)
+                })
+                .setCursor('e-resize')
             }}>
             {label}
           </Flex>

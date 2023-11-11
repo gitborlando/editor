@@ -25,15 +25,16 @@ export class StageStatusCreate {
     return this._item!
   }
   start() {
-    this.editor.Drag.onStart(({ absoluteStart }) => {
-      if (this.currentType === 'frame') this.createRect(absoluteStart)
-      if (this.currentType === 'rect') this.createRect(absoluteStart)
-      if (this.currentType === 'ellipse') this.createEllipse(absoluteStart)
-      if (this.currentType === 'line') this.createRect(absoluteStart)
-      if (this.currentType === 'text') this.createRect(absoluteStart)
-      if (this.currentType === 'img') this.createRect(absoluteStart)
-      this.add()
-    })
+    this.editor.drag
+      .onStart(({ absoluteStart }) => {
+        if (this.currentType === 'frame') this.createRect(absoluteStart)
+        if (this.currentType === 'rect') this.createRect(absoluteStart)
+        if (this.currentType === 'ellipse') this.createEllipse(absoluteStart)
+        if (this.currentType === 'line') this.createRect(absoluteStart)
+        if (this.currentType === 'text') this.createRect(absoluteStart)
+        if (this.currentType === 'img') this.createRect(absoluteStart)
+        this.add()
+      })
       .onMove(({ absoluteMarquee: { x, y, width, height } }) => {
         if (this.currentType === 'ellipse') {
           this.node.x = x + width / 2
@@ -58,7 +59,7 @@ export class StageStatusCreate {
     this.status.setStatus('create')
   }
   private createRect(absoluteStart: IXY) {
-    this._node = this.editor.Schema.Default.rect({
+    this._node = this.editor.schema.default.rect({
       x: absoluteStart.x,
       y: absoluteStart.y,
       width: 0,
@@ -67,7 +68,7 @@ export class StageStatusCreate {
     this._item = this.stage.draw.rect()
   }
   private createEllipse(absoluteStart: IXY) {
-    this._node = this.editor.Schema.Default.ellipse({
+    this._node = this.editor.schema.default.ellipse({
       x: absoluteStart.x,
       y: absoluteStart.y,
       width: 0,
@@ -76,7 +77,7 @@ export class StageStatusCreate {
     this._item = this.stage.draw.ellipse()
   }
   private add() {
-    this.editor.Schema.addNode(this.node)
+    this.editor.schema.addNode(this.node)
     this.editor.autoSchemaToItem(this.node, this.item)
     this.stage.mainLayer.add(this.item)
     //this.stage.transformer.nodes([this.item])

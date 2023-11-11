@@ -4,7 +4,7 @@ import { makeAutoObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import { FC, useEffect, useRef } from 'react'
 import { Layer } from 'react-konva'
-import { Editor } from '~/service/editor/editor'
+import { editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 
 type IRulerComp = {}
@@ -14,7 +14,7 @@ export const RulerComp: FC<IRulerComp> = observer(({}) => {
   const ref = useRef<Konva.Layer>(null)
   useEffect(() => {
     if (!ref.current) return
-    for (let i = 0; i <= Editor.Stage.bound.width; i += 10) {
+    for (let i = 0; i <= editor.stage.bound.width; i += 10) {
       const line = new Konva.Line({
         points: [i, 0, i, 5], // Adjust the Y coordinates for the ruler's position
         stroke: 'black',
@@ -32,7 +32,7 @@ export const RulerComp: FC<IRulerComp> = observer(({}) => {
         ref.current.add(label)
       }
     }
-    for (let i = 0; i <= Editor.Stage.bound.height; i += 10) {
+    for (let i = 0; i <= editor.stage.bound.height; i += 10) {
       const line = new Konva.Line({
         points: [0, i, 5, i], // Adjust the Y coordinates for the ruler's position
         stroke: 'black',

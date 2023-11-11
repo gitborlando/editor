@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC } from 'react'
-import { Editor } from '~/service/editor/editor'
+import { editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { PageHeaderComp } from './header'
@@ -23,7 +23,7 @@ export const PageComp: FC<IPageComp> = observer(({}) => {
         className={classes.pageList}
         vshow={!collapsed}
         style={{ height: state.height, overflow: 'overlay' }}>
-        {Editor.Schema.pages.map((page) => (
+        {editor.schema.pages.map((page) => (
           <PageItemComp key={page.id} name={page.name} id={page.id} />
         ))}
       </Flex>
@@ -33,7 +33,7 @@ export const PageComp: FC<IPageComp> = observer(({}) => {
         vshow={!collapsed}
         onMouseDown={() => {
           let lastHeight = state.height
-          Editor.Drag.setCursor('n-resize').onSlide(({ shift }) => {
+          editor.drag.setCursor('n-resize').onSlide(({ shift }) => {
             let newHeight = lastHeight + shift.y
             if (newHeight <= 30) return
             state.height = newHeight

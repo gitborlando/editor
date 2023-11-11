@@ -1,5 +1,5 @@
 import autoBind from 'auto-bind'
-import { makeAutoObservable, toJS } from 'mobx'
+import { makeObservable, toJS } from 'mobx'
 import { INode, IPage, ISchema } from '~/service/schema/type'
 import { EditorService } from '../editor/editor'
 import { DefaultSchema } from './default'
@@ -9,14 +9,15 @@ export class SchemaService {
   pages: IPage[] = []
   selectedNodeIds: string[] = []
   selectedPageId: string = ''
-  Default: DefaultSchema
-  constructor(public editor: EditorService) {
+  default: DefaultSchema
+  constructor(private editor: EditorService) {
     autoBind(this)
-    makeAutoObservable(this, {
-      nodeMap: false,
-      Default: false,
+    makeObservable(this, {
+      pages: true,
+      selectedNodeIds: true,
+      selectedPageId: true,
     })
-    this.Default = new DefaultSchema(this)
+    this.default = new DefaultSchema(this)
   }
   getSchema() {
     return {
@@ -47,7 +48,7 @@ export class SchemaService {
     this.selectedNodeIds.push(id)
   }
   newPage() {
-    this.pages.push(this.Default.page())
+    this.pages.push(this.default.page())
   }
   deletePage(id: string) {
     if (this.pages.length <= 1) return

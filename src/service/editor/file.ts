@@ -23,22 +23,22 @@ export class FileService {
     })
     if (!file) return
     const json = JSON.parse(await this.readAsText(file))
-    this.editor.Schema.setSchema(json)
-    this.editor.Schema.selectPage(json.pages[0].id)
+    this.editor.schema.setSchema(json)
+    this.editor.schema.selectPage(json.pages[0].id)
   }
   newFile() {
-    const json = this.editor.Schema.Default.schema()
-    this.editor.Schema.setSchema(json)
-    this.editor.Schema.selectPage(json.pages[0].id)
+    const json = this.editor.schema.default.schema()
+    this.editor.schema.setSchema(json)
+    this.editor.schema.selectPage(json.pages[0].id)
   }
   mockFile(json: ISchema) {
-    this.editor.Schema.setSchema(json)
-    this.editor.Schema.selectPage(json.pages[0].id)
+    this.editor.schema.setSchema(json)
+    this.editor.schema.selectPage(json.pages[0].id)
   }
   exportFile() {
-    console.log(this.editor.Schema.getSchema())
-    localStorage.setItem('file', JSON.stringify(this.editor.Schema.getSchema()))
-    this.downloadJsonFile(this.editor.Schema.getSchema())
+    console.log(this.editor.schema.getSchema())
+    localStorage.setItem('file', JSON.stringify(this.editor.schema.getSchema()))
+    this.downloadJsonFile(this.editor.schema.getSchema())
   }
   downloadJsonFile(data: object): void {
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })

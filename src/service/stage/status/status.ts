@@ -24,7 +24,7 @@ export class StageStatus {
     autoBind(this)
     makeObservable(this, { status: true })
     this.select = new StageStatusSelect(this, this.stage, this.editor)
-    this.dragStage = new StageStatusDragStage(this.stage, this.editor)
+    this.dragStage = new StageStatusDragStage(this, this.stage, this.editor)
     this.create = new StageStatusCreate(this, this.stage, this.editor)
   }
   init() {

@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { Editor } from '~/service/editor/editor'
+import { editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { BasePropsComp } from './base-props'
@@ -21,7 +21,7 @@ type IRightPanelCompStyle = {} /* & Required<Pick<IRightPanelComp>> */ /* & Pick
 
 const useStyles = makeStyles<IRightPanelCompStyle>()((t) => ({
   RightPanel: {
-    ...t.rect(Editor.Stage.bound.right, '100%'),
+    ...t.rect(editor.stage.bound.right, '100%'),
     marginLeft: 'auto',
     flexShrink: 0,
     flexGrow: 0,

@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { Editor } from '~/service/editor/editor'
+import { editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { Input } from '~/ui/widget/input'
@@ -9,7 +9,7 @@ type IBasePropsComp = {}
 
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { Schema } = Editor
+  const { schema: Schema } = editor
   const node = Schema.findNode(Schema.selectedNodeIds[0])
   return (
     <>

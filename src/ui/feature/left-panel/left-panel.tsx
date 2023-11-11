@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { Editor } from '~/service/editor/editor'
+import { editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { PageComp } from './page/page'
@@ -20,7 +20,7 @@ type ILeftPanelCompStyle = {} /* & Required<Pick<ILeftPanelComp>> */ /* & Pick<I
 
 const useStyles = makeStyles<ILeftPanelCompStyle>()((t) => ({
   LeftPanel: {
-    ...t.rect(Editor.Stage.bound.left, '100%'),
+    ...t.rect(editor.stage.bound.left, '100%'),
     flexShrink: 0,
     flexGrow: 0,
   },

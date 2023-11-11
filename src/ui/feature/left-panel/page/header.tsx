@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC } from 'react'
-import { Editor } from '~/service/editor/editor'
+import { editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 import { Button } from '~/ui/widget/button'
 import { Flex } from '~/ui/widget/flex'
@@ -15,9 +15,9 @@ export const PageHeaderComp: FC<IPageHeaderComp> = observer(({}) => {
   return (
     <Flex className={classes.PageHeader}>
       <Flex layout='c' className={classes.selectPageName}>
-        {Editor.Schema.findPage(Editor.Schema.selectedPageId)?.name}
+        {editor.schema.findPage(editor.schema.selectedPageId)?.name}
       </Flex>
-      <Button style={{ marginLeft: 'auto' }} onClick={() => Editor.Schema.newPage()}>
+      <Button style={{ marginLeft: 'auto' }} onClick={() => editor.schema.newPage()}>
         新建
       </Button>
       <Button onClick={() => setCollapsed(!collapsed)}>{collapsed ? '展开' : '收起'}</Button>
