@@ -7,7 +7,7 @@ export class FileService {
   constructor(private editor: EditorService) {
     autoBind(this)
     window.addEventListener('keydown', (e) => {
-      if (e.altKey && e.key === 'l') this.exportFile()
+      if (e.altKey && e.key === 'l') console.log(this.editor.schema.getSchema())
     })
   }
   get inputRef() {

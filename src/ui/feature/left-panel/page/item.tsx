@@ -11,7 +11,7 @@ type IPageItemComp = {
 }
 
 export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
-  const selected = editor.schema.selectedPageId === id
+  const selected = editor.schema.page.currentPageId === id
   const { classes } = useStyles({ selected })
   const state = useLocalObservable(() => ({
     isHover: false,
@@ -22,7 +22,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
       spaceBetween={true}
       className={classes.PageItem}
       onHover={(hover) => (state.isHover = hover)}
-      onClick={() => editor.schema.selectPage(id)}>
+      onClick={() => editor.schema.page.select(id)}>
       <Flex layout='h' sidePadding={15} className={classes.name}>
         {name}
       </Flex>
@@ -30,7 +30,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
         <Button
           onClick={(e) => {
             e.stopPropagation()
-            editor.schema.deletePage(id)
+            editor.schema.page.delete(id)
           }}>
           删除
         </Button>
