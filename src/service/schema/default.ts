@@ -61,8 +61,9 @@ export class DefaultSchema {
   ellipse(ellipse?: Partial<IEllipse>): IEllipse {
     return observable({
       type: 'ellipse',
-      radius: 100,
-      angle: 0,
+      innerRate: 0,
+      startAngle: 0,
+      endAngle: 360,
       ...this.createNodeName('ellipse'),
       ...this.createSchemaBase(),
       ...ellipse,

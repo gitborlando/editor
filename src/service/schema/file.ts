@@ -63,7 +63,14 @@ export class SchemaFile {
 const mockFileJson = (editor: EditorService) => ({
   meta: { id: 'mock1', name: '测试文件1' },
   nodes: {
-    rect1: editor.schema.default.rect({ id: 'rect1', parentId: 'page1' }),
+    rect1: editor.schema.default.ellipse({
+      id: 'rect1',
+      parentId: 'page1',
+      width: 200,
+      stroke: 'red',
+      strokeWidth: 1,
+      x: 100,
+    }),
     rect2: editor.schema.default.rect({
       id: 'rect1',
       width: 200,

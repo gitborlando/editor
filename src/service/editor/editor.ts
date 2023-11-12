@@ -28,7 +28,7 @@ export class EditorService {
     const page = this.schema.page.find(pageId || this.schema.page.pages[0].id)!
     const nodes = page.childIds.map((childId) => this.schema.node.map[childId])
     nodes.forEach((node) => {
-      const item = this.stage.draw.rect()
+      const item = this.stage.draw.ellipse()
       this.autoSchemaToItem(node, item)
     })
   }
@@ -42,6 +42,8 @@ export class EditorService {
     this.autoUpdate(() => item.opacity(node.opacity))
     this.autoUpdate(() => item.visible(node.visible))
     //this.autoUpdate(() => item.draggable(!schema.lock))
+    this.autoUpdate(() => item.stroke(node.stroke))
+    //  this.autoUpdate(() => item.opacity(node.opacity))
     this.autoUpdate(() => item.fill(randomColor()))
   }
   private autoUpdate(updateFunc: () => void) {

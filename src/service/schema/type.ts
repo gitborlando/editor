@@ -55,8 +55,9 @@ export type IRect = INodeBase & {
 
 export type IEllipse = INodeBase & {
   type: 'ellipse'
-  radius: number
-  angle: number
+  innerRate: number
+  startAngle: number
+  endAngle: number
 }
 
 export type IPolygon = INodeBase & {

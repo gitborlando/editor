@@ -69,3 +69,13 @@ export function Delete<T>(target: Record<string, T> | T[], filter: string | ((va
     delete target[filter as string]
   }
 }
+
+// 弧度到角度
+export function radiansToDegrees(radians: number) {
+  return radians * (180 / Math.PI)
+}
+// 角度到弧度
+export function degreesToRadians(degrees: number) {
+  return degrees * (Math.PI / 180)
+}
+export const radianfy = degreesToRadians

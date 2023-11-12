@@ -3,7 +3,7 @@ import Konva from 'konva'
 import { autorun, makeObservable } from 'mobx'
 import { INoopFunc, listen } from '~/helper/utils'
 import { EditorService } from '../editor/editor'
-import { StageDraw } from './draw'
+import { StageDraw } from './draw/draw'
 import { IStageStatusType, StageStatus } from './status/status'
 
 export class StageService {
