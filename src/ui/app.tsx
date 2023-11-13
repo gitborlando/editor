@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { editor } from '~/service/editor/editor'
+import { EditorService } from '~/service/editor/editor'
+import { EditorContext } from './context'
 import { EditorComp } from './feature/editor'
 import { makeStyles } from './theme'
 import { Flex } from './widget/flex'
@@ -9,10 +10,13 @@ interface IAppProps {}
 
 export const App: FC<IAppProps> = observer(() => {
   const { classes } = useStyles({})
+  const editor = new EditorService()
   return (
     <Flex layout='v' className={classes.App}>
       <Flex id='dragMask' vshow={editor.drag.canMove} className={classes.dragMask}></Flex>
-      <EditorComp />
+      <EditorContext.Provider value={editor}>
+        <EditorComp />
+      </EditorContext.Provider>
     </Flex>
   )
 })

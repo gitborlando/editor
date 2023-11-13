@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react'
 import { ComponentPropsWithRef, forwardRef, useRef } from 'react'
-import { editor } from '~/service/editor/editor'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
+import { useEditor } from '../context'
 
 interface IInput extends ComponentPropsWithRef<'div'> {
   label: string
@@ -16,6 +16,7 @@ export const Input = observer(
   forwardRef<HTMLDivElement, IInput>(
     ({ className, label, value, onNewValueApply: emitNewValue, min, max, ...rest }, ref) => {
       const { classes, cx } = useStyles({})
+      const { drag } = useEditor()
       const inputRef = useRef<HTMLInputElement>(null)
       const changeValue = (newValue: number) => {
         if (min !== undefined && newValue < min) newValue = min
@@ -30,7 +31,7 @@ export const Input = observer(
             layout='h'
             className={classes.label}
             onMouseDown={() => {
-              editor.drag
+              drag
                 .onSlide(({ shift }) => {
                   changeValue(value + shift.x)
                 })

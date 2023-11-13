@@ -86,4 +86,9 @@
     "body": ["<Flex layout='$1' className={classes.$2}></Flex>"],
     "description": "flex"
   },
+    "useEditor": {
+    "prefix": "ueditor",
+    "body": ["const { } = useEditor()"],
+    "description": "useEditor"
+  },
 }

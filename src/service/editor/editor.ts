@@ -53,5 +53,3 @@ export class EditorService {
     })
   }
 }
-
-export const editor = new EditorService()

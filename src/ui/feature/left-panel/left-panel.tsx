@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { editor } from '~/service/editor/editor'
+import { useEditor } from '~/ui/context'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { PageComp } from './page/page'
@@ -8,7 +8,8 @@ import { PageComp } from './page/page'
 type ILeftPanelComp = {}
 
 export const LeftPanelComp: FC<ILeftPanelComp> = observer(({}) => {
-  const { classes } = useStyles({})
+  const { stage } = useEditor()
+  const { classes } = useStyles({ left: stage.bound.left })
   return (
     <Flex layout='v' className={classes.LeftPanel}>
       <PageComp />
@@ -16,16 +17,15 @@ export const LeftPanelComp: FC<ILeftPanelComp> = observer(({}) => {
   )
 })
 
-type ILeftPanelCompStyle = {} /* & Required<Pick<ILeftPanelComp>> */ /* & Pick<ILeftPanelComp> */
+type ILeftPanelCompStyle = {
+  left: number
+} /* & Required<Pick<ILeftPanelComp>> */ /* & Pick<ILeftPanelComp> */
 
-const useStyles = makeStyles<ILeftPanelCompStyle>()((t) => ({
+const useStyles = makeStyles<ILeftPanelCompStyle>()((t, { left }) => ({
   LeftPanel: {
-    ...t.rect(editor.stage.bound.left, '100%'),
+    ...t.rect(left, '100%'),
     flexShrink: 0,
     flexGrow: 0,
-  },
-  s: {
-    backgroundColor: 'red',
   },
 }))
 

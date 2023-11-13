@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { editor } from '~/service/editor/editor'
+import { useEditor } from '~/ui/context'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { BasePropsComp } from './base-props'
@@ -8,7 +8,8 @@ import { BasePropsComp } from './base-props'
 type IRightPanelComp = {}
 
 export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
-  const { classes } = useStyles({})
+  const { stage } = useEditor()
+  const { classes } = useStyles({ right: stage.bound.right })
   return (
     <Flex layout='v' className={classes.RightPanel}>
       <BasePropsComp />
@@ -17,11 +18,13 @@ export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
   )
 })
 
-type IRightPanelCompStyle = {} /* & Required<Pick<IRightPanelComp>> */ /* & Pick<IRightPanelComp> */
+type IRightPanelCompStyle = {
+  right: number
+} /* & Required<Pick<IRightPanelComp>> */ /* & Pick<IRightPanelComp> */
 
-const useStyles = makeStyles<IRightPanelCompStyle>()((t) => ({
+const useStyles = makeStyles<IRightPanelCompStyle>()((t, { right }) => ({
   RightPanel: {
-    ...t.rect(editor.stage.bound.right, '100%'),
+    ...t.rect(right, '100%'),
     marginLeft: 'auto',
     flexShrink: 0,
     flexGrow: 0,

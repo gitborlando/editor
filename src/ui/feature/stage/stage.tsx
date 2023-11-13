@@ -1,9 +1,7 @@
-import autoBind from 'auto-bind'
-import { makeAutoObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { Stage } from 'react-konva'
-import { editor } from '~/service/editor/editor'
+import { useEditor } from '~/ui/context'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 
@@ -11,24 +9,17 @@ type IStageComp = {}
 
 export const StageComp: FC<IStageComp> = observer(({}) => {
   const { classes } = useStyles({})
+  const { stage } = useEditor()
   return (
-    <Flex className={classes.Stage} style={{ cursor: editor.stage.cursor }}>
+    <Flex className={classes.Stage} style={{ cursor: stage.cursor }}>
       <Stage
-        ref={(ref) => editor.stage.setInstance(ref!)}
-        width={editor.stage.bound.width}
-        height={editor.stage.bound.height}
-        //style={{ border: '1px solid red' }}
+        ref={(ref) => stage.setInstance(ref!)}
+        width={stage.bound.width}
+        height={stage.bound.height}
       />
     </Flex>
   )
 })
-
-const StageState = new (class {
-  public constructor() {
-    autoBind(this)
-    makeAutoObservable(this)
-  }
-})()
 
 type IStageCompStyle = {} /* & Required<Pick<IStageComp>> */ /* & Pick<IStageComp> */
 
