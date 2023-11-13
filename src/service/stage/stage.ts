@@ -10,7 +10,7 @@ export class StageService {
   zoom = 1
   cursor = 'auto'
   offset = { x: 0, y: 0 }
-  bound = { width: 0, height: 0, left: 250, right: 250, top: 45 }
+  bound = { width: 0, height: 0, left: 240, right: 240, top: 48 }
   konvaLayers: Konva.Layer[] = [new Konva.Layer(), new Konva.Layer()]
   mainLayer = this.konvaLayers[0]
   transformer = new Konva.Transformer()

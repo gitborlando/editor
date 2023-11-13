@@ -29,7 +29,7 @@ type IPageHeaderCompStyle = {} /* & Required<Pick<IPageHeaderComp>> */ /* & Pick
 
 const useStyles = makeStyles<IPageHeaderCompStyle>()((t) => ({
   PageHeader: {
-    ...t.rect('100%', 30, 'no-radius', 'white'),
+    ...t.rect('100%', t.default$.normalHeight, 'no-radius', 'white'),
   },
   selectPageName: {
     ...t.labelFont,

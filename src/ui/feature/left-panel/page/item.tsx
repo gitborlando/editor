@@ -45,7 +45,7 @@ type IPageItemCompStyle = {
 
 const useStyles = makeStyles<IPageItemCompStyle>()((t, { selected }) => ({
   PageItem: {
-    ...t.rect('100%', 30, 'no-radius', 'white'),
+    ...t.rect('100%', t.default$.normalHeight, 'no-radius', 'white'),
     ...t.default$.hover.background,
     cursor: 'pointer',
     flexShrink: 0,

@@ -59,7 +59,7 @@ type IInputStyle = {} /* & Required<Pick<IInput>> */ /* & Pick<IInput> */
 
 const useStyles = makeStyles<IInputStyle>()((t) => ({
   Input: {
-    ...t.rect('100%', 30),
+    ...t.rect('100%', t.default$.normalHeight),
     ...t.paddingHorizontal(10),
     ...t.default$.hover.background,
     boxSizing: 'border-box',

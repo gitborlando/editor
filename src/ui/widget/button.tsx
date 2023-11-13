@@ -26,7 +26,7 @@ type IButtonStyle = {} /* & Required<Pick<IButton>> */ /* & Pick<IButton> */
 
 const useStyles = makeStyles<IButtonStyle>()((t) => ({
   Button: {
-    ...t.rect('fit-content', 30),
+    ...t.rect('fit-content', t.default$.normalHeight),
     ...t.labelFont,
     ...t.default$.hover.background,
     cursor: 'pointer',

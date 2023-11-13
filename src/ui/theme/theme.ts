@@ -55,4 +55,5 @@ export const default$ = {
   color: {
     active: { color: 'rgba(36, 138, 255, 1)' },
   },
+  normalHeight: 32,
 }
