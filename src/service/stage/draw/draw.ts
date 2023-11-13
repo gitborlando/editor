@@ -3,7 +3,7 @@ import { makeObservable } from 'mobx'
 import { radianfy } from '~/helper/utils'
 import { EditorService } from '../../editor/editor'
 import { StageService } from '../stage'
-import { drawEllipse } from './ellipse/ellipse'
+import { drawEllipse } from './ellipse'
 
 type IDrawType = 'rect' | 'ellipse' | 'polygon' | 'line' | 'text'
 

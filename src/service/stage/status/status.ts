@@ -28,7 +28,7 @@ export class StageStatus {
     this.create = new StageStatusCreate(this, this.stage, this.editor)
   }
   init() {
-    const statusList = ['select', 'dragStage', 'create'] as IStageStatusType[]
+    const statusList = <IStageStatusType[]>['select', 'dragStage', 'create']
     statusList.forEach((status) =>
       this.operateMap.set(status, {
         start: () => this[status].start(),
