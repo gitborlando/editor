@@ -29,7 +29,7 @@ export class SchemaPage {
   }
   delete(id: string) {
     if (this.pages.length <= 1) return
-    this.find(id)?.childIds.forEach((id) => Delete(this.schema.nodeMap, id))
+    this.find(id)?.childIds.forEach((id) => Delete(this.schema.node.map, id))
     Delete(this.pages, (page) => page.id === id)
     this.select(this.pages[0].id)
   }
