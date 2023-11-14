@@ -70,14 +70,12 @@
       "import autoBind from 'auto-bind'",
       "import { makeObservable } from 'mobx'",
       "",
-      "export class $1${TM_FILENAME_BASE}Service {",
-      "  public constructor() {",
+      "export class $1${TM_FILENAME_BASE} {",
+      "  constructor() {",
       "    autoBind(this)",
-      "    makeObservable(this)",
+      "    makeObservable(this, {})",
       "  }",
-      "}",
-      "",
-      "export const $1${TM_FILENAME_BASE} = new $1${TM_FILENAME_BASE}Service()"
+      "}"
     ],
     "description": "Service"
   },

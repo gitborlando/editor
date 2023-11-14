@@ -1,7 +1,8 @@
 import autoBind from 'auto-bind'
 import Konva from 'konva'
 import { autorun, makeObservable } from 'mobx'
-import { INoopFunc, listen } from '~/helper/utils'
+import { EE } from '~/helper/event-emitter'
+import { listen } from '~/helper/utils'
 import { EditorService } from '../editor/editor'
 import { StageDraw } from './draw/draw'
 import { IStageStatusType, StageStatus } from './status/status'
@@ -16,7 +17,6 @@ export class StageService {
   transformer = new Konva.Transformer()
   status: StageStatus
   draw: StageDraw
-  private stageLoadCallbacks: INoopFunc[] = []
   private _instance: Konva.Stage | null = null
   get instance() {
     return this._instance!
@@ -35,16 +35,11 @@ export class StageService {
     this.draw = new StageDraw(this, this.editor)
     this.autoCursor()
   }
-  onLoad(callback: INoopFunc) {
-    this.stageLoadCallbacks.push(callback)
-  }
   setInstance(stage: Konva.Stage) {
     if (this._instance) return
     this._instance = stage
     this.instance.add(this.mainLayer).add(this.konvaLayers[1])
-    this.status.init()
-    while (this.stageLoadCallbacks.length) this.stageLoadCallbacks.pop()?.()
-    return this
+    EE.emit('stage-instance-exist')
   }
   setStatus(status: IStageStatusType = 'select') {
     this.status.setStatus(status)

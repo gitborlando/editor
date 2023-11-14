@@ -13,7 +13,6 @@ export const App: FC<IAppProps> = observer(() => {
   const editor = new EditorService()
   return (
     <Flex layout='v' className={classes.App}>
-      <Flex id='dragMask' vshow={editor.drag.canMove} className={classes.dragMask}></Flex>
       <EditorContext.Provider value={editor}>
         <EditorComp />
       </EditorContext.Provider>
@@ -26,11 +25,6 @@ type IAppStyleProps = {} /* & Required<Pick<IAppProps>> */ /* & Pick<IAppProps> 
 const useStyles = makeStyles<IAppStyleProps>()((t) => ({
   App: {
     ...t.rect('100vw', '100vh', 'no-radius', 'white'),
-  },
-  dragMask: {
-    ...t.rect('100vw', '100vh', 'no-radius', 'rgba(0,0,0,0)'),
-    ...t.fixed(0, 0),
-    zIndex: 2,
   },
 }))
 

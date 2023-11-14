@@ -4,5 +4,15 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": true
   },
-  "cSpell.words": ["autorun", "dragmove", "Konva", "radianfy", "stagefy", "uuidv", "vshow"]
+  "cSpell.words": [
+    "autorun",
+    "degreefy",
+    "dragmove",
+    "inited",
+    "Konva",
+    "radianfy",
+    "stagefy",
+    "uuidv",
+    "vshow"
+  ]
 }

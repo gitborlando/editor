@@ -1,4 +1,6 @@
-import { makeObservable } from 'mobx'
+import autoBind from 'auto-bind'
+import { autorun, makeObservable } from 'mobx'
+import { EE } from '~/helper/event-emitter'
 import { ICursor, noopFunc } from '~/helper/utils'
 import { EditorService } from './editor'
 
@@ -27,7 +29,11 @@ export class DragService {
   private moveHandler?: (this: Window, event: MouseEvent) => any
   private endHandler?: (this: Window, event: MouseEvent) => any
   constructor(private editor: EditorService) {
+    autoBind(this)
     makeObservable(this, { canMove: true })
+    EE.on('mask-div-exist', () => {
+      autorun(() => this.editor.mask.setShow(this.canMove))
+    })
   }
   onStart(callback?: (data: IDragData) => void) {
     if (this.startHandler) return this
@@ -123,8 +129,7 @@ export class DragService {
     this.endHandler = undefined
   }
   setCursor(cursor: ICursor) {
-    const dragMask = document.querySelector<HTMLDivElement>('#dragMask')
-    if (dragMask) dragMask.style.cursor = cursor
+    this.editor.mask.style.cursor = cursor
     return this
   }
   private calculateMarquee() {

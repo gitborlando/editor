@@ -70,12 +70,31 @@ export function Delete<T>(target: Record<string, T> | T[], filter: string | ((va
   }
 }
 
-// 弧度到角度
-export function radiansToDegrees(radians: number) {
+export function degreefy(radians: number) {
   return radians * (180 / Math.PI)
 }
-// 角度到弧度
-export function degreesToRadians(degrees: number) {
+export function radianfy(degrees: number) {
   return degrees * (Math.PI / 180)
 }
-export const radianfy = degreesToRadians
+
+export function documentCreateElement<Tag extends keyof HTMLElementTagNameMap>(
+  tag: Tag,
+  option: { parent: HTMLElement | string; innerHTML?: any } & Partial<CSSStyleDeclaration>
+): HTMLElementTagNameMap[Tag] {
+  const element = document.createElement(tag) as any
+  Object.entries(option).forEach(([key, value]) => {
+    if (key === 'parent') return
+    if (['id', 'className', 'innerHTML'].includes(key)) {
+      element[key] = value
+    } else {
+      element.style[key] = value
+    }
+  })
+  const { parent } = option
+  if (typeof parent !== 'string') {
+    parent.appendChild(element)
+  } else {
+    document.querySelector(parent)?.appendChild(element)
+  }
+  return element
+}

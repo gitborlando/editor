@@ -30,7 +30,6 @@ export class StageDraw {
   ellipse() {
     const item = new Konva.Shape({
       sceneFunc(ctx, shape) {
-        console.log(shape.getAttr('width'))
         const x = (shape.getAttr('x') || 0) as number
         const y = (shape.getAttr('y') || 0) as number
         const width = (shape.getAttr('width') || 0) as number

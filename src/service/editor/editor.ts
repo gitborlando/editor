@@ -1,20 +1,24 @@
 import Konva from 'konva'
 import { autorun, reaction } from 'mobx'
+import { EE } from '~/helper/event-emitter'
 import { randomColor } from '~/helper/utils'
 import { SchemaService } from '../schema/schema'
 import { INode } from '../schema/type'
 import { StageService } from '../stage/stage'
 import { DragService } from './drag'
+import { MaskService } from './mask'
 
 export class EditorService {
   stage: StageService
   schema: SchemaService
   drag: DragService
+  mask: MaskService
   constructor() {
     this.stage = new StageService(this)
     this.schema = new SchemaService(this)
     this.drag = new DragService(this)
-    this.stage.onLoad(() => {
+    this.mask = new MaskService(this)
+    EE.on('stage-instance-exist', () => {
       this.schema.file.mockFile()
       reaction(
         () => this.schema.page.currentId,
@@ -28,8 +32,9 @@ export class EditorService {
     const page = this.schema.page.find(pageId || this.schema.page.pages[0].id)!
     const nodes = page.childIds.map((childId) => this.schema.node.map[childId])
     nodes.forEach((node) => {
-      const item = this.stage.draw.ellipse()
+      const item = node.type === 'ellipse' ? this.stage.draw.ellipse() : this.stage.draw.rect()
       this.autoSchemaToItem(node, item)
+      console.log(item)
     })
   }
   autoSchemaToItem(node: INode, item: Konva.Shape) {

@@ -12,11 +12,7 @@ export const StageComp: FC<IStageComp> = observer(({}) => {
   const { stage } = useEditor()
   return (
     <Flex className={classes.Stage} style={{ cursor: stage.cursor }}>
-      <Stage
-        ref={(ref) => stage.setInstance(ref!)}
-        width={stage.bound.width}
-        height={stage.bound.height}
-      />
+      <Stage ref={stage.setInstance} width={stage.bound.width} height={stage.bound.height} />
     </Flex>
   )
 })

@@ -18,7 +18,7 @@ import {
   IText,
 } from './type'
 
-export class DefaultSchema {
+export class SchemaDefault {
   typeIndexMap: Record<string, [string, number]> = {}
   constructor(private _schema: SchemaService) {}
   meta(): ISchema['meta'] {

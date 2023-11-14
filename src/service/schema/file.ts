@@ -1,5 +1,6 @@
 import autoBind from 'auto-bind'
 import { EditorService } from '../editor/editor'
+import { mockFileJson } from './mock'
 import { SchemaService } from './schema'
 
 export class SchemaFile {
@@ -59,36 +60,3 @@ export class SchemaFile {
     })
   }
 }
-
-const mockFileJson = (editor: EditorService) => ({
-  meta: { id: 'mock1', name: '测试文件1' },
-  nodes: {
-    rect1: editor.schema.default.ellipse({
-      id: 'rect1',
-      parentId: 'page1',
-      width: 200,
-      stroke: 'red',
-      strokeWidth: 1,
-      x: 100,
-    }),
-    rect2: editor.schema.default.rect({
-      id: 'rect1',
-      width: 200,
-      height: 200,
-      x: 200,
-      parentId: 'page2',
-    }),
-  },
-  pages: [
-    {
-      id: 'page1',
-      name: '测试页面1',
-      childIds: ['rect1'],
-    },
-    {
-      id: 'page2',
-      name: '测试页面2',
-      childIds: ['rect2'],
-    },
-  ],
-})

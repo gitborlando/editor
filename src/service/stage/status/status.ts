@@ -1,5 +1,6 @@
 import autoBind from 'auto-bind'
 import { autorun, makeObservable } from 'mobx'
+import { EE } from '~/helper/event-emitter'
 import { EditorService } from '~/service/editor/editor'
 import { StageService } from '../stage'
 import { StageStatusCreate } from './create'
@@ -26,8 +27,9 @@ export class StageStatus {
     this.select = new StageStatusSelect(this, this.stage, this.editor)
     this.dragStage = new StageStatusDragStage(this, this.stage, this.editor)
     this.create = new StageStatusCreate(this, this.stage, this.editor)
+    EE.on('stage-instance-exist', () => this.init())
   }
-  init() {
+  private init() {
     const statusList = <IStageStatusType[]>['select', 'dragStage', 'create']
     statusList.forEach((status) =>
       this.operateMap.set(status, {
