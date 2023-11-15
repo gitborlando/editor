@@ -1,6 +1,6 @@
 import autoBind from 'auto-bind'
+import { mockFileJson } from '../../helper/mock'
 import { EditorService } from '../editor/editor'
-import { mockFileJson } from './mock'
 import { SchemaService } from './schema'
 
 export class SchemaFile {

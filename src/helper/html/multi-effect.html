@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="cvs" width="400" height="400"></canvas>
+  </body>
+  <script>
+    const c = cvs.getContext('2d')
+    const p = new Path2D()
+    p.moveTo(0, 0)
+    p.lineTo(100, 100)
+    p.lineTo(200, 100)
+    p.closePath()
+    c.lineWidth = 10
+    c.strokeStyle = 'red'
+    c.stroke(p)
+    c.save()
+    c.lineWidth = 5
+    c.strokeStyle = 'blue'
+    c.stroke(p)
+  </script>
+</html>

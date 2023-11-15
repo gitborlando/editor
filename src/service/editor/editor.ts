@@ -34,7 +34,6 @@ export class EditorService {
     nodes.forEach((node) => {
       const item = node.type === 'ellipse' ? this.stage.draw.ellipse() : this.stage.draw.rect()
       this.autoSchemaToItem(node, item)
-      console.log(item)
     })
   }
   autoSchemaToItem(node: INode, item: Konva.Shape) {

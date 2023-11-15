@@ -1,4 +1,4 @@
-import { EditorService } from '../editor/editor'
+import { EditorService } from '../service/editor/editor'
 
 export const mockFileJson = (editor: EditorService) => ({
   meta: { id: 'mock1', name: '测试文件1' },
@@ -38,7 +38,7 @@ export const mockFileJson = (editor: EditorService) => ({
     {
       id: 'page1',
       name: '测试页面1',
-      childIds: [/* 'ellipse1',  */ 'rect2' /* , 'rect4' */],
+      childIds: [/* 'ellipse1' ,  */ 'rect2' /* , 'rect4' */],
     },
     {
       id: 'page2',
