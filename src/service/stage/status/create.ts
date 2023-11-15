@@ -49,6 +49,8 @@ export class StageStatusCreate {
         }
       })
       .onEnd(({ drag }) => {
+        if (!this.node.width) this.node.width = 100
+        if (!this.node.height) this.node.height = 100
         this.stage.setStatus()
         drag.destroy()
       })
