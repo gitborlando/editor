@@ -1,15 +1,16 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { testDraw } from '~/helper/test-draw'
-import { EditorService } from '~/service/editor/editor'
+
+import { EditorService } from '~/editor/editor'
 import { EditorContext } from './context'
-import { EditorComp } from './feature/editor'
 import { makeStyles } from './theme'
+import { EditorComp } from './view/editor/editor'
 import { Flex } from './widget/flex'
 
 interface IAppProps {}
 
-const customMode = true
+const customMode = false
 
 export const App: FC<IAppProps> = observer(() => {
   const { classes } = useStyles({})

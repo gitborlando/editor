@@ -1,12 +1,8 @@
 import { IAutorunOptions, IReactionPublic, autorun } from 'mobx'
 import { useEffect } from 'react'
 
-export type IXY = { x: number; y: number }
-
 export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
-
-export type ICursor = 'auto' | 'n-resize' | 'e-resize' | 'grab' | (string & {})
 
 export const debounce = <F extends (...args: any[]) => any>(func: F, delay: number) => {
   let timeout: NodeJS.Timeout
@@ -53,28 +49,6 @@ export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOpt
     const disposer = autorun(view, opts)
     return () => disposer()
   }, [])
-}
-
-export function randomColor(): string {
-  return `#${Math.floor(Math.random() * 16777215).toString(16)}`
-}
-
-export function Delete<T>(object: Record<string, T>, key: string): void
-export function Delete<T>(target: T[], find: (value: T) => void): void
-export function Delete<T>(target: Record<string, T> | T[], filter: string | ((value: T) => void)) {
-  if (Array.isArray(target)) {
-    const index = target.findIndex(filter as (value: T) => void)
-    index >= 0 && target.splice(index, 1)
-  } else {
-    delete target[filter as string]
-  }
-}
-
-export function degreefy(radians: number) {
-  return radians * (180 / Math.PI)
-}
-export function radianfy(degrees: number) {
-  return degrees * (Math.PI / 180)
 }
 
 export function documentCreateElement<Tag extends keyof HTMLElementTagNameMap>(

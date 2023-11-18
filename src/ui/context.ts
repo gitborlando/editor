@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { EditorService } from '~/service/editor/editor'
+import { EditorService } from '~/editor/editor'
 
 export const EditorContext = createContext<EditorService | null>(null)
 

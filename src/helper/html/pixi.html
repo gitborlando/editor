@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://pixijs.download/v6.0.4/pixi.min.js"></script>
+  </head>
+  <body>
+    <script>
+      // 创建 Pixi 应用
+      const app = new PIXI.Application({ width: 800, height: 600 })
+      document.body.appendChild(app.view)
+
+      // 创建一个图形对象
+      const graphics = new PIXI.Graphics()
+      graphics.beginFill(0x00ff00)
+      graphics.drawRect(100, 100, 200, 200)
+      graphics.endFill()
+      graphics.interactive = true // 使图形对象可交互
+
+      // 注册鼠标移入和移出事件
+      graphics
+        .on('pointerover', () => {
+          //  console.log('鼠标移入图形')
+        })
+        .on('pointerout', () => {
+          //console.log('鼠标移出图形')
+        })
+
+      // 将图形对象添加到舞台
+      app.stage.addChild(graphics)
+
+      graphics.on('mousedown', (e) => console.log(e))
+
+      // 渲染舞台
+      app.renderer.render(app.stage)
+
+      // 获取鼠标坐标
+      function getMousePosition(event) {
+        const { x, y } = event.data.global
+        return new PIXI.Point(x, y)
+      }
+
+      // 注册鼠标移动事件
+      let dragFlag = false
+      let startPoint
+      app.renderer.plugins.interaction.on('mousedown', (event) => {
+        console.log(event)
+        dragFlag = true
+        startPoint = { x: event.data.global.x, y: event.data.global.y }
+      })
+
+      app.renderer.plugins.interaction.on('mousemove', (event) => {
+        if (dragFlag) {
+          const dx = event.data.global.x - startPoint.x
+          const dy = event.data.global.y - startPoint.y
+          app.stage.position.x += dx
+          app.stage.position.y += dy
+          startPoint = { x: event.data.global.x, y: event.data.global.y }
+        }
+      })
+
+      app.renderer.plugins.interaction.on('mouseup', (event) => {
+        dragFlag = false
+      })
+      window.addEventListener('mousewheel', (event) => {
+        const step = event.wheelDelta > 0 ? 0.1 : -0.1
+        if (app.stage.scale.x + step >= 0.1) {
+          app.stage.scale.x += step
+          app.stage.scale.y += step
+        }
+      })
+    </script>
+  </body>
+</html>

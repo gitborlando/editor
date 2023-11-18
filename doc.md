@@ -50,3 +50,11 @@ shadows,转换应用
 ### 工具栏
 
 创建矩形按钮 => stage dragStart, 生成 schema 并选择, 生成 item 并选择 => dragmove,shiftX,shiftY,操作 item 大小 =>
+
+### paper.js
+
+smooth() 铅笔工具
+
+在曲线中间生成点 bezierjs split()
+
+点的坐标的变换

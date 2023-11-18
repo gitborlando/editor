@@ -9,7 +9,6 @@
   "Component": {
     "prefix": "comp",
     "body": [
-      "import autoBind from 'auto-bind'",
       "import { observer, useLocalObservable } from 'mobx-react'",
       "import { FC } from 'react'",
       "import { makeStyles } from '~/ui/theme'",
@@ -84,7 +83,7 @@
     "body": ["<Flex layout='$1' className={classes.$2}></Flex>"],
     "description": "flex"
   },
-    "useEditor": {
+  "useEditor": {
     "prefix": "ueditor",
     "body": ["const { } = useEditor()"],
     "description": "useEditor"

@@ -4,19 +4,26 @@ type ICallback = (...args: any[]) => void
 
 class EventEmitter {
   private events = new Map<IEventType, ICallback[]>()
-  on(eventName: IEventType, callback: ICallback): void {
-    this.events.set(eventName, [...(this.events.get(eventName) || []), callback])
+  on(eventType: IEventType, callback: ICallback): void {
+    this.events.set(eventType, [...(this.events.get(eventType) || []), callback])
   }
-  off(eventName: IEventType, callback: ICallback): void {
-    const callbacks = this.events.get(eventName)
+  once(eventType: IEventType, callback: ICallback): void {
+    const onceCallback = (...args: any[]) => {
+      callback(...args)
+      this.off(eventType, onceCallback)
+    }
+    this.events.set(eventType, [...(this.events.get(eventType) || []), onceCallback])
+  }
+  off(eventType: IEventType, callback: ICallback): void {
+    const callbacks = this.events.get(eventType)
     if (!callbacks) return
     this.events.set(
-      eventName,
+      eventType,
       callbacks.filter((i) => i !== callback)
     )
   }
-  emit(eventName: IEventType, ...args: any[]): void {
-    this.events.get(eventName)?.forEach((callback) => callback(...args))
+  emit(eventType: IEventType, ...args: any[]): void {
+    this.events.get(eventType)?.forEach((callback) => callback(...args))
   }
 }
 

@@ -1,32 +1,30 @@
-import { EditorService } from '../service/editor/editor'
+import { SchemaService } from '~/service/schema/schema'
 
-export const mockFileJson = (editor: EditorService) => ({
+export const mockFileJson = (schema: SchemaService) => ({
   meta: { id: 'mock1', name: '测试文件1' },
   nodes: {
-    ellipse1: editor.schema.default.ellipse({
+    ellipse1: schema.default.ellipse({
       id: 'ellipse1',
       parentId: 'page1',
       width: 200,
       height: 100,
-      stroke: 'red',
-      strokeWidth: 1,
       x: 100,
     }),
-    rect2: editor.schema.default.rect({
+    rect2: schema.default.rect({
       id: 'rect2',
       width: 100,
       height: 100,
       x: 100,
       parentId: 'page1',
     }),
-    rect4: editor.schema.default.rect({
+    rect4: schema.default.rect({
       id: 'rect4',
       width: 100,
       height: 100,
       x: 100,
       parentId: 'page1',
     }),
-    rect3: editor.schema.default.rect({
+    rect3: schema.default.rect({
       id: 'rect3',
       width: 200,
       height: 200,
@@ -38,7 +36,8 @@ export const mockFileJson = (editor: EditorService) => ({
     {
       id: 'page1',
       name: '测试页面1',
-      childIds: [/* 'ellipse1' ,  */ 'rect2' /* , 'rect4' */],
+      // childIds: ['ellipse1' ,  'rect2' , 'rect4'],
+      childIds: ['ellipse1'],
     },
     {
       id: 'page2',
