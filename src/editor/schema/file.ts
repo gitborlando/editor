@@ -1,6 +1,6 @@
 import autoBind from 'auto-bind'
 
-import { mockFileJson } from '~/helper/mock'
+import { mock2 } from '~/helper/mock'
 import { SchemaService } from './schema'
 
 export class SchemaFile {
@@ -33,7 +33,7 @@ export class SchemaFile {
     this.schema.page.select(json.pages[0].id)
   }
   mockFile() {
-    const json = mockFileJson(this.schema)
+    const json = mock2(this.schema)
     this.schema.setSchema(json)
     this.schema.page.select(json.pages[0].id)
   }

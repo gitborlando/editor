@@ -5,7 +5,6 @@ import { DragService } from './drag'
 import { SchemaService } from './schema/schema'
 import { INode } from './schema/type'
 import { StageService } from './stage/stage'
-import { randomColor } from './utils'
 
 export class EditorService {
   schema: SchemaService
@@ -47,7 +46,8 @@ export class EditorService {
     this.autoUpdate(() => item.visible(node.visible))
     //this.autoUpdate(() => item.draggable(!schema.lock))
     //  this.autoUpdate(() => item.opacity(node.opacity))
-    this.autoUpdate(() => item.fill(randomColor()))
+    // this.autoUpdate(() => item.fill(randomColor()))
+    this.autoUpdate(() => item.fill('skyblue'))
   }
   private autoUpdate(updateFunc: () => void) {
     autorun(() => {

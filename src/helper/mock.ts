@@ -1,7 +1,9 @@
-import { SchemaService } from '~/service/schema/schema'
+import { v4 } from 'uuid'
+import { SchemaService } from '~/editor/schema/schema'
+import { INode } from '~/editor/schema/type'
 
 export const mockFileJson = (schema: SchemaService) => ({
-  meta: { id: 'mock1', name: '测试文件1' },
+  meta: { id: 'mock1', name: '测试文件1', user: 'myself' },
   nodes: {
     ellipse1: schema.default.ellipse({
       id: 'ellipse1',
@@ -46,3 +48,38 @@ export const mockFileJson = (schema: SchemaService) => ({
     },
   ],
 })
+
+export function mock2(schema: SchemaService) {
+  let s = new Date().getTime()
+  const nodes: Record<string, INode> = {}
+  let k = 0
+  for (let i = 0; i < 10000; i++) {
+    const id = v4()
+    let j = i % 50
+
+    k = ~~(i / 50)
+    const rect = schema.default.rect({
+      id,
+      width: 50,
+      height: 50,
+      x: 0 + j * 55,
+      y: 0 + k * 55,
+      radius: 10,
+      parentId: 'page1',
+      // fill: 'skyblue',
+    })
+    nodes[id] = rect
+  }
+  console.log(new Date().getTime() - s)
+  return {
+    meta: { id: 'mock1', name: '测试文件1', user: 'myself' },
+    nodes,
+    pages: [
+      {
+        id: 'page1',
+        name: '测试页面1',
+        childIds: Object.keys(nodes),
+      },
+    ],
+  }
+}

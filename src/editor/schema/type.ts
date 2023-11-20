@@ -1,7 +1,7 @@
 import { IXY } from '../utils'
 
 export type ISchema = {
-  meta: { id: string; name: string }
+  meta: { id: string; name: string; user: string }
   pages: IPage[]
   nodes: Record<string, INode>
 }

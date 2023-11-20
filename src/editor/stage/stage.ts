@@ -40,6 +40,14 @@ export class StageService {
     this._instance = stage
     this.instance.add(this.mainLayer).add(this.konvaLayers[1])
     EE.emit('stage-instance-exist')
+    window.addEventListener('mousewheel', (event) => {
+      const step = event.wheelDelta > 0 ? 0.1 : -0.1
+      this.setZoom(this.zoom + step)
+      // if (this.instance.scale() + step >= 0.1) {
+      //   this.instance.scale.x += step
+      //   this.instance.scale.y += step
+      // }
+    })
   }
   setStatus(status: IStageStatusType = 'select') {
     this.status.setStatus(status)
@@ -57,9 +65,10 @@ export class StageService {
     this.zoom = zoom
     this.instance.scaleX(this.instance.scaleX() * zoom)
     this.instance.scaleY(this.instance.scaleY() * zoom)
+    console.log(this.instance.scaleX())
     // zoom at a special point of the stage
-    this.instance.x(this.instance.x() - this.instance.width() * 0.05)
-    this.instance.y(this.instance.y() - this.instance.height() * 0.05)
+    // this.instance.x(this.instance.x() - this.instance.width() * 0.05)
+    // this.instance.y(this.instance.y() - this.instance.height() * 0.05)
     return this
   }
   autoCursor() {

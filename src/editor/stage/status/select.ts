@@ -3,7 +3,8 @@ import Konva from 'konva'
 import { KonvaEventListener } from 'konva/lib/Node'
 import { makeObservable } from 'mobx'
 import { noopFunc } from '~/helper/utils'
-import { EditorService } from '~/service/editor/editor'
+
+import { EditorService } from '~/editor/editor'
 import { StageService } from '../stage'
 import { StageStatus } from './status'
 

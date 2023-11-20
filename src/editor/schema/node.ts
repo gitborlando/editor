@@ -7,7 +7,7 @@ import { INode } from './type'
 export class SchemaNode {
   map: Record<string, INode> = {}
   selectedNodeIds: string[] = []
-  public constructor(private schema: SchemaService) {
+  constructor(private schema: SchemaService) {
     autoBind(this)
     makeObservable(this, {
       selectedNodeIds: true,
@@ -31,7 +31,7 @@ export class SchemaNode {
   find(id: string) {
     return this.map[id]
   }
-  findThen(id: string, callback: (schema: INode) => void) {
+  findThen(id: string, callback: (node: INode) => void) {
     const node = this.find(id)
     node && callback(node)
   }
@@ -48,7 +48,6 @@ export class SchemaNode {
     }
   }
   disconnect(id: string, parentId: string, isPage = false) {
-    this.find(id).parentId = parentId
     if (isPage) {
       const childIds = this.schema.page.find(parentId)?.childIds || []
       Delete(childIds, id)

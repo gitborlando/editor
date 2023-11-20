@@ -31,6 +31,7 @@ export class SchemaDefault {
     return {
       id: uuidv4(),
       name: '无标题',
+      user: 'myself',
     }
   }
   schema(): ISchema {

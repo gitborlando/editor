@@ -8,11 +8,12 @@ import { BasePropsComp } from './base-props'
 type IRightPanelComp = {}
 
 export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
-  const { stage } = useEditor()
+  const { stage, schema } = useEditor()
   const { classes } = useStyles({ right: stage.bound.right })
   return (
     <Flex layout='v' className={classes.RightPanel}>
       <BasePropsComp />
+      <Flex layout='c'>{stage.status.select.hoverId}</Flex>
       <Flex layout='h' style={{ width: '100%' }}></Flex>
     </Flex>
   )
