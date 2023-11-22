@@ -1,27 +1,21 @@
-import autoBind from 'auto-bind'
-import { makeObservable } from 'mobx'
+import { makeObservable, observable } from 'mobx'
+import { autoBind } from '~/helper/decorator'
 import { noopFunc } from '~/helper/utils'
-import { EditorService } from './editor'
-import { ICursor } from './utils'
-
-export type IPoint = { x: number; y: number }
-export type IMarquee = { x: number; y: number; width: number; height: number }
+import { PixiService } from './stage/pixi'
+import { IBound, IXY, type ICursor } from './utils'
 
 type IDragData = {
-  drag: DragService
-  current: IPoint
-  start: IPoint
-  shift: IPoint
-  marquee: IMarquee
-  absoluteCurrent: IPoint
-  absoluteStart: IPoint
-  absoluteShift: IPoint
-  absoluteMarquee: IMarquee
+  dragService: DragService
+  current: IXY
+  start: IXY
+  shift: IXY
+  marquee: IBound
 }
 
+@autoBind
 export class DragService {
-  canMove = false
-  cursor: ICursor = 'auto'
+  @observable canMove = false
+  @observable cursor: ICursor = 'auto'
   private current = { x: 0, y: 0 }
   private start = { x: 0, y: 0 }
   private shift = { x: 0, y: 0 }
@@ -29,9 +23,8 @@ export class DragService {
   private startHandler?: (this: Window, event: MouseEvent) => any
   private moveHandler?: (this: Window, event: MouseEvent) => any
   private endHandler?: (this: Window, event: MouseEvent) => any
-  constructor(private editor: EditorService) {
-    autoBind(this)
-    makeObservable(this, { canMove: true })
+  constructor(private pixiService: PixiService) {
+    makeObservable(this)
   }
   onStart(callback?: (data: IDragData) => void) {
     if (this.startHandler) return this
@@ -43,15 +36,11 @@ export class DragService {
         this.marquee = this.calculateMarquee()
         this.canMove = true
         callback?.({
-          drag: this,
+          dragService: this,
           current: this.current,
           start: this.start,
           shift: this.shift,
           marquee: this.marquee,
-          absoluteCurrent: this.editor.stage.absoluteXY(this.stagefy(this.current)),
-          absoluteStart: this.editor.stage.absoluteXY(this.stagefy(this.start)),
-          absoluteShift: this.editor.stage.absoluteShift(this.shift),
-          absoluteMarquee: this.absoluteMarquee(),
         })
       })
     )
@@ -71,15 +60,11 @@ export class DragService {
         }
         this.marquee = this.calculateMarquee()
         callback({
-          drag: this,
+          dragService: this,
           current: this.current,
           start: this.start,
           shift: this.shift,
           marquee: this.marquee,
-          absoluteCurrent: this.editor.stage.absoluteXY(this.stagefy(this.current)),
-          absoluteStart: this.editor.stage.absoluteXY(this.stagefy(this.start)),
-          absoluteShift: this.editor.stage.absoluteShift(this.shift),
-          absoluteMarquee: this.absoluteMarquee(),
         })
       })
     )
@@ -93,15 +78,11 @@ export class DragService {
         if (!this.canMove) return
         this.marquee = this.calculateMarquee()
         callback?.({
-          drag: this,
+          dragService: this,
           current: this.current,
           start: this.start,
           shift: this.shift,
           marquee: this.marquee,
-          absoluteCurrent: this.editor.stage.absoluteXY(this.stagefy(this.current)),
-          absoluteStart: this.editor.stage.absoluteXY(this.stagefy(this.start)),
-          absoluteShift: this.editor.stage.absoluteShift(this.shift),
-          absoluteMarquee: this.absoluteMarquee(),
         })
         this.canMove = false
         this.current = { x: 0, y: 0 }
@@ -115,10 +96,10 @@ export class DragService {
   onSlide(callback: (data: IDragData) => void) {
     this.onStart()
       .onMove(callback)
-      .onEnd(() => this.destroy())
+      .onEnd(() => this.endListen())
     return this
   }
-  destroy() {
+  endListen() {
     window.removeEventListener('mousedown', this.startHandler || noopFunc)
     window.removeEventListener('mousemove', this.moveHandler || noopFunc)
     window.removeEventListener('mouseup', this.endHandler || noopFunc)
@@ -154,19 +135,5 @@ export class DragService {
       }
     }
     return this.marquee
-  }
-  private stagefy({ x, y }: { x: number; y: number }) {
-    return { x: x - this.editor.stage.bound.left, y: y - this.editor.stage.bound.top }
-  }
-  private absoluteMarquee() {
-    const { x, y } = this.editor.stage.absoluteXY(
-      this.stagefy({ x: this.marquee.x, y: this.marquee.y })
-    )
-    const { x: width, y: height } = this.editor.stage.absoluteShift({
-      x: this.marquee.width,
-      y: this.marquee.height,
-    })
-    const absoluteMarquee = { x, y, width, height }
-    return absoluteMarquee
   }
 }

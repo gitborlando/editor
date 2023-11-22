@@ -2,10 +2,9 @@ import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
+import { DragMaskComp } from './drag-mask'
 import { HeaderComp } from './header/header'
 import { LeftPanelComp } from './left-panel/left-panel'
-
-import { DragMaskComp } from './drag-mask'
 import { RightPanelComp } from './right-panel/right-panel'
 import { StageComp } from './stage/stage'
 

@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC } from 'react'
-import { useEditor } from '~/ui/context'
+import { useService } from '~/ui/context'
 import { makeStyles } from '~/ui/theme'
 import { Button } from '~/ui/widget/button'
 import { Flex } from '~/ui/widget/flex'
@@ -10,15 +10,15 @@ type IPageHeaderComp = {}
 
 export const PageHeaderComp: FC<IPageHeaderComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { schema } = useEditor()
+  const { schemaPageService } = useService()
   const state = useLocalObservable(() => ({}))
   const { collapsed, setCollapsed } = pageCompShareState
   return (
     <Flex className={classes.PageHeader}>
       <Flex layout='c' className={classes.selectPageName}>
-        {schema.page.find(schema.page.currentId)?.name}
+        {schemaPageService.find(schemaPageService.currentId)?.name}
       </Flex>
-      <Button style={{ marginLeft: 'auto' }} onClick={() => schema.page.add()}>
+      <Button style={{ marginLeft: 'auto' }} onClick={() => schemaPageService.add()}>
         新建
       </Button>
       <Button onClick={() => setCollapsed(!collapsed)}>{collapsed ? '展开' : '收起'}</Button>

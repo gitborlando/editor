@@ -1,28 +1,29 @@
-import autoBind from 'auto-bind'
-import { makeObservable } from 'mobx'
+import { makeObservable, observable } from 'mobx'
+import { autoBind } from '~/helper/decorator'
 import { Delete } from '../utils'
-import { SchemaService } from './schema'
+import { SchemaDefaultService } from './default'
+import { SchemaNodeService } from './node'
 import { IPage } from './type'
 
-export class SchemaPage {
-  pages: IPage[] = []
-  currentId: string = ''
-  constructor(private schema: SchemaService) {
-    autoBind(this)
-    makeObservable(this, {
-      pages: true,
-      currentId: true,
-    })
+@autoBind
+export class SchemaPageService {
+  @observable pages: IPage[] = []
+  @observable currentId: string = ''
+  constructor(
+    private schemaDefaultService: SchemaDefaultService,
+    private schemaNodeService: SchemaNodeService
+  ) {
+    makeObservable(this)
   }
   setPages(pages: IPage[]) {
     this.pages = pages
   }
   add() {
-    this.pages.push(this.schema.default.page())
+    this.pages.push(this.schemaDefaultService.page())
   }
   delete(id: string) {
     if (this.pages.length <= 1) return
-    this.find(id)?.childIds.forEach((id) => Delete(this.schema.node.map, id))
+    this.find(id)?.childIds.forEach((id) => Delete(this.schemaNodeService.nodeMap, id))
     Delete(this.pages, (page) => page.id === id)
     this.select(this.pages[0].id)
   }

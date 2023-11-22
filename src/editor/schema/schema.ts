@@ -1,38 +1,29 @@
-import autoBind from 'auto-bind'
 import { toJS } from 'mobx'
-import { EditorService } from '../editor'
-import { SchemaDefault } from './default'
-import { SchemaFile } from './file'
-import { SchemaNode } from './node'
-import { SchemaPage } from './page'
+import { autoBind } from '~/helper/decorator'
+import { SchemaNodeService } from './node'
+import { SchemaPageService } from './page'
 import { ISchema } from './type'
 
+@autoBind
 export class SchemaService {
-  node: SchemaNode
-  page: SchemaPage
-  file: SchemaFile
-  default: SchemaDefault
   private _meta?: ISchema['meta']
+  constructor(
+    private schemaNodeService: SchemaNodeService,
+    private schemaPageService: SchemaPageService
+  ) {}
   get meta() {
     return this._meta!
-  }
-  constructor(private editor: EditorService) {
-    autoBind(this)
-    this.node = new SchemaNode(this)
-    this.page = new SchemaPage(this)
-    this.file = new SchemaFile(this)
-    this.default = new SchemaDefault(this)
   }
   getSchema() {
     return {
       meta: this.meta,
-      nodes: this.node.map,
-      pages: toJS(this.page.pages),
+      nodes: this.schemaNodeService.nodeMap,
+      pages: toJS(this.schemaPageService.pages),
     }
   }
   setSchema({ meta, nodes, pages }: ISchema) {
     this._meta = meta
-    this.node.setMap(nodes)
-    this.page.setPages(pages)
+    this.schemaNodeService.setMap(nodes)
+    this.schemaPageService.setPages(pages)
   }
 }

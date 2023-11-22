@@ -1,32 +1,42 @@
 import { v4 } from 'uuid'
-import { SchemaService } from '~/editor/schema/schema'
-import { INode } from '~/editor/schema/type'
+import { SchemaDefaultService } from './schema/default'
+import { INode } from './schema/type'
 
-export const mockFileJson = (schema: SchemaService) => ({
+export const mockFileJson = (schemaDefault: SchemaDefaultService) => ({
   meta: { id: 'mock1', name: '测试文件1', user: 'myself' },
   nodes: {
-    ellipse1: schema.default.ellipse({
+    frame1: schemaDefault.frame({
+      id: 'ellipse1',
+      parentId: 'page1',
+      width: 500,
+      height: 500,
+      x: 100,
+      childIds: ['rect2'],
+    }),
+    ellipse1: schemaDefault.ellipse({
       id: 'ellipse1',
       parentId: 'page1',
       width: 200,
       height: 100,
       x: 100,
     }),
-    rect2: schema.default.rect({
+    rect2: schemaDefault.rect({
       id: 'rect2',
       width: 100,
       height: 100,
       x: 100,
       parentId: 'page1',
     }),
-    rect4: schema.default.rect({
+    rect4: schemaDefault.rect({
       id: 'rect4',
-      width: 100,
+      width: 200,
       height: 100,
       x: 100,
+      radius: 10,
       parentId: 'page1',
+      fill: 'skyblue',
     }),
-    rect3: schema.default.rect({
+    rect3: schemaDefault.rect({
       id: 'rect3',
       width: 200,
       height: 200,
@@ -39,7 +49,8 @@ export const mockFileJson = (schema: SchemaService) => ({
       id: 'page1',
       name: '测试页面1',
       // childIds: ['ellipse1' ,  'rect2' , 'rect4'],
-      childIds: ['ellipse1'],
+      // childIds: ['ellipse1'],
+      childIds: ['frame1', 'rect4'],
     },
     {
       id: 'page2',
@@ -49,28 +60,28 @@ export const mockFileJson = (schema: SchemaService) => ({
   ],
 })
 
-export function mock2(schema: SchemaService) {
+export function mock2(schemaDefault: SchemaDefaultService) {
   let s = new Date().getTime()
   const nodes: Record<string, INode> = {}
   let k = 0
-  for (let i = 0; i < 1000000; i++) {
+  for (let i = 0; i < 1000; i++) {
     const id = v4()
-    let j = i % 50
+    let j = i % 100
 
-    k = ~~(i / 50)
-    const rect = schema.default.rect({
+    k = ~~(i / 100)
+    const rect = schemaDefault.rect({
       id,
-      width: 50,
-      height: 50,
-      x: 0 + j * 55,
-      y: 0 + k * 55,
+      width: 100,
+      height: 100,
+      x: 0 + j * 101,
+      y: 0 + k * 101,
       radius: 10,
       parentId: 'page1',
-      // fill: 'skyblue',
+      fill: '#CCCCCC',
     })
     nodes[id] = rect
   }
-  console.log(new Date().getTime() - s)
+  console.log('mock time: ', new Date().getTime() - s)
   return {
     meta: { id: 'mock1', name: '测试文件1', user: 'myself' },
     nodes,

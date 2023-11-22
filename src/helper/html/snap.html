@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PixiJS Screenshot</title>
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.3.2/dist/pixi.min.js"></script>
+  </head>
+  <body>
+    <img
+      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAWtJREFUeF7t1cEJAEAIxEDtv2gProo8xgpCwuLezI3LGFhBMi0+iCCtHoLEeggiSM1AjMcPESRmIIZjIYLEDMRwLESQmIEYjoUIEjMQw7EQQWIGYjgWIkjMQAzHQgSJGYjhWIggMQMxHAsRJGYghmMhgsQMxHAsRJCYgRiOhQgSMxDDsRBBYgZiOBYiSMxADMdCBIkZiOFYiCAxAzEcCxEkZiCGYyGCxAzEcCxEkJiBGI6FCBIzEMOxEEFiBmI4FiJIzEAMx0IEiRmI4ViIIDEDMRwLESRmIIZjIYLEDMRwLESQmIEYjoUIEjMQw7EQQWIGYjgWIkjMQAzHQgSJGYjhWIggMQMxHAsRJGYghmMhgsQMxHAsRJCYgRiOhQgSMxDDsRBBYgZiOBYiSMxADMdCBIkZiOFYiCAxAzEcCxEkZiCGYyGCxAzEcCxEkJiBGI6FCBIzEMOxEEFiBmI4FiJIzEAMx0IEiRmI4TwVjsedWCiXGAAAAABJRU5ErkJggg=="
+      alt=""
+    />
+    <script>
+      // 创建 Pixi 应用
+      const app = new PIXI.Application({ width: 800, height: 600, backgroundColor: 0xaaaaaa })
+      document.body.appendChild(app.view)
+
+      // 创建一个精灵作为示例
+      const sprite = PIXI.Sprite.from('https://files.pixijs.download/branding/pixijs-banner.png')
+
+      // app.stage.addChild(sprite)
+
+      const r = new PIXI.Graphics()
+      r.beginFill('red')
+      r.drawRect(0, 0, 100, 100)
+      r.endFill()
+      app.stage.addChild(r)
+
+      // 按钮用于触发截图
+      const screenshotButton = document.createElement('button')
+      screenshotButton.textContent = 'Take Screenshot'
+      document.body.appendChild(screenshotButton)
+
+      // 添加按钮点击事件
+      screenshotButton.addEventListener('click', () => {
+        // 获取截图的 Base64 编码
+        // const screenshotDataUrl = app.renderer.view.toDataURL()
+        // console.log(screenshotDataUrl)
+        app.renderer.extract.base64(app.stage).then((r) => console.log(r))
+        // 创建一个新的窗口显示截图
+        // const screenshotWindow = window.open()
+        // screenshotWindow.document.write(`<img src="${screenshotDataUrl}" alt="Screenshot"/>`)
+      })
+    </script>
+  </body>
+</html>

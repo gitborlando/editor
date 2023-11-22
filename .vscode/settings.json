@@ -5,6 +5,7 @@
     "source.organizeImports": true
   },
   "cSpell.words": [
+    "autobind",
     "autorun",
     "boundfy",
     "degreefy",
@@ -13,6 +14,7 @@
     "inited",
     "Konva",
     "loopfy",
+    "PIXI",
     "radianfy",
     "stagefy",
     "uuidv",

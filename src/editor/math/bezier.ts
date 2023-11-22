@@ -17,11 +17,11 @@ export function bezierParametricEquation(
   const B = new XY(p2x, p2y)
   const C = new XY(a1x, a1y)
   const D = new XY(a2x, a2y)
-  const newXY = XY.Plus(
-    A.multiNum(pow3(1 - t)),
-    C.multiNum(3, t, pow2(1 - t)),
-    D.multiNum(3, pow2(t), 1 - t),
-    B.multiNum(pow3(t))
+  const newXY = XY.plusAll(
+    A.multiNums(pow3(1 - t)),
+    C.multiNums(3, t, pow2(1 - t)),
+    D.multiNums(3, pow2(t), 1 - t),
+    B.multiNums(pow3(t))
   )
   return newXY.toArray()
 }
@@ -82,10 +82,10 @@ export function bezierDivide(
   const B = new XY(p2x, p2y)
   const C = new XY(a1x, a1y)
   const D = new XY(a2x, a2y)
-  const AC = C.minus(A).multiNum(t)
-  const BD = D.minus(B).multiNum(t)
-  const CD = D.minus(C).multiNum(t)
-  const CD_AC = CD.minus(AC).multiNum(t)
-  const CD_BD = CD.minus(BD).multiNum(t)
+  const AC = C.minus(A).multiNums(t)
+  const BD = D.minus(B).multiNums(t)
+  const CD = D.minus(C).multiNums(t)
+  const CD_AC = CD.minus(AC).multiNums(t)
+  const CD_BD = CD.minus(BD).multiNums(t)
   return [...AC.toArray(), ...CD_AC.toArray(), ...CD_BD.toArray(), ...BD.toArray()]
 }

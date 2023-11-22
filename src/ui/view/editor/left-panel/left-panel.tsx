@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditor } from '~/ui/context'
+import { useService } from '~/ui/context'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { PageComp } from './page/page'
@@ -8,11 +8,12 @@ import { PageComp } from './page/page'
 type ILeftPanelComp = {}
 
 export const LeftPanelComp: FC<ILeftPanelComp> = observer(({}) => {
-  const { stage } = useEditor()
-  const { classes } = useStyles({ left: stage.bound.left })
+  const { viewportService } = useService()
+  const { classes } = useStyles({ left: viewportService.bound.x })
   return (
     <Flex layout='v' className={classes.LeftPanel}>
       <PageComp />
+      {/* <ShapeComp /> */}
     </Flex>
   )
 })

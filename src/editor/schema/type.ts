@@ -32,6 +32,7 @@ export type INodeMeta = {
   select: boolean
   hover: boolean
   parentId: string
+  _needRender: boolean
 }
 
 export type INodeBase = INodeMeta & {
@@ -47,6 +48,7 @@ export type INodeBase = INodeMeta & {
   strokes: any[]
   blurs: any[]
   shadows: any[]
+  fill: string
 }
 
 export type IFrame = INodeBase & {

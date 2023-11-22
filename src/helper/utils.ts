@@ -28,22 +28,6 @@ export const throttleAnimationFrame = <F extends (...args: any[]) => any>(callba
   }
 }
 
-export function listen<K extends keyof WindowEventMap>(
-  type: K,
-  listener: (this: Window, ev: WindowEventMap[K]) => any,
-  options?: boolean | AddEventListenerOptions
-) {
-  window.addEventListener(
-    type,
-    (e) => {
-      requestAnimationFrame(() => {
-        listener.call(window, e)
-      })
-    },
-    options
-  )
-}
-
 export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOptions) {
   useEffect(() => {
     const disposer = autorun(view, opts)
@@ -51,24 +35,9 @@ export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOpt
   }, [])
 }
 
-export function documentCreateElement<Tag extends keyof HTMLElementTagNameMap>(
-  tag: Tag,
-  option: { parent: HTMLElement | string; innerHTML?: any } & Partial<CSSStyleDeclaration>
-): HTMLElementTagNameMap[Tag] {
-  const element = document.createElement(tag) as any
-  Object.entries(option).forEach(([key, value]) => {
-    if (key === 'parent') return
-    if (['id', 'className', 'innerHTML'].includes(key)) {
-      element[key] = value
-    } else {
-      element.style[key] = value
-    }
-  })
-  const { parent } = option
-  if (typeof parent !== 'string') {
-    parent.appendChild(element)
-  } else {
-    document.querySelector(parent)?.appendChild(element)
+export function timeRecord() {
+  let start = performance.now()
+  return (text?: any) => {
+    console.log(text, performance.now() - start)
   }
-  return element
 }

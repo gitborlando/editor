@@ -13,11 +13,13 @@
       "import { FC } from 'react'",
       "import { makeStyles } from '~/ui/theme'",
       "import { Flex } from '~/ui/widget/flex'",
+      "import { useService } from '~/ui/context'",
       "",
       "type I$1${TM_FILENAME_BASE}Comp = {}",
       "",
       "export const $1${TM_FILENAME_BASE}Comp: FC<I$1${TM_FILENAME_BASE}Comp> = observer(({}) => {",
       "  const { classes } = useStyles({})",
+      "  const { } = useService()",
       "  const state = useLocalObservable(() => ({}))",
       "  return <Flex className={classes.$1${TM_FILENAME_BASE}}></Flex>",
       "})",
@@ -66,13 +68,13 @@
   "Service": {
     "prefix": "service",
     "body": [
-      "import autoBind from 'auto-bind'",
+      "import { autoBind } from '~/helper/decorator'",
       "import { makeObservable } from 'mobx'",
       "",
-      "export class $1${TM_FILENAME_BASE} {",
+      "@autoBind",
+      "export class $1${TM_FILENAME_BASE}Service {",
       "  constructor() {",
-      "    autoBind(this)",
-      "    makeObservable(this, {})",
+      "    makeObservable(this)",
       "  }",
       "}"
     ],
@@ -83,9 +85,14 @@
     "body": ["<Flex layout='$1' className={classes.$2}></Flex>"],
     "description": "flex"
   },
-  "useEditor": {
-    "prefix": "ueditor",
-    "body": ["const { } = useEditor()"],
-    "description": "useEditor"
+  "useService": {
+    "prefix": "uservice",
+    "body": ["const { } = useService()"],
+    "description": "useService"
+  },
+  "private service": {
+    "prefix": "pser",
+    "body": ["private $1Service: $1Service"],
+    "description": "private service"
   },
 }

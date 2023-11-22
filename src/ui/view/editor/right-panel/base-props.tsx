@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditor } from '~/ui/context'
+import { useService } from '~/ui/context'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { Input } from '~/ui/widget/input'
@@ -9,44 +9,42 @@ type IBasePropsComp = {}
 
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { schema } = useEditor()
-  if (!schema.node.selectedNodeIds.length) return null
-  const node = schema.node.find(schema.node.selectedNodeIds[0])
+  const { schemaNodeService } = useService()
+  if (!schemaNodeService.selectedIds.length) return null
+
+  const node = schemaNodeService.find(schemaNodeService.selectedIds[0])
+  schemaNodeService.collectDirty(node.id)
   return (
-    <>
-      {node && (
-        <Flex layout='h' className={classes.SchemaBase}>
-          <Input
-            className={classes.input}
-            label='横坐标'
-            value={node.x}
-            onNewValueApply={(v) => {
-              node.x = v
-            }}
-          />
-          <Input
-            className={classes.input}
-            label='纵坐标'
-            value={node.y}
-            onNewValueApply={(v) => (node.y = v)}
-          />
-          <Input
-            className={classes.input}
-            label='长度'
-            value={node.width}
-            onNewValueApply={(v) => (node.width = v)}
-            min={0}
-          />
-          <Input
-            className={classes.input}
-            label='宽度'
-            value={node.height}
-            onNewValueApply={(v) => (node.height = v)}
-            min={0}
-          />
-        </Flex>
-      )}
-    </>
+    <Flex layout='h' className={classes.SchemaBase}>
+      <Input
+        className={classes.input}
+        label='横坐标'
+        value={node.x}
+        onNewValueApply={(v) => {
+          node.x = v
+        }}
+      />
+      <Input
+        className={classes.input}
+        label='纵坐标'
+        value={node.y}
+        onNewValueApply={(v) => (node.y = v)}
+      />
+      <Input
+        className={classes.input}
+        label='长度'
+        value={node.width}
+        onNewValueApply={(v) => (node.width = v)}
+        min={0}
+      />
+      <Input
+        className={classes.input}
+        label='宽度'
+        value={node.height}
+        onNewValueApply={(v) => (node.height = v)}
+        min={0}
+      />
+    </Flex>
   )
 })
 

@@ -1,29 +1,20 @@
-type IEventType = ['mask-div-exist', 'stage-instance-exist'][number]
-
-type ICallback = (...args: any[]) => void
+type IEventType = 'mask-div-existed' | 'pixi-stage-initialized' | 'stage-interact-type-changed'
 
 class EventEmitter {
-  private events = new Map<IEventType, ICallback[]>()
-  on(eventType: IEventType, callback: ICallback): void {
+  private events = new Map<IEventType, ((...args: any[]) => void)[]>()
+  on(eventType: IEventType, callback: (...args: any[]) => void): void {
     this.events.set(eventType, [...(this.events.get(eventType) || []), callback])
   }
-  once(eventType: IEventType, callback: ICallback): void {
-    const onceCallback = (...args: any[]) => {
-      callback(...args)
-      this.off(eventType, onceCallback)
-    }
-    this.events.set(eventType, [...(this.events.get(eventType) || []), onceCallback])
+  emit(eventType: IEventType, ...args: any[]): void {
+    this.events.get(eventType)?.forEach((callback) => callback(...args))
   }
-  off(eventType: IEventType, callback: ICallback): void {
+  off(eventType: IEventType, callback: (...args: any[]) => void): void {
     const callbacks = this.events.get(eventType)
     if (!callbacks) return
     this.events.set(
       eventType,
       callbacks.filter((i) => i !== callback)
     )
-  }
-  emit(eventType: IEventType, ...args: any[]): void {
-    this.events.get(eventType)?.forEach((callback) => callback(...args))
   }
 }
 

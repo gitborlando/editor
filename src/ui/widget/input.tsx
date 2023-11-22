@@ -1,8 +1,8 @@
-import { observer } from 'mobx-react'
-import { ComponentPropsWithRef, forwardRef, useRef } from 'react'
+import { observer, useLocalObservable } from 'mobx-react'
+import { ChangeEvent, ComponentPropsWithRef, forwardRef } from 'react'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
-import { useEditor } from '../context'
+import { useService } from '../context'
 
 interface IInput extends ComponentPropsWithRef<'div'> {
   label: string
@@ -14,40 +14,38 @@ interface IInput extends ComponentPropsWithRef<'div'> {
 
 export const Input = observer(
   forwardRef<HTMLDivElement, IInput>(
-    ({ className, label, value, onNewValueApply: emitNewValue, min, max, ...rest }, ref) => {
+    ({ className, label, value: outValue, onNewValueApply: emitNewValue, min, max }, ref) => {
       const { classes, cx } = useStyles({})
-      const { drag } = useEditor()
-      const inputRef = useRef<HTMLInputElement>(null)
-      const changeValue = (newValue: number) => {
-        if (min !== undefined && newValue < min) newValue = min
-        if (max !== undefined && newValue > max) newValue = max
-        emitNewValue(newValue)
-        if (inputRef.current) inputRef.current.value = newValue + ''
-      }
-
+      const { dragService } = useService()
+      const state = useLocalObservable(() => ({ value: outValue }))
+      state.value = outValue
       return (
         <Flex layout='h' className={cx(classes.Input, className)} ref={ref}>
           <Flex
             layout='h'
             className={classes.label}
             onMouseDown={() => {
-              drag
-                .onSlide(({ shift }) => {
-                  changeValue(value + shift.x)
-                })
-                .setCursor('e-resize')
+              let startValue = state.value
+              dragService.setCursor('e-resize').onSlide(({ shift }) => {
+                state.value = startValue + shift.x
+                if (min !== undefined && state.value < min) state.value = min
+                if (max !== undefined && state.value > max) state.value = max
+                emitNewValue(state.value)
+              })
             }}>
             {label}
           </Flex>
           <Flex layout='h'>
             <input
               type='number'
-              ref={inputRef}
-              defaultValue={value}
-              className={classes.input}
-              onBlur={(e) => {
-                changeValue(parseInt(e.target.value || '0'))
+              value={state.value}
+              onChange={(e) => {
+                state.value = parseFloat((e as ChangeEvent<HTMLInputElement>).target.value)
+                if (min !== undefined && state.value < min) state.value = min
+                if (max !== undefined && state.value > max) state.value = max
               }}
+              className={classes.input}
+              onBlur={() => emitNewValue(state.value)}
             />
           </Flex>
         </Flex>

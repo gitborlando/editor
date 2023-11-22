@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditor } from '~/ui/context'
+import { useService } from '~/ui/context'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 
@@ -8,13 +8,13 @@ type IDragMaskComp = {}
 
 export const DragMaskComp: FC<IDragMaskComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { drag } = useEditor()
+  const { dragService } = useService()
   return (
     <Flex
       className={classes.DragMask}
-      vshow={drag.canMove}
+      vshow={dragService.canMove}
       style={{
-        cursor: drag.cursor,
+        cursor: dragService.cursor,
       }}></Flex>
   )
 })

@@ -1,9 +1,8 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import { serviceMap } from '~/editor/service'
 import { testDraw } from '~/helper/test-draw'
-
-import { EditorService } from '~/editor/editor'
-import { EditorContext } from './context'
+import { ServiceContext } from './context'
 import { makeStyles } from './theme'
 import { EditorComp } from './view/editor/editor'
 import { Flex } from './widget/flex'
@@ -14,7 +13,6 @@ const customMode = false
 
 export const App: FC<IAppProps> = observer(() => {
   const { classes } = useStyles({})
-  const editor = new EditorService()
   return (
     <Flex layout='v' className={classes.App}>
       {customMode ? (
@@ -24,9 +22,9 @@ export const App: FC<IAppProps> = observer(() => {
           width={1000}
           height={1000}></canvas>
       ) : (
-        <EditorContext.Provider value={editor}>
+        <ServiceContext.Provider value={serviceMap}>
           <EditorComp />
-        </EditorContext.Provider>
+        </ServiceContext.Provider>
       )}
     </Flex>
   )

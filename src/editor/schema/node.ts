@@ -1,47 +1,46 @@
-import autoBind from 'auto-bind'
-import { makeObservable } from 'mobx'
+import { makeObservable, observable } from 'mobx'
+import { autoBind } from '~/helper/decorator'
 import { Delete } from '../utils'
-import { SchemaService } from './schema'
+import { SchemaPageService } from './page'
 import { INode } from './type'
 
-export class SchemaNode {
-  map: Record<string, INode> = {}
-  selectedNodeIds: string[] = []
-  constructor(private schema: SchemaService) {
-    autoBind(this)
-    makeObservable(this, {
-      selectedNodeIds: true,
-    })
+@autoBind
+export class SchemaNodeService {
+  @observable selectedIds: string[] = []
+  @observable dirtyIds: string[] = []
+  nodeMap: Record<string, INode> = {}
+  constructor(private schemaPageService: SchemaPageService) {
+    makeObservable(this)
   }
-  setMap(map: typeof this.map) {
-    this.map = map
+  setMap(map: typeof this.nodeMap) {
+    this.nodeMap = map
   }
   add(node: INode) {
-    this.map[node.id] = node
-    return this.map[node.id]!
+    this.nodeMap[node.id] = node
+    return this.nodeMap[node.id]!
   }
   delete(id: string) {
-    const node = this.map[id]
-    Delete(this.map, node.id)
+    const node = this.nodeMap[id]
+    Delete(this.nodeMap, node.id)
     if ('childIds' in node) node.childIds.forEach((i) => this.delete(i))
     // const parent = this.find(node.parentId) as INodeParent
     // Delete(parent.childIds, (id) => id === node.id)
   }
   copy() {}
   find(id: string) {
-    return this.map[id]
+    return this.nodeMap[id]
   }
   findThen(id: string, callback: (node: INode) => void) {
     const node = this.find(id)
     node && callback(node)
   }
   select(id: string) {
-    this.selectedNodeIds.push(id)
+    this.selectedIds.push(id)
   }
   connect(id: string, parentId: string, isPage = false) {
     this.find(id).parentId = parentId
     if (isPage) {
-      this.schema.page.find(parentId)?.childIds.push(id)
+      this.schemaPageService.find(parentId)?.childIds.push(id)
     } else {
       const parent = this.find(id)
       if ('childIds' in parent) parent.childIds.push(id)
@@ -49,11 +48,17 @@ export class SchemaNode {
   }
   disconnect(id: string, parentId: string, isPage = false) {
     if (isPage) {
-      const childIds = this.schema.page.find(parentId)?.childIds || []
+      const childIds = this.schemaPageService.find(parentId)?.childIds || []
       Delete(childIds, id)
     } else {
       const parent = this.find(id)
       if ('childIds' in parent) Delete(parent.childIds, id)
     }
+  }
+  observe(id: string) {
+    this.nodeMap[id] = observable(this.nodeMap[id])
+  }
+  collectDirty(id: string) {
+    this.dirtyIds.push(id)
   }
 }
