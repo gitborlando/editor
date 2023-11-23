@@ -1,7 +1,6 @@
-import { makeObservable, observable } from 'mobx'
+import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { auto, autobind } from '~/helper/decorator'
-import { EE } from '~/helper/event-emitter'
 import { XY } from '../math/xy'
 import { SchemaPageService, injectSchemaPage } from '../schema/page'
 import { IXY } from '../utils'
@@ -10,28 +9,32 @@ import { PixiService, injectPixi } from './pixi'
 @autobind
 @injectable()
 export class ViewportService {
-  @observable zoom = 1
-  @observable stageOffset = { x: 0, y: 0 }
+  @observable initialized = false
   @observable bound = { x: 240, y: 48, width: 0, height: 0, right: 240 }
   constructor(
     @injectPixi private pixiService: PixiService,
     @injectSchemaPage private schemaPageService: SchemaPageService
   ) {
     makeObservable(this)
-    EE.on('pixi-stage-initialized', () => {
+    when(() => pixiService.initialized).then(() => this.onResizeBound())
+    when(() => schemaPageService.initialized).then(() => {
       this.autoPixiStageZoom()
       this.autoPixiStageOffset()
-      this.onResizeBound()
       this.onWheelZoom()
+      this.initialized = true
     })
   }
+  get zoom() {
+    return this.schemaPageService.currentPage.zoom
+  }
+  get stageOffset() {
+    return this.schemaPageService.currentPage.offset
+  }
   setZoom(zoom: number) {
-    this.zoom = zoom
-    return this
+    this.schemaPageService.currentPage.zoom = zoom
   }
   setStageOffset(xy: IXY) {
-    this.stageOffset = xy
-    return this
+    this.schemaPageService.currentPage.offset = xy
   }
   toViewportXY(xy: IXY) {
     return XY.from(xy).minus(this.bound)
@@ -47,13 +50,9 @@ export class ViewportService {
   }
   @auto private autoPixiStageZoom() {
     this.pixiService.stage.scale.set(this.zoom, this.zoom)
-    this.schemaPageService.setCurrentPage({ zoom: this.zoom })
   }
   @auto private autoPixiStageOffset() {
     this.pixiService.stage.position.set(this.stageOffset.x, this.stageOffset.y)
-    this.schemaPageService.setCurrentPage({
-      offset: { x: this.stageOffset.x, y: this.stageOffset.y },
-    })
   }
   private onWheelZoom() {
     const onWheel = ({ deltaY, clientX, clientY }: WheelEvent) => {

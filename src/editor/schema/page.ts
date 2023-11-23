@@ -17,15 +17,16 @@ export class SchemaPageService {
   ) {
     makeObservable(this)
   }
+  get initialized() {
+    return !!this.currentId
+  }
   get currentPage() {
-    return this.find(this.currentId)
+    return this.find(this.currentId)!
   }
   setPages(pages: IPage[]) {
     this.pages = pages
   }
   setCurrentPage(option: Partial<IPage>) {
-    console.log({ ...this.currentPage })
-    if (!this.currentPage) return
     Object.assign(this.currentPage, option)
   }
   add() {

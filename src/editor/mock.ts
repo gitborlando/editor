@@ -89,6 +89,8 @@ export function mock2(schemaDefault: SchemaDefaultService) {
       {
         id: 'page1',
         name: '测试页面1',
+        zoom: 1,
+        offset: { x: 0, y: 0 },
         childIds: Object.keys(nodes),
       },
     ],

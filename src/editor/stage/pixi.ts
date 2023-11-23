@@ -1,3 +1,4 @@
+import { makeObservable, observable } from 'mobx'
 import * as PIXI from 'pixi.js'
 import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/helper/decorator'
@@ -8,14 +9,19 @@ export * as PIXI from 'pixi.js'
 @autobind
 @injectable()
 export class PixiService {
+  @observable initialized = false
   container!: HTMLDivElement
   app!: PIXI.Application
+  constructor() {
+    makeObservable(this)
+  }
   get stage() {
     return this.app.stage
   }
   setContainer(container: HTMLDivElement) {
     this.container = container
     this.initPixiApp(container)
+    this.initialized = true
     EE.emit('pixi-stage-initialized')
   }
   addListener(

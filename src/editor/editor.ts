@@ -27,7 +27,7 @@ export class EditorService {
       )
     })
   }
-  renderPage(pageId?: string) {
+  renderPage(pageId: string) {
     pageId = pageId || this.schemaPageService.pages[0].id
     const page = this.schemaPageService.find(pageId)!
     const nodes = page.childIds.map((childId) => this.schemaNodeService.nodeMap[childId])

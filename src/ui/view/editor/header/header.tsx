@@ -8,15 +8,18 @@ import { Flex } from '~/ui/widget/flex'
 type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
-  const { fileService, stageService, viewportService, stageCreateService } = useServices()
+  const { fileService, stageService, viewportService, stageCreateService, editorService } =
+    useServices()
   const { classes } = useStyles({ top: viewportService.bound.y })
 
   return (
     <Flex layout='v' className={classes.Header}>
       <Flex layout='c'>
-        <Flex layout='c' style={{ width: 50 }}>
-          {~~(viewportService.zoom * 100)}%
-        </Flex>
+        {viewportService.initialized && (
+          <Flex layout='c' style={{ width: 50 }}>
+            {~~(viewportService.zoom * 100)}%
+          </Flex>
+        )}
         <Button onClick={() => fileService.openFile()}>上传</Button>
         <Button onClick={() => fileService.exportFile()}>下载</Button>
         <Button onClick={() => fileService.newFile()}>新建</Button>
