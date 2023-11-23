@@ -1,8 +1,7 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { serviceMap } from '~/editor/service'
 import { testDraw } from '~/helper/test-draw'
-import { ServiceContext } from './context'
+
 import { makeStyles } from './theme'
 import { EditorComp } from './view/editor/editor'
 import { Flex } from './widget/flex'
@@ -22,9 +21,7 @@ export const App: FC<IAppProps> = observer(() => {
           width={1000}
           height={1000}></canvas>
       ) : (
-        <ServiceContext.Provider value={serviceMap}>
-          <EditorComp />
-        </ServiceContext.Provider>
+        <EditorComp />
       )}
     </Flex>
   )

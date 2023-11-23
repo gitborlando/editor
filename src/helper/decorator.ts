@@ -1,7 +1,8 @@
 import autoBindMethods from 'class-autobind-decorator'
 import { autorun } from 'mobx'
+import { delay, inject } from 'tsyringe'
 
-export const autoBind = autoBindMethods
+export const autobind = autoBindMethods
 
 export function auto(target: any, name: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value
@@ -9,4 +10,8 @@ export function auto(target: any, name: string, descriptor: PropertyDescriptor) 
     autorun(() => originalMethod.apply(this, args))
   }
   return descriptor
+}
+
+export function delayInject(service: any) {
+  return inject(delay(() => service))
 }

@@ -1,30 +1,32 @@
-import { DragService } from '~/editor/drag'
-import { SchemaDefaultService } from '~/editor/schema/default'
-import { SchemaNodeService } from '~/editor/schema/node'
-import { SchemaPageService } from '~/editor/schema/page'
+import { delay, inject, injectable } from 'tsyringe'
+import { DragService, injectDrag } from '~/editor/drag'
+import { SchemaDefaultService, injectSchemaDefault } from '~/editor/schema/default'
+import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
+import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
 import { INode } from '~/editor/schema/type'
 import { IXY } from '~/editor/utils'
-import { autoBind } from '~/helper/decorator'
-import { StageShapeDrawService } from '../shape/draw'
-import { StageService, listenInteractTypeChange } from '../stage'
-import { ViewportService } from '../viewport'
+import { autobind } from '~/helper/decorator'
+import { StageDrawService, injectStageDraw } from '../shape/draw'
+import { StageService, injectStage, listenInteractTypeChange } from '../stage'
+import { ViewportService, injectViewport } from '../viewport'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'polygon', 'line', 'text', 'img'] as const
 type ICreateType = typeof createTypes[number]
 
-@autoBind
-export class StageInteractCreateService {
+@autobind
+@injectable()
+export class StageCreateService {
   types = createTypes
   type: ICreateType = 'frame'
   private _node?: INode
   constructor(
-    private dragService: DragService,
-    private stageService: StageService,
-    private schemaDefaultService: SchemaDefaultService,
-    private schemaNodeService: SchemaNodeService,
-    private schemaPageService: SchemaPageService,
-    private shapeDrawService: StageShapeDrawService,
-    private viewportService: ViewportService
+    @injectDrag private dragService: DragService,
+    @injectStage private stageService: StageService,
+    @injectSchemaDefault private schemaDefaultService: SchemaDefaultService,
+    @injectSchemaNode private schemaNodeService: SchemaNodeService,
+    @injectSchemaPage private schemaPageService: SchemaPageService,
+    @injectStageDraw private stageDrawService: StageDrawService,
+    @injectViewport private viewportService: ViewportService
   ) {
     listenInteractTypeChange(this, 'create')
   }
@@ -97,6 +99,9 @@ export class StageInteractCreateService {
     this.schemaNodeService.connect(this.node.id, this.schemaPageService.currentId, true)
   }
   private draw() {
-    this.shapeDrawService.draw(this.node)
+    this.stageDrawService.draw(this.node)
   }
 }
+
+export const injectStageCreate = inject(StageCreateService)
+export const delayInjectStageCreate = inject(delay(() => StageCreateService))

@@ -1,4 +1,4 @@
-import { IAutorunOptions, IReactionPublic, autorun } from 'mobx'
+import { IAutorunOptions, IReactionOptions, IReactionPublic, autorun, reaction } from 'mobx'
 import { useEffect } from 'react'
 
 export type INoopFunc = typeof noopFunc
@@ -33,6 +33,17 @@ export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOpt
     const disposer = autorun(view, opts)
     return () => disposer()
   }, [])
+}
+
+export function watchChange(expression: (r: IReactionPublic) => any) {
+  return {
+    then: (
+      effect: (arg: any, prev: any, r: IReactionPublic) => void,
+      opts?: IReactionOptions<any, true> | undefined
+    ) => {
+      reaction(expression, effect, { ...opts, fireImmediately: true })
+    },
+  }
 }
 
 export function timeRecord() {

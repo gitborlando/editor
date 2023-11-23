@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC } from 'react'
-import { useService } from '~/ui/context'
+import { useServices } from '~/ioc'
 
 import { makeStyles } from '~/ui/theme'
 import { Button } from '~/ui/widget/button'
@@ -12,7 +12,7 @@ type IPageItemComp = {
 }
 
 export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
-  const { schemaPageService } = useService()
+  const { schemaPageService } = useServices()
   const selected = schemaPageService.currentId === id
   const { classes } = useStyles({ selected })
   const state = useLocalObservable(() => ({

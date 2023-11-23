@@ -1,24 +1,20 @@
 import * as PIXI from 'pixi.js'
-import { autoBind } from '~/helper/decorator'
+import { inject, injectable } from 'tsyringe'
+import { autobind } from '~/helper/decorator'
 import { EE } from '~/helper/event-emitter'
 
 export * as PIXI from 'pixi.js'
 
-@autoBind
+@autobind
+@injectable()
 export class PixiService {
-  private _container: HTMLDivElement | null = null
-  private _app: PIXI.Application | null = null
-  get container() {
-    return this._container!
-  }
-  get app() {
-    return this._app!
-  }
+  container!: HTMLDivElement
+  app!: PIXI.Application
   get stage() {
     return this.app.stage
   }
   setContainer(container: HTMLDivElement) {
-    this._container = container
+    this.container = container
     this.initPixiApp(container)
     EE.emit('pixi-stage-initialized')
   }
@@ -36,9 +32,8 @@ export class PixiService {
   ) {
     this.app.view.removeEventListener?.(type, listener, options)
   }
-
   private initPixiApp(container: HTMLDivElement) {
-    this._app = new PIXI.Application({
+    this.app = new PIXI.Application({
       backgroundColor: '#EBECED',
       resizeTo: container,
       antialias: true,
@@ -54,3 +49,5 @@ export class PixiService {
     container.appendChild(this.app.view as any)
   }
 }
+
+export const injectPixi = inject(PixiService)

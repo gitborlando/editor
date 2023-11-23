@@ -1,15 +1,19 @@
 import { makeObservable, observable } from 'mobx'
-import { autoBind } from '~/helper/decorator'
+import { delay, inject, injectable } from 'tsyringe'
+import { autobind } from '~/helper/decorator'
 import { Delete } from '../utils'
 import { SchemaPageService } from './page'
 import { INode } from './type'
 
-@autoBind
+@autobind
+@injectable()
 export class SchemaNodeService {
   @observable selectedIds: string[] = []
   @observable dirtyIds: string[] = []
   nodeMap: Record<string, INode> = {}
-  constructor(private schemaPageService: SchemaPageService) {
+  constructor(
+    @inject(delay(() => SchemaPageService)) private schemaPageService: SchemaPageService
+  ) {
     makeObservable(this)
   }
   setMap(map: typeof this.nodeMap) {
@@ -62,3 +66,5 @@ export class SchemaNodeService {
     this.dirtyIds.push(id)
   }
 }
+
+export const injectSchemaNode = inject(SchemaNodeService)

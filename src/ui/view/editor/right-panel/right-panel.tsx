@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useService } from '~/ui/context'
+import { useServices } from '~/ioc'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { BasePropsComp } from './base-props'
@@ -8,12 +8,12 @@ import { BasePropsComp } from './base-props'
 type IRightPanelComp = {}
 
 export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
-  const { viewportService, selectService } = useService()
+  const { viewportService, stageSelectService } = useServices()
   const { classes } = useStyles({ right: viewportService.bound.right })
   return (
     <Flex layout='v' className={classes.RightPanel}>
       <BasePropsComp />
-      <Flex layout='c'>{selectService.hoverId}</Flex>
+      <Flex layout='c'>{stageSelectService.hoverId}</Flex>
       <Flex layout='h' style={{ width: '100%' }}></Flex>
     </Flex>
   )

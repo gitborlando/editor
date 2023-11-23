@@ -1,11 +1,11 @@
-import autoBind from 'auto-bind'
-import { makeAutoObservable } from 'mobx'
+import { makeObservable, observable } from 'mobx'
+import { autobind } from '~/helper/decorator'
 
+@autobind
 export class PageCompShareState {
-  collapsed = false
+  @observable collapsed = false
   constructor() {
-    autoBind(this)
-    makeAutoObservable(this)
+    makeObservable(this)
   }
   setCollapsed(collapsed: boolean) {
     this.collapsed = collapsed

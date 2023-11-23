@@ -1,16 +1,22 @@
 import { makeObservable, observable } from 'mobx'
-import { auto, autoBind } from '~/helper/decorator'
+import { inject, injectable } from 'tsyringe'
+import { auto, autobind } from '~/helper/decorator'
 import { EE } from '~/helper/event-emitter'
 import { XY } from '../math/xy'
+import { SchemaPageService, injectSchemaPage } from '../schema/page'
 import { IXY } from '../utils'
-import { PixiService } from './pixi'
+import { PixiService, injectPixi } from './pixi'
 
-@autoBind
+@autobind
+@injectable()
 export class ViewportService {
   @observable zoom = 1
   @observable stageOffset = { x: 0, y: 0 }
   @observable bound = { x: 240, y: 48, width: 0, height: 0, right: 240 }
-  constructor(private pixiService: PixiService) {
+  constructor(
+    @injectPixi private pixiService: PixiService,
+    @injectSchemaPage private schemaPageService: SchemaPageService
+  ) {
     makeObservable(this)
     EE.on('pixi-stage-initialized', () => {
       this.autoPixiStageZoom()
@@ -41,9 +47,13 @@ export class ViewportService {
   }
   @auto private autoPixiStageZoom() {
     this.pixiService.stage.scale.set(this.zoom, this.zoom)
+    this.schemaPageService.setCurrentPage({ zoom: this.zoom })
   }
   @auto private autoPixiStageOffset() {
     this.pixiService.stage.position.set(this.stageOffset.x, this.stageOffset.y)
+    this.schemaPageService.setCurrentPage({
+      offset: { x: this.stageOffset.x, y: this.stageOffset.y },
+    })
   }
   private onWheelZoom() {
     const onWheel = ({ deltaY, clientX, clientY }: WheelEvent) => {
@@ -83,3 +93,5 @@ export class ViewportService {
     addEventListener('resize', setBound)
   }
 }
+
+export const injectViewport = inject(ViewportService)

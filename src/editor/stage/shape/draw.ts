@@ -1,17 +1,19 @@
+import { delay, inject, injectable } from 'tsyringe'
 import { INode, IRect, IVector } from '~/editor/schema/type'
-import { autoBind } from '~/helper/decorator'
-import { StageInteractSelectService } from '../interact/select'
-import { PIXI, PixiService } from '../pixi'
-import { StageShapeService } from './shape'
+import { autobind } from '~/helper/decorator'
+import { StageSelectService, injectStageSelect } from '../interact/select'
+import { PIXI, PixiService, injectPixi } from '../pixi'
+import { StageShapeService, injectStageShape } from './shape'
 
 type IPixiShape = PIXI.Graphics | PIXI.Text
 
-@autoBind
-export class StageShapeDrawService {
+@autobind
+@injectable()
+export class StageDrawService {
   constructor(
-    private pixiService: PixiService,
-    private shapeService: StageShapeService,
-    private selectService: StageInteractSelectService
+    @injectPixi private pixiService: PixiService,
+    @injectStageShape private shapeService: StageShapeService,
+    @injectStageSelect private selectService: StageSelectService
   ) {}
   drawNodes(nodes: INode[]) {
     nodes.forEach((node) => this.draw(node))
@@ -44,3 +46,6 @@ export class StageShapeDrawService {
   }
   private drawPath(node: IVector) {}
 }
+
+export const injectStageDraw = inject(StageDrawService)
+export const delayInjectStageDraw = inject(delay(() => StageDrawService))

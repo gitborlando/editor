@@ -1,22 +1,32 @@
 import { makeObservable, observable } from 'mobx'
-import { autoBind } from '~/helper/decorator'
+import { delay, inject, injectable } from 'tsyringe'
+import { autobind } from '~/helper/decorator'
 import { Delete } from '../utils'
-import { SchemaDefaultService } from './default'
-import { SchemaNodeService } from './node'
+import { SchemaDefaultService, injectSchemaDefault } from './default'
+import { SchemaNodeService, injectSchemaNode } from './node'
 import { IPage } from './type'
 
-@autoBind
+@autobind
+@injectable()
 export class SchemaPageService {
   @observable pages: IPage[] = []
   @observable currentId: string = ''
   constructor(
-    private schemaDefaultService: SchemaDefaultService,
-    private schemaNodeService: SchemaNodeService
+    @injectSchemaDefault private schemaDefaultService: SchemaDefaultService,
+    @injectSchemaNode private schemaNodeService: SchemaNodeService
   ) {
     makeObservable(this)
   }
+  get currentPage() {
+    return this.find(this.currentId)
+  }
   setPages(pages: IPage[]) {
     this.pages = pages
+  }
+  setCurrentPage(option: Partial<IPage>) {
+    console.log({ ...this.currentPage })
+    if (!this.currentPage) return
+    Object.assign(this.currentPage, option)
   }
   add() {
     this.pages.push(this.schemaDefaultService.page())
@@ -34,3 +44,6 @@ export class SchemaPageService {
     this.currentId = id
   }
 }
+
+export const injectSchemaPage = inject(SchemaPageService)
+export const delayInjectSchemaPage = inject(delay(() => SchemaPageService))

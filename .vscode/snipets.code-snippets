@@ -68,16 +68,23 @@
   "Service": {
     "prefix": "service",
     "body": [
-      "import { autoBind } from '~/helper/decorator'",
-      "import { makeObservable } from 'mobx'",
-      "",
-      "@autoBind",
-      "export class $1${TM_FILENAME_BASE}Service {",
-      "  constructor() {",
-      "    makeObservable(this)",
-      "  }",
-      "}"
-    ],
+    "import { inject, injectable } from 'tsyringe'",
+    "import { autobind } from '~/helper/decorator'",
+    "import { makeObservable } from 'mobx'",
+    "",
+    "@autobind",
+    "@injectable()",
+    "export class $1${TM_FILENAME_BASE}Service {",
+    "  constructor(",
+    "    /** @inject private Service: Service **/",
+    "  ) {",
+    "    makeObservable(this)",
+    "  }",
+    "}",
+    "",
+    "export const inject$1${TM_FILENAME_BASE} = inject($1${TM_FILENAME_BASE}Service)",
+    ""
+  ],
     "description": "Service"
   },
   "Flex": {
@@ -92,7 +99,7 @@
   },
   "private service": {
     "prefix": "pser",
-    "body": ["private $1Service: $1Service"],
+    "body": ["@inject$1 private $1Service: $1Service"],
     "description": "private service"
   },
 }

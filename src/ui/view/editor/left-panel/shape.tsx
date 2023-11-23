@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useService } from '~/ui/context'
+import { useServices } from '~/ioc'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 
@@ -8,7 +8,7 @@ type IShapeComp = {}
 
 export const ShapeComp: FC<IShapeComp> = observer(({}) => {
   const { classes, cx } = useStyles({})
-  const { schemaNodeService, selectService } = useService()
+  const { schemaNodeService, stageSelectService } = useServices()
 
   return (
     <Flex layout='v' className={classes.Shape}>
@@ -16,7 +16,7 @@ export const ShapeComp: FC<IShapeComp> = observer(({}) => {
         <Flex
           key={id}
           layout='h'
-          className={cx(classes.item, selectService.hoverId === id && classes.hovered)}>
+          className={cx(classes.item, stageSelectService.hoverId === id && classes.hovered)}>
           {id}
         </Flex>
       ))}

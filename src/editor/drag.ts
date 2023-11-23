@@ -1,7 +1,7 @@
 import { makeObservable, observable } from 'mobx'
-import { autoBind } from '~/helper/decorator'
+import { delay, inject, injectable } from 'tsyringe'
+import { autobind } from '~/helper/decorator'
 import { noopFunc } from '~/helper/utils'
-import { PixiService } from './stage/pixi'
 import { IBound, IXY, type ICursor } from './utils'
 
 type IDragData = {
@@ -12,7 +12,8 @@ type IDragData = {
   marquee: IBound
 }
 
-@autoBind
+@autobind
+@injectable()
 export class DragService {
   @observable canMove = false
   @observable cursor: ICursor = 'auto'
@@ -23,7 +24,7 @@ export class DragService {
   private startHandler?: (this: Window, event: MouseEvent) => any
   private moveHandler?: (this: Window, event: MouseEvent) => any
   private endHandler?: (this: Window, event: MouseEvent) => any
-  constructor(private pixiService: PixiService) {
+  constructor() {
     makeObservable(this)
   }
   onStart(callback?: (data: IDragData) => void) {
@@ -137,3 +138,6 @@ export class DragService {
     return this.marquee
   }
 }
+
+export const injectDrag = inject(DragService)
+export const delayInjectDrag = inject(delay(() => DragService))

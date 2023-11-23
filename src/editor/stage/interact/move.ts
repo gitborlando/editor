@@ -1,27 +1,27 @@
-import { DragService } from '~/editor/drag'
+import { inject, injectable } from 'tsyringe'
+import { DragService, injectDrag } from '~/editor/drag'
 import { XY } from '~/editor/math/xy'
-import { autoBind } from '~/helper/decorator'
+import { autobind } from '~/helper/decorator'
 import { noopFunc } from '~/helper/utils'
-import { PixiService } from '../pixi'
+import { PixiService, injectPixi } from '../pixi'
 import { listenInteractTypeChange } from '../stage'
-import { ViewportService } from '../viewport'
+import { ViewportService, injectViewport } from '../viewport'
 
-@autoBind
-export class StageInteractDragStageService {
+@autobind
+@injectable()
+export class StageMoveService {
   private startHandler = noopFunc
   constructor(
-    private pixiService: PixiService,
-    private dragService: DragService,
-    private viewportService: ViewportService
+    @injectPixi private pixiService: PixiService,
+    @injectDrag private dragService: DragService,
+    @injectViewport private viewportService: ViewportService
   ) {
     listenInteractTypeChange(this, 'dragStage')
   }
   startInteract() {
     this.startHandler = () => {
       const start = XY.from(this.pixiService.stage.position)
-      console.log(start)
       this.dragService
-        .setCursor('grab')
         .onStart()
         .onMove(({ shift }) => {
           this.viewportService.setStageOffset(start.plus(shift))
@@ -37,3 +37,5 @@ export class StageInteractDragStageService {
     this.pixiService.removeListener('mousedown', this.startHandler)
   }
 }
+
+export const injectStageMove = inject(StageMoveService)

@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC } from 'react'
-import { useService } from '~/ui/context'
+import { useServices } from '~/ioc'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { PageHeaderComp } from './header'
@@ -12,7 +12,7 @@ type IPageComp = {}
 export const PageComp: FC<IPageComp> = observer(({}) => {
   const { classes } = useStyles({})
   const { collapsed } = pageCompShareState
-  const { schemaPageService, dragService } = useService()
+  const { schemaPageService, dragService } = useServices()
   const state = useLocalObservable(() => ({
     height: 200,
   }))

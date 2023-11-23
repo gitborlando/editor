@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useService } from '~/ui/context'
+import { useServices } from '~/ioc'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 
@@ -8,7 +8,7 @@ type IStageComp = {}
 
 export const StageComp: FC<IStageComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { pixiService } = useService()
+  const { pixiService } = useServices()
   return <Flex ref={pixiService.setContainer} className={classes.Stage}></Flex>
 })
 

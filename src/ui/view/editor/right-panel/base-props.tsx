@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useService } from '~/ui/context'
+import { useServices } from '~/ioc'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { Input } from '~/ui/widget/input'
@@ -9,7 +9,7 @@ type IBasePropsComp = {}
 
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { schemaNodeService } = useService()
+  const { schemaNodeService } = useServices()
   if (!schemaNodeService.selectedIds.length) return null
 
   const node = schemaNodeService.find(schemaNodeService.selectedIds[0])

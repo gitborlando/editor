@@ -1,18 +1,20 @@
 import { toJS } from 'mobx'
-import { autoBind } from '~/helper/decorator'
-import { SchemaNodeService } from './node'
-import { SchemaPageService } from './page'
-import { ISchema } from './type'
+import { inject, injectable } from 'tsyringe'
+import { autobind } from '~/helper/decorator'
+import { SchemaNodeService, injectSchemaNode } from './node'
+import { SchemaPageService, injectSchemaPage } from './page'
+import { IMeta, ISchema } from './type'
 
-@autoBind
+@autobind
+@injectable()
 export class SchemaService {
-  private _meta?: ISchema['meta']
+  private meta!: IMeta
   constructor(
-    private schemaNodeService: SchemaNodeService,
-    private schemaPageService: SchemaPageService
+    @injectSchemaNode private schemaNodeService: SchemaNodeService,
+    @injectSchemaPage private schemaPageService: SchemaPageService
   ) {}
-  get meta() {
-    return this._meta!
+  setMeta(option: Partial<IMeta>) {
+    this.meta = { ...this.meta, ...option }
   }
   getSchema() {
     return {
@@ -22,8 +24,10 @@ export class SchemaService {
     }
   }
   setSchema({ meta, nodes, pages }: ISchema) {
-    this._meta = meta
+    this.meta = meta
     this.schemaNodeService.setMap(nodes)
     this.schemaPageService.setPages(pages)
   }
 }
+
+export const injectSchema = inject(SchemaService)

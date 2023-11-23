@@ -1,16 +1,22 @@
 import { makeObservable, observable } from 'mobx'
-import { auto, autoBind } from '~/helper/decorator'
+import { delay, inject, injectable } from 'tsyringe'
+import { auto, autobind } from '~/helper/decorator'
 import { EE } from '~/helper/event-emitter'
-import { PixiService } from './pixi'
+import { DragService, injectDrag } from '../drag'
+import { PixiService, injectPixi } from './pixi'
 
 export type IStageInteractType = 'select' | 'dragStage' | 'create'
 
-@autoBind
+@autobind
+@injectable()
 export class StageService {
   @observable cursor = 'auto'
   @observable interactType: IStageInteractType = 'select'
   private previousInteractType?: IStageInteractType
-  constructor(private pixiService: PixiService) {
+  constructor(
+    @injectPixi private pixiService: PixiService,
+    @injectDrag private dragService: DragService
+  ) {
     makeObservable(this)
     EE.on('pixi-stage-initialized', () => {
       this.autoCursor()
@@ -19,6 +25,7 @@ export class StageService {
   }
   setCursor(cursor = 'auto') {
     this.cursor = cursor
+    this.dragService.setCursor(cursor)
     this.pixiService.container.style.cursor = cursor
   }
   setInteractType(interactType: IStageInteractType = 'select') {
@@ -31,17 +38,20 @@ export class StageService {
   }
   @auto private autoInteract() {
     EE.emit('stage-interact-type-changed', {
-      type: this.interactType,
+      currentType: this.interactType,
       previousType: this.previousInteractType,
     })
     this.previousInteractType = this.interactType
   }
 }
 
+export const injectStage = inject(StageService)
+export const delayInjectStage = inject(delay(() => StageService))
+
 export function listenInteractTypeChange<
   T extends { startInteract: () => void; endInteract: () => void }
 >(target: T, type: IStageInteractType) {
-  EE.on('stage-interact-type-changed', ({ type: currentType, previousType }) => {
+  EE.on('stage-interact-type-changed', ({ currentType, previousType }) => {
     if (<IStageInteractType>currentType === type) target.startInteract()
     if (<IStageInteractType>previousType === type) target.endInteract()
   })

@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useService } from '~/ui/context'
+import { useServices } from '~/ioc'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 
@@ -8,7 +8,7 @@ type IDragMaskComp = {}
 
 export const DragMaskComp: FC<IDragMaskComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { dragService } = useService()
+  const { dragService } = useServices()
   return (
     <Flex
       className={classes.DragMask}

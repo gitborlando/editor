@@ -1,14 +1,22 @@
 import { IXY } from '../utils'
 
 export type ISchema = {
-  meta: { id: string; name: string; user: string }
+  meta: IMeta
   pages: IPage[]
   nodes: Record<string, INode>
+}
+
+export type IMeta = {
+  id: string
+  name: string
+  user: string
 }
 
 export type IPage = {
   id: string
   name: string
+  zoom: number
+  offset: IXY
   childIds: string[]
 }
 

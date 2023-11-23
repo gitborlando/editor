@@ -1,20 +1,25 @@
 import { makeObservable, observable } from 'mobx'
-import { DragService } from '~/editor/drag'
-import { SchemaNodeService } from '~/editor/schema/node'
-import { autoBind } from '~/helper/decorator'
+import { inject, injectable } from 'tsyringe'
+import { DragService, injectDrag } from '~/editor/drag'
+import { XY } from '~/editor/math/xy'
+import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
+import { autobind } from '~/helper/decorator'
 import { noopFunc } from '~/helper/utils'
-import { PIXI, PixiService } from '../pixi'
+import { PIXI, PixiService, injectPixi } from '../pixi'
 import { listenInteractTypeChange } from '../stage'
+import { ViewportService, injectViewport } from '../viewport'
 
-@autoBind
-export class StageInteractSelectService {
+@autobind
+@injectable()
+export class StageSelectService {
   @observable hoverId = ''
   private clickSelectHandler = noopFunc
   private marqueeSelectHandler = noopFunc
   constructor(
-    private pixiService: PixiService,
-    private dragService: DragService,
-    private schemaNodeService: SchemaNodeService
+    @injectPixi private pixiService: PixiService,
+    @injectDrag private dragService: DragService,
+    @injectViewport private viewportService: ViewportService,
+    @injectSchemaNode private schemaNodeService: SchemaNodeService
   ) {
     makeObservable(this)
     listenInteractTypeChange(this, 'select')
@@ -55,15 +60,19 @@ export class StageInteractSelectService {
         })
         .onMove(({ marquee: { x, y, width, height } }) => {
           marquee.clear()
-          marquee.lineStyle(1, 'purple')
+          marquee.lineStyle(1 / this.viewportService.zoom, 'purple')
           // marquee.lineStyle(1, 'rgba(0, 145, 255, 0.53)')
-          marquee.drawRect(x, y, width, height)
+          const realStart = this.viewportService.toRealStageXY(new XY(x, y))
+          const realShift = this.viewportService.toRealStageShift(new XY(width, height))
+          marquee.drawRect(realStart.x, realStart.y, realShift.x, realShift.y)
         })
-        .onEnd(({ dragService: drag }) => {
+        .onEnd(({ dragService }) => {
           marquee.destroy()
-          drag.endListen()
+          dragService.endListen()
         })
     }
     this.pixiService.addListener('mousedown', this.marqueeSelectHandler)
   }
 }
+
+export const injectStageSelect = inject(StageSelectService)

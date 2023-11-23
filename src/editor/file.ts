@@ -1,18 +1,20 @@
+import { delay, inject, injectable } from 'tsyringe'
 import { mock2 } from '~/editor/mock'
-import { autoBind } from '~/helper/decorator'
+import { autobind } from '~/helper/decorator'
 import { EditorService } from './editor'
-import { SchemaDefaultService } from './schema/default'
-import { SchemaPageService } from './schema/page'
-import { SchemaService } from './schema/schema'
+import { SchemaDefaultService, injectSchemaDefault } from './schema/default'
+import { SchemaPageService, injectSchemaPage } from './schema/page'
+import { SchemaService, injectSchema } from './schema/schema'
 
-@autoBind
+@autobind
+@injectable()
 export class FileService {
   private _inputRef?: HTMLInputElement
   constructor(
-    private schemaService: SchemaService,
-    private editorService: EditorService,
-    private schemaPageService: SchemaPageService,
-    private schemaDefaultService: SchemaDefaultService
+    @injectSchema private schemaService: SchemaService,
+    @injectSchemaPage private schemaPageService: SchemaPageService,
+    @injectSchemaDefault private schemaDefaultService: SchemaDefaultService,
+    @inject(delay(() => EditorService)) private editorService: EditorService
   ) {
     window.addEventListener('keydown', (e) => {
       if (e.altKey && e.key === 'l') console.log(this.schemaService.getSchema())
@@ -68,3 +70,6 @@ export class FileService {
     })
   }
 }
+
+export const injectFile = inject(FileService)
+export const delayInjectFile = inject(delay(() => FileService))

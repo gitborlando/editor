@@ -1,6 +1,6 @@
-import {} from 'mobx'
+import { inject, injectable } from 'tsyringe'
 import { v4 as uuidv4 } from 'uuid'
-import { autoBind } from '~/helper/decorator'
+import { autobind } from '~/helper/decorator'
 import { IXY } from '../utils'
 import {
   IEllipse,
@@ -24,7 +24,8 @@ import {
   IVector,
 } from './type'
 
-@autoBind
+@autobind
+@injectable()
 export class SchemaDefaultService {
   typeIndexMap: Record<string, [string, number]> = {}
   meta(): ISchema['meta'] {
@@ -45,6 +46,8 @@ export class SchemaDefaultService {
     return {
       id: uuidv4(),
       childIds: [],
+      zoom: 1,
+      offset: { x: 0, y: 0 },
       ...this.createNodeName('page'),
     }
   }
@@ -281,3 +284,5 @@ export class SchemaDefaultService {
     return { name: nameIndex[0] + ' ' + (nameIndex[1] as number)++ }
   }
 }
+
+export const injectSchemaDefault = inject(SchemaDefaultService)
