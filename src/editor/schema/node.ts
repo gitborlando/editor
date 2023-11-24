@@ -1,9 +1,14 @@
-import { makeObservable, observable } from 'mobx'
+import { Lambda, intercept, makeObservable, observable } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
 import { autobind } from '~/helper/decorator'
 import { Delete } from '../utils'
 import { SchemaPageService } from './page'
 import { INode } from './type'
+
+type INodeRuntime = {
+  observed: boolean
+  interceptDisposers: Lambda[]
+}
 
 @autobind
 @injectable()
@@ -11,6 +16,7 @@ export class SchemaNodeService {
   @observable selectedIds: string[] = []
   @observable dirtyIds: string[] = []
   nodeMap: Record<string, INode> = {}
+  private nodeRuntimeMap: Record<string, INodeRuntime> = {}
   constructor(
     @inject(delay(() => SchemaPageService)) private schemaPageService: SchemaPageService
   ) {
@@ -18,28 +24,29 @@ export class SchemaNodeService {
   }
   setMap(map: typeof this.nodeMap) {
     this.nodeMap = map
+    Object.keys(this.nodeMap).forEach((id) => this.createNodeRuntime(id))
   }
   add(node: INode) {
     this.nodeMap[node.id] = node
-    return this.nodeMap[node.id]!
+    this.createNodeRuntime(node.id)
+    this.intercept(node)
   }
   delete(id: string) {
-    const node = this.nodeMap[id]
+    const node = this.find(id)
     Delete(this.nodeMap, node.id)
     if ('childIds' in node) node.childIds.forEach((i) => this.delete(i))
     // const parent = this.find(node.parentId) as INodeParent
     // Delete(parent.childIds, (id) => id === node.id)
+    this.deleteNodeRuntime(id)
   }
-  copy() {}
   find(id: string) {
     return this.nodeMap[id]
   }
-  findThen(id: string, callback: (node: INode) => void) {
-    const node = this.find(id)
-    node && callback(node)
-  }
   select(id: string) {
     this.selectedIds.push(id)
+  }
+  clearSelection() {
+    this.selectedIds.length = 0
   }
   connect(id: string, parentId: string, isPage = false) {
     this.find(id).parentId = parentId
@@ -59,11 +66,39 @@ export class SchemaNodeService {
       if ('childIds' in parent) Delete(parent.childIds, id)
     }
   }
-  observe(id: string) {
-    this.nodeMap[id] = observable(this.nodeMap[id])
-  }
   collectDirty(id: string) {
     this.dirtyIds.push(id)
+  }
+  observe(id: string) {
+    const node = this.find(id)
+    const nodeRuntime = this.findNodeRuntime(id) || this.createNodeRuntime(id)
+    if (nodeRuntime.observed) return
+    this.nodeMap[id] = observable(node)
+    this.intercept(node)
+    nodeRuntime.observed = true
+  }
+  private createNodeRuntime(id: string) {
+    this.nodeRuntimeMap[id] = {
+      observed: true,
+      interceptDisposers: [],
+    }
+  }
+  private findNodeRuntime(id: string) {
+    return this.nodeRuntimeMap[id]
+  }
+  private deleteNodeRuntime(id: string) {
+    this.findNodeRuntime(id).interceptDisposers.forEach((dispose) => dispose())
+    Delete(this.nodeRuntimeMap, id)
+  }
+  private intercept(node: INode) {
+    const properties = <(keyof INode)[]>['x', 'y', 'width', 'height']
+    properties.forEach((i) => {
+      const disposer = intercept(node, i, (ctx) => {
+        ctx.newValue = Number((ctx.newValue as number).toFixed(2))
+        return ctx
+      })
+      this.findNodeRuntime(node.id).interceptDisposers.push(disposer)
+    })
   }
 }
 
