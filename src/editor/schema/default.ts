@@ -1,3 +1,4 @@
+import { observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { v4 as uuidv4 } from 'uuid'
 import { autobind } from '~/helper/decorator'
@@ -66,51 +67,43 @@ export class SchemaDefaultService {
   frame(option?: Partial<IFrame>): IFrame {
     const name = this.createNodeName('frame')
     const nodeBase = this.createNodeBase()
-    return {
+    return observable({
       type: 'frame',
       childIds: [],
       ...name,
       ...nodeBase,
       ...option,
-    }
+    })
   }
   group(option?: Partial<IGroup>): IGroup {
     const name = this.createNodeName('group')
     const nodeBase = this.createNodeBase()
-    return {
+    return observable({
       type: 'group',
       childIds: [],
       ...name,
       ...nodeBase,
       ...option,
-    }
+    })
   }
   rect(option?: Partial<IRect>): IRect {
     const name = this.createNodeName('rect')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return {
+    return observable({
       vectorType: 'rect',
       radius: 0,
       ...name,
       ...nodeBase,
       ...vectorBase,
       ...option,
-    }
-    // return {
-    //   vectorType: 'rect',
-    //   radius: 0,
-    //   ...name,
-    //   ...nodeBase,
-    //   ...vectorBase,
-    //   ...option,
-    // }
+    })
   }
   ellipse(option?: Partial<IEllipse>): IEllipse {
     const name = this.createNodeName('ellipse')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return {
+    return observable({
       vectorType: 'ellipse',
       innerRate: 0,
       startAngle: 0,
@@ -119,13 +112,13 @@ export class SchemaDefaultService {
       ...nodeBase,
       ...vectorBase,
       ...option,
-    }
+    })
   }
   triangle(option?: Partial<ITriangle>): ITriangle {
     const name = this.createNodeName('triangle')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return {
+    return observable({
       vectorType: 'triangle',
       sides: 3,
       radius: 0,
@@ -133,13 +126,13 @@ export class SchemaDefaultService {
       ...nodeBase,
       ...vectorBase,
       ...option,
-    }
+    })
   }
   star(option?: Partial<IStar>): IStar {
     const name = this.createNodeName('star')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return {
+    return observable({
       vectorType: 'star',
       sides: 3,
       innerRate: 0.3,
@@ -147,13 +140,13 @@ export class SchemaDefaultService {
       ...nodeBase,
       ...vectorBase,
       ...option,
-    }
+    })
   }
   line(option?: Partial<ILine>): ILine {
     const name = this.createNodeName('line')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return {
+    return observable({
       vectorType: 'line',
       start: { x: 0, y: 0 },
       end: { x: 100, y: 0 },
@@ -162,7 +155,7 @@ export class SchemaDefaultService {
       ...nodeBase,
       ...vectorBase,
       ...option,
-    }
+    })
   }
   image(option?: Partial<IRect>): IRect {
     const rect = this.rect(option)
@@ -172,13 +165,13 @@ export class SchemaDefaultService {
   text(option?: Partial<IText>): IText {
     const name = this.createNodeName('text')
     const nodeBase = this.createNodeBase()
-    return {
+    return observable({
       type: 'text',
       font: [],
       ...name,
       ...nodeBase,
       ...option,
-    }
+    })
   }
   fillColor(): IFillColor {
     return { type: 'color', color: 'skyBlue' }
@@ -221,7 +214,6 @@ export class SchemaDefaultService {
       select: false,
       hover: false,
       parentId: '',
-      _needRender: true,
     }
   }
   private createNodeBase(): INodeBase {

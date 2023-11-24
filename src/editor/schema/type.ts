@@ -40,7 +40,6 @@ export type INodeMeta = {
   select: boolean
   hover: boolean
   parentId: string
-  _needRender: boolean
 }
 
 export type INodeBase = INodeMeta & {
