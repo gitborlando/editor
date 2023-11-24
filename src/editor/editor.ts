@@ -19,7 +19,8 @@ export class EditorService {
     @injectStageShape private stageShapeService: StageShapeService,
     @injectStageDraw private stageDrawService: StageDrawService,
     @injectFile private fileService: FileService
-  ) {
+  ) {}
+  initialize() {
     when(() => this.pixiService.initialized).then(() => {
       this.fileService.mockFile()
       watch(() => this.schemaPageService.currentId).then(() =>
@@ -32,12 +33,11 @@ export class EditorService {
     const page = this.schemaPageService.find(pageId)!
     const nodes = page.childIds.map((childId) => this.schemaNodeService.nodeMap[childId])
     nodes.forEach((node) => this.schemaNodeService.collectDirty(node.id))
-    this.drawDirtyNodes()
+    this.autoDrawDirtyNodes()
   }
-  @auto private drawDirtyNodes() {
-    let id: string | undefined
+  @auto private autoDrawDirtyNodes() {
     while (this.schemaNodeService.dirtyIds.length) {
-      id = this.schemaNodeService.dirtyIds.pop()
+      let id = this.schemaNodeService.dirtyIds.pop()
       id && this.stageDrawService.draw(this.schemaNodeService.find(id))
     }
   }

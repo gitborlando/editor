@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
-import { FC } from 'react'
+import { FC, useEffect } from 'react'
+import { useServices } from '~/ioc'
 import { makeStyles } from '~/ui/theme'
 import { Flex } from '~/ui/widget/flex'
 import { DragMaskComp } from './drag-mask'
@@ -12,6 +13,8 @@ type IEditorComp = {}
 
 export const EditorComp: FC<IEditorComp> = observer(({}) => {
   const { classes } = useStyles({})
+  const { editorService } = useServices()
+  useEffect(() => editorService.initialize(), [])
   return (
     <Flex layout='v' className={classes.Editor}>
       <HeaderComp />
