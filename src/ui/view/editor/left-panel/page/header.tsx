@@ -1,4 +1,4 @@
-import { observer, useLocalObservable } from 'mobx-react'
+import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { useServices } from '~/ioc'
 import { makeStyles } from '~/ui/theme'
@@ -11,12 +11,11 @@ type IPageHeaderComp = {}
 export const PageHeaderComp: FC<IPageHeaderComp> = observer(({}) => {
   const { classes } = useStyles({})
   const { schemaPageService } = useServices()
-  const state = useLocalObservable(() => ({}))
   const { collapsed, setCollapsed } = pageCompShareState
   return (
     <Flex className={classes.PageHeader}>
       <Flex layout='c' className={classes.selectPageName}>
-        {schemaPageService.find(schemaPageService.currentId)?.name}
+        {schemaPageService.currentPage?.name}
       </Flex>
       <Button style={{ marginLeft: 'auto' }} onClick={() => schemaPageService.add()}>
         新建

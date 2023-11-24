@@ -1,39 +1,36 @@
+import { when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { auto, autobind } from '~/helper/decorator'
-import { EE } from '~/helper/event-emitter'
-import { watchChange } from '~/helper/utils'
+import { watch } from '~/helper/utils'
 import { FileService, injectFile } from './file'
 import { SchemaNodeService, injectSchemaNode } from './schema/node'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
+import { PixiService, injectPixi } from './stage/pixi'
 import { StageDrawService, injectStageDraw } from './stage/shape/draw'
 import { StageShapeService, injectStageShape } from './stage/shape/shape'
-import { ViewportService, injectViewport } from './stage/viewport'
 
 @autobind
 @injectable()
 export class EditorService {
   constructor(
+    @injectPixi private pixiService: PixiService,
     @injectSchemaPage private schemaPageService: SchemaPageService,
     @injectSchemaNode private schemaNodeService: SchemaNodeService,
     @injectStageShape private stageShapeService: StageShapeService,
     @injectStageDraw private stageDrawService: StageDrawService,
-    @injectViewport private viewportService: ViewportService,
     @injectFile private fileService: FileService
   ) {
-    EE.on('pixi-stage-initialized', () => {
+    when(() => this.pixiService.initialized).then(() => {
       this.fileService.mockFile()
-      watchChange(() => this.schemaPageService.currentId).then(() =>
+      watch(() => this.schemaPageService.currentId).then(() =>
         this.renderPage(this.schemaPageService.currentId)
       )
     })
   }
   renderPage(pageId: string) {
-    pageId = pageId || this.schemaPageService.pages[0].id
+    this.stageShapeService.clearAll()
     const page = this.schemaPageService.find(pageId)!
     const nodes = page.childIds.map((childId) => this.schemaNodeService.nodeMap[childId])
-    this.stageShapeService.clearAll()
-    this.viewportService.setZoom(page.zoom)
-    // console.log(page.zoom)
     nodes.forEach((node) => this.schemaNodeService.collectDirty(node.id))
     this.drawDirtyNodes()
   }

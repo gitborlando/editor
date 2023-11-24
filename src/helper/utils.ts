@@ -35,13 +35,13 @@ export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOpt
   }, [])
 }
 
-export function watchChange(expression: (r: IReactionPublic) => any) {
+export function watch(expression: (r: IReactionPublic) => any) {
   return {
     then: (
       effect: (arg: any, prev: any, r: IReactionPublic) => void,
-      opts?: IReactionOptions<any, true> | undefined
+      opts?: IReactionOptions<any, boolean> | undefined
     ) => {
-      reaction(expression, effect, { ...opts, fireImmediately: true })
+      reaction(expression, effect, { fireImmediately: true, ...opts })
     },
   }
 }

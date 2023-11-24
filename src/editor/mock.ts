@@ -64,11 +64,11 @@ export function mock2(schemaDefault: SchemaDefaultService) {
   let s = new Date().getTime()
   const nodes: Record<string, INode> = {}
   let k = 0
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 10; i++) {
     const id = v4()
-    let j = i % 100
+    let j = i % 5
 
-    k = ~~(i / 100)
+    k = ~~(i / 5)
     const rect = schemaDefault.rect({
       id,
       width: 100,
@@ -87,7 +87,7 @@ export function mock2(schemaDefault: SchemaDefaultService) {
     nodes,
     pages: [
       {
-        id: 'page1',
+        id: v4(),
         name: '测试页面1',
         zoom: 1,
         offset: { x: 0, y: 0 },

@@ -8,8 +8,7 @@ import { Flex } from '~/ui/widget/flex'
 type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
-  const { fileService, stageService, viewportService, stageCreateService, editorService } =
-    useServices()
+  const { fileService, stageService, viewportService, stageCreateService } = useServices()
   const { classes } = useStyles({ top: viewportService.bound.y })
 
   return (

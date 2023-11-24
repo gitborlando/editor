@@ -48,6 +48,9 @@ export class ViewportService {
   toRealStageShift(xy: IXY) {
     return XY.from(xy).divide(this.zoom)
   }
+  inViewport(xy: IXY) {
+    return xy.x > this.bound.x && xy.x < this.bound.x + this.bound.width && xy.y > this.bound.y
+  }
   @auto private autoPixiStageZoom() {
     this.pixiService.stage.scale.set(this.zoom, this.zoom)
   }
@@ -56,6 +59,7 @@ export class ViewportService {
   }
   private onWheelZoom() {
     const onWheel = ({ deltaY, clientX, clientY }: WheelEvent) => {
+      if (!this.inViewport(new XY(clientX, clientY))) return
       const sign = deltaY > 0 ? -1 : 1
       const stepByZoom = [
         [0, 0.02],

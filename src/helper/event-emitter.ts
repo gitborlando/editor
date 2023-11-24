@@ -1,8 +1,4 @@
-type IEventType =
-  | 'mask-div-existed'
-  | 'pixi-stage-initialized'
-  | 'stage-interact-type-changed'
-  | 'render-new-page'
+type IEventType = 'stage-interact-type-changed'
 
 class EventEmitter {
   private events = new Map<IEventType, ((...args: any[]) => void)[]>()

@@ -2,7 +2,6 @@ import { makeObservable, observable } from 'mobx'
 import * as PIXI from 'pixi.js'
 import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/helper/decorator'
-import { EE } from '~/helper/event-emitter'
 
 export * as PIXI from 'pixi.js'
 
@@ -22,7 +21,6 @@ export class PixiService {
     this.container = container
     this.initPixiApp(container)
     this.initialized = true
-    EE.emit('pixi-stage-initialized')
   }
   addListener(
     type: string,

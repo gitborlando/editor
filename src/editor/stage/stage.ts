@@ -1,5 +1,5 @@
-import { makeObservable, observable } from 'mobx'
-import { delay, inject, injectable } from 'tsyringe'
+import { makeObservable, observable, when } from 'mobx'
+import { inject, injectable } from 'tsyringe'
 import { auto, autobind } from '~/helper/decorator'
 import { EE } from '~/helper/event-emitter'
 import { DragService, injectDrag } from '../drag'
@@ -18,7 +18,7 @@ export class StageService {
     @injectDrag private dragService: DragService
   ) {
     makeObservable(this)
-    EE.on('pixi-stage-initialized', () => {
+    when(() => pixiService.initialized).then(() => {
       this.autoCursor()
       this.autoInteract()
     })
@@ -46,7 +46,6 @@ export class StageService {
 }
 
 export const injectStage = inject(StageService)
-export const delayInjectStage = inject(delay(() => StageService))
 
 export function listenInteractTypeChange<
   T extends { startInteract: () => void; endInteract: () => void }
