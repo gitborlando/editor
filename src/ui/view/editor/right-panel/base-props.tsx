@@ -32,14 +32,14 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
       />
       <Input
         className={classes.input}
-        label='长度'
+        label='宽度'
         value={node.width}
         onNewValueApply={(v) => (node.width = v)}
         min={0}
       />
       <Input
         className={classes.input}
-        label='宽度'
+        label='高度'
         value={node.height}
         onNewValueApply={(v) => (node.height = v)}
         min={0}

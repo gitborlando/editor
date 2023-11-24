@@ -15,9 +15,6 @@ export class StageDrawService {
     @injectStageShape private shapeService: StageShapeService,
     @injectStageSelect private selectService: StageSelectService
   ) {}
-  drawNodes(nodes: INode[]) {
-    nodes.forEach((node) => this.draw(node))
-  }
   draw(node: INode) {
     if (node.type === 'vector') {
       if (node.vectorType === 'rect') this.drawRect(node)

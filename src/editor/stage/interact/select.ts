@@ -44,7 +44,7 @@ export class StageSelectService {
       )
         return
       this.schemaNodeService.observe(this.hoverId)
-      this.schemaNodeService.selectedIds = []
+      this.schemaNodeService.clearSelection()
       this.schemaNodeService.select(this.hoverId)
     }
     this.pixiService.addListener('mousedown', this.clickSelectHandler)

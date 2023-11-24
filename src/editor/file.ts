@@ -9,7 +9,7 @@ import { SchemaService, injectSchema } from './schema/schema'
 @autobind
 @injectable()
 export class FileService {
-  private _inputRef?: HTMLInputElement
+  private inputRef!: HTMLInputElement
   constructor(
     @injectSchema private schemaService: SchemaService,
     @injectSchemaPage private schemaPageService: SchemaPageService,
@@ -20,11 +20,8 @@ export class FileService {
       if (e.altKey && e.key === 'l') console.log(this.schemaService.getSchema())
     })
   }
-  get inputRef() {
-    return this._inputRef!
-  }
   setInputRef(input: HTMLInputElement) {
-    this._inputRef = input
+    this.inputRef = input
   }
   async openFile() {
     this.inputRef.click()
@@ -72,4 +69,3 @@ export class FileService {
 }
 
 export const injectFile = inject(FileService)
-export const delayInjectFile = inject(delay(() => FileService))

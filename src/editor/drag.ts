@@ -1,5 +1,5 @@
 import { makeObservable, observable } from 'mobx'
-import { delay, inject, injectable } from 'tsyringe'
+import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/helper/decorator'
 import { noopFunc } from '~/helper/utils'
 import { IBound, IXY, type ICursor } from './utils'
@@ -140,4 +140,3 @@ export class DragService {
 }
 
 export const injectDrag = inject(DragService)
-export const delayInjectDrag = inject(delay(() => DragService))

@@ -12,6 +12,9 @@ export class StageShapeService {
   add(id: string, shape: IPixiShape) {
     this.shapeMap.set(id, shape)
   }
+  delete(id: string) {
+    this.shapeMap.delete(id)
+  }
   find(id: string) {
     return this.shapeMap.get(id)
   }
