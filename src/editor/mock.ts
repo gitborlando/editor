@@ -65,7 +65,7 @@ export function mock2(schemaDefault: SchemaDefaultService) {
   let s = new Date().getTime()
   const nodes: Record<string, INode> = {}
   let k = 0
-  for (let i = 0; i < 50000; i++) {
+  for (let i = 0; i < 10000; i++) {
     const id = v4()
     let j = i % 100
 

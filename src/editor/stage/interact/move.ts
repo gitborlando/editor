@@ -21,15 +21,9 @@ export class StageMoveService {
   startInteract() {
     this.startHandler = () => {
       const start = XY.from(this.pixiService.stage.position)
-      this.dragService
-        .onStart()
-        .onMove(({ shift }) => {
-          this.viewportService.setStageOffset(start.plus(shift))
-        })
-        .onEnd(({ shift, dragService }) => {
-          this.viewportService.setStageOffset(start.plus(shift))
-          dragService.endListen()
-        })
+      this.dragService.onSlide(({ shift }) => {
+        this.viewportService.setStageOffset(start.plus(shift))
+      })
     }
     this.pixiService.addListener('mousedown', this.startHandler)
   }
