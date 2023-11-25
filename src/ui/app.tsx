@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { testDraw } from '~/helper/test-draw'
-
 import { makeStyles } from './theme'
 import { EditorComp } from './view/editor/editor'
 import { Flex } from './widget/flex'

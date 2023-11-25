@@ -1,4 +1,4 @@
-import { delay, inject, injectable } from 'tsyringe'
+import { inject, injectable } from 'tsyringe'
 import { INode, IRect, IVector } from '~/editor/schema/type'
 import { autobind } from '~/helper/decorator'
 import { StageSelectService, injectStageSelect } from '../interact/select'
@@ -45,4 +45,3 @@ export class StageDrawService {
 }
 
 export const injectStageDraw = inject(StageDrawService)
-export const delayInjectStageDraw = inject(delay(() => StageDrawService))

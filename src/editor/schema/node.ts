@@ -94,7 +94,7 @@ export class SchemaNodeService {
     const properties = <(keyof INode)[]>['x', 'y', 'width', 'height']
     properties.forEach((i) => {
       const disposer = intercept(node, i, (ctx) => {
-        ctx.newValue = Number((ctx.newValue as number).toFixed(2))
+        ctx.newValue = Number((ctx.newValue as number).toFixed(1))
         return ctx
       })
       this.findNodeRuntime(node.id).interceptDisposers.push(disposer)

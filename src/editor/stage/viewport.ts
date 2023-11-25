@@ -51,6 +51,15 @@ export class ViewportService {
   inViewport(xy: IXY) {
     return xy.x > this.bound.x && xy.x < this.bound.x + this.bound.width && xy.y > this.bound.y
   }
+  // nodeInViewport(xy: IXY) {
+  //   const viewportXY = XY.from(xy).multiply(this.zoom).plus(this.stageOffset)
+  //   return (
+  //     viewportXY.x >= 0 &&
+  //     viewportXY.x <= this.bound.width &&
+  //     viewportXY.y >= 0 &&
+  //     viewportXY.y <= this.bound.height
+  //   )
+  // }
   @auto private autoPixiStageZoom() {
     this.pixiService.stage.scale.set(this.zoom, this.zoom)
   }
