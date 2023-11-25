@@ -5,6 +5,7 @@ interface IFlexProps extends ComponentPropsWithRef<'div'> {
   layout?: 'c' | 'h' | 'v'
   sidePadding?: number
   vshow?: boolean
+  justify?: 'space-around' | 'space-between'
   onHover?: (isHover: boolean) => void
 }
 
@@ -14,6 +15,7 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
       layout,
       sidePadding = 0,
       vshow = true,
+      justify,
       className,
       onHover,
       onMouseOver,
@@ -22,7 +24,7 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
     },
     ref
   ) => {
-    const { classes, cx } = useStyles({ sidePadding, vshow })
+    const { classes, cx } = useStyles({ sidePadding, vshow, justify })
     return (
       <div
         ref={ref}
@@ -45,13 +47,13 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
   }
 )
 
-type IFlexStyleProps = {} & Required<
-  Pick<IFlexProps, 'sidePadding' | 'vshow'>
-> /* & Pick<IFlexProps> */
+type IFlexStyleProps = {} & Required<Pick<IFlexProps, 'sidePadding' | 'vshow'>> &
+  Pick<IFlexProps, 'justify'>
 
-const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, vshow }) => ({
+const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, vshow, justify }) => ({
   Flex: {
     display: vshow ? 'flex' : 'none',
+    justifyContent: justify,
   },
   center: {
     justifyContent: 'center',
