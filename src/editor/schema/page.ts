@@ -30,7 +30,9 @@ export class SchemaPageService {
     this.pages = pages
   }
   add() {
-    this.pages.push(this.schemaDefaultService.page())
+    const page = this.schemaDefaultService.page()
+    this.pages.push(page)
+    this.select(page.id)
   }
   delete(id: string) {
     if (this.pages.length <= 1) return

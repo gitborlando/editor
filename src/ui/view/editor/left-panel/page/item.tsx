@@ -12,16 +12,15 @@ type IPageItemComp = {
 
 export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
   const { schemaPageService } = useServices()
-  const selected = schemaPageService.currentId === id
-  const { classes } = useStyles({ selected })
+  const { classes } = useStyles({ selected: schemaPageService.currentId === id })
   const state = useLocalObservable(() => ({
     isHover: false,
   }))
   return (
     <Flex
       layout='h'
+      justify='space-between'
       className={classes.PageItem}
-      style={{ justifyContent: 'space-between' }}
       onHover={(hover) => (state.isHover = hover)}
       onClick={() => schemaPageService.select(id)}>
       <Flex layout='h' sidePadding={15} className={classes.name}>
@@ -47,9 +46,11 @@ type IPageItemCompStyle = {
 const useStyles = makeStyles<IPageItemCompStyle>()((t, { selected }) => ({
   PageItem: {
     ...t.rect('100%', t.default$.normalHeight, 'no-radius', 'white'),
-    ...t.default$.hover.background,
     cursor: 'pointer',
-    flexShrink: 0,
+    // flexShrink: 0,
+    ...(selected
+      ? { backgroundColor: 'rgba(136, 130, 255, 0.21)' }
+      : { ...t.default$.hover.background }),
   },
   name: {
     fontSize: 12,
