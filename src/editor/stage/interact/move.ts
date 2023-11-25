@@ -16,7 +16,7 @@ export class StageMoveService {
     @injectDrag private dragService: DragService,
     @injectViewport private viewportService: ViewportService
   ) {
-    listenInteractTypeChange(this, 'dragStage')
+    listenInteractTypeChange(this, 'move')
   }
   startInteract() {
     this.startHandler = () => {

@@ -5,12 +5,11 @@ import { EE } from '~/helper/event-emitter'
 import { DragService, injectDrag } from '../drag'
 import { PixiService, injectPixi } from './pixi'
 
-export type IStageInteractType = 'select' | 'dragStage' | 'create'
+export type IStageInteractType = 'select' | 'move' | 'create'
 
 @autobind
 @injectable()
 export class StageService {
-  @observable cursor = 'auto'
   @observable interactType: IStageInteractType = 'select'
   private previousInteractType?: IStageInteractType
   constructor(
@@ -23,18 +22,8 @@ export class StageService {
       this.autoInteract()
     })
   }
-  setCursor(cursor = 'auto') {
-    this.cursor = cursor
-    this.dragService.setCursor(cursor)
-    this.pixiService.container.style.cursor = cursor
-  }
   setInteractType(interactType: IStageInteractType = 'select') {
     this.interactType = interactType
-  }
-  @auto private autoCursor() {
-    this.interactType === 'select' && this.setCursor('auto')
-    this.interactType === 'dragStage' && this.setCursor('grab')
-    this.interactType === 'create' && this.setCursor('crosshair')
   }
   @auto private autoInteract() {
     EE.emit('stage-interact-type-changed', {
@@ -43,9 +32,20 @@ export class StageService {
     })
     this.previousInteractType = this.interactType
   }
+  @auto private autoCursor() {
+    const cursor = interactCursorMap[this.interactType]
+    this.dragService.setCursor(cursor)
+    this.pixiService.container.style.cursor = cursor
+  }
 }
 
 export const injectStage = inject(StageService)
+
+const interactCursorMap = {
+  select: 'auto',
+  move: 'grab',
+  create: 'crosshair',
+}
 
 export function listenInteractTypeChange<
   T extends { startInteract: () => void; endInteract: () => void }
