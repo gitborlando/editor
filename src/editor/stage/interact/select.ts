@@ -68,7 +68,7 @@ export class StageSelectService {
         })
         .onEnd(({ dragService }) => {
           marquee.destroy()
-          dragService.endListen()
+          dragService.destroy()
         })
     }
     this.pixiService.addListener('mousedown', this.marqueeSelectHandler)

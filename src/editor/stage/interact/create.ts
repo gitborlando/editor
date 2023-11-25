@@ -4,7 +4,7 @@ import { SchemaDefaultService, injectSchemaDefault } from '~/editor/schema/defau
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
 import { INode } from '~/editor/schema/type'
-import { IXY } from '~/editor/utils'
+import { IXY, runAsAction } from '~/editor/utils'
 import { autobind } from '~/helper/decorator'
 import { StageService, injectStage, listenInteractTypeChange } from '../stage'
 import { ViewportService, injectViewport } from '../viewport'
@@ -30,7 +30,12 @@ export class StageCreateService {
   }
   startInteract() {
     this.dragService
-      .onStart(({ start }) => {
+      .onStart(({ start, dragService }) => {
+        if (!this.viewportService.inViewport(start)) {
+          this.stageService.setInteractType('select')
+          dragService.destroy()
+          return
+        }
         const realStageStart = this.viewportService.toRealStageXY(start)
         if (this.type === 'frame') this.createRect(realStageStart)
         if (this.type === 'rect') this.createRect(realStageStart)
@@ -40,30 +45,34 @@ export class StageCreateService {
         if (this.type === 'img') this.createRect(realStageStart)
         this.addToSchemaAndObserveAndSelect()
       })
-      .onMove(({ marquee }) => {
-        const { x, y } = this.viewportService.toRealStageXY(marquee)
-        const { x: width, y: height } = this.viewportService.toRealStageShift({
-          x: marquee.width,
-          y: marquee.height,
+      .onMove(
+        runAsAction(({ marquee }) => {
+          const { x, y } = this.viewportService.toRealStageXY(marquee)
+          const { x: width, y: height } = this.viewportService.toRealStageShift({
+            x: marquee.width,
+            y: marquee.height,
+          })
+          if (this.type === 'ellipse') {
+            this.node.x = x + width / 2
+            this.node.y = y + height / 2
+            this.node.width = width
+            this.node.height = height
+          } else {
+            this.node.x = x
+            this.node.y = y
+            this.node.width = width
+            this.node.height = height
+          }
         })
-        if (this.type === 'ellipse') {
-          this.node.x = x + width / 2
-          this.node.y = y + height / 2
-          this.node.width = width
-          this.node.height = height
-        } else {
-          this.node.x = x
-          this.node.y = y
-          this.node.width = width
-          this.node.height = height
-        }
-      })
-      .onEnd(({ dragService: drag }) => {
-        if (!this.node.width) this.node.width = 100
-        if (!this.node.height) this.node.height = 100
-        this.stageService.setInteractType('select')
-        drag.endListen()
-      })
+      )
+      .onEnd(
+        runAsAction(({ dragService }) => {
+          if (!this.node.width) this.node.width = 100
+          if (!this.node.height) this.node.height = 100
+          this.stageService.setInteractType('select')
+          dragService.destroy()
+        })
+      )
   }
   endInteract() {}
   setType(type: ICreateType) {

@@ -1,3 +1,5 @@
+import { runInAction } from 'mobx'
+
 export type IXY = { x: number; y: number }
 export type IBound = IXY & { width: number; height: number }
 export type ICursor = 'auto' | 'n-resize' | 'e-resize' | 'grab' | (string & {})
@@ -80,4 +82,10 @@ export function numberHalfFix(number: number) {
   const floatPart = number - integerPart
   const halfFixed = floatPart >= 0.75 ? 1 : floatPart >= 0.25 ? 0.5 : 0
   return integerPart + halfFixed
+}
+
+export function runAsAction<T extends any>(callback: (...args: T[]) => void) {
+  return (...args: T[]) => {
+    runInAction(() => callback(...args))
+  }
 }

@@ -85,11 +85,7 @@ export class DragService {
           shift: this.shift,
           marquee: this.marquee,
         })
-        this.canMove = false
-        this.current = { x: 0, y: 0 }
-        this.start = { x: 0, y: 0 }
-        this.shift = { x: 0, y: 0 }
-        this.marquee = { x: 0, y: 0, width: 0, height: 0 }
+        this.setDataToDefault()
       })
     )
     return this
@@ -97,16 +93,17 @@ export class DragService {
   onSlide(callback: (data: IDragData) => void) {
     this.onStart()
       .onMove(callback)
-      .onEnd(() => this.endListen())
+      .onEnd(() => this.destroy())
     return this
   }
-  endListen() {
+  destroy() {
     window.removeEventListener('mousedown', this.startHandler || noopFunc)
     window.removeEventListener('mousemove', this.moveHandler || noopFunc)
     window.removeEventListener('mouseup', this.endHandler || noopFunc)
     this.startHandler = undefined
     this.moveHandler = undefined
     this.endHandler = undefined
+    this.setDataToDefault()
   }
   setCursor(cursor: ICursor) {
     this.cursor = cursor
@@ -136,6 +133,13 @@ export class DragService {
       }
     }
     return this.marquee
+  }
+  private setDataToDefault() {
+    this.canMove = false
+    this.current = { x: 0, y: 0 }
+    this.start = { x: 0, y: 0 }
+    this.shift = { x: 0, y: 0 }
+    this.marquee = { x: 0, y: 0, width: 0, height: 0 }
   }
 }
 
