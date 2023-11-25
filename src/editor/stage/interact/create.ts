@@ -38,7 +38,7 @@ export class StageCreateService {
         if (this.type === 'line') this.createRect(realStageStart)
         if (this.type === 'text') this.createRect(realStageStart)
         if (this.type === 'img') this.createRect(realStageStart)
-        this.addToSchemaAndSelect()
+        this.addToSchemaAndObserveAndSelect()
       })
       .onMove(({ marquee }) => {
         const { x, y } = this.viewportService.toRealStageXY(marquee)
@@ -57,12 +57,10 @@ export class StageCreateService {
           this.node.width = width
           this.node.height = height
         }
-        this.schemaNodeService.collectDirty(this.node.id)
       })
       .onEnd(({ dragService: drag }) => {
         if (!this.node.width) this.node.width = 100
         if (!this.node.height) this.node.height = 100
-        this.schemaNodeService.collectDirty(this.node.id)
         this.stageService.setInteractType('select')
         drag.endListen()
       })
@@ -88,8 +86,8 @@ export class StageCreateService {
       height: 0,
     })
   }
-  private addToSchemaAndSelect() {
-    this.schemaNodeService.add(this.node)
+  private addToSchemaAndObserveAndSelect() {
+    this.node = this.schemaNodeService.add(this.node)
     this.schemaNodeService.clearSelection()
     this.schemaNodeService.select(this.node.id)
     this.schemaNodeService.connect(this.node.id, this.schemaPageService.currentId, true)

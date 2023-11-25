@@ -1,7 +1,7 @@
 import { Lambda, intercept, makeObservable, observable } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
 import { autobind } from '~/helper/decorator'
-import { Delete } from '../utils'
+import { Delete, numberHalfFix } from '../utils'
 import { SchemaPageService } from './page'
 import { INode } from './type'
 
@@ -24,12 +24,12 @@ export class SchemaNodeService {
   }
   setMap(map: typeof this.nodeMap) {
     this.nodeMap = map
-    Object.keys(this.nodeMap).forEach((id) => this.createNodeRuntime(id))
+    Object.keys(this.nodeMap).forEach(this.initNodeRuntime)
   }
   add(node: INode) {
     this.nodeMap[node.id] = node
-    this.createNodeRuntime(node.id)
-    this.intercept(node)
+    this.initNodeRuntime(node.id)
+    return this.observeNode(node.id)
   }
   delete(id: string) {
     const node = this.find(id)
@@ -69,19 +69,21 @@ export class SchemaNodeService {
   collectDirty(id: string) {
     this.dirtyIds.push(id)
   }
-  observe(id: string) {
+  observeNode(id: string) {
     const node = this.find(id)
-    const nodeRuntime = this.findNodeRuntime(id) || this.createNodeRuntime(id)
-    if (nodeRuntime.observed) return
-    this.nodeMap[id] = observable(node)
-    this.intercept(node)
+    const nodeRuntime = this.findNodeRuntime(id)
+    if (nodeRuntime.observed) return node
+    const observedNode = observable(node)
+    this.nodeMap[id] = observedNode
+    this.interceptProperty(observedNode)
     nodeRuntime.observed = true
+    return observedNode
   }
-  private createNodeRuntime(id: string) {
-    this.nodeRuntimeMap[id] = {
-      observed: true,
+  private initNodeRuntime(id: string) {
+    return (this.nodeRuntimeMap[id] = {
+      observed: false,
       interceptDisposers: [],
-    }
+    })
   }
   private findNodeRuntime(id: string) {
     return this.nodeRuntimeMap[id]
@@ -90,15 +92,17 @@ export class SchemaNodeService {
     this.findNodeRuntime(id).interceptDisposers.forEach((dispose) => dispose())
     Delete(this.nodeRuntimeMap, id)
   }
-  private intercept(node: INode) {
-    const properties = <(keyof INode)[]>['x', 'y', 'width', 'height']
-    properties.forEach((i) => {
-      const disposer = intercept(node, i, (ctx) => {
-        ctx.newValue = Number((ctx.newValue as number).toFixed(1))
-        return ctx
-      })
-      this.findNodeRuntime(node.id).interceptDisposers.push(disposer)
+  private interceptProperty(node: INode) {
+    const nodeRuntime = this.findNodeRuntime(node.id)
+    const disposer = intercept(node, (ctx) => {
+      this.collectDirty(node.id)
+      if (ctx.type !== 'update') return ctx
+      if ((<(keyof INode)[]>['x', 'y', 'width', 'height']).includes(<keyof INode>ctx.name)) {
+        ctx.newValue = numberHalfFix(ctx.newValue)
+      }
+      return ctx
     })
+    nodeRuntime.interceptDisposers.push(disposer)
   }
 }
 

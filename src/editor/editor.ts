@@ -30,9 +30,8 @@ export class EditorService {
   }
   renderPage(pageId: string) {
     this.stageShapeService.clearAll()
-    const page = this.schemaPageService.find(pageId)!
-    const nodes = page.childIds.map((childId) => this.schemaNodeService.nodeMap[childId])
-    nodes.forEach((node) => this.schemaNodeService.collectDirty(node.id))
+    const nodeIds = this.schemaPageService.find(pageId)!.childIds
+    nodeIds.forEach(this.schemaNodeService.collectDirty)
     this.autoDrawDirtyNodes()
   }
   @auto private autoDrawDirtyNodes() {

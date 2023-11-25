@@ -11,9 +11,7 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
   const { schemaNodeService } = useServices()
   if (!schemaNodeService.selectedIds.length) return null
-
   const node = schemaNodeService.find(schemaNodeService.selectedIds[0])
-  schemaNodeService.collectDirty(node.id)
   return (
     <Flex layout='h' className={classes.SchemaBase}>
       <Input

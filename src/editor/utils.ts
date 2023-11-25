@@ -42,10 +42,6 @@ export function Delete<T>(target: Record<string, T> | T[], filter: string | ((va
   }
 }
 
-export function lazyInject(target: any, serviceName: string, service: any) {
-  target[serviceName] = service
-}
-
 export function loopForEach<T>(
   array: T[],
   callback: (current: T, left: T, next: T, index: number) => void
@@ -77,4 +73,11 @@ export function rgbaToHex(r: number, g: number, b: number, a: number) {
   const hexA = ('0' + Math.round(a * 255).toString(16)).slice(-2)
   const hexColor = `#${hexR}${hexG}${hexB}${hexA}`
   return hexColor.toUpperCase()
+}
+
+export function numberHalfFix(number: number) {
+  const integerPart = ~~number
+  const floatPart = number - integerPart
+  const halfFixed = floatPart >= 0.75 ? 1 : floatPart >= 0.25 ? 0.5 : 0
+  return integerPart + halfFixed
 }

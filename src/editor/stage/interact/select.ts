@@ -43,7 +43,7 @@ export class StageSelectService {
         this.schemaNodeService.selectedIds[0] === this.hoverId
       )
         return
-      this.schemaNodeService.observe(this.hoverId)
+      this.schemaNodeService.observeNode(this.hoverId)
       this.schemaNodeService.clearSelection()
       this.schemaNodeService.select(this.hoverId)
     }
