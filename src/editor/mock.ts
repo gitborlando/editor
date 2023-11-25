@@ -61,14 +61,15 @@ export const mockFileJson = (schemaDefault: SchemaDefaultService) => ({
 })
 
 export function mock2(schemaDefault: SchemaDefaultService) {
+  schemaDefault._observe = false
   let s = new Date().getTime()
   const nodes: Record<string, INode> = {}
   let k = 0
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 50000; i++) {
     const id = v4()
-    let j = i % 5
+    let j = i % 100
 
-    k = ~~(i / 5)
+    k = ~~(i / 100)
     const rect = schemaDefault.rect({
       id,
       width: 100,
@@ -89,7 +90,7 @@ export function mock2(schemaDefault: SchemaDefaultService) {
       {
         id: v4(),
         name: '测试页面1',
-        zoom: 1,
+        zoom: 0.05,
         offset: { x: 0, y: 0 },
         childIds: Object.keys(nodes),
       },

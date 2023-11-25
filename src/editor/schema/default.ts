@@ -28,7 +28,11 @@ import {
 @autobind
 @injectable()
 export class SchemaDefaultService {
+  _observe = false
   typeIndexMap: Record<string, [string, number]> = {}
+  observe<T extends object>(o: T): T {
+    return this._observe ? observable(o) : o
+  }
   meta(): ISchema['meta'] {
     return {
       id: uuidv4(),
@@ -67,7 +71,7 @@ export class SchemaDefaultService {
   frame(option?: Partial<IFrame>): IFrame {
     const name = this.createNodeName('frame')
     const nodeBase = this.createNodeBase()
-    return observable({
+    return this.observe({
       type: 'frame',
       childIds: [],
       ...name,
@@ -78,7 +82,7 @@ export class SchemaDefaultService {
   group(option?: Partial<IGroup>): IGroup {
     const name = this.createNodeName('group')
     const nodeBase = this.createNodeBase()
-    return observable({
+    return this.observe({
       type: 'group',
       childIds: [],
       ...name,
@@ -90,7 +94,7 @@ export class SchemaDefaultService {
     const name = this.createNodeName('rect')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return observable({
+    return this.observe({
       vectorType: 'rect',
       radius: 0,
       ...name,
@@ -103,7 +107,7 @@ export class SchemaDefaultService {
     const name = this.createNodeName('ellipse')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return observable({
+    return this.observe({
       vectorType: 'ellipse',
       innerRate: 0,
       startAngle: 0,
@@ -118,7 +122,7 @@ export class SchemaDefaultService {
     const name = this.createNodeName('triangle')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return observable({
+    return this.observe({
       vectorType: 'triangle',
       sides: 3,
       radius: 0,
@@ -132,7 +136,7 @@ export class SchemaDefaultService {
     const name = this.createNodeName('star')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return observable({
+    return this.observe({
       vectorType: 'star',
       sides: 3,
       innerRate: 0.3,
@@ -146,7 +150,7 @@ export class SchemaDefaultService {
     const name = this.createNodeName('line')
     const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
-    return observable({
+    return this.observe({
       vectorType: 'line',
       start: { x: 0, y: 0 },
       end: { x: 100, y: 0 },
@@ -165,7 +169,7 @@ export class SchemaDefaultService {
   text(option?: Partial<IText>): IText {
     const name = this.createNodeName('text')
     const nodeBase = this.createNodeBase()
-    return observable({
+    return this.observe({
       type: 'text',
       font: [],
       ...name,
