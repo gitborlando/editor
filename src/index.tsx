@@ -1,6 +1,6 @@
 import { configure } from 'mobx'
 import ReactDOM from 'react-dom/client'
-import { App } from './ui/app'
+import { App } from './view/app'
 
 configure({ enforceActions: 'never' })
 

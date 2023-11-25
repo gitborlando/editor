@@ -1,0 +1,44 @@
+import { observer } from 'mobx-react'
+import { FC } from 'react'
+import { useServices } from '~/ioc'
+import { makeStyles } from '~/view/ui-utility/theme'
+import { Flex } from '~/view/ui-utility/widget/flex'
+
+type IShapeComp = {}
+
+export const ShapeComp: FC<IShapeComp> = observer(({}) => {
+  const { classes, cx } = useStyles({})
+  const { schemaNodeService, stageSelectService } = useServices()
+
+  return (
+    <Flex layout='v' className={classes.Shape}>
+      {Object.keys(schemaNodeService.nodeMap).map((id) => (
+        <Flex
+          key={id}
+          layout='h'
+          className={cx(classes.item, stageSelectService.hoverId === id && classes.hovered)}>
+          {id}
+        </Flex>
+      ))}
+    </Flex>
+  )
+})
+
+type IShapeCompStyle = {} /* & Required<Pick<IShapeComp>> */ /* & Pick<IShapeComp> */
+
+const useStyles = makeStyles<IShapeCompStyle>()((t) => ({
+  Shape: {
+    ...t.rect('100%', 'fit-content', 'no-radius', 'white'),
+    //borderBottom: '1px solid gray',
+    overflowY: 'auto',
+  },
+  item: {
+    ...t.rect('100%', 30, 'no-radius', 'white'),
+    // borderBottom: '1px solid gray',
+  },
+  hovered: {
+    color: 'blue',
+  },
+}))
+
+ShapeComp.displayName = 'ShapeComp'
