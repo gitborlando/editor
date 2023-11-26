@@ -48,22 +48,20 @@ export class SchemaNodeService {
   clearSelection() {
     this.selectedIds.length = 0
   }
-  connect(id: string, parentId: string, isPage = false) {
-    this.find(id).parentId = parentId
-    if (isPage) {
-      this.schemaPageService.find(parentId)?.childIds.push(id)
+  connect(id: string, parentId: string) {
+    const nodeParent = this.find(parentId)
+    if (nodeParent) {
+      if ('childIds' in nodeParent) nodeParent.childIds.push(id)
     } else {
-      const parent = this.find(id)
-      if ('childIds' in parent) parent.childIds.push(id)
+      this.schemaPageService.find(parentId)?.childIds.push(id)
     }
   }
-  disconnect(id: string, parentId: string, isPage = false) {
-    if (isPage) {
-      const childIds = this.schemaPageService.find(parentId)?.childIds || []
-      Delete(childIds, id)
+  disconnect(id: string, parentId: string) {
+    const nodeParent = this.find(parentId)
+    if (nodeParent) {
+      if ('childIds' in nodeParent) Delete(nodeParent.childIds, id)
     } else {
-      const parent = this.find(id)
-      if ('childIds' in parent) Delete(parent.childIds, id)
+      Delete(this.schemaPageService.find(parentId)?.childIds || [], id)
     }
   }
   collectDirty(id: string) {
