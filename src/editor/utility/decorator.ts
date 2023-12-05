@@ -3,12 +3,12 @@ import { runInAction as _runInAction, autorun, reaction } from 'mobx'
 
 export const autobind = autoBindMethods
 
-export function watch(property: string) {
+export function watch(chain: string) {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
     descriptor.value = function (...args: any[]) {
       reaction(
-        () => (<any>this)[property],
+        () => new Function('service', `with(service){return ${chain}}`)(this),
         () => originalMethod.apply(this, args),
         { fireImmediately: true }
       )

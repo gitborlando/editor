@@ -4,7 +4,6 @@ import { XY } from '~/editor/math/xy'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { autobind } from '~/editor/utility/decorator'
 import { PIXI, PixiService, injectPixi } from '../pixi'
-import { listenInteractTypeChange } from '../stage'
 import { ViewportService, injectViewport } from '../viewport'
 
 @autobind
@@ -15,9 +14,7 @@ export class StageSelectService {
     @injectDrag private dragService: DragService,
     @injectViewport private viewportService: ViewportService,
     @injectSchemaNode private schemaNodeService: SchemaNodeService
-  ) {
-    listenInteractTypeChange(this, 'select')
-  }
+  ) {}
   startInteract() {
     this.pixiService.addListener('mousedown', this.onDragNodeMove)
     this.pixiService.addListener('mousedown', this.onMousedownSelect)
@@ -38,7 +35,7 @@ export class StageSelectService {
     this.schemaNodeService.select(this.hoverId)
   }
   private onMarqueeSelect() {
-    if (!this.hoverId) return
+    if (this.hoverId) return
     let marqueeShape: PIXI.Graphics
     this.dragService
       .onStart(() => {

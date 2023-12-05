@@ -5,20 +5,23 @@ import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { IFrame, ILine, INode, IRect, ITriangle, IVector } from '~/editor/schema/type'
 import { autobind } from '~/editor/utility/decorator'
 import { cullNegatives } from '~/editor/utility/utils'
+import { StageElementService, injectStageElement } from '../element'
 import { PIXI, PixiService, injectPixi } from '../pixi'
+import { StageCTXService, injectStageCTX } from './ctx/ctx'
+import { customPixiCTX } from './ctx/pixi-ctx'
 import { Path } from './path/path'
 import { PathPoint } from './path/point'
-import { StageShapeService, injectStageShape } from './shape'
 
-type IPixiShape = PIXI.Graphics | PIXI.Text
+type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 @injectable()
 export class StageDrawService {
-  private shape!: IPixiShape
+  private element!: IStageElement
   constructor(
     @injectPixi private pixiService: PixiService,
-    @injectStageShape private shapeService: StageShapeService,
+    @injectStageCTX private stageCTXService: StageCTXService,
+    @injectStageElement private stageElementService: StageElementService,
     @injectSchemaNode private schemaNodeService: SchemaNodeService
   ) {}
   draw(node: INode) {
@@ -28,7 +31,7 @@ export class StageDrawService {
       if (node.vectorType === 'triangle') this.drawTriangle(node)
       if (node.vectorType === 'line') this.drawLine(node)
     }
-    this.initializeShape(this.shape, node.id, node.parentId)
+    this.setupElement(this.element, node.id, node.parentId)
   }
   private drawFrame(node: IFrame) {
     const { x, y, width, height, id, fill } = node
@@ -83,6 +86,7 @@ export class StageDrawService {
     }
   }
   private drawPath(shape: PIXI.Graphics, vector: IVector) {
+    customPixiCTX(this.stageCTXService, shape)
     const pathPoints = vector.points.map((nodePoint) => {
       return new PathPoint({
         ...nodePoint,
@@ -102,7 +106,7 @@ export class StageDrawService {
         } else {
           startXY.set(startPoint)
         }
-        shape.moveTo(startXY.x, startXY.y)
+        this.stageCTXService.moveTo(startXY)
       }
 
       if (curLine.type === 'line') {
@@ -119,11 +123,11 @@ export class StageDrawService {
             )
           const radius = min(...cullNegatives(startPoint.radius, rightMaxRadius, leftMaxRadius))
           // console.log([startPoint.radius, rightMaxRadius, leftMaxRadius])
-          shape.arcTo(startPoint.x, startPoint.y, startPoint.right!.x, startPoint.right!.y, radius)
+          this.stageCTXService.arcTo(startPoint, startPoint.right!, radius)
           hasArcedPointMap.add(startPoint)
         }
         if (!endPoint.canDrawArc) {
-          return shape.lineTo(endPoint.x, endPoint.y)
+          return this.stageCTXService.lineTo(endPoint)
         }
         if (endPoint.canDrawArc && !hasArcedPointMap.has(endPoint)) {
           const leftMaxRadius =
@@ -133,10 +137,10 @@ export class StageDrawService {
             endPoint.right!.arcLength &&
             endPoint.calcRadiusByArcLength(endPoint.rightLine!.length - endPoint.right!.arcLength)
           const radius = min(...cullNegatives(endPoint.radius, rightMaxRadius, leftMaxRadius))
-          shape.arcTo(endPoint.x, endPoint.y, endPoint.right!.x, endPoint.right!.y, radius)
+          this.stageCTXService.arcTo(endPoint, endPoint.right!, radius)
           hasArcedPointMap.add(endPoint)
         }
-        if (at.end && !startPoint.jumpToRight) shape.closePath()
+        if (at.end && !startPoint.jumpToRight) this.stageCTXService.closePath()
       }
 
       if (curLine.type === 'curve') {
@@ -149,20 +153,23 @@ export class StageDrawService {
   private findShapeOrCreate(id: string, type: 'graphic'): PIXI.Graphics
   private findShapeOrCreate(id: string, type: 'text'): PIXI.Text
   private findShapeOrCreate(id: string, type: 'graphic' | 'text') {
-    if (type === 'text')
-      return (this.shape = (this.shapeService.find(id) as PIXI.Text) || new PIXI.Text())
-    return (this.shape = (this.shapeService.find(id) as PIXI.Graphics) || new PIXI.Graphics())
-  }
-  private initializeShape(shape: IPixiShape, id: string, parentId: string) {
-    if (!shape.parent) {
-      const parent = this.shapeService.find(parentId) || this.pixiService.stage
-      shape.setParent(parent)
+    if (type === 'text') {
+      return (this.element = (this.stageElementService.find(id) as PIXI.Text) || new PIXI.Text())
+    } else {
+      return (this.element =
+        (this.stageElementService.find(id) as PIXI.Graphics) || new PIXI.Graphics())
     }
-    if (!this.shapeService.find(id)) {
-      this.shapeService.add(id, shape)
-      shape.eventMode = 'dynamic'
-      shape.on('mouseenter', () => this.schemaNodeService.hover(id))
-      shape.on('mouseleave', () => this.schemaNodeService.hover(''))
+  }
+  private setupElement(element: IStageElement, id: string, parentId: string) {
+    if (!element.parent) {
+      const parent = this.stageElementService.find(parentId) || this.pixiService.stage
+      element.setParent(parent)
+    }
+    if (!this.stageElementService.find(id)) {
+      this.stageElementService.add(id, element)
+      element.eventMode = 'dynamic'
+      element.on('mouseenter', () => this.schemaNodeService.hover(id))
+      element.on('mouseleave', () => this.schemaNodeService.hover(''))
     }
   }
 }

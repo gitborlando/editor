@@ -22,8 +22,8 @@ export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
         <Button onClick={() => fileService.openFile()}>上传</Button>
         <Button onClick={() => fileService.exportFile()}>下载</Button>
         <Button onClick={() => fileService.newFile()}>新建</Button>
-        <Button onClick={() => stageService.setInteractType('select')}>选择</Button>
-        <Button onClick={() => stageService.setInteractType('move')}>拖动</Button>
+        <Button onClick={() => stageService.setType('select')}>选择</Button>
+        <Button onClick={() => stageService.setType('move')}>拖动</Button>
         <Button onClick={() => stageCreateService.setType('frame')}>画板</Button>
         <Button onClick={() => stageCreateService.setType('rect')}>矩形</Button>
         <Button onClick={() => stageCreateService.setType('ellipse')}>圆形</Button>

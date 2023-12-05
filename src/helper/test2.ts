@@ -1,7 +1,7 @@
 import { min } from '~/editor/math/base'
 import { XY } from '~/editor/math/xy'
-import { Path } from '~/editor/stage/shape/path/path'
-import { PathPoint } from '~/editor/stage/shape/path/point'
+import { Path } from '~/editor/stage/draw/path/path'
+import { PathPoint } from '~/editor/stage/draw/path/point'
 import { IXY, cullNegatives } from '~/editor/utility/utils'
 
 export function testDraw2(_ctx: CanvasRenderingContext2D) {

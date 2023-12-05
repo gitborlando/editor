@@ -1,13 +1,12 @@
-import { when } from 'mobx'
+import { runInAction, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { autobind, runInAction } from '~/editor/utility/decorator'
+import { autobind, watch } from '~/editor/utility/decorator'
 import { FileService, injectFile } from './file'
 import { SchemaNodeService, injectSchemaNode } from './schema/node'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
+import { StageDrawService, injectStageDraw } from './stage/draw/draw'
+import { StageElementService, injectStageElement } from './stage/element'
 import { PixiService, injectPixi } from './stage/pixi'
-import { StageDrawService, injectStageDraw } from './stage/shape/draw'
-import { StageShapeService, injectStageShape } from './stage/shape/shape'
-import { watch } from './utility/utils'
 
 @autobind
 @injectable()
@@ -16,23 +15,25 @@ export class EditorService {
     @injectPixi private pixiService: PixiService,
     @injectSchemaPage private schemaPageService: SchemaPageService,
     @injectSchemaNode private schemaNodeService: SchemaNodeService,
-    @injectStageShape private stageShapeService: StageShapeService,
+    @injectStageElement private stageElementService: StageElementService,
     @injectStageDraw private stageDrawService: StageDrawService,
     @injectFile private fileService: FileService
-  ) {}
-  initialize() {
+  ) {
     when(() => this.pixiService.initialized).then(() => {
       this.fileService.mockFile()
-      watch(() => this.schemaPageService.currentId).then(() => {
-        this.makePageAllNodesDirty(this.schemaPageService.currentId)
-      })
+      this.autoClearStageElement()
+      this.autoMakePageAllNodesDirty()
       this.drawDirtyNodesInEveryPixiTick()
     })
   }
-  @runInAction makePageAllNodesDirty(pageId: string) {
-    this.stageShapeService.clearAll()
-    const nodeIds = this.schemaPageService.find(pageId)!.childIds
-    nodeIds.forEach(this.schemaNodeService.collectDirtyNode)
+  @watch('schemaPageService.currentId')
+  private autoClearStageElement() {
+    this.stageElementService.clearAll()
+  }
+  @watch('schemaPageService.currentId')
+  private autoMakePageAllNodesDirty() {
+    const nodeIds = this.schemaPageService.find(this.schemaPageService.currentId)!.childIds
+    runInAction(() => nodeIds.forEach(this.schemaNodeService.collectDirtyNode))
   }
   private drawDirtyNodesInEveryPixiTick() {
     this.schemaNodeService.onFlushDirtyNode((id) =>

@@ -7,8 +7,8 @@ import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
 import { ILine, INode } from '~/editor/schema/type'
 import { autobind, runInAction } from '~/editor/utility/decorator'
 import { IXY } from '~/editor/utility/utils'
-import { StageService, injectStage, listenInteractTypeChange } from '../stage'
 import { ViewportService, injectViewport } from '../viewport'
+import { StageInteractService, injectStageInteract } from './interact'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'polygon', 'line', 'text', 'img'] as const
 type ICreateType = typeof createTypes[number]
@@ -21,26 +21,24 @@ export class StageCreateService {
   private node!: INode
   private realStageStart!: IXY
   constructor(
-    @injectDrag private dragService: DragService,
-    @injectStage private stageService: StageService,
     @injectSchemaDefault private schemaDefaultService: SchemaDefaultService,
     @injectSchemaNode private schemaNodeService: SchemaNodeService,
     @injectSchemaPage private schemaPageService: SchemaPageService,
-    @injectViewport private viewportService: ViewportService
-  ) {
-    listenInteractTypeChange(this, 'create')
-  }
+    @injectDrag private dragService: DragService,
+    @injectViewport private viewportService: ViewportService,
+    @injectStageInteract private stageInteractService: StageInteractService
+  ) {}
   startInteract() {
     this.dragService.onStart(this.onCreateStart).onMove(this.onCreateMove).onEnd(this.onCreateEnd)
   }
   endInteract() {}
   setType(type: ICreateType) {
     this.type = type
-    this.stageService.setInteractType('create')
+    this.stageInteractService.setType('create')
   }
   private onCreateStart({ start, dragService }: IDragData) {
     if (!this.viewportService.inViewport(start)) {
-      this.stageService.setInteractType('select')
+      this.stageInteractService.setType('select')
       return dragService.destroy()
     }
     this.realStageStart = this.viewportService.toRealStageXY(start)
@@ -75,7 +73,7 @@ export class StageCreateService {
   @runInAction private onCreateEnd({ dragService }: IDragData) {
     if (!this.node.width) this.node.width = 100
     if (!this.node.height) this.node.height = 100
-    this.stageService.setInteractType('select')
+    this.stageInteractService.setType('select')
     dragService.destroy()
   }
   private createFrameNode() {

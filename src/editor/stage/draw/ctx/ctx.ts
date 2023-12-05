@@ -2,23 +2,26 @@ import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/editor/utility/decorator'
 import { IXY } from '~/editor/utility/utils'
 
-type IACustomCTXShouldBe = {
+type ICustomCTX = {
   beginPath(): void
   closePath(): void
   moveTo(x: number, y: number): void
   lineTo(x: number, y: number): void
-  arcTo(x: number, y: number): void
+  arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): void
 }
 
 @autobind
 @injectable()
 export class StageCTXService {
-  initialized = false
-  ctx: any
+  ctx = <ICustomCTX>{}
   customCTX(custom: (ctx: typeof this.ctx) => void) {
-    if (this.initialized) return
     custom(this.ctx)
-    this.initialized = true
+  }
+  beginPath() {
+    this.ctx.beginPath()
+  }
+  closePath() {
+    this.ctx.closePath()
   }
   moveTo({ x, y }: IXY) {
     this.ctx.moveTo(x, y)

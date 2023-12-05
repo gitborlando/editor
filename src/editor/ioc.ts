@@ -7,14 +7,14 @@ import { SchemaDefaultService } from './schema/default'
 import { SchemaNodeService } from './schema/node'
 import { SchemaPageService } from './schema/page'
 import { SchemaService } from './schema/schema'
+import { StageCTXService } from './stage/draw/ctx/ctx'
+import { StageDrawService } from './stage/draw/draw'
+import { StageElementService } from './stage/element'
 import { StageCreateService } from './stage/interact/create'
+import { StageInteractService } from './stage/interact/interact'
 import { StageMoveService } from './stage/interact/move'
 import { StageSelectService } from './stage/interact/select'
 import { PixiService } from './stage/pixi'
-import { StageCTXService } from './stage/shape/ctx/ctx'
-import { StageDrawService } from './stage/shape/draw'
-import { StageShapeService } from './stage/shape/shape'
-import { StageService } from './stage/stage'
 import { ViewportService } from './stage/viewport'
 
 container.registerSingleton(SchemaDefaultService)
@@ -29,8 +29,8 @@ container.registerSingleton(StageMoveService)
 container.registerSingleton(StageCreateService)
 container.registerSingleton(StageCTXService)
 container.registerSingleton(StageDrawService)
-container.registerSingleton(StageShapeService)
-container.registerSingleton(StageService)
+container.registerSingleton(StageElementService)
+container.registerSingleton(StageInteractService)
 container.registerSingleton(EditorService)
 container.registerSingleton(FileService)
 
@@ -47,8 +47,8 @@ export const editorServices = {
   stageCreateService: container.resolve(StageCreateService),
   stageCTXService: container.resolve(StageCTXService),
   stageDrawService: container.resolve(StageDrawService),
-  stageShapeService: container.resolve(StageShapeService),
-  stageService: container.resolve(StageService),
+  stageShapeService: container.resolve(StageElementService),
+  stageService: container.resolve(StageInteractService),
   editorService: container.resolve(EditorService),
   fileService: container.resolve(FileService),
 }
