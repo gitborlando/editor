@@ -1,8 +1,11 @@
 import { v4 } from 'uuid'
-import { SchemaDefaultService } from './schema/default'
-import { INode } from './schema/type'
+import { XY } from '../math/xy'
+import { SchemaDefaultService } from '../schema/default'
+import { INode } from '../schema/type'
 
-export const mockFileJson = (schemaDefault: SchemaDefaultService) => ({
+export const mockJsonFile = mockJsonFile3
+
+const mockFileJson1 = (schemaDefault: SchemaDefaultService) => ({
   meta: { id: 'mock1', name: '测试文件1', user: 'myself' },
   nodes: {
     frame1: schemaDefault.frame({
@@ -60,8 +63,7 @@ export const mockFileJson = (schemaDefault: SchemaDefaultService) => ({
   ],
 })
 
-export function mock2(schemaDefault: SchemaDefaultService) {
-  schemaDefault._observe = false
+export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
   let s = new Date().getTime()
   const nodes: Record<string, INode> = {}
   let k = 0
@@ -70,7 +72,7 @@ export function mock2(schemaDefault: SchemaDefaultService) {
     let j = i % 100
 
     k = ~~(i / 100)
-    const rect = schemaDefault.rect({
+    const triangle = schemaDefault.triangle({
       id,
       width: 100,
       height: 100,
@@ -78,9 +80,9 @@ export function mock2(schemaDefault: SchemaDefaultService) {
       y: 0 + k * 101,
       radius: 10,
       parentId: 'page1',
-      fill: '#CCCCCC',
+      fill: 'skyBlue', //'#CCCCCC',
     })
-    nodes[id] = rect
+    nodes[id] = triangle
   }
   console.log('mock time: ', new Date().getTime() - s)
   return {
@@ -91,6 +93,49 @@ export function mock2(schemaDefault: SchemaDefaultService) {
         id: v4(),
         name: '测试页面1',
         zoom: 0.05,
+        offset: { x: 0, y: 0 },
+        childIds: Object.keys(nodes),
+      },
+    ],
+  }
+}
+
+export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
+  const nodes: Record<string, INode> = {
+    rect2: schemaDefault.rect({
+      id: 'rect2',
+      name: '测试矩形1',
+      width: 100,
+      height: 100,
+      x: 100,
+      parentId: 'page1',
+    }),
+
+    line1: schemaDefault.line({
+      id: 'line1',
+      name: '测试线段1',
+      height: 1,
+      start: XY.Of(300, 0),
+      end: XY.Of(400, 100),
+      parentId: 'page1',
+    }),
+    triangle1: schemaDefault.triangle({
+      id: 'triangle1',
+      width: 100,
+      height: 100,
+      x: 200,
+      parentId: 'page1',
+    }),
+  }
+
+  return {
+    meta: { id: 'mock1', name: '测试文件1', user: 'myself' },
+    nodes,
+    pages: [
+      {
+        id: v4(),
+        name: '测试页面1',
+        zoom: 1,
         offset: { x: 0, y: 0 },
         childIds: Object.keys(nodes),
       },

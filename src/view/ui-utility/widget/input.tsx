@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { ChangeEvent, ComponentPropsWithRef, forwardRef } from 'react'
-import { useServices } from '~/ioc'
+import { useEditorServices } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -16,7 +16,7 @@ export const Input = observer(
   forwardRef<HTMLDivElement, IInput>(
     ({ className, label, value: outValue, onNewValueApply: emitNewValue, min, max }, ref) => {
       const { classes, cx } = useStyles({})
-      const { dragService } = useServices()
+      const { dragService } = useEditorServices()
       const state = useLocalObservable(() => ({ value: outValue }))
       state.value = outValue
       return (

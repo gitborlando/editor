@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useServices } from '~/ioc'
+import { useEditorServices } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -8,16 +8,22 @@ type IShapeComp = {}
 
 export const ShapeComp: FC<IShapeComp> = observer(({}) => {
   const { classes, cx } = useStyles({})
-  const { schemaNodeService, stageSelectService } = useServices()
-
+  const { schemaNodeService } = useEditorServices()
   return (
     <Flex layout='v' className={classes.Shape}>
-      {Object.keys(schemaNodeService.nodeMap).map((id) => (
+      {Object.entries(schemaNodeService.nodeMap).map(([id, node]) => (
         <Flex
           key={id}
           layout='h'
-          className={cx(classes.item, stageSelectService.hoverId === id && classes.hovered)}>
-          {id}
+          sidePadding={10}
+          className={cx(
+            classes.item,
+            schemaNodeService.hoverId === id && classes.hovered,
+            schemaNodeService.selectedIds.includes(id) && classes.selected
+          )}
+          onHover={(h) => schemaNodeService.hover(h ? id : '')}
+          onMouseDown={() => schemaNodeService.select(id)}>
+          {node.name}
         </Flex>
       ))}
     </Flex>
@@ -35,9 +41,14 @@ const useStyles = makeStyles<IShapeCompStyle>()((t) => ({
   item: {
     ...t.rect('100%', 30, 'no-radius', 'white'),
     // borderBottom: '1px solid gray',
+    fontSize: 12,
+    ...t.default$.borderBottom,
   },
   hovered: {
-    color: 'blue',
+    ...t.default$.hover.background,
+  },
+  selected: {
+    ...t.default$.select.background,
   },
 }))
 

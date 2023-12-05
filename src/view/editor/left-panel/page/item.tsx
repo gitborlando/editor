@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC } from 'react'
-import { useServices } from '~/ioc'
+import { useEditorServices } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -11,7 +11,7 @@ type IPageItemComp = {
 }
 
 export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
-  const { schemaPageService } = useServices()
+  const { schemaPageService } = useEditorServices()
   const { classes } = useStyles({ selected: schemaPageService.currentId === id })
   const state = useLocalObservable(() => ({
     isHover: false,
@@ -23,7 +23,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
       className={classes.PageItem}
       onHover={(hover) => (state.isHover = hover)}
       onClick={() => schemaPageService.select(id)}>
-      <Flex layout='h' sidePadding={15} className={classes.name}>
+      <Flex layout='h' sidePadding={10} className={classes.name}>
         {name}
       </Flex>
       {state.isHover && (
@@ -47,7 +47,6 @@ const useStyles = makeStyles<IPageItemCompStyle>()((t, { selected }) => ({
   PageItem: {
     ...t.rect('100%', t.default$.normalHeight, 'no-radius', 'white'),
     cursor: 'pointer',
-    // flexShrink: 0,
     ...(selected
       ? { backgroundColor: 'rgba(136, 130, 255, 0.21)' }
       : { ...t.default$.hover.background }),

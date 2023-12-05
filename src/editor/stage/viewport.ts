@@ -1,9 +1,9 @@
 import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { auto, autobind } from '~/helper/decorator'
+import { auto, autobind } from '~/editor/utility/decorator'
 import { XY } from '../math/xy'
 import { SchemaPageService, injectSchemaPage } from '../schema/page'
-import { IXY } from '../utils'
+import { IXY } from '../utility/utils'
 import { PixiService, injectPixi } from './pixi'
 
 @autobind
@@ -37,7 +37,7 @@ export class ViewportService {
     this.schemaPageService.currentPage.offset = xy
   }
   toViewportXY(xy: IXY) {
-    return XY.from(xy).minus(this.bound)
+    return XY.From(xy).minus(this.bound)
   }
   toStageXY(xy: IXY) {
     return this.toViewportXY(xy).minus(this.stageOffset)
@@ -46,7 +46,7 @@ export class ViewportService {
     return this.toViewportXY(xy).minus(this.stageOffset).divide(this.zoom)
   }
   toRealStageShift(xy: IXY) {
-    return XY.from(xy).divide(this.zoom)
+    return XY.From(xy).divide(this.zoom)
   }
   inViewport(xy: IXY) {
     return xy.x > this.bound.x && xy.x < this.bound.x + this.bound.width && xy.y > this.bound.y
@@ -74,7 +74,7 @@ export class ViewportService {
       let newZoom = this.zoom + step
       if (newZoom <= 0.02) return (newZoom = 0.02)
       const realStageXY = this.toRealStageXY(new XY(clientX, clientY))
-      const newOffset = XY.from(this.stageOffset).plus(realStageXY.multiply(-step))
+      const newOffset = XY.From(this.stageOffset).plus(realStageXY.multiply(-step))
       this.setZoom(newZoom)
       this.setStageOffset(newOffset)
     }

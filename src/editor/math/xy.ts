@@ -1,7 +1,12 @@
-import { IXY, multiply, pow2, sqrt } from '../utils'
+import { IXY } from '../utility/utils'
+import { multiply, pow2, sqrt } from './base'
 
 export class XY {
   constructor(public x: number, public y: number) {}
+  set({ x, y }: { x?: number; y?: number }) {
+    this.x = x ? x : this.x
+    this.y = y ? y : this.y
+  }
   plus(another: IXY) {
     return new XY(this.x + another.x, this.y + another.y)
   }
@@ -16,23 +21,22 @@ export class XY {
     const n = multiply(...numbers)
     return new XY(this.x / n, this.y / n)
   }
-  update(xy: IXY) {
-    this.x = xy.x
-    this.y = xy.y
-  }
   distance(another: IXY) {
     return sqrt(pow2(this.x - another.x) + pow2(this.y - another.y))
   }
   toArray() {
     return [this.x, this.y]
   }
-  toObject() {
+  toObject(): IXY {
     return { x: this.x, y: this.y }
   }
-  static from<T extends IXY>(xy: T) {
+  static From<T extends IXY>(xy: T) {
     return new XY(xy.x, xy.y)
   }
-  static plusAll(...xys: XY[]) {
+  static Of(x: number, y: number) {
+    return new XY(x, y)
+  }
+  static Plus(...xys: XY[]) {
     return xys.reduce((i, all) => all.plus(i), new XY(0, 0))
   }
 }

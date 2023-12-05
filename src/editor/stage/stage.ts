@@ -1,6 +1,6 @@
 import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { auto, autobind } from '~/helper/decorator'
+import { auto, autobind } from '~/editor/utility/decorator'
 import { EE } from '~/helper/event-emitter'
 import { DragService, injectDrag } from '../drag'
 import { PixiService, injectPixi } from './pixi'

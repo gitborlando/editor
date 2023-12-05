@@ -1,6 +1,6 @@
 import { delay, inject, injectable } from 'tsyringe'
-import { mock2 } from '~/editor/mock'
-import { autobind } from '~/helper/decorator'
+import { autobind } from '~/editor/utility/decorator'
+import { mockJsonFile } from '~/editor/utility/mock'
 import { EditorService } from './editor'
 import { SchemaDefaultService, injectSchemaDefault } from './schema/default'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
@@ -32,7 +32,6 @@ export class FileService {
     const json = JSON.parse(await this.readAsText(file))
     this.schemaService.setSchema(json)
     this.schemaPageService.select(json.pages[0].id)
-    this.editorService.renderPage(json.pages[0].id)
   }
   newFile() {
     const json = this.schemaDefaultService.schema()
@@ -40,7 +39,7 @@ export class FileService {
     this.schemaPageService.select(json.pages[0].id)
   }
   mockFile() {
-    const json = /* mockFileJson */ mock2(this.schemaDefaultService)
+    const json = mockJsonFile(this.schemaDefaultService)
     this.schemaService.setSchema(json)
     this.schemaPageService.select(json.pages[0].id)
   }

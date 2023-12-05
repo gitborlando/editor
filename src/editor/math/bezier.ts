@@ -1,4 +1,4 @@
-import { abs, pow2, pow3 } from './util'
+import { abs, pow2, pow3 } from './base'
 import { XY } from './xy'
 
 /* 贝塞尔参数方程 */
@@ -17,11 +17,11 @@ export function bezierParametricEquation(
   const B = new XY(p2x, p2y)
   const C = new XY(a1x, a1y)
   const D = new XY(a2x, a2y)
-  const newXY = XY.plusAll(
-    A.multiNums(pow3(1 - t)),
-    C.multiNums(3, t, pow2(1 - t)),
-    D.multiNums(3, pow2(t), 1 - t),
-    B.multiNums(pow3(t))
+  const newXY = XY.Plus(
+    A.multiply(pow3(1 - t)),
+    C.multiply(3, t, pow2(1 - t)),
+    D.multiply(3, pow2(t), 1 - t),
+    B.multiply(pow3(t))
   )
   return newXY.toArray()
 }
@@ -82,10 +82,10 @@ export function bezierDivide(
   const B = new XY(p2x, p2y)
   const C = new XY(a1x, a1y)
   const D = new XY(a2x, a2y)
-  const AC = C.minus(A).multiNums(t)
-  const BD = D.minus(B).multiNums(t)
-  const CD = D.minus(C).multiNums(t)
-  const CD_AC = CD.minus(AC).multiNums(t)
-  const CD_BD = CD.minus(BD).multiNums(t)
+  const AC = C.minus(A).multiply(t)
+  const BD = D.minus(B).multiply(t)
+  const CD = D.minus(C).multiply(t)
+  const CD_AC = CD.minus(AC).multiply(t)
+  const CD_BD = CD.minus(BD).multiply(t)
   return [...AC.toArray(), ...CD_AC.toArray(), ...CD_BD.toArray(), ...BD.toArray()]
 }

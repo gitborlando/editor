@@ -1,4 +1,4 @@
-import { IXY } from '../utils'
+import { IXY } from '../utility/utils'
 
 export type ISchema = {
   meta: IMeta
@@ -37,8 +37,6 @@ export type INodeMeta = {
   name: string
   lock: boolean
   visible: boolean
-  select: boolean
-  hover: boolean
   parentId: string
 }
 
@@ -68,14 +66,17 @@ export type IGroup = INodeBase & {
   childIds: string[]
 }
 
+export type IBezierType = 'no-bezier' | 'symmetric' | 'angle-symmetric' | 'no-symmetric'
+
 export type IPoint = {
   type: 'point'
-  mode: 'no-bezier' | 'symmetric' | 'angle-symmetric' | 'no-symmetric'
+  bezierType: IBezierType
   x: number
   y: number
-  handleIn: IXY
-  handleOut: IXY
   radius: number
+  handleLeft?: IXY
+  handleRight?: IXY
+  jumpToRight?: boolean
 }
 
 export type IVector = INodeBase & {
@@ -109,6 +110,7 @@ export type ITriangle = IVector & {
 export type IStar = IVector & {
   vectorType: 'star'
   sides: number
+  radius: number
   innerRate: number
 }
 

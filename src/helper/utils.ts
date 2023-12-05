@@ -1,4 +1,4 @@
-import { IAutorunOptions, IReactionOptions, IReactionPublic, autorun, reaction } from 'mobx'
+import { IAutorunOptions, IReactionPublic, autorun } from 'mobx'
 import { useEffect } from 'react'
 
 export type INoopFunc = typeof noopFunc
@@ -35,20 +35,14 @@ export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOpt
   }, [])
 }
 
-export function watch(expression: (r: IReactionPublic) => any) {
-  return {
-    then: (
-      effect: (arg: any, prev: any, r: IReactionPublic) => void,
-      opts?: IReactionOptions<any, boolean> | undefined
-    ) => {
-      reaction(expression, effect, { fireImmediately: true, ...opts })
-    },
-  }
-}
-
 export function timeRecord() {
   let start = performance.now()
   return (text?: any) => {
     console.log(text, performance.now() - start)
   }
+}
+
+export function Log<T>(someThing: T, label: string = '') {
+  console.log(label, someThing)
+  return someThing
 }

@@ -1,4 +1,5 @@
-import { IXY, radianfy } from '~/editor/utils'
+import { radianfy } from '~/editor/math/base'
+import { IXY } from '~/editor/utility/utils'
 
 export function drawEllipsePath(
   center: IXY,

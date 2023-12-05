@@ -1,7 +1,7 @@
 import { makeObservable, observable } from 'mobx'
 import * as PIXI from 'pixi.js'
 import { inject, injectable } from 'tsyringe'
-import { autobind } from '~/helper/decorator'
+import { autobind } from '~/editor/utility/decorator'
 
 export * as PIXI from 'pixi.js'
 

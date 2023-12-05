@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useServices } from '~/ioc'
+import { useEditorServices } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -8,7 +8,7 @@ import { Flex } from '~/view/ui-utility/widget/flex'
 type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
-  const { fileService, stageService, viewportService, stageCreateService } = useServices()
+  const { fileService, stageService, viewportService, stageCreateService } = useEditorServices()
   const { classes } = useStyles({ top: viewportService.bound.y })
 
   return (
@@ -24,8 +24,10 @@ export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
         <Button onClick={() => fileService.newFile()}>新建</Button>
         <Button onClick={() => stageService.setInteractType('select')}>选择</Button>
         <Button onClick={() => stageService.setInteractType('move')}>拖动</Button>
+        <Button onClick={() => stageCreateService.setType('frame')}>画板</Button>
         <Button onClick={() => stageCreateService.setType('rect')}>矩形</Button>
         <Button onClick={() => stageCreateService.setType('ellipse')}>圆形</Button>
+        <Button onClick={() => stageCreateService.setType('line')}>线段</Button>
       </Flex>
       <input
         ref={fileService.setInputRef}

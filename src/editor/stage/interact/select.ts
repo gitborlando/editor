@@ -1,78 +1,72 @@
-import { makeObservable, observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { DragService, injectDrag } from '~/editor/drag'
 import { XY } from '~/editor/math/xy'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
-import { autobind } from '~/helper/decorator'
-import { noopFunc } from '~/helper/utils'
+import { autobind } from '~/editor/utility/decorator'
 import { PIXI, PixiService, injectPixi } from '../pixi'
 import { listenInteractTypeChange } from '../stage'
 import { ViewportService, injectViewport } from '../viewport'
 
 @autobind
 @injectable()
-export class StageSelectService {
-  @observable hoverId = ''
-  private clickSelectHandler = noopFunc
-  private marqueeSelectHandler = noopFunc
+export class StageSelectController {
   constructor(
     @injectPixi private pixiService: PixiService,
     @injectDrag private dragService: DragService,
     @injectViewport private viewportService: ViewportService,
     @injectSchemaNode private schemaNodeService: SchemaNodeService
   ) {
-    makeObservable(this)
     listenInteractTypeChange(this, 'select')
   }
-  setHoverId(id: string) {
-    this.hoverId = id
-  }
   startInteract() {
-    this.onClickSelect()
-    this.onMarqueeSelect()
+    this.pixiService.addListener('mousedown', this.onDragNodeMove)
+    this.pixiService.addListener('mousedown', this.onMousedownSelect)
+    this.pixiService.addListener('mousedown', this.onMarqueeSelect)
   }
   endInteract() {
-    this.pixiService.removeListener('mousedown', this.clickSelectHandler)
-    this.pixiService.removeListener('mousedown', this.marqueeSelectHandler)
+    this.pixiService.removeListener('mousedown', this.onDragNodeMove)
+    this.pixiService.removeListener('mousedown', this.onMousedownSelect)
+    this.pixiService.removeListener('mousedown', this.onMarqueeSelect)
   }
-  private onClickSelect() {
-    this.clickSelectHandler = () => {
-      if (!this.hoverId) return
-      if (
-        this.schemaNodeService.selectedIds.length &&
-        this.schemaNodeService.selectedIds[0] === this.hoverId
-      )
-        return
-      this.schemaNodeService.observeNode(this.hoverId)
-      this.schemaNodeService.clearSelection()
-      this.schemaNodeService.select(this.hoverId)
-    }
-    this.pixiService.addListener('mousedown', this.clickSelectHandler)
+  private get hoverId() {
+    return this.schemaNodeService.hoverId
+  }
+  private onMousedownSelect() {
+    if (!this.hoverId) return
+    if (this.schemaNodeService.selectedIds?.[0] === this.hoverId) return
+    this.schemaNodeService.clearSelection()
+    this.schemaNodeService.select(this.hoverId)
   }
   private onMarqueeSelect() {
-    this.marqueeSelectHandler = () => {
-      if (this.hoverId) return
-      let marquee: PIXI.Graphics
-      this.dragService
-        .onStart(() => {
-          marquee = new PIXI.Graphics()
-          this.pixiService.stage.addChild(marquee)
-        })
-        .onMove(({ marquee: { x, y, width, height } }) => {
-          marquee.clear()
-          marquee.lineStyle(1 / this.viewportService.zoom, 'purple')
-          // marquee.lineStyle(1, 'rgba(0, 145, 255, 0.53)')
-          const realStart = this.viewportService.toRealStageXY(new XY(x, y))
-          const realShift = this.viewportService.toRealStageShift(new XY(width, height))
-          marquee.drawRect(realStart.x, realStart.y, realShift.x, realShift.y)
-        })
-        .onEnd(({ dragService }) => {
-          marquee.destroy()
-          dragService.destroy()
-        })
-    }
-    this.pixiService.addListener('mousedown', this.marqueeSelectHandler)
+    if (!this.hoverId) return
+    let marqueeShape: PIXI.Graphics
+    this.dragService
+      .onStart(() => {
+        marqueeShape = new PIXI.Graphics()
+        this.pixiService.stage.addChild(marqueeShape)
+      })
+      .onMove(({ marquee: { x, y, width, height } }) => {
+        marqueeShape.clear()
+        marqueeShape.lineStyle(1 / this.viewportService.zoom, 'purple')
+        const realStart = this.viewportService.toRealStageXY(XY.Of(x, y))
+        const realShift = this.viewportService.toRealStageShift(XY.Of(width, height))
+        marqueeShape.drawRect(realStart.x, realStart.y, realShift.x, realShift.y)
+      })
+      .onEnd(({ dragService }) => {
+        marqueeShape.destroy()
+        dragService.destroy()
+      })
+  }
+  private onDragNodeMove() {
+    if (!this.hoverId) return
+    const node = this.schemaNodeService.find(this.hoverId)
+    const startXY = XY.From(node)
+    this.dragService.onSlide(({ shift }) => {
+      const realShift = this.viewportService.toRealStageShift(shift)
+      node.x = startXY.x + realShift.x
+      node.y = startXY.y + realShift.y
+    })
   }
 }
 
-export const injectStageSelect = inject(StageSelectService)
+export const injectStageSelect = inject(StageSelectController)

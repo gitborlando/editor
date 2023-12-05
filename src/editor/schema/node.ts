@@ -1,22 +1,29 @@
-import { Lambda, intercept, makeObservable, observable } from 'mobx'
+import { IObjectDidChange, Lambda, intercept, makeObservable, observable, observe } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
-import { autobind } from '~/helper/decorator'
-import { Delete, numberHalfFix } from '../utils'
+import { autobind } from '~/editor/utility/decorator'
+import { numberHalfFix } from '../math/base'
+import { Delete } from '../utility/utils'
 import { SchemaPageService } from './page'
 import { INode } from './type'
 
 type INodeRuntime = {
   observed: boolean
-  interceptDisposers: Lambda[]
+  disposers: Lambda[]
+  oneTickChangeRecord: {
+    [K in keyof INode]?: { new: INode[K]; old: INode[K] }
+  }
 }
 
 @autobind
 @injectable()
 export class SchemaNodeService {
+  @observable initialized = false
+  @observable hoverId = ''
   @observable selectedIds: string[] = []
-  @observable dirtyIds: string[] = []
+  @observable dirtyIds: Set<string> = new Set()
   nodeMap: Record<string, INode> = {}
   private nodeRuntimeMap: Record<string, INodeRuntime> = {}
+  private flushDirtyNodeCallbacks: ((id: string) => void)[] = []
   constructor(
     @inject(delay(() => SchemaPageService)) private schemaPageService: SchemaPageService
   ) {
@@ -25,6 +32,7 @@ export class SchemaNodeService {
   setMap(map: typeof this.nodeMap) {
     this.nodeMap = map
     Object.keys(this.nodeMap).forEach(this.initNodeRuntime)
+    this.initialized = true
   }
   add(node: INode) {
     this.nodeMap[node.id] = node
@@ -41,6 +49,14 @@ export class SchemaNodeService {
   }
   find(id: string) {
     return this.nodeMap[id]
+  }
+  findNodeRuntime(id: string) {
+    return this.nodeRuntimeMap[id]
+  }
+  hover(id: string) {
+    this.hoverId = id
+    if (id === '' || this.findNodeRuntime(id).observed) return
+    this.observeNode(id)
   }
   select(id: string) {
     this.selectedIds.push(id)
@@ -64,8 +80,19 @@ export class SchemaNodeService {
       Delete(this.schemaPageService.find(parentId)?.childIds || [], id)
     }
   }
-  collectDirty(id: string) {
-    this.dirtyIds.push(id)
+  collectDirtyNode(id: string) {
+    this.dirtyIds.add(id)
+  }
+  onFlushDirtyNode(callback: (id: string) => void) {
+    this.flushDirtyNodeCallbacks.push(callback)
+  }
+  flushDirtyNode() {
+    this.dirtyIds.forEach((id) => {
+      this.vectorBoundChangeApplyToPoints(id)
+      this.flushDirtyNodeCallbacks.forEach((flush) => flush(id))
+      this.dirtyIds.delete(id)
+      this.findNodeRuntime(id).oneTickChangeRecord = {}
+    })
   }
   observeNode(id: string) {
     const node = this.find(id)
@@ -73,34 +100,58 @@ export class SchemaNodeService {
     if (nodeRuntime.observed) return node
     const observedNode = observable(node)
     this.nodeMap[id] = observedNode
-    this.interceptProperty(observedNode)
+    this.listenNodeWillChange(observedNode)
+    this.listenNodeDidChange(observedNode)
     nodeRuntime.observed = true
     return observedNode
   }
   private initNodeRuntime(id: string) {
-    return (this.nodeRuntimeMap[id] = {
+    this.nodeRuntimeMap[id] = {
       observed: false,
-      interceptDisposers: [],
-    })
-  }
-  private findNodeRuntime(id: string) {
-    return this.nodeRuntimeMap[id]
+      disposers: [],
+      oneTickChangeRecord: {},
+    }
   }
   private deleteNodeRuntime(id: string) {
-    this.findNodeRuntime(id).interceptDisposers.forEach((dispose) => dispose())
+    this.findNodeRuntime(id).disposers.forEach((dispose) => dispose())
     Delete(this.nodeRuntimeMap, id)
   }
-  private interceptProperty(node: INode) {
-    const nodeRuntime = this.findNodeRuntime(node.id)
+  private listenNodeWillChange(node: INode) {
     const disposer = intercept(node, (ctx) => {
-      this.collectDirty(node.id)
       if (ctx.type !== 'update') return ctx
-      if ((<(keyof INode)[]>['x', 'y', 'width', 'height']).includes(<keyof INode>ctx.name)) {
+      if (ctx.name.toString().match(/x|y|width|height|rotation/)) {
         ctx.newValue = numberHalfFix(ctx.newValue)
       }
       return ctx
     })
-    nodeRuntime.interceptDisposers.push(disposer)
+    this.findNodeRuntime(node.id).disposers.push(disposer)
+  }
+  private listenNodeDidChange(node: INode) {
+    const { disposers } = this.findNodeRuntime(node.id)
+    const disposer = observe(node, (ctx) => {
+      if (ctx.type !== 'update') return ctx
+      this.collectDirtyNode(node.id)
+      this.recordNodeChange(node, ctx)
+      return ctx
+    })
+    disposers.push(disposer)
+  }
+  private recordNodeChange(node: INode, ctx: IObjectDidChange & { type: 'update' }) {
+    const { oneTickChangeRecord } = this.findNodeRuntime(node.id)
+    ;(<any>oneTickChangeRecord)[ctx.name.toString()] = {
+      new: ctx.newValue,
+      old: ctx.oldValue,
+    }
+  }
+  private vectorBoundChangeApplyToPoints(id: string) {
+    const vector = this.find(id)
+    if (vector.type !== 'vector') return
+    const oneTickChangeRecord = this.findNodeRuntime(id).oneTickChangeRecord
+    const { width, height } = oneTickChangeRecord
+    vector.points.forEach((point) => {
+      if (width) point.x *= width.new / width.old
+      if (height) point.y *= height.new / height.old
+    })
   }
 }
 

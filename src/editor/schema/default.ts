@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe'
 import { v4 as uuidv4 } from 'uuid'
-import { autobind } from '~/helper/decorator'
-import { IXY } from '../utils'
+import { autobind } from '~/editor/utility/decorator'
+import { IXY } from '../utility/utils'
 import {
   IEllipse,
   IFillColor,
@@ -54,11 +54,11 @@ export class SchemaDefaultService {
   point(option?: Partial<IPoint>): IPoint {
     return {
       type: 'point',
-      mode: 'no-bezier',
+      bezierType: 'no-bezier',
       x: 0,
       y: 0,
-      handleIn: { x: 0, y: 0 },
-      handleOut: { x: 0, y: 0 },
+      handleLeft: { x: 0, y: 0 },
+      handleRight: { x: 0, y: 0 },
       radius: 0,
       ...option,
     }
@@ -66,11 +66,13 @@ export class SchemaDefaultService {
   frame(option?: Partial<IFrame>): IFrame {
     const name = this.createNodeName('frame')
     const nodeBase = this.createNodeBase()
+    const fill = { fill: 'white' }
     return {
       type: 'frame',
       childIds: [],
-      ...name,
       ...nodeBase,
+      ...name,
+      ...fill,
       ...option,
     }
   }
@@ -80,79 +82,89 @@ export class SchemaDefaultService {
     return {
       type: 'group',
       childIds: [],
-      ...name,
       ...nodeBase,
+      ...name,
       ...option,
     }
   }
   rect(option?: Partial<IRect>): IRect {
     const name = this.createNodeName('rect')
-    const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
+    const points = this.createRectPoints(
+      option?.x ?? 0,
+      option?.y ?? 0,
+      option?.width ?? 100,
+      option?.height ?? 100
+    )
     return {
       vectorType: 'rect',
       radius: 0,
-      ...name,
-      ...nodeBase,
       ...vectorBase,
+      ...points,
+      ...name,
       ...option,
     }
   }
   ellipse(option?: Partial<IEllipse>): IEllipse {
     const name = this.createNodeName('ellipse')
-    const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
     return {
       vectorType: 'ellipse',
       innerRate: 0,
       startAngle: 0,
       endAngle: 360,
-      ...name,
-      ...nodeBase,
       ...vectorBase,
+      ...name,
       ...option,
     }
   }
   triangle(option?: Partial<ITriangle>): ITriangle {
     const name = this.createNodeName('triangle')
-    const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
+    const points = this.createTrianglePoints(
+      option?.x ?? 0,
+      option?.y ?? 0,
+      option?.width ?? 100,
+      option?.height ?? 100
+    )
     return {
       vectorType: 'triangle',
       sides: 3,
       radius: 0,
-      ...name,
-      ...nodeBase,
       ...vectorBase,
+      ...name,
+      ...points,
       ...option,
     }
   }
   star(option?: Partial<IStar>): IStar {
     const name = this.createNodeName('star')
-    const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
     return {
       vectorType: 'star',
       sides: 3,
+      radius: 0,
       innerRate: 0.3,
-      ...name,
-      ...nodeBase,
       ...vectorBase,
+      ...name,
       ...option,
     }
   }
   line(option?: Partial<ILine>): ILine {
     const name = this.createNodeName('line')
-    const nodeBase = this.createNodeBase()
     const vectorBase = this.createVectorBase()
+    const points = this.createLinePoints(
+      option?.start || { x: 0, y: 100 },
+      option?.end || { x: 100, y: 100 }
+    )
     return {
       vectorType: 'line',
-      start: { x: 0, y: 0 },
-      end: { x: 100, y: 0 },
+      start: { x: 0, y: 100 },
+      end: { x: 100, y: 100 },
       length: 100,
-      ...name,
-      ...nodeBase,
       ...vectorBase,
+      ...name,
+      ...points,
       ...option,
     }
   }
@@ -167,8 +179,8 @@ export class SchemaDefaultService {
     return {
       type: 'text',
       font: [],
-      ...name,
       ...nodeBase,
+      ...name,
       ...option,
     }
   }
@@ -210,8 +222,6 @@ export class SchemaDefaultService {
       name: '',
       lock: false,
       visible: true,
-      select: false,
-      hover: false,
       parentId: '',
     }
   }
@@ -273,6 +283,53 @@ export class SchemaDefaultService {
         }
     let nameIndex = this.typeIndexMap[type]!
     return { name: nameIndex[0] + ' ' + (nameIndex[1] as number)++ }
+  }
+  private createRectPoints(x: number, y: number, width: number, height: number) {
+    return {
+      points: [
+        this.createPoint(0, 0, 'no-bezier', 0),
+        this.createPoint(width, 0, 'no-bezier', 0),
+        this.createPoint(width, 0 + height, 'no-bezier', 0),
+        this.createPoint(0, height, 'no-bezier', 0),
+      ],
+    }
+  }
+  private createTrianglePoints(x: number, y: number, width: number, height: number) {
+    return {
+      points: [
+        this.createPoint(width * 0.7, 0, 'no-bezier', 0),
+        this.createPoint(0, height, 'no-bezier', 0),
+        this.createPoint(width, height, 'no-bezier', 0),
+      ],
+    }
+  }
+  private createLinePoints(start: IXY, end: IXY) {
+    return {
+      points: [
+        this.createPoint(start.x, start.y, 'no-bezier', 0),
+        this.createPoint(end.x, end.y, 'no-bezier', 0, undefined, undefined, true),
+      ],
+    }
+  }
+  private createPoint(
+    x: number,
+    y: number,
+    bezierType: IPoint['bezierType'],
+    radius: number = 0,
+    handleLeft?: IPoint['handleLeft'],
+    handleRight?: IPoint['handleRight'],
+    jumpToRight?: IPoint['jumpToRight']
+  ) {
+    return {
+      type: 'point',
+      x,
+      y,
+      bezierType,
+      radius,
+      handleLeft,
+      handleRight,
+      jumpToRight,
+    } as IPoint
   }
 }
 

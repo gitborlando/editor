@@ -56,4 +56,9 @@ export const default$ = {
     active: { color: 'rgba(36, 138, 255, 1)' },
   },
   normalHeight: 32,
+  select: {
+    background: {
+      backgroundColor: 'rgba(136, 130, 255, 0.21)',
+    },
+  },
 }

@@ -1,6 +1,6 @@
 import { toJS } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { autobind } from '~/helper/decorator'
+import { autobind } from '~/editor/utility/decorator'
 import { SchemaNodeService, injectSchemaNode } from './node'
 import { SchemaPageService, injectSchemaPage } from './page'
 import { IMeta, ISchema } from './type'
@@ -19,7 +19,7 @@ export class SchemaService {
   getSchema() {
     return {
       meta: this.meta,
-      nodes: this.schemaNodeService.nodeMap,
+      nodes: toJS(this.schemaNodeService.nodeMap),
       pages: toJS(this.schemaPageService.pages),
     }
   }

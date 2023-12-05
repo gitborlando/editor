@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useServices } from '~/ioc'
+import { useEditorServices } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -10,7 +10,7 @@ type IPageHeaderComp = {}
 
 export const PageHeaderComp: FC<IPageHeaderComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { schemaPageService } = useServices()
+  const { schemaPageService } = useEditorServices()
   const { collapsed, setCollapsed } = pageCompShareState
   return (
     <Flex className={classes.PageHeader}>

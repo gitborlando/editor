@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useServices } from '~/ioc'
+import { useEditorServices } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Input } from '~/view/ui-utility/widget/input'
@@ -9,7 +9,7 @@ type IBasePropsComp = {}
 
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { schemaNodeService } = useServices()
+  const { schemaNodeService } = useEditorServices()
   if (!schemaNodeService.selectedIds.length) return null
   const node = schemaNodeService.find(schemaNodeService.selectedIds[0])
   return (
@@ -42,6 +42,23 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
         onNewValueApply={(v) => (node.height = v)}
         min={0}
       />
+      <Input
+        className={classes.input}
+        label='旋转'
+        value={node.rotation}
+        onNewValueApply={(v) => (node.rotation = v)}
+        min={0}
+        max={360}
+      />
+      {node.type === 'vector' && 'radius' in node && (
+        <Input
+          className={classes.input}
+          label='圆角'
+          value={node.radius}
+          onNewValueApply={(v) => (node.radius = v)}
+          min={0}
+        />
+      )}
     </Flex>
   )
 })
