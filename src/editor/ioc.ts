@@ -9,7 +9,7 @@ import { SchemaPageService } from './schema/page'
 import { SchemaService } from './schema/schema'
 import { StageCreateService } from './stage/interact/create'
 import { StageMoveService } from './stage/interact/move'
-import { StageSelectController } from './stage/interact/select'
+import { StageSelectService } from './stage/interact/select'
 import { PixiService } from './stage/pixi'
 import { StageCTXService } from './stage/shape/ctx/ctx'
 import { StageDrawService } from './stage/shape/draw'
@@ -24,7 +24,7 @@ container.registerSingleton(SchemaService)
 container.registerSingleton(DragService)
 container.registerSingleton(PixiService)
 container.registerSingleton(ViewportService)
-container.registerSingleton(StageSelectController)
+container.registerSingleton(StageSelectService)
 container.registerSingleton(StageMoveService)
 container.registerSingleton(StageCreateService)
 container.registerSingleton(StageCTXService)
@@ -42,7 +42,7 @@ export const editorServices = {
   dragService: container.resolve(DragService),
   pixiService: container.resolve(PixiService),
   viewportService: container.resolve(ViewportService),
-  stageSelectController: container.resolve(StageSelectController),
+  stageSelectService: container.resolve(StageSelectService),
   stageMoveService: container.resolve(StageMoveService),
   stageCreateService: container.resolve(StageCreateService),
   stageCTXService: container.resolve(StageCTXService),

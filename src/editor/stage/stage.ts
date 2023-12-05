@@ -1,6 +1,6 @@
 import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { auto, autobind } from '~/editor/utility/decorator'
+import { autobind, watch } from '~/editor/utility/decorator'
 import { EE } from '~/helper/event-emitter'
 import { DragService, injectDrag } from '../drag'
 import { PixiService, injectPixi } from './pixi'
@@ -25,14 +25,14 @@ export class StageService {
   setInteractType(interactType: IStageInteractType = 'select') {
     this.interactType = interactType
   }
-  @auto private autoInteract() {
+  @watch('interactType') private autoInteract() {
     EE.emit('stage-interact-type-changed', {
       currentType: this.interactType,
       previousType: this.previousInteractType,
     })
     this.previousInteractType = this.interactType
   }
-  @auto private autoCursor() {
+  @watch('interactType') private autoCursor() {
     const cursor = interactCursorMap[this.interactType]
     this.dragService.setCursor(cursor)
     this.pixiService.container.style.cursor = cursor

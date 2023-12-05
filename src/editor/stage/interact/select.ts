@@ -9,7 +9,7 @@ import { ViewportService, injectViewport } from '../viewport'
 
 @autobind
 @injectable()
-export class StageSelectController {
+export class StageSelectService {
   constructor(
     @injectPixi private pixiService: PixiService,
     @injectDrag private dragService: DragService,
@@ -33,7 +33,7 @@ export class StageSelectController {
   }
   private onMousedownSelect() {
     if (!this.hoverId) return
-    if (this.schemaNodeService.selectedIds?.[0] === this.hoverId) return
+    if (this.schemaNodeService.selectedIds?.includes(this.hoverId)) return
     this.schemaNodeService.clearSelection()
     this.schemaNodeService.select(this.hoverId)
   }
@@ -69,4 +69,4 @@ export class StageSelectController {
   }
 }
 
-export const injectStageSelect = inject(StageSelectController)
+export const injectStageSelect = inject(StageSelectService)
