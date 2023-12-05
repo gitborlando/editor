@@ -11,15 +11,15 @@
     "body": [
       "import { observer, useLocalObservable } from 'mobx-react'",
       "import { FC } from 'react'",
-      "import { makeStyles } from '~/ui/theme'",
-      "import { Flex } from '~/ui/widget/flex'",
-      "import { useService } from '~/ui/context'",
+      "import { useEditorServices } from '~/view/context'",
+      "import { makeStyles } from '~/view/ui-utility/theme'",
+      "import { Flex } from '~/view/ui-utility/widget/flex'",
       "",
       "type I$1${TM_FILENAME_BASE}Comp = {}",
       "",
       "export const $1${TM_FILENAME_BASE}Comp: FC<I$1${TM_FILENAME_BASE}Comp> = observer(({}) => {",
       "  const { classes } = useStyles({})",
-      "  const { } = useService()",
+      "  const { } = useEditorServices()",
       "  const state = useLocalObservable(() => ({}))",
       "  return <Flex className={classes.$1${TM_FILENAME_BASE}}></Flex>",
       "})",
@@ -30,7 +30,7 @@
       "const useStyles = makeStyles<I$1${TM_FILENAME_BASE}CompStyle>()((t) => ({",
       "  $1${TM_FILENAME_BASE}: {",
       "    ...t.rect('100%', 30, 'no-radius', 'white'),",
-      "    borderBottom: '1px solid gray'"
+      "    borderBottom: '1px solid gray'",
       "  },",
       "}))",
       "",
@@ -68,23 +68,23 @@
   "Service": {
     "prefix": "service",
     "body": [
-    "import { inject, injectable } from 'tsyringe'",
-    "import { autobind } from '~/helper/decorator'",
-    "import { makeObservable } from 'mobx'",
-    "",
-    "@autobind",
-    "@injectable()",
-    "export class $1${TM_FILENAME_BASE}Service {",
-    "  constructor(",
-    "    /** @inject private Service: Service **/",
-    "  ) {",
-    "    makeObservable(this)",
-    "  }",
-    "}",
-    "",
-    "export const inject$1${TM_FILENAME_BASE} = inject($1${TM_FILENAME_BASE}Service)",
-    ""
-  ],
+      "import { inject, injectable } from 'tsyringe'",
+      "import { autobind } from '~/helper/decorator'",
+      "import { makeObservable } from 'mobx'",
+      "",
+      "@autobind",
+      "@injectable()",
+      "export class $1${TM_FILENAME_BASE}Service {",
+      "  constructor(",
+      "    /** @inject private Service: Service **/",
+      "  ) {",
+      "    makeObservable(this)",
+      "  }",
+      "}",
+      "",
+      "export const inject$1${TM_FILENAME_BASE} = inject($1${TM_FILENAME_BASE}Service)",
+      ""
+    ],
     "description": "Service"
   },
   "Flex": {
@@ -94,12 +94,12 @@
   },
   "useService": {
     "prefix": "uservice",
-    "body": ["const { } = useService()"],
+    "body": ["const { } = useEditorService()"],
     "description": "useService"
   },
   "private service": {
     "prefix": "pser",
-    "body": ["@inject$1 private $1Service: $1Service"],
+    "body": [",@inject$1 private $1Service: $1Service"],
     "description": "private service"
-  },
+  }
 }
