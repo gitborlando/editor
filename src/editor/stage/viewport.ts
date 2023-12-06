@@ -8,16 +8,16 @@ import { PixiService, injectPixi } from './pixi'
 
 @autobind
 @injectable()
-export class ViewportService {
+export class StageViewportService {
   @observable initialized = false
   @observable bound = { x: 240, y: 48, width: 0, height: 0, right: 240 }
   constructor(
-    @injectPixi private pixiService: PixiService,
-    @injectSchemaPage private schemaPageService: SchemaPageService
+    @injectPixi private Pixi: PixiService,
+    @injectSchemaPage private SchemaPage: SchemaPageService
   ) {
     makeObservable(this)
-    when(() => pixiService.initialized).then(() => this.onResizeBound())
-    when(() => schemaPageService.initialized).then(() => {
+    when(() => Pixi.initialized).then(() => this.onResizeBound())
+    when(() => SchemaPage.initialized).then(() => {
       this.autoSetPixiStageZoom()
       this.autoSetPixiStageOffset()
       this.onWheelZoom()
@@ -25,16 +25,16 @@ export class ViewportService {
     })
   }
   get zoom() {
-    return this.schemaPageService.currentPage.zoom
+    return this.SchemaPage.currentPage.zoom
   }
   get stageOffset() {
-    return this.schemaPageService.currentPage.offset
+    return this.SchemaPage.currentPage.offset
   }
   setZoom(zoom: number) {
-    this.schemaPageService.currentPage.zoom = zoom
+    this.SchemaPage.currentPage.zoom = zoom
   }
   setStageOffset(xy: IXY) {
-    this.schemaPageService.currentPage.offset = xy
+    this.SchemaPage.currentPage.offset = xy
   }
   toViewportXY(xy: IXY) {
     return XY.From(xy).minus(this.bound)
@@ -53,11 +53,11 @@ export class ViewportService {
   }
   @Watch('zoom')
   private autoSetPixiStageZoom() {
-    this.pixiService.stage.scale.set(this.zoom, this.zoom)
+    this.Pixi.stage.scale.set(this.zoom, this.zoom)
   }
   @Watch('stageOffset')
   private autoSetPixiStageOffset() {
-    this.pixiService.stage.position.set(this.stageOffset.x, this.stageOffset.y)
+    this.Pixi.stage.position.set(this.stageOffset.x, this.stageOffset.y)
   }
   private onWheelZoom() {
     const onWheel = ({ deltaY, clientX, clientY }: WheelEvent) => {
@@ -89,13 +89,13 @@ export class ViewportService {
         width: window.innerWidth - this.bound.x - this.bound.right,
         height: window.innerHeight - this.bound.y + 1,
       }
-      this.pixiService.container.style.width = this.bound.width + 'px'
-      this.pixiService.container.style.height = this.bound.height + 'px'
-      this.pixiService.app?.resize()
+      this.Pixi.container.style.width = this.bound.width + 'px'
+      this.Pixi.container.style.height = this.bound.height + 'px'
+      this.Pixi.app?.resize()
     }
     setBound()
     window.addEventListener('resize', setBound)
   }
 }
 
-export const injectViewport = inject(ViewportService)
+export const injectStageViewport = inject(StageViewportService)

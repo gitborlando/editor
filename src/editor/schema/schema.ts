@@ -10,8 +10,8 @@ import { IMeta, ISchema } from './type'
 export class SchemaService {
   private meta!: IMeta
   constructor(
-    @injectSchemaNode private schemaNodeService: SchemaNodeService,
-    @injectSchemaPage private schemaPageService: SchemaPageService
+    @injectSchemaNode private SchemaNode: SchemaNodeService,
+    @injectSchemaPage private SchemaPage: SchemaPageService
   ) {}
   setMeta(option: Partial<IMeta>) {
     this.meta = { ...this.meta, ...option }
@@ -19,14 +19,14 @@ export class SchemaService {
   getSchema() {
     return {
       meta: this.meta,
-      nodes: toJS(this.schemaNodeService.nodeMap),
-      pages: toJS(this.schemaPageService.pages),
+      nodes: toJS(this.SchemaNode.nodeMap),
+      pages: toJS(this.SchemaPage.pages),
     }
   }
   setSchema({ meta, nodes, pages }: ISchema) {
     this.meta = meta
-    this.schemaNodeService.setMap(nodes)
-    this.schemaPageService.setPages(pages)
+    this.SchemaNode.setMap(nodes)
+    this.SchemaPage.setPages(pages)
   }
 }
 

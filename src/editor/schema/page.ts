@@ -14,8 +14,8 @@ export class SchemaPageService {
   @observable currentPage!: IPage
   @observable initialized = false
   constructor(
-    @injectSchemaDefault private schemaDefaultService: SchemaDefaultService,
-    @injectSchemaNode private schemaNodeService: SchemaNodeService
+    @injectSchemaDefault private SchemaDefault: SchemaDefaultService,
+    @injectSchemaNode private SchemaNode: SchemaNodeService
   ) {
     makeObservable(this)
     when(() => !!this.currentId).then(() => {
@@ -27,14 +27,14 @@ export class SchemaPageService {
     this.pages = pages
   }
   add() {
-    const page = this.schemaDefaultService.page()
+    const page = this.SchemaDefault.page()
     this.pages.push(page)
     this.select(page.id)
   }
   delete(id: string) {
     if (this.pages.length <= 1) return
     this.find(id)?.childIds.forEach((id) => {
-      Delete(this.schemaNodeService.nodeMap, id)
+      Delete(this.SchemaNode.nodeMap, id)
     })
     Delete(this.pages, (page) => page.id === id)
     if (id === this.currentId) this.select(this.pages[0].id)

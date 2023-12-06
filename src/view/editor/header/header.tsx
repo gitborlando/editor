@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditorServices } from '~/view/context'
+import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -8,32 +8,28 @@ import { Flex } from '~/view/ui-utility/widget/flex'
 type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
-  const { fileService, stageService, viewportService, stageCreateService } = useEditorServices()
-  const { classes } = useStyles({ top: viewportService.bound.y })
+  const { File, StageInteract, StageViewport, StageCreate } = useEditor()
+  const { classes } = useStyles({ top: StageViewport.bound.y })
 
   return (
     <Flex layout='v' className={classes.Header}>
       <Flex layout='c'>
-        {viewportService.initialized && (
+        {StageViewport.initialized && (
           <Flex layout='c' style={{ width: 50 }}>
-            {~~(viewportService.zoom * 100)}%
+            {~~(StageViewport.zoom * 100)}%
           </Flex>
         )}
-        <Button onClick={() => fileService.openFile()}>上传</Button>
-        <Button onClick={() => fileService.exportFile()}>下载</Button>
-        <Button onClick={() => fileService.newFile()}>新建</Button>
-        <Button onClick={() => stageService.setType('select')}>选择</Button>
-        <Button onClick={() => stageService.setType('move')}>拖动</Button>
-        <Button onClick={() => stageCreateService.setType('frame')}>画板</Button>
-        <Button onClick={() => stageCreateService.setType('rect')}>矩形</Button>
-        <Button onClick={() => stageCreateService.setType('ellipse')}>圆形</Button>
-        <Button onClick={() => stageCreateService.setType('line')}>线段</Button>
+        <Button onClick={() => File.openFile()}>上传</Button>
+        <Button onClick={() => File.exportFile()}>下载</Button>
+        <Button onClick={() => File.newFile()}>新建</Button>
+        <Button onClick={() => StageInteract.setType('select')}>选择</Button>
+        <Button onClick={() => StageInteract.setType('move')}>拖动</Button>
+        <Button onClick={() => StageCreate.setType('frame')}>画板</Button>
+        <Button onClick={() => StageCreate.setType('rect')}>矩形</Button>
+        <Button onClick={() => StageCreate.setType('ellipse')}>圆形</Button>
+        <Button onClick={() => StageCreate.setType('line')}>线段</Button>
       </Flex>
-      <input
-        ref={fileService.setInputRef}
-        id='uploader'
-        type='file'
-        style={{ display: 'none' }}></input>
+      <input ref={File.setInputRef} id='uploader' type='file' style={{ display: 'none' }}></input>
     </Flex>
   )
 })

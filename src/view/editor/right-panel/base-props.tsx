@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditorServices } from '~/view/context'
+import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Input } from '~/view/ui-utility/widget/input'
@@ -9,9 +9,9 @@ type IBasePropsComp = {}
 
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { schemaNodeService } = useEditorServices()
-  if (!schemaNodeService.selectIds.size) return null
-  const node = schemaNodeService.find([...schemaNodeService.selectIds][0])
+  const { SchemaNode } = useEditor()
+  if (!SchemaNode.selectIds.size) return null
+  const node = SchemaNode.find([...SchemaNode.selectIds][0])
   return (
     <Flex layout='h' className={classes.SchemaBase}>
       <Input

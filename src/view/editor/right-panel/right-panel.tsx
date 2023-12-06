@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditorServices } from '~/view/context'
+import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { BasePropsComp } from './base-props'
@@ -8,12 +8,12 @@ import { BasePropsComp } from './base-props'
 type IRightPanelComp = {}
 
 export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
-  const { viewportService, schemaNodeService } = useEditorServices()
-  const { classes } = useStyles({ right: viewportService.bound.right })
+  const { StageViewport, SchemaNode } = useEditor()
+  const { classes } = useStyles({ right: StageViewport.bound.right })
   return (
     <Flex layout='v' className={classes.RightPanel}>
       <BasePropsComp />
-      <Flex layout='c'>{schemaNodeService.hoverId}</Flex>
+      <Flex layout='c'>{SchemaNode.hoverId}</Flex>
       <Flex layout='h' style={{ width: '100%' }}></Flex>
     </Flex>
   )

@@ -4,7 +4,7 @@ import { editorServices } from '~/editor/ioc'
 import { testDraw2 } from '~/helper/test2'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { EditorServicesContext } from './context'
+import { EditorContext } from './context'
 import { EditorComp } from './editor/editor'
 
 type IAppProps = {}
@@ -22,9 +22,9 @@ export const App: FC<IAppProps> = observer(() => {
           width={1000}
           height={1000}></canvas>
       ) : (
-        <EditorServicesContext.Provider value={editorServices}>
+        <EditorContext.Provider value={editorServices}>
           <EditorComp />
-        </EditorServicesContext.Provider>
+        </EditorContext.Provider>
       )}
     </Flex>
   )

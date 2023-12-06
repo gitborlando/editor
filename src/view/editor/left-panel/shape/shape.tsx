@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditorServices } from '~/view/context'
+import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -8,7 +8,7 @@ type IShapeComp = {}
 
 export const ShapeComp: FC<IShapeComp> = observer(({}) => {
   const { classes, cx } = useStyles({})
-  const { schemaNodeService } = useEditorServices()
+  const { schemaNodeService } = useEditor()
   return (
     <Flex layout='v' className={classes.Shape}>
       {Object.entries(schemaNodeService.nodeMap).map(([id, node]) => (

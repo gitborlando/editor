@@ -19,9 +19,9 @@ type IStageElement = PIXI.Graphics | PIXI.Text
 export class StageDrawService {
   currentElement!: IStageElement
   constructor(
-    @injectStageCTX private stageCTXService: StageCTXService,
-    @injectStageElement private stageElementService: StageElementService,
-    @injectSchemaNode private schemaNodeService: SchemaNodeService
+    @injectStageCTX private StageCtx: StageCTXService,
+    @injectStageElement private StageElement: StageElementService,
+    @injectSchemaNode private SchemaNode: SchemaNodeService
   ) {}
   drawNode(node: INode) {
     if (node.type === 'frame') this.drawFrame(node)
@@ -40,13 +40,13 @@ export class StageDrawService {
   }
   private drawRect(node: IRect) {
     const { x, y, width, height, id, fill, points } = node
-    const nodeRuntime = this.schemaNodeService.findNodeRuntime(id)
+    const nodeRuntime = this.SchemaNode.findNodeRuntime(id)
     const element = this.findElementOrCreate(id, 'graphic')
     element.clear()
     this.drawFill(element, fill)
     element.lineStyle(1, 'green')
-    this.schemaNodeService.hoverId === id && element.lineStyle(2, 'blue')
-    this.schemaNodeService.selectIds.has(id) && element.lineStyle(2, 'red')
+    this.SchemaNode.hoverId === id && element.lineStyle(2, 'blue')
+    this.SchemaNode.selectIds.has(id) && element.lineStyle(2, 'red')
     this.drawPath(element, node)
   }
   private drawTriangle(node: ITriangle) {
@@ -55,8 +55,8 @@ export class StageDrawService {
     element.clear()
     this.drawFill(element, fill)
     element.lineStyle(1, 'green')
-    this.schemaNodeService.hoverId === id && element.lineStyle(2, 'blue')
-    this.schemaNodeService.selectIds.has(id) && element.lineStyle(2, 'red')
+    this.SchemaNode.hoverId === id && element.lineStyle(2, 'blue')
+    this.SchemaNode.selectIds.has(id) && element.lineStyle(2, 'red')
     this.drawPath(element, node)
   }
   private drawLine(node: ILine) {
@@ -69,8 +69,8 @@ export class StageDrawService {
     // shape.lineTo(end.x, end.y)
     element.quadraticCurveTo(start.x + 200, start.y, end.x, end.y)
     //  this.drawPath(element, node)
-    this.schemaNodeService.hoverId === id && element.lineStyle(2, 'blue')
-    this.schemaNodeService.selectIds.has(id) && element.lineStyle(2, 'red')
+    this.SchemaNode.hoverId === id && element.lineStyle(2, 'blue')
+    this.SchemaNode.selectIds.has(id) && element.lineStyle(2, 'red')
     element.hitArea = {
       contains: (x: number, y: number) => {
         const points = element.geometry.points
@@ -91,7 +91,7 @@ export class StageDrawService {
     }
   }
   private drawPath(element: PIXI.Graphics, vector: IVector) {
-    customPixiCTX(this.stageCTXService, element)
+    customPixiCTX(this.StageCtx, element)
     const pathPoints = vector.points.map((nodePoint) => {
       return new PathPoint({
         ...nodePoint,
@@ -111,7 +111,7 @@ export class StageDrawService {
         } else {
           startXY.set(startPoint)
         }
-        this.stageCTXService.moveTo(startXY)
+        this.StageCtx.moveTo(startXY)
       }
 
       if (curLine.type === 'line') {
@@ -128,11 +128,11 @@ export class StageDrawService {
             )
           const radius = min(...cullNegatives(startPoint.radius, rightMaxRadius, leftMaxRadius))
           // console.log([startPoint.radius, rightMaxRadius, leftMaxRadius])
-          this.stageCTXService.arcTo(startPoint, startPoint.right!, radius)
+          this.StageCtx.arcTo(startPoint, startPoint.right!, radius)
           hasArcedPointMap.add(startPoint)
         }
         if (!endPoint.canDrawArc) {
-          return this.stageCTXService.lineTo(endPoint)
+          return this.StageCtx.lineTo(endPoint)
         }
         if (endPoint.canDrawArc && !hasArcedPointMap.has(endPoint)) {
           const leftMaxRadius =
@@ -142,10 +142,10 @@ export class StageDrawService {
             endPoint.right!.arcLength &&
             endPoint.calcRadiusByArcLength(endPoint.rightLine!.length - endPoint.right!.arcLength)
           const radius = min(...cullNegatives(endPoint.radius, rightMaxRadius, leftMaxRadius))
-          this.stageCTXService.arcTo(endPoint, endPoint.right!, radius)
+          this.StageCtx.arcTo(endPoint, endPoint.right!, radius)
           hasArcedPointMap.add(endPoint)
         }
-        if (at.end && !startPoint.jumpToRight) this.stageCTXService.closePath()
+        if (at.end && !startPoint.jumpToRight) this.StageCtx.closePath()
       }
 
       if (curLine.type === 'curve') {
@@ -159,11 +159,10 @@ export class StageDrawService {
   private findElementOrCreate(id: string, type: 'text'): PIXI.Text
   private findElementOrCreate(id: string, type: 'graphic' | 'text') {
     if (type === 'text') {
-      return (this.currentElement =
-        (this.stageElementService.find(id) as PIXI.Text) || new PIXI.Text())
+      return (this.currentElement = (this.StageElement.find(id) as PIXI.Text) || new PIXI.Text())
     } else {
       return (this.currentElement =
-        (this.stageElementService.find(id) as PIXI.Graphics) || new PIXI.Graphics())
+        (this.StageElement.find(id) as PIXI.Graphics) || new PIXI.Graphics())
     }
   }
 }

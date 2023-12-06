@@ -12,37 +12,37 @@ import { PixiService, injectPixi } from './stage/pixi'
 @injectable()
 export class EditorService {
   constructor(
-    @injectPixi private pixiService: PixiService,
-    @injectSchemaPage private schemaPageService: SchemaPageService,
-    @injectSchemaNode private schemaNodeService: SchemaNodeService,
-    @injectStageElement private stageElementService: StageElementService,
-    @injectStageDraw private stageDrawService: StageDrawService,
-    @injectFile private fileService: FileService
+    @injectPixi private Pixi: PixiService,
+    @injectSchemaPage private SchemaPage: SchemaPageService,
+    @injectSchemaNode private SchemaNode: SchemaNodeService,
+    @injectStageElement private StageElement: StageElementService,
+    @injectStageDraw private StageDraw: StageDrawService,
+    @injectFile private File: FileService
   ) {
-    when(() => pixiService.initialized).then(() => {
-      this.fileService.mockFile()
+    when(() => Pixi.initialized).then(() => {
+      this.File.mockFile()
       this.autoClearStage()
       this.autoMakeNodesDirty()
       this.drawDirtyInPixiTick()
     })
   }
-  @Watch('schemaPageService.currentId')
+  @Watch('SchemaPage.currentId')
   private autoClearStage() {
-    this.stageElementService.clearAll()
+    this.StageElement.clearAll()
   }
-  @Watch('schemaPageService.currentId')
+  @Watch('SchemaPage.currentId')
   private autoMakeNodesDirty() {
-    const nodeIds = this.schemaPageService.find(this.schemaPageService.currentId)!.childIds
-    runInAction(() => nodeIds.forEach(this.schemaNodeService.collectDirty))
+    const nodeIds = this.SchemaPage.find(this.SchemaPage.currentId)!.childIds
+    runInAction(() => nodeIds.forEach(this.SchemaNode.collectDirty))
   }
   private drawDirtyInPixiTick() {
-    this.schemaNodeService.onFlushDirty((id) => {
-      this.stageDrawService.drawNode(this.schemaNodeService.find(id))
-      if (!this.stageElementService.find(id)) {
-        this.stageElementService.add(id, this.stageDrawService.currentElement)
+    this.SchemaNode.onFlushDirty((id) => {
+      this.StageDraw.drawNode(this.SchemaNode.find(id))
+      if (!this.StageElement.find(id)) {
+        this.StageElement.add(id, this.StageDraw.currentElement)
       }
     })
-    this.pixiService.app.ticker.add(this.schemaNodeService.flushDirty)
+    this.Pixi.app.ticker.add(this.SchemaNode.flushDirty)
   }
 }
 

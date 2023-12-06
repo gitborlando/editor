@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditorServices } from '~/view/context'
+import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -8,10 +8,10 @@ type IStageComp = {}
 
 export const StageComp: FC<IStageComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { pixiService } = useEditorServices()
+  const { Pixi } = useEditor()
   return (
     <Flex
-      ref={pixiService.setContainer}
+      ref={Pixi.setContainer}
       className={classes.Stage}
       onContextMenu={(e) => e.preventDefault()}></Flex>
   )

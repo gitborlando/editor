@@ -24,9 +24,7 @@ export class SchemaNodeService {
   nodeMap: Record<string, INode> = {}
   private nodeRuntimeMap: Record<string, INodeRuntime> = {}
   private flushDirtyNodeCallbacks: ((id: string) => void)[] = []
-  constructor(
-    @inject(delay(() => SchemaPageService)) private schemaPageService: SchemaPageService
-  ) {
+  constructor(@inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService) {
     makeObservable(this)
     this.autoOnHoverObserve()
   }
@@ -81,7 +79,7 @@ export class SchemaNodeService {
     if (nodeParent) {
       if ('childIds' in nodeParent) nodeParent.childIds.push(id)
     } else {
-      this.schemaPageService.find(parentId)?.childIds.push(id)
+      this.SchemaPage.find(parentId)?.childIds.push(id)
     }
   }
   disconnect(id: string, parentId: string) {
@@ -89,7 +87,7 @@ export class SchemaNodeService {
     if (nodeParent) {
       if ('childIds' in nodeParent) Delete(nodeParent.childIds, id)
     } else {
-      Delete(this.schemaPageService.find(parentId)?.childIds || [], id)
+      Delete(this.SchemaPage.find(parentId)?.childIds || [], id)
     }
   }
   collectDirty(id: string) {

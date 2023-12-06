@@ -15,7 +15,7 @@ import { StageInteractService } from './stage/interact/interact'
 import { StageMoveService } from './stage/interact/move'
 import { StageSelectService } from './stage/interact/select'
 import { PixiService } from './stage/pixi'
-import { ViewportService } from './stage/viewport'
+import { StageViewportService } from './stage/viewport'
 
 container.registerSingleton(SchemaDefaultService)
 container.registerSingleton(SchemaNodeService)
@@ -23,7 +23,7 @@ container.registerSingleton(SchemaPageService)
 container.registerSingleton(SchemaService)
 container.registerSingleton(DragService)
 container.registerSingleton(PixiService)
-container.registerSingleton(ViewportService)
+container.registerSingleton(StageViewportService)
 container.registerSingleton(StageSelectService)
 container.registerSingleton(StageMoveService)
 container.registerSingleton(StageCreateService)
@@ -35,20 +35,20 @@ container.registerSingleton(EditorService)
 container.registerSingleton(FileService)
 
 export const editorServices = {
-  schemaDefaultService: container.resolve(SchemaDefaultService),
-  schemaNodeService: container.resolve(SchemaNodeService),
-  schemaPageService: container.resolve(SchemaPageService),
-  schemaService: container.resolve(SchemaService),
-  dragService: container.resolve(DragService),
-  pixiService: container.resolve(PixiService),
-  viewportService: container.resolve(ViewportService),
-  stageSelectService: container.resolve(StageSelectService),
-  stageMoveService: container.resolve(StageMoveService),
-  stageCreateService: container.resolve(StageCreateService),
-  stageCTXService: container.resolve(StageCTXService),
-  stageDrawService: container.resolve(StageDrawService),
-  stageShapeService: container.resolve(StageElementService),
-  stageService: container.resolve(StageInteractService),
-  editorService: container.resolve(EditorService),
-  fileService: container.resolve(FileService),
+  SchemaDefault: container.resolve(SchemaDefaultService),
+  SchemaNode: container.resolve(SchemaNodeService),
+  SchemaPage: container.resolve(SchemaPageService),
+  Schema: container.resolve(SchemaService),
+  Drag: container.resolve(DragService),
+  Pixi: container.resolve(PixiService),
+  StageViewport: container.resolve(StageViewportService),
+  StageSelect: container.resolve(StageSelectService),
+  StageMove: container.resolve(StageMoveService),
+  StageCreate: container.resolve(StageCreateService),
+  StageCTX: container.resolve(StageCTXService),
+  StageDraw: container.resolve(StageDrawService),
+  StageShape: container.resolve(StageElementService),
+  StageInteract: container.resolve(StageInteractService),
+  Editor: container.resolve(EditorService),
+  File: container.resolve(FileService),
 }

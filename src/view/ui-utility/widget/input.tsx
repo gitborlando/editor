@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { ChangeEvent, ComponentPropsWithRef, forwardRef } from 'react'
-import { useEditorServices } from '~/view/context'
+import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -16,7 +16,7 @@ export const Input = observer(
   forwardRef<HTMLDivElement, IInput>(
     ({ className, label, value: outValue, onNewValueApply: emitNewValue, min, max }, ref) => {
       const { classes, cx } = useStyles({})
-      const { dragService } = useEditorServices()
+      const { Drag } = useEditor()
       const state = useLocalObservable(() => ({ value: outValue }))
       state.value = outValue
       return (
@@ -26,7 +26,7 @@ export const Input = observer(
             className={classes.label}
             onMouseDown={() => {
               let startValue = state.value
-              dragService.setCursor('e-resize').onSlide(({ shift }) => {
+              Drag.setCursor('e-resize').onSlide(({ shift }) => {
                 state.value = startValue + shift.x
                 if (min !== undefined && state.value < min) state.value = min
                 if (max !== undefined && state.value > max) state.value = max

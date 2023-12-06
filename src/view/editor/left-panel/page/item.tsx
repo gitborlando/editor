@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC } from 'react'
-import { useEditorServices } from '~/view/context'
+import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -11,8 +11,8 @@ type IPageItemComp = {
 }
 
 export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
-  const { schemaPageService } = useEditorServices()
-  const { classes } = useStyles({ selected: schemaPageService.currentId === id })
+  const { SchemaPage } = useEditor()
+  const { classes } = useStyles({ selected: SchemaPage.currentId === id })
   const state = useLocalObservable(() => ({
     isHover: false,
   }))
@@ -22,7 +22,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
       justify='space-between'
       className={classes.PageItem}
       onHover={(hover) => (state.isHover = hover)}
-      onClick={() => schemaPageService.select(id)}>
+      onClick={() => SchemaPage.select(id)}>
       <Flex layout='h' sidePadding={10} className={classes.name}>
         {name}
       </Flex>
@@ -30,7 +30,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
         <Button
           onClick={(e) => {
             e.stopPropagation()
-            schemaPageService.delete(id)
+            SchemaPage.delete(id)
           }}>
           删除
         </Button>

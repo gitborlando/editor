@@ -3,26 +3,26 @@ import { DragService, injectDrag } from '~/editor/drag'
 import { XY } from '~/editor/math/xy'
 import { autobind } from '~/editor/utility/decorator'
 import { PixiService, injectPixi } from '../pixi'
-import { ViewportService, injectViewport } from '../viewport'
+import { StageViewportService, injectStageViewport } from '../viewport'
 
 @autobind
 @injectable()
 export class StageMoveService {
   constructor(
-    @injectPixi private pixiService: PixiService,
-    @injectDrag private dragService: DragService,
-    @injectViewport private viewportService: ViewportService
+    @injectPixi private Pixi: PixiService,
+    @injectDrag private Drag: DragService,
+    @injectStageViewport private StageViewport: StageViewportService
   ) {}
   startInteract() {
-    this.pixiService.addListener('mousedown', this.onMoveStage)
+    this.Pixi.addListener('mousedown', this.onMoveStage)
   }
   endInteract() {
-    this.pixiService.removeListener('mousedown', this.onMoveStage)
+    this.Pixi.removeListener('mousedown', this.onMoveStage)
   }
   private onMoveStage() {
-    const start = XY.From(this.pixiService.stage.position)
-    this.dragService.onSlide(({ shift }) => {
-      this.viewportService.setStageOffset(start.plus(shift))
+    const start = XY.From(this.Pixi.stage.position)
+    this.Drag.onSlide(({ shift }) => {
+      this.StageViewport.setStageOffset(start.plus(shift))
     })
   }
 }

@@ -19,17 +19,17 @@ export class StageInteractService {
     { startInteract: () => void; endInteract: () => void }
   >()
   constructor(
-    @injectPixi private pixiService: PixiService,
-    @injectDrag private dragService: DragService,
-    @injectStageMove private stageMoveService: StageMoveService,
-    @injectStageSelect private stageSelectService: StageSelectService,
-    @inject(delay(() => StageCreateService)) private stageCreateService: StageCreateService
+    @injectPixi private Pixi: PixiService,
+    @injectDrag private Drag: DragService,
+    @injectStageMove private StageMove: StageMoveService,
+    @injectStageSelect private StageSelect: StageSelectService,
+    @inject(delay(() => StageCreateService)) private StageCreate: StageCreateService
   ) {
     makeObservable(this)
-    this.interactHandlerMap.set('create', this.stageCreateService)
-    this.interactHandlerMap.set('move', this.stageMoveService)
-    this.interactHandlerMap.set('select', this.stageSelectService)
-    when(() => this.pixiService.initialized).then(() => {
+    this.interactHandlerMap.set('create', this.StageCreate)
+    this.interactHandlerMap.set('move', this.StageMove)
+    this.interactHandlerMap.set('select', this.StageSelect)
+    when(() => this.Pixi.initialized).then(() => {
       this.autoInteract()
       this.autoCursor()
     })
@@ -47,8 +47,8 @@ export class StageInteractService {
   @Watch('type')
   private autoCursor() {
     const cursor = interactCursorMap[this.type]
-    this.dragService.setCursor(cursor)
-    this.pixiService.container.style.cursor = cursor
+    this.Drag.setCursor(cursor)
+    this.Pixi.container.style.cursor = cursor
   }
 }
 

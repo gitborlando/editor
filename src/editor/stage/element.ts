@@ -10,8 +10,8 @@ export type IStageElement = PIXI.Graphics | PIXI.Text
 export class StageElementService {
   private elementMap: Map<string, IStageElement> = new Map()
   constructor(
-    @injectPixi private pixiService: PixiService,
-    @injectSchemaNode private schemaNodeService: SchemaNodeService
+    @injectPixi private Pixi: PixiService,
+    @injectSchemaNode private SchemaNode: SchemaNodeService
   ) {}
   add(id: string, element: IStageElement) {
     this.elementMap.set(id, element)
@@ -24,18 +24,18 @@ export class StageElementService {
     return this.elementMap.get(id)
   }
   clearAll() {
-    this.pixiService.stage.removeChildren()
+    this.Pixi.stage.removeChildren()
     this.elementMap = new Map()
   }
   private setupElement(id: string, element: IStageElement) {
-    const { parentId } = this.schemaNodeService.find(id)
+    const { parentId } = this.SchemaNode.find(id)
     if (!element.parent) {
-      const parent = this.find(parentId) || this.pixiService.stage
+      const parent = this.find(parentId) || this.Pixi.stage
       element.setParent(parent)
     }
     element.eventMode = 'dynamic'
-    element.on('mouseenter', () => this.schemaNodeService.hover(id))
-    element.on('mouseleave', () => this.schemaNodeService.unHover(id))
+    element.on('mouseenter', () => this.SchemaNode.hover(id))
+    element.on('mouseleave', () => this.SchemaNode.unHover(id))
   }
 }
 

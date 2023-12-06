@@ -7,7 +7,7 @@ import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
 import { ILine, INode } from '~/editor/schema/type'
 import { RunInAction, autobind } from '~/editor/utility/decorator'
 import { IXY } from '~/editor/utility/utils'
-import { ViewportService, injectViewport } from '../viewport'
+import { StageViewportService, injectStageViewport } from '../viewport'
 import { StageInteractService, injectStageInteract } from './interact'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'polygon', 'line', 'text', 'img'] as const
@@ -21,27 +21,27 @@ export class StageCreateService {
   private node!: INode
   private realStageStart!: IXY
   constructor(
-    @injectSchemaDefault private schemaDefaultService: SchemaDefaultService,
-    @injectSchemaNode private schemaNodeService: SchemaNodeService,
-    @injectSchemaPage private schemaPageService: SchemaPageService,
-    @injectDrag private dragService: DragService,
-    @injectViewport private viewportService: ViewportService,
-    @injectStageInteract private stageInteractService: StageInteractService
+    @injectSchemaDefault private SchemaDefault: SchemaDefaultService,
+    @injectSchemaNode private SchemaNode: SchemaNodeService,
+    @injectSchemaPage private SchemaPage: SchemaPageService,
+    @injectDrag private Drag: DragService,
+    @injectStageViewport private StageViewport: StageViewportService,
+    @injectStageInteract private StageInteract: StageInteractService
   ) {}
   startInteract() {
-    this.dragService.onStart(this.onCreateStart).onMove(this.onCreateMove).onEnd(this.onCreateEnd)
+    this.Drag.onStart(this.onCreateStart).onMove(this.onCreateMove).onEnd(this.onCreateEnd)
   }
   endInteract() {}
   setType(type: ICreateType) {
     this.type = type
-    this.stageInteractService.setType('create')
+    this.StageInteract.setType('create')
   }
   private onCreateStart({ start, dragService }: IDragData) {
-    if (!this.viewportService.inViewport(start)) {
-      this.stageInteractService.setType('select')
+    if (!this.StageViewport.inViewport(start)) {
+      this.StageInteract.setType('select')
       return dragService.destroy()
     }
-    this.realStageStart = this.viewportService.toRealStageXY(start)
+    this.realStageStart = this.StageViewport.toRealStageXY(start)
     if (this.type === 'frame') this.createFrameNode()
     if (this.type === 'rect') this.createRectNode()
     if (this.type === 'ellipse') this.createEllipseNode()
@@ -51,8 +51,8 @@ export class StageCreateService {
     this.addNodeToSchemaAndObserveAndSelect()
   }
   @RunInAction private onCreateMove({ marquee, current }: IDragData) {
-    const { x, y } = this.viewportService.toRealStageXY(marquee)
-    const { x: width, y: height } = this.viewportService.toRealStageShift({
+    const { x, y } = this.StageViewport.toRealStageXY(marquee)
+    const { x: width, y: height } = this.StageViewport.toRealStageShift({
       x: marquee.width,
       y: marquee.height,
     })
@@ -62,7 +62,7 @@ export class StageCreateService {
       this.node.width = width
       this.node.height = height
     } else if (this.type === 'line') {
-      ;(this.node as ILine).end = this.viewportService.toRealStageXY(current)
+      ;(this.node as ILine).end = this.StageViewport.toRealStageXY(current)
     } else {
       this.node.x = x
       this.node.y = y
@@ -73,26 +73,26 @@ export class StageCreateService {
   @RunInAction private onCreateEnd({ dragService }: IDragData) {
     if (!this.node.width) this.node.width = 100
     if (!this.node.height) this.node.height = 100
-    this.stageInteractService.setType('select')
+    this.StageInteract.setType('select')
     dragService.destroy()
   }
   private createFrameNode() {
-    this.node = this.schemaDefaultService.frame({
+    this.node = this.SchemaDefault.frame({
       ...this.createMousedownBound(),
     })
   }
   private createRectNode() {
-    this.node = this.schemaDefaultService.rect({
+    this.node = this.SchemaDefault.rect({
       ...this.createMousedownBound(),
     })
   }
   private createEllipseNode() {
-    this.node = this.schemaDefaultService.ellipse({
+    this.node = this.SchemaDefault.ellipse({
       ...this.createMousedownBound(),
     })
   }
   private createLineNode() {
-    this.node = this.schemaDefaultService.line({
+    this.node = this.SchemaDefault.line({
       start: XY.From(this.realStageStart),
       end: new XY(0, 0),
     })
@@ -106,10 +106,10 @@ export class StageCreateService {
     }
   }
   private addNodeToSchemaAndObserveAndSelect() {
-    this.node = this.schemaNodeService.add(this.node)
-    this.schemaNodeService.clearSelection()
-    this.schemaNodeService.select(this.node.id)
-    this.schemaNodeService.connect(this.node.id, this.schemaPageService.currentId)
+    this.node = this.SchemaNode.add(this.node)
+    this.SchemaNode.clearSelection()
+    this.SchemaNode.select(this.node.id)
+    this.SchemaNode.connect(this.node.id, this.SchemaPage.currentId)
   }
 }
 
