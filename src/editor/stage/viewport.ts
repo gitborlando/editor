@@ -1,6 +1,6 @@
 import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { autobind, watch } from '~/editor/utility/decorator'
+import { Watch, autobind } from '~/editor/utility/decorator'
 import { XY } from '../math/xy'
 import { SchemaPageService, injectSchemaPage } from '../schema/page'
 import { IXY } from '../utility/utils'
@@ -51,10 +51,12 @@ export class ViewportService {
   inViewport(xy: IXY) {
     return xy.x > this.bound.x && xy.x < this.bound.x + this.bound.width && xy.y > this.bound.y
   }
-  @watch('zoom') private autoSetPixiStageZoom() {
+  @Watch('zoom')
+  private autoSetPixiStageZoom() {
     this.pixiService.stage.scale.set(this.zoom, this.zoom)
   }
-  @watch('stageOffset') private autoSetPixiStageOffset() {
+  @Watch('stageOffset')
+  private autoSetPixiStageOffset() {
     this.pixiService.stage.position.set(this.stageOffset.x, this.stageOffset.y)
   }
   private onWheelZoom() {
@@ -78,9 +80,8 @@ export class ViewportService {
       this.setZoom(newZoom)
       this.setStageOffset(newOffset)
     }
-    addEventListener('wheel', onWheel)
+    window.addEventListener('wheel', onWheel)
   }
-  private onEnterZoom(zoom: number) {}
   private onResizeBound() {
     const setBound = () => {
       this.bound = {
@@ -93,7 +94,7 @@ export class ViewportService {
       this.pixiService.app?.resize()
     }
     setBound()
-    addEventListener('resize', setBound)
+    window.addEventListener('resize', setBound)
   }
 }
 

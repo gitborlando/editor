@@ -6,7 +6,7 @@ import { IFrame, ILine, INode, IRect, ITriangle, IVector } from '~/editor/schema
 import { autobind } from '~/editor/utility/decorator'
 import { cullNegatives } from '~/editor/utility/utils'
 import { StageElementService, injectStageElement } from '../element'
-import { PIXI, PixiService, injectPixi } from '../pixi'
+import { PIXI } from '../pixi'
 import { StageCTXService, injectStageCTX } from './ctx/ctx'
 import { customPixiCTX } from './ctx/pixi-ctx'
 import { Path } from './path/path'
@@ -17,58 +17,63 @@ type IStageElement = PIXI.Graphics | PIXI.Text
 @autobind
 @injectable()
 export class StageDrawService {
-  private element!: IStageElement
+  currentElement!: IStageElement
   constructor(
-    @injectPixi private pixiService: PixiService,
     @injectStageCTX private stageCTXService: StageCTXService,
     @injectStageElement private stageElementService: StageElementService,
     @injectSchemaNode private schemaNodeService: SchemaNodeService
   ) {}
-  draw(node: INode) {
+  drawNode(node: INode) {
     if (node.type === 'frame') this.drawFrame(node)
     if (node.type === 'vector') {
       if (node.vectorType === 'rect') this.drawRect(node)
       if (node.vectorType === 'triangle') this.drawTriangle(node)
       if (node.vectorType === 'line') this.drawLine(node)
     }
-    this.setupElement(this.element, node.id, node.parentId)
   }
   private drawFrame(node: IFrame) {
     const { x, y, width, height, id, fill } = node
-    const shape = this.findShapeOrCreate(id, 'graphic')
-    shape.clear()
-    this.drawFill(shape, fill)
-    shape.drawRect(x, y, width, height)
+    const element = this.findElementOrCreate(id, 'graphic')
+    element.clear()
+    this.drawFill(element, fill)
+    element.drawRect(x, y, width, height)
   }
   private drawRect(node: IRect) {
     const { x, y, width, height, id, fill, points } = node
-    const shape = this.findShapeOrCreate(id, 'graphic')
-    shape.clear()
-    this.drawFill(shape, fill)
-    shape.lineStyle(1, 'green')
-    this.drawPath(shape, node)
+    const nodeRuntime = this.schemaNodeService.findNodeRuntime(id)
+    const element = this.findElementOrCreate(id, 'graphic')
+    element.clear()
+    this.drawFill(element, fill)
+    element.lineStyle(1, 'green')
+    this.schemaNodeService.hoverId === id && element.lineStyle(2, 'blue')
+    this.schemaNodeService.selectIds.has(id) && element.lineStyle(2, 'red')
+    this.drawPath(element, node)
   }
   private drawTriangle(node: ITriangle) {
     const { x, y, width, height, id, fill, points } = node
-    const shape = this.findShapeOrCreate(id, 'graphic')
-    shape.clear()
-    this.drawFill(shape, fill)
-    shape.lineStyle(1, 'green')
-    this.drawPath(shape, node)
+    const element = this.findElementOrCreate(id, 'graphic')
+    element.clear()
+    this.drawFill(element, fill)
+    element.lineStyle(1, 'green')
+    this.schemaNodeService.hoverId === id && element.lineStyle(2, 'blue')
+    this.schemaNodeService.selectIds.has(id) && element.lineStyle(2, 'red')
+    this.drawPath(element, node)
   }
   private drawLine(node: ILine) {
     const { id, fill, start, end, points } = node
-    const shape = this.findShapeOrCreate(id, 'graphic')
-    shape.clear()
-    this.drawFill(shape, fill)
-    shape.lineStyle(1, 'red')
-    // shape.moveTo(start.x, start.y)
+    const element = this.findElementOrCreate(id, 'graphic')
+    element.clear()
+    // this.drawFill(element, fill)
+    element.lineStyle(1, 'red')
+    element.moveTo(start.x, start.y)
     // shape.lineTo(end.x, end.y)
-    this.drawPath(shape, node)
-    //console.log(shape.geometry.points)
-    shape.hitArea = {
+    element.quadraticCurveTo(start.x + 200, start.y, end.x, end.y)
+    //  this.drawPath(element, node)
+    this.schemaNodeService.hoverId === id && element.lineStyle(2, 'blue')
+    this.schemaNodeService.selectIds.has(id) && element.lineStyle(2, 'red')
+    element.hitArea = {
       contains: (x: number, y: number) => {
-        const points = shape.geometry.points
+        const points = element.geometry.points
         const odds: { x: number; y: number; z: number }[] = []
         const evens: { x: number; y: number; z: number }[] = []
         for (let index = 0; index * 2 < points.length; index++) {
@@ -85,8 +90,8 @@ export class StageDrawService {
       },
     }
   }
-  private drawPath(shape: PIXI.Graphics, vector: IVector) {
-    customPixiCTX(this.stageCTXService, shape)
+  private drawPath(element: PIXI.Graphics, vector: IVector) {
+    customPixiCTX(this.stageCTXService, element)
     const pathPoints = vector.points.map((nodePoint) => {
       return new PathPoint({
         ...nodePoint,
@@ -150,26 +155,15 @@ export class StageDrawService {
   private drawFill(shape: PIXI.Graphics, fill: INode['fill']) {
     shape.beginFill(fill)
   }
-  private findShapeOrCreate(id: string, type: 'graphic'): PIXI.Graphics
-  private findShapeOrCreate(id: string, type: 'text'): PIXI.Text
-  private findShapeOrCreate(id: string, type: 'graphic' | 'text') {
+  private findElementOrCreate(id: string, type: 'graphic'): PIXI.Graphics
+  private findElementOrCreate(id: string, type: 'text'): PIXI.Text
+  private findElementOrCreate(id: string, type: 'graphic' | 'text') {
     if (type === 'text') {
-      return (this.element = (this.stageElementService.find(id) as PIXI.Text) || new PIXI.Text())
+      return (this.currentElement =
+        (this.stageElementService.find(id) as PIXI.Text) || new PIXI.Text())
     } else {
-      return (this.element =
+      return (this.currentElement =
         (this.stageElementService.find(id) as PIXI.Graphics) || new PIXI.Graphics())
-    }
-  }
-  private setupElement(element: IStageElement, id: string, parentId: string) {
-    if (!element.parent) {
-      const parent = this.stageElementService.find(parentId) || this.pixiService.stage
-      element.setParent(parent)
-    }
-    if (!this.stageElementService.find(id)) {
-      this.stageElementService.add(id, element)
-      element.eventMode = 'dynamic'
-      element.on('mouseenter', () => this.schemaNodeService.hover(id))
-      element.on('mouseleave', () => this.schemaNodeService.hover(''))
     }
   }
 }

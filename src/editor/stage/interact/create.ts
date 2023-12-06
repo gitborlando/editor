@@ -5,7 +5,7 @@ import { SchemaDefaultService, injectSchemaDefault } from '~/editor/schema/defau
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
 import { ILine, INode } from '~/editor/schema/type'
-import { autobind, runInAction } from '~/editor/utility/decorator'
+import { RunInAction, autobind } from '~/editor/utility/decorator'
 import { IXY } from '~/editor/utility/utils'
 import { ViewportService, injectViewport } from '../viewport'
 import { StageInteractService, injectStageInteract } from './interact'
@@ -50,7 +50,7 @@ export class StageCreateService {
     if (this.type === 'img') this.createRectNode()
     this.addNodeToSchemaAndObserveAndSelect()
   }
-  @runInAction private onCreateMove({ marquee, current }: IDragData) {
+  @RunInAction private onCreateMove({ marquee, current }: IDragData) {
     const { x, y } = this.viewportService.toRealStageXY(marquee)
     const { x: width, y: height } = this.viewportService.toRealStageShift({
       x: marquee.width,
@@ -70,7 +70,7 @@ export class StageCreateService {
       this.node.height = height
     }
   }
-  @runInAction private onCreateEnd({ dragService }: IDragData) {
+  @RunInAction private onCreateEnd({ dragService }: IDragData) {
     if (!this.node.width) this.node.width = 100
     if (!this.node.height) this.node.height = 100
     this.stageInteractService.setType('select')

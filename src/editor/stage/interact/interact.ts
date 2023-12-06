@@ -1,6 +1,6 @@
 import { makeObservable, observable, when } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
-import { autobind, watch } from '~/editor/utility/decorator'
+import { Watch, autobind } from '~/editor/utility/decorator'
 import { DragService, injectDrag } from '../../drag'
 import { PixiService, injectPixi } from '../pixi'
 import { StageCreateService } from './create'
@@ -38,12 +38,14 @@ export class StageInteractService {
     if (this.type === type) return
     this.type = type
   }
-  @watch('type') private autoInteract() {
+  @Watch('type')
+  private autoInteract() {
     this.interactHandlerMap.get(this.type)?.startInteract()
     this.interactHandlerMap.get(this.previousType!)?.endInteract()
     this.previousType = this.type
   }
-  @watch('type') private autoCursor() {
+  @Watch('type')
+  private autoCursor() {
     const cursor = interactCursorMap[this.type]
     this.dragService.setCursor(cursor)
     this.pixiService.container.style.cursor = cursor

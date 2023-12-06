@@ -1,6 +1,6 @@
 import { IObjectDidChange, Lambda, intercept, makeObservable, observable, observe } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
-import { autobind } from '~/editor/utility/decorator'
+import { RunInAction, Watch, autobind } from '~/editor/utility/decorator'
 import { numberHalfFix } from '../math/base'
 import { Delete } from '../utility/utils'
 import { SchemaPageService } from './page'
@@ -19,7 +19,7 @@ type INodeRuntime = {
 export class SchemaNodeService {
   @observable initialized = false
   @observable hoverId = ''
-  @observable selectedIds: string[] = []
+  @observable selectIds: Set<string> = new Set()
   @observable dirtyIds: Set<string> = new Set()
   nodeMap: Record<string, INode> = {}
   private nodeRuntimeMap: Record<string, INodeRuntime> = {}
@@ -28,6 +28,7 @@ export class SchemaNodeService {
     @inject(delay(() => SchemaPageService)) private schemaPageService: SchemaPageService
   ) {
     makeObservable(this)
+    this.autoOnHoverObserve()
   }
   setMap(map: typeof this.nodeMap) {
     this.nodeMap = map
@@ -37,7 +38,7 @@ export class SchemaNodeService {
   add(node: INode) {
     this.nodeMap[node.id] = node
     this.initNodeRuntime(node.id)
-    return this.observeNode(node.id)
+    return this.observe(node.id)
   }
   delete(id: string) {
     const node = this.find(id)
@@ -54,15 +55,26 @@ export class SchemaNodeService {
     return this.nodeRuntimeMap[id]
   }
   hover(id: string) {
+    if (this.selectIds.has(id)) return
     this.hoverId = id
-    if (id === '' || this.findNodeRuntime(id).observed) return
-    this.observeNode(id)
+    this.collectDirty(id)
+  }
+  unHover(id: string) {
+    this.hoverId = ''
+    this.collectDirty(id)
   }
   select(id: string) {
-    this.selectedIds.push(id)
+    this.selectIds.add(id)
+    this.collectDirty(id)
   }
+  unSelect(id: string) {
+    this.selectIds.delete(id)
+    this.collectDirty(id)
+  }
+  @RunInAction
   clearSelection() {
-    this.selectedIds.length = 0
+    this.selectIds.forEach(this.collectDirty)
+    this.selectIds = new Set()
   }
   connect(id: string, parentId: string) {
     const nodeParent = this.find(parentId)
@@ -80,13 +92,13 @@ export class SchemaNodeService {
       Delete(this.schemaPageService.find(parentId)?.childIds || [], id)
     }
   }
-  collectDirtyNode(id: string) {
+  collectDirty(id: string) {
     this.dirtyIds.add(id)
   }
-  onFlushDirtyNode(callback: (id: string) => void) {
+  onFlushDirty(callback: (id: string) => void) {
     this.flushDirtyNodeCallbacks.push(callback)
   }
-  flushDirtyNode() {
+  flushDirty() {
     this.dirtyIds.forEach((id) => {
       this.vectorBoundChangeApplyToPoints(id)
       this.flushDirtyNodeCallbacks.forEach((flush) => flush(id))
@@ -94,7 +106,7 @@ export class SchemaNodeService {
       this.findNodeRuntime(id).oneTickChangeRecord = {}
     })
   }
-  observeNode(id: string) {
+  private observe(id: string) {
     const node = this.find(id)
     const nodeRuntime = this.findNodeRuntime(id)
     if (nodeRuntime.observed) return node
@@ -104,6 +116,11 @@ export class SchemaNodeService {
     this.listenNodeDidChange(observedNode)
     nodeRuntime.observed = true
     return observedNode
+  }
+  @Watch('hoverId')
+  private autoOnHoverObserve() {
+    if (this.hoverId === '') return
+    this.observe(this.hoverId)
   }
   private initNodeRuntime(id: string) {
     this.nodeRuntimeMap[id] = {
@@ -130,7 +147,7 @@ export class SchemaNodeService {
     const { disposers } = this.findNodeRuntime(node.id)
     const disposer = observe(node, (ctx) => {
       if (ctx.type !== 'update') return ctx
-      this.collectDirtyNode(node.id)
+      this.collectDirty(node.id)
       this.recordNodeChange(node, ctx)
       return ctx
     })

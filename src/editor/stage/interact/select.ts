@@ -1,3 +1,4 @@
+import { observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { DragService, injectDrag } from '~/editor/drag'
 import { XY } from '~/editor/math/xy'
@@ -9,6 +10,7 @@ import { ViewportService, injectViewport } from '../viewport'
 @autobind
 @injectable()
 export class StageSelectService {
+  @observable marquee = new PIXI.Graphics()
   constructor(
     @injectPixi private pixiService: PixiService,
     @injectDrag private dragService: DragService,
@@ -29,28 +31,24 @@ export class StageSelectService {
     return this.schemaNodeService.hoverId
   }
   private onMousedownSelect() {
-    if (!this.hoverId) return
-    if (this.schemaNodeService.selectedIds?.includes(this.hoverId)) return
+    if (!this.hoverId) return this.schemaNodeService.clearSelection()
+    if (this.schemaNodeService.selectIds?.has(this.hoverId)) return
     this.schemaNodeService.clearSelection()
     this.schemaNodeService.select(this.hoverId)
   }
   private onMarqueeSelect() {
     if (this.hoverId) return
-    let marqueeShape: PIXI.Graphics
     this.dragService
-      .onStart(() => {
-        marqueeShape = new PIXI.Graphics()
-        this.pixiService.stage.addChild(marqueeShape)
-      })
+      .onStart(() => this.pixiService.stage.addChild(this.marquee))
       .onMove(({ marquee: { x, y, width, height } }) => {
-        marqueeShape.clear()
-        marqueeShape.lineStyle(1 / this.viewportService.zoom, 'purple')
+        this.marquee.clear()
+        this.marquee.lineStyle(1 / this.viewportService.zoom, 'purple')
         const realStart = this.viewportService.toRealStageXY(XY.Of(x, y))
         const realShift = this.viewportService.toRealStageShift(XY.Of(width, height))
-        marqueeShape.drawRect(realStart.x, realStart.y, realShift.x, realShift.y)
+        this.marquee.drawRect(realStart.x, realStart.y, realShift.x, realShift.y)
       })
       .onEnd(({ dragService }) => {
-        marqueeShape.destroy()
+        this.marquee.clear()
         dragService.destroy()
       })
   }

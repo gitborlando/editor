@@ -19,7 +19,7 @@ export const ShapeComp: FC<IShapeComp> = observer(({}) => {
           className={cx(
             classes.item,
             schemaNodeService.hoverId === id && classes.hovered,
-            schemaNodeService.selectedIds.includes(id) && classes.selected
+            schemaNodeService.selectIds.has(id) && classes.selected
           )}
           onHover={(h) => schemaNodeService.hover(h ? id : '')}
           onMouseDown={() => schemaNodeService.select(id)}>

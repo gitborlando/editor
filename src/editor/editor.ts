@@ -1,6 +1,6 @@
 import { runInAction, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { autobind, watch } from '~/editor/utility/decorator'
+import { Watch, autobind } from '~/editor/utility/decorator'
 import { FileService, injectFile } from './file'
 import { SchemaNodeService, injectSchemaNode } from './schema/node'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
@@ -19,27 +19,30 @@ export class EditorService {
     @injectStageDraw private stageDrawService: StageDrawService,
     @injectFile private fileService: FileService
   ) {
-    when(() => this.pixiService.initialized).then(() => {
+    when(() => pixiService.initialized).then(() => {
       this.fileService.mockFile()
-      this.autoClearStageElement()
-      this.autoMakePageAllNodesDirty()
-      this.drawDirtyNodesInEveryPixiTick()
+      this.autoClearStage()
+      this.autoMakeNodesDirty()
+      this.drawDirtyInPixiTick()
     })
   }
-  @watch('schemaPageService.currentId')
-  private autoClearStageElement() {
+  @Watch('schemaPageService.currentId')
+  private autoClearStage() {
     this.stageElementService.clearAll()
   }
-  @watch('schemaPageService.currentId')
-  private autoMakePageAllNodesDirty() {
+  @Watch('schemaPageService.currentId')
+  private autoMakeNodesDirty() {
     const nodeIds = this.schemaPageService.find(this.schemaPageService.currentId)!.childIds
-    runInAction(() => nodeIds.forEach(this.schemaNodeService.collectDirtyNode))
+    runInAction(() => nodeIds.forEach(this.schemaNodeService.collectDirty))
   }
-  private drawDirtyNodesInEveryPixiTick() {
-    this.schemaNodeService.onFlushDirtyNode((id) =>
-      this.stageDrawService.draw(this.schemaNodeService.find(id))
-    )
-    this.pixiService.app.ticker.add(this.schemaNodeService.flushDirtyNode)
+  private drawDirtyInPixiTick() {
+    this.schemaNodeService.onFlushDirty((id) => {
+      this.stageDrawService.drawNode(this.schemaNodeService.find(id))
+      if (!this.stageElementService.find(id)) {
+        this.stageElementService.add(id, this.stageDrawService.currentElement)
+      }
+    })
+    this.pixiService.app.ticker.add(this.schemaNodeService.flushDirty)
   }
 }
 

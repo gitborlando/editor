@@ -10,8 +10,8 @@ type IBasePropsComp = {}
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
   const { schemaNodeService } = useEditorServices()
-  if (!schemaNodeService.selectedIds.length) return null
-  const node = schemaNodeService.find(schemaNodeService.selectedIds[0])
+  if (!schemaNodeService.selectIds.size) return null
+  const node = schemaNodeService.find([...schemaNodeService.selectIds][0])
   return (
     <Flex layout='h' className={classes.SchemaBase}>
       <Input
