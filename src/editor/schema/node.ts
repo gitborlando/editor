@@ -9,7 +9,7 @@ import { INode } from './type'
 type INodeRuntime = {
   observed: boolean
   disposers: Lambda[]
-  oneTickChangeRecord: {
+  oneTickChange: {
     [K in keyof INode]?: { new: INode[K]; old: INode[K] }
   }
 }
@@ -23,10 +23,13 @@ export class SchemaNodeService {
   @observable dirtyIds: Set<string> = new Set()
   nodeMap: Record<string, INode> = {}
   private nodeRuntimeMap: Record<string, INodeRuntime> = {}
-  private flushDirtyNodeCallbacks: ((id: string) => void)[] = []
+  private flushDirtyCallbacks: ((id: string) => void)[] = []
   constructor(@inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService) {
     makeObservable(this)
     this.autoOnHoverObserve()
+    this.onFlushDirty((id) => {
+      this.vectorChangeApplyToPoints(id)
+    })
   }
   setMap(map: typeof this.nodeMap) {
     this.nodeMap = map
@@ -94,14 +97,13 @@ export class SchemaNodeService {
     this.dirtyIds.add(id)
   }
   onFlushDirty(callback: (id: string) => void) {
-    this.flushDirtyNodeCallbacks.push(callback)
+    this.flushDirtyCallbacks.push(callback)
   }
   flushDirty() {
     this.dirtyIds.forEach((id) => {
-      this.vectorBoundChangeApplyToPoints(id)
-      this.flushDirtyNodeCallbacks.forEach((flush) => flush(id))
+      this.flushDirtyCallbacks.forEach((flush) => flush(id))
       this.dirtyIds.delete(id)
-      this.findNodeRuntime(id).oneTickChangeRecord = {}
+      this.findNodeRuntime(id).oneTickChange = {}
     })
   }
   private observe(id: string) {
@@ -124,7 +126,7 @@ export class SchemaNodeService {
     this.nodeRuntimeMap[id] = {
       observed: false,
       disposers: [],
-      oneTickChangeRecord: {},
+      oneTickChange: {},
     }
   }
   private deleteNodeRuntime(id: string) {
@@ -152,17 +154,18 @@ export class SchemaNodeService {
     disposers.push(disposer)
   }
   private recordNodeChange(node: INode, ctx: IObjectDidChange & { type: 'update' }) {
-    const { oneTickChangeRecord } = this.findNodeRuntime(node.id)
-    ;(<any>oneTickChangeRecord)[ctx.name.toString()] = {
+    const { oneTickChange } = this.findNodeRuntime(node.id)
+    ;(<any>oneTickChange)[ctx.name.toString()] = {
       new: ctx.newValue,
       old: ctx.oldValue,
     }
   }
-  private vectorBoundChangeApplyToPoints(id: string) {
+  @RunInAction
+  private vectorChangeApplyToPoints(id: string) {
     const vector = this.find(id)
     if (vector.type !== 'vector') return
-    const oneTickChangeRecord = this.findNodeRuntime(id).oneTickChangeRecord
-    const { width, height } = oneTickChangeRecord
+    const { oneTickChange } = this.findNodeRuntime(id)
+    const { width, height } = oneTickChange
     vector.points.forEach((point) => {
       if (width) point.x *= width.new / width.old
       if (height) point.y *= height.new / height.old
