@@ -1,4 +1,11 @@
-export const { PI, sqrt, cos, sin, tan, abs, min, max, acos, atan } = Math
+export const { PI, sqrt, cos, sin, tan, abs, min, max, acos, asin, atan } = Math
+
+export const rcos = (degree: number) => cos(radianfy(degree))
+export const rsin = (degree: number) => sin(radianfy(degree))
+export const rtan = (degree: number) => tan(radianfy(degree))
+export const racos = (degree: number) => acos(radianfy(degree))
+export const rasin = (degree: number) => asin(radianfy(degree))
+export const ratan = (degree: number) => atan(radianfy(degree))
 
 export function pow2(number: number) {
   return Math.pow(number, 2)
@@ -35,4 +42,12 @@ export function numberHalfFix(number: number) {
   const floatPart = number - integerPart
   const halfFixed = floatPart >= 0.75 ? 1 : floatPart >= 0.25 ? 0.5 : 0
   return integerPart + halfFixed
+}
+
+export function rotatePoint(ax: number, ay: number, ox: number, oy: number, degree: number) {
+  const radian = radianfy(degree)
+  return [
+    (ax - ox) * cos(radian) - (ay - oy) * sin(radian) + ox,
+    (ax - ox) * sin(radian) + (ay - oy) * cos(radian) + oy,
+  ]
 }

@@ -33,22 +33,18 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
         label='宽度'
         value={node.width}
         onNewValueApply={(v) => (node.width = v)}
-        min={0}
       />
       <Input
         className={classes.input}
         label='高度'
         value={node.height}
         onNewValueApply={(v) => (node.height = v)}
-        min={0}
       />
       <Input
         className={classes.input}
         label='旋转'
         value={node.rotation}
         onNewValueApply={(v) => (node.rotation = v)}
-        min={0}
-        max={360}
       />
       {node.type === 'vector' && 'radius' in node && (
         <Input
@@ -56,7 +52,6 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
           label='圆角'
           value={node.radius}
           onNewValueApply={(v) => (node.radius = v)}
-          min={0}
         />
       )}
     </Flex>

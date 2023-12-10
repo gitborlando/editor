@@ -2,9 +2,10 @@
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+    "source.organizeImports": "explicit"
   },
   "cSpell.words": [
+    "aabb",
     "autobind",
     "autorun",
     "boundfy",
@@ -15,7 +16,12 @@
     "Konva",
     "loopfy",
     "PIXI",
+    "racos",
     "radianfy",
+    "rasin",
+    "rcos",
+    "rsin",
+    "rtan",
     "stagefy",
     "tsyringe",
     "uuidv",

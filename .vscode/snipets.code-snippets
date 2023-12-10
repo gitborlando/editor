@@ -69,7 +69,7 @@
     "prefix": "service",
     "body": [
       "import { inject, injectable } from 'tsyringe'",
-      "import { autobind } from '~/helper/decorator'",
+      "import { autobind } from '~/editor/helper/decorator'",
       "import { makeObservable } from 'mobx'",
       "",
       "@autobind",
@@ -94,12 +94,12 @@
   },
   "useService": {
     "prefix": "uservice",
-    "body": ["const { } = useEditorService()"],
+    "body": ["const { } = useEditor()"],
     "description": "useService"
   },
   "private service": {
     "prefix": "pser",
-    "body": [",@inject$1 private $1Service: $1Service"],
+    "body": ["@inject$1 private $1: $1Service"],
     "description": "private service"
   }
 }
