@@ -1,33 +1,46 @@
-import { IXY } from '../utility/utils'
-import { multiply, pow2, sqrt } from './base'
+import { IXY } from '../helper/utils'
+import { multiply, pow2, rotatePoint, sqrt } from './base'
 
 export class XY {
   constructor(public x: number, public y: number) {}
-  set({ x, y }: { x?: number; y?: number }) {
+  set = ({ x, y }: { x?: number; y?: number }) => {
     this.x = x ? x : this.x
     this.y = y ? y : this.y
+    return this
   }
-  plus(another: IXY) {
+  plus = (another: IXY) => {
     return new XY(this.x + another.x, this.y + another.y)
   }
-  minus(another: IXY) {
+  minus = (another: IXY) => {
     return new XY(this.x - another.x, this.y - another.y)
   }
-  multiply(...numbers: number[]) {
+  multiply = (...numbers: number[]) => {
     const n = multiply(...numbers)
     return new XY(this.x * n, this.y * n)
   }
-  divide(...numbers: number[]) {
+  divide = (...numbers: number[]) => {
     const n = multiply(...numbers)
     return new XY(this.x / n, this.y / n)
   }
-  distance(another: IXY) {
+  dot = (another: IXY) => {
+    return this.x * another.x + this.y * another.y
+  }
+  distance = (another: IXY) => {
     return sqrt(pow2(this.x - another.x) + pow2(this.y - another.y))
   }
-  toArray() {
+  rotate = (origin: IXY, degree: number) => {
+    const [x, y] = rotatePoint(this.x, this.y, origin.x, origin.y, degree)
+    return new XY(x, y)
+  }
+  mutate = <T extends IXY>(obj: T) => {
+    obj.x = this.x
+    obj.y = this.y
+    return obj
+  }
+  toArray = () => {
     return [this.x, this.y]
   }
-  toObject(): IXY {
+  toObject = (): IXY => {
     return { x: this.x, y: this.y }
   }
   static From<T extends IXY>(xy: T) {
@@ -40,8 +53,3 @@ export class XY {
     return xys.reduce((i, all) => all.plus(i), new XY(0, 0))
   }
 }
-
-export function distance(x1: number, y1: number, x2: number, y2: number) {
-  return sqrt(pow2(x2 - x1) + pow2(y2 - y1))
-}
-export const d = distance
