@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe'
 import { v4 as uuidv4 } from 'uuid'
-import { autobind } from '~/editor/utility/decorator'
-import { IXY } from '../utility/utils'
+import { autobind } from '~/editor/helper/decorator'
+import { IBound, IXY } from '../helper/utils'
 import {
   IEllipse,
   IFillColor,
@@ -12,6 +12,7 @@ import {
   IFrame,
   IGroup,
   ILine,
+  INode,
   INodeBase,
   INodeMeta,
   IPage,
@@ -216,6 +217,16 @@ export class SchemaDefaultService {
   fillImage(url: string): IFillImage {
     return { type: 'image', url, matrix: [0, 0, 0, 0, 0, 0] }
   }
+  initNodeXYBound(node: INode, { x, y, width, height }: IBound) {
+    node.x = x
+    node.y = y
+    node.pivotX = x
+    node.pivotY = y
+    node.centerX = x + width / 2
+    node.centerY = y + height / 2
+    node.width = width
+    node.height = height
+  }
   private createSchemaMeta(): INodeMeta {
     return {
       id: uuidv4(),
@@ -230,6 +241,10 @@ export class SchemaDefaultService {
       ...this.createSchemaMeta(),
       x: 0,
       y: 0,
+      pivotX: 0,
+      pivotY: 0,
+      centerX: 50,
+      centerY: 50,
       width: 100,
       height: 100,
       opacity: 1,
@@ -240,7 +255,7 @@ export class SchemaDefaultService {
       strokes: [],
       blurs: [],
       shadows: [],
-      fill: 'gray',
+      fill: '#CCCCCC',
     }
   }
   private createVectorBase(option?: Partial<IVector>): IVector {
@@ -287,19 +302,19 @@ export class SchemaDefaultService {
   private createRectPoints(x: number, y: number, width: number, height: number) {
     return {
       points: [
-        this.createPoint(0, 0, 'no-bezier', 0),
-        this.createPoint(width, 0, 'no-bezier', 0),
-        this.createPoint(width, 0 + height, 'no-bezier', 0),
-        this.createPoint(0, height, 'no-bezier', 0),
+        this.createPoint(-width / 2, -height / 2, 'no-bezier', 0),
+        this.createPoint(width / 2, -height / 2, 'no-bezier', 0),
+        this.createPoint(width / 2, height / 2, 'no-bezier', 0),
+        this.createPoint(-width / 2, height / 2, 'no-bezier', 0),
       ],
     }
   }
   private createTrianglePoints(x: number, y: number, width: number, height: number) {
     return {
       points: [
-        this.createPoint(width * 0.7, 0, 'no-bezier', 0),
-        this.createPoint(0, height, 'no-bezier', 0),
-        this.createPoint(width, height, 'no-bezier', 0),
+        this.createPoint(width / 2, -height / 2, 'no-bezier', 0),
+        this.createPoint(width / 2, height / 2, 'no-bezier', 0),
+        this.createPoint(-width / 2, height / 2, 'no-bezier', 0),
       ],
     }
   }
@@ -311,7 +326,7 @@ export class SchemaDefaultService {
       ],
     }
   }
-  private createPoint(
+  public createPoint(
     x: number,
     y: number,
     bezierType: IPoint['bezierType'],

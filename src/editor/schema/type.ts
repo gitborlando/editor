@@ -1,4 +1,4 @@
-import { IXY } from '../utility/utils'
+import { IXY } from '../helper/utils'
 
 export type ISchema = {
   meta: IMeta
@@ -43,6 +43,10 @@ export type INodeMeta = {
 export type INodeBase = INodeMeta & {
   x: number
   y: number
+  pivotX: number
+  pivotY: number
+  centerX: number
+  centerY: number
   width: number
   height: number
   opacity: number
