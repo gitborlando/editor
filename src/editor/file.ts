@@ -1,6 +1,6 @@
 import { delay, inject, injectable } from 'tsyringe'
-import { autobind } from '~/editor/utility/decorator'
-import { mockJsonFile } from '~/editor/utility/mock'
+import { autobind } from '~/editor/helper/decorator'
+import { mockJsonFile } from '~/editor/helper/mock'
 import { EditorService } from './editor'
 import { SchemaDefaultService, injectSchemaDefault } from './schema/default'
 import { SchemaPageService, injectSchemaPage } from './schema/page'

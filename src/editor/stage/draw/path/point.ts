@@ -1,9 +1,9 @@
 import { makeAutoObservable } from 'mobx'
+import { autobind } from '~/editor/helper/decorator'
+import { IXY } from '~/editor/helper/utils'
 import { min, tan } from '~/editor/math/base'
 import { XY } from '~/editor/math/xy'
 import { IBezierType } from '~/editor/schema/type'
-import { autobind } from '~/editor/utility/decorator'
-import { IXY } from '~/editor/utility/utils'
 import { PathCurve } from './curve'
 import { PathLine } from './line'
 import { PathNull } from './null'
@@ -73,12 +73,12 @@ export class PathPoint {
       right.leftNull = new PathNull(this.right, this)
       return
     }
-    if (this.bezierType !== 'no-bezier' || right.bezierType !== 'no-bezier') {
-      this.rightCurve = new PathCurve(this, this.right)
-      right.leftCurve = new PathCurve(this.right, this)
-    } else {
+    if (!this.handleRight && !right.handleLeft) {
       this.rightLine = new PathLine(this, this.right)
       right.leftLine = new PathLine(this.right, this)
+    } else {
+      this.rightCurve = new PathCurve(this, this.right)
+      right.leftCurve = new PathCurve(this.right, this)
     }
   }
   distanceTo(another: PathPoint) {

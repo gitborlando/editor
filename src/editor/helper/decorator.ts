@@ -1,14 +1,14 @@
 import autoBindMethods from 'class-autobind-decorator'
-import { runInAction as _runInAction, autorun, reaction } from 'mobx'
+import { reaction, runInAction, when } from 'mobx'
 
 export const autobind = autoBindMethods
 
-export function Watch(chain: string) {
+export function Watch(...chains: string[]) {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
     descriptor.value = function (...args: any[]) {
       reaction(
-        () => new Function('$this', `with($this){return ${chain}}`)(this),
+        () => new Function('$this', `with($this){return [${chains}].map(()=>{})}`)(this),
         () => originalMethod.apply(this, args),
         { fireImmediately: true }
       )
@@ -17,18 +17,22 @@ export function Watch(chain: string) {
   }
 }
 
-export function Auto(target: any, name: string, descriptor: PropertyDescriptor) {
-  const originalMethod = descriptor.value
-  descriptor.value = function (...args: any[]) {
-    autorun(() => originalMethod.apply(this, args))
+export function When(chain: string) {
+  return (target: any, name: string, descriptor: PropertyDescriptor) => {
+    const originalMethod = descriptor.value
+    descriptor.value = function (...args: any[]) {
+      when(() => new Function('$this', `with($this){return ${chain}}`)(this)).then(() =>
+        originalMethod.apply(this, args)
+      )
+    }
+    return descriptor
   }
-  return descriptor
 }
 
 export function RunInAction(target: any, name: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value
   descriptor.value = function (...args: any[]) {
-    _runInAction(() => originalMethod.apply(this, args))
+    runInAction(() => originalMethod.apply(this, args))
   }
   return descriptor
 }

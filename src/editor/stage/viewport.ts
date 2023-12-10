@@ -1,9 +1,9 @@
 import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { Watch, autobind } from '~/editor/utility/decorator'
+import { Watch, autobind } from '~/editor/helper/decorator'
+import { IXY } from '../helper/utils'
 import { XY } from '../math/xy'
 import { SchemaPageService, injectSchemaPage } from '../schema/page'
-import { IXY } from '../utility/utils'
 import { PixiService, injectPixi } from './pixi'
 
 @autobind

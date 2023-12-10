@@ -38,7 +38,10 @@ export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOpt
 export function timeRecord() {
   let start = performance.now()
   return (text?: any) => {
-    console.log(text, performance.now() - start)
+    const shift = performance.now() - start
+    text && console.log(text, shift)
+    start = performance.now()
+    return shift
   }
 }
 

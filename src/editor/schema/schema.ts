@@ -1,6 +1,6 @@
 import { toJS } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { autobind } from '~/editor/utility/decorator'
+import { autobind } from '~/editor/helper/decorator'
 import { SchemaNodeService, injectSchemaNode } from './node'
 import { SchemaPageService, injectSchemaPage } from './page'
 import { IMeta, ISchema } from './type'

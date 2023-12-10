@@ -1,5 +1,5 @@
 import { inject, injectable } from 'tsyringe'
-import { autobind } from '~/editor/utility/decorator'
+import { autobind } from '~/editor/helper/decorator'
 import { SchemaNodeService, injectSchemaNode } from '../schema/node'
 import { PIXI, PixiService, injectPixi } from './pixi'
 

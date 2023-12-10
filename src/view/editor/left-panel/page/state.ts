@@ -1,5 +1,5 @@
 import { makeObservable, observable } from 'mobx'
-import { autobind } from '~/editor/utility/decorator'
+import { autobind } from '~/editor/helper/decorator'
 
 @autobind
 export class PageCompShareState {

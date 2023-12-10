@@ -1,6 +1,6 @@
 import { runInAction, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { Watch, autobind } from '~/editor/utility/decorator'
+import { Watch, autobind } from '~/editor/helper/decorator'
 import { FileService, injectFile } from './file'
 import { SchemaNodeService, injectSchemaNode } from './schema/node'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
@@ -42,7 +42,6 @@ export class EditorService {
         this.StageElement.add(id, this.StageDraw.currentElement)
       }
     })
-    this.Pixi.app.ticker.add(this.SchemaNode.flushDirty)
   }
 }
 

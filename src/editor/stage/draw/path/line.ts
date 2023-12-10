@@ -1,8 +1,8 @@
 import { makeAutoObservable } from 'mobx'
+import { autobind } from '~/editor/helper/decorator'
+import { pipe } from '~/editor/helper/utils'
 import { abs, atan, radianfy } from '~/editor/math/base'
 import { XY } from '~/editor/math/xy'
-import { autobind } from '~/editor/utility/decorator'
-import { pipe } from '~/editor/utility/utils'
 import { PathPoint } from './point'
 
 @autobind

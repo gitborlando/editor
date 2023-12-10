@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx'
-import { autobind } from '~/editor/utility/decorator'
-import { ILoopArrayCallbackData, LoopArray } from '~/editor/utility/loop-array'
+import { autobind } from '~/editor/helper/decorator'
+import { ILoopArrayCallbackData, LoopArray } from '~/editor/helper/loop-array'
 import { PathCurve } from './curve'
 import { PathLine } from './line'
 import { PathNull } from './null'
