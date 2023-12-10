@@ -49,3 +49,5 @@ export function Log<T>(someThing: T, label: string = '') {
   console.log(label, someThing)
   return someThing
 }
+
+export const win = window as any

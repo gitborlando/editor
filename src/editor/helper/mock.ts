@@ -14,16 +14,17 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
     let j = i % 100
 
     k = ~~(i / 100)
-    let node: any = schemaDefault.triangle({
+    let size = 100
+    let node: any = schemaDefault.rect({
       id,
-      width: 100,
-      height: 100,
-      x: 0 + j * 130,
-      y: 0 + k * 130,
-      pivotX: 0 + j * 130,
-      pivotY: 0 + k * 130,
-      centerX: 50 + j * 130,
-      centerY: 50 + k * 130,
+      width: size,
+      height: size,
+      x: 0 + j * (size + 30),
+      y: 0 + k * (size + 30),
+      pivotX: 0 + j * (size + 30),
+      pivotY: 0 + k * (size + 30),
+      centerX: 50 + j * (size + 30),
+      centerY: 50 + k * (size + 30),
       radius: 10,
       parentId: 'page1',
       fill: 'skyBlue', //'#CCCCCC',

@@ -1,5 +1,9 @@
 import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/editor/helper/decorator'
+import { cullNegatives } from '~/editor/helper/utils'
+import { min } from '~/editor/math/base'
+import { XY } from '~/editor/math/xy'
+import { OptimizeCache } from '~/editor/optimize/cache'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { IFrame, ILine, INode, IRect, IStar, ITriangle, IVector } from '~/editor/schema/type'
 import { SettingService, injectSetting } from '~/editor/utility/setting'
@@ -8,7 +12,8 @@ import { PIXI } from '../pixi'
 import { StageViewportService, injectStageViewport } from '../viewport'
 import { StageCTXService, injectStageCTX } from './ctx/ctx'
 import { customPixiCTX } from './ctx/pixi-ctx'
-import { drawPath } from './path/draw-path'
+import { Path } from './path/path'
+import { PathPoint } from './path/point'
 
 type IStageElement = PIXI.Graphics | PIXI.Text
 
@@ -33,10 +38,6 @@ export class StageDrawService {
       if (node.vectorType === 'line') this.drawLine(node)
     }
   }
-  drawPath(element: PIXI.Graphics, vector: IVector) {
-    customPixiCTX(this.StageCtx, element)
-    drawPath(element, vector, this.StageCtx)
-  }
   private drawFrame(node: IFrame) {
     const { x, y, width, height, id, fill } = node
     const element = this.findElementOrCreate(id, 'graphic')
@@ -52,8 +53,7 @@ export class StageDrawService {
     // element.lineStyle(1, 'green')
     this.SchemaNode.selectIds.has(id) &&
       element.lineStyle(1 / this.StageViewport.zoom, this.Setting.color)
-    element.drawRect(x, y, width, height)
-    //this.drawPath(element, node)
+    this.drawPath(element, node)
   }
   private drawTriangle(node: ITriangle) {
     const { x, y, width, height, id, fill, points } = node
@@ -90,15 +90,91 @@ export class StageDrawService {
   private drawFill(shape: PIXI.Graphics, fill: INode['fill']) {
     shape.beginFill(fill)
   }
-  private findElementOrCreate(id: string, type: 'graphic'): PIXI.Graphics
-  private findElementOrCreate(id: string, type: 'text'): PIXI.Text
-  private findElementOrCreate(id: string, type: 'graphic' | 'text') {
-    if (type === 'text') {
-      return (this.currentElement = (this.StageElement.find(id) as PIXI.Text) || new PIXI.Text())
-    } else {
-      return (this.currentElement =
-        (this.StageElement.find(id) as PIXI.Graphics) || new PIXI.Graphics())
+  private drawPath(element: PIXI.Graphics, node: IVector) {
+    const createPath = () => {
+      const pathPoints = node.points.map((nodePoint) => {
+        const rotatedXY = XY.From(nodePoint).rotate(XY.Of(0, 0), node.rotation)
+        const rotatedHandleLeft =
+          nodePoint.handleLeft && XY.From(nodePoint.handleLeft).rotate(XY.Of(0, 0), node.rotation)
+        const rotatedHandleRight =
+          nodePoint.handleRight && XY.From(nodePoint.handleRight).rotate(XY.Of(0, 0), node.rotation)
+        const centerXY = XY.Of(node.centerX, node.centerY)
+        return new PathPoint({
+          ...nodePoint,
+          ...rotatedXY.plus(centerXY),
+          ...(rotatedHandleLeft && { handleLeft: rotatedHandleLeft.plus(centerXY) }),
+          ...(rotatedHandleRight && { handleRight: rotatedHandleRight.plus(centerXY) }),
+        })
+      })
+      return new Path(pathPoints)
     }
+
+    const cache = OptimizeCache.GetOrNew('drawPathCache')
+    const { geometryChanged } = this.SchemaNode.findNodeRuntime(node.id)
+
+    let path: Path
+    if (geometryChanged) {
+      path = cache.set(node.id, createPath())
+    } else {
+      path = cache.getSet(node.id, () => createPath())
+    }
+
+    customPixiCTX(this.StageCtx, element)
+    const hasArcedPointMap = new Set<PathPoint>()
+
+    path.forEachLine(({ cur: curLine, at }) => {
+      const { start: startPoint, end: endPoint } = curLine
+
+      if (at.first) {
+        const startXY = new XY(0, 0)
+        if (startPoint.canDrawArc) {
+          startXY.set(startPoint.leftLine!.calcXYInSomeDistance(startPoint.arcLength!)!)
+        } else {
+          startXY.set(startPoint)
+        }
+        this.StageCtx.moveTo(startXY)
+      }
+
+      if (curLine.type === 'line') {
+        if (startPoint.canDrawArc && !hasArcedPointMap.has(startPoint)) {
+          const leftMaxRadius =
+            startPoint.left!.arcLength &&
+            startPoint.calcRadiusByArcLength(
+              startPoint.leftLine!.length - startPoint.left!.arcLength!
+            )
+          const rightMaxRadius =
+            startPoint.right!.arcLength &&
+            startPoint.calcRadiusByArcLength(
+              startPoint.rightLine!.length - startPoint.right!.arcLength
+            )
+          const radius = min(...cullNegatives(startPoint.radius, rightMaxRadius, leftMaxRadius))
+          this.StageCtx.arcTo(startPoint, startPoint.right!, radius)
+          hasArcedPointMap.add(startPoint)
+        }
+        if (!endPoint.canDrawArc) {
+          return this.StageCtx.lineTo(endPoint)
+        }
+        if (endPoint.canDrawArc && !hasArcedPointMap.has(endPoint)) {
+          const leftMaxRadius =
+            endPoint.left!.arcLength &&
+            endPoint.calcRadiusByArcLength(endPoint.leftLine!.length - endPoint.left!.arcLength!)
+          const rightMaxRadius =
+            endPoint.right!.arcLength &&
+            endPoint.calcRadiusByArcLength(endPoint.rightLine!.length - endPoint.right!.arcLength)
+          const radius = min(...cullNegatives(endPoint.radius, rightMaxRadius, leftMaxRadius))
+          this.StageCtx.arcTo(endPoint, endPoint.right!, radius)
+          hasArcedPointMap.add(endPoint)
+        }
+        if (at.end && !startPoint.jumpToRight) this.StageCtx.closePath()
+      }
+
+      if (curLine.type === 'curve') {
+        const { start, end } = curLine
+        const handleRight = start.handleRight || start
+        const handleLeft = end.handleLeft || end
+        this.StageCtx.bezierTo(handleRight, handleLeft, end)
+      }
+    })
   }
   private drawHitArea(element: PIXI.Graphics) {
     const contains = (x: number, y: number) => {
@@ -118,6 +194,16 @@ export class StageDrawService {
       return new PIXI.Polygon([...odds, ...evens.reverse()]).contains(x, y)
     }
     element.hitArea = { contains }
+  }
+  private findElementOrCreate(id: string, type: 'graphic'): PIXI.Graphics
+  private findElementOrCreate(id: string, type: 'text'): PIXI.Text
+  private findElementOrCreate(id: string, type: 'graphic' | 'text') {
+    if (type === 'text') {
+      return (this.currentElement = (this.StageElement.find(id) as PIXI.Text) || new PIXI.Text())
+    } else {
+      return (this.currentElement =
+        (this.StageElement.find(id) as PIXI.Graphics) || new PIXI.Graphics())
+    }
   }
 }
 

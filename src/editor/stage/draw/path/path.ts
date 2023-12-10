@@ -1,4 +1,3 @@
-import { makeAutoObservable } from 'mobx'
 import { autobind } from '~/editor/helper/decorator'
 import { ILoopArrayCallbackData, LoopArray } from '~/editor/helper/loop-array'
 import { PathCurve } from './curve'
@@ -10,15 +9,16 @@ export type PathLineOrCurveOrNull = PathLine | PathCurve | PathNull
 
 @autobind
 export class Path {
+  lines: PathLineOrCurveOrNull[]
   constructor(public points: PathPoint[]) {
     this.connectPoints()
-    makeAutoObservable(this)
+    this.lines = this.calcLines()
   }
-  get lines() {
-    return LoopArray.From(this.points).reduce(({ cur, init: lines }) => {
+  calcLines() {
+    return (this.lines = LoopArray.From(this.points).reduce(({ cur, init: lines }) => {
       lines.push((cur.rightLine || cur.rightCurve || cur.rightNull)!)
       return lines
-    }, <PathLineOrCurveOrNull[]>[])
+    }, <PathLineOrCurveOrNull[]>[]))
   }
   forEachPoint(callback: (data: ILoopArrayCallbackData<PathPoint>) => void) {
     LoopArray.From(this.points).forEach(callback)

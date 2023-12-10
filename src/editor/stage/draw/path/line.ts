@@ -1,4 +1,3 @@
-import { makeAutoObservable } from 'mobx'
 import { autobind } from '~/editor/helper/decorator'
 import { pipe } from '~/editor/helper/utils'
 import { abs, atan, radianfy } from '~/editor/math/base'
@@ -8,16 +7,28 @@ import { PathPoint } from './point'
 @autobind
 export class PathLine {
   readonly type = 'line' as const
+  length: number
+  slope: number
   constructor(public start: PathPoint, public end: PathPoint) {
-    makeAutoObservable(this)
+    this.length = this.calcLength()
+    this.slope = this.calcSlope()
   }
-  get length() {
-    return this.start.distanceTo(this.end)
+  calcLength() {
+    return (this.length = this.start.distanceTo(this.end))
   }
-  get slope() {
-    return (this.end.y - this.start.y) / (this.end.x - this.start.x)
+  calcSlope() {
+    return (this.slope = (this.end.y - this.start.y) / (this.end.x - this.start.x))
   }
-  get middleXY() {
+  calcXYInSomeRatio(ratio: number) {
+    return XY.Plus(
+      XY.From(this.start).multiply(1 - ratio),
+      XY.From(this.end).multiply(ratio)
+    ).toObject()
+  }
+  calcXYInSomeDistance(distance: number) {
+    return this.calcXYInSomeRatio(distance / this.length)
+  }
+  calcMiddleXY() {
     return this.calcXYInSomeRatio(0.5)
   }
   radianWith(another: PathLine) {
@@ -30,14 +41,5 @@ export class PathLine {
     if (another.slope === 0) return pipe(this.slope).to(atan, abs)
     if (another.slope === Infinity) return pipe(1 / this.slope).to(atan, abs)
     return pipe((another.slope - this.slope) / (1 + another.slope * this.slope)).to(atan, abs)
-  }
-  calcXYInSomeRatio(ratio: number) {
-    return XY.Plus(
-      XY.From(this.start).multiply(1 - ratio),
-      XY.From(this.end).multiply(ratio)
-    ).toObject()
-  }
-  calcXYInSomeDistance(distance: number) {
-    return this.calcXYInSomeRatio(distance / this.length)
   }
 }

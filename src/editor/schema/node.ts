@@ -14,18 +14,20 @@ import { Delete } from '../helper/utils'
 import { max, min, numberHalfFix, rcos, rsin } from '../math/base'
 import { OBB } from '../math/obb'
 import { XY } from '../math/xy'
+import { OptimizeCache } from '../optimize/cache'
 import { PixiService, injectPixi } from '../stage/pixi'
-import { SchemaDefaultService, injectSchemaDefault } from './default'
 import { SchemaPageService } from './page'
 import { INode } from './type'
 
 type INodeRuntime = {
+  nodeRuntime: INodeRuntime
   observed: boolean
   disposers: Lambda[]
-  changedProps: Set<keyof INode>
   oneTickChange: {
     [K in keyof INode]?: { new: INode[K]; old: INode[K] }
   }
+  changedProps: Set<keyof INode>
+  geometryChanged: boolean
   OBB: OBB
 }
 
@@ -42,8 +44,7 @@ export class SchemaNodeService {
   private flushDirtyCallbacks: ((id: string) => void)[] = []
   constructor(
     @injectPixi private Pixi: PixiService,
-    @inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService,
-    @injectSchemaDefault private SchemaDefault: SchemaDefaultService
+    @inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService
   ) {
     makeObservable(this)
     when(() => this.Pixi.initialized && this.initialized).then(() => {
@@ -74,6 +75,7 @@ export class SchemaNodeService {
     // const parent = this.find(node.parentId) as INodeParent
     // Delete(parent.childIds, (id) => id === node.id)
     this.deleteNodeRuntime(id)
+    OptimizeCache.GetOrNew('drawPathCache').delete(id)
   }
   find(id: string) {
     return this.nodeMap[id]
@@ -125,25 +127,29 @@ export class SchemaNodeService {
     this.flushDirtyCallbacks.push(callback)
   }
   flushDirty() {
-    console.log(this.dirtyIds.size)
     this.dirtyIds.forEach((id) => {
       this.flushDirtyCallbacks.forEach((flush) => flush(id))
       this.dirtyIds.delete(id)
-      const { oneTickChange, changedProps } = this.findNodeRuntime(id)
+      const { oneTickChange, changedProps, nodeRuntime } = this.findNodeRuntime(id)
       changedProps.clear()
+      nodeRuntime.geometryChanged = false
       Object.values(oneTickChange).forEach((prop) => (prop.old = prop.new))
     })
   }
   private initNodeRuntime(id: string) {
     const { centerX, centerY, width, height, rotation } = this.find(id)
     const obb = new OBB(centerX, centerY, width, height, rotation)
-    this.nodeRuntimeMap[id] = {
+    const nodeRuntime: INodeRuntime = {
+      nodeRuntime: <any>null,
       observed: false,
       disposers: [],
       changedProps: new Set(),
       oneTickChange: {},
       OBB: obb,
+      geometryChanged: false,
     }
+    nodeRuntime.nodeRuntime = nodeRuntime
+    this.nodeRuntimeMap[id] = nodeRuntime
   }
   private deleteNodeRuntime(id: string) {
     this.findNodeRuntime(id).disposers.forEach((dispose) => dispose())
@@ -208,7 +214,7 @@ export class SchemaNodeService {
     this.findNodeRuntime(node.id).disposers.push(disposer)
   }
   private recordOneTickChange(id: string, ctx: IObjectDidChange & { type: 'update' }) {
-    const { oneTickChange, changedProps } = this.findNodeRuntime(id)
+    const { oneTickChange, changedProps, nodeRuntime } = this.findNodeRuntime(id)
     const propName = <keyof INode>ctx.name.toString()
     changedProps.add(propName)
     if (!oneTickChange[propName]) {
@@ -216,6 +222,9 @@ export class SchemaNodeService {
       oneTickChange[propName]!.old = ctx.oldValue
     }
     oneTickChange[propName]!.new = ctx.newValue
+    if (propName.match(/x|y|width|height|rotation/)) {
+      nodeRuntime.geometryChanged = true
+    }
   }
   @RunInAction
   private reconcilePropChange(id: string) {

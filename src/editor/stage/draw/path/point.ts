@@ -1,4 +1,3 @@
-import { makeAutoObservable } from 'mobx'
 import { autobind } from '~/editor/helper/decorator'
 import { IXY } from '~/editor/helper/utils'
 import { min, tan } from '~/editor/math/base'
@@ -28,6 +27,7 @@ export class PathPoint {
   rightNull?: PathNull
   jumpToLeft?: boolean
   jumpToRight?: boolean
+  arcLength?: number
   constructor(option: {
     x?: number
     y?: number
@@ -38,7 +38,6 @@ export class PathPoint {
     jumpToLeft?: boolean
     jumpToRight?: boolean
   }) {
-    makeAutoObservable(this)
     const { x, y, bezierType, radius, handleLeft, handleRight, jumpToLeft, jumpToRight } = option!
     this.x = x ? x : this.x
     this.y = y ? y : this.y
@@ -49,20 +48,35 @@ export class PathPoint {
     this.jumpToLeft = jumpToLeft
     this.jumpToRight = jumpToRight
     this.maxRadius = this.radius
+    this.arcLength = this.calcArcLength()
   }
   get isEnd() {
     return !this.left || !this.right
   }
   get canDrawArc() {
-    return this.leftLine && this.rightLine && (!this.handleLeft || !this.handleRight)
-  }
-  get arcLength() {
-    if (!this.canDrawArc) return
-    const arcLength = this.radius / tan(this.radian! / 2)
-    return min(arcLength, this.leftLine!.length, this.rightLine!.length)
+    return this.radius && this.leftLine && this.rightLine && (!this.handleLeft || !this.handleRight)
   }
   get needCulled() {
     return !this.leftLine || !this.rightLine || !this.leftCurve || !this.rightCurve
+  }
+  calcArcLength() {
+    if (!this.canDrawArc) return
+    this.arcLength = this.radius / tan(this.radian! / 2)
+    return (this.arcLength = min(this.arcLength, this.leftLine!.length, this.rightLine!.length))
+  }
+  calcRadian() {
+    if (!this.canDrawArc) return
+    this.radian = this.leftLine!.radianWith(this.rightLine!)
+  }
+  calcRadiusByArcLength(arcLength: number) {
+    return arcLength * tan(this.radian! / 2)
+  }
+  distanceTo(another: PathPoint) {
+    return XY.From(this).distance(another)
+  }
+  setJumpToRight(jumpToRight: boolean) {
+    this.jumpToRight = jumpToRight
+    this.right && (this.right.jumpToLeft = jumpToRight)
   }
   connectRight(right: PathPoint) {
     this.right = right
@@ -80,19 +94,5 @@ export class PathPoint {
       this.rightCurve = new PathCurve(this, this.right)
       right.leftCurve = new PathCurve(this.right, this)
     }
-  }
-  distanceTo(another: PathPoint) {
-    return XY.From(this).distance(another)
-  }
-  setJumpToRight(jumpToRight: boolean) {
-    this.jumpToRight = jumpToRight
-    this.right && (this.right.jumpToLeft = jumpToRight)
-  }
-  calcRadian() {
-    if (!this.canDrawArc) return
-    this.radian = this.leftLine!.radianWith(this.rightLine!)
-  }
-  calcRadiusByArcLength(arcLength: number) {
-    return arcLength * tan(this.radian! / 2)
   }
 }
