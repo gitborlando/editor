@@ -17,7 +17,6 @@ import { StageInteractService } from './stage/interact/interact'
 import { StageMoveService } from './stage/interact/move'
 import { StageSelectService } from './stage/interact/select'
 import { PixiService } from './stage/pixi'
-import { StageTransformerService } from './stage/transformer'
 import { StageViewportService } from './stage/viewport'
 import { DragService } from './utility/drag'
 import { MenuService } from './utility/menu'
@@ -37,7 +36,6 @@ container.registerSingleton(StageCTXService)
 container.registerSingleton(StageDrawService)
 container.registerSingleton(StageElementService)
 container.registerSingleton(StageInteractService)
-container.registerSingleton(StageTransformerService)
 container.registerSingleton(StageWidgetHoverService)
 container.registerSingleton(StageWidgetMarqueeService)
 container.registerSingleton(StageWidgetTransformerService)
@@ -65,7 +63,6 @@ export const editorServices = {
   StageDraw: container.resolve(StageDrawService),
   StageShape: container.resolve(StageElementService),
   StageInteract: container.resolve(StageInteractService),
-  StageTransformer: container.resolve(StageTransformerService),
   Menu: container.resolve(MenuService),
   Setting: container.resolve(SettingService),
   Editor: container.resolve(EditorService),
