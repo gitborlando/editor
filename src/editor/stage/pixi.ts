@@ -1,7 +1,8 @@
+import { Cull } from '@pixi-essentials/cull'
 import { makeObservable, observable } from 'mobx'
 import * as PIXI from 'pixi.js'
 import { inject, injectable } from 'tsyringe'
-import { autobind } from '~/editor/utility/decorator'
+import { autobind } from '~/editor/helper/decorator'
 
 export * as PIXI from 'pixi.js'
 
@@ -20,6 +21,7 @@ export class PixiService {
   setContainer(container: HTMLDivElement) {
     this.container = container
     this.initPixiApp(container)
+    this.cull()
     this.initialized = true
   }
   addListener(
@@ -51,6 +53,14 @@ export class PixiService {
       },
     })
     container.appendChild(this.app.view as any)
+    this.stage.sortableChildren = true
+  }
+  private cull() {
+    const cull = new Cull({ recursive: true, toggle: 'renderable' })
+    cull.add(this.app.stage)
+    this.app.renderer.on('prerender', () => {
+      cull.cull(this.app.renderer.screen)
+    })
   }
 }
 

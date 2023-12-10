@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@emotion/react": "^11.10.4",
+    "@pixi-essentials/cull": "^2.0.0",
     "@types/node": "^18.11.3",
     "class-autobind-decorator": "^3.0.1",
     "mobx": "^6.6.2",
