@@ -1,3 +1,4 @@
+import { IXY } from '~/editor/helper/utils'
 import { IStageElement } from '../../element'
 import { PIXI } from '../../pixi'
 import { StageCTXService } from './ctx'
@@ -8,10 +9,19 @@ export function customPixiCTX(stageCTXService: StageCTXService, shape: IStageEle
   stageCTXService.customCTX((ctx) => {
     ctx.beginPath = () => {}
     ctx.closePath = () => vector.closePath()
-    ctx.moveTo = (x: number, y: number) => vector.moveTo(x, y)
-    ctx.lineTo = (x: number, y: number) => vector.lineTo(x, y)
-    ctx.arcTo = (x1: number, y1: number, x2: number, y2: number, radius: number) => {
-      vector.arcTo(x1, y1, x2, y2, radius)
+    ctx.moveTo = (to: IXY) => vector.moveTo(to.x, to.y)
+    ctx.lineTo = (to: IXY) => vector.lineTo(to.x, to.y)
+    ctx.arcTo = (handle: IXY, to: IXY, radius: number) => {
+      vector.arcTo(handle.x, handle.y, to.x, to.y, radius)
+    }
+    ctx.bezierTo = (handle1: IXY, handle2: IXY, to: IXY) => {
+      vector.bezierCurveTo(handle1.x, handle1.y, handle2.x, handle2.y, to.x, to.y)
+    }
+    ctx.drawStroke = (element: IStageElement, option) => {
+      vector.lineStyle(option.width, option.color)
+    }
+    ctx.drawRect = (x: number, y: number, width: number, height: number) => {
+      vector.drawRect(x, y, width, height)
     }
   })
 }

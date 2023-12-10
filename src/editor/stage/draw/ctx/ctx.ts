@@ -1,13 +1,13 @@
 import { inject, injectable } from 'tsyringe'
-import { autobind } from '~/editor/utility/decorator'
-import { IXY } from '~/editor/utility/utils'
+import { autobind } from '~/editor/helper/decorator'
+import { IXY } from '~/editor/helper/utils'
+import { IStageElement } from '../../element'
 
-type ICustomCTX = {
-  beginPath(): void
-  closePath(): void
-  moveTo(x: number, y: number): void
-  lineTo(x: number, y: number): void
-  arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): void
+type ICustomCTX = Omit<StageCTXService, 'ctx' | 'customCTX'>
+
+type IStrokeOption = {
+  width: number
+  color?: string
 }
 
 @autobind
@@ -23,16 +23,24 @@ export class StageCTXService {
   closePath() {
     this.ctx.closePath()
   }
-  moveTo({ x, y }: IXY) {
-    this.ctx.moveTo(x, y)
+  moveTo(to: IXY) {
+    this.ctx.moveTo(to)
   }
-  lineTo({ x, y }: IXY) {
-    this.ctx.lineTo(x, y)
+  lineTo(to: IXY) {
+    this.ctx.lineTo(to)
   }
-  arcTo(p1: IXY, p2: IXY, radius: number) {
-    this.ctx.arcTo(p1.x, p1.y, p2.x, p2.y, radius)
+  arcTo(handle: IXY, to: IXY, radius: number) {
+    this.ctx.arcTo(handle, to, radius)
   }
-  bezierTo() {}
+  bezierTo(handle1: IXY, handle2: IXY, to: IXY) {
+    this.ctx.bezierTo(handle1, handle2, to)
+  }
+  drawRect(x: number, y: number, width: number, height: number) {
+    this.ctx.drawRect(x, y, width, height)
+  }
+  drawStroke(element: IStageElement, option: IStrokeOption) {
+    this.ctx.drawStroke(element, option)
+  }
 }
 
 export const injectStageCTX = inject(StageCTXService)
