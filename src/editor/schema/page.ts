@@ -1,7 +1,7 @@
 import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { Watch, autobind } from '~/shared/decorator'
-import { Delete } from '../../shared/utils'
+import { Delete } from '~/shared/utils'
 import { SchemaDefaultService, injectSchemaDefault } from './default'
 import { SchemaNodeService, injectSchemaNode } from './node'
 import { type IPage } from './type'

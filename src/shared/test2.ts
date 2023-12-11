@@ -1,8 +1,8 @@
 import { min } from '~/editor/math/base'
 import { Path } from '~/editor/stage/draw/path/path'
 import { PathPoint } from '~/editor/stage/draw/path/point'
+import { XY } from '~/shared/helper/xy'
 import { IXY, cullNegatives } from '~/shared/utils'
-import { XY } from '~/shared/xy'
 
 export function testDraw2(_ctx: CanvasRenderingContext2D) {
   const ctx = new CTX(_ctx)

@@ -1,8 +1,8 @@
 import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { Watch, autobind } from '~/shared/decorator'
-import { IXY } from '../../shared/utils'
-import { XY } from '../../shared/xy'
+import { XY } from '~/shared/helper/xy'
+import { IXY } from '~/shared/utils'
 import { SchemaPageService, injectSchemaPage } from '../schema/page'
 import { PixiService, injectPixi } from './pixi'
 

@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { testDraw2 } from '~/helper/test2'
 import { editorServices, globalServices } from '~/ioc'
+import { testDraw2 } from '~/shared/test2'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { EditorContext, GlobalContext } from './context'

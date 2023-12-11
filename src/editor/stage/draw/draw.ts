@@ -5,8 +5,8 @@ import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { IFrame, ILine, INode, IRect, IStar, ITriangle, IVector } from '~/editor/schema/type'
 import { SettingService, injectSetting } from '~/editor/utility/setting'
 import { autobind } from '~/shared/decorator'
+import { XY } from '~/shared/helper/xy'
 import { cullNegatives } from '~/shared/utils'
-import { XY } from '~/shared/xy'
 import { StageElementService, injectStageElement } from '../element'
 import { PIXI } from '../pixi'
 import { StageViewportService, injectStageViewport } from '../viewport'
@@ -53,7 +53,8 @@ export class StageDrawService {
     // element.lineStyle(1, 'green')
     this.SchemaNode.selectIds.has(id) &&
       element.lineStyle(1 / this.StageViewport.zoom, this.Setting.color)
-    this.drawPath(element, node)
+    //this.drawPath(element, node)
+    element.drawRect(x, y, width, height)
   }
   private drawTriangle(node: ITriangle) {
     const { x, y, width, height, id, fill, points } = node
@@ -90,7 +91,7 @@ export class StageDrawService {
   private drawFill(shape: PIXI.Graphics, fill: INode['fill']) {
     shape.beginFill(fill)
   }
-  private drawPath(element: PIXI.Graphics, node: IVector) {
+  drawPath(element: PIXI.Graphics, node: IVector) {
     const createPath = () => {
       const pathPoints = node.points.map((nodePoint) => {
         const rotatedXY = XY.From(nodePoint).rotate(XY.Of(0, 0), node.rotation)

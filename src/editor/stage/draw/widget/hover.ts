@@ -5,8 +5,6 @@ import { Watch, When, autobind } from '~/shared/decorator'
 import { StageSelectService, injectStageSelect } from '../../interact/select'
 import { PIXI, PixiService, injectPixi } from '../../pixi'
 import { StageViewportService, injectStageViewport } from '../../viewport'
-import { StageCTXService, injectStageCTX } from '../ctx/ctx'
-import { customPixiCTX } from '../ctx/pixi-ctx'
 import { StageDrawService, injectStageDraw } from '../draw'
 
 @autobind
@@ -16,7 +14,6 @@ export class StageWidgetHoverService {
   constructor(
     @injectPixi private Pixi: PixiService,
     @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectStageCTX private StageCTX: StageCTXService,
     @injectStageViewport private StageViewport: StageViewportService,
     @injectStageDraw private StageDraw: StageDrawService,
     @injectStageSelect private StageSelect: StageSelectService,
@@ -38,11 +35,7 @@ export class StageWidgetHoverService {
     this.hoverWidget.clear()
     const node = this.SchemaNode.find(this.SchemaNode.hoverId)
     if (node.type === 'vector') {
-      customPixiCTX(this.StageCTX, this.hoverWidget)
-      this.StageCTX.drawStroke(this.hoverWidget, {
-        width: 1.5 / this.StageViewport.zoom,
-        color: this.Setting.color,
-      })
+      this.hoverWidget.lineStyle(1.5 / this.StageViewport.zoom, this.Setting.color)
       this.StageDraw.drawPath(this.hoverWidget, node)
     }
   }

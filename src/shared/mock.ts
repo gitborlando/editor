@@ -1,7 +1,7 @@
 import { v4 } from 'uuid'
 import { SchemaDefaultService } from '../editor/schema/default'
 import { INode } from '../editor/schema/type'
-import { XY } from './xy'
+import { XY } from './helper/xy'
 
 export const mockJsonFile = mockJsonFile3
 

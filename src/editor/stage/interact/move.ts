@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe'
 import { DragService, injectDrag } from '~/editor/utility/drag'
 import { autobind } from '~/shared/decorator'
-import { XY } from '~/shared/xy'
+import { XY } from '~/shared/helper/xy'
 import { PixiService, injectPixi } from '../pixi'
 import { StageViewportService, injectStageViewport } from '../viewport'
 
