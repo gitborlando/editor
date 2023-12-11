@@ -1,7 +1,7 @@
 import { makeObservable, observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { Watch, When, autobind } from '~/editor/helper/decorator'
-import { XY } from '../math/xy'
+import { Watch, When, autobind } from '~/shared/decorator'
+import { XY } from '../shared/xy'
 
 @autobind
 @injectable()
@@ -13,7 +13,7 @@ export class MenuService {
   constructor() {
     makeObservable(this)
     this.autoPosition()
-    this.autoHideMenu()
+    window.addEventListener('mousedown', this.hideMenu, { capture: true })
   }
   setRef(div: HTMLDivElement) {
     this.ref = div
@@ -36,19 +36,14 @@ export class MenuService {
     this.ref.style.left = this.xy.x + 'px'
     this.ref.style.top = this.xy.y + 'px'
   }
-  @Watch('show')
-  private autoHideMenu() {
+  private hideMenu(e: MouseEvent) {
     if (!this.show) return
-    const hideMenu = (e: MouseEvent) => {
-      let dom = document.elementFromPoint(e.clientX, e.clientY)
-      if (dom?.className.match('Menu')) return
-      while (dom?.parentElement && (dom = dom.parentElement)) {
-        if (dom.className.match('Menu')) return
-      }
-      this.setShow(false)
-      window.removeEventListener('mousedown', hideMenu, { capture: true })
+    let dom = document.elementFromPoint(e.clientX, e.clientY)
+    while (dom) {
+      if (dom.className.match('Menu')) return
+      dom = dom.parentElement
     }
-    window.addEventListener('mousedown', hideMenu, { capture: true })
+    this.setShow(false)
   }
 }
 

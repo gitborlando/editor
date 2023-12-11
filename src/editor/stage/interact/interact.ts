@@ -1,6 +1,6 @@
 import { makeObservable, observable, when } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
-import { Watch, autobind } from '~/editor/helper/decorator'
+import { Watch, autobind } from '~/shared/decorator'
 import { DragService, injectDrag } from '../../utility/drag'
 import { PixiService, injectPixi } from '../pixi'
 import { StageCreateService } from './create'

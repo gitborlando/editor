@@ -20,7 +20,6 @@ export const EditorComp: FC<IEditorComp> = observer(({}) => {
         <LeftPanelComp />
         <StageComp />
         <RightPanelComp />
-        {/* <MenuComp /> */}
       </Flex>
       <Flex
         className={classes.dragMask}

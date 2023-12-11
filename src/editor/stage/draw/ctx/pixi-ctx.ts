@@ -1,4 +1,4 @@
-import { IXY } from '~/editor/helper/utils'
+import { IXY } from '~/shared/utils'
 import { IStageElement } from '../../element'
 import { PIXI } from '../../pixi'
 import { StageCTXService } from './ctx'

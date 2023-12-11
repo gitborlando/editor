@@ -1,8 +1,7 @@
 import { makeObservable, observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { autobind } from '~/editor/helper/decorator'
-import { noopFunc } from '~/helper/utils'
-import { IBound, IXY, makeAction, type ICursor } from '../helper/utils'
+import { autobind } from '~/shared/decorator'
+import { IBound, IXY, makeAction, noopFunc, type ICursor } from '../../shared/utils'
 
 export type IDragData = {
   dragService: DragService

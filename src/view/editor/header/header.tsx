@@ -10,7 +10,6 @@ type IHeaderComp = {}
 export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
   const { File, StageInteract, StageViewport, StageCreate } = useEditor()
   const { classes } = useStyles({ top: StageViewport.bound.y })
-
   return (
     <Flex layout='v' className={classes.Header}>
       <Flex layout='c'>

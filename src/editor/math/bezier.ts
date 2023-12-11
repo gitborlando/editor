@@ -1,5 +1,5 @@
+import { XY } from '../../shared/xy'
 import { abs, pow2, pow3 } from './base'
-import { XY } from './xy'
 
 /* 贝塞尔参数方程 */
 export function bezierParametricEquation(

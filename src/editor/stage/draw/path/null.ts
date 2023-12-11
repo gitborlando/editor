@@ -1,4 +1,4 @@
-import { autobind } from '~/editor/helper/decorator'
+import { autobind } from '~/shared/decorator'
 import { PathPoint } from './point'
 
 @autobind

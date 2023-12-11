@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { container as Container } from 'tsyringe'
+import { container } from 'tsyringe'
 import { EditorService } from './editor/editor'
 import { FileService } from './editor/file'
 import { SchemaDefaultService } from './editor/schema/default'
@@ -19,13 +19,11 @@ import { StageSelectService } from './editor/stage/interact/select'
 import { PixiService } from './editor/stage/pixi'
 import { StageViewportService } from './editor/stage/viewport'
 import { DragService } from './editor/utility/drag'
-import { MenuService } from './editor/utility/menu'
 import { SettingService } from './editor/utility/setting'
 import { StatusService } from './editor/utility/status'
+import { MenuService } from './global/menu'
 
-const editorContainer = Container.createChildContainer()
-
-editorContainer
+container
   .registerSingleton(SchemaDefaultService)
   .registerSingleton(SchemaNodeService)
   .registerSingleton(SchemaPageService)
@@ -43,34 +41,37 @@ editorContainer
   .registerSingleton(StageWidgetHoverService)
   .registerSingleton(StageWidgetMarqueeService)
   .registerSingleton(StageWidgetTransformerService)
-  .registerSingleton(MenuService)
   .registerSingleton(SettingService)
   .registerSingleton(StatusService)
   .registerSingleton(EditorService)
   .registerSingleton(FileService)
 
-editorContainer.resolve(StageWidgetHoverService)
-editorContainer.resolve(StageWidgetMarqueeService)
-editorContainer.resolve(StageWidgetTransformerService)
+container.registerSingleton(MenuService)
 
 export const editorServices = {
-  SchemaDefault: editorContainer.resolve(SchemaDefaultService),
-  SchemaNode: editorContainer.resolve(SchemaNodeService),
-  SchemaPage: editorContainer.resolve(SchemaPageService),
-  Schema: editorContainer.resolve(SchemaService),
-  Drag: editorContainer.resolve(DragService),
-  Pixi: editorContainer.resolve(PixiService),
-  StageViewport: editorContainer.resolve(StageViewportService),
-  StageSelect: editorContainer.resolve(StageSelectService),
-  StageMove: editorContainer.resolve(StageMoveService),
-  StageCreate: editorContainer.resolve(StageCreateService),
-  StageCTX: editorContainer.resolve(StageCTXService),
-  StageDraw: editorContainer.resolve(StageDrawService),
-  StageShape: editorContainer.resolve(StageElementService),
-  StageInteract: editorContainer.resolve(StageInteractService),
-  Menu: editorContainer.resolve(MenuService),
-  Setting: editorContainer.resolve(SettingService),
-  Status: editorContainer.resolve(StatusService),
-  Editor: editorContainer.resolve(EditorService),
-  File: editorContainer.resolve(FileService),
+  SchemaDefault: container.resolve(SchemaDefaultService),
+  SchemaNode: container.resolve(SchemaNodeService),
+  SchemaPage: container.resolve(SchemaPageService),
+  Schema: container.resolve(SchemaService),
+  Drag: container.resolve(DragService),
+  Pixi: container.resolve(PixiService),
+  StageViewport: container.resolve(StageViewportService),
+  StageSelect: container.resolve(StageSelectService),
+  StageMove: container.resolve(StageMoveService),
+  StageCreate: container.resolve(StageCreateService),
+  StageCTX: container.resolve(StageCTXService),
+  StageDraw: container.resolve(StageDrawService),
+  StageShape: container.resolve(StageElementService),
+  StageInteract: container.resolve(StageInteractService),
+  Setting: container.resolve(SettingService),
+  Status: container.resolve(StatusService),
+  Editor: container.resolve(EditorService),
+  File: container.resolve(FileService),
+}
+container.resolve(StageWidgetHoverService)
+container.resolve(StageWidgetMarqueeService)
+container.resolve(StageWidgetTransformerService)
+
+export const globalServices = {
+  Menu: container.resolve(MenuService),
 }

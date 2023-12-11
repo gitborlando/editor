@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe'
-import { Watch, When, autobind } from '~/editor/helper/decorator'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { SettingService, injectSetting } from '~/editor/utility/setting'
+import { Watch, When, autobind } from '~/shared/decorator'
 import { StageSelectService, injectStageSelect } from '../../interact/select'
 import { PIXI, PixiService, injectPixi } from '../../pixi'
 import { StageViewportService, injectStageViewport } from '../../viewport'

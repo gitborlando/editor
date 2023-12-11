@@ -1,11 +1,10 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import ReactDOM from 'react-dom/client'
 import { testDraw2 } from '~/helper/test2'
-import { editorServices } from '~/ioc'
+import { editorServices, globalServices } from '~/ioc'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { EditorContext } from './context'
+import { EditorContext, GlobalContext } from './context'
 import { EditorComp } from './editor/editor'
 
 type IAppProps = {}
@@ -13,9 +12,9 @@ type IAppProps = {}
 const customMode = false
 
 export const App: FC<IAppProps> = observer(() => {
-  const { classes, cx } = useStyles({})
+  const { classes } = useStyles({})
   return (
-    <Flex layout='v' className={classes.App}>
+    <Flex layout='v' className={classes.App} onContextMenu={(e) => e.preventDefault()}>
       {customMode ? (
         <canvas
           ref={(cvs) => testDraw2(cvs!.getContext('2d')!)}
@@ -23,9 +22,12 @@ export const App: FC<IAppProps> = observer(() => {
           width={1000}
           height={1000}></canvas>
       ) : (
-        <EditorContext.Provider value={editorServices}>
-          <EditorComp />
-        </EditorContext.Provider>
+        <GlobalContext.Provider value={globalServices}>
+          <EditorContext.Provider value={editorServices}>
+            <EditorComp />
+          </EditorContext.Provider>
+          {/* <MenuComp /> */}
+        </GlobalContext.Provider>
       )}
     </Flex>
   )
@@ -45,7 +47,3 @@ const useStyles = makeStyles<IAppStyleProps>()((t) => ({
 }))
 
 App.displayName = 'App'
-
-export const renderApp = () => {
-  ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />)
-}

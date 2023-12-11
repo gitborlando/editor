@@ -1,6 +1,6 @@
 import { inject, injectable } from 'tsyringe'
-import { autobind } from '~/editor/helper/decorator'
-import { IXY } from '~/editor/helper/utils'
+import { autobind } from '~/shared/decorator'
+import { IXY } from '~/shared/utils'
 import { IStageElement } from '../../element'
 
 type ICustomCTX = Omit<StageCTXService, 'ctx' | 'customCTX'>

@@ -1,6 +1,6 @@
-import { IBound } from '../helper/utils'
+import { IBound } from '../../shared/utils'
+import { XY } from '../../shared/xy'
 import { abs, rcos, rsin } from './base'
-import { XY } from './xy'
 
 type IAxis = { widthAxis: XY; heightAxis: XY }
 

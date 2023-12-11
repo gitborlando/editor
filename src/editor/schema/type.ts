@@ -1,4 +1,4 @@
-import { IXY } from '../helper/utils'
+import { IXY } from '../../shared/utils'
 
 export type ISchema = {
   meta: IMeta

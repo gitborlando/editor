@@ -2,7 +2,7 @@ import { Cull } from '@pixi-essentials/cull'
 import { makeObservable, observable } from 'mobx'
 import * as PIXI from 'pixi.js'
 import { inject, injectable } from 'tsyringe'
-import { autobind } from '~/editor/helper/decorator'
+import { autobind } from '~/shared/decorator'
 
 export * as PIXI from 'pixi.js'
 

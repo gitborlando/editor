@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe'
 import { v4 as uuidv4 } from 'uuid'
-import { autobind } from '~/editor/helper/decorator'
-import { IBound, IXY } from '../helper/utils'
+import { autobind } from '~/shared/decorator'
+import { IBound, IXY } from '../../shared/utils'
 import {
   IEllipse,
   IFillColor,
