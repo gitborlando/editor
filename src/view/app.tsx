@@ -1,7 +1,8 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { editorServices } from '~/editor/ioc'
+import ReactDOM from 'react-dom/client'
 import { testDraw2 } from '~/helper/test2'
+import { editorServices } from '~/ioc'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { EditorContext } from './context'
@@ -44,3 +45,7 @@ const useStyles = makeStyles<IAppStyleProps>()((t) => ({
 }))
 
 App.displayName = 'App'
+
+export const renderApp = () => {
+  ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />)
+}
