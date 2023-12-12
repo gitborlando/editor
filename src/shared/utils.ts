@@ -1,5 +1,9 @@
 import { IAutorunOptions, IReactionPublic, autorun, runInAction } from 'mobx'
 import { useEffect } from 'react'
+import { v4 } from 'uuid'
+
+export const GlobalThis = globalThis as any
+export const uuid = v4
 
 export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
@@ -110,5 +114,3 @@ export function Log<T>(someThing: T, label: string = '') {
   console.log(label, someThing)
   return someThing
 }
-
-export const win = window as any

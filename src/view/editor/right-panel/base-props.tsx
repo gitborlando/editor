@@ -10,6 +10,7 @@ type IBasePropsComp = {}
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
   const { SchemaNode } = useEditor()
+  SchemaNode.selectChange
   if (!SchemaNode.selectIds.size) return null
   const node = SchemaNode.find([...SchemaNode.selectIds][0])
   return (

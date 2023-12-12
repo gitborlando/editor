@@ -4,7 +4,7 @@ import { autobind } from '~/shared/decorator'
 
 type IStateKey = keyof Omit<
   StatusService,
-  'enter' | 'leave' | 'true' | 'false' | 'toggle' | 'set' | 'thisAsAny'
+  'thisAsAny' | 'enter' | 'leave' | 'true' | 'false' | 'toggle' | 'set' | 'emit'
 >
 
 @autobind
