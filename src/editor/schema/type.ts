@@ -40,7 +40,7 @@ export type INodeMeta = {
   parentId: string
 }
 
-export type INodeBase = INodeMeta & {
+export type IGeometryDetail = {
   x: number
   y: number
   pivotX: number
@@ -49,16 +49,20 @@ export type INodeBase = INodeMeta & {
   centerY: number
   width: number
   height: number
-  opacity: number
   rotation: number
-  hFlip: boolean
-  vFlip: boolean
-  fills: IFill[]
-  strokes: any[]
-  blurs: any[]
-  shadows: any[]
-  fill: string
 }
+
+export type INodeBase = INodeMeta &
+  IGeometryDetail & {
+    opacity: number
+    hFlip: boolean
+    vFlip: boolean
+    fills: IFill[]
+    strokes: any[]
+    blurs: any[]
+    shadows: any[]
+    fill: string
+  }
 
 export type IFrame = INodeBase & {
   type: 'frame'

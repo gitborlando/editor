@@ -12,7 +12,6 @@ import {
   IFrame,
   IGroup,
   ILine,
-  INode,
   INodeBase,
   INodeMeta,
   IPage,
@@ -217,15 +216,18 @@ export class SchemaDefaultService {
   fillImage(url: string): IFillImage {
     return { type: 'image', url, matrix: [0, 0, 0, 0, 0, 0] }
   }
-  initNodeXYBound(node: INode, { x, y, width, height }: IBound) {
-    node.x = x
-    node.y = y
-    node.pivotX = x
-    node.pivotY = y
-    node.centerX = x + width / 2
-    node.centerY = y + height / 2
-    node.width = width
-    node.height = height
+  geometryDetail({ x, y, width, height }: IBound) {
+    return {
+      x: x,
+      y: y,
+      pivotX: x,
+      pivotY: y,
+      centerX: x + width / 2,
+      centerY: y + height / 2,
+      width: width,
+      height: height,
+      rotation: 0,
+    }
   }
   private createSchemaMeta(): INodeMeta {
     return {
