@@ -1,6 +1,7 @@
 import { runInAction, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { Watch, autobind } from '~/shared/decorator'
+import { macroStringMatch } from '~/shared/macro/string-match'
 import { FileService, injectFile } from './file'
 import { SchemaNodeService, injectSchemaNode } from './schema/node'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
@@ -42,6 +43,7 @@ export class EditorService {
   }
   private drawDirtyInPixiTick() {
     this.SchemaNode.onFlushDirty((id) => {
+      if (macroStringMatch`transform|marquee`(id)) return
       this.StageDraw.drawNode(this.SchemaNode.find(id))
       if (!this.StageElement.find(id)) {
         this.StageElement.add(id, this.StageDraw.currentElement)

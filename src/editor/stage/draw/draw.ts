@@ -4,7 +4,6 @@ import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { IFrame, ILine, INode, IRect, IStar, ITriangle, IVector } from '~/editor/schema/type'
 import { SettingService, injectSetting } from '~/global/setting'
 import { autobind } from '~/shared/decorator'
-import { macroStringMatch } from '~/shared/macro/string-match'
 import { MultiCache } from '~/shared/multi-cache'
 import { XY } from '~/shared/structure/xy'
 import { cullNegatives } from '~/shared/utils'
@@ -27,7 +26,6 @@ export class StageDrawService {
     @injectSetting private Setting: SettingService
   ) {}
   drawNode(node: INode) {
-    if (macroStringMatch`transform|marquee`(node.id)) return
     if (node.type === 'frame') this.drawFrame(node)
     if (node.type === 'vector') {
       if (node.vectorType === 'rect') this.drawRect(node)
@@ -44,7 +42,7 @@ export class StageDrawService {
     element.drawRect(x, y, width, height)
   }
   private drawRect(node: IRect) {
-    const { x, y, width, height, id, fill, points } = node
+    const { x, y, width, height, id, fill, points, rotation } = node
     const element = this.findElementOrCreate(id, 'graphic')
     element.clear()
     this.SchemaNode.selectIds.has(id) &&
