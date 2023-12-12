@@ -1,7 +1,7 @@
 import { min, tan } from '~/editor/math/base'
 import { IBezierType } from '~/editor/schema/type'
 import { autobind } from '~/shared/decorator'
-import { XY } from '~/shared/helper/xy'
+import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils'
 import { PathCurve } from './curve'
 import { PathLine } from './line'

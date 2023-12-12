@@ -1,7 +1,7 @@
 import { makeObservable, observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { Watch, When, autobind } from '~/shared/decorator'
-import { XY } from '~/shared/helper/xy'
+import { XY } from '~/shared/structure/xy'
 
 @autobind
 @injectable()

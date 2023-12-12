@@ -1,7 +1,7 @@
 import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { Watch, autobind } from '~/shared/decorator'
-import { XY } from '~/shared/helper/xy'
+import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils'
 import { SchemaPageService, injectSchemaPage } from '../schema/page'
 import { PixiService, injectPixi } from './pixi'
@@ -10,7 +10,7 @@ import { PixiService, injectPixi } from './pixi'
 @injectable()
 export class StageViewportService {
   @observable initialized = false
-  @observable bound = { x: 240, y: 48, width: 0, height: 0, right: 240 }
+  @observable bound = { x: /* 240 */ 0, y: 48, width: 0, height: 0, right: 240 }
   constructor(
     @injectPixi private Pixi: PixiService,
     @injectSchemaPage private SchemaPage: SchemaPageService

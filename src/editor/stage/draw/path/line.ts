@@ -1,6 +1,6 @@
 import { abs, atan, radianfy } from '~/editor/math/base'
 import { autobind } from '~/shared/decorator'
-import { XY } from '~/shared/helper/xy'
+import { XY } from '~/shared/structure/xy'
 import { pipe } from '~/shared/utils'
 import { PathPoint } from './point'
 

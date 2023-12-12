@@ -1,4 +1,4 @@
-import { XY } from '~/shared/helper/xy'
+import { XY } from '~/shared/structure/xy'
 import { IBound } from '~/shared/utils'
 import { abs, rcos, rsin } from './base'
 

@@ -1,15 +1,15 @@
 import { v4 } from 'uuid'
-import { SchemaDefaultService } from '../editor/schema/default'
-import { INode } from '../editor/schema/type'
-import { XY } from './helper/xy'
+import { XY } from '../shared/structure/xy'
+import { SchemaDefaultService } from './schema/default'
+import { INode } from './schema/type'
 
-export const mockJsonFile = mockJsonFile3
+export const mockJsonFile = mockJsonFile2
 
 export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
   let s = new Date().getTime()
   const nodes: Record<string, INode> = {}
   let k = 0
-  for (let i = 0; i < 50000; i++) {
+  for (let i = 0; i < 10000; i++) {
     const id = v4()
     let j = i % 100
 
