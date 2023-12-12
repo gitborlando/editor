@@ -17,7 +17,7 @@ export function Watch(...chains: string[]) {
   }
 }
 
-export function When(chain: string) {
+export function Until(chain: string) {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
     descriptor.value = function (...args: any[]) {
