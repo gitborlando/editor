@@ -1,20 +1,17 @@
-type IEventType = 'stage-interact-type-changed'
-
 class EventEmitter {
-  private events = new Map<IEventType, ((...args: any[]) => void)[]>()
-  on(eventType: IEventType, callback: (...args: any[]) => void): void {
-    this.events.set(eventType, [...(this.events.get(eventType) || []), callback])
-  }
-  emit(eventType: IEventType, ...args: any[]): void {
-    this.events.get(eventType)?.forEach((callback) => callback(...args))
-  }
-  off(eventType: IEventType, callback: (...args: any[]) => void): void {
-    const callbacks = this.events.get(eventType)
-    if (!callbacks) return
-    this.events.set(
-      eventType,
-      callbacks.filter((i) => i !== callback)
-    )
+  'node-change-x' = this.createHandler<number[]>()
+
+  private events = new Map<any, ((...args: any) => void)[]>()
+  private createHandler<T extends any[]>() {
+    const handler = {
+      on: (callback: (...args: T) => void) => {
+        this.events.set(handler, [...(this.events.get(handler) || []), callback])
+      },
+      emit: (...args: T) => {
+        this.events.get(handler)?.forEach((callback) => callback(...args))
+      },
+    }
+    return handler
   }
 }
 
