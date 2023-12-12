@@ -10,11 +10,12 @@ import {
 } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
 import { RunInAction, Watch, autobind } from '~/shared/decorator'
-import { XY } from '~/shared/helper/xy'
+import { macroStringMatch } from '~/shared/macro/string-match'
+import { XY } from '~/shared/structure/xy'
 import { Delete } from '~/shared/utils'
+import { MultiCache } from '../../shared/multi-cache'
 import { max, min, numberHalfFix, rcos, rsin } from '../math/base'
 import { OBB } from '../math/obb'
-import { OptimizeCache } from '../optimize/cache'
 import { PixiService, injectPixi } from '../stage/pixi'
 import { SchemaPageService } from './page'
 import { INode } from './type'
@@ -36,12 +37,13 @@ type INodeRuntime = {
 export class SchemaNodeService {
   @observable initialized = false
   @observable hoverId = ''
-  @observable selectIds: Set<string> = new Set()
-  @observable dirtyIds: Set<string> = new Set()
-  nodeMap: Record<string, INode> = {}
-  nodeEntries: [string, INode][] = []
-  private nodeRuntimeMap: Record<string, INodeRuntime> = {}
-  private flushDirtyCallbacks: ((id: string) => void)[] = []
+  @observable selectChange = false
+  @observable nodeObserved = false
+  selectIds = new Set<string>()
+  dirtyIds = new Set<string>()
+  nodeMap = <Record<string, INode>>{}
+  private nodeRuntimeMap = <Record<string, INodeRuntime>>{}
+  private flushDirtyCallbacks = <((id: string) => void)[]>[]
   constructor(
     @injectPixi private Pixi: PixiService,
     @inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService
@@ -49,7 +51,6 @@ export class SchemaNodeService {
     makeObservable(this)
     when(() => this.Pixi.initialized && this.initialized).then(() => {
       this.Pixi.app.ticker.add(this.flushDirty)
-      this.autoIdleObserve()
       this.autoOnHoverObserve()
       this.autoOnSelectObserve()
     })
@@ -75,7 +76,7 @@ export class SchemaNodeService {
     // const parent = this.find(node.parentId) as INodeParent
     // Delete(parent.childIds, (id) => id === node.id)
     this.deleteNodeRuntime(id)
-    OptimizeCache.GetOrNew('drawPathCache').delete(id)
+    MultiCache.GetOrNew('draw-path').delete(id)
   }
   find(id: string) {
     return this.nodeMap[id]
@@ -108,12 +109,12 @@ export class SchemaNodeService {
   select(id: string) {
     if (this.selectIds.has(id)) return
     this.selectIds.add(id)
-    this.collectDirty(id)
+    this.selectChange = !this.selectChange
   }
   unSelect(id: string) {
     if (!this.selectIds.has(id)) return
     this.selectIds.delete(id)
-    this.collectDirty(id)
+    this.selectChange = !this.selectChange
   }
   @RunInAction
   clearSelection() {
@@ -166,23 +167,14 @@ export class SchemaNodeService {
     nodeRuntime.observed = true
     return observedNode
   }
-  private autoIdleObserve() {
-    const ids = Object.keys(this.nodeMap)
-    requestIdleCallback(() => {
-      while (ids.length) {
-        const id = ids.pop()
-        id && this.observe(id)
-      }
-    })
-  }
   @Watch('hoverId')
   private autoOnHoverObserve() {
     if (this.hoverId === '') return
     this.observe(this.hoverId)
   }
-  @Watch('selectIds.values()')
+  @Watch('selectChange')
   private autoOnSelectObserve() {
-    this.selectIds.forEach(this.observe)
+    this.dirtyIds.forEach(this.observe)
   }
   private listenNodeWillChange(node: INode) {
     const disposer = intercept(node, (ctx) => {
@@ -194,13 +186,13 @@ export class SchemaNodeService {
   }
   private fixNodeChange(ctx: IObjectWillChange & { type: 'update' | 'add' }) {
     const propName = <keyof INode>ctx.name.toString()
-    if (propName.match(/x|y|width|height|rotation/)) {
+    if (macroStringMatch`x|y|width|height|rotation`(propName)) {
       ctx.newValue = numberHalfFix(ctx.newValue)
     }
-    if (propName.match(/width|height/)) {
+    if (macroStringMatch`width|height`(propName)) {
       ctx.newValue = max(0, ctx.newValue)
     }
-    if (propName.match(/rotation/)) {
+    if (macroStringMatch`rotation`(propName)) {
       ctx.newValue = max(-180, min(180, ctx.newValue))
     }
   }
@@ -222,7 +214,7 @@ export class SchemaNodeService {
       oneTickChange[propName]!.old = ctx.oldValue
     }
     oneTickChange[propName]!.new = ctx.newValue
-    if (propName.match(/x|y|width|height|rotation/)) {
+    if (macroStringMatch`x|y|width|height|rotation`(propName)) {
       nodeRuntime.geometryChanged = true
     }
   }
