@@ -1,17 +1,16 @@
 import { inject, injectable } from 'tsyringe'
 import { min } from '~/editor/math/base'
-import { OptimizeCache } from '~/editor/optimize/cache'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { IFrame, ILine, INode, IRect, IStar, ITriangle, IVector } from '~/editor/schema/type'
-import { SettingService, injectSetting } from '~/editor/utility/setting'
+import { SettingService, injectSetting } from '~/global/setting'
 import { autobind } from '~/shared/decorator'
-import { XY } from '~/shared/helper/xy'
+import { macroStringMatch } from '~/shared/macro/string-match'
+import { MultiCache } from '~/shared/multi-cache'
+import { XY } from '~/shared/structure/xy'
 import { cullNegatives } from '~/shared/utils'
 import { StageElementService, injectStageElement } from '../element'
 import { PIXI } from '../pixi'
 import { StageViewportService, injectStageViewport } from '../viewport'
-import { StageCTXService, injectStageCTX } from './ctx/ctx'
-import { customPixiCTX } from './ctx/pixi-ctx'
 import { Path } from './path/path'
 import { PathPoint } from './path/point'
 
@@ -22,14 +21,13 @@ type IStageElement = PIXI.Graphics | PIXI.Text
 export class StageDrawService {
   currentElement!: IStageElement
   constructor(
-    @injectStageCTX private StageCtx: StageCTXService,
     @injectStageElement private StageElement: StageElementService,
     @injectSchemaNode private SchemaNode: SchemaNodeService,
     @injectStageViewport private StageViewport: StageViewportService,
     @injectSetting private Setting: SettingService
   ) {}
   drawNode(node: INode) {
-    if (node.id.match(/transformer|marquee/)) return
+    if (macroStringMatch`transform|marquee`(node.id)) return
     if (node.type === 'frame') this.drawFrame(node)
     if (node.type === 'vector') {
       if (node.vectorType === 'rect') this.drawRect(node)
@@ -49,12 +47,10 @@ export class StageDrawService {
     const { x, y, width, height, id, fill, points } = node
     const element = this.findElementOrCreate(id, 'graphic')
     element.clear()
-    this.drawFill(element, fill)
-    // element.lineStyle(1, 'green')
     this.SchemaNode.selectIds.has(id) &&
       element.lineStyle(1 / this.StageViewport.zoom, this.Setting.color)
-    //this.drawPath(element, node)
-    element.drawRect(x, y, width, height)
+    this.drawFill(element, fill)
+    this.drawPath(element, node)
   }
   private drawTriangle(node: ITriangle) {
     const { x, y, width, height, id, fill, points } = node
@@ -110,7 +106,7 @@ export class StageDrawService {
       return new Path(pathPoints)
     }
 
-    const cache = OptimizeCache.GetOrNew('drawPathCache')
+    const cache = MultiCache.GetOrNew('draw-path')
     const { geometryChanged } = this.SchemaNode.findNodeRuntime(node.id)
 
     let path: Path
@@ -120,7 +116,6 @@ export class StageDrawService {
       path = cache.getSet(node.id, () => createPath())
     }
 
-    customPixiCTX(this.StageCtx, element)
     const hasArcedPointMap = new Set<PathPoint>()
 
     path.forEachLine(({ cur: curLine, at }) => {
@@ -133,7 +128,7 @@ export class StageDrawService {
         } else {
           startXY.set(startPoint)
         }
-        this.StageCtx.moveTo(startXY)
+        element.moveTo(startXY.x, startXY.y)
       }
 
       if (curLine.type === 'line') {
@@ -149,11 +144,17 @@ export class StageDrawService {
               startPoint.rightLine!.length - startPoint.right!.arcLength
             )
           const radius = min(...cullNegatives(startPoint.radius, rightMaxRadius, leftMaxRadius))
-          this.StageCtx.arcTo(startPoint, startPoint.right!, radius)
+          element.arcTo(
+            startPoint.x,
+            startPoint.y,
+            startPoint.right!.x,
+            startPoint.right!.y,
+            radius
+          )
           hasArcedPointMap.add(startPoint)
         }
         if (!endPoint.canDrawArc) {
-          return this.StageCtx.lineTo(endPoint)
+          return element.lineTo(endPoint.x, endPoint.y)
         }
         if (endPoint.canDrawArc && !hasArcedPointMap.has(endPoint)) {
           const leftMaxRadius =
@@ -163,17 +164,24 @@ export class StageDrawService {
             endPoint.right!.arcLength &&
             endPoint.calcRadiusByArcLength(endPoint.rightLine!.length - endPoint.right!.arcLength)
           const radius = min(...cullNegatives(endPoint.radius, rightMaxRadius, leftMaxRadius))
-          this.StageCtx.arcTo(endPoint, endPoint.right!, radius)
+          element.arcTo(endPoint.x, endPoint.y, endPoint.right!.x, endPoint.right!.y, radius)
           hasArcedPointMap.add(endPoint)
         }
-        if (at.end && !startPoint.jumpToRight) this.StageCtx.closePath()
+        if (at.end && !startPoint.jumpToRight) element.closePath()
       }
 
       if (curLine.type === 'curve') {
         const { start, end } = curLine
         const handleRight = start.handleRight || start
         const handleLeft = end.handleLeft || end
-        this.StageCtx.bezierTo(handleRight, handleLeft, end)
+        element.bezierCurveTo(
+          handleRight.x,
+          handleRight.y,
+          handleLeft.x,
+          handleLeft.y,
+          end.x,
+          end.y
+        )
       }
     })
   }
