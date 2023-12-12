@@ -3,6 +3,9 @@ import { IXY } from '../utils'
 
 export class XY {
   constructor(public x: number, public y: number) {}
+  get xy() {
+    return { x: this.x, y: this.y }
+  }
   set = ({ x, y }: { x?: number; y?: number }) => {
     this.x = x ? x : this.x
     this.y = y ? y : this.y
@@ -32,7 +35,12 @@ export class XY {
     const [x, y] = rotatePoint(this.x, this.y, origin.x, origin.y, degree)
     return new XY(x, y)
   }
-  mutate = <T extends IXY>(obj: T) => {
+  mutate = (obj: Record<string, any>, prefix?: string) => {
+    if (prefix) {
+      obj[prefix + 'X'] = this.x
+      obj[prefix + 'Y'] = this.y
+      return obj
+    }
     obj.x = this.x
     obj.y = this.y
     return obj
@@ -43,7 +51,8 @@ export class XY {
   toObject = (): IXY => {
     return { x: this.x, y: this.y }
   }
-  static From<T extends IXY>(xy: T) {
+  static From(xy: Record<string, any>, prefix?: string) {
+    if (prefix) return new XY(xy[prefix + 'X'], xy[prefix + 'Y'])
     return new XY(xy.x, xy.y)
   }
   static Of(x: number, y: number) {

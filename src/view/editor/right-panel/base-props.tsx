@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import { numberHalfFix } from '~/editor/math/base'
 import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -18,16 +19,14 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
       <Input
         className={classes.input}
         label='横坐标'
-        value={node.x}
-        onNewValueApply={(v) => {
-          node.x = v
-        }}
+        value={numberHalfFix(node.x)}
+        onNewValueApply={(v) => (node.x = numberHalfFix(v))}
       />
       <Input
         className={classes.input}
         label='纵坐标'
-        value={node.y}
-        onNewValueApply={(v) => (node.y = v)}
+        value={numberHalfFix(node.y)}
+        onNewValueApply={(v) => (node.y = numberHalfFix(v))}
       />
       <Input
         className={classes.input}
