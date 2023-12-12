@@ -39,6 +39,27 @@ export class OBB {
       height,
     })
   }
+  calcVertexXY = () => {
+    const halfWidth = this.width / 2
+    const halfHeight = this.height / 2
+    const TL = XY.Of(this.centerX - halfWidth, this.centerY - halfHeight).rotate(
+      this.center,
+      this.rotation
+    )
+    const TR = XY.Of(this.centerX + halfWidth, this.centerY - halfHeight).rotate(
+      this.center,
+      this.rotation
+    )
+    const BR = XY.Of(this.centerX + halfWidth, this.centerY + halfHeight).rotate(
+      this.center,
+      this.rotation
+    )
+    const BL = XY.Of(this.centerX - halfWidth, this.centerY + halfHeight).rotate(
+      this.center,
+      this.rotation
+    )
+    return { TL, TR, BR, BL }
+  }
   hitTest = (another: OBB) => {
     const simpleTest = this.simpleHitTest(another)
     if (specialRotationSet.has(this.rotation)) return simpleTest
