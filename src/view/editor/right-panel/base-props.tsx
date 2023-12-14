@@ -1,7 +1,7 @@
-import { observer } from 'mobx-react'
-import { FC } from 'react'
+import { observer, useLocalObservable } from 'mobx-react'
+import { FC, useEffect, useRef } from 'react'
 import { numberHalfFix } from '~/editor/math/base'
-import { useEditor } from '~/view/context'
+import { useEditor, useGlobalService } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Input } from '~/view/ui-utility/widget/input'
@@ -10,50 +10,88 @@ type IBasePropsComp = {}
 
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { SchemaNode } = useEditor()
-  SchemaNode.selectChange
-  if (!SchemaNode.selectIds.size) return null
-  const node = SchemaNode.find([...SchemaNode.selectIds][0])
+  const { Drag } = useGlobalService()
+  const { OperateGeometry } = useEditor()
+  const { proxyData } = OperateGeometry
+  const xRef = useRef<HTMLDivElement>(null)
+  const yRef = useRef<HTMLDivElement>(null)
+  const widthRef = useRef<HTMLDivElement>(null)
+  const heightRef = useRef<HTMLDivElement>(null)
+  const rotationRef = useRef<HTMLDivElement>(null)
+  const state = useLocalObservable(() => ({
+    onDragProps: [] as (keyof typeof OperateGeometry.proxyData)[],
+  }))
+  useEffect(() => {
+    Drag.beforeDrag.hook(() => {
+      if (!state.onDragProps.length) return
+      OperateGeometry.beforeOperate.dispatch(state.onDragProps)
+    })
+    Drag.afterDrag.hook(() => {
+      if (!state.onDragProps.length) return
+      OperateGeometry.afterOperate.dispatch()
+      state.onDragProps = []
+    })
+    xRef.current?.querySelector('.label')?.addEventListener('mousedown', () => {
+      state.onDragProps = ['x']
+    })
+    yRef.current?.querySelector('.label')?.addEventListener('mousedown', () => {
+      state.onDragProps = ['y']
+    })
+    widthRef.current?.querySelector('.label')?.addEventListener('mousedown', () => {
+      state.onDragProps = ['width']
+    })
+    heightRef.current?.querySelector('.label')?.addEventListener('mousedown', () => {
+      state.onDragProps = ['height']
+    })
+    rotationRef.current?.querySelector('.label')?.addEventListener('mousedown', () => {
+      state.onDragProps = ['rotation']
+    })
+  }, [])
   return (
     <Flex layout='h' className={classes.SchemaBase}>
       <Input
+        ref={xRef}
         className={classes.input}
         label='横坐标'
-        value={numberHalfFix(node.x)}
-        onNewValueApply={(v) => (node.x = numberHalfFix(v))}
+        value={numberHalfFix(proxyData.x)}
+        onNewValueApply={(v) => (proxyData.x = v)}
       />
       <Input
+        ref={yRef}
         className={classes.input}
         label='纵坐标'
-        value={numberHalfFix(node.y)}
-        onNewValueApply={(v) => (node.y = numberHalfFix(v))}
+        value={numberHalfFix(proxyData.y)}
+        onNewValueApply={(v) => (proxyData.y = v)}
       />
       <Input
+        ref={widthRef}
         className={classes.input}
         label='宽度'
-        value={node.width}
-        onNewValueApply={(v) => (node.width = v)}
+        value={proxyData.width}
+        onNewValueApply={(v) => (proxyData.width = v)}
       />
       <Input
+        ref={heightRef}
         className={classes.input}
         label='高度'
-        value={node.height}
-        onNewValueApply={(v) => (node.height = v)}
+        value={proxyData.height}
+        onNewValueApply={(v) => (proxyData.height = v)}
       />
       <Input
+        ref={rotationRef}
         className={classes.input}
         label='旋转'
-        value={node.rotation}
-        onNewValueApply={(v) => (node.rotation = v)}
+        value={proxyData.rotation}
+        onNewValueApply={(v) => (proxyData.rotation = v)}
       />
-      {node.type === 'vector' && 'radius' in node && (
+      {/* {SchemaOperateGeometry.type === 'vector' && 'radius' in SchemaOperateGeometry && (
         <Input
           className={classes.input}
           label='圆角'
-          value={node.radius}
-          onNewValueApply={(v) => (node.radius = v)}
+          value={SchemaOperateGeometry.radius}
+          onNewValueApply={(v) => (SchemaOperateGeometry.radius = v)}
         />
-      )}
+      )} */}
     </Flex>
   )
 })

@@ -1,5 +1,5 @@
 import { XY } from '~/shared/structure/xy'
-import { IBound } from '~/shared/utils'
+import { IBound, IXY } from '~/shared/utils'
 import { abs, rcos, rsin } from './base'
 
 type IAxis = { widthAxis: XY; heightAxis: XY }
@@ -8,16 +8,34 @@ export class OBB {
   center: XY
   axis: IAxis
   aabb: IBound
+  vertexes: { TL: IXY; TR: IXY; BR: IXY; BL: IXY }
+  vertexArr: [IXY, IXY, IXY, IXY]
   constructor(
     public centerX: number,
     public centerY: number,
     public width: number,
     public height: number,
-    public rotation: number
+    public rotation: number,
+    public scaleX: number,
+    public scaleY: number
   ) {
     this.center = this.calcCenter()
     this.axis = this.calcAxis()
     this.aabb = this.calcAABB()
+    this.vertexes = this.calcVertexXY()
+    this.vertexArr = <[IXY, IXY, IXY, IXY]>Object.values(this.vertexes)
+  }
+  shift = ({ x, y }: Partial<IXY>) => {
+    if (x) {
+      this.centerX += x
+      this.aabb.x += x
+      this.vertexArr.forEach((i) => (i.x += x))
+    }
+    if (y) {
+      this.centerY += y
+      this.aabb.y += y
+      this.vertexArr.forEach((i) => (i.y += y))
+    }
   }
   calcCenter = () => {
     return (this.center = XY.Of(this.centerX, this.centerY))
@@ -42,23 +60,19 @@ export class OBB {
   calcVertexXY = () => {
     const halfWidth = this.width / 2
     const halfHeight = this.height / 2
-    const TL = XY.Of(this.centerX - halfWidth, this.centerY - halfHeight).rotate(
-      this.center,
-      this.rotation
-    )
-    const TR = XY.Of(this.centerX + halfWidth, this.centerY - halfHeight).rotate(
-      this.center,
-      this.rotation
-    )
-    const BR = XY.Of(this.centerX + halfWidth, this.centerY + halfHeight).rotate(
-      this.center,
-      this.rotation
-    )
-    const BL = XY.Of(this.centerX - halfWidth, this.centerY + halfHeight).rotate(
-      this.center,
-      this.rotation
-    )
-    return { TL, TR, BR, BL }
+    const TL = XY.Of(this.centerX - halfWidth, this.centerY - halfHeight)
+      .rotate(this.center, this.rotation)
+      .toObject()
+    const TR = XY.Of(this.centerX + halfWidth, this.centerY - halfHeight)
+      .rotate(this.center, this.rotation)
+      .toObject()
+    const BR = XY.Of(this.centerX + halfWidth, this.centerY + halfHeight)
+      .rotate(this.center, this.rotation)
+      .toObject()
+    const BL = XY.Of(this.centerX - halfWidth, this.centerY + halfHeight)
+      .rotate(this.center, this.rotation)
+      .toObject()
+    return (this.vertexes = { TL, TR, BR, BL })
   }
   hitTest = (another: OBB) => {
     const simpleTest = this.simpleHitTest(another)

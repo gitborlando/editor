@@ -3,7 +3,7 @@ import { SchemaDefaultService, injectSchemaDefault } from '~/editor/schema/defau
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
 import { ILine, INode } from '~/editor/schema/type'
-import { DragService, injectDrag, type IDragData } from '~/editor/utility/drag'
+import { DragService, injectDrag, type IDragData } from '~/global/drag'
 import { RunInAction, autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils'
@@ -106,7 +106,7 @@ export class StageCreateService {
     }
   }
   private addNodeToSchemaAndObserveAndSelect() {
-    this.node = this.SchemaNode.add(this.node)
+    this.SchemaNode.add(this.node)
     this.SchemaNode.clearSelection()
     this.SchemaNode.select(this.node.id)
     this.SchemaNode.connect(this.node.id, this.SchemaPage.currentId)

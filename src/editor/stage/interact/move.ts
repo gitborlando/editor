@@ -1,5 +1,5 @@
 import { inject, injectable } from 'tsyringe'
-import { DragService, injectDrag } from '~/editor/utility/drag'
+import { DragService, injectDrag } from '~/global/drag'
 import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
 import { PixiService, injectPixi } from '../pixi'

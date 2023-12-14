@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import { When } from 'react-if'
 import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -12,7 +13,9 @@ export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
   const { classes } = useStyles({ right: StageViewport.bound.right })
   return (
     <Flex layout='v' className={classes.RightPanel}>
-      <BasePropsComp />
+      <When condition={SchemaNode.selectCount}>
+        <BasePropsComp />
+      </When>
       <Flex layout='c'>{SchemaNode.hoverId}</Flex>
       <Flex layout='h' style={{ width: '100%' }}></Flex>
     </Flex>

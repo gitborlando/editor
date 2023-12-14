@@ -46,8 +46,8 @@ export function numberHalfFix(number: number) {
 
 export function rotatePoint(ax: number, ay: number, ox: number, oy: number, degree: number) {
   const radian = radianfy(degree)
-  return [
-    (ax - ox) * cos(radian) - (ay - oy) * sin(radian) + ox,
-    (ax - ox) * sin(radian) + (ay - oy) * cos(radian) + oy,
-  ]
+  return {
+    x: (ax - ox) * cos(radian) - (ay - oy) * sin(radian) + ox,
+    y: (ax - ox) * sin(radian) + (ay - oy) * cos(radian) + oy,
+  }
 }

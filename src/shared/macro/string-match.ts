@@ -1,8 +1,8 @@
-import { MultiCache } from '~/shared/multi-cache'
+import { OptimizeCache } from '~/shared/cache'
 
-const cache = MultiCache.GetOrNew('macro-string-match')
+const cache = OptimizeCache.GetOrNew('macro-string-match')
 
-export function macroStringMatch(_input: TemplateStringsArray) {
+export function macro_StringMatch(_input: TemplateStringsArray) {
   const input = _input[0]
   const test = cache.getSet(input, () => {
     const right = input.trimStart().trimEnd().split('|')

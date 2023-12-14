@@ -43,13 +43,13 @@ export type INodeMeta = {
 export type IGeometryDetail = {
   x: number
   y: number
-  pivotX: number
-  pivotY: number
   centerX: number
   centerY: number
   width: number
   height: number
   rotation: number
+  scaleX: number
+  scaleY: number
 }
 
 export type INodeBase = INodeMeta &

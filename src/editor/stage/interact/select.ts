@@ -2,7 +2,7 @@ import { makeObservable, observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { OBB } from '~/editor/math/obb'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
-import { DragService, injectDrag } from '~/editor/utility/drag'
+import { DragService, injectDrag } from '~/global/drag'
 import { MenuService, injectMenu } from '~/global/menu'
 import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
@@ -51,19 +51,21 @@ export class StageSelectService {
     if (e.button !== 0) return
     if (this.hoverId) return
     const nodesIds = Object.keys(this.SchemaNode.nodeMap)
-    this.Drag.onStart(() => (this.marquee = createBound(0, 0, 0, 0)))
+    this.Drag.onStart(() => {
+      this.SchemaNode.clearSelection()
+      this.marquee = createBound(0, 0, 0, 0)
+    })
       .onMove(({ marquee }) => {
         this.marquee = marquee
         this.stageMarqueeOBB = this.calcStageMarqueeOBB()
         nodesIds.forEach((id) => {
-          const nodeRuntime = this.SchemaNode.findNodeRuntime(id)
-          const testResult = this.stageMarqueeOBB?.hitTest(nodeRuntime.OBB)
+          const OBB = this.SchemaNode.OBBCache.get(id)
+          const testResult = this.stageMarqueeOBB?.hitTest(OBB)
           testResult ? this.SchemaNode.select(id) : this.SchemaNode.unSelect(id)
         })
       })
       .onEnd(({ dragService }) => {
         this.marquee = undefined
-        this.SchemaNode.clearSelection()
         dragService.destroy()
       })
   }

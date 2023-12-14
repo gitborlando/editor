@@ -20,7 +20,7 @@ export class StageWidgetHoverService {
     this.autoDraw()
   }
   @When('StageViewport.initialized')
-  @Watch('SchemaNode.hoverId', 'StageViewport.zoom')
+  @Watch('SchemaNode.hoverId', 'SchemaNode.selectCount', 'StageViewport.zoom')
   private autoDraw() {
     if (!this.SchemaNode.hoverId || this.SchemaNode.selectIds.has(this.SchemaNode.hoverId)) {
       return this.hoverWidget.clear()

@@ -1,5 +1,5 @@
 import { v4 } from 'uuid'
-import { macroStringMatch } from '~/shared/macro/string-match'
+import { macro_StringMatch } from '~/shared/macro/string-match'
 import { GlobalThis, timeRecord } from '~/shared/utils'
 GlobalThis.ids = <string[]>[]
 
@@ -10,7 +10,7 @@ if (!GlobalThis.ids.length) {
 }
 
 const set = new Set(['transform', 'marquee'])
-const tt = macroStringMatch`id === transform | marquee`
+const tt = macro_StringMatch`id === transform | marquee`
 
 const log = timeRecord()
 ;(<string[]>GlobalThis.ids).forEach((id) => {

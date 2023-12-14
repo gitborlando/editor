@@ -3,17 +3,17 @@ import { CSSProperties } from 'react'
 export * from './themes'
 
 export interface IRect {
-  width: number | 'fit-content' | `${number}%` | `${number}px` | `${number}vw` | (string & {})
-  height: number | 'fit-content' | `${number}%` | `${number}px` | `${number}vh` | (string & {})
-  left: number | `${number}%` | `${number}px` | (string & {})
-  right: number | `${number}%` | `${number}px` | (string & {})
-  top: number | `${number}%` | `${number}px` | (string & {})
-  bottom: number | `${number}%` | `${number}px` | (string & {})
+  width: number | 'fit-content' | '100%' | '50%' | (string & {})
+  height: number | 'fit-content' | '100%' | '50%' | (string & {})
+  left: number | '100%' | (string & {})
+  right: number | '100%' | (string & {})
+  top: number | '100%' | (string & {})
+  bottom: number | '100%' | (string & {})
 }
 
 export const rect = (
-  width: IRect['width'],
-  height: IRect['height'],
+  width: IRect['width'] | '100%',
+  height: IRect['height'] | '100%',
   radius?: number | 'no-radius',
   bgColor?: CSSProperties['color'] | 'no-bgColor'
 ) => ({
@@ -42,7 +42,7 @@ export const default$ = {
   hover: {
     border: {
       '&:hover': {
-        boxShadow: 'inset 0 0 0px 1px #57ADFB',
+        boxShadow: 'inset 0 0 0px 0.7px #9166FF',
       },
     },
     background: {
@@ -50,6 +50,15 @@ export const default$ = {
         backgroundColor: 'rgba(138, 138, 138, 0.13)',
         //color: 'rgba(36, 138, 255, 1)',
       },
+    },
+  },
+  active: {
+    border: {
+      boxShadow: 'inset 0 0 0px 0.7px #9166FF',
+    },
+    background: {
+      backgroundColor: 'rgba(138, 138, 138, 0.13)',
+      //color: 'rgba(36, 138, 255, 1)',
     },
   },
   color: {

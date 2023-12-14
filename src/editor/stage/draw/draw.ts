@@ -1,15 +1,15 @@
 import { inject, injectable } from 'tsyringe'
-import { min } from '~/editor/math/base'
-import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
+import { min, rotatePoint } from '~/editor/math/base'
+import { xy_plus } from '~/editor/math/xy'
+import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
+import { OperateService, injectOperate } from '~/editor/operate/operate'
 import { IFrame, ILine, INode, IRect, IStar, ITriangle, IVector } from '~/editor/schema/type'
-import { SettingService, injectSetting } from '~/global/setting'
+import { OptimizeCache } from '~/shared/cache'
 import { autobind } from '~/shared/decorator'
-import { MultiCache } from '~/shared/multi-cache'
 import { XY } from '~/shared/structure/xy'
 import { cullNegatives } from '~/shared/utils'
 import { StageElementService, injectStageElement } from '../element'
 import { PIXI } from '../pixi'
-import { StageViewportService, injectStageViewport } from '../viewport'
 import { Path } from './path/path'
 import { PathPoint } from './path/point'
 
@@ -21,9 +21,8 @@ export class StageDrawService {
   currentElement!: IStageElement
   constructor(
     @injectStageElement private StageElement: StageElementService,
-    @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectStageViewport private StageViewport: StageViewportService,
-    @injectSetting private Setting: SettingService
+    @injectOperate private Operate: OperateService,
+    @injectOperateGeometry private OperateGeometry: OperateGeometryService
   ) {}
   drawNode(node: INode) {
     if (node.type === 'frame') this.drawFrame(node)
@@ -45,8 +44,6 @@ export class StageDrawService {
     const { x, y, width, height, id, fill, points, rotation } = node
     const element = this.findElementOrCreate(id, 'graphic')
     element.clear()
-    this.SchemaNode.selectIds.has(id) &&
-      element.lineStyle(1 / this.StageViewport.zoom, this.Setting.color)
     this.drawFill(element, fill)
     this.drawPath(element, node)
   }
@@ -56,8 +53,6 @@ export class StageDrawService {
     element.clear()
     this.drawFill(element, fill)
     // element.lineStyle(1, 'green')
-    this.SchemaNode.selectIds.has(id) &&
-      element.lineStyle(1 / this.StageViewport.zoom, this.Setting.color)
     this.drawPath(element, node)
   }
   private drawStar(node: IStar) {
@@ -66,8 +61,6 @@ export class StageDrawService {
     element.clear()
     this.drawFill(element, fill)
     //element.lineStyle(1, 'green')
-    this.SchemaNode.selectIds.has(id) &&
-      element.lineStyle(1 / this.StageViewport.zoom, this.Setting.color)
     this.drawPath(element, node)
     //this.drawHitArea(element)
   }
@@ -77,8 +70,6 @@ export class StageDrawService {
     element.clear()
     this.drawFill(element, fill)
     element.lineStyle(1, 'black')
-    this.SchemaNode.selectIds.has(id) &&
-      element.lineStyle(1 / this.StageViewport.zoom, this.Setting.color)
     this.drawPath(element, node)
     this.drawHitArea(element)
   }
@@ -87,16 +78,17 @@ export class StageDrawService {
   }
   drawPath(element: PIXI.Graphics, node: IVector) {
     const createPath = () => {
-      const pathPoints = node.points.map((nodePoint) => {
-        const rotatedXY = XY.From(nodePoint).rotate(XY.Of(0, 0), node.rotation)
+      const pathPoints = node.points.map((nodePoint, i) => {
+        const centerXY = XY.Of(node.centerX, node.centerY)
+        const rotatedXY = rotatePoint(nodePoint.x, nodePoint.y, 0, 0, node.rotation)
+        xy_plus(rotatedXY, centerXY)
         const rotatedHandleLeft =
           nodePoint.handleLeft && XY.From(nodePoint.handleLeft).rotate(XY.Of(0, 0), node.rotation)
         const rotatedHandleRight =
           nodePoint.handleRight && XY.From(nodePoint.handleRight).rotate(XY.Of(0, 0), node.rotation)
-        const centerXY = XY.Of(node.centerX, node.centerY)
         return new PathPoint({
           ...nodePoint,
-          ...rotatedXY.plus(centerXY),
+          ...rotatedXY,
           ...(rotatedHandleLeft && { handleLeft: rotatedHandleLeft.plus(centerXY) }),
           ...(rotatedHandleRight && { handleRight: rotatedHandleRight.plus(centerXY) }),
         })
@@ -104,14 +96,21 @@ export class StageDrawService {
       return new Path(pathPoints)
     }
 
-    const cache = MultiCache.GetOrNew('draw-path')
-    const { geometryChanged } = this.SchemaNode.findNodeRuntime(node.id)
+    const cache = OptimizeCache.GetOrNew<Path>('draw-path')
+    const { oneTickChange } = this.Operate
+    const { isGeometryChanged, beforeOperate } = this.OperateGeometry
 
     let path: Path
-    if (geometryChanged) {
-      path = cache.set(node.id, createPath())
-    } else {
+    if (!isGeometryChanged.value) {
       path = cache.getSet(node.id, () => createPath())
+    } else {
+      if (beforeOperate.get('newValues')[0][0] === 'x') {
+        const x = oneTickChange['x']!
+        path = cache.get(node.id)
+        path.forEachPoint(({ cur }) => (cur.x += x.new - x.old))
+      } else {
+        path = cache.set(node.id, createPath())
+      }
     }
 
     const hasArcedPointMap = new Set<PathPoint>()

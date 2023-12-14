@@ -1,9 +1,8 @@
 import { v4 } from 'uuid'
-import { XY } from '../shared/structure/xy'
 import { SchemaDefaultService } from './schema/default'
 import { INode } from './schema/type'
 
-export const mockJsonFile = mockJsonFile2
+export const mockJsonFile = mockJsonFile3
 
 export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
   let s = new Date().getTime()
@@ -21,8 +20,6 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
       height: size,
       x: 0 + j * (size + 30),
       y: 0 + k * (size + 30),
-      pivotX: 0 + j * (size + 30),
-      pivotY: 0 + k * (size + 30),
       centerX: 50 + j * (size + 30),
       centerY: 50 + k * (size + 30),
       radius: 10,
@@ -63,6 +60,7 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
 }
 
 export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
+  const [x, y, width, height] = [100, 0, 100, 100]
   const nodes: Record<string, INode> = {
     rect2: schemaDefault.rect({
       id: 'rect2',
@@ -70,51 +68,72 @@ export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
       width: 100,
       height: 100,
       x: 100,
-      pivotX: 100,
       centerX: 150,
+      centerY: 50,
       parentId: 'page1',
     }),
-    rect3: schemaDefault.rect({
-      id: 'rect3',
+    rect7: schemaDefault.rect({
+      id: 'rect7',
+      name: '测试矩形1',
+      width: 100,
+      height: 100,
+      x: 300,
+      centerX: 350,
+      centerY: 50,
+      parentId: 'page1',
+    }),
+    rect10: schemaDefault.rect({
+      id: 'rect10',
       name: '测试矩形1',
       width: 200,
       height: 100,
-      x: 200,
-      pivotX: 200,
-      centerX: 300,
+      x: 100,
+      y: 100,
+      centerX: 200,
+      centerY: 150,
       parentId: 'page1',
+      fill: 'skyblue',
     }),
-    line1: schemaDefault.line({
-      id: 'line1',
-      name: '测试线段1',
-      height: 1,
-      start: XY.Of(300, 0),
-      end: XY.Of(400, 100),
-      parentId: 'page1',
-    }),
-    triangle1: schemaDefault.triangle({
-      id: 'triangle1',
-      width: 100,
-      height: 100,
-      x: 200,
-      pivotX: 200,
-      centerX: 250,
-      parentId: 'page1',
-    }),
-    irregular1: schemaDefault.star({
-      id: 'irregular1',
-      width: 100,
-      height: 100,
-      x: 500,
-      pivotX: 500,
-      centerX: 525,
-      points: [
-        schemaDefault.createPoint(-50, -50, 'no-bezier', 0, XY.Of(-100, -50)),
-        schemaDefault.createPoint(50, 0, 'no-bezier', 0),
-        schemaDefault.createPoint(-50, 50, 'no-bezier', 0, undefined, XY.Of(-100, 50)),
-      ],
-      parentId: 'page1',
-    }),
+    // rect3: schemaDefault.rect({
+    //   id: 'rect3',
+    //   name: '测试矩形1',
+    //   width: 200,
+    //   height: 200,
+    //   x: 250,
+    //   centerX: 300,
+    //   parentId: 'page1',
+    // }),
+    // line1: schemaDefault.line({
+    //   id: 'line1',
+    //   name: '测试线段1',
+    //   height: 1,
+    //   start: XY.Of(300, 0),
+    //   end: XY.Of(400, 100),
+    //   parentId: 'page1',
+    // }),
+    // triangle1: schemaDefault.triangle({
+    //   id: 'triangle1',
+    //   width: 100,
+    //   height: 100,
+    //   x: 300,
+    //   y: 400,
+    //   centerX: 250,
+    //   centerY: 250,
+    //   parentId: 'page1',
+    // }),
+    // irregular1: schemaDefault.star({
+    //   id: 'irregular1',
+    //   width: 100,
+    //   height: 100,
+    //   x: 500,
+    //   centerX: 525,
+    //   points: [
+    //     schemaDefault.createPoint(500, 0, 'no-bezier', 0, XY.Of(400, 0)),
+    //     schemaDefault.createPoint(500, 0, 'no-bezier', 0),
+    //     schemaDefault.createPoint(500, 100, 'no-bezier', 0, undefined, XY.Of(400, 100)),
+    //   ],
+    //   parentId: 'page1',
+    // }),
   }
 
   return {

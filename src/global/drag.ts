@@ -1,6 +1,7 @@
 import { makeObservable, observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
+import { createHooker } from '~/shared/hooker/hooker'
 import { IBound, IXY, makeAction, noopFunc, type ICursor } from '~/shared/utils'
 
 export type IDragData = {
@@ -16,6 +17,9 @@ export type IDragData = {
 export class DragService {
   @observable canMove = false
   @observable cursor: ICursor = 'auto'
+  beforeDrag = createHooker()
+  duringDrag = createHooker()
+  afterDrag = createHooker()
   private current = { x: 0, y: 0 }
   private start = { x: 0, y: 0 }
   private shift = { x: 0, y: 0 }
@@ -35,6 +39,7 @@ export class DragService {
         this.start = { x: clientX, y: clientY }
         this.marquee = this.calculateMarquee()
         this.canMove = true
+        this.beforeDrag.dispatch()
         makeAction(callback)?.({
           dragService: this,
           current: this.current,
@@ -59,6 +64,7 @@ export class DragService {
           y: this.current.y - this.start.y,
         }
         this.marquee = this.calculateMarquee()
+        this.duringDrag.dispatch()
         makeAction(callback)({
           dragService: this,
           current: this.current,
@@ -77,6 +83,7 @@ export class DragService {
       (this.endHandler = () => {
         if (!this.canMove) return
         this.marquee = this.calculateMarquee()
+        this.afterDrag.dispatch()
         makeAction(callback)?.({
           dragService: this,
           current: this.current,

@@ -220,8 +220,6 @@ export class SchemaDefaultService {
     return {
       x: x,
       y: y,
-      pivotX: x,
-      pivotY: y,
       centerX: x + width / 2,
       centerY: y + height / 2,
       width: width,
@@ -243,12 +241,12 @@ export class SchemaDefaultService {
       ...this.createSchemaMeta(),
       x: 0,
       y: 0,
-      pivotX: 0,
-      pivotY: 0,
       centerX: 50,
       centerY: 50,
       width: 100,
       height: 100,
+      scaleX: 1,
+      scaleY: 1,
       opacity: 1,
       rotation: 0,
       hFlip: false,
@@ -302,21 +300,23 @@ export class SchemaDefaultService {
     return { name: nameIndex[0] + ' ' + (nameIndex[1] as number)++ }
   }
   private createRectPoints(x: number, y: number, width: number, height: number) {
+    const halfWidth = width / 2
+    const halfHeight = height / 2
     return {
       points: [
-        this.createPoint(-width / 2, -height / 2, 'no-bezier', 0),
-        this.createPoint(width / 2, -height / 2, 'no-bezier', 0),
-        this.createPoint(width / 2, height / 2, 'no-bezier', 0),
-        this.createPoint(-width / 2, height / 2, 'no-bezier', 0),
+        this.createPoint(-halfWidth, -halfHeight, 'no-bezier', 0),
+        this.createPoint(halfWidth, -halfHeight, 'no-bezier', 0),
+        this.createPoint(halfWidth, halfHeight, 'no-bezier', 0),
+        this.createPoint(-halfWidth, halfHeight, 'no-bezier', 0),
       ],
     }
   }
   private createTrianglePoints(x: number, y: number, width: number, height: number) {
     return {
       points: [
-        this.createPoint(width / 2, -height / 2, 'no-bezier', 0),
-        this.createPoint(width / 2, height / 2, 'no-bezier', 0),
-        this.createPoint(-width / 2, height / 2, 'no-bezier', 0),
+        this.createPoint(x + width, y, 'no-bezier', 0),
+        this.createPoint(x + width, y + height, 'no-bezier', 0),
+        this.createPoint(x, y + height, 'no-bezier', 0),
       ],
     }
   }

@@ -16,6 +16,7 @@ export const PageComp: FC<IPageComp> = observer(({}) => {
   const state = useLocalObservable(() => ({
     height: 200,
   }))
+
   return (
     <Flex layout='v' className={classes.Page}>
       <PageHeaderComp />

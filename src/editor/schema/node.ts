@@ -1,73 +1,49 @@
-import {
-  IObjectDidChange,
-  IObjectWillChange,
-  Lambda,
-  intercept,
-  makeObservable,
-  observable,
-  observe,
-  when,
-} from 'mobx'
+import { makeObservable, observable, when } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
-import { RunInAction, Watch, autobind } from '~/shared/decorator'
-import { macroStringMatch } from '~/shared/macro/string-match'
-import { XY } from '~/shared/structure/xy'
+import { WatchNext, autobind } from '~/shared/decorator'
+import { createHooker } from '~/shared/hooker/hooker'
 import { Delete } from '~/shared/utils'
-import { MultiCache } from '../../shared/multi-cache'
-import { max, min, numberHalfFix, rcos, rsin } from '../math/base'
+import { OptimizeCache } from '../../shared/cache'
 import { OBB } from '../math/obb'
 import { PixiService, injectPixi } from '../stage/pixi'
 import { SchemaPageService } from './page'
 import { INode } from './type'
-
-type INodeRuntime = {
-  nodeRuntime: INodeRuntime
-  observed: boolean
-  disposers: Lambda[]
-  oneTickChange: {
-    [K in keyof INode]?: { new: INode[K]; old: INode[K] }
-  }
-  changedProps: Set<keyof INode>
-  geometryChanged: boolean
-  OBB: OBB
-}
 
 @autobind
 @injectable()
 export class SchemaNodeService {
   @observable initialized = false
   @observable hoverId = ''
-  @observable selectChange = false
-  @observable nodeObserved = false
+  @observable selectCount = 0
   selectIds = new Set<string>()
   dirtyIds = new Set<string>()
   nodeMap = <Record<string, INode>>{}
-  private nodeRuntimeMap = <Record<string, INodeRuntime>>{}
-  private flushDirtyCallbacks = <((id: string) => void)[]>[]
+  whenSelectChange = createHooker()
+  beforeFlushDirty = createHooker()
+  duringFlushDirty = createHooker<[string]>()
+  afterFlushDirty = createHooker()
+  OBBCache = OptimizeCache.GetOrNew<OBB>('OBB')
   constructor(
     @injectPixi private Pixi: PixiService,
     @inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService
   ) {
     makeObservable(this)
-    when(() => this.Pixi.initialized && this.initialized).then(() => {
-      this.Pixi.app.ticker.add(this.flushDirty)
-      this.autoOnHoverObserve()
-      this.autoOnSelectObserve()
-    })
-    this.onFlushDirty((id) => {
-      this.reconcilePropChange(id)
-      this.vectorChangeToPoints(id)
-    })
+    this.Pixi.afterInitialize.hook(() => {
+      when(() => this.initialized).then(() => {
+        this.Pixi.app.ticker.add(this.flushDirty)
+        this.autoDispatchSelectChange()
+      })
+    }, 0)
   }
   setMap(map: typeof this.nodeMap) {
     this.nodeMap = map
-    Object.keys(this.nodeMap).forEach(this.initNodeRuntime)
+    Object.keys(this.nodeMap).forEach(this.initOBB)
     this.initialized = true
   }
   add(node: INode) {
     this.nodeMap[node.id] = node
-    this.initNodeRuntime(node.id)
-    return this.observe(node.id)
+    this.initOBB(node.id)
+    return node
   }
   delete(id: string) {
     const node = this.find(id)
@@ -75,14 +51,11 @@ export class SchemaNodeService {
     if ('childIds' in node) node.childIds.forEach((i) => this.delete(i))
     // const parent = this.find(node.parentId) as INodeParent
     // Delete(parent.childIds, (id) => id === node.id)
-    this.deleteNodeRuntime(id)
-    MultiCache.GetOrNew('draw-path').delete(id)
+    this.OBBCache.delete(id)
+    OptimizeCache.GetOrNew('draw-path').delete(id)
   }
   find(id: string) {
     return this.nodeMap[id]
-  }
-  findNodeRuntime(id: string) {
-    return this.nodeRuntimeMap[id]
   }
   connect(id: string, parentId: string) {
     const nodeParent = this.find(parentId)
@@ -103,164 +76,46 @@ export class SchemaNodeService {
   hover(id: string) {
     this.hoverId = id
   }
-  unHover(id: string) {
+  unHover() {
     this.hoverId = ''
   }
   select(id: string) {
     if (this.selectIds.has(id)) return
     this.selectIds.add(id)
-    this.selectChange = !this.selectChange
+    this.selectCount--
   }
   unSelect(id: string) {
     if (!this.selectIds.has(id)) return
     this.selectIds.delete(id)
-    this.selectChange = !this.selectChange
+    this.selectCount++
   }
-  @RunInAction
   clearSelection() {
     this.selectIds.forEach(this.collectDirty)
     this.selectIds = new Set()
+    this.selectCount = 0
+  }
+  @WatchNext('selectCount')
+  private autoDispatchSelectChange() {
+    this.whenSelectChange.dispatch()
   }
   collectDirty(id: string) {
     this.dirtyIds.add(id)
   }
-  onFlushDirty(callback: (id: string) => void) {
-    this.flushDirtyCallbacks.push(callback)
-  }
   flushDirty() {
+    this.beforeFlushDirty.dispatch()
     this.dirtyIds.forEach((id) => {
-      this.flushDirtyCallbacks.forEach((flush) => flush(id))
+      this.duringFlushDirty.dispatch(id)
       this.dirtyIds.delete(id)
-      const { oneTickChange, changedProps, nodeRuntime } = this.findNodeRuntime(id)
-      changedProps.clear()
-      nodeRuntime.geometryChanged = false
-      Object.values(oneTickChange).forEach((prop) => (prop.old = prop.new))
     })
+    this.afterFlushDirty.dispatch()
   }
-  private initNodeRuntime(id: string) {
-    const { centerX, centerY, width, height, rotation } = this.find(id)
-    const obb = new OBB(centerX, centerY, width, height, rotation)
-    const nodeRuntime: INodeRuntime = {
-      nodeRuntime: <any>null,
-      observed: false,
-      disposers: [],
-      changedProps: new Set(),
-      oneTickChange: {},
-      OBB: obb,
-      geometryChanged: false,
-    }
-    nodeRuntime.nodeRuntime = nodeRuntime
-    this.nodeRuntimeMap[id] = nodeRuntime
+  makeSelectDirty() {
+    this.selectIds.forEach(this.collectDirty)
   }
-  private deleteNodeRuntime(id: string) {
-    this.findNodeRuntime(id).disposers.forEach((dispose) => dispose())
-    Delete(this.nodeRuntimeMap, id)
-  }
-  private observe(id: string) {
-    const node = this.find(id)
-    const nodeRuntime = this.findNodeRuntime(id)
-    if (nodeRuntime.observed) return node
-    const observedNode = observable(node)
-    this.nodeMap[id] = observedNode
-    this.listenNodeWillChange(observedNode)
-    this.listenNodeDidChange(observedNode)
-    nodeRuntime.observed = true
-    return observedNode
-  }
-  @Watch('hoverId')
-  private autoOnHoverObserve() {
-    if (this.hoverId === '') return
-    this.observe(this.hoverId)
-  }
-  @Watch('selectChange')
-  private autoOnSelectObserve() {
-    this.dirtyIds.forEach(this.observe)
-  }
-  private listenNodeWillChange(node: INode) {
-    const disposer = intercept(node, (ctx) => {
-      if (ctx.type !== 'update') return ctx
-      this.fixNodeChange(ctx)
-      return ctx
-    })
-    this.findNodeRuntime(node.id).disposers.push(disposer)
-  }
-  private fixNodeChange(ctx: IObjectWillChange & { type: 'update' | 'add' }) {
-    const propName = <keyof INode>ctx.name.toString()
-    if (macroStringMatch`x|y|width|height|rotation`(propName)) {
-      ctx.newValue = numberHalfFix(ctx.newValue)
-    }
-    if (macroStringMatch`width|height`(propName)) {
-      ctx.newValue = max(0, ctx.newValue)
-    }
-    if (macroStringMatch`rotation`(propName)) {
-      ctx.newValue = max(-180, min(180, ctx.newValue))
-    }
-  }
-  private listenNodeDidChange(node: INode) {
-    const disposer = observe(node, (ctx) => {
-      if (ctx.type !== 'update') return ctx
-      this.collectDirty(node.id)
-      this.recordOneTickChange(node.id, ctx)
-      return ctx
-    })
-    this.findNodeRuntime(node.id).disposers.push(disposer)
-  }
-  private recordOneTickChange(id: string, ctx: IObjectDidChange & { type: 'update' }) {
-    const { oneTickChange, changedProps, nodeRuntime } = this.findNodeRuntime(id)
-    const propName = <keyof INode>ctx.name.toString()
-    changedProps.add(propName)
-    if (!oneTickChange[propName]) {
-      ;(<any>oneTickChange[propName]) = {}
-      oneTickChange[propName]!.old = ctx.oldValue
-    }
-    oneTickChange[propName]!.new = ctx.newValue
-    if (macroStringMatch`x|y|width|height|rotation`(propName)) {
-      nodeRuntime.geometryChanged = true
-    }
-  }
-  @RunInAction
-  private reconcilePropChange(id: string) {
-    const node = this.find(id)
-    const { oneTickChange, changedProps } = this.findNodeRuntime(id)
-    const { x, y, width, height, rotation } = oneTickChange
-    if (changedProps.has('x') && x) {
-      node.centerX += x.new - x.old
-      node.pivotX += x.new - x.old
-    }
-    if (changedProps.has('y') && y) {
-      node.centerY += y.new - y.old
-      node.pivotY += y.new - y.old
-    }
-    if (changedProps.has('width') && width) {
-      node.centerX += (rcos(node.rotation) * (width.new - width.old)) / 2
-      node.centerY += (rsin(node.rotation) * (width.new - width.old)) / 2
-    }
-    if (changedProps.has('height') && height) {
-      node.centerX += (rsin(node.rotation) * (height.new - height.old)) / 2
-      node.centerY -= (rcos(node.rotation) * (height.new - height.old)) / 2
-    }
-    if (changedProps.has('rotation') && rotation) {
-      const originXY = XY.Of(node.centerX, node.centerY)
-      XY.Of(node.pivotX, node.pivotY).rotate(originXY, rotation.new).mutate(node)
-    }
-  }
-  @RunInAction
-  private vectorChangeToPoints(id: string) {
-    const vector = this.find(id)
-    if (vector.type !== 'vector') return
-    const { width, height } = this.findNodeRuntime(id).oneTickChange
-    vector.points.forEach((point) => {
-      if (width) {
-        point.x *= width.new / width.old
-        point.handleLeft && (point.handleLeft.x *= width.new / width.old)
-        point.handleRight && (point.handleRight.x *= width.new / width.old)
-      }
-      if (height) {
-        point.y *= height.new / height.old
-        point.handleLeft && (point.handleLeft.y *= height.new / height.old)
-        point.handleRight && (point.handleRight.y *= height.new / height.old)
-      }
-    })
+  private initOBB(id: string) {
+    const { centerX, centerY, width, height, rotation, scaleX, scaleY } = this.find(id)
+    const obb = new OBB(centerX, centerY, width, height, rotation, scaleX, scaleY)
+    this.OBBCache.set(id, obb)
   }
 }
 

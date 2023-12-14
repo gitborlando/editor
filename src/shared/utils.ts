@@ -101,12 +101,21 @@ export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOpt
 }
 
 export function timeRecord() {
+  let all = 0
   let start = performance.now()
-  return (text?: any) => {
-    const shift = performance.now() - start
-    text && console.log(text, shift)
-    start = performance.now()
-    return shift
+  return {
+    every: (text?: any) => {
+      const shift = performance.now() - start
+      all += shift
+      text && console.log(text, shift)
+      start = performance.now()
+      return shift
+    },
+    all: (text?: any) => {
+      const shift = performance.now() - start
+      all += shift
+      console.log(text, all)
+    },
   }
 }
 
