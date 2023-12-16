@@ -1,9 +1,9 @@
 import { inject, injectable } from 'tsyringe'
 import { SettingService, injectSetting } from '~/global/setting'
 import { Watch, When, autobind } from '~/shared/decorator'
-import { StageSelectService, injectStageSelect } from '../../interact/select'
-import { PIXI, PixiService, injectPixi } from '../../pixi'
-import { StageViewportService, injectStageViewport } from '../../viewport'
+import { StageSelectService, injectStageSelect } from '../interact/select'
+import { PIXI, PixiService, injectPixi } from '../pixi'
+import { StageViewportService, injectStageViewport } from '../viewport'
 
 @autobind
 @injectable()

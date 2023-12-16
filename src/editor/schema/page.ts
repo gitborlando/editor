@@ -1,6 +1,6 @@
-import { makeObservable, observable, when } from 'mobx'
+import { computed, makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { Watch, autobind } from '~/shared/decorator'
+import { autobind } from '~/shared/decorator'
 import { Delete } from '~/shared/utils'
 import { SchemaDefaultService, injectSchemaDefault } from './default'
 import { SchemaNodeService, injectSchemaNode } from './node'
@@ -11,17 +11,16 @@ import { type IPage } from './type'
 export class SchemaPageService {
   @observable pages: IPage[] = []
   @observable currentId = ''
-  @observable currentPage!: IPage
   @observable initialized = false
   constructor(
     @injectSchemaDefault private SchemaDefault: SchemaDefaultService,
     @injectSchemaNode private SchemaNode: SchemaNodeService
   ) {
     makeObservable(this)
-    when(() => !!this.currentId).then(() => {
-      this.autoSetCurrentPage()
-      this.initialized = true
-    })
+    when(() => !!this.currentId).then(() => (this.initialized = true))
+  }
+  @computed get currentPage() {
+    return this.find(this.currentId)!
   }
   setPages(pages: IPage[]) {
     this.pages = pages
@@ -44,10 +43,6 @@ export class SchemaPageService {
   }
   select(id: string) {
     this.currentId = id
-  }
-  @Watch('currentId')
-  private autoSetCurrentPage() {
-    this.currentPage = this.find(this.currentId)!
   }
 }
 

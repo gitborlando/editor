@@ -1,6 +1,6 @@
 import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker/hooker'
+import { createHooker } from '~/shared/hooker'
 import { SchemaNodeService, injectSchemaNode } from '../schema/node'
 import { INode } from '../schema/type'
 

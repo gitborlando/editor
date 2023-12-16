@@ -13,7 +13,7 @@ export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
   const { classes } = useStyles({ right: StageViewport.bound.right })
   return (
     <Flex layout='v' className={classes.RightPanel}>
-      <When condition={SchemaNode.selectCount}>
+      <When condition={SchemaNode.selectIds.size}>
         <BasePropsComp />
       </When>
       <Flex layout='c'>{SchemaNode.hoverId}</Flex>

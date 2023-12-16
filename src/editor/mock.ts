@@ -144,7 +144,7 @@ export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
         id: v4(),
         name: '测试页面1',
         zoom: 1,
-        offset: { x: 0, y: 0 },
+        offset: { x: 100, y: 100 },
         childIds: Object.keys(nodes),
       },
     ],

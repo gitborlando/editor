@@ -1,6 +1,6 @@
 import { min } from '~/editor/math/base'
-import { Path } from '~/editor/stage/draw/path/path'
-import { PathPoint } from '~/editor/stage/draw/path/point'
+import { Path } from '~/editor/math/path/path'
+import { PathPoint } from '~/editor/math/path/point'
 import { XY } from '~/shared/structure/xy'
 import { IXY, cullNegatives } from '~/shared/utils'
 

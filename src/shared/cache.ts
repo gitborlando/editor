@@ -1,13 +1,8 @@
 import { autobind } from '~/shared/decorator'
 
-type IOptimizeCacheName = 'draw-path' | 'OBB' | (string & {})
-
-const optimizeCacheMap = new Map<string, OptimizeCache<any>>()
-
 @autobind
-export class OptimizeCache<T> {
+export class Cache<T> {
   cache = new Map<string, any>()
-  constructor(public readonly name: string) {}
   get(id: string) {
     return this.cache.get(id) as T
   }
@@ -28,11 +23,8 @@ export class OptimizeCache<T> {
   depose() {
     this.cache.clear()
   }
-  static GetOrNew<T>(cacheName: IOptimizeCacheName): OptimizeCache<T> {
-    let cache = optimizeCacheMap.get(cacheName)
-    if (cache) return cache
-    cache = new OptimizeCache(cacheName)
-    optimizeCacheMap.set(cacheName, cache)
-    return cache
-  }
+}
+
+export function createCache<T extends any>() {
+  return new Cache<T>()
 }

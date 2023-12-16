@@ -5,8 +5,11 @@ import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { DragService, injectDrag } from '~/global/drag'
 import { MenuService, injectMenu } from '~/global/menu'
 import { autobind } from '~/shared/decorator'
+import { createHooker } from '~/shared/hooker'
+import { macro_Match } from '~/shared/macro'
 import { XY } from '~/shared/structure/xy'
 import { createBound, type IBound } from '~/shared/utils'
+import { StageElementService, injectStageElement } from '../element'
 import { PixiService, injectPixi } from '../pixi'
 import { StageViewportService, injectStageViewport } from '../viewport'
 
@@ -14,24 +17,25 @@ import { StageViewportService, injectStageViewport } from '../viewport'
 @injectable()
 export class StageSelectService {
   @observable marquee?: IBound
-  private stageMarqueeOBB?: OBB
+  duringSelect = createHooker()
+  afterSelect = createHooker()
+  private marqueeOBB?: OBB
   constructor(
     @injectPixi private Pixi: PixiService,
     @injectDrag private Drag: DragService,
     @injectStageViewport private StageViewport: StageViewportService,
     @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectMenu private Menu: MenuService
+    @injectMenu private Menu: MenuService,
+    @injectStageElement private StageElement: StageElementService
   ) {
     makeObservable(this)
   }
   startInteract() {
-    this.Pixi.addListener('mousedown', this.onDragNodeMove)
     this.Pixi.addListener('mousedown', this.onMousedownSelect)
     this.Pixi.addListener('mousedown', this.onMarqueeSelect)
     this.Pixi.addListener('mousedown', this.onMenu)
   }
   endInteract() {
-    this.Pixi.removeListener('mousedown', this.onDragNodeMove)
     this.Pixi.removeListener('mousedown', this.onMousedownSelect)
     this.Pixi.removeListener('mousedown', this.onMarqueeSelect)
     this.Pixi.removeListener('mousedown', this.onMenu)
@@ -41,15 +45,24 @@ export class StageSelectService {
   }
   private onMousedownSelect(e: Event) {
     if ((e as any).button !== 0) return
+    if (this.Pixi.isForbidEvent) return
     if (!this.hoverId) return this.SchemaNode.clearSelection()
     if (this.SchemaNode.selectIds?.has(this.hoverId)) return
     this.SchemaNode.clearSelection()
     this.SchemaNode.select(this.hoverId)
+    this.afterSelect.dispatch()
   }
   private onMarqueeSelect(_e: Event) {
     const e = _e as MouseEvent
     if (e.button !== 0) return
+    if (this.Pixi.isForbidEvent) return
     if (this.hoverId) return
+    const hitTest = (marqueeOBB: OBB | undefined, obb: OBB) => {
+      if (!marqueeOBB) return false
+      const aabbResult = marqueeOBB.aabbHitTest(obb)
+      if (macro_Match`-180|-90|0|90|180`(obb.rotation)) return aabbResult
+      return aabbResult && marqueeOBB.obbHitTest(obb)
+    }
     const nodesIds = Object.keys(this.SchemaNode.nodeMap)
     this.Drag.onStart(() => {
       this.SchemaNode.clearSelection()
@@ -57,28 +70,18 @@ export class StageSelectService {
     })
       .onMove(({ marquee }) => {
         this.marquee = marquee
-        this.stageMarqueeOBB = this.calcStageMarqueeOBB()
+        this.marqueeOBB = this.calcMarqueeOBB()
         nodesIds.forEach((id) => {
-          const OBB = this.SchemaNode.OBBCache.get(id)
-          const testResult = this.stageMarqueeOBB?.hitTest(OBB)
-          testResult ? this.SchemaNode.select(id) : this.SchemaNode.unSelect(id)
+          const OBB = this.StageElement.OBBCache.get(id)
+          hitTest(this.marqueeOBB, OBB) ? this.SchemaNode.select(id) : this.SchemaNode.unSelect(id)
         })
+        this.duringSelect.dispatch()
       })
       .onEnd(({ dragService }) => {
         this.marquee = undefined
+        this.afterSelect.dispatch()
         dragService.destroy()
       })
-  }
-  private onDragNodeMove(e: Event) {
-    if ((e as any).button !== 0) return
-    if (!this.hoverId) return
-    // const node = this.SchemaNode.find(this.hoverId)
-    // const startXY = XY.From(node)
-    // this.Drag.onSlide(({ shift }) => {
-    //   const realShift = this.StageViewport.toRealStageShift(shift)
-    //   node.x = startXY.x + realShift.x
-    //   node.y = startXY.y + realShift.y
-    // })
   }
   private onMenu(_e: Event) {
     const e = _e as MouseEvent
@@ -86,13 +89,13 @@ export class StageSelectService {
     this.Menu.setShow(true)
     this.Menu.setXY(e.clientX, e.clientY)
   }
-  private calcStageMarqueeOBB() {
+  private calcMarqueeOBB() {
     if (!this.marquee) return
     const { x, y } = this.StageViewport.toRealStageXY(XY.Of(this.marquee.x, this.marquee.y))
     const { x: width, y: height } = this.StageViewport.toRealStageShift(
       XY.Of(this.marquee.width, this.marquee.height)
     )
-    return new OBB(x + width / 2, y + height / 2, width, height, 0)
+    return new OBB(x + width / 2, y + height / 2, width, height, 0, 1, 1)
   }
 }
 

@@ -3,7 +3,7 @@ import { makeObservable, observable } from 'mobx'
 import * as PIXI from 'pixi.js'
 import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker/hooker'
+import { createHooker } from '~/shared/hooker'
 
 export * as PIXI from 'pixi.js'
 
@@ -13,7 +13,7 @@ export class PixiService {
   @observable initialized = false
   container!: HTMLDivElement
   app!: PIXI.Application
-  afterInitialize = createHooker()
+  isForbidEvent = false
   duringTicker = createHooker()
   constructor() {
     makeObservable(this)
@@ -25,8 +25,8 @@ export class PixiService {
     this.container = container
     this.initPixiApp(container)
     this.cull()
+    this.app.ticker.add(this.duringTicker.dispatch)
     this.initialized = true
-    this.afterInitialize.dispatch()
   }
   addListener(
     type: string,
@@ -55,9 +55,6 @@ export class PixiService {
         click: true,
         wheel: true,
       },
-    })
-    this.app.ticker.add(() => {
-      this.duringTicker.dispatch()
     })
     container.appendChild(this.app.view as any)
     this.stage.sortableChildren = true

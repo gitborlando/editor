@@ -1,12 +1,6 @@
 import autoBindMethods from 'class-autobind-decorator'
 import { reaction, runInAction, when } from 'mobx'
-
-const proxyThis = ($this: any) => {
-  function get(_: any, key: any) {
-    return new Function('$this', `with($this){return ${<string>key}}`)($this)
-  }
-  return new Proxy({}, { get })
-}
+import { stringPathProxy, withNewFunction } from './utils'
 
 export const autobind = autoBindMethods
 
@@ -30,10 +24,10 @@ export function WatchNext(...chains: string[]) {
     descriptor.value = function (...args: any[]) {
       chains.forEach((chain) => {
         if (chain.endsWith('?hook')) {
-          proxyThis(this)[chain.slice(0, -5)].hook(originalMethod.bind(this))
+          stringPathProxy(this)[chain.slice(0, -5)].hook(originalMethod.bind(this))
         } else {
           reaction(
-            () => proxyThis(this)[chain],
+            () => stringPathProxy(this)[chain],
             () => originalMethod.apply(this, args),
             { fireImmediately: false }
           )
@@ -48,7 +42,7 @@ export function Hook(chain: string, index?: number) {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
     descriptor.value = function (...args: any[]) {
-      proxyThis(this)[chain].hook(originalMethod.bind(this), index)
+      stringPathProxy(this)[chain].hook(originalMethod.bind(this), index)
     }
     return descriptor
   }
@@ -58,7 +52,31 @@ export function When(chain: string) {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
     descriptor.value = function (...args: any[]) {
-      when(() => proxyThis(this)[chain]).then(() => originalMethod.apply(this, args))
+      when(() => stringPathProxy(this)[chain]).then(() => originalMethod.apply(this, args))
+    }
+    return descriptor
+  }
+}
+
+export function Before_After(before: string, after: string) {
+  return (target: any, name: string, descriptor: PropertyDescriptor) => {
+    const originalMethod = descriptor.value
+    descriptor.value = function (...args: any[]) {
+      withNewFunction(before)(this)
+      originalMethod.apply(this, args)
+      withNewFunction(after)(this)
+    }
+    return descriptor
+  }
+}
+
+export function Before_After_Toggle(toggle: string) {
+  return (target: any, name: string, descriptor: PropertyDescriptor) => {
+    const originalMethod = descriptor.value
+    descriptor.value = function (...args: any[]) {
+      withNewFunction(toggle + ' = true')(this)
+      originalMethod.apply(this, args)
+      withNewFunction(toggle + ' = false')(this)
     }
     return descriptor
   }

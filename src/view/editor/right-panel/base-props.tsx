@@ -11,7 +11,7 @@ type IBasePropsComp = {}
 export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
   const { classes } = useStyles({})
   const { Drag } = useGlobalService()
-  const { OperateGeometry } = useEditor()
+  const { OperateGeometry, StageViewport } = useEditor()
   const { proxyData } = OperateGeometry
   const xRef = useRef<HTMLDivElement>(null)
   const yRef = useRef<HTMLDivElement>(null)
@@ -34,6 +34,12 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
     xRef.current?.querySelector('.label')?.addEventListener('mousedown', () => {
       state.onDragProps = ['x']
     })
+    xRef.current?.querySelector('.operator')?.addEventListener('mousedown', () => {
+      OperateGeometry.beforeOperate.dispatch(['x'])
+    })
+    xRef.current?.querySelector('.operator')?.addEventListener('mouseup', () => {
+      OperateGeometry.afterOperate.dispatch()
+    })
     yRef.current?.querySelector('.label')?.addEventListener('mousedown', () => {
       state.onDragProps = ['y']
     })
@@ -47,6 +53,7 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
       state.onDragProps = ['rotation']
     })
   }, [])
+
   return (
     <Flex layout='h' className={classes.SchemaBase}>
       <Input
@@ -55,6 +62,7 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
         label='横坐标'
         value={numberHalfFix(proxyData.x)}
         onNewValueApply={(v) => (proxyData.x = v)}
+        slideRate={1 / StageViewport.zoom}
       />
       <Input
         ref={yRef}
@@ -67,14 +75,14 @@ export const BasePropsComp: FC<IBasePropsComp> = observer(({}) => {
         ref={widthRef}
         className={classes.input}
         label='宽度'
-        value={proxyData.width}
+        value={numberHalfFix(proxyData.width)}
         onNewValueApply={(v) => (proxyData.width = v)}
       />
       <Input
         ref={heightRef}
         className={classes.input}
         label='高度'
-        value={proxyData.height}
+        value={numberHalfFix(proxyData.height)}
         onNewValueApply={(v) => (proxyData.height = v)}
       />
       <Input

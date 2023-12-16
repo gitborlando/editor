@@ -1,13 +1,17 @@
-import { inject, injectable } from 'tsyringe'
+import { injectable } from 'tsyringe'
+import { xy_mutate } from '~/editor/math/xy'
 import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { DragService, injectDrag } from '~/global/drag'
 import { SettingService, injectSetting } from '~/global/setting'
-import { Hook, autobind } from '~/shared/decorator'
+import { When, autobind } from '~/shared/decorator'
+import { watchNext } from '~/shared/mobx'
 import { XY } from '~/shared/structure/xy'
-import { PIXI, PixiService, injectPixi } from '../../pixi'
-import { StageViewportService, injectStageViewport } from '../../viewport'
-import { StageDrawService, injectStageDraw } from '../draw'
+import { StageDrawPathService, injectStageDrawPath } from '../draw/path'
+import { StageElementService, injectStageElement } from '../element'
+import { StageTransformService, injectStageTransform } from '../interact/transform'
+import { PIXI, PixiService, injectPixi } from '../pixi'
+import { StageViewportService, injectStageViewport } from '../viewport'
 
 @autobind
 @injectable()
@@ -24,7 +28,9 @@ export class StageWidgetTransformService {
   lineT = new PIXI.Graphics()
   lineR = new PIXI.Graphics()
   lineB = new PIXI.Graphics()
+  hitArea = new PIXI.Graphics()
   outlines = <PIXI.Graphics[]>[]
+  transformContainer = new PIXI.Container()
   private renderType = <'reDraw' | 'clear' | 'reserve'>'reserve'
   constructor(
     @injectPixi private Pixi: PixiService,
@@ -33,20 +39,36 @@ export class StageWidgetTransformService {
     @injectSetting private Setting: SettingService,
     @injectSchemaNode private SchemaNode: SchemaNodeService,
     @injectOperateGeometry private OperateGeometry: OperateGeometryService,
-    @injectStageDraw private StageDraw: StageDrawService
+    @injectStageDrawPath private StageDrawPath: StageDrawPathService,
+    @injectStageTransform private StageTransform: StageTransformService,
+    @injectStageElement private StageElement: StageElementService
   ) {
     this.initialize()
   }
-  @Hook('Pixi.afterInitialize', 2)
+  @When('Pixi.initialized')
   private initialize() {
+    this.setup()
+    this.bindHitAreaEvent()
+    this.hookRender()
+  }
+  @When('SchemaNode.initialized')
+  private setup() {
+    Object.keys(this.SchemaNode.nodeMap).forEach((id) => {
+      const outline = this.StageElement.outlineCache.set(id, new PIXI.Graphics())
+      this.outlines.push(outline)
+    })
+    this.addToStage()
+  }
+  private hookRender() {
     this.Pixi.duringTicker.hook(() => {
+      //   this.draw()
       if (this.renderType === 'reDraw') this.draw()
       if (this.renderType === 'clear') this.clear()
     })
     this.OperateGeometry.beforeOperate.hook(() => (this.renderType = 'clear'))
     this.OperateGeometry.afterOperate.hook(() => (this.renderType = 'reDraw'))
-    this.SchemaNode.whenSelectChange.hook(() => (this.renderType = 'reDraw'))
-    this.StageViewport.whenZoomChange.hook(() => (this.renderType = 'reDraw'))
+    watchNext('SchemaNode.selectIds').hook(() => (this.renderType = 'reDraw'))
+    watchNext('StageViewport.zoom').hook(() => (this.renderType = 'reDraw'))
   }
   private get vertexes() {
     return [this.vertexTL, this.vertexTR, this.vertexBL, this.vertexBR]
@@ -57,8 +79,11 @@ export class StageWidgetTransformService {
   private get lines() {
     return [this.lineL, this.lineT, this.lineR, this.lineB]
   }
+  private get components() {
+    return [this.hitArea, ...this.lines, ...this.outlines, ...this.vertexes]
+  }
   private draw() {
-    if (this.SchemaNode.selectCount === 0) {
+    if (!this.SchemaNode.selectIds.size) {
       return this.clear()
     }
     this.clear()
@@ -66,22 +91,22 @@ export class StageWidgetTransformService {
     this.drawVertexes()
     this.drawLine()
     this.drawOutline()
-    this.addToStage()
+    this.drawHitArea()
     this.renderType = 'reserve'
   }
   private clear() {
-    ;[...this.lines, ...this.outlines, ...this.vertexes].forEach((i) => i.clear())
-    this.outlines = []
+    this.components.forEach((i) => i.clear())
     this.renderType = 'reserve'
   }
   private addToStage() {
-    ;[...this.lines, ...this.outlines, ...this.vertexes].forEach((i) =>
-      i.setParent(this.Pixi.stage)
-    )
+    this.components.forEach((i) => i.setParent(this.transformContainer))
+    this.transformContainer.zIndex = 990
+    this.transformContainer.setParent(this.Pixi.stage)
   }
   private calcVertexXY() {
-    const { centerX, centerY, width, height, rotation } = this.OperateGeometry.proxyData
-    const { x: pivotX, y: pivotY } = this.OperateGeometry.pivotXY
+    const { centerX, centerY, width, height, rotation } = this.StageTransform.data
+    const pivotX = centerX - width / 2
+    const pivotY = centerY - height / 2
     const centerXY = XY.Of(centerX, centerY)
     this.vertexTL_XY = XY.Of(pivotX, pivotY).rotate(centerXY, rotation)
     this.vertexTR_XY = XY.Of(pivotX + width, pivotY).rotate(centerXY, rotation)
@@ -120,22 +145,35 @@ export class StageWidgetTransformService {
   }
   private drawOutline() {
     this.SchemaNode.selectIds.forEach((id) => {
-      const outline = new PIXI.Graphics()
-      this.outlines.push(outline)
       const node = this.SchemaNode.find(id)
+      const outline = this.StageElement.outlineCache.get(id)
+      this.outlines.push(outline)
       if (node.type === 'vector') {
         outline.lineStyle(0.5 / this.StageViewport.zoom, this.Setting.color)
-        this.StageDraw.drawPath(outline, node)
+        this.StageDrawPath.drawPath(this.StageDrawPath.getCachedPath(id), outline)
       }
     })
   }
+  private drawHitArea() {
+    this.hitArea.beginFill('white', 0)
+    this.hitArea.moveTo(this.vertexTL_XY.x, this.vertexTL_XY.y)
+    this.hitArea.lineTo(this.vertexTR_XY.x, this.vertexTR_XY.y)
+    this.hitArea.lineTo(this.vertexBR_XY.x, this.vertexBR_XY.y)
+    this.hitArea.lineTo(this.vertexBL_XY.x, this.vertexBL_XY.y)
+    this.hitArea.closePath()
+  }
+  private bindHitAreaEvent() {
+    this.hitArea.eventMode = 'dynamic'
+    this.hitArea.on('mousedown', () => {
+      this.Pixi.isForbidEvent = true
+      this.Drag.onStart()
+        .onMove(({ shift }) => {
+          xy_mutate(this.StageTransform.data, shift)
+        })
+        .onEnd(({ dragService }) => {
+          dragService.destroy()
+          this.Pixi.isForbidEvent = false
+        })
+    })
+  }
 }
-
-export const injectStageWidgetTransform = inject(StageWidgetTransformService)
-
-// const startXY = XY.From(this.transformerWidget)
-//     // this.Drag.onSlide(({ shift }) => {
-//     //   const realShift = this.StageViewport.toRealStageShift(shift)
-//     //   // node.x = startXY.x + realShift.x
-//     //   // node.y = startXY.y + realShift.y
-//     // })

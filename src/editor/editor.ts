@@ -1,7 +1,7 @@
 import { runInAction } from 'mobx'
 import { inject, injectable } from 'tsyringe'
-import { Hook, Watch, autobind } from '~/shared/decorator'
-import { macro_StringMatch } from '~/shared/macro/string-match'
+import { Watch, When, autobind } from '~/shared/decorator'
+import { macro_StringMatch } from '~/shared/macro'
 import { FileService, injectFile } from './file'
 import { SchemaNodeService, injectSchemaNode } from './schema/node'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
@@ -22,7 +22,7 @@ export class EditorService {
   ) {
     this.initialize()
   }
-  @Hook('Pixi.afterInitialize', 1)
+  @When('Pixi.initialized')
   private initialize() {
     this.File.mockFile()
     this.autoClearStage()

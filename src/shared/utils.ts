@@ -1,8 +1,6 @@
-import { IAutorunOptions, IReactionPublic, autorun, runInAction } from 'mobx'
-import { useEffect } from 'react'
 import { v4 } from 'uuid'
 
-export const GlobalThis = globalThis as any
+export const This = globalThis as any
 export const uuid = v4
 
 export type INoopFunc = typeof noopFunc
@@ -16,10 +14,18 @@ export function createBound(x: number, y: number, width: number, height: number)
   return { x, y, width, height }
 }
 
-export function randomColor() {
-  return `#${Math.floor(Math.random() * 16777215).toString(16)}`
+export function withNewFunction(body: string) {
+  return new Function('target', `with(target){${body}}`)
 }
 
+export function stringPathProxy(target: any) {
+  function get(_: any, key: string) {
+    return withNewFunction(
+      `return ${key}?.constructor.name === 'ObservableSet2' ? ${key}.values() : ${key}`
+    )(target)
+  }
+  return new Proxy({}, { get })
+}
 export function Delete<T>(object: Record<string, T>, key: string): void
 export function Delete<T>(target: T[], find: string | ((value: T) => void)): void
 export function Delete<T>(target: Record<string, T> | T[], filter: string | ((value: T) => void)) {
@@ -45,12 +51,6 @@ export function hierarchyDown<T>(target: T[], filter: string | ((value: T) => vo
     typeof filter === 'function' ? target.findIndex(filter) : target.findIndex((i) => i === filter)
   if (index >= target.length - 1) return
   ;[target[index], target[index + 1]] = [target[index + 1], target[index]]
-}
-
-export function makeAction<T extends any>(callback?: (...args: T[]) => void) {
-  return (...args: T[]) => {
-    runInAction(() => callback?.(...args))
-  }
 }
 
 export function pipe<T>(raw: T) {
@@ -91,13 +91,6 @@ export const throttleAnimationFrame = <F extends (...args: any[]) => any>(callba
       previousTime = currentTime
     })
   }
-}
-
-export function useAutoRun(view: (r: IReactionPublic) => any, opts?: IAutorunOptions) {
-  useEffect(() => {
-    const disposer = autorun(view, opts)
-    return () => disposer()
-  }, [])
 }
 
 export function timeRecord() {

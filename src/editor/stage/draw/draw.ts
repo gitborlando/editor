@@ -1,17 +1,9 @@
 import { inject, injectable } from 'tsyringe'
-import { min, rotatePoint } from '~/editor/math/base'
-import { xy_plus } from '~/editor/math/xy'
-import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
-import { OperateService, injectOperate } from '~/editor/operate/operate'
 import { IFrame, ILine, INode, IRect, IStar, ITriangle, IVector } from '~/editor/schema/type'
-import { OptimizeCache } from '~/shared/cache'
 import { autobind } from '~/shared/decorator'
-import { XY } from '~/shared/structure/xy'
-import { cullNegatives } from '~/shared/utils'
 import { StageElementService, injectStageElement } from '../element'
 import { PIXI } from '../pixi'
-import { Path } from './path/path'
-import { PathPoint } from './path/point'
+import { StageDrawPathService, injectStageDrawPath } from './path'
 
 type IStageElement = PIXI.Graphics | PIXI.Text
 
@@ -21,8 +13,7 @@ export class StageDrawService {
   currentElement!: IStageElement
   constructor(
     @injectStageElement private StageElement: StageElementService,
-    @injectOperate private Operate: OperateService,
-    @injectOperateGeometry private OperateGeometry: OperateGeometryService
+    @injectStageDrawPath private StageDrawPath: StageDrawPathService
   ) {}
   drawNode(node: INode) {
     if (node.type === 'frame') this.drawFrame(node)
@@ -41,7 +32,7 @@ export class StageDrawService {
     element.drawRect(x, y, width, height)
   }
   private drawRect(node: IRect) {
-    const { x, y, width, height, id, fill, points, rotation } = node
+    const { /* x, y, width, height, */ id, fill, points, rotation } = node
     const element = this.findElementOrCreate(id, 'graphic')
     element.clear()
     this.drawFill(element, fill)
@@ -76,111 +67,9 @@ export class StageDrawService {
   private drawFill(shape: PIXI.Graphics, fill: INode['fill']) {
     shape.beginFill(fill)
   }
-  drawPath(element: PIXI.Graphics, node: IVector) {
-    const createPath = () => {
-      const pathPoints = node.points.map((nodePoint, i) => {
-        const centerXY = XY.Of(node.centerX, node.centerY)
-        const rotatedXY = rotatePoint(nodePoint.x, nodePoint.y, 0, 0, node.rotation)
-        xy_plus(rotatedXY, centerXY)
-        const rotatedHandleLeft =
-          nodePoint.handleLeft && XY.From(nodePoint.handleLeft).rotate(XY.Of(0, 0), node.rotation)
-        const rotatedHandleRight =
-          nodePoint.handleRight && XY.From(nodePoint.handleRight).rotate(XY.Of(0, 0), node.rotation)
-        return new PathPoint({
-          ...nodePoint,
-          ...rotatedXY,
-          ...(rotatedHandleLeft && { handleLeft: rotatedHandleLeft.plus(centerXY) }),
-          ...(rotatedHandleRight && { handleRight: rotatedHandleRight.plus(centerXY) }),
-        })
-      })
-      return new Path(pathPoints)
-    }
-
-    const cache = OptimizeCache.GetOrNew<Path>('draw-path')
-    const { oneTickChange } = this.Operate
-    const { isGeometryChanged, beforeOperate } = this.OperateGeometry
-
-    let path: Path
-    if (!isGeometryChanged.value) {
-      path = cache.getSet(node.id, () => createPath())
-    } else {
-      if (beforeOperate.get('newValues')[0][0] === 'x') {
-        const x = oneTickChange['x']!
-        path = cache.get(node.id)
-        path.forEachPoint(({ cur }) => (cur.x += x.new - x.old))
-      } else {
-        path = cache.set(node.id, createPath())
-      }
-    }
-
-    const hasArcedPointMap = new Set<PathPoint>()
-
-    path.forEachLine(({ cur: curLine, at }) => {
-      const { start: startPoint, end: endPoint } = curLine
-
-      if (at.first) {
-        const startXY = new XY(0, 0)
-        if (startPoint.canDrawArc) {
-          startXY.set(startPoint.leftLine!.calcXYInSomeDistance(startPoint.arcLength!)!)
-        } else {
-          startXY.set(startPoint)
-        }
-        element.moveTo(startXY.x, startXY.y)
-      }
-
-      if (curLine.type === 'line') {
-        if (startPoint.canDrawArc && !hasArcedPointMap.has(startPoint)) {
-          const leftMaxRadius =
-            startPoint.left!.arcLength &&
-            startPoint.calcRadiusByArcLength(
-              startPoint.leftLine!.length - startPoint.left!.arcLength!
-            )
-          const rightMaxRadius =
-            startPoint.right!.arcLength &&
-            startPoint.calcRadiusByArcLength(
-              startPoint.rightLine!.length - startPoint.right!.arcLength
-            )
-          const radius = min(...cullNegatives(startPoint.radius, rightMaxRadius, leftMaxRadius))
-          element.arcTo(
-            startPoint.x,
-            startPoint.y,
-            startPoint.right!.x,
-            startPoint.right!.y,
-            radius
-          )
-          hasArcedPointMap.add(startPoint)
-        }
-        if (!endPoint.canDrawArc) {
-          return element.lineTo(endPoint.x, endPoint.y)
-        }
-        if (endPoint.canDrawArc && !hasArcedPointMap.has(endPoint)) {
-          const leftMaxRadius =
-            endPoint.left!.arcLength &&
-            endPoint.calcRadiusByArcLength(endPoint.leftLine!.length - endPoint.left!.arcLength!)
-          const rightMaxRadius =
-            endPoint.right!.arcLength &&
-            endPoint.calcRadiusByArcLength(endPoint.rightLine!.length - endPoint.right!.arcLength)
-          const radius = min(...cullNegatives(endPoint.radius, rightMaxRadius, leftMaxRadius))
-          element.arcTo(endPoint.x, endPoint.y, endPoint.right!.x, endPoint.right!.y, radius)
-          hasArcedPointMap.add(endPoint)
-        }
-        if (at.end && !startPoint.jumpToRight) element.closePath()
-      }
-
-      if (curLine.type === 'curve') {
-        const { start, end } = curLine
-        const handleRight = start.handleRight || start
-        const handleLeft = end.handleLeft || end
-        element.bezierCurveTo(
-          handleRight.x,
-          handleRight.y,
-          handleLeft.x,
-          handleLeft.y,
-          end.x,
-          end.y
-        )
-      }
-    })
+  private drawPath(element: PIXI.Graphics, node: IVector) {
+    const path = this.StageDrawPath.patchPath(node)
+    this.StageDrawPath.drawPath(path, element)
   }
   private drawHitArea(element: PIXI.Graphics) {
     const contains = (x: number, y: number) => {

@@ -1,6 +1,5 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { ComponentPropsWithRef, forwardRef } from 'react'
-import { When } from 'react-if'
 import { useGlobalService } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -10,11 +9,12 @@ interface IInput extends ComponentPropsWithRef<'div'> {
   value: number
   onNewValueApply: (value: number) => void
   step?: number
+  slideRate?: number
 }
 
 export const Input = observer(
   forwardRef<HTMLDivElement, IInput>(
-    ({ className, label, value, onNewValueApply: emitNewValue, step = 1 }, ref) => {
+    ({ className, label, value, onNewValueApply: emitNewValue, step = 1, slideRate = 1 }, ref) => {
       const { classes, cx } = useStyles({})
       const { Drag } = useGlobalService()
       const state = useLocalObservable(() => ({
@@ -35,9 +35,10 @@ export const Input = observer(
               let startValue = value
               Drag.setCursor('e-resize')
                 .onStart(() => (state.active = true))
-                .onMove(({ shift }) => emitNewValue(startValue + shift.x))
+                .onMove(({ shift }) => emitNewValue(startValue + shift.x * slideRate))
                 .onEnd(({ dragService }) => {
                   dragService.destroy()
+                  dragService.setCursor('auto')
                   state.active = false
                 })
             }}>
@@ -54,16 +55,14 @@ export const Input = observer(
               onBlur={() => emitNewValue(state.value)}
             />
           </Flex>
-          <When condition={state.hover}>
-            <Flex layout='v' className={cx(classes.operate, 'operator')}>
-              <Flex layout='c' onClick={() => emitNewValue(value + step)}>
-                +
-              </Flex>
-              <Flex layout='c' onClick={() => emitNewValue(value - step)}>
-                -
-              </Flex>
+          <Flex layout='v' vshow={state.hover} className={cx(classes.operate, 'operator')}>
+            <Flex layout='c' onClick={() => emitNewValue(value + step)}>
+              +
             </Flex>
-          </When>
+            <Flex layout='c' onClick={() => emitNewValue(value - step)}>
+              -
+            </Flex>
+          </Flex>
         </Flex>
       )
     }
