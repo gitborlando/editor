@@ -2,13 +2,15 @@ import { injectable } from 'tsyringe'
 import { xy_mutate } from '~/editor/math/xy'
 import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
+import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
 import { DragService, injectDrag } from '~/global/drag'
 import { SettingService, injectSetting } from '~/global/setting'
-import { When, autobind } from '~/shared/decorator'
+import { Hook, autobind } from '~/shared/decorator'
 import { watchNext } from '~/shared/mobx'
 import { XY } from '~/shared/structure/xy'
 import { StageDrawPathService, injectStageDrawPath } from '../draw/path'
 import { StageElementService, injectStageElement } from '../element'
+import { StageSelectService, injectStageSelect } from '../interact/select'
 import { StageTransformService, injectStageTransform } from '../interact/transform'
 import { PIXI, PixiService, injectPixi } from '../pixi'
 import { StageViewportService, injectStageViewport } from '../viewport'
@@ -29,7 +31,6 @@ export class StageWidgetTransformService {
   lineR = new PIXI.Graphics()
   lineB = new PIXI.Graphics()
   hitArea = new PIXI.Graphics()
-  outlines = <PIXI.Graphics[]>[]
   transformContainer = new PIXI.Container()
   private renderType = <'reDraw' | 'clear' | 'reserve'>'reserve'
   constructor(
@@ -41,23 +42,38 @@ export class StageWidgetTransformService {
     @injectOperateGeometry private OperateGeometry: OperateGeometryService,
     @injectStageDrawPath private StageDrawPath: StageDrawPathService,
     @injectStageTransform private StageTransform: StageTransformService,
-    @injectStageElement private StageElement: StageElementService
+    @injectStageElement private StageElement: StageElementService,
+    @injectStageSelect private StageSelect: StageSelectService,
+    @injectSchemaPage private SchemaPage: SchemaPageService
   ) {
     this.initialize()
   }
-  @When('Pixi.initialized')
+  @Hook('SchemaPage.isPageFirstRendered')
   private initialize() {
-    this.setup()
-    this.bindHitAreaEvent()
-    this.hookRender()
-  }
-  @When('SchemaNode.initialized')
-  private setup() {
-    Object.keys(this.SchemaNode.nodeMap).forEach((id) => {
-      const outline = this.StageElement.outlineCache.set(id, new PIXI.Graphics())
-      this.outlines.push(outline)
-    })
+    if (this.SchemaPage.isPageFirstRendered.args[0] === false) return
     this.addToStage()
+    this.hookRender()
+    this.bindHitAreaEvent()
+  }
+  private get vertexes() {
+    return [this.vertexTL, this.vertexTR, this.vertexBL, this.vertexBR]
+  }
+  private get vertexXYs() {
+    return [this.vertexTL_XY, this.vertexTR_XY, this.vertexBL_XY, this.vertexBR_XY]
+  }
+  private get lines() {
+    return [this.lineL, this.lineT, this.lineR, this.lineB]
+  }
+  private get outlines() {
+    return Object.values(this.StageElement.outlineCache.cache)
+  }
+  private get components() {
+    return [this.hitArea, ...this.lines, ...this.outlines, ...this.vertexes]
+  }
+  private addToStage() {
+    this.components.forEach((i) => i.setParent(this.transformContainer))
+    this.transformContainer.zIndex = 990
+    this.transformContainer.setParent(this.Pixi.stage)
   }
   private hookRender() {
     this.Pixi.duringTicker.hook(() => {
@@ -70,22 +86,8 @@ export class StageWidgetTransformService {
     watchNext('SchemaNode.selectIds').hook(() => (this.renderType = 'reDraw'))
     watchNext('StageViewport.zoom').hook(() => (this.renderType = 'reDraw'))
   }
-  private get vertexes() {
-    return [this.vertexTL, this.vertexTR, this.vertexBL, this.vertexBR]
-  }
-  private get vertexXYs() {
-    return [this.vertexTL_XY, this.vertexTR_XY, this.vertexBL_XY, this.vertexBR_XY]
-  }
-  private get lines() {
-    return [this.lineL, this.lineT, this.lineR, this.lineB]
-  }
-  private get components() {
-    return [this.hitArea, ...this.lines, ...this.outlines, ...this.vertexes]
-  }
   private draw() {
-    if (!this.SchemaNode.selectIds.size) {
-      return this.clear()
-    }
+    if (this.SchemaNode.selectIds.size === 0) return this.clear()
     this.clear()
     this.calcVertexXY()
     this.drawVertexes()
@@ -97,11 +99,6 @@ export class StageWidgetTransformService {
   private clear() {
     this.components.forEach((i) => i.clear())
     this.renderType = 'reserve'
-  }
-  private addToStage() {
-    this.components.forEach((i) => i.setParent(this.transformContainer))
-    this.transformContainer.zIndex = 990
-    this.transformContainer.setParent(this.Pixi.stage)
   }
   private calcVertexXY() {
     const { centerX, centerY, width, height, rotation } = this.StageTransform.data
@@ -147,7 +144,6 @@ export class StageWidgetTransformService {
     this.SchemaNode.selectIds.forEach((id) => {
       const node = this.SchemaNode.find(id)
       const outline = this.StageElement.outlineCache.get(id)
-      this.outlines.push(outline)
       if (node.type === 'vector') {
         outline.lineStyle(0.5 / this.StageViewport.zoom, this.Setting.color)
         this.StageDrawPath.drawPath(this.StageDrawPath.getCachedPath(id), outline)
@@ -155,7 +151,7 @@ export class StageWidgetTransformService {
     })
   }
   private drawHitArea() {
-    this.hitArea.beginFill('white', 0)
+    this.hitArea.beginFill('white', 0.001)
     this.hitArea.moveTo(this.vertexTL_XY.x, this.vertexTL_XY.y)
     this.hitArea.lineTo(this.vertexTR_XY.x, this.vertexTR_XY.y)
     this.hitArea.lineTo(this.vertexBR_XY.x, this.vertexBR_XY.y)
@@ -164,16 +160,19 @@ export class StageWidgetTransformService {
   }
   private bindHitAreaEvent() {
     this.hitArea.eventMode = 'dynamic'
-    this.hitArea.on('mousedown', () => {
-      this.Pixi.isForbidEvent = true
+    const handleDrag = () => {
       this.Drag.onStart()
         .onMove(({ shift }) => {
-          xy_mutate(this.StageTransform.data, shift)
+          const realShift = this.StageViewport.toRealStageShift(shift)
+          xy_mutate(this.StageTransform.data, realShift)
         })
         .onEnd(({ dragService }) => {
           dragService.destroy()
-          this.Pixi.isForbidEvent = false
+          this.hitArea.off('mousedown', handleDrag)
         })
+    }
+    this.StageSelect.afterSelect.hook(() => {
+      this.hitArea.on('mousedown', handleDrag)
     })
   }
 }

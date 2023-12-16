@@ -33,9 +33,11 @@ export class StageTransformService {
       if (this.noIntercept) return ctx
       if (ctx.type !== 'update') return ctx
       const prop = <keyof typeof this.data>ctx.name.toString()
+
       return ctx
     })
   }
+  @Before_After_Toggle('noIntercept')
   private setTransformData() {
     const selectIds = this.SchemaNode.selectIds
     if (selectIds.size === 1) {

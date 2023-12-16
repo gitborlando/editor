@@ -34,6 +34,8 @@ export class OperateGeometryService {
       height: 0,
       rotation: 0,
       radius: 0,
+      scaleX: 1,
+      scaleY: 1,
     }
   }
   private initialize() {

@@ -1,6 +1,7 @@
 import { computed, makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
+import { createHooker } from '~/shared/hooker'
 import { Delete } from '~/shared/utils'
 import { SchemaDefaultService, injectSchemaDefault } from './default'
 import { SchemaNodeService, injectSchemaNode } from './node'
@@ -12,12 +13,20 @@ export class SchemaPageService {
   @observable pages: IPage[] = []
   @observable currentId = ''
   @observable initialized = false
+  isPageFirstRendered = createHooker<[boolean]>([false])
   constructor(
     @injectSchemaDefault private SchemaDefault: SchemaDefaultService,
     @injectSchemaNode private SchemaNode: SchemaNodeService
   ) {
     makeObservable(this)
+    this.initialize()
+  }
+  private initialize() {
     when(() => !!this.currentId).then(() => (this.initialized = true))
+    this.SchemaNode.afterFlushDirty.hook(() => {
+      if (this.isPageFirstRendered.args[0] === true) return
+      this.isPageFirstRendered.dispatch(true)
+    })
   }
   @computed get currentPage() {
     return this.find(this.currentId)!
@@ -43,6 +52,7 @@ export class SchemaPageService {
   }
   select(id: string) {
     this.currentId = id
+    this.isPageFirstRendered.dispatch(false)
   }
 }
 

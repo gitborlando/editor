@@ -35,12 +35,10 @@ export class SchemaNodeService {
   }
   setMap(map: typeof this.nodeMap) {
     this.nodeMap = map
-    // Object.keys(this.nodeMap).forEach(this.initOBB)
     this.initialized = true
   }
   add(node: INode) {
     this.nodeMap[node.id] = node
-    //  this.initOBB(node.id)
     this.collectDirty(node.id)
     return node
   }

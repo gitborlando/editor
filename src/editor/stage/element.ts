@@ -25,6 +25,7 @@ export class StageElementService {
     this.elementMap.set(id, element)
     this.setupElement(id, element)
     this.initOBB(id)
+    this.initOutline(id)
   }
   delete(id: string) {
     this.elementMap.delete(id)
@@ -53,6 +54,9 @@ export class StageElementService {
     const { centerX, centerY, width, height, rotation, scaleX, scaleY } = this.SchemaNode.find(id)
     const obb = new OBB(centerX, centerY, width, height, rotation, scaleX, scaleY)
     this.OBBCache.set(id, obb)
+  }
+  private initOutline(id: string) {
+    this.outlineCache.set(id, new PIXI.Graphics())
   }
 }
 
