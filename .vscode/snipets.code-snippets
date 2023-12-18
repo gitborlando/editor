@@ -40,6 +40,7 @@
   },
   "Widget": {
     "prefix": "widget",
+    "scope": ["typescriptreact"],
     "body": [
       "import { Flex } from '~/ui/widget/flex'",
       "import { makeStyles } from '~/ui/theme'",
@@ -99,5 +100,11 @@
     "prefix": "pser",
     "body": ["@inject$1 private $1: $1Service"],
     "description": "private service"
+  },
+  "service set": {
+    "scope": "typescript",
+    "prefix": "Set",
+    "body": ["set$1($1: $2) {", "  this.$1 = $1", "}"],
+    "description": ""
   }
 }

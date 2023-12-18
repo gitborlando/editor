@@ -1,7 +1,6 @@
 import { runInAction } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { Watch, When, autobind } from '~/shared/decorator'
-import { macro_StringMatch } from '~/shared/macro'
 import { FileService, injectFile } from './file'
 import { SchemaNodeService, injectSchemaNode } from './schema/node'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
@@ -40,11 +39,7 @@ export class EditorService {
   }
   private drawDirtyInPixiTick() {
     this.SchemaNode.duringFlushDirty.hook((id) => {
-      if (macro_StringMatch`transform|marquee`(id)) return
       this.StageDraw.drawNode(this.SchemaNode.find(id))
-      if (!this.StageElement.find(id)) {
-        this.StageElement.add(id, this.StageDraw.currentElement)
-      }
     })
   }
 }

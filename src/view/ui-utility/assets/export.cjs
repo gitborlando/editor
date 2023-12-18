@@ -28,8 +28,8 @@ function genName(file, dirs, i) {
   while ((i = name.findIndex((i) => /[^\w\d$_\u4e00-\u9fa5]/.test(i))) >= 0) {
     void (name[i] = '') || (name[i + 1] = name[i + 1]?.toUpperCase() || name[i + 1])
   }
-  imports.push(`import $${name.join('')} from './${dirs.join('/')}/${file}'`)
-  $exports.push(`$${name.join('')}`)
+  imports.push(`import $_${name.join('')} from './${dirs.join('/')}/${file}'`)
+  $exports.push(`$_${name.join('')}`)
 }
 
 recurse(root)

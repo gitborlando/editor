@@ -31,6 +31,13 @@ export class Hooker<T extends any[]> {
     }
     hookerMap.set(this, hooks)
   }
+  hookOnce(hook: (...args: T) => void) {
+    const once = (...args: T) => {
+      hook(...args)
+      this.unHook(once)
+    }
+    this.hook(once)
+  }
 }
 
 export function createHooker<T extends any[]>(args?: T) {

@@ -3,8 +3,13 @@ import { v4 } from 'uuid'
 export const This = globalThis as any
 export const uuid = v4
 
+export const isLeftMouse = (e: any) => e.button === 0
+export const isRightMouse = (e: any) => e.button === 2
+
 export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
+
+export type ValueOf<T extends Record<string, any>> = T[keyof T]
 
 export type IXY = { x: number; y: number }
 export type IBound = IXY & { width: number; height: number }
@@ -67,6 +72,13 @@ export function cullNegatives<T>(..._values: (T | undefined | null | false)[]) {
     if (i !== undefined && i !== false && i !== null && !Number.isNaN(i)) values.push(i)
   })
   return values
+}
+
+export function objEntries<T extends Record<string, any>, K extends keyof T = keyof T>(
+  obj: T,
+  callback: (key: K, val: T[K], i: number) => void
+) {
+  Object.entries(obj).forEach(([key, val], i) => callback(key as K, val, i))
 }
 
 export const debounce = <F extends (...args: any[]) => any>(func: F, delay: number) => {

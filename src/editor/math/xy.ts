@@ -14,6 +14,9 @@ export function xy_mutate2(self: IXY, x: number, y: number) {
   self.y = y
 }
 
+export function xy_plus(self: IXY, another: IXY) {
+  return { x: self.x + another.x, y: self.y + another.y }
+}
 export function xy_plus_mutate(self: IXY, another: IXY) {
   self.x = self.x + another.x
   self.y = self.y + another.y

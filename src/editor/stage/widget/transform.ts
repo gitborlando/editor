@@ -1,5 +1,5 @@
 import { injectable } from 'tsyringe'
-import { xy_mutate } from '~/editor/math/xy'
+import { xy_new } from '~/editor/math/xy'
 import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
@@ -8,8 +8,10 @@ import { SettingService, injectSetting } from '~/global/setting'
 import { Hook, autobind } from '~/shared/decorator'
 import { watchNext } from '~/shared/mobx'
 import { XY } from '~/shared/structure/xy'
+import { StageCursorService, injectStageCursor } from '../cursor'
 import { StageDrawPathService, injectStageDrawPath } from '../draw/path'
 import { StageElementService, injectStageElement } from '../element'
+import { StageCreateService, injectStageCreate } from '../interact/create'
 import { StageSelectService, injectStageSelect } from '../interact/select'
 import { StageTransformService, injectStageTransform } from '../interact/transform'
 import { PIXI, PixiService, injectPixi } from '../pixi'
@@ -30,7 +32,6 @@ export class StageWidgetTransformService {
   lineT = new PIXI.Graphics()
   lineR = new PIXI.Graphics()
   lineB = new PIXI.Graphics()
-  hitArea = new PIXI.Graphics()
   transformContainer = new PIXI.Container()
   private renderType = <'reDraw' | 'clear' | 'reserve'>'reserve'
   constructor(
@@ -44,7 +45,9 @@ export class StageWidgetTransformService {
     @injectStageTransform private StageTransform: StageTransformService,
     @injectStageElement private StageElement: StageElementService,
     @injectStageSelect private StageSelect: StageSelectService,
-    @injectSchemaPage private SchemaPage: SchemaPageService
+    @injectSchemaPage private SchemaPage: SchemaPageService,
+    @injectStageCursor private StageCursor: StageCursorService,
+    @injectStageCreate private StageCreate: StageCreateService
   ) {
     this.initialize()
   }
@@ -53,7 +56,7 @@ export class StageWidgetTransformService {
     if (this.SchemaPage.isPageFirstRendered.args[0] === false) return
     this.addToStage()
     this.hookRender()
-    this.bindHitAreaEvent()
+    this.bindEvent()
   }
   private get vertexes() {
     return [this.vertexTL, this.vertexTR, this.vertexBL, this.vertexBR]
@@ -65,10 +68,10 @@ export class StageWidgetTransformService {
     return [this.lineL, this.lineT, this.lineR, this.lineB]
   }
   private get outlines() {
-    return Object.values(this.StageElement.outlineCache.cache)
+    return this.StageElement.outlineCache.cache.values()
   }
   private get components() {
-    return [this.hitArea, ...this.lines, ...this.outlines, ...this.vertexes]
+    return [...this.lines, ...this.outlines, ...this.vertexes]
   }
   private addToStage() {
     this.components.forEach((i) => i.setParent(this.transformContainer))
@@ -77,14 +80,22 @@ export class StageWidgetTransformService {
   }
   private hookRender() {
     this.Pixi.duringTicker.hook(() => {
-      //   this.draw()
+      // this.draw()
       if (this.renderType === 'reDraw') this.draw()
       if (this.renderType === 'clear') this.clear()
     })
+    this.StageCreate.duringCreate.hook(() => (this.renderType = 'reDraw'))
     this.OperateGeometry.beforeOperate.hook(() => (this.renderType = 'clear'))
     this.OperateGeometry.afterOperate.hook(() => (this.renderType = 'reDraw'))
     watchNext('SchemaNode.selectIds').hook(() => (this.renderType = 'reDraw'))
     watchNext('StageViewport.zoom').hook(() => (this.renderType = 'reDraw'))
+  }
+  private bindEvent() {
+    this.bindMoveEvent()
+    this.bindTopLineEvent()
+    this.bindRightLineEvent()
+    this.bindBottomLineEvent()
+    this.bindLeftLineEvent()
   }
   private draw() {
     if (this.SchemaNode.selectIds.size === 0) return this.clear()
@@ -93,7 +104,6 @@ export class StageWidgetTransformService {
     this.drawVertexes()
     this.drawLine()
     this.drawOutline()
-    this.drawHitArea()
     this.renderType = 'reserve'
   }
   private clear() {
@@ -150,29 +160,137 @@ export class StageWidgetTransformService {
       }
     })
   }
-  private drawHitArea() {
-    this.hitArea.beginFill('white', 0.001)
-    this.hitArea.moveTo(this.vertexTL_XY.x, this.vertexTL_XY.y)
-    this.hitArea.lineTo(this.vertexTR_XY.x, this.vertexTR_XY.y)
-    this.hitArea.lineTo(this.vertexBR_XY.x, this.vertexBR_XY.y)
-    this.hitArea.lineTo(this.vertexBL_XY.x, this.vertexBL_XY.y)
-    this.hitArea.closePath()
-  }
-  private bindHitAreaEvent() {
-    this.hitArea.eventMode = 'dynamic'
+  private bindMoveEvent() {
     const handleDrag = () => {
-      this.Drag.onStart()
+      if (!this.SchemaNode.hoverId) return
+      if (!this.SchemaNode.selectIds.has(this.SchemaNode.hoverId)) return
+      const { x, y } = this.OperateGeometry.data
+      this.Drag.onStart(() => (this.renderType = 'clear'))
         .onMove(({ shift }) => {
           const realShift = this.StageViewport.toRealStageShift(shift)
-          xy_mutate(this.StageTransform.data, realShift)
+          this.OperateGeometry.data.x = x + realShift.x
+          this.OperateGeometry.data.y = y + realShift.y
         })
         .onEnd(({ dragService }) => {
+          this.OperateGeometry.afterOperate.dispatch()
+          this.renderType = 'reDraw'
           dragService.destroy()
-          this.hitArea.off('mousedown', handleDrag)
         })
     }
-    this.StageSelect.afterSelect.hook(() => {
-      this.hitArea.on('mousedown', handleDrag)
+    this.Pixi.addListener('mousedown', handleDrag)
+  }
+  private bindTopLineEvent() {
+    this.lineT.eventMode = 'dynamic'
+    this.lineT.hitArea = {
+      contains: (x, y) =>
+        new PIXI.Polygon([
+          xy_new(this.vertexTL_XY.x + 5, this.vertexTL_XY.y - 5),
+          xy_new(this.vertexTL_XY.x + 5, this.vertexTL_XY.y + 5),
+          xy_new(this.vertexTR_XY.x - 5, this.vertexTR_XY.y + 5),
+          xy_new(this.vertexTR_XY.x - 5, this.vertexTR_XY.y - 5),
+        ]).contains(x, y),
+    }
+    this.lineT.on('mouseenter', () => this.StageCursor.setType('v-resize'))
+    this.lineT.on('mouseleave', () => this.StageCursor.setType('select'))
+    this.lineT.on('mousedown', () => {
+      this.Pixi.isForbidEvent = true
+      const { y, height } = this.OperateGeometry.data
+      this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['height']))
+        .onMove(({ shift }) => {
+          const realShift = this.StageViewport.toRealStageShift(shift)
+          this.OperateGeometry.data.height = height - realShift.y
+          this.OperateGeometry.data.y = y + realShift.y
+        })
+        .onEnd(({ dragService }) => {
+          this.Pixi.isForbidEvent = false
+          this.OperateGeometry.afterOperate.dispatch()
+          dragService.destroy()
+        })
+    })
+  }
+  private bindRightLineEvent() {
+    this.lineR.eventMode = 'dynamic'
+    this.lineR.hitArea = {
+      contains: (x, y) =>
+        new PIXI.Polygon([
+          xy_new(this.vertexTR_XY.x - 5, this.vertexTR_XY.y + 5),
+          xy_new(this.vertexTR_XY.x + 5, this.vertexTR_XY.y + 5),
+          xy_new(this.vertexBR_XY.x + 5, this.vertexBR_XY.y - 5),
+          xy_new(this.vertexBR_XY.x - 5, this.vertexBR_XY.y - 5),
+        ]).contains(x, y),
+    }
+    this.lineR.on('mouseenter', () => this.StageCursor.setType('h-resize'))
+    this.lineR.on('mouseleave', () => this.StageCursor.setType('select'))
+    this.lineR.on('mousedown', () => {
+      this.Pixi.isForbidEvent = true
+      const { width } = this.OperateGeometry.data
+      this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['width']))
+        .onMove(({ shift }) => {
+          const realShift = this.StageViewport.toRealStageShift(shift)
+          this.OperateGeometry.data.width = width + realShift.x
+        })
+        .onEnd(({ dragService }) => {
+          this.Pixi.isForbidEvent = false
+          this.OperateGeometry.afterOperate.dispatch()
+          dragService.destroy()
+        })
+    })
+  }
+  private bindBottomLineEvent() {
+    this.lineB.eventMode = 'dynamic'
+    this.lineB.hitArea = {
+      contains: (x, y) =>
+        new PIXI.Polygon([
+          xy_new(this.vertexBL_XY.x + 5, this.vertexBL_XY.y - 5),
+          xy_new(this.vertexBR_XY.x - 5, this.vertexBR_XY.y - 5),
+          xy_new(this.vertexBR_XY.x - 5, this.vertexBR_XY.y + 5),
+          xy_new(this.vertexBL_XY.x + 5, this.vertexBL_XY.y + 5),
+        ]).contains(x, y),
+    }
+    this.lineB.on('mouseenter', () => this.StageCursor.setType('v-resize'))
+    this.lineB.on('mouseleave', () => this.StageCursor.setType('select'))
+    this.lineB.on('mousedown', () => {
+      this.Pixi.isForbidEvent = true
+      const { height } = this.OperateGeometry.data
+      this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['height']))
+        .onMove(({ shift }) => {
+          const realShift = this.StageViewport.toRealStageShift(shift)
+          this.OperateGeometry.data.height = height + realShift.y
+        })
+        .onEnd(({ dragService }) => {
+          this.Pixi.isForbidEvent = false
+          this.OperateGeometry.afterOperate.dispatch()
+          dragService.destroy()
+        })
+    })
+  }
+  private bindLeftLineEvent() {
+    this.lineL.eventMode = 'dynamic'
+    this.lineL.hitArea = {
+      contains: (x, y) =>
+        new PIXI.Polygon([
+          xy_new(this.vertexTL_XY.x - 5, this.vertexTL_XY.y + 5),
+          xy_new(this.vertexTL_XY.x + 5, this.vertexTL_XY.y + 5),
+          xy_new(this.vertexBL_XY.x + 5, this.vertexBL_XY.y - 5),
+          xy_new(this.vertexBL_XY.x - 5, this.vertexBL_XY.y - 5),
+        ]).contains(x, y),
+    }
+    this.lineL.on('mouseenter', () => this.StageCursor.setType('h-resize'))
+    this.lineL.on('mouseleave', () => this.StageCursor.setType('select'))
+    this.lineL.on('mousedown', () => {
+      this.Pixi.isForbidEvent = true
+      const { x, width } = this.OperateGeometry.data
+      this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['width']))
+        .onMove(({ shift }) => {
+          const realShift = this.StageViewport.toRealStageShift(shift)
+          this.OperateGeometry.data.width = width - realShift.x
+          this.OperateGeometry.data.x = x + realShift.x
+        })
+        .onEnd(({ dragService }) => {
+          this.Pixi.isForbidEvent = false
+          this.OperateGeometry.afterOperate.dispatch()
+          dragService.destroy()
+        })
     })
   }
 }

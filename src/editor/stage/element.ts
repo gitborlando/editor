@@ -22,10 +22,10 @@ export class StageElementService {
     SchemaNode.beforeDelete.hook((id) => this.delete(id))
   }
   add(id: string, element: IStageElement) {
-    this.elementMap.set(id, element)
-    this.setupElement(id, element)
     this.initOBB(id)
     this.initOutline(id)
+    this.elementMap.set(id, element)
+    this.setupElement(id, element)
   }
   delete(id: string) {
     this.elementMap.delete(id)
@@ -39,6 +39,21 @@ export class StageElementService {
   clearAll() {
     this.Pixi.stage.removeChildren()
     this.elementMap = new Map()
+    this.OBBCache.clear()
+    this.pathCache.clear()
+    this.outlineCache.clear()
+  }
+  findOrCreate(id: string, type: 'graphic'): PIXI.Graphics
+  findOrCreate(id: string, type: 'text'): PIXI.Text
+  findOrCreate(id: string, type: 'graphic' | 'text') {
+    let element = this.find(id)
+    if (element) {
+      return type === 'graphic' ? <PIXI.Graphics>element : <PIXI.Text>element
+    } else {
+      element = type === 'graphic' ? new PIXI.Graphics() : new PIXI.Text()
+      this.add(id, element)
+      return element
+    }
   }
   private setupElement(id: string, element: IStageElement) {
     const { parentId } = this.SchemaNode.find(id)
@@ -51,8 +66,8 @@ export class StageElementService {
     element.on('mouseleave', () => this.SchemaNode.unHover())
   }
   private initOBB(id: string) {
-    const { centerX, centerY, width, height, rotation, scaleX, scaleY } = this.SchemaNode.find(id)
-    const obb = new OBB(centerX, centerY, width, height, rotation, scaleX, scaleY)
+    const { centerX, centerY, width, height, rotation } = this.SchemaNode.find(id)
+    const obb = new OBB(centerX, centerY, width, height, rotation)
     this.OBBCache.set(id, obb)
   }
   private initOutline(id: string) {

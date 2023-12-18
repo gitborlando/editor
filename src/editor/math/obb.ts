@@ -15,9 +15,7 @@ export class OBB {
     public centerY: number,
     public width: number,
     public height: number,
-    public rotation: number,
-    public scaleX: number,
-    public scaleY: number
+    public rotation: number
   ) {
     this.xy = this.calcXY()
     this.axis = this.calcAxis()

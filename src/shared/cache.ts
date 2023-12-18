@@ -20,7 +20,7 @@ export class Cache<T> {
     this.cache.set(id, value)
     return value as T
   }
-  depose() {
+  clear() {
     this.cache.clear()
   }
 }

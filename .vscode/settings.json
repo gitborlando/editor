@@ -13,6 +13,7 @@
     "dragmove",
     "gonic",
     "inited",
+    "Interceptable",
     "Konva",
     "loopfy",
     "PIXI",

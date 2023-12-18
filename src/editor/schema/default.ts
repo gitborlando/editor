@@ -90,12 +90,7 @@ export class SchemaDefaultService {
   rect(option?: Partial<IRect>): IRect {
     const name = this.createNodeName('rect')
     const vectorBase = this.createVectorBase()
-    const points = this.createRectPoints(
-      option?.x ?? 0,
-      option?.y ?? 0,
-      option?.width ?? 100,
-      option?.height ?? 100
-    )
+    const points = this.createRectPoints(option?.width ?? 100, option?.height ?? 100)
     return {
       vectorType: 'rect',
       radius: 0,
@@ -121,12 +116,7 @@ export class SchemaDefaultService {
   triangle(option?: Partial<ITriangle>): ITriangle {
     const name = this.createNodeName('triangle')
     const vectorBase = this.createVectorBase()
-    const points = this.createTrianglePoints(
-      option?.x ?? 0,
-      option?.y ?? 0,
-      option?.width ?? 100,
-      option?.height ?? 100
-    )
+    const points = this.createTrianglePoints(option?.width ?? 100, option?.height ?? 100)
     return {
       vectorType: 'triangle',
       sides: 3,
@@ -299,7 +289,7 @@ export class SchemaDefaultService {
     let nameIndex = this.typeIndexMap[type]!
     return { name: nameIndex[0] + ' ' + (nameIndex[1] as number)++ }
   }
-  private createRectPoints(x: number, y: number, width: number, height: number) {
+  private createRectPoints(width: number, height: number) {
     const halfWidth = width / 2
     const halfHeight = height / 2
     return {
@@ -311,12 +301,14 @@ export class SchemaDefaultService {
       ],
     }
   }
-  private createTrianglePoints(x: number, y: number, width: number, height: number) {
+  private createTrianglePoints(width: number, height: number) {
+    const halfWidth = width / 2
+    const halfHeight = height / 2
     return {
       points: [
-        this.createPoint(x + width, y, 'no-bezier', 0),
-        this.createPoint(x + width, y + height, 'no-bezier', 0),
-        this.createPoint(x, y + height, 'no-bezier', 0),
+        this.createPoint(0, -halfHeight, 'no-bezier', 0),
+        this.createPoint(halfWidth, halfHeight, 'no-bezier', 0),
+        this.createPoint(-halfWidth, halfHeight, 'no-bezier', 0),
       ],
     }
   }

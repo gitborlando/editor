@@ -3,11 +3,11 @@ import { container } from 'tsyringe'
 import { EditorService } from './editor/editor'
 import { FileService } from './editor/file'
 import { OperateGeometryService } from './editor/operate/geometry'
-import { OperateService } from './editor/operate/operate'
 import { SchemaDefaultService } from './editor/schema/default'
 import { SchemaNodeService } from './editor/schema/node'
 import { SchemaPageService } from './editor/schema/page'
 import { SchemaService } from './editor/schema/schema'
+import { StageCursorService } from './editor/stage/cursor'
 import { StageDrawService } from './editor/stage/draw/draw'
 import { StageDrawPathService } from './editor/stage/draw/path'
 import { StageElementService } from './editor/stage/element'
@@ -36,7 +36,6 @@ container // schema
   .registerSingleton(SchemaService)
 container // operate
   .registerSingleton(OperateGeometryService)
-  .registerSingleton(OperateService)
 container // stage interact
   .registerSingleton(StageInteractService)
   .registerSingleton(StageSelectService)
@@ -49,6 +48,7 @@ container // stage
   .registerSingleton(StageDrawService)
   .registerSingleton(StageElementService)
   .registerSingleton(StageDrawPathService)
+  .registerSingleton(StageCursorService)
 container // stage widget
   .registerSingleton(StageWidgetHoverService)
   .registerSingleton(StageWidgetMarqueeService)
@@ -70,7 +70,6 @@ export const editorServices = {
   SchemaPage: container.resolve(SchemaPageService),
   Schema: container.resolve(SchemaService),
   OperateGeometry: container.resolve(OperateGeometryService),
-  Operate: container.resolve(OperateService),
   Pixi: container.resolve(PixiService),
   StageViewport: container.resolve(StageViewportService),
   StageSelect: container.resolve(StageSelectService),
@@ -78,11 +77,13 @@ export const editorServices = {
   StageCreate: container.resolve(StageCreateService),
   StageTransform: container.resolve(StageTransformService),
   StageDraw: container.resolve(StageDrawService),
+  StageCursor: container.resolve(StageCursorService),
   StageShape: container.resolve(StageElementService),
   StageInteract: container.resolve(StageInteractService),
   Editor: container.resolve(EditorService),
   File: container.resolve(FileService),
 }
+
 container.resolve(StageDrawPathService)
 container.resolve(StageWidgetHoverService)
 container.resolve(StageWidgetMarqueeService)

@@ -26,21 +26,21 @@ export class StageDrawService {
   }
   private drawFrame(node: IFrame) {
     const { x, y, width, height, id, fill } = node
-    const element = this.findElementOrCreate(id, 'graphic')
+    const element = this.StageElement.findOrCreate(id, 'graphic')
     element.clear()
     this.drawFill(element, fill)
     element.drawRect(x, y, width, height)
   }
   private drawRect(node: IRect) {
-    const { /* x, y, width, height, */ id, fill, points, rotation } = node
-    const element = this.findElementOrCreate(id, 'graphic')
+    const { /* x, y, width, height, */ id, fill, points, rotation, scaleX, scaleY } = node
+    const element = this.StageElement.findOrCreate(id, 'graphic')
     element.clear()
     this.drawFill(element, fill)
     this.drawPath(element, node)
   }
   private drawTriangle(node: ITriangle) {
     const { x, y, width, height, id, fill, points } = node
-    const element = this.findElementOrCreate(id, 'graphic')
+    const element = this.StageElement.findOrCreate(id, 'graphic')
     element.clear()
     this.drawFill(element, fill)
     // element.lineStyle(1, 'green')
@@ -48,7 +48,7 @@ export class StageDrawService {
   }
   private drawStar(node: IStar) {
     const { x, y, width, height, id, fill, points } = node
-    const element = this.findElementOrCreate(id, 'graphic')
+    const element = this.StageElement.findOrCreate(id, 'graphic')
     element.clear()
     this.drawFill(element, fill)
     //element.lineStyle(1, 'green')
@@ -57,7 +57,7 @@ export class StageDrawService {
   }
   private drawLine(node: ILine) {
     const { id, fill, start, end, points } = node
-    const element = this.findElementOrCreate(id, 'graphic')
+    const element = this.StageElement.findOrCreate(id, 'graphic')
     element.clear()
     this.drawFill(element, fill)
     element.lineStyle(1, 'black')
@@ -68,7 +68,9 @@ export class StageDrawService {
     shape.beginFill(fill)
   }
   private drawPath(element: PIXI.Graphics, node: IVector) {
-    const path = this.StageDrawPath.patchPath(node)
+    const path = this.StageElement.pathCache.getSet(node.id, () =>
+      this.StageDrawPath.createPath(node)
+    )
     this.StageDrawPath.drawPath(path, element)
   }
   private drawHitArea(element: PIXI.Graphics) {
@@ -89,16 +91,6 @@ export class StageDrawService {
       return new PIXI.Polygon([...odds, ...evens.reverse()]).contains(x, y)
     }
     element.hitArea = { contains }
-  }
-  private findElementOrCreate(id: string, type: 'graphic'): PIXI.Graphics
-  private findElementOrCreate(id: string, type: 'text'): PIXI.Text
-  private findElementOrCreate(id: string, type: 'graphic' | 'text') {
-    if (type === 'text') {
-      return (this.currentElement = (this.StageElement.find(id) as PIXI.Text) || new PIXI.Text())
-    } else {
-      return (this.currentElement =
-        (this.StageElement.find(id) as PIXI.Graphics) || new PIXI.Graphics())
-    }
   }
 }
 

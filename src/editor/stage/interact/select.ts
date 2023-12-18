@@ -8,7 +8,7 @@ import { autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
 import { macro_Match } from '~/shared/macro'
 import { XY } from '~/shared/structure/xy'
-import { createBound, type IBound } from '~/shared/utils'
+import { createBound, isLeftMouse, type IBound } from '~/shared/utils'
 import { StageElementService, injectStageElement } from '../element'
 import { PixiService, injectPixi } from '../pixi'
 import { StageViewportService, injectStageViewport } from '../viewport'
@@ -18,7 +18,8 @@ import { StageViewportService, injectStageViewport } from '../viewport'
 export class StageSelectService {
   @observable marquee?: IBound
   duringSelect = createHooker()
-  afterSelect = createHooker()
+  beforeSelect = createHooker()
+  afterSelect = createHooker<['single' | 'marquee']>()
   private marqueeOBB?: OBB
   constructor(
     @injectPixi private Pixi: PixiService,
@@ -44,13 +45,14 @@ export class StageSelectService {
     return this.SchemaNode.hoverId
   }
   private onMousedownSelect(e: Event) {
-    if ((e as any).button !== 0) return
+    if (!isLeftMouse(e)) return
     if (this.Pixi.isForbidEvent) return
     if (!this.hoverId) return this.SchemaNode.clearSelection()
     if (this.SchemaNode.selectIds?.has(this.hoverId)) return
+    this.beforeSelect.dispatch()
     this.SchemaNode.clearSelection()
     this.SchemaNode.select(this.hoverId)
-    this.afterSelect.dispatch()
+    this.afterSelect.dispatch('single')
   }
   private onMarqueeSelect(_e: Event) {
     const e = _e as MouseEvent
@@ -67,6 +69,7 @@ export class StageSelectService {
     this.Drag.onStart(() => {
       this.SchemaNode.clearSelection()
       this.marquee = createBound(0, 0, 0, 0)
+      this.beforeSelect.dispatch()
     })
       .onMove(({ marquee }) => {
         this.marquee = marquee
@@ -79,7 +82,7 @@ export class StageSelectService {
       })
       .onEnd(({ dragService }) => {
         this.marquee = undefined
-        this.afterSelect.dispatch()
+        this.afterSelect.dispatch('marquee')
         dragService.destroy()
       })
   }
@@ -95,7 +98,7 @@ export class StageSelectService {
     const { x: width, y: height } = this.StageViewport.toRealStageShift(
       XY.Of(this.marquee.width, this.marquee.height)
     )
-    return new OBB(x + width / 2, y + height / 2, width, height, 0, 1, 1)
+    return new OBB(x + width / 2, y + height / 2, width, height, 0)
   }
 }
 

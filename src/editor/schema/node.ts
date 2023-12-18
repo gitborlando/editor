@@ -25,7 +25,7 @@ export class SchemaNodeService {
   ) {
     makeObservable(this)
     when(() => Pixi.initialized && this.initialized).then(() => {
-      this.Pixi.app.ticker.add(this.flushDirty)
+      this.Pixi.duringTicker.hook(this.flushDirty)
     })
   }
   get selectNodes() {
