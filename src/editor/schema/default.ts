@@ -235,8 +235,6 @@ export class SchemaDefaultService {
       centerY: 50,
       width: 100,
       height: 100,
-      scaleX: 1,
-      scaleY: 1,
       opacity: 1,
       rotation: 0,
       hFlip: false,

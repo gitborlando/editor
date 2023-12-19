@@ -88,7 +88,8 @@ export class StageWidgetTransformService {
     this.OperateGeometry.beforeOperate.hook(() => (this.renderType = 'clear'))
     this.OperateGeometry.afterOperate.hook(() => (this.renderType = 'reDraw'))
     watchNext('SchemaNode.selectIds').hook(() => (this.renderType = 'reDraw'))
-    watchNext('StageViewport.zoom').hook(() => (this.renderType = 'reDraw'))
+    this.StageViewport.beforeZoom.hook(() => (this.renderType = 'clear'))
+    this.StageViewport.afterZoom.hook(() => (this.renderType = 'reDraw'))
   }
   private bindEvent() {
     this.bindMoveEvent()

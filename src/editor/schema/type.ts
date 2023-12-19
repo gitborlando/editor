@@ -48,8 +48,6 @@ export type IGeometryDetail = {
   width: number
   height: number
   rotation: number
-  scaleX: number
-  scaleY: number
 }
 
 export type INodeBase = INodeMeta &

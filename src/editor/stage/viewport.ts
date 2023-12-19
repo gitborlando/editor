@@ -1,6 +1,7 @@
 import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { Watch, autobind } from '~/shared/decorator'
+import { createHooker } from '~/shared/hooker'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils'
 import { SchemaPageService, injectSchemaPage } from '../schema/page'
@@ -11,6 +12,9 @@ import { PixiService, injectPixi } from './pixi'
 export class StageViewportService {
   @observable initialized = false
   @observable bound = { x: 0, y: 48, width: 0, height: 0, right: 240 }
+  beforeZoom = createHooker()
+  afterZoom = createHooker()
+  private zoomTimeOut?: NodeJS.Timeout
   constructor(
     @injectPixi private Pixi: PixiService,
     @injectSchemaPage private SchemaPage: SchemaPageService
@@ -62,6 +66,11 @@ export class StageViewportService {
   private onWheelZoom() {
     const onWheel = ({ deltaY, clientX, clientY }: WheelEvent) => {
       if (!this.inViewport(new XY(clientX, clientY))) return
+      if (this.zoomTimeOut) {
+        clearTimeout(this.zoomTimeOut)
+      } else {
+        this.beforeZoom.dispatch()
+      }
       const sign = deltaY > 0 ? -1 : 1
       const stepByZoom = [
         [0, 0.02],
@@ -79,6 +88,10 @@ export class StageViewportService {
       const newOffset = XY.From(this.stageOffset).plus(realStageXY.multiply(-step))
       this.setZoom(newZoom)
       this.setStageOffset(newOffset)
+      this.zoomTimeOut = setTimeout(() => {
+        this.zoomTimeOut = undefined
+        this.afterZoom.dispatch()
+      }, 250)
     }
     window.addEventListener('wheel', onWheel)
   }

@@ -32,7 +32,7 @@ export class StageDrawService {
     element.drawRect(x, y, width, height)
   }
   private drawRect(node: IRect) {
-    const { /* x, y, width, height, */ id, fill, points, rotation, scaleX, scaleY } = node
+    const { /* x, y, width, height, */ id, fill, points, rotation } = node
     const element = this.StageElement.findOrCreate(id, 'graphic')
     element.clear()
     this.drawFill(element, fill)
