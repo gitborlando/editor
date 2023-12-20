@@ -1,6 +1,7 @@
 import { inject, injectable } from 'tsyringe'
 import { IFrame, ILine, INode, IRect, IStar, ITriangle, IVector } from '~/editor/schema/type'
 import { autobind } from '~/shared/decorator'
+import { CKService, injectCK } from '../ck'
 import { StageElementService, injectStageElement } from '../element'
 import { PIXI } from '../pixi'
 import { StageDrawPathService, injectStageDrawPath } from './path'
@@ -12,9 +13,16 @@ type IStageElement = PIXI.Graphics | PIXI.Text
 export class StageDrawService {
   currentElement!: IStageElement
   constructor(
+    @injectCK private CK: CKService,
     @injectStageElement private StageElement: StageElementService,
     @injectStageDrawPath private StageDrawPath: StageDrawPathService
   ) {}
+  get ck() {
+    return this.CK.canvasKit
+  }
+  get ctx() {
+    return this.CK.canvas
+  }
   drawNode(node: INode) {
     if (node.type === 'frame') this.drawFrame(node)
     if (node.type === 'vector') {
@@ -32,11 +40,16 @@ export class StageDrawService {
     element.drawRect(x, y, width, height)
   }
   private drawRect(node: IRect) {
-    const { /* x, y, width, height, */ id, fill, points, rotation } = node
-    const element = this.StageElement.findOrCreate(id, 'graphic')
-    element.clear()
-    this.drawFill(element, fill)
-    this.drawPath(element, node)
+    const { x, y, width, height, id, fill, points, rotation } = node
+    // const element = this.StageElement.findOrCreate(id, 'graphic')
+    // element.clear()
+    // this.drawFill(element, fill)
+    // this.drawPath(element, node)
+    const paint = new this.ck.Paint()
+    paint.setColor(this.ck.Color(255, 0, 0, 1))
+    paint.setStyle(this.ck.PaintStyle.Stroke)
+    this.ctx.drawRRect(this.ck.XYWHRect(x, y, width, height), paint)
+    this.CK.needFlush = true
   }
   private drawTriangle(node: ITriangle) {
     const { x, y, width, height, id, fill, points } = node

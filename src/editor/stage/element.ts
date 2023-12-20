@@ -25,7 +25,7 @@ export class StageElementService {
     this.initOBB(id)
     this.initOutline(id)
     this.elementMap.set(id, element)
-    this.setupElement(id, element)
+    // this.setupElement(id, element)
   }
   delete(id: string) {
     this.elementMap.delete(id)

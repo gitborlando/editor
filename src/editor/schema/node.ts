@@ -1,8 +1,10 @@
-import { makeObservable, observable, when } from 'mobx'
+import { makeObservable, observable, runInAction, when } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
 import { Delete } from '~/shared/utils'
+import { LoopService, injectLoop } from '../loop'
+import { CKService, injectCK } from '../stage/ck'
 import { PixiService, injectPixi } from '../stage/pixi'
 import { SchemaPageService } from './page'
 import { INode } from './type'
@@ -21,11 +23,13 @@ export class SchemaNodeService {
   beforeDelete = createHooker<[string]>()
   constructor(
     @injectPixi private Pixi: PixiService,
+    @injectCK private CK: CKService,
+    @injectLoop private Loop: LoopService,
     @inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService
   ) {
     makeObservable(this)
-    when(() => Pixi.initialized && this.initialized).then(() => {
-      this.Pixi.duringTicker.hook(this.flushDirty)
+    when(() => this.CK.initialized && this.initialized).then(() => {
+      this.Loop.secondStage.hook(this.flushDirty)
     })
   }
   get selectNodes() {
@@ -100,6 +104,10 @@ export class SchemaNodeService {
   }
   makeSelectDirty() {
     this.selectIds.forEach(this.collectDirty)
+  }
+  makeAllDirty() {
+    const nodeIds = this.SchemaPage.find(this.SchemaPage.currentId)!.childIds
+    runInAction(() => nodeIds.forEach(this.collectDirty))
   }
 }
 

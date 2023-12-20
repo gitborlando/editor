@@ -2,11 +2,13 @@ import 'reflect-metadata'
 import { container } from 'tsyringe'
 import { EditorService } from './editor/editor'
 import { FileService } from './editor/file'
+import { LoopService } from './editor/loop'
 import { OperateGeometryService } from './editor/operate/geometry'
 import { SchemaDefaultService } from './editor/schema/default'
 import { SchemaNodeService } from './editor/schema/node'
 import { SchemaPageService } from './editor/schema/page'
 import { SchemaService } from './editor/schema/schema'
+import { CKService } from './editor/stage/ck'
 import { StageCursorService } from './editor/stage/cursor'
 import { StageDrawService } from './editor/stage/draw/draw'
 import { StageDrawPathService } from './editor/stage/draw/path'
@@ -43,6 +45,7 @@ container // stage interact
   .registerSingleton(StageCreateService)
   .registerSingleton(StageTransformService)
 container // stage
+  .registerSingleton(CKService)
   .registerSingleton(PixiService)
   .registerSingleton(StageViewportService)
   .registerSingleton(StageDrawService)
@@ -55,6 +58,7 @@ container // stage widget
   .registerSingleton(StageWidgetTransformService)
   .registerSingleton(StageWidgetRulerService)
 container // other
+  .registerSingleton(LoopService)
   .registerSingleton(EditorService)
   .registerSingleton(FileService)
 
@@ -70,6 +74,7 @@ export const editorServices = {
   SchemaPage: container.resolve(SchemaPageService),
   Schema: container.resolve(SchemaService),
   OperateGeometry: container.resolve(OperateGeometryService),
+  CK: container.resolve(CKService),
   Pixi: container.resolve(PixiService),
   StageViewport: container.resolve(StageViewportService),
   StageSelect: container.resolve(StageSelectService),
@@ -80,6 +85,7 @@ export const editorServices = {
   StageCursor: container.resolve(StageCursorService),
   StageShape: container.resolve(StageElementService),
   StageInteract: container.resolve(StageInteractService),
+  Loop: container.resolve(LoopService),
   Editor: container.resolve(EditorService),
   File: container.resolve(FileService),
 }

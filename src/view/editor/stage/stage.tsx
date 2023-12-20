@@ -2,18 +2,22 @@ import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
-import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IStageComp = {}
 
 export const StageComp: FC<IStageComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { Pixi } = useEditor()
+  const { CK, StageViewport } = useEditor()
+  const { width, height } = StageViewport.bound
   return (
-    <Flex
-      ref={Pixi.setContainer}
+    <canvas
+      id='mainCanvas'
+      ref={CK.setRef}
       className={classes.Stage}
-      onContextMenu={(e) => e.preventDefault()}></Flex>
+      width={width}
+      height={height}
+      style={{ width, height }}
+      onContextMenu={(e) => e.preventDefault()}></canvas>
   )
 })
 

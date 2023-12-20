@@ -4,6 +4,7 @@ import { Watch, When, autobind } from '~/shared/decorator'
 import { FileService, injectFile } from './file'
 import { SchemaNodeService, injectSchemaNode } from './schema/node'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
+import { CKService, injectCK } from './stage/ck'
 import { StageDrawService, injectStageDraw } from './stage/draw/draw'
 import { StageElementService, injectStageElement } from './stage/element'
 import { PixiService, injectPixi } from './stage/pixi'
@@ -17,14 +18,15 @@ export class EditorService {
     @injectSchemaNode private SchemaNode: SchemaNodeService,
     @injectStageElement private StageElement: StageElementService,
     @injectStageDraw private StageDraw: StageDrawService,
-    @injectFile private File: FileService
+    @injectFile private File: FileService,
+    @injectCK private CK: CKService
   ) {
     this.initialize()
   }
-  @When('Pixi.initialized')
+  @When('CK.initialized')
   private initialize() {
     this.File.mockFile()
-    this.autoClearStage()
+    // this.autoClearStage()
     this.autoMakeNodesDirty()
     this.drawDirtyInPixiTick()
   }

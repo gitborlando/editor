@@ -54,9 +54,9 @@ export class StageWidgetTransformService {
   @Hook('SchemaPage.isPageFirstRendered')
   private initialize() {
     if (this.SchemaPage.isPageFirstRendered.args[0] === false) return
-    this.addToStage()
-    this.hookRender()
-    this.bindEvent()
+    // this.addToStage()
+    // this.hookRender()
+    // this.bindEvent()
   }
   private get vertexes() {
     return [this.vertexTL, this.vertexTR, this.vertexBL, this.vertexBR]

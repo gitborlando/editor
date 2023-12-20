@@ -2,7 +2,7 @@ import { v4 } from 'uuid'
 import { SchemaDefaultService } from './schema/default'
 import { INode } from './schema/type'
 
-export const mockJsonFile = mockJsonFile3
+export const mockJsonFile = mockJsonFile2
 
 export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
   let s = new Date().getTime()
@@ -51,7 +51,7 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
       {
         id: v4(),
         name: '测试页面1',
-        zoom: 0.05,
+        zoom: 1,
         offset: { x: 0, y: 0 },
         childIds: Object.keys(nodes),
       },

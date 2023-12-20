@@ -13,7 +13,9 @@
   "dependencies": {
     "@emotion/react": "^11.10.4",
     "@pixi-essentials/cull": "^2.0.0",
+    "@types/canvaskit-wasm": "^0.18.1",
     "@types/node": "^18.11.3",
+    "canvaskit-wasm": "^0.39.1",
     "class-autobind-decorator": "^3.0.1",
     "mobx": "^6.6.2",
     "mobx-react": "^7.5.3",
