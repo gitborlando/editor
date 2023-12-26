@@ -39,7 +39,11 @@ export class EditorService {
   }
   private drawDirtyInPixiTick() {
     this.SchemaNode.duringFlushDirty.hook((id) => {
-      this.StageDraw.drawNode(this.SchemaNode.find(id))
+      const node = this.SchemaNode.find(id)
+      this.StageDraw.drawNode(node)
+      if ('childIds' in node && this.SchemaPage.isPageFirstRendered.args[0] === false) {
+        node.childIds.forEach(this.SchemaNode.collectDirty)
+      }
     })
   }
 }

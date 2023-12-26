@@ -48,7 +48,11 @@ export const default$ = {
     background: {
       '&:hover': {
         backgroundColor: 'rgba(138, 138, 138, 0.13)',
-        //color: 'rgba(36, 138, 255, 1)',
+      },
+    },
+    font: {
+      '&:hover': {
+        color: 'rgba(162, 112, 255, 1)',
       },
     },
   },
@@ -57,8 +61,15 @@ export const default$ = {
       boxShadow: 'inset 0 0 0px 0.7px #9166FF',
     },
     background: {
-      backgroundColor: 'rgba(138, 138, 138, 0.13)',
-      //color: 'rgba(36, 138, 255, 1)',
+      backgroundColor: 'rgba(114, 38, 255, 0.6)',
+    },
+    font: {
+      color: 'rgba(123, 36, 255, 1)',
+    },
+  },
+  disabled: {
+    font: {
+      color: 'rgba(201, 201, 201, 1)',
     },
   },
   color: {

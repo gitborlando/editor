@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import { useCb } from '~/shared/utils/normal'
 import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -13,11 +14,16 @@ export const PageHeaderComp: FC<IPageHeaderComp> = observer(({}) => {
   const { SchemaPage } = useEditor()
   const { collapsed, setCollapsed } = pageCompShareState
   return (
-    <Flex className={classes.PageHeader}>
+    <Flex layout='h' className={classes.PageHeader}>
       <Flex layout='c' className={classes.selectPageName}>
         {SchemaPage.currentPage?.name}
       </Flex>
-      <Button style={{ marginLeft: 'auto' }} onClick={() => SchemaPage.add()}>
+      <Button
+        style={{ marginLeft: 'auto' }}
+        onClick={useCb(() => {
+          if (collapsed === true) setCollapsed(false)
+          SchemaPage.add()
+        })}>
         新建
       </Button>
       <Button onClick={() => setCollapsed(!collapsed)}>{collapsed ? '展开' : '收起'}</Button>

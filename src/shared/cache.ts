@@ -13,7 +13,7 @@ export class Cache<T> {
   delete(id: string) {
     this.cache.delete(id)
   }
-  getSet(id: string, fn: () => T) {
+  getSet<T>(id: string, fn: () => T) {
     let value = this.cache.get(id)
     if (value) return value as T
     value = fn()

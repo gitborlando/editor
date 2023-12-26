@@ -1,8 +1,8 @@
-import { makeObservable, observable, when } from 'mobx'
+import { computed, makeObservable, observable, when } from 'mobx'
 import { delay, inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
-import { Delete } from '~/shared/utils'
+import { Delete } from '~/shared/utils/normal'
 import { PixiService, injectPixi } from '../stage/pixi'
 import { SchemaPageService } from './page'
 import { INode } from './type'
@@ -14,7 +14,7 @@ export class SchemaNodeService {
   @observable hoverId = ''
   @observable selectIds = new Set<string>()
   dirtyIds = new Set<string>()
-  nodeMap = <Record<string, INode>>{}
+  nodeMap = <Record<string, Record<string, INode>>>{}
   beforeFlushDirty = createHooker()
   duringFlushDirty = createHooker<[string]>()
   afterFlushDirty = createHooker()
@@ -28,7 +28,10 @@ export class SchemaNodeService {
       this.Pixi.duringTicker.hook(this.flushDirty)
     })
   }
-  get selectNodes() {
+  @computed get currentPageNodeMap() {
+    return this.nodeMap[this.SchemaPage.currentId]
+  }
+  @computed get selectNodes() {
     const nodes = <INode[]>[]
     this.selectIds.forEach((id) => nodes.push(this.find(id)))
     return nodes
@@ -38,7 +41,7 @@ export class SchemaNodeService {
     this.initialized = true
   }
   add(node: INode) {
-    this.nodeMap[node.id] = node
+    this.currentPageNodeMap[node.id] = node
     this.collectDirty(node.id)
     return node
   }
@@ -51,7 +54,7 @@ export class SchemaNodeService {
     // Delete(parent.childIds, (id) => id === node.id)
   }
   find(id: string) {
-    return this.nodeMap[id]
+    return this.currentPageNodeMap[id]
   }
   connect(id: string, parentId: string) {
     const nodeParent = this.find(parentId)
@@ -83,7 +86,7 @@ export class SchemaNodeService {
     if (!this.selectIds.has(id)) return
     this.selectIds.delete(id)
   }
-  clearSelection() {
+  clearSelect() {
     this.selectIds.forEach(this.collectDirty)
     this.selectIds = new Set()
   }

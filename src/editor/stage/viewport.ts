@@ -3,7 +3,7 @@ import { inject, injectable } from 'tsyringe'
 import { Watch, autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
 import { XY } from '~/shared/structure/xy'
-import { IXY } from '~/shared/utils'
+import { IXY } from '~/shared/utils/normal'
 import { SchemaPageService, injectSchemaPage } from '../schema/page'
 import { PixiService, injectPixi } from './pixi'
 
@@ -49,19 +49,27 @@ export class StageViewportService {
   toRealStageXY(xy: IXY) {
     return this.toViewportXY(xy).minus(this.stageOffset).divide(this.zoom)
   }
-  toRealStageShift(xy: IXY) {
+  toRealStage(key: 'x' | 'y', num: number) {
+    const viewportXY = num - this.bound[key]
+    const stageXY = viewportXY - this.stageOffset[key]
+    return stageXY / this.zoom
+  }
+  toRealStageShiftXY(xy: IXY) {
     return XY.From(xy).divide(this.zoom)
+  }
+  toRealStageShift(shift: number) {
+    return shift / this.zoom
   }
   inViewport(xy: IXY) {
     return xy.x > this.bound.x && xy.x < this.bound.x + this.bound.width && xy.y > this.bound.y
   }
   @Watch('zoom')
   private autoSetPixiStageZoom() {
-    this.Pixi.stage.scale.set(this.zoom, this.zoom)
+    this.Pixi.sceneStage.scale.set(this.zoom, this.zoom)
   }
   @Watch('stageOffset')
   private autoSetPixiStageOffset() {
-    this.Pixi.stage.position.set(this.stageOffset.x, this.stageOffset.y)
+    this.Pixi.sceneStage.position.set(this.stageOffset.x, this.stageOffset.y)
   }
   private onWheelZoom() {
     const onWheel = ({ deltaY, clientX, clientY }: WheelEvent) => {
@@ -79,7 +87,10 @@ export class StageViewportService {
         [0.3, 0.1],
         [0.5, 0.2],
         [1.2, 0.3],
-        [2.5, 0.5],
+        [1.5, 0.5],
+        [2, 1],
+        [3, 2],
+        [5, 3],
       ].reverse()
       const step = stepByZoom.find(([_zoom, _step]) => _zoom <= this.zoom)![1] * sign
       let newZoom = this.zoom + step

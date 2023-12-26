@@ -8,7 +8,7 @@ import { autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
 import { macro_Match } from '~/shared/macro'
 import { XY } from '~/shared/structure/xy'
-import { createBound, isLeftMouse, type IBound } from '~/shared/utils'
+import { createBound, isLeftMouse, isRightMouse, type IBound } from '~/shared/utils/normal'
 import { StageElementService, injectStageElement } from '../element'
 import { PixiService, injectPixi } from '../pixi'
 import { StageViewportService, injectStageViewport } from '../viewport'
@@ -47,16 +47,15 @@ export class StageSelectService {
   private onMousedownSelect(e: Event) {
     if (!isLeftMouse(e)) return
     if (this.Pixi.isForbidEvent) return
-    if (!this.hoverId) return this.SchemaNode.clearSelection()
+    if (!this.hoverId) return this.SchemaNode.clearSelect()
     if (this.SchemaNode.selectIds?.has(this.hoverId)) return
     this.beforeSelect.dispatch()
-    this.SchemaNode.clearSelection()
+    this.SchemaNode.clearSelect()
     this.SchemaNode.select(this.hoverId)
     this.afterSelect.dispatch('single')
   }
-  private onMarqueeSelect(_e: Event) {
-    const e = _e as MouseEvent
-    if (e.button !== 0) return
+  private onMarqueeSelect(e: Event) {
+    if (!isLeftMouse(e)) return
     if (this.Pixi.isForbidEvent) return
     if (this.hoverId) return
     const hitTest = (marqueeOBB: OBB | undefined, obb: OBB) => {
@@ -67,7 +66,7 @@ export class StageSelectService {
     }
     const nodesIds = Object.keys(this.SchemaNode.nodeMap)
     this.Drag.onStart(() => {
-      this.SchemaNode.clearSelection()
+      this.SchemaNode.clearSelect()
       this.marquee = createBound(0, 0, 0, 0)
       this.beforeSelect.dispatch()
     })
@@ -86,16 +85,15 @@ export class StageSelectService {
         dragService.destroy()
       })
   }
-  private onMenu(_e: Event) {
-    const e = _e as MouseEvent
-    if (e.button !== 2) return
+  private onMenu(e: Event) {
+    if (!isRightMouse(e)) return
     this.Menu.setShow(true)
     this.Menu.setXY(e.clientX, e.clientY)
   }
   private calcMarqueeOBB() {
     if (!this.marquee) return
     const { x, y } = this.StageViewport.toRealStageXY(XY.Of(this.marquee.x, this.marquee.y))
-    const { x: width, y: height } = this.StageViewport.toRealStageShift(
+    const { x: width, y: height } = this.StageViewport.toRealStageShiftXY(
       XY.Of(this.marquee.width, this.marquee.height)
     )
     return new OBB(x + width / 2, y + height / 2, width, height, 0)

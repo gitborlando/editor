@@ -28,6 +28,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
       </Flex>
       {state.isHover && (
         <Button
+          type='text'
           onClick={(e) => {
             e.stopPropagation()
             SchemaPage.delete(id)

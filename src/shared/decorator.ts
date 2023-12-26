@@ -1,6 +1,6 @@
 import autoBindMethods from 'class-autobind-decorator'
 import { reaction, runInAction, when } from 'mobx'
-import { stringPathProxy, withNewFunction } from './utils'
+import { stringPathProxy, withNewFunction } from './utils/normal'
 
 export const autobind = autoBindMethods
 

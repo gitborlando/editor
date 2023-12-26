@@ -3,10 +3,10 @@ import { min, rotatePoint } from '~/editor/math/base'
 import { Path } from '~/editor/math/path/path'
 import { PathPoint } from '~/editor/math/path/point'
 import { xy_plus_mutate } from '~/editor/math/xy'
-import { IVector } from '~/editor/schema/type'
+import { IIrregular } from '~/editor/schema/type'
 import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
-import { cullNegatives } from '~/shared/utils'
+import { cullNegatives } from '~/shared/utils/normal'
 import { StageElementService, injectStageElement } from '../element'
 import { PIXI } from '../pixi'
 
@@ -17,7 +17,7 @@ export class StageDrawPathService {
   getCachedPath(id: string) {
     return this.StageElement.pathCache.get(id)
   }
-  createPath(node: IVector) {
+  createPath(node: IIrregular) {
     const pathPoints = node.points.map((nodePoint, i) => {
       const centerXY = XY.Of(node.centerX, node.centerY)
       const rotatedXY = rotatePoint(nodePoint.x, nodePoint.y, 0, 0, node.rotation)

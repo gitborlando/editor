@@ -1,7 +1,7 @@
 import { IAutorunOptions, IReactionPublic, autorun, reaction, runInAction } from 'mobx'
 import { useEffect } from 'react'
 import { editorServices } from '~/ioc'
-import { INoopFunc, stringPathProxy } from './utils'
+import { INoopFunc, stringPathProxy } from './normal'
 
 export function watchNext(stringPath: string) {
   return {

@@ -8,7 +8,7 @@ import { DragService, injectDrag, type IDragData } from '~/global/drag'
 import { RunInAction, autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
 import { XY } from '~/shared/structure/xy'
-import { IXY } from '~/shared/utils'
+import { IXY } from '~/shared/utils/normal'
 import { StageElementService, injectStageElement } from '../element'
 import { StageViewportService, injectStageViewport } from '../viewport'
 import { StageInteractService, injectStageInteract } from './interact'
@@ -62,7 +62,7 @@ export class StageCreateService {
   @RunInAction
   private onCreateMove({ marquee, current }: IDragData) {
     const { x, y } = this.StageViewport.toRealStageXY(marquee)
-    const { x: width, y: height } = this.StageViewport.toRealStageShift({
+    const { x: width, y: height } = this.StageViewport.toRealStageShiftXY({
       x: marquee.width,
       y: marquee.height,
     })
@@ -120,7 +120,7 @@ export class StageCreateService {
   }
   private addNodeToSchemaAndSelect() {
     this.SchemaNode.add(this.node)
-    this.SchemaNode.clearSelection()
+    this.SchemaNode.clearSelect()
     this.SchemaNode.select(this.node.id)
     this.SchemaNode.connect(this.node.id, this.SchemaPage.currentId)
   }

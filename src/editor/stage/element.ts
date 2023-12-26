@@ -14,6 +14,7 @@ export class StageElementService {
   OBBCache = createCache<OBB>()
   pathCache = createCache<Path>()
   outlineCache = createCache<PIXI.Graphics>()
+  linearGradientCache = createCache<PIXI.Texture>()
   private elementMap: Map<string, IStageElement> = new Map()
   constructor(
     @injectPixi private Pixi: PixiService,
@@ -37,7 +38,7 @@ export class StageElementService {
     return this.elementMap.get(id)
   }
   clearAll() {
-    this.Pixi.stage.removeChildren()
+    this.Pixi.sceneStage.removeChildren()
     this.elementMap = new Map()
     this.OBBCache.clear()
     this.pathCache.clear()
@@ -56,11 +57,12 @@ export class StageElementService {
     }
   }
   private setupElement(id: string, element: IStageElement) {
-    const { parentId } = this.SchemaNode.find(id)
+    const node = this.SchemaNode.find(id)
     if (!element.parent) {
-      const parent = this.find(parentId) || this.Pixi.stage
+      const parent = this.find(node.parentId) || this.Pixi.sceneStage
       element.setParent(parent)
     }
+    if (node.type === 'frame' && node.parentId.startsWith('page')) return
     element.eventMode = 'dynamic'
     element.on('mouseenter', () => this.SchemaNode.hover(id))
     element.on('mouseleave', () => this.SchemaNode.unHover())

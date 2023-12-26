@@ -1,7 +1,6 @@
 import 'reflect-metadata'
 import { container } from 'tsyringe'
 import { EditorService } from './editor/editor'
-import { FileService } from './editor/file'
 import { OperateGeometryService } from './editor/operate/geometry'
 import { SchemaDefaultService } from './editor/schema/default'
 import { SchemaNodeService } from './editor/schema/node'
@@ -18,11 +17,13 @@ import { StageSelectService } from './editor/stage/interact/select'
 import { StageTransformService } from './editor/stage/interact/transform'
 import { PixiService } from './editor/stage/pixi'
 import { StageViewportService } from './editor/stage/viewport'
+import { StageWidgetGuideService } from './editor/stage/widget/guide'
 import { StageWidgetHoverService } from './editor/stage/widget/hover'
 import { StageWidgetMarqueeService } from './editor/stage/widget/marquee'
 import { StageWidgetRulerService } from './editor/stage/widget/ruler'
 import { StageWidgetTransformService } from './editor/stage/widget/transform'
 import { DragService } from './global/drag'
+import { FileService } from './global/file'
 import { MenuService } from './global/menu'
 import { SettingService } from './global/setting'
 import { createHooker } from './shared/hooker'
@@ -53,13 +54,14 @@ container // stage widget
   .registerSingleton(StageWidgetHoverService)
   .registerSingleton(StageWidgetMarqueeService)
   .registerSingleton(StageWidgetTransformService)
+  .registerSingleton(StageWidgetGuideService)
   .registerSingleton(StageWidgetRulerService)
 container // other
   .registerSingleton(EditorService)
-  .registerSingleton(FileService)
 
 // global
 container
+  .registerSingleton(FileService)
   .registerSingleton(DragService)
   .registerSingleton(MenuService)
   .registerSingleton(SettingService)
@@ -83,14 +85,15 @@ export const editorServices = {
   Editor: container.resolve(EditorService),
   File: container.resolve(FileService),
 }
-
 container.resolve(StageDrawPathService)
 container.resolve(StageWidgetHoverService)
 container.resolve(StageWidgetMarqueeService)
 container.resolve(StageWidgetTransformService)
+container.resolve(StageWidgetGuideService)
 container.resolve(StageWidgetRulerService)
 
 export const globalServices = {
+  File: container.resolve(FileService),
   Drag: container.resolve(DragService),
   Menu: container.resolve(MenuService),
   Setting: container.resolve(SettingService),

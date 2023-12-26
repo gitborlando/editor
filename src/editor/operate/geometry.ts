@@ -6,29 +6,30 @@ import { createHooker } from '~/shared/hooker'
 import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { macro_StringMatch } from '~/shared/macro'
-import { ValueOf } from '~/shared/utils'
-import { xy_mutate, xy_new, xy_rotate, xy_rotate2 } from '../math/xy'
+import { ValueOf } from '~/shared/utils/normal'
+import { xy_mutate, xy_rotate2 } from '../math/xy'
 import { SchemaNodeService, injectSchemaNode } from '../schema/node'
-import { IVector } from '../schema/type'
+import { ITriangle } from '../schema/type'
 import { StageElementService, injectStageElement } from '../stage/element'
 import { StageSelectService, injectStageSelect } from '../stage/interact/select'
 
-type IGeometryData = {
+export type IGeometryData = {
   x: number
   y: number
   width: number
   height: number
   rotation: number
   radius: number
+  sides: number
 }
 
 @autobind
 @injectable()
 export class OperateGeometryService {
   data = createInterceptData(initData())
-  oneTickChange = createMomentChange()
+  oneTickChange = createMomentChange<Record<keyof IGeometryData, any>>()
   isGeometryChanged = false
-  beforeOperate = createHooker<[(keyof typeof this.data)[]]>()
+  beforeOperate = createHooker<[(keyof IGeometryData)[]]>()
   afterOperate = createHooker()
   constructor(
     @injectSchemaNode private SchemaNode: SchemaNodeService,
@@ -42,7 +43,7 @@ export class OperateGeometryService {
       this.setupGeometryData()
     })
     this.data._whenDataWillChange.hook(({ key, ctx }) => {
-      //   this.fixBeforeChange(key, ctx)
+      //this.fixBeforeChange(key, ctx)
     })
     this.data._whenDataDidChange.hook(({ key, val }) => {
       this.oneTickChange.update(key, val)
@@ -51,7 +52,7 @@ export class OperateGeometryService {
     })
     this.SchemaNode.duringFlushDirty.hook((id) => {
       if (!this.isGeometryChanged) return
-      this.patchChangeToVectorPoints(id)
+      //this.patchChangeToVectorPoints(id)
       this.patchChangeToNode(id)
     })
     this.SchemaNode.afterFlushDirty.hook(() => {
@@ -91,33 +92,34 @@ export class OperateGeometryService {
         else this.data[key] = 0
       })
     }
-    const { x, y, width, height, rotation } = this.data
-    this.oneTickChange.reset({ x, y, width, height, rotation })
+
+    const { x, y, width, height, rotation, radius, sides } = this.data
+    this.oneTickChange.reset({ x, y, width, height, rotation, radius, sides })
   }
   private patchChangeToVectorPoints(id: string) {
     const node = this.SchemaNode.find(id)
     if (node.type !== 'vector') return
     const { record, changedKeys } = this.oneTickChange
     const { width, height } = record
-    node.points.forEach((point) => {
-      if (changedKeys.has('width') && width) {
-        point.x *= 1 + (width.new - width.old) / node.width
-        point.handleLeft && (point.handleLeft.x *= width.new / width.old)
-        point.handleRight && (point.handleRight.x *= width.new / width.old)
-      }
-      if (changedKeys.has('height') && height) {
-        point.y *= 1 + (height.new - height.old) / node.height
-        point.handleLeft && (point.handleLeft.y *= height.new / height.old)
-        point.handleRight && (point.handleRight.y *= height.new / height.old)
-      }
-    })
+    // node.points.forEach((point) => {
+    //   if (changedKeys.has('width') && width) {
+    //     point.x *= 1 + (width.new - width.old) / node.width
+    //     point.handleLeft && (point.handleLeft.x *= width.new / width.old)
+    //     point.handleRight && (point.handleRight.x *= width.new / width.old)
+    //   }
+    //   if (changedKeys.has('height') && height) {
+    //     point.y *= 1 + (height.new - height.old) / node.height
+    //     point.handleLeft && (point.handleLeft.y *= height.new / height.old)
+    //     point.handleRight && (point.handleRight.y *= height.new / height.old)
+    //   }
+    // })
   }
   private patchChangeToNode(id: string) {
     const node = this.SchemaNode.find(id)
     const OBB = this.StageElement.OBBCache.get(id)
     const path = this.StageElement.pathCache.get(id)
     const { record, changedKeys } = this.oneTickChange
-    const { x, y, width, height, rotation } = record
+    const { x, y, width, height, rotation, sides } = record
     if (changedKeys.has('x') && x) {
       node.x += x.new - x.old
       node.centerX += x.new - x.old
@@ -146,19 +148,22 @@ export class OperateGeometryService {
       xy_mutate(node, rotatedXY)
       OBB.reRotation(node.rotation)
     }
-    path.points.forEach((point, i) => {
-      if (changedKeys.has('x') && x) {
-        point.x += x.new - x.old
-      }
-      if (changedKeys.has('y') && y) {
-        point.y += y.new - y.old
-      }
-      if (changedKeys.has('width') || changedKeys.has('height') || changedKeys.has('rotation')) {
-        const rotatedXY = xy_rotate((<IVector>node).points[i], xy_new(0, 0), node.rotation)
-        point.x = rotatedXY.x + node.centerX
-        point.y = rotatedXY.y + node.centerY
-      }
-    })
+    if (changedKeys.has('sides') && sides) {
+      ;(node as ITriangle).sides = sides.new
+    }
+    // path.points.forEach((point, i) => {
+    //   if (changedKeys.has('x') && x) {
+    //     point.x += x.new - x.old
+    //   }
+    //   if (changedKeys.has('y') && y) {
+    //     point.y += y.new - y.old
+    //   }
+    //   if (changedKeys.has('width') || changedKeys.has('height') || changedKeys.has('rotation')) {
+    //     const rotatedXY = xy_rotate((<IVector>node).points[i], xy_new(0, 0), node.rotation)
+    //     point.x = rotatedXY.x + node.centerX
+    //     point.y = rotatedXY.y + node.centerY
+    //   }
+    // })
     this.StageElement.pathCache.set(id, path)
     this.StageElement.OBBCache.set(id, OBB)
   }
@@ -174,5 +179,6 @@ function initData() {
     height: 0,
     rotation: 0,
     radius: 0,
+    sides: 3,
   }
 }

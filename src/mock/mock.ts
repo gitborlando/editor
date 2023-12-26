@@ -1,11 +1,27 @@
 import { v4 } from 'uuid'
-import { SchemaDefaultService } from './schema/default'
-import { INode } from './schema/type'
+import { xy_new } from '~/editor/math/xy'
+import { XY } from '~/shared/structure/xy'
+import { COLOR } from '~/shared/utils/color'
+import { SchemaDefaultService } from '../editor/schema/default'
+import { IFillLinearGradient, INode } from '../editor/schema/type'
+import { mockNested } from './nested'
 
-export const mockJsonFile = mockJsonFile3
+export const mockJsonFile = mockNested
 
 export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
   let s = new Date().getTime()
+
+  let size = 100
+  const LinearGradient = <IFillLinearGradient>{
+    type: 'linearGradient',
+    start: xy_new(-size / 2, 0),
+    end: xy_new(size / 2, 0),
+    stops: [
+      { offset: 0, color: COLOR.blue },
+      { offset: 1, color: COLOR.pinkRed },
+    ],
+  }
+
   const nodes: Record<string, INode> = {}
   let k = 0
   for (let i = 0; i < 10000; i++) {
@@ -13,7 +29,7 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
     let j = i % 100
 
     k = ~~(i / 100)
-    let size = 100
+
     let node: any = schemaDefault.rect({
       id,
       width: size,
@@ -24,7 +40,7 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
       centerY: 50 + k * (size + 30),
       radius: 10,
       parentId: 'page1',
-      fill: 'skyBlue', //'#CCCCCC',
+      fills: [schemaDefault.fillColor(COLOR.blue)], //'#CCCCCC',
     })
     // node = schemaDefault.star({
     //   id,
@@ -82,45 +98,44 @@ export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
       centerY: 50,
       parentId: 'page1',
     }),
-    // rect10: schemaDefault.rect({
-    //   id: 'rect10',
-    //   name: '测试矩形1',
-    //   width: 200,
-    //   height: 100,
-    //   x: 100,
-    //   y: 100,
-    //   centerX: 200,
-    //   centerY: 150,
-    //   parentId: 'page1',
-    //   fill: 'skyblue',
-    // }),
-    // rect3: schemaDefault.rect({
-    //   id: 'rect3',
-    //   name: '测试矩形1',
-    //   width: 200,
-    //   height: 200,
-    //   x: 250,
-    //   centerX: 300,
-    //   parentId: 'page1',
-    // }),
-    // line1: schemaDefault.line({
-    //   id: 'line1',
-    //   name: '测试线段1',
-    //   height: 1,
-    //   start: XY.Of(300, 0),
-    //   end: XY.Of(400, 100),
-    //   parentId: 'page1',
-    // }),
-    // triangle1: schemaDefault.triangle({
-    //   id: 'triangle1',
-    //   width: 100,
-    //   height: 100,
-    //   x: 300,
-    //   y: 400,
-    //   centerX: 250,
-    //   centerY: 250,
-    //   parentId: 'page1',
-    // }),
+    rect10: schemaDefault.rect({
+      id: 'rect10',
+      name: '测试矩形1',
+      width: 200,
+      height: 100,
+      x: 100,
+      y: 100,
+      centerX: 200,
+      centerY: 150,
+      parentId: 'page1',
+    }),
+    rect3: schemaDefault.rect({
+      id: 'rect3',
+      name: '测试矩形1',
+      width: 200,
+      height: 200,
+      x: 250,
+      centerX: 300,
+      parentId: 'page1',
+    }),
+    line1: schemaDefault.line({
+      id: 'line1',
+      name: '测试线段1',
+      height: 1,
+      start: XY.Of(300, 0),
+      end: XY.Of(400, 100),
+      parentId: 'page1',
+    }),
+    triangle1: schemaDefault.triangle({
+      id: 'triangle1',
+      width: 100,
+      height: 100,
+      x: 300,
+      y: 400,
+      centerX: 250,
+      centerY: 250,
+      parentId: 'page1',
+    }),
     // irregular1: schemaDefault.star({
     //   id: 'irregular1',
     //   width: 100,

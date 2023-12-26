@@ -1,7 +1,7 @@
 import { makeObservable, observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { WatchNext, autobind } from '~/shared/decorator'
-import { IXY } from '~/shared/utils'
+import { IXY } from '~/shared/utils/normal'
 import { xy_new } from '../math/xy'
 import { PixiService, injectPixi } from './pixi'
 

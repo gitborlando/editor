@@ -2,7 +2,7 @@ import { min } from '~/editor/math/base'
 import { Path } from '~/editor/math/path/path'
 import { PathPoint } from '~/editor/math/path/point'
 import { XY } from '~/shared/structure/xy'
-import { IXY, cullNegatives } from '~/shared/utils'
+import { IXY, cullNegatives } from '~/shared/utils/normal'
 
 export function testDraw2(_ctx: CanvasRenderingContext2D) {
   const ctx = new CTX(_ctx)

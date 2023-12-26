@@ -24,7 +24,7 @@ export class StageWidgetPointService {
       return this.marqueeWidget.clear()
     }
     this.marqueeWidget.clear()
-    this.marqueeWidget.setParent(this.Pixi.stage)
+    this.marqueeWidget.setParent(this.Pixi.sceneStage)
     const { x, y, width, height } = this.StageSelect.marquee
 
     // this.StageCTX.drawStroke(this.marqueeWidget, {

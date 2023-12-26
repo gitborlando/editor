@@ -1,9 +1,10 @@
-import { IXY } from '~/shared/utils'
+import { IRGBA } from '~/shared/utils/color'
+import { IXY } from '~/shared/utils/normal'
 
 export type ISchema = {
   meta: IMeta
   pages: IPage[]
-  nodes: Record<string, INode>
+  nodes: Record<string, Record<string, INode>>
 }
 
 export type IMeta = {
@@ -59,7 +60,6 @@ export type INodeBase = INodeMeta &
     strokes: any[]
     blurs: any[]
     shadows: any[]
-    fill: string
   }
 
 export type IFrame = INodeBase & {
@@ -85,81 +85,87 @@ export type IPoint = {
   jumpToRight?: boolean
 }
 
-export type IVector = INodeBase & {
-  type: 'vector'
-  closed: boolean
-  points: IPoint[]
-}
+export type IVector = IRect | IEllipse | ITriangle | IStar | ILine | IIrregular
 
-export type IIrregular = IVector & {
-  vectorType: 'irregular'
-}
+export type IVectorType = { type: 'vector' }
 
-export type IRect = IVector & {
-  vectorType: 'rect'
-  radius: number
-}
+export type IIrregular = INodeBase &
+  IVectorType & {
+    vectorType: 'irregular'
+    closed: boolean
+    points: IPoint[]
+  }
 
-export type IEllipse = IVector & {
-  vectorType: 'ellipse'
-  innerRate: number
-  startAngle: number
-  endAngle: number
-}
+export type IRect = INodeBase &
+  IVectorType & {
+    vectorType: 'rect'
+    radius: number
+  }
 
-export type ITriangle = IVector & {
-  vectorType: 'triangle'
-  sides: number
-  radius: number
-}
+export type IEllipse = INodeBase &
+  IVectorType & {
+    vectorType: 'ellipse'
+    innerRate: number
+    startAngle: number
+    endAngle: number
+  }
 
-export type IStar = IVector & {
-  vectorType: 'star'
-  sides: number
-  radius: number
-  innerRate: number
-}
+export type ITriangle = INodeBase &
+  IVectorType & {
+    vectorType: 'triangle'
+    sides: number
+    radius: number
+  }
 
-export type ILine = IVector & {
-  vectorType: 'line'
-  start: IXY
-  end: IXY
-  length: number
-}
+export type IStar = INodeBase &
+  IVectorType & {
+    vectorType: 'star'
+    sides: number
+    radius: number
+    innerRate: number
+  }
+
+export type ILine = INodeBase &
+  IVectorType & {
+    vectorType: 'line'
+    start: IXY
+    end: IXY
+    length: number
+  }
 
 export type IText = INodeBase & {
   type: 'text'
   font: {}
 }
 
-export type IFill = IFillColor | IFillLinearGradient | IFillRadialGradient | IFillImage
+export type IFill = IFillColor | IFillLinearGradient | IFillImage
 
 export type IFillColor = {
   type: 'color'
-  color: string
+  color: IRGBA
 }
 
 export type IFillLinearGradient = {
   type: 'linearGradient'
   start: IXY
   end: IXY
-  stops: { xy: IXY; color: string }[]
+  stops: { offset: number; color: IRGBA }[]
 }
 
-export type IFillRadialGradient = {
-  type: 'radialGradient'
-  center: IXY
-  radiusA: IXY
-  radiusB: IXY
-  stops: { xy: IXY; color: string }[]
-}
+// export type IFillRadialGradient = {
+//   type: 'radialGradient'
+//   center: IXY
+//   radiusA: IXY
+//   radiusB: IXY
+//   stops: { xy: IXY; color: string }[]
+// }
 
-export type IFillGonicGradient = {
-  type: 'gonicGradient'
-  startAngle: number
-  center: IXY
-  stops: { xy: IXY; color: string }[]
-}
+// export type IFillGonicGradient = {
+//   type: 'gonicGradient'
+//   startAngle: number
+//   center: IXY
+//   stops: { xy: IXY; color: string }[]
+// }
 
 export type IFillImage = {
   type: 'image'

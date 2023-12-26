@@ -1,4 +1,4 @@
-import { IXY } from '~/shared/utils'
+import { IXY } from '~/shared/utils/normal'
 import { rotatePoint } from './base'
 
 export function xy_new(x: number, y: number) {

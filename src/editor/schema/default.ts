@@ -1,14 +1,15 @@
 import { inject, injectable } from 'tsyringe'
 import { v4 as uuidv4 } from 'uuid'
 import { autobind } from '~/shared/decorator'
-import { IBound, IXY } from '~/shared/utils'
+import { COLOR, rgba } from '~/shared/utils/color'
+import { IBound, IXY } from '~/shared/utils/normal'
 import {
   IEllipse,
   IFillColor,
-  IFillGonicGradient,
+  // IFillGonicGradient,
   IFillImage,
   IFillLinearGradient,
-  IFillRadialGradient,
+  // IFillRadialGradient,
   IFrame,
   IGroup,
   ILine,
@@ -21,7 +22,6 @@ import {
   IStar,
   IText,
   ITriangle,
-  IVector,
 } from './type'
 
 @autobind
@@ -66,13 +66,12 @@ export class SchemaDefaultService {
   frame(option?: Partial<IFrame>): IFrame {
     const name = this.createNodeName('frame')
     const nodeBase = this.createNodeBase()
-    const fill = { fill: 'white' }
     return {
       type: 'frame',
       childIds: [],
       ...nodeBase,
       ...name,
-      ...fill,
+      fills: [this.fillColor(COLOR.white)],
       ...option,
     }
   }
@@ -89,39 +88,33 @@ export class SchemaDefaultService {
   }
   rect(option?: Partial<IRect>): IRect {
     const name = this.createNodeName('rect')
-    const vectorBase = this.createVectorBase()
-    const points = this.createRectPoints(option?.width ?? 100, option?.height ?? 100)
-    return {
-      vectorType: 'rect',
-      radius: 0,
-      ...vectorBase,
-      ...points,
-      ...name,
-      ...option,
-    }
+    const nodeBase = this.createNodeBase()
+    return { type: 'vector', vectorType: 'rect', radius: 0, ...nodeBase, ...name, ...option }
   }
   ellipse(option?: Partial<IEllipse>): IEllipse {
     const name = this.createNodeName('ellipse')
-    const vectorBase = this.createVectorBase()
+    const nodeBase = this.createNodeBase()
     return {
+      type: 'vector',
       vectorType: 'ellipse',
       innerRate: 0,
       startAngle: 0,
       endAngle: 360,
-      ...vectorBase,
+      ...nodeBase,
       ...name,
       ...option,
     }
   }
   triangle(option?: Partial<ITriangle>): ITriangle {
     const name = this.createNodeName('triangle')
-    const vectorBase = this.createVectorBase()
+    const nodeBase = this.createNodeBase()
     const points = this.createTrianglePoints(option?.width ?? 100, option?.height ?? 100)
     return {
+      type: 'vector',
       vectorType: 'triangle',
       sides: 3,
       radius: 0,
-      ...vectorBase,
+      ...nodeBase,
       ...name,
       ...points,
       ...option,
@@ -129,32 +122,29 @@ export class SchemaDefaultService {
   }
   star(option?: Partial<IStar>): IStar {
     const name = this.createNodeName('star')
-    const vectorBase = this.createVectorBase()
+    const nodeBase = this.createNodeBase()
     return {
+      type: 'vector',
       vectorType: 'star',
       sides: 3,
       radius: 0,
       innerRate: 0.3,
-      ...vectorBase,
+      ...nodeBase,
       ...name,
       ...option,
     }
   }
   line(option?: Partial<ILine>): ILine {
     const name = this.createNodeName('line')
-    const vectorBase = this.createVectorBase()
-    const points = this.createLinePoints(
-      option?.start || { x: 0, y: 100 },
-      option?.end || { x: 100, y: 100 }
-    )
+    const nodeBase = this.createNodeBase()
     return {
+      type: 'vector',
       vectorType: 'line',
       start: { x: 0, y: 100 },
       end: { x: 100, y: 100 },
       length: 100,
-      ...vectorBase,
+      ...nodeBase,
       ...name,
-      ...points,
       ...option,
     }
   }
@@ -174,8 +164,8 @@ export class SchemaDefaultService {
       ...option,
     }
   }
-  fillColor(): IFillColor {
-    return { type: 'color', color: 'skyBlue' }
+  fillColor(color = rgba(204, 204, 204, 1)): IFillColor {
+    return { type: 'color', color }
   }
   fillLinearGradient(start: IXY, end: IXY): IFillLinearGradient {
     return {
@@ -183,26 +173,26 @@ export class SchemaDefaultService {
       start,
       end,
       stops: [
-        { xy: start, color: 'skyBlue' },
-        { xy: end, color: 'pink' },
+        { offset: 0, color: COLOR.blue },
+        { offset: 1, color: COLOR.pinkRed },
       ],
     }
   }
-  fillRadialGradient(center: IXY, radiusA: IXY, radiusB: IXY): IFillRadialGradient {
-    return {
-      type: 'radialGradient',
-      center,
-      radiusA,
-      radiusB,
-      stops: [
-        { xy: center, color: 'skyBlue' },
-        { xy: radiusA, color: 'pink' },
-      ],
-    }
-  }
-  fillGonicGradient(startAngle: number, center: IXY): IFillGonicGradient {
-    return { type: 'gonicGradient', startAngle, center, stops: [{ xy: center, color: 'skyBlue' }] }
-  }
+  // fillRadialGradient(center: IXY, radiusA: IXY, radiusB: IXY): IFillRadialGradient {
+  //   return {
+  //     type: 'radialGradient',
+  //     center,
+  //     radiusA,
+  //     radiusB,
+  //     stops: [
+  //       { xy: center, color: 'skyBlue' },
+  //       { xy: radiusA, color: 'pink' },
+  //     ],
+  //   }
+  // }
+  // fillGonicGradient(startAngle: number, center: IXY): IFillGonicGradient {
+  //   return { type: 'gonicGradient', startAngle, center, stops: [{ xy: center, color: 'skyBlue' }] }
+  // }
   fillImage(url: string): IFillImage {
     return { type: 'image', url, matrix: [0, 0, 0, 0, 0, 0] }
   }
@@ -227,6 +217,10 @@ export class SchemaDefaultService {
     }
   }
   private createNodeBase(): INodeBase {
+    const colorFill = <IFillColor>{
+      type: 'color',
+      color: rgba(204, 204, 204, 1),
+    }
     return {
       ...this.createSchemaMeta(),
       x: 0,
@@ -239,20 +233,10 @@ export class SchemaDefaultService {
       rotation: 0,
       hFlip: false,
       vFlip: false,
-      fills: [],
+      fills: [colorFill],
       strokes: [],
       blurs: [],
       shadows: [],
-      fill: '#CCCCCC',
-    }
-  }
-  private createVectorBase(option?: Partial<IVector>): IVector {
-    return {
-      type: 'vector',
-      closed: true,
-      points: [],
-      ...this.createNodeBase(),
-      ...option,
     }
   }
   private createNodeName(

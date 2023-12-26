@@ -1,10 +1,11 @@
+import { useCallback } from 'react'
 import { v4 } from 'uuid'
 
 export const This = globalThis as any
 export const uuid = v4
 
-export const isLeftMouse = (e: any) => e.button === 0
-export const isRightMouse = (e: any) => e.button === 2
+export const isLeftMouse = (e: any): e is MouseEvent => e.button === 0
+export const isRightMouse = (e: any): e is MouseEvent => e.button === 2
 
 export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
@@ -105,36 +106,6 @@ export const throttleAnimationFrame = <F extends (...args: any[]) => any>(callba
   }
 }
 
-export function timeRecord() {
-  let all = 0
-  let start = performance.now()
-  return {
-    every: (text?: any) => {
-      const shift = performance.now() - start
-      all += shift
-      text && console.log(text, shift)
-      start = performance.now()
-      return shift
-    },
-    all: (text?: any) => {
-      const shift = performance.now() - start
-      all += shift
-      console.log(text, all)
-    },
-  }
-}
-
-export function Log<T>(someThing: T, label: string = '') {
-  console.log(label, someThing)
-  return someThing
-}
-
-let count = 0
-export function once(fn: () => void, _count = 1) {
-  if (count >= _count) return
-  fn()
-  count++
-}
-export function onceLog(...args: any[]) {
-  once(() => console.log(...args), 1)
+export function useCb<T extends Function>(callback: T) {
+  return useCallback(callback, [])
 }

@@ -4,6 +4,7 @@ import * as PIXI from 'pixi.js'
 import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
+import { This } from '~/shared/utils/normal'
 
 export * as PIXI from 'pixi.js'
 
@@ -13,19 +14,18 @@ export class PixiService {
   @observable initialized = false
   container!: HTMLDivElement
   app!: PIXI.Application
+  sceneStage = new PIXI.Container()
   isForbidEvent = false
   duringTicker = createHooker()
   constructor() {
     makeObservable(this)
   }
-  get stage() {
-    return this.app.stage
-  }
-  setContainer(container: HTMLDivElement) {
-    this.container = container
-    this.initPixiApp(container)
+  setContainer(div: HTMLDivElement) {
+    this.container = div
+    this.initPixiApp()
     this.cull()
     this.app.ticker.add(this.duringTicker.dispatch)
+    this.sceneStage.setParent(this.app.stage)
     this.initialized = true
   }
   addListener(
@@ -42,10 +42,10 @@ export class PixiService {
   ) {
     this.app.view.removeEventListener?.(type, listener, options)
   }
-  private initPixiApp(container: HTMLDivElement) {
+  private initPixiApp() {
     this.app = new PIXI.Application({
-      backgroundColor: '#EBECED',
-      resizeTo: container,
+      backgroundColor: '#F5F5F5',
+      resizeTo: this.container,
       antialias: true,
       resolution: window.devicePixelRatio,
       eventMode: 'passive',
@@ -56,8 +56,9 @@ export class PixiService {
         wheel: true,
       },
     })
-    container.appendChild(this.app.view as any)
-    this.stage.sortableChildren = true
+    this.container.appendChild(this.app.view as any)
+    this.app.stage.sortableChildren = true
+    This.__PIXI_APP__ = this.app
   }
   private cull() {
     const cull = new Cull({ recursive: true, toggle: 'renderable' })

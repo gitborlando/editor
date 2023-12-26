@@ -6,9 +6,10 @@ import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
 import { DragService, injectDrag } from '~/global/drag'
 import { SettingService, injectSetting } from '~/global/setting'
 import { Hook, autobind } from '~/shared/decorator'
-import { watchNext } from '~/shared/mobx'
 import { XY } from '~/shared/structure/xy'
+import { watchNext } from '~/shared/utils/mobx'
 import { StageCursorService, injectStageCursor } from '../cursor'
+import { StageDrawService, injectStageDraw } from '../draw/draw'
 import { StageDrawPathService, injectStageDrawPath } from '../draw/path'
 import { StageElementService, injectStageElement } from '../element'
 import { StageCreateService, injectStageCreate } from '../interact/create'
@@ -47,7 +48,8 @@ export class StageWidgetTransformService {
     @injectStageSelect private StageSelect: StageSelectService,
     @injectSchemaPage private SchemaPage: SchemaPageService,
     @injectStageCursor private StageCursor: StageCursorService,
-    @injectStageCreate private StageCreate: StageCreateService
+    @injectStageCreate private StageCreate: StageCreateService,
+    @injectStageDraw private StageDraw: StageDrawService
   ) {
     this.initialize()
   }
@@ -76,7 +78,7 @@ export class StageWidgetTransformService {
   private addToStage() {
     this.components.forEach((i) => i.setParent(this.transformContainer))
     this.transformContainer.zIndex = 990
-    this.transformContainer.setParent(this.Pixi.stage)
+    this.transformContainer.setParent(this.Pixi.sceneStage)
   }
   private hookRender() {
     this.Pixi.duringTicker.hook(() => {
@@ -157,7 +159,7 @@ export class StageWidgetTransformService {
       const outline = this.StageElement.outlineCache.get(id)
       if (node.type === 'vector') {
         outline.lineStyle(0.5 / this.StageViewport.zoom, this.Setting.color)
-        this.StageDrawPath.drawPath(this.StageDrawPath.getCachedPath(id), outline)
+        this.StageDraw.drawShape(outline, node)
       }
     })
   }
@@ -168,7 +170,7 @@ export class StageWidgetTransformService {
       const { x, y } = this.OperateGeometry.data
       this.Drag.onStart(() => (this.renderType = 'clear'))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShift(shift)
+          const realShift = this.StageViewport.toRealStageShiftXY(shift)
           this.OperateGeometry.data.x = x + realShift.x
           this.OperateGeometry.data.y = y + realShift.y
         })
@@ -198,7 +200,7 @@ export class StageWidgetTransformService {
       const { y, height } = this.OperateGeometry.data
       this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['height']))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShift(shift)
+          const realShift = this.StageViewport.toRealStageShiftXY(shift)
           this.OperateGeometry.data.height = height - realShift.y
           this.OperateGeometry.data.y = y + realShift.y
         })
@@ -227,7 +229,7 @@ export class StageWidgetTransformService {
       const { width } = this.OperateGeometry.data
       this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['width']))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShift(shift)
+          const realShift = this.StageViewport.toRealStageShiftXY(shift)
           this.OperateGeometry.data.width = width + realShift.x
         })
         .onEnd(({ dragService }) => {
@@ -255,7 +257,7 @@ export class StageWidgetTransformService {
       const { height } = this.OperateGeometry.data
       this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['height']))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShift(shift)
+          const realShift = this.StageViewport.toRealStageShiftXY(shift)
           this.OperateGeometry.data.height = height + realShift.y
         })
         .onEnd(({ dragService }) => {
@@ -283,7 +285,7 @@ export class StageWidgetTransformService {
       const { x, width } = this.OperateGeometry.data
       this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['width']))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShift(shift)
+          const realShift = this.StageViewport.toRealStageShiftXY(shift)
           this.OperateGeometry.data.width = width - realShift.x
           this.OperateGeometry.data.x = x + realShift.x
         })

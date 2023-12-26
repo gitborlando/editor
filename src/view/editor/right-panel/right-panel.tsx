@@ -1,23 +1,25 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { When } from 'react-if'
+import { Case, Switch } from 'react-if'
 import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { BasePropsComp } from './base-props'
+import { OperatePanelComp } from './operate/operate-panel'
+import { rightPanelShareState } from './shared-state'
 
 type IRightPanelComp = {}
 
 export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
-  const { StageViewport, SchemaNode } = useEditor()
+  const { StageViewport } = useEditor()
   const { classes } = useStyles({ right: StageViewport.bound.right })
+  const { type } = rightPanelShareState
   return (
     <Flex layout='v' className={classes.RightPanel}>
-      <When condition={SchemaNode.selectIds.size}>
-        <BasePropsComp />
-      </When>
-      <Flex layout='c'>{SchemaNode.hoverId}</Flex>
-      <Flex layout='h' style={{ width: '100%' }}></Flex>
+      <Switch>
+        <Case condition={type === 'operate'}>
+          <OperatePanelComp />
+        </Case>
+      </Switch>
     </Flex>
   )
 })

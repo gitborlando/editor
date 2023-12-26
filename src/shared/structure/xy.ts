@@ -1,5 +1,5 @@
 import { multiply, pow2, rcos, rotatePoint, rsin, sqrt } from '../../editor/math/base'
-import { IXY } from '../utils'
+import { IXY } from '../utils/normal'
 
 export class XY {
   constructor(public x: number, public y: number) {}

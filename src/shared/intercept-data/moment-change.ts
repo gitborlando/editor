@@ -1,4 +1,4 @@
-import { objEntries } from '../utils'
+import { objEntries } from '../utils/normal'
 
 class NewOldRecord<T> {
   new: T

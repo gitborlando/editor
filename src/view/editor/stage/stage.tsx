@@ -21,7 +21,7 @@ type IStageCompStyle = {} /* & Required<Pick<IStageComp>> */ /* & Pick<IStageCom
 
 const useStyles = makeStyles<IStageCompStyle>()((t) => ({
   Stage: {
-    ...t.rect('100%', '100%', 'no-radius', '#EBECED'),
+    ...t.rect('100%', '100%', 'no-radius', 'white'),
     ...t.relative(0, -0.5),
   },
 }))

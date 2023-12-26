@@ -1,5 +1,5 @@
 import { XY } from '~/shared/structure/xy'
-import { IBound, IXY } from '~/shared/utils'
+import { IBound, IXY } from '~/shared/utils/normal'
 import { abs, rcos, rsin } from './base'
 import { xy_dot, xy_minus, xy_rotate3 } from './xy'
 
@@ -25,14 +25,17 @@ export class OBB {
   get center() {
     return { x: this.centerX, y: this.centerY }
   }
-  shift = (x?: number, y?: number) => {
+  shift(x?: number, y?: number) {
     this.xy.x += x ?? 0
     this.xy.y += y ?? 0
     this.centerX += x ?? 0
     this.centerY += y ?? 0
     this.aabb.x += x ?? 0
     this.aabb.y += y ?? 0
-    this.calcVertexXY()
+    this.vertexes.forEach((vertex) => {
+      vertex.x += x ?? 0
+      vertex.y += y ?? 0
+    })
   }
   reBound(width?: number, height?: number, centerX?: number, centerY?: number) {
     if (width) this.width = width
@@ -57,14 +60,14 @@ export class OBB {
       this.rotation
     ))
   }
-  calcAxis = () => {
+  calcAxis() {
     const cos = rcos(this.rotation)
     const sin = rsin(this.rotation)
     const widthAxis = XY.Of(cos, -sin)
     const heightAxis = XY.Of(sin, cos)
     return (this.axis = { widthAxis, heightAxis })
   }
-  calcAABB = () => {
+  calcAABB() {
     const width = this.projectionLengthAt(XY.Of(1, 0))
     const height = this.projectionLengthAt(XY.Of(0, 1))
     return (this.aabb = {
@@ -74,7 +77,7 @@ export class OBB {
       height,
     })
   }
-  calcVertexXY = () => {
+  calcVertexXY() {
     const halfWidth = this.width / 2
     const halfHeight = this.height / 2
     const TL = xy_rotate3(
@@ -103,7 +106,7 @@ export class OBB {
     )
     return (this.vertexes = [TL, TR, BR, BL])
   }
-  aabbHitTest = (another: OBB) => {
+  aabbHitTest(another: OBB) {
     return (
       this.aabb.x < another.aabb.x + another.aabb.width &&
       this.aabb.x + this.aabb.width > another.aabb.x &&
@@ -111,7 +114,7 @@ export class OBB {
       this.aabb.height + this.aabb.y > another.aabb.y
     )
   }
-  obbHitTest = (another: OBB) => {
+  obbHitTest(another: OBB) {
     const lineVector = xy_minus(this.center, another.center)
     if (
       this.projectionLengthAt(another.axis.widthAxis) + another.width <=
@@ -135,7 +138,7 @@ export class OBB {
       return false
     return true
   }
-  projectionLengthAt = (anotherAxis: XY) => {
+  projectionLengthAt(anotherAxis: XY) {
     const { widthAxis, heightAxis } = this.axis
     return (
       abs(xy_dot(widthAxis, anotherAxis)) * this.width +

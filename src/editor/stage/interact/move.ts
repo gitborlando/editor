@@ -20,7 +20,7 @@ export class StageMoveService {
     this.Pixi.removeListener('mousedown', this.onMoveStage)
   }
   private onMoveStage() {
-    const start = XY.From(this.Pixi.stage.position)
+    const start = XY.From(this.Pixi.sceneStage.position)
     this.Drag.onSlide(({ shift }) => {
       this.StageViewport.setStageOffset(start.plus(shift))
     })

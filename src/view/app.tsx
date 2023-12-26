@@ -4,6 +4,7 @@ import { editorServices, globalServices } from '~/ioc'
 import { testDraw2 } from '~/shared/helper/test2'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
+import { UploaderComp } from './component/uploader'
 import { EditorContext, GlobalContext } from './context'
 import { EditorComp } from './editor/editor'
 
@@ -27,6 +28,7 @@ export const App: FC<IAppProps> = observer(() => {
             <EditorComp />
           </EditorContext.Provider>
           {/* <MenuComp /> */}
+          <UploaderComp />
         </GlobalContext.Provider>
       )}
     </Flex>

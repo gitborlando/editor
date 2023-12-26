@@ -4,7 +4,7 @@ import { useGlobalService } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
-interface IInput extends ComponentPropsWithRef<'div'> {
+export interface IInput extends ComponentPropsWithRef<'div'> {
   label: string
   value: number
   onNewValueApply: (value: number) => void

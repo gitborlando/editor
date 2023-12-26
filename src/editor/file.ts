@@ -1,7 +1,7 @@
-import { delay, inject, injectable } from 'tsyringe'
-import { mockJsonFile } from '~/editor/mock'
+import { inject, injectable } from 'tsyringe'
+import { mockJsonFile } from '~/mock/mock'
 import { autobind } from '~/shared/decorator'
-import { EditorService } from './editor'
+import { createHooker } from '~/shared/hooker'
 import { SchemaDefaultService, injectSchemaDefault } from './schema/default'
 import { SchemaPageService, injectSchemaPage } from './schema/page'
 import { SchemaService, injectSchema } from './schema/schema'
@@ -9,12 +9,12 @@ import { SchemaService, injectSchema } from './schema/schema'
 @autobind
 @injectable()
 export class FileService {
+  afterOpenFile = createHooker<[File]>()
   private inputRef!: HTMLInputElement
   constructor(
     @injectSchema private schemaService: SchemaService,
     @injectSchemaPage private schemaPageService: SchemaPageService,
-    @injectSchemaDefault private schemaDefaultService: SchemaDefaultService,
-    @inject(delay(() => EditorService)) private editorService: EditorService
+    @injectSchemaDefault private schemaDefaultService: SchemaDefaultService
   ) {
     window.addEventListener('keydown', (e) => {
       if (e.altKey && e.key === 'l') console.log(this.schemaService.getSchema())
@@ -29,6 +29,7 @@ export class FileService {
       this.inputRef.onchange = () => resolve(this.inputRef.files?.[0])
     })
     if (!file) return
+    this.afterOpenFile.dispatch(file)
     const json = JSON.parse(await this.readAsText(file))
     this.schemaService.setSchema(json)
     this.schemaPageService.select(json.pages[0].id)
