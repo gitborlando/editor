@@ -1,18 +1,30 @@
 import { SchemaDefaultService } from '~/editor/schema/default'
 import { ISchema } from '~/editor/schema/type'
+import { COLOR } from '~/shared/utils/color'
 
 export function mockNested(schemaDefault: SchemaDefaultService) {
   const [x, y, width, height] = [100, 0, 100, 100]
   const nodes: ISchema['nodes'] = {
     page1: {
+      // frame0: schemaDefault.frame({
+      //   id: 'frame0',
+      //   name: '测试画板0',
+      //   width: 500,
+      //   height: 500,
+      //   x: 0,
+      //   centerX: 250,
+      //   centerY: 250,
+      //   parentId: 'frame1',
+      //   childIds: ['frame1'],
+      // }),
       frame1: schemaDefault.frame({
         id: 'frame1',
         name: '测试画板1',
-        width: 500,
-        height: 500,
-        x: 0,
-        centerX: 250,
-        centerY: 250,
+        width: 400,
+        height: 400,
+        x: 100,
+        centerX: 300,
+        centerY: 200,
         parentId: 'page1',
         childIds: ['rect2', 'triangle1'],
       }),
@@ -30,10 +42,14 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
         id: 'triangle1',
         width: 100,
         height: 100,
-        x: 300,
-        y: 400,
+        // x: 100,
+        // centerX: 150,
+        // centerY: 50,
+        x: 200,
+        y: 300,
         centerX: 250,
-        centerY: 250,
+        centerY: 350,
+        fills: [schemaDefault.fillColor(COLOR.pinkRed)],
         parentId: 'frame1',
       }),
       // irregular1: schemaDefault.star({
@@ -59,7 +75,7 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
       {
         id: 'page1',
         name: '测试页面1',
-        zoom: 1.2,
+        zoom: 1,
         offset: { x: 100, y: 100 },
         childIds: ['frame1'],
       },

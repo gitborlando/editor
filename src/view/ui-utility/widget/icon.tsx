@@ -1,17 +1,46 @@
-import { ComponentPropsWithRef, forwardRef } from 'react'
+import { CSSProperties, ComponentPropsWithRef, FC, createElement } from 'react'
 import { makeStyles } from '../theme'
 
-interface IIconProps extends ComponentPropsWithRef<'div'> {}
+interface IIconProps extends ComponentPropsWithRef<'img'> {
+  children: any
+  size?: number
+  rotate?: number
+  scale?: number
+  fill?: CSSProperties['color'] | (string & {})
+}
 
-export const Icon = forwardRef<HTMLDivElement, IIconProps>(({ className, ...rest }, ref) => {
-  const { classes, cx } = useStyles({})
-  return <div className={cx(classes.Icon, className)} {...rest} ref={ref}></div>
-})
+export const Icon: FC<IIconProps> = ({
+  className,
+  children,
+  size = 8,
+  rotate = 0,
+  scale = 1,
+  fill,
+  ...rest
+}) => {
+  const { classes, cx } = useStyles({ size, rotate, scale, fill: fill || '#545454' })
+  if (typeof children === 'string') {
+    return <img src={children} className={cx(classes.Icon, className)} {...rest}></img>
+  }
+  return createElement(children as unknown as FC<any>, {
+    className: cx(classes.Icon, className),
+    ...rest,
+  })
+}
 
-type IIconStyleProps = {} /* & Required<Pick<IIconProps>> */ /* & Pick<IIconProps> */
+type IIconStyleProps = {} & Required<
+  Pick<IIconProps, 'size' | 'rotate' | 'scale' | 'fill'>
+> /* & Pick<IIconProps> */
 
-const useStyles = makeStyles<IIconStyleProps>()((t) => ({
-  Icon: {},
+const useStyles = makeStyles<IIconStyleProps>()((t, { size, rotate, scale, fill }) => ({
+  Icon: {
+    ...t.rect(size, size),
+    rotate: `${rotate}deg`,
+    '& path': {
+      fill: fill,
+      scale: `${scale} ${scale}`,
+    },
+  },
 }))
 
 Icon.displayName = 'Icon'

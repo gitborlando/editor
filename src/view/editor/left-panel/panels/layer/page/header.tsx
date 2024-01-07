@@ -1,0 +1,52 @@
+import { FC } from 'react'
+import { useHookSignal } from '~/shared/utils/signal'
+import { useEditor } from '~/view/context'
+import Asset from '~/view/ui-utility/assets'
+import { makeStyles } from '~/view/ui-utility/theme'
+import { Button } from '~/view/ui-utility/widget/button'
+import { Flex } from '~/view/ui-utility/widget/flex'
+import { Icon } from '~/view/ui-utility/widget/icon'
+
+type IPageHeaderComp = {}
+
+export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
+  const { classes } = useStyles({})
+  const { SchemaPage, UILeftPanelLayer } = useEditor()
+  const { allPageExpanded } = UILeftPanelLayer
+  useHookSignal(allPageExpanded.hook)
+  return (
+    <Flex layout='h' shrink={0} sidePadding={4} className={classes.PageHeader}>
+      <Flex layout='c' className={classes.selectPageName}>
+        {SchemaPage.currentPage?.name}
+      </Flex>
+      <Button
+        type='icon'
+        style={{ marginLeft: 'auto' }}
+        onClick={() => {
+          if (allPageExpanded.value === false) allPageExpanded.dispatch(true)
+          SchemaPage.add()
+        }}>
+        <Icon size={16}>{Asset.editor.leftPanel.page.add}</Icon>
+      </Button>
+      <Button type='icon' onClick={() => allPageExpanded.dispatch(!allPageExpanded.value)}>
+        <Icon size={16} rotate={allPageExpanded.value ? 180 : 0}>
+          {Asset.editor.leftPanel.page.collapse}
+        </Icon>
+      </Button>
+    </Flex>
+  )
+}
+
+type IPageHeaderCompStyle = {} /* & Required<Pick<IPageHeaderComp>> */ /* & Pick<IPageHeaderComp> */
+
+const useStyles = makeStyles<IPageHeaderCompStyle>()((t) => ({
+  PageHeader: {
+    ...t.rect('100%', t.default$.normalHeight, 'no-radius', 'white'),
+  },
+  selectPageName: {
+    ...t.labelFont,
+    paddingLeft: 6,
+  },
+}))
+
+PageHeaderComp.displayName = 'PageHeaderComp'

@@ -7,7 +7,7 @@ import { DragService, injectDrag } from '~/global/drag'
 import { SettingService, injectSetting } from '~/global/setting'
 import { Hook, autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
-import { watchNext } from '~/shared/utils/mobx'
+import { firstOne } from '~/shared/utils/normal'
 import { StageCursorService, injectStageCursor } from '../cursor'
 import { StageDrawService, injectStageDraw } from '../draw/draw'
 import { StageDrawPathService, injectStageDrawPath } from '../draw/path'
@@ -33,6 +33,7 @@ export class StageWidgetTransformService {
   lineT = new PIXI.Graphics()
   lineR = new PIXI.Graphics()
   lineB = new PIXI.Graphics()
+  outlines = <PIXI.Graphics[]>[]
   transformContainer = new PIXI.Container()
   private renderType = <'reDraw' | 'clear' | 'reserve'>'reserve'
   constructor(
@@ -69,9 +70,6 @@ export class StageWidgetTransformService {
   private get lines() {
     return [this.lineL, this.lineT, this.lineR, this.lineB]
   }
-  private get outlines() {
-    return this.StageElement.outlineCache.cache.values()
-  }
   private get components() {
     return [...this.lines, ...this.outlines, ...this.vertexes]
   }
@@ -89,9 +87,10 @@ export class StageWidgetTransformService {
     this.StageCreate.duringCreate.hook(() => (this.renderType = 'reDraw'))
     this.OperateGeometry.beforeOperate.hook(() => (this.renderType = 'clear'))
     this.OperateGeometry.afterOperate.hook(() => (this.renderType = 'reDraw'))
-    watchNext('SchemaNode.selectIds').hook(() => (this.renderType = 'reDraw'))
+    this.StageSelect.afterSelect.hook(() => (this.renderType = 'reDraw'))
     this.StageViewport.beforeZoom.hook(() => (this.renderType = 'clear'))
     this.StageViewport.afterZoom.hook(() => (this.renderType = 'reDraw'))
+    this.SchemaNode.selectIds.hook(() => (this.renderType = 'reDraw'))
   }
   private bindEvent() {
     this.bindMoveEvent()
@@ -101,7 +100,7 @@ export class StageWidgetTransformService {
     this.bindLeftLineEvent()
   }
   private draw() {
-    if (this.SchemaNode.selectIds.size === 0) return this.clear()
+    if (this.SchemaNode.selectIds.value.size === 0) return this.clear()
     this.clear()
     this.calcVertexXY()
     this.drawVertexes()
@@ -128,7 +127,7 @@ export class StageWidgetTransformService {
     const borderWidth = 1 / this.StageViewport.zoom
     const radius = 1 / this.StageViewport.zoom
     this.vertexes.forEach((vertex, i) => {
-      vertex.lineStyle(borderWidth, this.Setting.color)
+      vertex.lineStyle(borderWidth, this.Setting.color.value)
       vertex.beginFill('white')
       vertex.drawRoundedRect(
         this.vertexXYs[i].x - size / 2,
@@ -142,7 +141,7 @@ export class StageWidgetTransformService {
   private drawLine() {
     const lineWidth = 1 / this.StageViewport.zoom
     this.lines.forEach((line) => {
-      line.lineStyle(lineWidth, this.Setting.color)
+      line.lineStyle(lineWidth, this.Setting.color.value)
     })
     this.lineT.moveTo(this.vertexTL_XY.x, this.vertexTL_XY.y)
     this.lineT.lineTo(this.vertexTR_XY.x, this.vertexTR_XY.y)
@@ -154,19 +153,22 @@ export class StageWidgetTransformService {
     this.lineL.lineTo(this.vertexBL_XY.x, this.vertexBL_XY.y)
   }
   private drawOutline() {
-    this.SchemaNode.selectIds.forEach((id) => {
+    this.SchemaNode.selectIds.value.forEach((id) => {
       const node = this.SchemaNode.find(id)
-      const outline = this.StageElement.outlineCache.get(id)
+      const outline = new PIXI.Graphics()
+      const parent = this.StageElement.findParentElement(node.parentId)
+      outline.setParent(parent)
+      this.outlines.push(outline)
       if (node.type === 'vector') {
-        outline.lineStyle(0.5 / this.StageViewport.zoom, this.Setting.color)
+        outline.lineStyle(0.5 / this.StageViewport.zoom, this.Setting.color.value)
         this.StageDraw.drawShape(outline, node)
       }
     })
   }
   private bindMoveEvent() {
     const handleDrag = () => {
-      if (!this.SchemaNode.hoverId) return
-      if (!this.SchemaNode.selectIds.has(this.SchemaNode.hoverId)) return
+      if (!this.SchemaNode.hoverIds.value.size) return
+      if (!this.SchemaNode.selectIds.value.has(firstOne(this.SchemaNode.hoverIds.value))) return
       const { x, y } = this.OperateGeometry.data
       this.Drag.onStart(() => (this.renderType = 'clear'))
         .onMove(({ shift }) => {
@@ -174,10 +176,9 @@ export class StageWidgetTransformService {
           this.OperateGeometry.data.x = x + realShift.x
           this.OperateGeometry.data.y = y + realShift.y
         })
-        .onEnd(({ dragService }) => {
+        .onDestroy(() => {
           this.OperateGeometry.afterOperate.dispatch()
           this.renderType = 'reDraw'
-          dragService.destroy()
         })
     }
     this.Pixi.addListener('mousedown', handleDrag)

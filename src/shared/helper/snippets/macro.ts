@@ -1,4 +1,4 @@
-import { v4 } from 'uuid'
+import { nanoid } from 'nanoid'
 import { macro_StringMatch } from '~/shared/macro'
 import { timeRecord } from '~/shared/utils/dev'
 import { This } from '~/shared/utils/normal'
@@ -6,7 +6,7 @@ This.ids = <string[]>[]
 
 if (!This.ids.length) {
   for (let i = 0; i < 50000; i++) {
-    This.ids.push(v4())
+    This.ids.push(nanoid())
   }
 }
 

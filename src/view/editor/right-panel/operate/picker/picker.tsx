@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { Case, Switch, When } from 'react-if'
+import { When } from 'react-if'
 import { DraggableComp } from '~/view/component/draggable'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -28,11 +28,7 @@ export const PickerComp: FC<IPickerComp> = observer(({}) => {
               图片
             </Button>
           </Flex>
-          <Switch>
-            <Case condition={type === 'color'}>
-              <PickerColorComp />
-            </Case>
-          </Switch>
+          {type === 'color' && <PickerColorComp />}
         </Flex>
       </DraggableComp>
     </When>

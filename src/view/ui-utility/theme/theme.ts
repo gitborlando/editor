@@ -1,4 +1,5 @@
 import { CSSProperties } from 'react'
+import { hslBlueColor } from '~/shared/utils/color'
 
 export * from './themes'
 
@@ -28,21 +29,32 @@ export const border = (width: number, color: CSSProperties['color']) => ({
 })
 
 const position =
-  (position: CSSProperties['position']) => (left?: IRect['left'], top?: IRect['top']) => ({
+  (position: CSSProperties['position']) =>
+  (left?: number, top?: number, right?: number, bottom?: number) => ({
     position,
     left,
     top,
+    right,
+    bottom,
   })
 export const fixed = position('fixed')
 export const relative = position('relative')
 export const absolute = position('absolute')
 
 export const default$ = {
+  border: (type?: 'left' | 'top' | 'right' | 'bottom') => {
+    if (type === 'left') return { borderLeft: '1px solid #E3E3E3' }
+    if (type === 'top') return { borderTop: '1px solid #E3E3E3' }
+    if (type === 'right') return { borderRight: '1px solid #E3E3E3' }
+    if (type === 'bottom') return { borderBottom: '1px solid #E3E3E3' }
+    return { border: '1px solid #E3E3E3' }
+  },
   borderBottom: { borderBottom: '1px solid #E3E3E3' },
   hover: {
     border: {
       '&:hover': {
-        boxShadow: 'inset 0 0 0px 0.7px #9166FF',
+        // boxShadow: 'inset 0 0 0px 0.7px #9166FF',
+        boxShadow: 'inset 0 0 0px 0.7px ' + hslBlueColor(50),
       },
     },
     background: {
@@ -58,13 +70,15 @@ export const default$ = {
   },
   active: {
     border: {
-      boxShadow: 'inset 0 0 0px 0.7px #9166FF',
+      boxShadow: 'inset 0 0 0px 0.7px ' + hslBlueColor(50),
     },
     background: {
-      backgroundColor: 'rgba(114, 38, 255, 0.6)',
+      // backgroundColor: 'rgba(114, 38, 255, 0.6)',
+      backgroundColor: hslBlueColor(95),
     },
     font: {
-      color: 'rgba(123, 36, 255, 1)',
+      // color: 'rgba(123, 36, 255, 1)',
+      color: hslBlueColor(50),
     },
   },
   disabled: {
@@ -78,7 +92,8 @@ export const default$ = {
   normalHeight: 32,
   select: {
     background: {
-      backgroundColor: 'rgba(136, 130, 255, 0.21)',
+      // backgroundColor: 'rgba(234, 224, 255, 1)',
+      backgroundColor: hslBlueColor(92),
     },
   },
 }

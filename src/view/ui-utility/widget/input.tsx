@@ -3,6 +3,8 @@ import { ComponentPropsWithRef, forwardRef } from 'react'
 import { useGlobalService } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
+import Asset from '../assets'
+import { Icon } from './icon'
 
 export interface IInput extends ComponentPropsWithRef<'div'> {
   label: string
@@ -36,8 +38,7 @@ export const Input = observer(
               Drag.setCursor('e-resize')
                 .onStart(() => (state.active = true))
                 .onMove(({ shift }) => emitNewValue(startValue + shift.x * slideRate))
-                .onEnd(({ dragService }) => {
-                  dragService.destroy()
+                .onDestroy(({ dragService }) => {
                   dragService.setCursor('auto')
                   state.active = false
                 })
@@ -57,10 +58,14 @@ export const Input = observer(
           </Flex>
           <Flex layout='v' vshow={state.hover} className={cx(classes.operate, 'operator')}>
             <Flex layout='c' onClick={() => emitNewValue(value + step)}>
-              +
+              <Icon size={7} scale={0.7}>
+                {Asset.editor.widget.numberInput.operateUp}
+              </Icon>
             </Flex>
             <Flex layout='c' onClick={() => emitNewValue(value - step)}>
-              -
+              <Icon size={7} scale={0.7} rotate={180}>
+                {Asset.editor.widget.numberInput.operateUp}
+              </Icon>
             </Flex>
           </Flex>
         </Flex>
@@ -111,7 +116,7 @@ const useStyles = makeStyles<IInputStyle>()((t) => ({
     '& div': {
       ...t.rect('100%', '50%'),
       ...t.labelFont,
-      ...t.default$.hover.background,
+      cursor: 'pointer',
     },
   },
 }))

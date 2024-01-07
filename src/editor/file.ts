@@ -14,10 +14,11 @@ export class FileService {
   constructor(
     @injectSchema private schemaService: SchemaService,
     @injectSchemaPage private schemaPageService: SchemaPageService,
-    @injectSchemaDefault private schemaDefaultService: SchemaDefaultService
+    @injectSchemaDefault private schemaDefaultService: SchemaDefaultService // @inject(delay(() => SchemaNodeService)) private SchemaNode: SchemaNodeService
   ) {
     window.addEventListener('keydown', (e) => {
-      if (e.altKey && e.key === 'l') console.log(this.schemaService.getSchema())
+      if (!(e.altKey && e.key === 'l')) return
+      console.log(this.schemaService.getSchema())
     })
   }
   setInputRef(input: HTMLInputElement) {

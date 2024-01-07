@@ -9,6 +9,7 @@
     "autobind",
     "autorun",
     "boundfy",
+    "camelcase",
     "degreefy",
     "dragmove",
     "gonic",
@@ -26,8 +27,11 @@
     "rsin",
     "rtan",
     "stagefy",
+    "svgr",
     "tsyringe",
+    "uniquify",
     "uuidv",
-    "vshow"
+    "vshow",
+    "zattoo"
   ]
 }

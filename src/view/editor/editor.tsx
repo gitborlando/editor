@@ -23,7 +23,7 @@ export const EditorComp: FC<IEditorComp> = observer(({}) => {
       </Flex>
       <Flex
         className={classes.dragMask}
-        vshow={Drag.canMove}
+        vshow={Drag.canMove && false}
         style={{
           cursor: Drag.cursor,
         }}></Flex>

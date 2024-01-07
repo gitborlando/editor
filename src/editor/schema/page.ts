@@ -13,6 +13,7 @@ export class SchemaPageService {
   @observable pages: IPage[] = []
   @observable currentId = ''
   @observable initialized = false
+  afterInitialize = createHooker()
   isPageFirstRendered = createHooker<[boolean]>([false])
   constructor(
     @injectSchemaDefault private SchemaDefault: SchemaDefaultService,
@@ -52,6 +53,10 @@ export class SchemaPageService {
   }
   select(id: string) {
     this.currentId = id
+    if (this.initialized === false) {
+      this.afterInitialize.dispatch()
+      this.initialized = true
+    }
     this.isPageFirstRendered.dispatch(false)
   }
 }

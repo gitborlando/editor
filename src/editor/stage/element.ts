@@ -1,25 +1,29 @@
 import { inject, injectable } from 'tsyringe'
 import { createCache } from '~/shared/cache'
 import { autobind } from '~/shared/decorator'
+import { XY } from '~/shared/structure/xy'
 import { OBB } from '../math/obb'
 import { Path } from '../math/path/path'
 import { SchemaNodeService, injectSchemaNode } from '../schema/node'
 import { PIXI, PixiService, injectPixi } from './pixi'
+import { StageViewportService, injectStageViewport } from './viewport'
 
 export type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 @injectable()
 export class StageElementService {
+  private elementMap: Map<string, IStageElement> = new Map()
   OBBCache = createCache<OBB>()
   pathCache = createCache<Path>()
   outlineCache = createCache<PIXI.Graphics>()
   linearGradientCache = createCache<PIXI.Texture>()
-  private elementMap: Map<string, IStageElement> = new Map()
   constructor(
     @injectPixi private Pixi: PixiService,
-    @injectSchemaNode private SchemaNode: SchemaNodeService
+    @injectSchemaNode private SchemaNode: SchemaNodeService,
+    @injectStageViewport private StageViewport: StageViewportService
   ) {
+    this.Pixi.inited.hook(this.bindHover)
     SchemaNode.beforeDelete.hook((id) => this.delete(id))
   }
   add(id: string, element: IStageElement) {
@@ -29,6 +33,7 @@ export class StageElementService {
     this.setupElement(id, element)
   }
   delete(id: string) {
+    this.elementMap.get(id)?.destroy()
     this.elementMap.delete(id)
     this.OBBCache.delete(id)
     this.pathCache.delete(id)
@@ -56,16 +61,25 @@ export class StageElementService {
       return element
     }
   }
+  findParentElement(parentId: string) {
+    return this.find(parentId) || this.Pixi.sceneStage
+  }
   private setupElement(id: string, element: IStageElement) {
     const node = this.SchemaNode.find(id)
     if (!element.parent) {
-      const parent = this.find(node.parentId) || this.Pixi.sceneStage
-      element.setParent(parent)
+      element.setParent(this.findParentElement(node.parentId))
     }
-    if (node.type === 'frame' && node.parentId.startsWith('page')) return
-    element.eventMode = 'dynamic'
-    element.on('mouseenter', () => this.SchemaNode.hover(id))
-    element.on('mouseleave', () => this.SchemaNode.unHover())
+  }
+  private bindHover() {
+    const handler = (e: Event) => {
+      const realXY = this.StageViewport.toViewportXY(XY.From(e, 'client'))
+      this.elementMap.forEach((element, id) => {
+        const hovered = element?.containsPoint(realXY)
+        hovered ? this.SchemaNode.hover(id) : this.SchemaNode.unHover(id)
+      })
+      this.SchemaNode.hoverIds.dispatch()
+    }
+    this.Pixi.addListener('mousemove', handler, { capture: true })
   }
   private initOBB(id: string) {
     const { centerX, centerY, width, height, rotation } = this.SchemaNode.find(id)

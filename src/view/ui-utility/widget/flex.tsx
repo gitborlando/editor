@@ -6,6 +6,7 @@ interface IFlexProps extends ComponentPropsWithRef<'div'> {
   sidePadding?: number
   vshow?: boolean
   justify?: 'space-around' | 'space-between'
+  shrink?: number
   onHover?: (isHover: boolean) => void
 }
 
@@ -15,6 +16,7 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
       layout,
       sidePadding = 0,
       vshow = true,
+      shrink = 1,
       justify,
       className,
       onHover,
@@ -24,7 +26,7 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
     },
     ref
   ) => {
-    const { classes, cx } = useStyles({ sidePadding, vshow, justify })
+    const { classes, cx } = useStyles({ sidePadding, vshow, justify, shrink })
     return (
       <div
         ref={ref}
@@ -48,12 +50,14 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
 )
 
 type IFlexStyleProps = {} & Required<Pick<IFlexProps, 'sidePadding' | 'vshow'>> &
-  Pick<IFlexProps, 'justify'>
+  Pick<IFlexProps, 'justify' | 'shrink'>
 
-const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, vshow, justify }) => ({
+const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, vshow, justify, shrink }) => ({
   Flex: {
+    position: 'relative',
     display: vshow ? 'flex' : 'none',
     justifyContent: justify,
+    flexShrink: shrink,
   },
   center: {
     justifyContent: 'center',

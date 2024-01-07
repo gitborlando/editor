@@ -1,10 +1,10 @@
-import { useLocalObservable } from 'mobx-react'
 import { ComponentPropsWithRef, forwardRef } from 'react'
+import { hslBlueColor } from '~/shared/utils/color'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IButton = ComponentPropsWithRef<'div'> & {
-  type?: 'text' | 'normal'
+  type?: 'text' | 'normal' | 'icon'
   active?: boolean
   disabled?: boolean
 }
@@ -12,16 +12,15 @@ type IButton = ComponentPropsWithRef<'div'> & {
 export const Button = forwardRef<HTMLDivElement, IButton>(
   ({ type = 'normal', active = false, disabled = false, className, children, ...rest }, ref) => {
     const { classes, cx } = useStyles({ active, disabled })
-    const {} = useLocalObservable(() => ({}))
     return (
       <Flex
-        sidePadding={8}
         layout='c'
         className={cx(
           classes.Button,
           className,
           type === 'normal' && classes.normal,
-          type === 'text' && classes.text
+          type === 'text' && classes.text,
+          type === 'icon' && classes.icon
         )}
         {...(!disabled && rest)}
         ref={ref}>
@@ -43,12 +42,19 @@ const useStyles = makeStyles<IButtonStyle>()((t, { active, disabled }) => ({
     ...t.rect('fit-content', 'fit-content', 4),
     padding: 6,
     marginInline: 2,
-    ...(!disabled && active && { color: 'white', ...t.default$.active.background }),
+    ...(!disabled && active && { color: hslBlueColor(65), ...t.default$.active.background }),
     ...(!active && !disabled && { ...t.default$.hover.background }),
   },
   text: {
     ...(!disabled && active && { ...t.default$.active.font }),
     ...(!active && !disabled && { ...t.default$.hover.font }),
+  },
+  icon: {
+    ...t.rect('fit-content', 'fit-content', 4),
+    padding: 4,
+    marginInline: 2,
+    ...(!disabled && active && { color: hslBlueColor(65), ...t.default$.active.background }),
+    ...(!active && !disabled && { ...t.default$.hover.background }),
   },
 }))
 

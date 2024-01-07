@@ -29,7 +29,7 @@ export class StageWidgetMarqueeService {
     const { x, y, width, height } = this.StageSelect.marquee
     const realStart = this.StageViewport.toRealStageXY(XY.Of(x, y))
     const realShift = this.StageViewport.toRealStageShiftXY(XY.Of(width, height))
-    this.marqueeElement.lineStyle(1 / this.StageViewport.zoom, this.Setting.color)
+    this.marqueeElement.lineStyle(1 / this.StageViewport.zoom, this.Setting.color.value)
     this.marqueeElement.drawRect(realStart.x, realStart.y, realShift.x, realShift.y)
   }
 }

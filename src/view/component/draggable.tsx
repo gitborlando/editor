@@ -2,7 +2,7 @@ import { observer, useLocalObservable } from 'mobx-react'
 import { FC, ReactNode } from 'react'
 import { xy_new } from '~/editor/math/xy'
 import { XY } from '~/shared/structure/xy'
-import { IXY, useCb } from '~/shared/utils/normal'
+import { IXY } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { useGlobalService } from '../context'
@@ -29,14 +29,14 @@ export const DraggableComp: FC<IDraggableComp> = observer(
           className={classes.header}
           justify='space-between'
           sidePadding={4}
-          onMouseDown={useCb(() => {
+          onMouseDown={() => {
             const start = state.xy
             const { innerWidth, innerHeight } = window
             Drag.onSlide(({ shift, current }) => {
               if (current.x > innerWidth || current.y > innerHeight) return
               state.xy = XY.From(start).plus(shift)
             })
-          })}>
+          }}>
           {headerSlot}
           <Button
             onMouseDown={(e) => e.stopPropagation()}

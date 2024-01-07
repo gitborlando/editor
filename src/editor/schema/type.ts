@@ -11,6 +11,7 @@ export type IMeta = {
   id: string
   name: string
   user: string
+  version: number
 }
 
 export type IPage = {

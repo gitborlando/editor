@@ -11,7 +11,6 @@ type IGeometryPropsComp = {}
 export const GeometryPropsComp: FC<IGeometryPropsComp> = observer(({}) => {
   const { classes } = useStyles({})
   const { StageViewport } = useEditor()
-
   return (
     <Flex layout='h' className={classes.SchemaBase}>
       <GeometryPropComp label='横坐标' operateKey='x' slideRate={1 / StageViewport.zoom} />

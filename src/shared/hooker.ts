@@ -4,10 +4,18 @@ export const hookerMap = new Map<any, (((...args: any) => void) | undefined)[]>(
 
 @autobind
 export class Hooker<T extends any[]> {
+  private isBlocked = false
   private newArgs: T = [] as unknown as T
   private oldArgs: T = [] as unknown as T
   constructor(args?: T) {
     this.newArgs = args ?? this.newArgs
+  }
+  get value(): T[0] {
+    return this.newArgs[0]
+  }
+  set value(value: T[0]) {
+    this.oldArgs[0] = this.newArgs[0]
+    this.newArgs[0] = value
   }
   get args() {
     return this.newArgs
@@ -16,11 +24,7 @@ export class Hooker<T extends any[]> {
     let hooks = hookerMap.get(this)
     if (!hooks) hookerMap.set(this, (hooks = []))
     index !== undefined ? (hooks[index] = hook) : hooks.push(hook)
-  }
-  dispatch(...args: T) {
-    this.oldArgs = this.newArgs
-    this.newArgs = args
-    hookerMap.get(this)?.forEach((hook) => hook?.(...args))
+    return () => this.unHook(hook)
   }
   unHook(hook: number | ((...args: T) => void)) {
     let hooks = hookerMap.get(this) || []
@@ -38,6 +42,23 @@ export class Hooker<T extends any[]> {
     }
     this.hook(once)
   }
+  update(...args: T) {
+    this.oldArgs = this.newArgs
+    this.newArgs = args
+  }
+  broadcast() {
+    hookerMap.get(this)?.forEach((hook) => hook?.(...this.newArgs))
+  }
+  dispatch(...args: T) {
+    this.update(...args)
+    hookerMap.get(this)?.forEach((hook) => hook?.(...this.newArgs))
+  }
+  // batch(callback: () => any) {
+  //   this.isBlocked = true
+  //   callback()
+  //   this.isBlocked = false
+  //   this.dispatch(...this.args)
+  // }
 }
 
 export function createHooker<T extends any[]>(args?: T) {

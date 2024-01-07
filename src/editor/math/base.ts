@@ -1,5 +1,5 @@
 export const { PI, cos, sin, tan, acos, asin, atan } = Math
-export const { sqrt, abs, min, max, round, floor, random } = Math
+export const { sqrt, abs, min, max, round, floor, ceil, random } = Math
 
 export const rcos = (degree: number) => cos(radianfy(degree))
 export const rsin = (degree: number) => sin(radianfy(degree))

@@ -42,10 +42,9 @@
     "prefix": "widget",
     "scope": ["typescriptreact"],
     "body": [
-      "import { Flex } from '~/ui/widget/flex'",
-      "import { makeStyles } from '~/ui/theme'",
-      "import { observer, useLocalObservable } from 'mobx-react'",
       "import { ComponentPropsWithRef, forwardRef } from 'react'",
+      "import { makeStyles } from '../theme'",
+      "import { Flex } from './flex'",
       "",
       "interface I$1${TM_FILENAME_BASE} extends ComponentPropsWithRef<'div'> {}",
       "",

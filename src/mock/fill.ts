@@ -1,8 +1,8 @@
+import { nanoid } from 'nanoid'
 import { xy_new } from '~/editor/math/xy'
 import { SchemaDefaultService } from '~/editor/schema/default'
 import { IFillColor, IFillLinearGradient, INode } from '~/editor/schema/type'
 import { rgba } from '~/shared/utils/color'
-import { uuid } from '~/shared/utils/normal'
 
 export function mockFill(schemaDefault: SchemaDefaultService) {
   const [width, height] = [100, 100]
@@ -42,7 +42,7 @@ export function mockFill(schemaDefault: SchemaDefaultService) {
     nodes,
     pages: [
       {
-        id: uuid(),
+        id: nanoid(),
         name: '测试页面1',
         zoom: 1,
         offset: { x: 100, y: 100 },

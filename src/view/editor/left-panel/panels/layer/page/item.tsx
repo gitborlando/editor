@@ -2,7 +2,6 @@ import { observer, useLocalObservable } from 'mobx-react'
 import { FC } from 'react'
 import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
-import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IPageItemComp = {
@@ -26,16 +25,13 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
       <Flex layout='h' sidePadding={10} className={classes.name}>
         {name}
       </Flex>
-      {state.isHover && (
+      {/* {state.isHover && (
         <Button
-          type='text'
           onClick={(e) => {
             e.stopPropagation()
             SchemaPage.delete(id)
-          }}>
-          删除
-        </Button>
-      )}
+          }}></Button>
+      )} */}
     </Flex>
   )
 })
@@ -49,9 +45,7 @@ const useStyles = makeStyles<IPageItemCompStyle>()((t, { selected }) => ({
     ...t.rect('100%', t.default$.normalHeight, 'no-radius', 'white'),
     cursor: 'pointer',
     flexShrink: 0,
-    ...(selected
-      ? { backgroundColor: 'rgba(136, 130, 255, 0.21)' }
-      : { ...t.default$.hover.background }),
+    ...(selected ? t.default$.select.background : t.default$.hover.background),
   },
   name: {
     fontSize: 12,

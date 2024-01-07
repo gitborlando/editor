@@ -4,6 +4,14 @@ import { stringPathProxy, withNewFunction } from './utils/normal'
 
 export const autobind = autoBindMethods
 
+// const rawCache = createCache<Function>()
+// const key = (target: any, name: string) => `${target.constructor.name}.${name}`
+
+// export function SaveRaw(target: any, name: string, descriptor: PropertyDescriptor) {
+//   rawCache.set(key(target, name), descriptor.value)
+//   return descriptor
+// }
+
 export function Watch(...chains: string[]) {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
@@ -38,11 +46,13 @@ export function WatchNext(...chains: string[]) {
   }
 }
 
-export function Hook(chain: string, index?: number) {
+export function Hook(...chains: string[]) {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
     descriptor.value = function (...args: any[]) {
-      stringPathProxy(this)[chain].hook(originalMethod.bind(this), index)
+      chains.forEach((chain) => {
+        stringPathProxy(this)[chain].hook(originalMethod.bind(this, args))
+      })
     }
     return descriptor
   }
@@ -58,7 +68,7 @@ export function When(chain: string) {
   }
 }
 
-export function Before_After(before: string, after: string) {
+export function Wrap(before: string, after: string) {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
     descriptor.value = function (...args: any[]) {
@@ -70,7 +80,7 @@ export function Before_After(before: string, after: string) {
   }
 }
 
-export function Before_After_Toggle(toggle: string) {
+export function WrapToggle(toggle: string) {
   return (target: any, name: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
     descriptor.value = function (...args: any[]) {

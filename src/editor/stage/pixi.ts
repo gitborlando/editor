@@ -4,7 +4,7 @@ import * as PIXI from 'pixi.js'
 import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
-import { This } from '~/shared/utils/normal'
+import { createSignal } from '~/shared/signal'
 
 export * as PIXI from 'pixi.js'
 
@@ -12,6 +12,7 @@ export * as PIXI from 'pixi.js'
 @injectable()
 export class PixiService {
   @observable initialized = false
+  inited = createSignal(false)
   container!: HTMLDivElement
   app!: PIXI.Application
   sceneStage = new PIXI.Container()
@@ -25,8 +26,8 @@ export class PixiService {
     this.initPixiApp()
     this.cull()
     this.app.ticker.add(this.duringTicker.dispatch)
-    this.sceneStage.setParent(this.app.stage)
     this.initialized = true
+    this.inited.dispatch(true)
   }
   addListener(
     type: string,
@@ -57,8 +58,8 @@ export class PixiService {
       },
     })
     this.container.appendChild(this.app.view as any)
+    this.sceneStage.setParent(this.app.stage)
     this.app.stage.sortableChildren = true
-    This.__PIXI_APP__ = this.app
   }
   private cull() {
     const cull = new Cull({ recursive: true, toggle: 'renderable' })

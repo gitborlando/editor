@@ -3,7 +3,7 @@ import { max, min } from '~/editor/math/base'
 import { xy_mutate2 } from '~/editor/math/xy'
 import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
-import { Before_After_Toggle, autobind } from '~/shared/decorator'
+import { WrapToggle, autobind } from '~/shared/decorator'
 import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { StageElementService, injectStageElement } from '../element'
 import { StageSelectService, injectStageSelect } from './select'
@@ -21,7 +21,7 @@ export class StageTransformService {
     this.initialize()
   }
   private initialize() {
-    this.StageSelect.duringSelect.hook(() => this.onSelectSetTransformData())
+    this.StageSelect.duringMarqueeSelect.hook(() => this.onSelectSetTransformData())
     this.StageSelect.afterSelect.hook(() => this.onSelectSetTransformData())
     this.OperateGeometry.afterOperate.hook(() => {
       this.SchemaNode.afterFlushDirty.hookOnce(() => {
@@ -29,18 +29,18 @@ export class StageTransformService {
       })
     })
   }
-  @Before_After_Toggle('data._noIntercept')
+  @WrapToggle('data._noIntercept')
   private onSelectSetTransformData() {
     const selectIds = this.SchemaNode.selectIds
-    if (selectIds.size === 1) {
-      const OBB = this.StageElement.OBBCache.get([...selectIds][0])
+    if (selectIds.value.size === 1) {
+      const OBB = this.StageElement.OBBCache.get([...selectIds.value][0])
       void (<const>['width', 'height', 'centerX', 'centerY', 'rotation']).forEach(
         (key) => (this.data[key] = OBB[key])
       )
       xy_mutate2(this.data, OBB.xy.x, OBB.xy.y)
     }
-    if (selectIds.size > 1) {
-      const nodes = [...selectIds].map((id) => this.SchemaNode.find(id))
+    if (selectIds.value.size > 1) {
+      const nodes = [...selectIds.value].map((id) => this.SchemaNode.find(id))
       let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
       nodes.forEach((node) => {
         const OBB = this.StageElement.OBBCache.get(node.id)

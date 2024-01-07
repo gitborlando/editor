@@ -1,5 +1,5 @@
+import { nanoid } from 'nanoid'
 import { inject, injectable } from 'tsyringe'
-import { v4 as uuidv4 } from 'uuid'
 import { autobind } from '~/shared/decorator'
 import { COLOR, rgba } from '~/shared/utils/color'
 import { IBound, IXY } from '~/shared/utils/normal'
@@ -30,9 +30,10 @@ export class SchemaDefaultService {
   typeIndexMap: Record<string, [string, number]> = {}
   meta(): ISchema['meta'] {
     return {
-      id: uuidv4(),
+      id: nanoid(),
       name: '无标题',
       user: 'myself',
+      version: 0,
     }
   }
   schema(): ISchema {
@@ -44,7 +45,7 @@ export class SchemaDefaultService {
   }
   page(): IPage {
     return {
-      id: uuidv4(),
+      id: nanoid(),
       childIds: [],
       zoom: 1,
       offset: { x: 0, y: 0 },
@@ -209,7 +210,7 @@ export class SchemaDefaultService {
   }
   private createSchemaMeta(): INodeMeta {
     return {
-      id: uuidv4(),
+      id: nanoid(),
       name: '',
       lock: false,
       visible: true,
@@ -261,7 +262,7 @@ export class SchemaDefaultService {
           group: ['分组', 1],
           rect: ['矩形', 1],
           ellipse: ['椭圆', 1],
-          triangle: ['三角形', 1],
+          triangle: ['多边形', 1],
           star: ['星形', 1],
           irregular: ['矢量图形', 1],
           line: ['线段', 1],

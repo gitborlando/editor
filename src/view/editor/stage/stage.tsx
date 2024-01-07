@@ -11,6 +11,7 @@ export const StageComp: FC<IStageComp> = observer(({}) => {
   const { Pixi } = useEditor()
   return (
     <Flex
+      shrink={0}
       ref={Pixi.setContainer}
       className={classes.Stage}
       onContextMenu={(e) => e.preventDefault()}></Flex>

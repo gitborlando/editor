@@ -1,8 +1,9 @@
 import { toJS } from 'mobx'
-import { inject, injectable } from 'tsyringe'
+import { nanoid } from 'nanoid'
+import { delay, inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
-import { SchemaNodeService, injectSchemaNode } from './node'
-import { SchemaPageService, injectSchemaPage } from './page'
+import { SchemaNodeService } from './node'
+import { SchemaPageService } from './page'
 import { IMeta, ISchema } from './type'
 
 @autobind
@@ -10,8 +11,8 @@ import { IMeta, ISchema } from './type'
 export class SchemaService {
   private meta!: IMeta
   constructor(
-    @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectSchemaPage private SchemaPage: SchemaPageService
+    @inject(delay(() => SchemaNodeService)) private SchemaNode: SchemaNodeService,
+    @inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService
   ) {}
   setMeta(option: Partial<IMeta>) {
     this.meta = { ...this.meta, ...option }
@@ -19,7 +20,7 @@ export class SchemaService {
   getSchema() {
     return {
       meta: this.meta,
-      nodes: toJS(this.SchemaNode.nodeMap),
+      nodes: this.SchemaNode.nodeMap,
       pages: toJS(this.SchemaPage.pages),
     }
   }
@@ -27,6 +28,9 @@ export class SchemaService {
     this.meta = meta
     this.SchemaNode.setMap(nodes)
     this.SchemaPage.setPages(pages)
+  }
+  createId() {
+    return this.meta.version + nanoid()
   }
 }
 

@@ -1,7 +1,7 @@
+import { nanoid } from 'nanoid'
 import { SchemaDefaultService } from '~/editor/schema/default'
 import { INode } from '~/editor/schema/type'
 import { XY } from '~/shared/structure/xy'
-import { uuid } from '~/shared/utils/normal'
 
 export function mockAll(schemaDefault: SchemaDefaultService) {
   const [x, y, width, height] = [100, 0, 100, 100]
@@ -94,7 +94,7 @@ export function mockAll(schemaDefault: SchemaDefaultService) {
     nodes,
     pages: [
       {
-        id: uuid(),
+        id: nanoid(),
         name: '测试页面1',
         zoom: 1,
         offset: { x: 100, y: 100 },

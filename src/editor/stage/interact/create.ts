@@ -1,3 +1,4 @@
+import { makeObservable, observable } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
 import { SchemaDefaultService, injectSchemaDefault } from '~/editor/schema/default'
@@ -10,22 +11,24 @@ import { createHooker } from '~/shared/hooker'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
 import { StageElementService, injectStageElement } from '../element'
+import { PixiService, injectPixi } from '../pixi'
 import { StageViewportService, injectStageViewport } from '../viewport'
 import { StageInteractService, injectStageInteract } from './interact'
 import { StageTransformService, injectStageTransform } from './transform'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'polygon', 'line', 'text', 'img'] as const
-type ICreateType = typeof createTypes[number]
+type ICreateType = (typeof createTypes)[number]
 
 @autobind
 @injectable()
 export class StageCreateService {
   types = createTypes
-  type: ICreateType = 'frame'
+  @observable type: ICreateType = 'frame'
   duringCreate = createHooker()
   private node!: INode
   private realStageStart!: IXY
   constructor(
+    @injectPixi private Pixi: PixiService,
     @injectSchemaDefault private SchemaDefault: SchemaDefaultService,
     @injectSchemaNode private SchemaNode: SchemaNodeService,
     @injectSchemaPage private SchemaPage: SchemaPageService,
@@ -35,14 +38,21 @@ export class StageCreateService {
     @injectOperateGeometry private OperateGeometry: OperateGeometryService,
     @injectStageTransform private StageTransform: StageTransformService,
     @injectStageElement private StageElement: StageElementService
-  ) {}
-  startInteract() {
-    this.Drag.onStart(this.onCreateStart).onMove(this.onCreateMove).onEnd(this.onCreateEnd)
+  ) {
+    makeObservable(this)
   }
-  endInteract() {}
+  startInteract() {
+    this.Pixi.addListener('mousedown', this.create)
+  }
+  endInteract() {
+    this.Pixi.removeListener('mousedown', this.create)
+  }
   setType(type: ICreateType) {
     this.type = type
     this.StageInteract.setType('create')
+  }
+  private create() {
+    this.Drag.onStart(this.onCreateStart).onMove(this.onCreateMove).onEnd(this.onCreateEnd)
   }
   private onCreateStart({ start, dragService }: IDragData) {
     if (!this.StageViewport.inViewport(start)) {
@@ -122,7 +132,7 @@ export class StageCreateService {
     this.SchemaNode.add(this.node)
     this.SchemaNode.clearSelect()
     this.SchemaNode.select(this.node.id)
-    this.SchemaNode.connect(this.node.id, this.SchemaPage.currentId)
+    this.SchemaNode.connectAt(this.SchemaPage.currentPage, this.node)
   }
 }
 

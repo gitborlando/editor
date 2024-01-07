@@ -12,7 +12,7 @@ export class StageWidgetGuideService {
     @injectPixi private Pixi: PixiService,
     @injectStageViewport private StageViewport: StageViewportService
   ) {
-    this.draw()
+    // this.draw()
   }
   @When('Pixi.initialized')
   @Watch('StageViewport.zoom')

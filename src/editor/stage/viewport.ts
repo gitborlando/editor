@@ -2,6 +2,7 @@ import { makeObservable, observable, when } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { Watch, autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
+import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
 import { SchemaPageService, injectSchemaPage } from '../schema/page'
@@ -11,8 +12,10 @@ import { PixiService, injectPixi } from './pixi'
 @injectable()
 export class StageViewportService {
   @observable initialized = false
-  @observable bound = { x: 0, y: 48, width: 0, height: 0, right: 240 }
+  @observable bound = { x: 240, y: 48, width: 0, height: 0, right: 240 }
+  needReBound = createSignal()
   beforeZoom = createHooker()
+  duringZoom = createSignal()
   afterZoom = createHooker()
   private zoomTimeOut?: NodeJS.Timeout
   constructor(
@@ -20,7 +23,10 @@ export class StageViewportService {
     @injectSchemaPage private SchemaPage: SchemaPageService
   ) {
     makeObservable(this)
-    when(() => Pixi.initialized).then(() => this.onResizeBound())
+    when(() => Pixi.initialized).then(() => {
+      this.needReBound.immediateHook(this.onResizeBound)
+      window.addEventListener('resize', this.onResizeBound)
+    })
     when(() => SchemaPage.initialized).then(() => {
       this.autoSetPixiStageZoom()
       this.autoSetPixiStageOffset()
@@ -99,6 +105,7 @@ export class StageViewportService {
       const newOffset = XY.From(this.stageOffset).plus(realStageXY.multiply(-step))
       this.setZoom(newZoom)
       this.setStageOffset(newOffset)
+      this.duringZoom.dispatch()
       this.zoomTimeOut = setTimeout(() => {
         this.zoomTimeOut = undefined
         this.afterZoom.dispatch()
@@ -107,18 +114,14 @@ export class StageViewportService {
     window.addEventListener('wheel', onWheel)
   }
   private onResizeBound() {
-    const setBound = () => {
-      this.bound = {
-        ...this.bound,
-        width: window.innerWidth - this.bound.x - this.bound.right,
-        height: window.innerHeight - this.bound.y + 1,
-      }
-      this.Pixi.container.style.width = this.bound.width + 'px'
-      this.Pixi.container.style.height = this.bound.height + 'px'
-      this.Pixi.app?.resize()
+    this.bound = {
+      ...this.bound,
+      width: window.innerWidth - this.bound.x - this.bound.right,
+      height: window.innerHeight - this.bound.y + 1,
     }
-    setBound()
-    window.addEventListener('resize', setBound)
+    this.Pixi.container.style.width = this.bound.width + 'px'
+    this.Pixi.container.style.height = this.bound.height + 'px'
+    this.Pixi.app?.resize()
   }
 }
 

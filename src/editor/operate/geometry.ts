@@ -1,7 +1,7 @@
 import { IValueWillChange } from 'mobx'
 import { inject, injectable } from 'tsyringe'
 import { max, min, rcos, rsin } from '~/editor/math/base'
-import { Before_After_Toggle, autobind } from '~/shared/decorator'
+import { WrapToggle, autobind } from '~/shared/decorator'
 import { createHooker } from '~/shared/hooker'
 import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
@@ -10,6 +10,7 @@ import { ValueOf } from '~/shared/utils/normal'
 import { xy_mutate, xy_rotate2 } from '../math/xy'
 import { SchemaNodeService, injectSchemaNode } from '../schema/node'
 import { ITriangle } from '../schema/type'
+import { SchemaUtilService, injectSchemaUtil } from '../schema/util'
 import { StageElementService, injectStageElement } from '../stage/element'
 import { StageSelectService, injectStageSelect } from '../stage/interact/select'
 
@@ -34,7 +35,8 @@ export class OperateGeometryService {
   constructor(
     @injectSchemaNode private SchemaNode: SchemaNodeService,
     @injectStageElement private StageElement: StageElementService,
-    @injectStageSelect private StageSelect: StageSelectService
+    @injectStageSelect private StageSelect: StageSelectService,
+    @injectSchemaUtil private SchemaUtil: SchemaUtilService
   ) {
     this.initialize()
   }
@@ -54,6 +56,7 @@ export class OperateGeometryService {
       if (!this.isGeometryChanged) return
       //this.patchChangeToVectorPoints(id)
       this.patchChangeToNode(id)
+      this.SchemaUtil.getChildIds(id).forEach(this.patchChangeToNode)
     })
     this.SchemaNode.afterFlushDirty.hook(() => {
       this.oneTickChange.endCurrent()
@@ -68,17 +71,17 @@ export class OperateGeometryService {
       ctx.newValue = max(-180, min(180, ctx.newValue))
     }
   }
-  @Before_After_Toggle('data._noIntercept')
+  @WrapToggle('data._noIntercept')
   private setupGeometryData() {
-    if (this.SchemaNode.selectIds.size === 1) {
+    if (this.SchemaNode.selectIds.value.size === 1) {
       const node = this.SchemaNode.selectNodes[0]
       void (<const>['x', 'y', 'width', 'height', 'rotation']).forEach(
         (key) => (this.data[key] = node[key])
       )
     }
-    if (this.SchemaNode.selectIds.size > 1) {
+    if (this.SchemaNode.selectIds.value.size > 1) {
       const propKeys = <const>['x', 'y', 'width', 'height', 'rotation']
-      const tempObj = <Record<typeof propKeys[number], number>>{}
+      const tempObj = <Record<(typeof propKeys)[number], number>>{}
       const multiValueArr = <string[]>[]
       this.SchemaNode.selectNodes.forEach((node, i) => {
         propKeys.forEach((key) => {

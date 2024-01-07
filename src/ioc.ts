@@ -6,6 +6,7 @@ import { SchemaDefaultService } from './editor/schema/default'
 import { SchemaNodeService } from './editor/schema/node'
 import { SchemaPageService } from './editor/schema/page'
 import { SchemaService } from './editor/schema/schema'
+import { SchemaUtilService } from './editor/schema/util'
 import { StageCursorService } from './editor/stage/cursor'
 import { StageDrawService } from './editor/stage/draw/draw'
 import { StageDrawPathService } from './editor/stage/draw/path'
@@ -22,7 +23,10 @@ import { StageWidgetHoverService } from './editor/stage/widget/hover'
 import { StageWidgetMarqueeService } from './editor/stage/widget/marquee'
 import { StageWidgetRulerService } from './editor/stage/widget/ruler'
 import { StageWidgetTransformService } from './editor/stage/widget/transform'
+import { UILeftPanelLayerService } from './editor/ui-state/left-panel/layer'
+import { UILeftPanelService } from './editor/ui-state/left-panel/left-panel'
 import { DragService } from './global/drag'
+import { EventWheelService } from './global/event/wheel'
 import { FileService } from './global/file'
 import { MenuService } from './global/menu'
 import { SettingService } from './global/setting'
@@ -35,6 +39,7 @@ container // schema
   .registerSingleton(SchemaNodeService)
   .registerSingleton(SchemaPageService)
   .registerSingleton(SchemaService)
+  .registerSingleton(SchemaUtilService)
 container // operate
   .registerSingleton(OperateGeometryService)
 container // stage interact
@@ -58,6 +63,9 @@ container // stage widget
   .registerSingleton(StageWidgetRulerService)
 container // other
   .registerSingleton(EditorService)
+container // ui
+  .registerSingleton(UILeftPanelService)
+  .registerSingleton(UILeftPanelLayerService)
 
 // global
 container
@@ -65,11 +73,14 @@ container
   .registerSingleton(DragService)
   .registerSingleton(MenuService)
   .registerSingleton(SettingService)
+container // event
+  .register(EventWheelService, { useClass: EventWheelService })
 
 export const editorServices = {
   SchemaDefault: container.resolve(SchemaDefaultService),
   SchemaNode: container.resolve(SchemaNodeService),
   SchemaPage: container.resolve(SchemaPageService),
+  SchemaUtil: container.resolve(SchemaUtilService),
   Schema: container.resolve(SchemaService),
   OperateGeometry: container.resolve(OperateGeometryService),
   Pixi: container.resolve(PixiService),
@@ -83,7 +94,8 @@ export const editorServices = {
   StageShape: container.resolve(StageElementService),
   StageInteract: container.resolve(StageInteractService),
   Editor: container.resolve(EditorService),
-  File: container.resolve(FileService),
+  UILeftPanel: container.resolve(UILeftPanelService),
+  UILeftPanelLayer: container.resolve(UILeftPanelLayerService),
 }
 container.resolve(StageDrawPathService)
 container.resolve(StageWidgetHoverService)
@@ -95,6 +107,7 @@ container.resolve(StageWidgetRulerService)
 export const globalServices = {
   File: container.resolve(FileService),
   Drag: container.resolve(DragService),
+  EventWheel: container.resolve(EventWheelService),
   Menu: container.resolve(MenuService),
   Setting: container.resolve(SettingService),
 }

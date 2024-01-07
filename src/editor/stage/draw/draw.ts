@@ -1,6 +1,8 @@
 import { inject, injectable } from 'tsyringe'
 import { radianfy } from '~/editor/math/base'
+import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
 import { IFill, IIrregular, INode, IVector } from '~/editor/schema/type'
+import { SchemaUtilService, injectSchemaUtil } from '~/editor/schema/util'
 import { autobind } from '~/shared/decorator'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { StageElementService, injectStageElement } from '../element'
@@ -18,7 +20,9 @@ export class StageDrawService {
   constructor(
     @injectStageElement private StageElement: StageElementService,
     @injectStageDrawPath private StageDrawPath: StageDrawPathService,
-    @injectStageViewport private StageViewport: StageViewportService
+    @injectStageViewport private StageViewport: StageViewportService,
+    @injectSchemaUtil private SchemaUtil: SchemaUtilService,
+    @injectSchemaNode private SchemaNode: SchemaNodeService
   ) {}
   drawNode(node: INode) {
     const { id, fills } = node
@@ -41,16 +45,18 @@ export class StageDrawService {
     })
   }
   drawShape(element: PIXI.Graphics, node: INode) {
-    const { x, y, width, height, rotation } = node
-    element.x = x
-    element.y = y
-    element.rotation = radianfy(rotation)
+    const { id, parentId, x, y, width, height, rotation } = node
+    const parentNode = this.SchemaNode.find(parentId)
+    element.x = x /*  - (parentNode?.x || 0) */
+    element.y = y /* - (parentNode?.y || 0) */
+    element.rotation = radianfy(rotation /* - (parentNode?.rotation || 0) */)
+    // this.drawHitArea(element)
     if (node.type === 'frame') {
       return element.drawRect(0, 0, width, height)
     }
     if (node.type === 'vector') {
       if (node.vectorType === 'rect') {
-        return element.drawRect(0, 0, width, height)
+        element.drawRect(0, 0, width, height)
       }
       if (node.vectorType === 'triangle') {
         return drawRegularPolygon(element, width / 2, height / 2, width / 2, node.sides, rotation)
@@ -85,6 +91,7 @@ export class StageDrawService {
           evens.push({ x, y, z })
         }
       }
+      console.log([...odds, ...evens.reverse()])
       return new PIXI.Polygon([...odds, ...evens.reverse()]).contains(x, y)
     }
     element.hitArea = { contains }

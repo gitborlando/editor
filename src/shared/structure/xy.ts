@@ -37,7 +37,7 @@ export class XY {
   shift = (distance: number, rotation: number) => {
     return new XY(this.x + distance * rcos(rotation), this.y + distance * rsin(rotation))
   }
-  mutate = (obj: Record<string, any>, prefix?: string) => {
+  mutate = (obj: Record<string, any>, prefix?: 'client' | 'center' | (string & {})) => {
     if (prefix) {
       obj[prefix + 'X'] = this.x
       obj[prefix + 'Y'] = this.y
@@ -53,7 +53,7 @@ export class XY {
   toObject = (): IXY => {
     return { x: this.x, y: this.y }
   }
-  static From(xy: Record<string, any>, prefix?: string) {
+  static From(xy: Record<string, any>, prefix?: 'client' | 'center' | (string & {})) {
     if (prefix) return new XY(xy[prefix + 'X'], xy[prefix + 'Y'])
     return new XY(xy.x, xy.y)
   }

@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { Case, Switch } from 'react-if'
 import { useEditor } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -15,11 +14,7 @@ export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
   const { type } = rightPanelShareState
   return (
     <Flex layout='v' className={classes.RightPanel}>
-      <Switch>
-        <Case condition={type === 'operate'}>
-          <OperatePanelComp />
-        </Case>
-      </Switch>
+      {type === 'operate' && <OperatePanelComp />}
     </Flex>
   )
 })

@@ -1,14 +1,13 @@
-import { useCallback } from 'react'
-import { v4 } from 'uuid'
-
 export const This = globalThis as any
-export const uuid = v4
 
 export const isLeftMouse = (e: any): e is MouseEvent => e.button === 0
 export const isRightMouse = (e: any): e is MouseEvent => e.button === 2
 
 export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
+
+export type IAnyFunc = typeof anyFunc
+export function anyFunc(...args: any[]): any {}
 
 export type ValueOf<T extends Record<string, any>> = T[keyof T]
 
@@ -32,6 +31,7 @@ export function stringPathProxy(target: any) {
   }
   return new Proxy({}, { get })
 }
+
 export function Delete<T>(object: Record<string, T>, key: string): void
 export function Delete<T>(target: T[], find: string | ((value: T) => void)): void
 export function Delete<T>(target: Record<string, T> | T[], filter: string | ((value: T) => void)) {
@@ -82,30 +82,19 @@ export function objEntries<T extends Record<string, any>, K extends keyof T = ke
   Object.entries(obj).forEach(([key, val], i) => callback(key as K, val, i))
 }
 
-export const debounce = <F extends (...args: any[]) => any>(func: F, delay: number) => {
-  let timeout: NodeJS.Timeout
-  return (...args: Parameters<F>) => {
-    clearTimeout(timeout)
-    timeout = setTimeout(() => {
-      func.apply(this, args)
-    }, delay)
-  }
+export function stopPropagation(e: any) {
+  e.stopPropagation()
 }
 
-export const throttleAnimationFrame = <F extends (...args: any[]) => any>(callback: F) => {
-  let requestId: number | null = null
-  let previousTime = 0
-  return (...args: Parameters<F>) => {
-    const currentTime = performance.now()
-    if (currentTime - previousTime <= 16) return
-    if (requestId) cancelAnimationFrame(requestId)
-    requestId = requestAnimationFrame(() => {
-      callback(...args)
-      previousTime = currentTime
-    })
-  }
+export function firstOne(input: any[] | Set<any>) {
+  return [...input][0]
+}
+export function lastOne(input: any[] | Set<any>) {
+  const arr = [...input]
+  return arr[arr.length - 1]
 }
 
-export function useCb<T extends Function>(callback: T) {
-  return useCallback(callback, [])
+export function insertAt<T>(array: T[], index: number, item: T) {
+  if (index < 0 || index > array.length - 1) return
+  array.splice(index, 0, item)
 }
