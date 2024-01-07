@@ -37,6 +37,7 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
         centerX: 150,
         centerY: 50,
         parentId: 'frame1',
+        rotation: 30,
       }),
       triangle1: schemaDefault.triangle({
         id: 'triangle1',
@@ -68,8 +69,8 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
     },
   }
 
-  return {
-    meta: { id: 'mock1', name: '测试文件1', user: 'myself' },
+  return <ISchema>{
+    meta: { id: 'mock1', name: '测试文件1', user: 'myself', version: 0 },
     nodes,
     pages: [
       {

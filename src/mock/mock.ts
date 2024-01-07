@@ -3,9 +3,9 @@ import { xy_new } from '~/editor/math/xy'
 import { COLOR } from '~/shared/utils/color'
 import { SchemaDefaultService } from '../editor/schema/default'
 import { IFillLinearGradient, INode } from '../editor/schema/type'
-import { mockList } from './list'
+import { mockNested } from './nested'
 
-export const mockJsonFile = mockList
+export const mockJsonFile = mockNested
 
 export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
   let s = new Date().getTime()

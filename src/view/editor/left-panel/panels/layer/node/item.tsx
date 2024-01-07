@@ -96,20 +96,15 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
           )}
         </Flex>
         <Flex layout='c' sidePadding={6}>
-          {(() => {
-            if (node.type === 'frame')
-              return (
-                <Icon size={12} scale={12 / 10}>
-                  {Asset.editor.node.frame}
-                </Icon>
-              )
-            if (node.type === 'vector')
-              return (
-                <Icon size={12} scale={12 / 10}>
-                  {Asset.editor.node.rect}
-                </Icon>
-              )
-          })()}
+          <Icon size={12} scale={12 / 10}>
+            {(() => {
+              if (node.type === 'frame') return Asset.editor.node.frame
+              if (node.type === 'vector') {
+                if (node.vectorType === 'rect') return Asset.editor.node.rect
+                if (node.vectorType === 'triangle') return Asset.editor.node.triangle
+              }
+            })()}
+          </Icon>
         </Flex>
         <Flex layout='h' justify='space-between' style={{ width: '100%' }}>
           <Flex

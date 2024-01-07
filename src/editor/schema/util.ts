@@ -103,6 +103,11 @@ export class SchemaUtilService {
     const newSchema = structuredClone(this.Schema.getSchema())
     console.log(newSchema)
   }
+  private initNodeRuntime() {
+    this.traverse(({ id, depth, ancestors }) => {
+      this.nodeRuntime.get(id).ancestorIds = ancestors
+    })
+  }
 }
 
 export const injectSchemaUtil = inject(SchemaUtilService)

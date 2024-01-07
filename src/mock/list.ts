@@ -6,7 +6,7 @@ export function mockList(schemaDefault: SchemaDefaultService) {
     page1: {},
   }
   // const frames = new Array(3).fill('').map((i) => nanoid())
-  const frames = new Array(3).fill('').map((_, i) => '画板' + (i + 1))
+  const frames = new Array(30).fill('').map((_, i) => '画板' + (i + 1))
   frames.forEach((frameId, i) => {
     i = i + 1
     const rect = schemaDefault.rect({

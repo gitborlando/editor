@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useSubscribes } from '~/shared/utils/signal'
+import { useHookSignal } from '~/shared/utils/signal'
 import { useEditor, useGlobalService } from '~/view/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -14,7 +14,8 @@ export const PageComp: FC<IPageComp> = observer(({}) => {
   const { SchemaPage, UILeftPanelLayer } = useEditor()
   const { allPageExpanded, pagePanelHeight } = UILeftPanelLayer
   const { Drag } = useGlobalService()
-  useSubscribes(pagePanelHeight.hook, allPageExpanded.hook)
+  useHookSignal(pagePanelHeight)
+  useHookSignal(allPageExpanded)
   return (
     <Flex layout='v' shrink={0} className={classes.Page}>
       <PageHeaderComp />
