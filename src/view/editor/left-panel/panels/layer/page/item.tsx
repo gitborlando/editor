@@ -1,6 +1,6 @@
-import { observer, useLocalObservable } from 'mobx-react'
 import { FC } from 'react'
-import { useEditor } from '~/view/context'
+import { SchemaPage } from '~/editor/schema/page'
+import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -9,32 +9,32 @@ type IPageItemComp = {
   id: string
 }
 
-export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
-  const { SchemaPage } = useEditor()
-  const { classes } = useStyles({ selected: SchemaPage.currentId === id })
-  const state = useLocalObservable(() => ({
-    isHover: false,
-  }))
+export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
+  useHookSignal(SchemaPage.currentId)
+  const { classes } = useStyles({ selected: SchemaPage.currentId.value === id })
+  const isHover = useAutoSignal(false)
   return (
     <Flex
       layout='h'
       justify='space-between'
       className={classes.PageItem}
-      onHover={(hover) => (state.isHover = hover)}
+      onHover={isHover.dispatch}
       onClick={() => SchemaPage.select(id)}>
       <Flex layout='h' sidePadding={10} className={classes.name}>
         {name}
       </Flex>
-      {/* {state.isHover && (
+      {/* {isHover.value && (
         <Button
           onClick={(e) => {
             e.stopPropagation()
             SchemaPage.delete(id)
-          }}></Button>
+          }}>
+          <Icon>{Asset.editor.shared.delete}</Icon>
+        </Button>
       )} */}
     </Flex>
   )
-})
+}
 
 type IPageItemCompStyle = {
   selected: boolean

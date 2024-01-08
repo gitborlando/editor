@@ -1,48 +1,35 @@
-import { inject, injectable } from 'tsyringe'
-import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
-import { SettingService, injectSetting } from '~/global/setting'
-import { When, autobind } from '~/shared/decorator'
-import { lastOne } from '~/shared/utils/normal'
-import { StageDrawService, injectStageDraw } from '../draw/draw'
-import { StageElementService, injectStageElement } from '../element'
-import { PIXI, PixiService, injectPixi } from '../pixi'
-import { StageViewportService, injectStageViewport } from '../viewport'
+import { SchemaNode } from '~/editor/schema/node'
+import { Setting } from '~/global/setting'
+import { autobind } from '~/shared/decorator'
+import { lastOne } from '~/shared/utils/array'
+import { StageDraw } from '../draw/draw'
+import { StageElement } from '../element'
+import { PIXI, Pixi } from '../pixi'
+import { StageViewport } from '../viewport'
 
 @autobind
-@injectable()
 export class StageWidgetHoverService {
   hoverWidget = new PIXI.Graphics()
-  constructor(
-    @injectPixi private Pixi: PixiService,
-    @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectStageViewport private StageViewport: StageViewportService,
-    @injectSetting private Setting: SettingService,
-    @injectStageElement private StageElement: StageElementService,
-    @injectStageDraw private StageDraw: StageDrawService
-  ) {
-    this.initialize()
-  }
   private get hoverId() {
-    return lastOne(this.SchemaNode.hoverIds.value)
+    return lastOne(SchemaNode.hoverIds.value)
   }
-  @When('StageViewport.initialized')
-  private initialize() {
-    this.SchemaNode.hoverIds.hook(this.autoDraw)
-    this.StageViewport.duringZoom.hook(this.autoDraw)
+  initHook() {
+    SchemaNode.hoverIds.hook(this.autoDraw)
+    StageViewport.duringZoom.hook(this.autoDraw)
   }
   private autoDraw() {
-    if (!this.hoverId || this.SchemaNode.selectIds.value.has(this.hoverId)) {
+    if (!this.hoverId || SchemaNode.selectIds.value.has(this.hoverId)) {
       return this.hoverWidget.clear()
     }
     this.hoverWidget.clear()
-    const hoverNode = this.SchemaNode.find(this.hoverId)
-    const parent = this.StageElement.find(hoverNode.parentId) || this.Pixi.sceneStage
+    const hoverNode = SchemaNode.find(this.hoverId)
+    const parent = StageElement.find(hoverNode.parentId) || Pixi.sceneStage
     this.hoverWidget.setParent(parent)
     if (hoverNode.type === 'vector') {
-      this.hoverWidget.lineStyle(1.5 / this.StageViewport.zoom, this.Setting.color.value)
-      this.StageDraw.drawShape(this.hoverWidget, hoverNode)
+      this.hoverWidget.lineStyle(1.5 / StageViewport.zoom.value, Setting.color.value)
+      StageDraw.drawShape(this.hoverWidget, hoverNode)
     }
   }
 }
 
-export const injectStageWidgetHover = inject(StageWidgetHoverService)
+export const StageWidgetHover = new StageWidgetHoverService()

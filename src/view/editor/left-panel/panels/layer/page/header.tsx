@@ -1,6 +1,7 @@
 import { FC } from 'react'
-import { useHookSignal } from '~/shared/utils/signal'
-import { useEditor } from '~/view/context'
+import { SchemaPage } from '~/editor/schema/page'
+import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
+import { useHookSignal } from '~/shared/signal-react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -11,13 +12,13 @@ type IPageHeaderComp = {}
 
 export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
   const { classes } = useStyles({})
-  const { SchemaPage, UILeftPanelLayer } = useEditor()
   const { allPageExpanded } = UILeftPanelLayer
-  useHookSignal(allPageExpanded.hook)
+  useHookSignal(allPageExpanded)
+  useHookSignal(SchemaPage.currentPage)
   return (
     <Flex layout='h' shrink={0} sidePadding={4} className={classes.PageHeader}>
       <Flex layout='c' className={classes.selectPageName}>
-        {SchemaPage.currentPage?.name}
+        {SchemaPage.currentPage?.value.name}
       </Flex>
       <Button
         type='icon'
@@ -25,6 +26,7 @@ export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
         onClick={() => {
           if (allPageExpanded.value === false) allPageExpanded.dispatch(true)
           SchemaPage.add()
+          SchemaPage.pages.dispatch()
         }}>
         <Icon size={16}>{Asset.editor.leftPanel.page.add}</Icon>
       </Button>

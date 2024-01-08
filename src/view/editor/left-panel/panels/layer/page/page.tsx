@@ -1,7 +1,8 @@
-import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useHookSignal } from '~/shared/utils/signal'
-import { useEditor, useGlobalService } from '~/view/context'
+import { SchemaPage } from '~/editor/schema/page'
+import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
+import { Drag } from '~/global/drag'
+import { useHookSignal } from '~/shared/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PageHeaderComp } from './header'
@@ -9,13 +10,12 @@ import { PageItemComp } from './item'
 
 type IPageComp = {}
 
-export const PageComp: FC<IPageComp> = observer(({}) => {
+export const PageComp: FC<IPageComp> = ({}) => {
   const { classes } = useStyles({})
-  const { SchemaPage, UILeftPanelLayer } = useEditor()
   const { allPageExpanded, pagePanelHeight } = UILeftPanelLayer
-  const { Drag } = useGlobalService()
   useHookSignal(pagePanelHeight)
   useHookSignal(allPageExpanded)
+  useHookSignal(SchemaPage.pages)
   return (
     <Flex layout='v' shrink={0} className={classes.Page}>
       <PageHeaderComp />
@@ -25,7 +25,7 @@ export const PageComp: FC<IPageComp> = observer(({}) => {
         vshow={allPageExpanded.value}
         shrink={1}
         style={{ height: pagePanelHeight.value - 37 }}>
-        {SchemaPage.pages.map((page) => (
+        {SchemaPage.pages.value.map((page) => (
           <PageItemComp key={page.id} name={page.name} id={page.id} />
         ))}
       </Flex>
@@ -44,7 +44,7 @@ export const PageComp: FC<IPageComp> = observer(({}) => {
         }}></Flex>
     </Flex>
   )
-})
+}
 
 type IPageCompStyle = {} /* & Required<Pick<IPageComp>> */ /* & Pick<IPageComp> */
 

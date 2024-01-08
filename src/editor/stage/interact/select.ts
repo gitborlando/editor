@@ -1,84 +1,71 @@
-import { makeObservable, observable } from 'mobx'
-import { inject, injectable } from 'tsyringe'
 import { OBB } from '~/editor/math/obb'
-import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
-import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
-import { SchemaUtilService, injectSchemaUtil } from '~/editor/schema/util'
-import { DragService, injectDrag } from '~/global/drag'
-import { MenuService, injectMenu } from '~/global/menu'
+import { SchemaNode } from '~/editor/schema/node'
+import { SchemaPage } from '~/editor/schema/page'
+import { SchemaUtil } from '~/editor/schema/util'
+import { Drag } from '~/global/drag'
+import { Menu } from '~/global/menu'
 import { autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker'
 import { macro_Match } from '~/shared/macro'
+import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { createBound, isLeftMouse, isRightMouse, type IBound } from '~/shared/utils/normal'
-import { StageElementService, injectStageElement } from '../element'
-import { PixiService, injectPixi } from '../pixi'
-import { StageViewportService, injectStageViewport } from '../viewport'
+import { StageElement } from '../element'
+import { Pixi } from '../pixi'
+import { StageViewport } from '../viewport'
 
 @autobind
-@injectable()
 export class StageSelectService {
-  @observable marquee?: IBound
-  beforeSelect = createHooker()
-  afterSelect = createHooker<['panel' | 'stage-single' | 'marquee']>()
-  duringMarqueeSelect = createHooker()
+  marquee = createSignal<IBound | undefined>()
+  beforeSelect = createSignal()
+  afterSelect = createSignal<'panel' | 'stage-single' | 'marquee'>()
+  duringMarqueeSelect = createSignal()
   needExpandIds = new Set<string>()
   private marqueeOBB?: OBB
-  constructor(
-    @injectPixi private Pixi: PixiService,
-    @injectDrag private Drag: DragService,
-    @injectStageViewport private StageViewport: StageViewportService,
-    @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectMenu private Menu: MenuService,
-    @injectStageElement private StageElement: StageElementService,
-    @injectSchemaPage private SchemaPage: SchemaPageService,
-    @injectSchemaUtil private SchemaUtil: SchemaUtilService
-  ) {
-    makeObservable(this)
+  initHook() {
     this.beforeSelect.hook(() => this.needExpandIds.clear())
   }
   startInteract() {
-    this.Pixi.addListener('mousedown', this.onMousedownSelect)
-    this.Pixi.addListener('mousedown', this.onMarqueeSelect)
-    this.Pixi.addListener('mousedown', this.onMenu)
+    Pixi.addListener('mousedown', this.onMousedownSelect)
+    Pixi.addListener('mousedown', this.onMarqueeSelect)
+    Pixi.addListener('mousedown', this.onMenu)
   }
   endInteract() {
-    this.Pixi.removeListener('mousedown', this.onMousedownSelect)
-    this.Pixi.removeListener('mousedown', this.onMarqueeSelect)
-    this.Pixi.removeListener('mousedown', this.onMenu)
+    Pixi.removeListener('mousedown', this.onMousedownSelect)
+    Pixi.removeListener('mousedown', this.onMarqueeSelect)
+    Pixi.removeListener('mousedown', this.onMenu)
   }
   private get hoverId() {
-    const hoverIds = [...this.SchemaNode.hoverIds.value]
+    const hoverIds = [...SchemaNode.hoverIds.value]
     return hoverIds[hoverIds.length - 1]
   }
   onPanelSelect(id: string) {
     this.beforeSelect.dispatch()
-    this.SchemaNode.clearSelect()
-    this.SchemaNode.select(id)
+    SchemaNode.clearSelect()
+    SchemaNode.select(id)
     this.afterSelect.dispatch('panel')
   }
   private onMousedownSelect(e: Event) {
     if (!isLeftMouse(e)) return
-    if (this.Pixi.isForbidEvent) return
+    if (Pixi.isForbidEvent) return
     if (!this.hoverId) {
-      this.SchemaNode.clearSelect()
+      SchemaNode.clearSelect()
       return this.afterSelect.dispatch('stage-single')
     }
-    if (this.SchemaNode.selectIds.value.has(this.hoverId)) return
-    if (this.SchemaUtil.parentIsPage(this.hoverId)) return
+    if (SchemaNode.selectIds.value.has(this.hoverId)) return
+    if (SchemaUtil.parentIsPage(this.hoverId)) return
     this.beforeSelect.dispatch()
-    this.SchemaNode.clearSelect()
-    this.SchemaNode.select(this.hoverId)
-    let node = this.SchemaNode.find(this.hoverId)
+    SchemaNode.clearSelect()
+    SchemaNode.select(this.hoverId)
+    let node = SchemaNode.find(this.hoverId)
     while (node) {
       this.needExpandIds.add(node.parentId)
-      node = this.SchemaNode.find(node.parentId)
+      node = SchemaNode.find(node.parentId)
     }
     this.afterSelect.dispatch('stage-single')
   }
   private onMarqueeSelect(e: Event) {
     if (!isLeftMouse(e)) return
-    if (this.Pixi.isForbidEvent) return
+    if (Pixi.isForbidEvent) return
     if (this.hoverId) return
     const hitTest = (marqueeOBB: OBB | undefined, obb: OBB) => {
       if (!marqueeOBB) return false
@@ -88,53 +75,52 @@ export class StageSelectService {
     }
     const traverseTest = (ids: string[]) => {
       ids.forEach((id) => {
-        const OBB = this.StageElement.OBBCache.get(id)
-        const node = this.SchemaNode.find(id)
-        if (node.type === 'frame' && this.SchemaUtil.parentIsPage(id)) {
-          return traverseTest(this.SchemaUtil.getChildIds(id))
+        const OBB = StageElement.OBBCache.get(id)
+        const node = SchemaNode.find(id)
+        if (node.type === 'frame' && SchemaUtil.parentIsPage(id)) {
+          return traverseTest(SchemaUtil.getChildIds(id))
         }
         if (hitTest(this.marqueeOBB, OBB)) {
-          this.SchemaNode.select(id)
+          SchemaNode.select(id)
           this.needExpandIds.add(node.parentId)
-          traverseTest(this.SchemaUtil.getChildIds(id))
+          traverseTest(SchemaUtil.getChildIds(id))
         } else {
-          this.SchemaNode.unSelect(id)
+          SchemaNode.unSelect(id)
         }
       })
     }
-    let startedSelect = false
-    this.Drag.onStart(() => {
-      this.marquee = createBound(0, 0, 0, 0)
+    Drag.onStart(() => {
+      this.marquee.value = createBound(0, 0, 0, 0)
+      this.beforeSelect.dispatch()
+      SchemaNode.clearSelect()
     })
       .onMove(({ marquee }) => {
-        if (!startedSelect) {
-          this.beforeSelect.dispatch()
-          this.SchemaNode.clearSelect()
-          startedSelect = true
-        }
-        this.marquee = marquee
+        this.marquee.dispatch(marquee)
         this.marqueeOBB = this.calcMarqueeOBB()
-        traverseTest(this.SchemaPage.currentPage.childIds)
+        traverseTest(SchemaPage.currentPage.value.childIds)
         this.duringMarqueeSelect.dispatch()
       })
       .onDestroy(() => {
-        this.marquee = undefined
-        if (startedSelect) this.afterSelect.dispatch('marquee')
+        this.marquee.value = undefined
+        this.marquee.dispatch()
+        this.afterSelect.dispatch('marquee')
       })
   }
   private onMenu(e: Event) {
     if (!isRightMouse(e)) return
-    this.Menu.setShow(true)
-    this.Menu.setXY(e.clientX, e.clientY)
+    Menu.setShow(true)
+    Menu.setXY(e.clientX, e.clientY)
   }
   private calcMarqueeOBB() {
     if (!this.marquee) return
-    const { x, y } = this.StageViewport.toRealStageXY(XY.Of(this.marquee.x, this.marquee.y))
-    const { x: width, y: height } = this.StageViewport.toRealStageShiftXY(
-      XY.Of(this.marquee.width, this.marquee.height)
+    const { x, y } = StageViewport.toRealStageXY(
+      XY.Of(this.marquee.value!.x, this.marquee.value!.y)
+    )
+    const { x: width, y: height } = StageViewport.toRealStageShiftXY(
+      XY.Of(this.marquee.value!.width, this.marquee.value!.height)
     )
     return new OBB(x + width / 2, y + height / 2, width, height, 0)
   }
 }
 
-export const injectStageSelect = inject(StageSelectService)
+export const StageSelect = new StageSelectService()

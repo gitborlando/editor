@@ -1,39 +1,25 @@
-import { makeObservable, observable } from 'mobx'
-import { inject, injectable } from 'tsyringe'
-import { WatchNext, autobind } from '~/shared/decorator'
-import { IXY } from '~/shared/utils/normal'
+import { autobind } from '~/shared/decorator'
+import { createSignal } from '~/shared/signal'
 import { xy_new } from '../math/xy'
-import { PixiService, injectPixi } from './pixi'
+import { Pixi } from './pixi'
 
 export type IStageCursorType = 'select' | 'h-resize' | 'v-resize'
 
 @autobind
-@injectable()
 export class StageCursorService {
-  @observable type = <IStageCursorType>'select'
-  @observable xy = xy_new(0, 0)
-  @observable rotation = 0
-  constructor(@injectPixi private Pixi: PixiService) {
-    makeObservable(this)
-    this.autoChange()
+  type = createSignal(<IStageCursorType>'select')
+  xy = createSignal(xy_new(0, 0))
+  rotation = createSignal(0)
+  initHook() {
+    this.type.hook(this.autoChange)
   }
-  setType(type: IStageCursorType) {
-    this.type = type
-  }
-  setXy(xy: IXY) {
-    this.xy = xy
-  }
-  setRotation(rotation: number) {
-    this.rotation = rotation
-  }
-  @WatchNext('type')
   private autoChange() {
-    this.Pixi.container.style.cursor = (<const>{
+    Pixi.container.style.cursor = (<const>{
       select: 'auto',
       'h-resize': 'e-resize',
       'v-resize': 's-resize',
-    })[this.type]
+    })[this.type.value]
   }
 }
 
-export const injectStageCursor = inject(StageCursorService)
+export const StageCursor = new StageCursorService()

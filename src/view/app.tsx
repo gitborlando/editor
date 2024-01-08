@@ -1,36 +1,24 @@
 import { observer } from 'mobx-react'
-import { FC } from 'react'
-import { editorServices, globalServices } from '~/ioc'
-import { testDraw2 } from '~/shared/helper/test2'
+import { FC, Suspense } from 'react'
+import { Setting } from '~/global/setting'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { UploaderComp } from './component/uploader'
-import { EditorContext, GlobalContext } from './context'
 import { EditorComp } from './editor/editor'
 
-type IAppProps = {}
+Setting.init()
 
-const customMode = false
+type IAppProps = {}
 
 export const App: FC<IAppProps> = observer(() => {
   const { classes } = useStyles({})
   return (
     <Flex layout='v' className={classes.App} onContextMenu={(e) => e.preventDefault()}>
-      {customMode ? (
-        <canvas
-          ref={(cvs) => testDraw2(cvs!.getContext('2d')!)}
-          className={classes.canvas}
-          width={1000}
-          height={1000}></canvas>
-      ) : (
-        <GlobalContext.Provider value={globalServices}>
-          <EditorContext.Provider value={editorServices}>
-            <EditorComp />
-          </EditorContext.Provider>
-          {/* <MenuComp /> */}
-          <UploaderComp />
-        </GlobalContext.Provider>
-      )}
+      <Suspense fallback={'加载中...'}>
+        <EditorComp />
+      </Suspense>
+      {/* <MenuComp /> */}
+      <UploaderComp />
     </Flex>
   )
 })

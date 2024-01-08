@@ -1,5 +1,4 @@
 import { nanoid } from 'nanoid'
-import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
 import { COLOR, rgba } from '~/shared/utils/color'
 import { IBound, IXY } from '~/shared/utils/normal'
@@ -25,7 +24,6 @@ import {
 } from './type'
 
 @autobind
-@injectable()
 export class SchemaDefaultService {
   typeIndexMap: Record<string, [string, number]> = {}
   meta(): ISchema['meta'] {
@@ -325,4 +323,4 @@ export class SchemaDefaultService {
   }
 }
 
-export const injectSchemaDefault = inject(SchemaDefaultService)
+export const SchemaDefault = new SchemaDefaultService()

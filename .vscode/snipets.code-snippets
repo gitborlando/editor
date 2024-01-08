@@ -73,14 +73,14 @@
       "import { makeObservable } from 'mobx'",
       "",
       "@autobind",
-      "@injectable()",
+      "",
       "export class $1${TM_FILENAME_BASE}Service {",
       "  constructor() {",
       "    makeObservable(this)",
       "  }",
       "}",
       "",
-      "export const inject$1${TM_FILENAME_BASE} = inject($1${TM_FILENAME_BASE}Service)",
+      "export const $1${TM_FILENAME_BASE} = new $1${TM_FILENAME_BASE}Service()",
       ""
     ],
     "description": "Service"

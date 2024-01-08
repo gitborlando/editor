@@ -93,7 +93,7 @@ export const default$ = {
   select: {
     background: {
       // backgroundColor: 'rgba(234, 224, 255, 1)',
-      backgroundColor: hslBlueColor(92),
+      backgroundColor: hslBlueColor(94),
     },
   },
 }

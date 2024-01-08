@@ -1,5 +1,3 @@
-import { inject, injectable } from 'tsyringe'
-import { iocEditorHooker } from '~/ioc'
 import { autobind } from '~/shared/decorator'
 import { macro_StringMatch } from '~/shared/macro'
 import { Signal, createSignal } from '~/shared/signal'
@@ -10,15 +8,11 @@ export type ISetting = {
 }
 
 @autobind
-@injectable()
 export class SettingService {
   key = 'setting'
   inited = createSignal(false)
   color = createSignal(hslBlueColor(65))
   switchBarPosition = createSignal(<'left' | 'top'>'top')
-  constructor() {
-    iocEditorHooker.hook(this.init)
-  }
   init() {
     this.load()
     this.autoStore()
@@ -46,4 +40,4 @@ export class SettingService {
   }
 }
 
-export const injectSetting = inject(SettingService)
+export const Setting = new SettingService()

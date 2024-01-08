@@ -1,12 +1,11 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useGlobalService } from '~/view/context'
+import { File } from '~/editor/file'
 import { makeStyles } from '~/view/ui-utility/theme'
 
 type IUploaderComp = {}
 
 export const UploaderComp: FC<IUploaderComp> = observer(({}) => {
-  const { File } = useGlobalService()
   return (
     <input ref={File.setInputRef} id='uploader' type='file' style={{ display: 'none' }}></input>
   )

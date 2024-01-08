@@ -1,58 +1,42 @@
-import { makeObservable, observable, when } from 'mobx'
-import { delay, inject, injectable } from 'tsyringe'
-import { DragService, injectDrag } from '~/global/drag'
-import { Watch, autobind } from '~/shared/decorator'
-import { PixiService, injectPixi } from '../pixi'
-import { StageCreateService } from './create'
-import { StageMoveService, injectStageMove } from './move'
-import { StageSelectService, injectStageSelect } from './select'
+import { Drag } from '~/global/drag'
+import { autobind } from '~/shared/decorator'
+import { createSignal } from '~/shared/signal'
+import { Pixi } from '../pixi'
+import { StageCreate } from './create'
+import { StageMove } from './move'
+import { StageSelect } from './select'
 
 export type IStageInteractType = 'select' | 'move' | 'create'
 
 @autobind
-@injectable()
 export class StageInteractService {
-  @observable type: IStageInteractType = 'select'
+  type = createSignal(<IStageInteractType>'select')
   private previousType?: IStageInteractType
   private interactHandlerMap = new Map<
     IStageInteractType,
     { startInteract: () => void; endInteract: () => void }
   >()
-  constructor(
-    @injectPixi private Pixi: PixiService,
-    @injectDrag private Drag: DragService,
-    @injectStageMove private StageMove: StageMoveService,
-    @injectStageSelect private StageSelect: StageSelectService,
-    @inject(delay(() => StageCreateService)) private StageCreate: StageCreateService
-  ) {
-    makeObservable(this)
-    this.interactHandlerMap.set('create', this.StageCreate)
-    this.interactHandlerMap.set('move', this.StageMove)
-    this.interactHandlerMap.set('select', this.StageSelect)
-    when(() => this.Pixi.initialized).then(() => {
-      this.autoInteract()
-      this.autoCursor()
-    })
+  initHook() {
+    this.interactHandlerMap.set('create', StageCreate)
+    this.interactHandlerMap.set('move', StageMove)
+    this.interactHandlerMap.set('select', StageSelect)
+    this.type.hook(this.autoInteract)
+    this.type.hook(this.autoCursor)
+    Pixi.inited.hook(() => this.type.dispatch('select'))
   }
-  setType(type: IStageInteractType = 'select') {
-    if (this.type === type) return
-    this.type = type
-  }
-  @Watch('type')
   private autoInteract() {
-    this.interactHandlerMap.get(this.type)?.startInteract()
+    this.interactHandlerMap.get(this.type.value)?.startInteract()
     this.interactHandlerMap.get(this.previousType!)?.endInteract()
-    this.previousType = this.type
+    this.previousType = this.type.value
   }
-  @Watch('type')
   private autoCursor() {
-    const cursor = interactCursorMap[this.type]
-    this.Drag.setCursor(cursor)
-    this.Pixi.container.style.cursor = cursor
+    const cursor = interactCursorMap[this.type.value]
+    Drag.setCursor(cursor)
+    Pixi.container.style.cursor = cursor
   }
 }
 
-export const injectStageInteract = inject(StageInteractService)
+export const StageInteract = new StageInteractService()
 
 const interactCursorMap = {
   select: 'auto',

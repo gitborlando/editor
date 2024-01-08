@@ -1,5 +1,5 @@
 import autoBindMethods from 'class-autobind-decorator'
-import { IAnyFunc } from './utils/normal'
+import { IAnyFunc, INoopFunc } from './utils/normal'
 
 type IHookOption = {
   immediately?: boolean
@@ -47,7 +47,7 @@ export class Signal<T extends any> {
     return this.hook(hook, { ...option, immediately: true })
   }
   dispatch(value?: T) {
-    this.value = value ?? this.newValue
+    this.value = value === undefined ? this.newValue : value
     if (isBatching) return batchSignals.add(this)
     signalMap.get(this)?.forEach((hook) => hook?.(this.newValue, this.oldValue))
   }
@@ -58,6 +58,10 @@ export class Signal<T extends any> {
 
 export function createSignal<T extends any>(value?: T) {
   return new Signal<T>(value)
+}
+
+export function multiSignal(signals: Signal<any>[], callback: INoopFunc) {
+  signals.forEach((signal) => signal.hook(callback))
 }
 
 let isBatching = false

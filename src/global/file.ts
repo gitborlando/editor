@@ -1,8 +1,6 @@
-import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
 
 @autobind
-@injectable()
 export class FileService {
   private inputRef!: HTMLInputElement
   setInputRef(input: HTMLInputElement) {
@@ -25,4 +23,4 @@ export class FileService {
   }
 }
 
-export const injectFile = inject(FileService)
+export const File = new FileService()

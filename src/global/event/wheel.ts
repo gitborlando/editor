@@ -1,31 +1,31 @@
 import { WheelEvent as ReactWheelEvent } from 'react'
-import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker'
+import { createSignal } from '~/shared/signal'
+
+type IWheelData = { e: WheelEvent | ReactWheelEvent; direction: 1 | -1 }
 
 @autobind
-@injectable()
 export class EventWheelService {
-  direction = <1 | -1>1
-  beforeWheel = createHooker()
-  duringWheel = createHooker<[WheelEvent | ReactWheelEvent, typeof this.direction]>()
-  afterWheel = createHooker()
+  beforeWheel = createSignal<IWheelData>()
+  duringWheel = createSignal<IWheelData>()
+  afterWheel = createSignal<IWheelData>()
   private wheelTimeOut?: NodeJS.Timeout
   onWheel(e: WheelEvent | ReactWheelEvent) {
+    const direction = e.deltaY > 0 ? 1 : -1
+
     if (this.wheelTimeOut) {
       clearTimeout(this.wheelTimeOut)
     } else {
-      this.beforeWheel.dispatch()
+      this.beforeWheel.dispatch({ e, direction })
     }
 
-    this.direction = e.deltaY > 0 ? 1 : -1
-    this.duringWheel.dispatch(e, this.direction)
+    this.duringWheel.dispatch({ e, direction })
 
     this.wheelTimeOut = setTimeout(() => {
       this.wheelTimeOut = undefined
-      this.afterWheel.dispatch()
+      this.afterWheel.dispatch({ e, direction })
     }, 250)
   }
 }
 
-export const injectEventWheel = inject(EventWheelService)
+export const EventWheel = new EventWheelService()

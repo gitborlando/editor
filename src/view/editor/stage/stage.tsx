@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditor } from '~/view/context'
+import { Pixi } from '~/editor/stage/pixi'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -8,7 +8,6 @@ type IStageComp = {}
 
 export const StageComp: FC<IStageComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { Pixi } = useEditor()
   return (
     <Flex
       shrink={0}

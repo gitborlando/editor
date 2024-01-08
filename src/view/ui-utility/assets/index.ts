@@ -1,3 +1,4 @@
+import EditorHeaderShiyangyang from './editor/header/shiyangyang.png'
 import EditorHeaderToolsMove from './editor/header/tools/move.tsx'
 import EditorHeaderToolsSelect from './editor/header/tools/select.tsx'
 import EditorLeftPanelNodeCollapse from './editor/left-panel/node/collapse.tsx'
@@ -17,6 +18,7 @@ import EditorWidgetNumberInputOperateUp from './editor/widget/number-input/opera
 const Asset = {
   editor: {
     header: {
+      shiyangyang: EditorHeaderShiyangyang,
       tools: {
         move: EditorHeaderToolsMove,
         select: EditorHeaderToolsSelect,

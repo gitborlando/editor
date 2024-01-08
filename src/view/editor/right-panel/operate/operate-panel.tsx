@@ -1,7 +1,8 @@
 import { FC } from 'react'
-import { lastOne } from '~/shared/utils/normal'
-import { useHookSignal } from '~/shared/utils/signal'
-import { useEditor } from '~/view/context'
+import { SchemaNode } from '~/editor/schema/node'
+import { StageSelect } from '~/editor/stage/interact/select'
+import { useHookSignal } from '~/shared/signal-react'
+import { lastOne } from '~/shared/utils/array'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { GeometryPropsComp } from './geometry/geometry-props'
@@ -9,11 +10,10 @@ import { GeometryPropsComp } from './geometry/geometry-props'
 type IOperatePanelComp = {}
 
 export const OperatePanelComp: FC<IOperatePanelComp> = ({}) => {
-  const { SchemaNode, StageSelect } = useEditor()
   const { afterSelect } = StageSelect
   const { classes } = useStyles({})
   useHookSignal(afterSelect.hook)
-  useHookSignal(SchemaNode.hoverIds.hook)
+  useHookSignal(SchemaNode.hoverIds)
   return (
     <Flex layout='v' className={classes.OperatePanel}>
       {SchemaNode.selectIds.value.size !== 0 && <GeometryPropsComp />}

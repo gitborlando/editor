@@ -1,7 +1,10 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import { StageCreate } from '~/editor/stage/interact/create'
+import { StageInteract } from '~/editor/stage/interact/interact'
+import { StageViewport } from '~/editor/stage/viewport'
+import { useSignalHook } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
-import { useEditor } from '~/view/context'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -12,35 +15,40 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
-  const { StageInteract, StageViewport, StageCreate } = useEditor()
-  const { classes } = useStyles({ top: StageViewport.bound.y })
+  const { classes } = useStyles({ top: StageViewport.bound.value.y })
+  useSignalHook(StageInteract.type)
+  useSignalHook(StageViewport.zoom)
   return (
-    <Flex layout='v' justify='space-around' className={classes.Header}>
-      <Flex layout='c'>
+    <Flex layout='h' className={classes.Header}>
+      <Flex layout='c' className={classes.leftGroup}>
+        <Icon size={28}>{Asset.editor.header.shiyangyang}</Icon>
+        <h4 style={{ color: hslBlueColor(60) }}>屎羊羊编辑器</h4>
+      </Flex>
+      <Flex layout='c' className={classes.centerGroup}>
         <Button
           type='icon'
-          active={StageInteract.type === 'select'}
-          onClick={() => StageInteract.setType('select')}>
-          <Icon size={22} fill={StageInteract.type === 'select' ? hslBlueColor(65) : ''}>
+          active={StageInteract.type.value === 'select'}
+          onClick={() => StageInteract.type.dispatch('select')}>
+          <Icon size={22} fill={StageInteract.type.value === 'select' ? hslBlueColor(65) : ''}>
             {Asset.editor.header.tools.select}
           </Icon>
         </Button>
         <Button
           type='icon'
-          active={StageInteract.type === 'move'}
-          onClick={() => StageInteract.setType('move')}>
-          <Icon size={22} fill={StageInteract.type === 'move' ? hslBlueColor(65) : ''}>
+          active={StageInteract.type.value === 'move'}
+          onClick={() => StageInteract.type.dispatch('move')}>
+          <Icon size={22} fill={StageInteract.type.value === 'move' ? hslBlueColor(65) : ''}>
             {Asset.editor.header.tools.move}
           </Icon>
         </Button>
         <Button
           type='icon'
-          active={StageInteract.type === 'create' && StageCreate.type === 'frame'}
-          onClick={() => StageCreate.setType('frame')}>
+          active={StageInteract.type.value === 'create' && StageCreate.type.value === 'frame'}
+          onClick={() => StageCreate.type.dispatch('frame')}>
           <Icon
             size={22}
             fill={
-              StageInteract.type === 'create' && StageCreate.type === 'frame'
+              StageInteract.type.value === 'create' && StageCreate.type.value === 'frame'
                 ? hslBlueColor(65)
                 : ''
             }>
@@ -49,23 +57,25 @@ export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
         </Button>
         <Button
           type='icon'
-          active={StageInteract.type === 'create' && StageCreate.type === 'rect'}
-          onClick={() => StageCreate.setType('rect')}>
+          active={StageInteract.type.value === 'create' && StageCreate.type.value === 'rect'}
+          onClick={() => StageCreate.type.dispatch('rect')}>
           <Icon
             size={22}
             fill={
-              StageInteract.type === 'create' && StageCreate.type === 'rect' ? hslBlueColor(65) : ''
+              StageInteract.type.value === 'create' && StageCreate.type.value === 'rect'
+                ? hslBlueColor(65)
+                : ''
             }>
             {Asset.editor.node.rect}
           </Icon>
         </Button>
         <Button
-          active={StageInteract.type === 'create' && StageCreate.type === 'ellipse'}
-          onClick={() => StageCreate.setType('ellipse')}>
+          active={StageInteract.type.value === 'create' && StageCreate.type.value === 'ellipse'}
+          onClick={() => StageCreate.type.dispatch('ellipse')}>
           <Icon
             size={22}
             fill={
-              StageInteract.type === 'create' && StageCreate.type === 'ellipse'
+              StageInteract.type.value === 'create' && StageCreate.type.value === 'ellipse'
                 ? hslBlueColor(65)
                 : ''
             }>
@@ -73,23 +83,20 @@ export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
           </Icon>
         </Button>
         <Button
-          active={StageInteract.type === 'create' && StageCreate.type === 'line'}
-          onClick={() => StageCreate.setType('line')}>
+          active={StageInteract.type.value === 'create' && StageCreate.type.value === 'line'}
+          onClick={() => StageCreate.type.dispatch('line')}>
           <Icon
             size={22}
             fill={
-              StageInteract.type === 'create' && StageCreate.type === 'line' ? hslBlueColor(65) : ''
+              StageInteract.type.value === 'create' && StageCreate.type.value === 'line'
+                ? hslBlueColor(65)
+                : ''
             }>
             {Asset.editor.node.line}
           </Icon>
         </Button>
         <Divide />
-        {StageViewport.initialized && (
-          <Button>{~~((StageViewport?.zoom || 0) * 100)}%</Button>
-          // <Flex layout='c' style={{ width: 50 }} className={classes.zoom}>
-          //   {~~((StageViewport?.zoom || 0) * 100)}%
-          // </Flex>
-        )}
+        <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
       </Flex>
     </Flex>
   )
@@ -103,14 +110,15 @@ const useStyles = makeStyles<IHeaderCompStyle>()((t, { top }) => ({
   Header: {
     ...t.rect('100%', top),
     ...t.default$.borderBottom,
+    ...t.relative(),
   },
-  zoom: {
-    ...t.labelFont,
+  leftGroup: {
+    marginLeft: 10,
+    gap: 8,
   },
-  icon: {
-    '& path': {
-      fill: '',
-    },
+  centerGroup: {
+    ...t.absolute(0, 0, 0, 0),
+    margin: 'auto',
   },
 }))
 

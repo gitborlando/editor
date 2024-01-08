@@ -1,9 +1,8 @@
-import { delay, inject, injectable } from 'tsyringe'
 import { createCache } from '~/shared/cache'
 import { autobind } from '~/shared/decorator'
-import { SchemaNodeService } from './node'
-import { SchemaPageService } from './page'
-import { SchemaService } from './schema'
+import { SchemaNode } from './node'
+import { SchemaPage } from './page'
+import { Schema } from './schema'
 import { INode, INodeParent, IPage } from './type'
 
 type ITraverseData = {
@@ -23,51 +22,45 @@ type INodeRuntime = {
 }
 
 @autobind
-@injectable()
 export class SchemaUtilService {
   nodeRuntime = createCache<INodeRuntime>()
-  constructor(
-    @inject(delay(() => SchemaNodeService)) private SchemaNode: SchemaNodeService,
-    @inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService,
-    @inject(delay(() => SchemaService)) private Schema: SchemaService
-  ) {}
   findParent(id: string) {
-    const { parentId } = this.SchemaNode.find(id)
-    if (this.isPage(parentId)) return this.SchemaPage.find(parentId)
-    const node = this.SchemaNode.find(parentId)
+    const { parentId } = SchemaNode.find(id)
+    if (this.isPage(parentId)) return SchemaPage.find(parentId)
+    const node = SchemaNode.find(parentId)
     if ('childIds' in node) return node
   }
   insertBefore(parent: INodeParent | IPage, node: INode, anotherId: string) {
     const index = parent.childIds.findIndex((i) => i === anotherId)
-    this.SchemaNode.connectAt(parent, node, index - 1)
+    SchemaNode.connectAt(parent, node, index - 1)
   }
   insertAfter(parent: INodeParent | IPage, node: INode, anotherId: string) {
     const index = parent.childIds.findIndex((i) => i === anotherId)
-    this.SchemaNode.connectAt(parent, node, index + 1)
+    SchemaNode.connectAt(parent, node, index + 1)
   }
   getChildIds(id: string) {
-    if (this.isPage(id)) return this.SchemaPage.find(id)?.childIds || []
-    const node = this.SchemaNode.find(id)
+    if (this.isPage(id)) return SchemaPage.find(id)?.childIds || []
+    const node = SchemaNode.find(id)
     return 'childIds' in node ? node.childIds : []
   }
   getChildren(id: string) {
-    return this.getChildIds(id).map((id) => this.SchemaNode.find(id))
+    return this.getChildIds(id).map((id) => SchemaNode.find(id))
   }
   isPage(id: string) {
     return id.startsWith('page')
   }
   isFrame(id: string) {
-    return this.SchemaNode.find(id).type === 'frame'
+    return SchemaNode.find(id).type === 'frame'
   }
   isContainerNode(target: string | INode) {
-    const node = typeof target === 'string' ? this.SchemaNode.find(target) : target
+    const node = typeof target === 'string' ? SchemaNode.find(target) : target
     return 'childIds' in node
   }
   parentIsPage(id: string) {
-    return this.SchemaNode.find(id).parentId.startsWith('page')
+    return SchemaNode.find(id).parentId.startsWith('page')
   }
   traverse(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
-    this.traverseIds(this.SchemaPage.currentPage.childIds, callback, bubbleCallback)
+    this.traverseIds(SchemaPage.currentPage.value.childIds, callback, bubbleCallback)
   }
   traverseFromSomeId(id: string, callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
     let canTraverse = false
@@ -88,7 +81,7 @@ export class SchemaUtilService {
     const traverse = (ids: string[], depth: number, upLevelRef?: ITraverseData) => {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
-        const node = this.SchemaNode.find(id)
+        const node = SchemaNode.find(id)
         const childIds = 'childIds' in node ? node.childIds : undefined
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []
         const props = { id, node, index, childIds, depth, abort, upLevelRef, ancestors }
@@ -100,7 +93,7 @@ export class SchemaUtilService {
     traverse(ids, 0)
   }
   logSchema() {
-    const newSchema = structuredClone(this.Schema.getSchema())
+    const newSchema = structuredClone(Schema.getSchema())
     console.log(newSchema)
   }
   private initNodeRuntime() {
@@ -110,4 +103,4 @@ export class SchemaUtilService {
   }
 }
 
-export const injectSchemaUtil = inject(SchemaUtilService)
+export const SchemaUtil = new SchemaUtilService()

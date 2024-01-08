@@ -1,32 +1,23 @@
 import { Cull } from '@pixi-essentials/cull'
-import { makeObservable, observable } from 'mobx'
 import * as PIXI from 'pixi.js'
-import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker'
 import { createSignal } from '~/shared/signal'
 
 export * as PIXI from 'pixi.js'
 
 @autobind
-@injectable()
 export class PixiService {
-  @observable initialized = false
   inited = createSignal(false)
   container!: HTMLDivElement
   app!: PIXI.Application
   sceneStage = new PIXI.Container()
   isForbidEvent = false
-  duringTicker = createHooker()
-  constructor() {
-    makeObservable(this)
-  }
+  duringTicker = createSignal()
   setContainer(div: HTMLDivElement) {
     this.container = div
     this.initPixiApp()
     this.cull()
     this.app.ticker.add(this.duringTicker.dispatch)
-    this.initialized = true
     this.inited.dispatch(true)
   }
   addListener(
@@ -60,6 +51,7 @@ export class PixiService {
     this.container.appendChild(this.app.view as any)
     this.sceneStage.setParent(this.app.stage)
     this.app.stage.sortableChildren = true
+    this.sceneStage.sortableChildren = true
   }
   private cull() {
     const cull = new Cull({ recursive: true, toggle: 'renderable' })
@@ -70,4 +62,4 @@ export class PixiService {
   }
 }
 
-export const injectPixi = inject(PixiService)
+export const Pixi = new PixiService()

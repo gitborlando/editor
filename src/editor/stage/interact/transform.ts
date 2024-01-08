@@ -1,49 +1,39 @@
-import { inject, injectable } from 'tsyringe'
 import { max, min } from '~/editor/math/base'
 import { xy_mutate2 } from '~/editor/math/xy'
-import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
-import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
+import { OperateGeometry } from '~/editor/operate/geometry'
+import { SchemaNode } from '~/editor/schema/node'
 import { WrapToggle, autobind } from '~/shared/decorator'
 import { createInterceptData } from '~/shared/intercept-data/interceptable'
-import { StageElementService, injectStageElement } from '../element'
-import { StageSelectService, injectStageSelect } from './select'
+import { StageElement } from '../element'
+import { StageSelect } from './select'
 
 @autobind
-@injectable()
 export class StageTransformService {
   data = createInterceptData(initData())
-  constructor(
-    @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectStageSelect private StageSelect: StageSelectService,
-    @injectOperateGeometry private OperateGeometry: OperateGeometryService,
-    @injectStageElement private StageElement: StageElementService
-  ) {
-    this.initialize()
-  }
-  private initialize() {
-    this.StageSelect.duringMarqueeSelect.hook(() => this.onSelectSetTransformData())
-    this.StageSelect.afterSelect.hook(() => this.onSelectSetTransformData())
-    this.OperateGeometry.afterOperate.hook(() => {
-      this.SchemaNode.afterFlushDirty.hookOnce(() => {
+  initHook() {
+    StageSelect.duringMarqueeSelect.hook(() => this.onSelectSetTransformData())
+    StageSelect.afterSelect.hook(() => this.onSelectSetTransformData())
+    OperateGeometry.afterOperate.hook(() => {
+      SchemaNode.afterFlushDirty.hookOnce(() => {
         this.onSelectSetTransformData()
       })
     })
   }
   @WrapToggle('data._noIntercept')
   private onSelectSetTransformData() {
-    const selectIds = this.SchemaNode.selectIds
+    const selectIds = SchemaNode.selectIds
     if (selectIds.value.size === 1) {
-      const OBB = this.StageElement.OBBCache.get([...selectIds.value][0])
+      const OBB = StageElement.OBBCache.get([...selectIds.value][0])
       void (<const>['width', 'height', 'centerX', 'centerY', 'rotation']).forEach(
         (key) => (this.data[key] = OBB[key])
       )
       xy_mutate2(this.data, OBB.xy.x, OBB.xy.y)
     }
     if (selectIds.value.size > 1) {
-      const nodes = [...selectIds.value].map((id) => this.SchemaNode.find(id))
+      const nodes = [...selectIds.value].map((id) => SchemaNode.find(id))
       let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
       nodes.forEach((node) => {
-        const OBB = this.StageElement.OBBCache.get(node.id)
+        const OBB = StageElement.OBBCache.get(node.id)
         OBB.vertexes.forEach((xy) => {
           xMin = min(xMin, xy.x)
           yMin = min(yMin, xy.y)
@@ -62,7 +52,7 @@ export class StageTransformService {
   }
 }
 
-export const injectStageTransform = inject(StageTransformService)
+export const StageTransform = new StageTransformService()
 
 function initData() {
   return {

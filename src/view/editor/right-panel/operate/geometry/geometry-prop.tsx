@@ -1,8 +1,8 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC, useEffect, useRef } from 'react'
 import { numberHalfFix } from '~/editor/math/base'
-import { IGeometryData } from '~/editor/operate/geometry'
-import { useEditor, useGlobalService } from '~/view/context'
+import { IGeometryData, OperateGeometry } from '~/editor/operate/geometry'
+import { Drag } from '~/global/drag'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Input } from '~/view/ui-utility/widget/input'
 
@@ -15,8 +15,6 @@ type IGeometryPropComp = {
 export const GeometryPropComp: FC<IGeometryPropComp> = observer(
   ({ label, operateKey, slideRate = 1 }) => {
     const { classes } = useStyles({})
-    const { Drag } = useGlobalService()
-    const { OperateGeometry } = useEditor()
     const { data } = OperateGeometry
     const ref = useRef<HTMLDivElement>(null)
     const state = useLocalObservable(() => ({

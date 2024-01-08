@@ -1,7 +1,8 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useHookSignal } from '~/shared/utils/signal'
-import { useEditor } from '~/view/context'
+import { StageViewport } from '~/editor/stage/viewport'
+import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
+import { useHookSignal } from '~/shared/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { LayerComp } from './panels/layer/layer'
@@ -10,9 +11,8 @@ import { SwitchBarComp } from './switch-bar/switch-bar'
 type ILeftPanelComp = {}
 
 export const LeftPanelComp: FC<ILeftPanelComp> = observer(({}) => {
-  const { StageViewport, UILeftPanel } = useEditor()
   const { switchTag, switchBarPosition } = UILeftPanel
-  const { classes } = useStyles({ left: StageViewport.bound.x })
+  const { classes } = useStyles({ left: StageViewport.bound.value.x })
   useHookSignal(switchTag)
   useHookSignal(switchBarPosition)
   return (

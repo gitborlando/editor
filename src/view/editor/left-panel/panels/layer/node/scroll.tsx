@@ -1,8 +1,8 @@
-import { observer, useLocalObservable } from 'mobx-react'
+import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { max } from '~/editor/math/base'
-import { useAutoRun } from '~/shared/utils/mobx'
-import { useGlobalService } from '../../../../../context'
+import { Drag } from '~/global/drag'
+import { useAutoSignal, useSignal, useSignalHook } from '~/shared/signal-react'
 import { makeStyles } from '../../../../../ui-utility/theme'
 import { Flex } from '../../../../../ui-utility/widget/flex'
 
@@ -15,24 +15,21 @@ type IScrollComp = {
 
 export const ScrollComp: FC<IScrollComp> = observer(
   ({ contentHeight, viewHeight, scrollHeight, hookScroll }) => {
-    const { Drag } = useGlobalService()
-    const state = useLocalObservable(() => ({
-      width: 4,
-      dragging: false,
-    }))
-    const { classes } = useStyles({ width: state.width })
+    const width = useAutoSignal(4)
+    const dragging = useSignal(false)
+    const { classes } = useStyles({ width: width.value })
     const rate = contentHeight !== 0 ? viewHeight / contentHeight : 0
     const sliderHeight = max(24, viewHeight * rate)
-    useAutoRun(() => (state.width = state.dragging ? 6 : 4))
+    useSignalHook(dragging, (isDragging) => width.dispatch(isDragging ? 6 : 4))
     return (
       <Flex layout='v' className={classes.Scroll} style={{ height: viewHeight }}>
         <Flex
           className={classes.slider}
           style={{ height: sliderHeight, top: scrollHeight * rate }}
           onMouseDown={() => {
-            Drag.onStart(() => (state.dragging = true))
+            Drag.onStart(() => dragging.dispatch(true))
               .onMove(({ shift }) => hookScroll(scrollHeight + shift.y / rate))
-              .onDestroy(() => (state.dragging = false))
+              .onDestroy(() => dragging.dispatch(false))
           }}></Flex>
       </Flex>
     )

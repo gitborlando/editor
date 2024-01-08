@@ -1,10 +1,8 @@
 import { makeObservable, observable } from 'mobx'
-import { inject, injectable } from 'tsyringe'
-import { Watch, When, autobind } from '~/shared/decorator'
+import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
 
 @autobind
-@injectable()
 export class MenuService {
   @observable ref?: HTMLDivElement
   @observable show = false
@@ -24,8 +22,8 @@ export class MenuService {
   setXY(x: number, y: number) {
     this.xy = XY.Of(x, y)
   }
-  @Watch('xy')
-  @When('!!ref')
+  // @Watch('xy')
+  // @When('!!ref')
   private autoPosition() {
     if (!this.ref) return
     const { width, height } = this.ref.getBoundingClientRect()
@@ -47,4 +45,4 @@ export class MenuService {
   }
 }
 
-export const injectMenu = inject(MenuService)
+export const Menu = new MenuService()

@@ -1,11 +1,14 @@
 import { useDoubleClick } from '@zattoo/use-double-click'
 import { FC, useCallback } from 'react'
-import { ILeftPanelNodeStatus } from '~/editor/ui-state/left-panel/layer'
+import { SchemaNode } from '~/editor/schema/node'
+import { SchemaUtil } from '~/editor/schema/util'
+import { StageSelect } from '~/editor/stage/interact/select'
+import { ILeftPanelNodeStatus, UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
+import { Drag } from '~/global/drag'
 import { Signal } from '~/shared/signal'
+import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { noopFunc, stopPropagation } from '~/shared/utils/normal'
-import { useAutoSignal, useHookSignal } from '~/shared/utils/signal'
-import { useEditor, useGlobalService } from '~/view/context'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -17,7 +20,6 @@ type INodeItemComp = ILeftPanelNodeStatus & {
 }
 
 export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestors }) => {
-  const { SchemaNode, StageSelect, SchemaUtil, UILeftPanelLayer } = useEditor()
   const {
     nodeIdsInSearch,
     singleNodeExpanded,
@@ -27,7 +29,6 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
     nodeMoveStarted,
     nodeMoveEnded,
   } = UILeftPanelLayer
-  const { Drag } = useGlobalService()
   const node = SchemaNode.find(id)
   const selected = SchemaNode.selectIds.value.has(id)
   const subSelected = ancestors.some((i) => SchemaNode.selectIds.value.has(i)) && !selected
@@ -62,7 +63,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
     })
   )
   useHookSignal((forceUpdate) =>
-    SchemaNode.beforeDelete.hook((_, parentId) => {
+    SchemaNode.beforeDelete.hook(({ parentId }) => {
       if (parentId === id) forceUpdate()
       if (SchemaUtil.isPage(parentId)) forceUpdate()
     })
@@ -175,7 +176,7 @@ const useStyles = makeStyles<INodeItemCompStyle>()((t, { selected, subSelected, 
     paddingInline: 6,
     ...(selected && { ...t.default$.select.background }),
     // ...(subSelected && { backgroundColor: '#F4EFFF' }),
-    ...(subSelected && { backgroundColor: hslBlueColor(96) }),
+    ...(subSelected && { backgroundColor: hslBlueColor(97) }),
     ...t.default$.hover.border,
   },
   input: {

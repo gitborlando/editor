@@ -1,8 +1,7 @@
 import { makeObservable, observable } from 'mobx'
-import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker'
-import { makeAction } from '~/shared/utils/mobx'
+import { createSignal } from '~/shared/signal'
+import {} from '~/shared/utils/mobx'
 import { IBound, IXY, noopFunc, type ICursor } from '~/shared/utils/normal'
 
 export type IDragData = {
@@ -14,13 +13,12 @@ export type IDragData = {
 }
 
 @autobind
-@injectable()
 export class DragService {
   @observable canMove = false
   @observable cursor: ICursor = 'auto'
-  beforeDrag = createHooker()
-  duringDrag = createHooker()
-  afterDrag = createHooker()
+  beforeDrag = createSignal()
+  duringDrag = createSignal()
+  afterDrag = createSignal()
   private started = false
   private current = { x: 0, y: 0 }
   private start = { x: 0, y: 0 }
@@ -39,7 +37,7 @@ export class DragService {
       this.start = { x: clientX, y: clientY }
       this.marquee = this.calculateMarquee()
       this.beforeDrag.dispatch()
-      makeAction(callback)?.({
+      callback?.({
         dragService: this,
         current: this.current,
         start: this.start,
@@ -69,7 +67,7 @@ export class DragService {
         }
         this.marquee = this.calculateMarquee()
         this.duringDrag.dispatch()
-        makeAction(callback)({
+        callback({
           dragService: this,
           current: this.current,
           start: this.start,
@@ -89,7 +87,7 @@ export class DragService {
         this.marquee = this.calculateMarquee()
         if (this.started) {
           this.afterDrag.dispatch()
-          makeAction(callback)?.({
+          callback?.({
             dragService: this,
             current: this.current,
             start: this.start,
@@ -111,7 +109,7 @@ export class DragService {
         this.marquee = this.calculateMarquee()
         if (this.started) {
           this.afterDrag.dispatch()
-          makeAction(callback)?.({
+          callback?.({
             dragService: this,
             current: this.current,
             start: this.start,
@@ -179,4 +177,4 @@ export class DragService {
   }
 }
 
-export const injectDrag = inject(DragService)
+export const Drag = new DragService()

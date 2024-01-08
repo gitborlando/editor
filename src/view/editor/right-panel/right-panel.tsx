@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useEditor } from '~/view/context'
+import { StageViewport } from '~/editor/stage/viewport'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { OperatePanelComp } from './operate/operate-panel'
@@ -9,8 +9,7 @@ import { rightPanelShareState } from './shared-state'
 type IRightPanelComp = {}
 
 export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
-  const { StageViewport } = useEditor()
-  const { classes } = useStyles({ right: StageViewport.bound.right })
+  const { classes } = useStyles({ right: StageViewport.bound.value.right })
   const { type } = rightPanelShareState
   return (
     <Flex layout='v' className={classes.RightPanel}>

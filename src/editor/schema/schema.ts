@@ -1,37 +1,33 @@
 import { toJS } from 'mobx'
 import { nanoid } from 'nanoid'
-import { delay, inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
-import { SchemaNodeService } from './node'
-import { SchemaPageService } from './page'
+import { createSignal } from '~/shared/signal'
+import { SchemaNode } from './node'
+import { SchemaPage } from './page'
 import { IMeta, ISchema } from './type'
 
 @autobind
-@injectable()
 export class SchemaService {
+  inited = createSignal(false)
   private meta!: IMeta
-  constructor(
-    @inject(delay(() => SchemaNodeService)) private SchemaNode: SchemaNodeService,
-    @inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService
-  ) {}
   setMeta(option: Partial<IMeta>) {
     this.meta = { ...this.meta, ...option }
   }
   getSchema() {
     return {
       meta: this.meta,
-      nodes: this.SchemaNode.nodeMap,
-      pages: toJS(this.SchemaPage.pages),
+      nodes: SchemaNode.nodeMap,
+      pages: toJS(SchemaPage.pages),
     }
   }
   setSchema({ meta, nodes, pages }: ISchema) {
     this.meta = meta
-    this.SchemaNode.setMap(nodes)
-    this.SchemaPage.setPages(pages)
+    SchemaNode.setMap(nodes)
+    SchemaPage.pages.value = pages
   }
   createId() {
     return this.meta.version + nanoid()
   }
 }
 
-export const injectSchema = inject(SchemaService)
+export const Schema = new SchemaService()

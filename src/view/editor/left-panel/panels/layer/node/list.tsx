@@ -1,6 +1,7 @@
 import { FC, useEffect } from 'react'
-import { useHookSignal } from '~/shared/utils/signal'
-import { useEditor, useGlobalService } from '~/view/context'
+import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
+import { EventWheel } from '~/global/event/wheel'
+import { useHookSignal } from '~/shared/signal-react'
 import { ScrollComp } from '~/view/editor/left-panel/panels/layer/node/scroll'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -10,8 +11,6 @@ type INodeListComp = {}
 
 export const NodeListComp: FC<INodeListComp> = ({}) => {
   const { classes } = useStyles({})
-  const { UILeftPanelLayer } = useEditor()
-  const { EventWheel } = useGlobalService()
   const {
     nodeViewHeight,
     nodeListHeight,
@@ -23,7 +22,7 @@ export const NodeListComp: FC<INodeListComp> = ({}) => {
   } = UILeftPanelLayer
   useHookSignal(nodeIdsInView.hook)
   useHookSignal(() =>
-    EventWheel.duringWheel.hook((e, direction) => {
+    EventWheel.duringWheel.hook(({ direction }) => {
       nodeScrollHeight.dispatch(nodeScrollHeight.value + direction * 24)
     })
   )

@@ -8,7 +8,7 @@ class SharedStateService {
   constructor() {
     makeObservable(this)
   }
-  initialize() {
+  init() {
     if (this.initialized) return
     this.initialized = true
   }

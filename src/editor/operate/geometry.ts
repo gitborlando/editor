@@ -1,18 +1,17 @@
 import { IValueWillChange } from 'mobx'
-import { inject, injectable } from 'tsyringe'
 import { max, min, rcos, rsin } from '~/editor/math/base'
 import { WrapToggle, autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker'
 import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { macro_StringMatch } from '~/shared/macro'
+import { createSignal } from '~/shared/signal'
 import { ValueOf } from '~/shared/utils/normal'
 import { xy_mutate, xy_rotate2 } from '../math/xy'
-import { SchemaNodeService, injectSchemaNode } from '../schema/node'
+import { SchemaNode } from '../schema/node'
 import { ITriangle } from '../schema/type'
-import { SchemaUtilService, injectSchemaUtil } from '../schema/util'
-import { StageElementService, injectStageElement } from '../stage/element'
-import { StageSelectService, injectStageSelect } from '../stage/interact/select'
+import { SchemaUtil } from '../schema/util'
+import { StageElement } from '../stage/element'
+import { StageSelect } from '../stage/interact/select'
 
 export type IGeometryData = {
   x: number
@@ -25,23 +24,14 @@ export type IGeometryData = {
 }
 
 @autobind
-@injectable()
 export class OperateGeometryService {
   data = createInterceptData(initData())
   oneTickChange = createMomentChange<Record<keyof IGeometryData, any>>()
   isGeometryChanged = false
-  beforeOperate = createHooker<[(keyof IGeometryData)[]]>()
-  afterOperate = createHooker()
-  constructor(
-    @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectStageElement private StageElement: StageElementService,
-    @injectStageSelect private StageSelect: StageSelectService,
-    @injectSchemaUtil private SchemaUtil: SchemaUtilService
-  ) {
-    this.initialize()
-  }
-  private initialize() {
-    this.StageSelect.afterSelect.hook(() => {
+  beforeOperate = createSignal<keyof IGeometryData>()
+  afterOperate = createSignal()
+  initHook() {
+    StageSelect.afterSelect.hook(() => {
       this.setupGeometryData()
     })
     this.data._whenDataWillChange.hook(({ key, ctx }) => {
@@ -49,16 +39,16 @@ export class OperateGeometryService {
     })
     this.data._whenDataDidChange.hook(({ key, val }) => {
       this.oneTickChange.update(key, val)
-      this.SchemaNode.makeSelectDirty()
+      SchemaNode.makeSelectDirty()
       this.isGeometryChanged = true
     })
-    this.SchemaNode.duringFlushDirty.hook((id) => {
+    SchemaNode.duringFlushDirty.hook((id) => {
       if (!this.isGeometryChanged) return
       //this.patchChangeToVectorPoints(id)
       this.patchChangeToNode(id)
-      this.SchemaUtil.getChildIds(id).forEach(this.patchChangeToNode)
+      SchemaUtil.getChildIds(id).forEach(this.patchChangeToNode)
     })
-    this.SchemaNode.afterFlushDirty.hook(() => {
+    SchemaNode.afterFlushDirty.hook(() => {
       this.oneTickChange.endCurrent()
       this.isGeometryChanged = false
     })
@@ -73,17 +63,17 @@ export class OperateGeometryService {
   }
   @WrapToggle('data._noIntercept')
   private setupGeometryData() {
-    if (this.SchemaNode.selectIds.value.size === 1) {
-      const node = this.SchemaNode.selectNodes[0]
+    if (SchemaNode.selectIds.value.size === 1) {
+      const node = SchemaNode.selectNodes[0]
       void (<const>['x', 'y', 'width', 'height', 'rotation']).forEach(
         (key) => (this.data[key] = node[key])
       )
     }
-    if (this.SchemaNode.selectIds.value.size > 1) {
+    if (SchemaNode.selectIds.value.size > 1) {
       const propKeys = <const>['x', 'y', 'width', 'height', 'rotation']
       const tempObj = <Record<(typeof propKeys)[number], number>>{}
       const multiValueArr = <string[]>[]
-      this.SchemaNode.selectNodes.forEach((node, i) => {
+      SchemaNode.selectNodes.forEach((node, i) => {
         propKeys.forEach((key) => {
           if (i === 0) {
             tempObj[key] = node[key]
@@ -100,7 +90,7 @@ export class OperateGeometryService {
     this.oneTickChange.reset({ x, y, width, height, rotation, radius, sides })
   }
   private patchChangeToVectorPoints(id: string) {
-    const node = this.SchemaNode.find(id)
+    const node = SchemaNode.find(id)
     if (node.type !== 'vector') return
     const { record, changedKeys } = this.oneTickChange
     const { width, height } = record
@@ -118,9 +108,9 @@ export class OperateGeometryService {
     // })
   }
   private patchChangeToNode(id: string) {
-    const node = this.SchemaNode.find(id)
-    const OBB = this.StageElement.OBBCache.get(id)
-    const path = this.StageElement.pathCache.get(id)
+    const node = SchemaNode.find(id)
+    const OBB = StageElement.OBBCache.get(id)
+    const path = StageElement.pathCache.get(id)
     const { record, changedKeys } = this.oneTickChange
     const { x, y, width, height, rotation, sides } = record
     if (changedKeys.has('x') && x) {
@@ -167,12 +157,12 @@ export class OperateGeometryService {
     //     point.y = rotatedXY.y + node.centerY
     //   }
     // })
-    this.StageElement.pathCache.set(id, path)
-    this.StageElement.OBBCache.set(id, OBB)
+    StageElement.pathCache.set(id, path)
+    StageElement.OBBCache.set(id, OBB)
   }
 }
 
-export const injectOperateGeometry = inject(OperateGeometryService)
+export const OperateGeometry = new OperateGeometryService()
 
 function initData() {
   return {

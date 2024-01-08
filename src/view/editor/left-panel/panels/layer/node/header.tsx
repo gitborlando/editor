@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useHookSignal } from '~/shared/utils/signal'
-import { useEditor } from '~/view/context'
+import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
+import { useHookSignal } from '~/shared/signal-react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -12,7 +12,6 @@ type INodeHeaderComp = {}
 
 export const NodeHeaderComp: FC<INodeHeaderComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { UILeftPanelLayer } = useEditor()
   const { allNodeExpanded, searchSlice } = UILeftPanelLayer
   const isCollapsed = allNodeExpanded.value === 'collapsed'
   useHookSignal(allNodeExpanded.hook)

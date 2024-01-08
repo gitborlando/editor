@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { useHookSignal } from '~/shared/utils/signal'
-import { useEditor } from '~/view/context'
+import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
+import { useHookSignal } from '~/shared/signal-react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -11,7 +11,6 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 type ISwitchBarComp = {}
 
 export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
-  const { UILeftPanel } = useEditor()
   const { switchBarPosition, switchBarSize, switchTag } = UILeftPanel
   const { classes, cx } = useStyles({ size: switchBarSize.value })
   useHookSignal(switchBarPosition.hook)

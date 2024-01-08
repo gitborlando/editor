@@ -1,90 +1,71 @@
-import { makeObservable, observable } from 'mobx'
-import { inject, injectable } from 'tsyringe'
-import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
-import { SchemaDefaultService, injectSchemaDefault } from '~/editor/schema/default'
-import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
-import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
+import { SchemaDefault } from '~/editor/schema/default'
+import { SchemaNode } from '~/editor/schema/node'
+import { SchemaPage } from '~/editor/schema/page'
 import { ILine, INode } from '~/editor/schema/type'
-import { DragService, injectDrag, type IDragData } from '~/global/drag'
-import { RunInAction, autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker'
+import { Drag, type IDragData } from '~/global/drag'
+import { autobind } from '~/shared/decorator'
+import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
-import { StageElementService, injectStageElement } from '../element'
-import { PixiService, injectPixi } from '../pixi'
-import { StageViewportService, injectStageViewport } from '../viewport'
-import { StageInteractService, injectStageInteract } from './interact'
-import { StageTransformService, injectStageTransform } from './transform'
+import { StageElement } from '../element'
+import { Pixi } from '../pixi'
+import { StageViewport } from '../viewport'
+import { StageInteract } from './interact'
+import { StageTransform } from './transform'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'polygon', 'line', 'text', 'img'] as const
 type ICreateType = (typeof createTypes)[number]
 
 @autobind
-@injectable()
 export class StageCreateService {
   types = createTypes
-  @observable type: ICreateType = 'frame'
-  duringCreate = createHooker()
+  type = createSignal(<ICreateType>'frame')
+  duringCreate = createSignal()
   private node!: INode
   private realStageStart!: IXY
-  constructor(
-    @injectPixi private Pixi: PixiService,
-    @injectSchemaDefault private SchemaDefault: SchemaDefaultService,
-    @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectSchemaPage private SchemaPage: SchemaPageService,
-    @injectDrag private Drag: DragService,
-    @injectStageViewport private StageViewport: StageViewportService,
-    @injectStageInteract private StageInteract: StageInteractService,
-    @injectOperateGeometry private OperateGeometry: OperateGeometryService,
-    @injectStageTransform private StageTransform: StageTransformService,
-    @injectStageElement private StageElement: StageElementService
-  ) {
-    makeObservable(this)
+  constructor() {
+    this.type.hook(() => StageInteract.type.dispatch('create'))
   }
   startInteract() {
-    this.Pixi.addListener('mousedown', this.create)
+    Pixi.addListener('mousedown', this.create)
   }
   endInteract() {
-    this.Pixi.removeListener('mousedown', this.create)
-  }
-  setType(type: ICreateType) {
-    this.type = type
-    this.StageInteract.setType('create')
+    Pixi.removeListener('mousedown', this.create)
   }
   private create() {
-    this.Drag.onStart(this.onCreateStart).onMove(this.onCreateMove).onEnd(this.onCreateEnd)
+    Drag.onStart(this.onCreateStart).onMove(this.onCreateMove).onEnd(this.onCreateEnd)
   }
   private onCreateStart({ start, dragService }: IDragData) {
-    if (!this.StageViewport.inViewport(start)) {
-      this.StageInteract.setType('select')
+    if (!StageViewport.inViewport(start)) {
+      StageInteract.type.dispatch('select')
       return dragService.destroy()
     }
-    this.realStageStart = this.StageViewport.toRealStageXY(start)
-    if (this.type === 'frame') this.createFrameNode()
-    if (this.type === 'rect') this.createRectNode()
-    if (this.type === 'ellipse') this.createEllipseNode()
-    if (this.type === 'line') this.createLineNode()
-    if (this.type === 'text') this.createRectNode()
-    if (this.type === 'img') this.createRectNode()
+    this.realStageStart = StageViewport.toRealStageXY(start)
+    if (this.type.value === 'frame') this.createFrameNode()
+    if (this.type.value === 'rect') this.createRectNode()
+    if (this.type.value === 'ellipse') this.createEllipseNode()
+    if (this.type.value === 'line') this.createLineNode()
+    if (this.type.value === 'text') this.createRectNode()
+    if (this.type.value === 'img') this.createRectNode()
     this.addNodeToSchemaAndSelect()
-    this.StageElement.findOrCreate(this.node.id, 'graphic')
+    StageElement.findOrCreate(this.node.id, 'graphic')
   }
-  @RunInAction
+  // @RunInAction
   private onCreateMove({ marquee, current }: IDragData) {
-    const { x, y } = this.StageViewport.toRealStageXY(marquee)
-    const { x: width, y: height } = this.StageViewport.toRealStageShiftXY({
+    const { x, y } = StageViewport.toRealStageXY(marquee)
+    const { x: width, y: height } = StageViewport.toRealStageShiftXY({
       x: marquee.width,
       y: marquee.height,
     })
-    if (this.type === 'ellipse') {
+    if (this.type.value === 'ellipse') {
       this.node.x = x + width / 2
       this.node.y = y + height / 2
       this.node.width = width
       this.node.height = height
-    } else if (this.type === 'line') {
-      ;(this.node as ILine).end = this.StageViewport.toRealStageXY(current)
+    } else if (this.type.value === 'line') {
+      ;(this.node as ILine).end = StageViewport.toRealStageXY(current)
     } else {
-      const { data } = this.StageTransform
+      const { data } = StageTransform
       data.centerX = x + width / 2
       data.centerY = x + height / 2
       data.width = width
@@ -92,30 +73,30 @@ export class StageCreateService {
     }
     this.duringCreate.dispatch()
   }
-  @RunInAction
+  // @RunInAction
   private onCreateEnd({ dragService }: IDragData) {
     if (!this.node.width) this.node.width = 100
     if (!this.node.height) this.node.height = 100
-    this.StageInteract.setType('select')
+    StageInteract.type.dispatch('select')
     dragService.destroy()
   }
   private createFrameNode() {
-    this.node = this.SchemaDefault.frame({
+    this.node = SchemaDefault.frame({
       ...this.createMousedownBound(),
     })
   }
   private createRectNode() {
-    this.node = this.SchemaDefault.rect({
+    this.node = SchemaDefault.rect({
       ...this.createMousedownBound(),
     })
   }
   private createEllipseNode() {
-    this.node = this.SchemaDefault.ellipse({
+    this.node = SchemaDefault.ellipse({
       ...this.createMousedownBound(),
     })
   }
   private createLineNode() {
-    this.node = this.SchemaDefault.line({
+    this.node = SchemaDefault.line({
       start: XY.From(this.realStageStart),
       end: new XY(0, 0),
     })
@@ -129,11 +110,11 @@ export class StageCreateService {
     }
   }
   private addNodeToSchemaAndSelect() {
-    this.SchemaNode.add(this.node)
-    this.SchemaNode.clearSelect()
-    this.SchemaNode.select(this.node.id)
-    this.SchemaNode.connectAt(this.SchemaPage.currentPage, this.node)
+    SchemaNode.add(this.node)
+    SchemaNode.clearSelect()
+    SchemaNode.select(this.node.id)
+    SchemaNode.connectAt(SchemaPage.currentPage.value, this.node)
   }
 }
 
-export const injectStageCreate = inject(StageCreateService)
+export const StageCreate = new StageCreateService()

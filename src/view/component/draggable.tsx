@@ -1,11 +1,11 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC, ReactNode } from 'react'
 import { xy_new } from '~/editor/math/xy'
+import { Drag } from '~/global/drag'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { useGlobalService } from '../context'
 import { Button } from '../ui-utility/widget/button'
 
 type IDraggableComp = {
@@ -18,7 +18,6 @@ type IDraggableComp = {
 export const DraggableComp: FC<IDraggableComp> = observer(
   ({ closeFunc, children, xy, headerSlot }) => {
     const { classes } = useStyles({})
-    const { Drag } = useGlobalService()
     const state = useLocalObservable(() => ({
       xy: xy || xy_new(480, 240),
     }))

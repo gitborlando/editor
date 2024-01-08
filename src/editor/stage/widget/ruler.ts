@@ -1,11 +1,9 @@
-import { inject, injectable } from 'tsyringe'
 import { radianfy } from '~/editor/math/base'
-import { Watch, When, autobind } from '~/shared/decorator'
-import { PIXI, PixiService, injectPixi } from '../pixi'
-import { StageViewportService, injectStageViewport } from '../viewport'
+import { autobind } from '~/shared/decorator'
+import { PIXI, Pixi } from '../pixi'
+import { StageViewport } from '../viewport'
 
 @autobind
-@injectable()
 export class StageWidgetRulerService {
   private vertical = new PIXI.Graphics()
   private horizontal = new PIXI.Graphics()
@@ -14,27 +12,23 @@ export class StageWidgetRulerService {
   private labels = <PIXI.Text[]>[]
   private baseX = 0
   private baseY = 0
-  constructor(
-    @injectPixi private Pixi: PixiService,
-    @injectStageViewport private StageViewport: StageViewportService
-  ) {
-    this.initialize()
-  }
   get zoom() {
-    return this.StageViewport.zoom
+    return StageViewport.zoom.value
   }
-  @When('StageViewport.initialized')
-  private initialize() {
-    this.baseX = this.StageViewport.stageOffset.x / this.zoom
-    this.baseY = this.StageViewport.stageOffset.y / this.zoom
-    this.horizontal.setParent(this.container)
-    this.vertical.setParent(this.container)
-    this.corner.setParent(this.container)
-    this.container.setParent(this.Pixi.app.stage)
-    this.autoDraw()
-    this.drawCorner()
+  initHook() {
+    Pixi.inited.hook(() => {
+      this.baseX = StageViewport.stageOffset.value.x / this.zoom
+      this.baseY = StageViewport.stageOffset.value.y / this.zoom
+      this.horizontal.setParent(this.container)
+      this.vertical.setParent(this.container)
+      this.corner.setParent(this.container)
+      this.container.setParent(Pixi.app.stage)
+      this.autoDraw()
+      this.drawCorner()
+    })
+    StageViewport.zoom.hook(this.autoDraw)
+    StageViewport.stageOffset.hook(this.autoDraw)
   }
-  @Watch('zoom', 'StageViewport.stageOffset')
   private autoDraw() {
     this.horizontal.clear()
     this.vertical.clear()
@@ -43,8 +37,8 @@ export class StageWidgetRulerService {
     this.drawVertical()
   }
   private drawHorizontal() {
-    const width = this.StageViewport.bound.width / this.zoom
-    const offsetX = this.StageViewport.stageOffset.x / this.zoom
+    const width = StageViewport.bound.value.width / this.zoom
+    const offsetX = StageViewport.stageOffset.value.x / this.zoom
     // this.horizontal.beginFill('#F5F5F5')
     // this.horizontal.drawRect(0, 0, width, 20)
     const step = this.getStepByZoom()
@@ -65,8 +59,8 @@ export class StageWidgetRulerService {
     }
   }
   private drawVertical() {
-    const height = this.StageViewport.bound.height / this.zoom
-    const offsetY = this.StageViewport.stageOffset.y / this.zoom
+    const height = StageViewport.bound.value.height / this.zoom
+    const offsetY = StageViewport.stageOffset.value.y / this.zoom
     // this.vertical.beginFill('#F5F5F5')
     // this.vertical.drawRect(0, 0, 20, height)
     const step = this.getStepByZoom()
@@ -93,7 +87,7 @@ export class StageWidgetRulerService {
   }
   private getStepByZoom = () => {
     const steps = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
-    const base = 50 / this.StageViewport.zoom
+    const base = 50 / StageViewport.zoom.value
     return steps.find((i) => i >= base) || steps[0]
   }
   private getNearestIntMultiple = (number: number, rate: number) => {
@@ -104,4 +98,4 @@ export class StageWidgetRulerService {
   }
 }
 
-export const injectStageWidgetRuler = inject(StageWidgetRulerService)
+export const StageWidgetRuler = new StageWidgetRulerService()

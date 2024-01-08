@@ -1,13 +1,13 @@
 import { IValueWillChange, intercept, observable } from 'mobx'
 import { autobind } from '../decorator'
-import { createHooker } from '../hooker'
+import { createSignal } from '../signal'
 
 @autobind
 class Interceptable<T extends Record<string, any>, K extends keyof T = keyof T> {
   _noIntercept = false
   _observedData: T
-  _whenDataWillChange = createHooker<[{ key: K; ctx: IValueWillChange<T[K]> }]>()
-  _whenDataDidChange = createHooker<[{ key: K; val: T[K] }]>()
+  _whenDataWillChange = createSignal<{ key: K; ctx: IValueWillChange<T[K]> }>()
+  _whenDataDidChange = createSignal<{ key: K; val: T[K] }>()
   constructor(sourceData: T) {
     this._observedData = observable(sourceData)
     this.intercept()

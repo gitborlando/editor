@@ -1,32 +1,21 @@
-import { inject, injectable } from 'tsyringe'
 import { radianfy } from '~/editor/math/base'
-import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
+import { SchemaNode } from '~/editor/schema/node'
 import { IFill, IIrregular, INode, IVector } from '~/editor/schema/type'
-import { SchemaUtilService, injectSchemaUtil } from '~/editor/schema/util'
 import { autobind } from '~/shared/decorator'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
-import { StageElementService, injectStageElement } from '../element'
+import { StageElement } from '../element'
 import { PIXI } from '../pixi'
-import { StageViewportService, injectStageViewport } from '../viewport'
-import { StageDrawPathService, injectStageDrawPath } from './path'
+import { StageDrawPath } from './path'
 import { drawRegularPolygon } from './pixi/regular-polygon'
 
 type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
-@injectable()
 export class StageDrawService {
   currentElement!: IStageElement
-  constructor(
-    @injectStageElement private StageElement: StageElementService,
-    @injectStageDrawPath private StageDrawPath: StageDrawPathService,
-    @injectStageViewport private StageViewport: StageViewportService,
-    @injectSchemaUtil private SchemaUtil: SchemaUtilService,
-    @injectSchemaNode private SchemaNode: SchemaNodeService
-  ) {}
   drawNode(node: INode) {
     const { id, fills } = node
-    const element = this.StageElement.findOrCreate(id, 'graphic')
+    const element = StageElement.findOrCreate(id, 'graphic')
     element.clear()
     this.drawFills(element, node, fills)
   }
@@ -36,7 +25,7 @@ export class StageDrawService {
         element.beginFill(fill.color)
       }
       if (fill.type === 'linearGradient') {
-        const texture = this.StageElement.linearGradientCache.getSet(node.id, () =>
+        const texture = StageElement.linearGradientCache.getSet(node.id, () =>
           createLinearGradientTexture(fill)
         )
         element.beginTextureFill({ texture })
@@ -46,7 +35,7 @@ export class StageDrawService {
   }
   drawShape(element: PIXI.Graphics, node: INode) {
     const { id, parentId, x, y, width, height, rotation } = node
-    const parentNode = this.SchemaNode.find(parentId)
+    const parentNode = SchemaNode.find(parentId)
     element.x = x /*  - (parentNode?.x || 0) */
     element.y = y /* - (parentNode?.y || 0) */
     element.rotation = radianfy(rotation /* - (parentNode?.rotation || 0) */)
@@ -68,10 +57,10 @@ export class StageDrawService {
         return drawRegularPolygon(element, width / 2, height / 2, width / 2, rotation)
       }
       if (node.vectorType === 'irregular') {
-        const path = this.StageElement.pathCache.getSet(node.id, () =>
-          this.StageDrawPath.createPath(<IIrregular>node)
+        const path = StageElement.pathCache.getSet(node.id, () =>
+          StageDrawPath.createPath(<IIrregular>node)
         )
-        this.StageDrawPath.drawPath(path, element)
+        StageDrawPath.drawPath(path, element)
         return
       }
     }
@@ -98,4 +87,4 @@ export class StageDrawService {
   }
 }
 
-export const injectStageDraw = inject(StageDrawService)
+export const StageDraw = new StageDrawService()

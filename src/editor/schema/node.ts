@@ -1,55 +1,48 @@
-import { computed, makeObservable, observable, when } from 'mobx'
-import { delay, inject, injectable } from 'tsyringe'
+import { computed } from 'mobx'
 import { autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker'
 import { createSignal } from '~/shared/signal'
-import { Delete, insertAt } from '~/shared/utils/normal'
-import { PixiService, injectPixi } from '../stage/pixi'
-import { SchemaPageService } from './page'
+import { insertAt } from '~/shared/utils/array'
+import { Delete } from '~/shared/utils/normal'
+import { StageDraw } from '../stage/draw/draw'
+import { StageElement } from '../stage/element'
+import { Pixi } from '../stage/pixi'
+import { SchemaPage } from './page'
 import { INode, INodeParent, IPage } from './type'
-import { SchemaUtilService, injectSchemaUtil } from './util'
+import { SchemaUtil } from './util'
 
 @autobind
-@injectable()
 export class SchemaNodeService {
-  @observable initialized = false
+  inited = createSignal(false)
   nodeMap = <Record<string, Record<string, INode>>>{}
   dirtyIds = new Set<string>()
   hoverIds = createSignal(new Set<string>())
   selectIds = createSignal(new Set<string>())
-  inited = createHooker()
   afterAdd = createSignal('')
   afterConnect = createSignal({ id: '', parentId: '' })
-  beforeDelete = createHooker<[string, string]>()
-  beforeFlushDirty = createHooker()
-  duringFlushDirty = createHooker<[string]>()
-  afterFlushDirty = createHooker()
+  beforeDelete = createSignal({ id: '', parentId: '' })
+  beforeFlushDirty = createSignal()
+  duringFlushDirty = createSignal('')
+  afterFlushDirty = createSignal()
   datumId = createSignal('')
-  constructor(
-    @injectPixi private Pixi: PixiService,
-    @inject(delay(() => SchemaPageService)) private SchemaPage: SchemaPageService,
-    @injectSchemaUtil private SchemaUtil: SchemaUtilService
-  ) {
-    makeObservable(this)
-    when(() => Pixi.initialized && this.initialized).then(() => {
-      this.Pixi.duringTicker.hook(this.flushDirty)
+  initHook() {
+    SchemaPage.currentId.hook(() => {
+      StageElement.clearAll()
+      const nodeIds = SchemaPage.find(SchemaPage.currentId.value)!.childIds
+      nodeIds.forEach(SchemaNode.collectDirty)
     })
-    // this.inited.hook(() => {
-    //   this.selectIds.intercept((selectIds) => {
-    //     if (selectIds.size === 0) this.datumId.dispatch(SchemaPage.currentId)
-    //     else {
-    //       selectIds.forEach((id) => {
-    //         const node = this.find(id)
-    //         if (SchemaUtil.isPage(node.parentId) && SchemaUtil.isFrame(id)) {
-    //           this.datumId.dispatch(id)
-    //         }
-    //       })
-    //     }
-    //   })
-    // })
+    this.duringFlushDirty.hook((id) => {
+      const node = SchemaNode.find(id)
+      StageDraw.drawNode(node)
+      if ('childIds' in node && SchemaPage.isPageFirstRendered.value === false) {
+        node.childIds.forEach(SchemaNode.collectDirty)
+      }
+    })
+    Pixi.inited.hook(() => {
+      Pixi.duringTicker.hook(this.flushDirty)
+    })
   }
   @computed get currentPageNodeMap() {
-    return this.nodeMap[this.SchemaPage.currentId]
+    return this.nodeMap[SchemaPage.currentId.value]
   }
   @computed get selectNodes() {
     const nodes = <INode[]>[]
@@ -58,8 +51,6 @@ export class SchemaNodeService {
   }
   setMap(map: typeof this.nodeMap) {
     this.nodeMap = map
-    this.initialized = true
-    this.inited.dispatch()
   }
   add(node: INode) {
     this.currentPageNodeMap[node.id] = node
@@ -69,9 +60,9 @@ export class SchemaNodeService {
   }
   delete(id: string) {
     const node = this.find(id)
-    this.beforeDelete.dispatch(id, node.parentId)
+    this.beforeDelete.dispatch({ id, parentId: node.parentId })
     if ('childIds' in node) node.childIds.forEach((i) => this.delete(i))
-    Delete(this.SchemaUtil.getChildIds(node.parentId), node.id)
+    Delete(SchemaUtil.getChildIds(node.parentId), node.id)
     Delete(this.currentPageNodeMap, id)
   }
   find(id: string) {
@@ -123,4 +114,4 @@ export class SchemaNodeService {
   }
 }
 
-export const injectSchemaNode = inject(SchemaNodeService)
+export const SchemaNode = new SchemaNodeService()

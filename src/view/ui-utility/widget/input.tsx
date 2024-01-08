@@ -1,6 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { ComponentPropsWithRef, forwardRef } from 'react'
-import { useGlobalService } from '~/view/context'
+import { Drag } from '~/global/drag'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import Asset from '../assets'
@@ -18,7 +18,6 @@ export const Input = observer(
   forwardRef<HTMLDivElement, IInput>(
     ({ className, label, value, onNewValueApply: emitNewValue, step = 1, slideRate = 1 }, ref) => {
       const { classes, cx } = useStyles({})
-      const { Drag } = useGlobalService()
       const state = useLocalObservable(() => ({
         value: value,
         active: false,

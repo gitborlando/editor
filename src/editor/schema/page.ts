@@ -1,64 +1,49 @@
-import { computed, makeObservable, observable, when } from 'mobx'
-import { inject, injectable } from 'tsyringe'
 import { autobind } from '~/shared/decorator'
-import { createHooker } from '~/shared/hooker'
+import { createSignal } from '~/shared/signal'
 import { Delete } from '~/shared/utils/normal'
-import { SchemaDefaultService, injectSchemaDefault } from './default'
-import { SchemaNodeService, injectSchemaNode } from './node'
+import { SchemaDefault } from './default'
+import { SchemaNode } from './node'
 import { type IPage } from './type'
 
 @autobind
-@injectable()
 export class SchemaPageService {
-  @observable pages: IPage[] = []
-  @observable currentId = ''
-  @observable initialized = false
-  afterInitialize = createHooker()
-  isPageFirstRendered = createHooker<[boolean]>([false])
-  constructor(
-    @injectSchemaDefault private SchemaDefault: SchemaDefaultService,
-    @injectSchemaNode private SchemaNode: SchemaNodeService
-  ) {
-    makeObservable(this)
-    this.initialize()
-  }
-  private initialize() {
-    when(() => !!this.currentId).then(() => (this.initialized = true))
-    this.SchemaNode.afterFlushDirty.hook(() => {
-      if (this.isPageFirstRendered.args[0] === true) return
+  inited = createSignal(false)
+  pages = createSignal(<IPage[]>[])
+  currentId = createSignal('')
+  currentPage = createSignal(<IPage>null!)
+  isPageFirstRendered = createSignal(false)
+  initHook() {
+    SchemaNode.afterFlushDirty.hook(() => {
+      if (this.isPageFirstRendered.value === true) return
       this.isPageFirstRendered.dispatch(true)
     })
-  }
-  @computed get currentPage() {
-    return this.find(this.currentId)!
-  }
-  setPages(pages: IPage[]) {
-    this.pages = pages
+    this.currentId.hook((id) => {
+      this.currentPage.dispatch(this.find(id))
+    })
   }
   add() {
-    const page = this.SchemaDefault.page()
-    this.pages.push(page)
+    const page = SchemaDefault.page()
+    this.pages.value.push(page)
     this.select(page.id)
   }
   delete(id: string) {
-    if (this.pages.length <= 1) return
+    if (this.pages.value.length <= 1) return
     this.find(id)?.childIds.forEach((id) => {
-      Delete(this.SchemaNode.nodeMap, id)
+      Delete(SchemaNode.nodeMap, id)
     })
-    Delete(this.pages, (page) => page.id === id)
-    if (id === this.currentId) this.select(this.pages[0].id)
+    Delete(this.pages.value, (page) => page.id === id)
+    if (id === this.currentId.value) this.select(this.pages.value[0].id)
   }
   find(id: string) {
-    return this.pages.find((page) => page.id === id)
+    return this.pages.value.find((page) => page.id === id)
   }
   select(id: string) {
-    this.currentId = id
-    if (this.initialized === false) {
-      this.afterInitialize.dispatch()
-      this.initialized = true
+    this.currentId.dispatch(id)
+    if (this.inited.value === false) {
+      this.inited.dispatch(true)
     }
     this.isPageFirstRendered.dispatch(false)
   }
 }
 
-export const injectSchemaPage = inject(SchemaPageService)
+export const SchemaPage = new SchemaPageService()

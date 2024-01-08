@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { When } from 'react-if'
-import { useEditor } from '~/view/context'
+import { StageViewport } from '~/editor/stage/viewport'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { GeometryPropComp } from './geometry-prop'
@@ -10,11 +10,10 @@ type IGeometryPropsComp = {}
 
 export const GeometryPropsComp: FC<IGeometryPropsComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { StageViewport } = useEditor()
   return (
     <Flex layout='h' className={classes.SchemaBase}>
-      <GeometryPropComp label='横坐标' operateKey='x' slideRate={1 / StageViewport.zoom} />
-      <GeometryPropComp label='纵坐标' operateKey='y' slideRate={1 / StageViewport.zoom} />
+      <GeometryPropComp label='横坐标' operateKey='x' slideRate={1 / StageViewport.zoom.value} />
+      <GeometryPropComp label='纵坐标' operateKey='y' slideRate={1 / StageViewport.zoom.value} />
       <GeometryPropComp label='宽度' operateKey='width' />
       <GeometryPropComp label='高度' operateKey='height' />
       <GeometryPropComp label='旋转' operateKey='rotation' />

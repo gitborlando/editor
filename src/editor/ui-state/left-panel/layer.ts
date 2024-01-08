@@ -1,13 +1,12 @@
-import { inject, injectable } from 'tsyringe'
+import { SchemaNode } from '~/editor/schema/node'
+import { SchemaUtil } from '~/editor/schema/util'
+import { StageSelect } from '~/editor/stage/interact/select'
 import { createCache } from '~/shared/cache'
-import { When, autobind } from '~/shared/decorator'
+import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { ceil, floor, max, min } from '../../math/base'
-import { SchemaNodeService, injectSchemaNode } from '../../schema/node'
 import { INode } from '../../schema/type'
-import { SchemaUtilService, injectSchemaUtil } from '../../schema/util'
-import { StageSelectService, injectStageSelect } from '../../stage/interact/select'
-import { UILeftPanelService, injectUILeftPanel } from './left-panel'
+import { UILeftPanel } from './left-panel'
 
 export type ILeftPanelNodeStatus = {
   expanded: boolean
@@ -18,7 +17,6 @@ export type ILeftPanelNodeStatus = {
 type IAllNodeExpanded = 'expanded' | 'collapsed' | 'partial-expanded'
 
 @autobind
-@injectable()
 export class UILeftPanelLayerService {
   nodeStatusCache = createCache<ILeftPanelNodeStatus>()
   allPageExpanded = createSignal(true)
@@ -36,17 +34,7 @@ export class UILeftPanelLayerService {
   nodeMoveDropDetail = createSignal({ type: <'before' | 'in' | 'after'>'', id: '' })
   nodeMoveStarted = createSignal({ moveId: '' })
   nodeMoveEnded = createSignal()
-  constructor(
-    @injectUILeftPanel private UILeftPanel: UILeftPanelService,
-    @injectSchemaUtil private SchemaUtil: SchemaUtilService,
-    @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectStageSelect private StageSelect: StageSelectService
-  ) {
-    this.initialize()
-  }
-  @When('SchemaNode.initialized')
-  private initialize() {
-    this.initNodeStatus()
+  initHook() {
     this.singleNodeExpanded.hook((expanded) => {
       if (expanded === false) return
       if (this.allNodeExpanded.value !== 'collapsed') return
@@ -64,9 +52,9 @@ export class UILeftPanelLayerService {
         this.singleNodeExpanded.dispatch(false)
       }
     })
-    this.StageSelect.afterSelect.hook((type) => {
-      this.StageSelect.needExpandIds.forEach((id) => this.setNodeExpanded(id, true))
-      if (type !== 'panel') this.autoScroll(this.SchemaNode.selectIds.value)
+    StageSelect.afterSelect.hook((type) => {
+      StageSelect.needExpandIds.forEach((id) => this.setNodeExpanded(id, true))
+      if (type !== 'panel') this.autoScroll(SchemaNode.selectIds.value)
       this.singleNodeExpanded.dispatch(true)
     })
     this.searchSlice.hook(this.searchNode)
@@ -76,9 +64,9 @@ export class UILeftPanelLayerService {
       this.singleNodeExpanded.dispatch(true)
     })
     this.singleNodeExpanded.hook(this.calcNodeListChange)
-    this.SchemaNode.beforeDelete.hook(this.calcNodeListChange)
-    this.SchemaNode.afterConnect.hook(({ id: currentId }) => {
-      this.SchemaUtil.traverseFromSomeId(currentId, ({ id, upLevelRef }) => {
+    SchemaNode.beforeDelete.hook(this.calcNodeListChange)
+    SchemaNode.afterConnect.hook(({ id: currentId }) => {
+      SchemaUtil.traverseFromSomeId(currentId, ({ id, upLevelRef }) => {
         const parentId = upLevelRef?.id ?? ''
         const indent = (this.getNodeStatus(parentId)?.indent ?? -1) + 1
         const ancestors = this.getNodeStatus(parentId)?.ancestors ?? []
@@ -90,17 +78,17 @@ export class UILeftPanelLayerService {
       if (!this.nodeMoveDropDetail.value) return
       const { moveId } = this.nodeMoveStarted.value
       const { type, id: dropId } = this.nodeMoveDropDetail.value
-      const node = this.SchemaNode.find(moveId)
-      let parent = this.SchemaUtil.findParent(dropId)
+      const node = SchemaNode.find(moveId)
+      let parent = SchemaUtil.findParent(dropId)
       if (parent) {
-        this.SchemaNode.disconnect(parent, node)
-        if (type === 'before') this.SchemaUtil.insertBefore(parent, node, dropId)
+        SchemaNode.disconnect(parent, node)
+        if (type === 'before') SchemaUtil.insertBefore(parent, node, dropId)
         if (type === 'in') {
-          ;(parent as INode) = this.SchemaNode.find(dropId)
-          this.SchemaNode.connectAt(parent, node, 0)
+          ;(parent as INode) = SchemaNode.find(dropId)
+          SchemaNode.connectAt(parent, node, 0)
           this.setNodeExpanded(dropId, true)
         }
-        if (type === 'after') this.SchemaUtil.insertAfter(parent, node, dropId)
+        if (type === 'after') SchemaUtil.insertAfter(parent, node, dropId)
         this.findNodeInView()
         this.nodeIdsInView.dispatch()
       }
@@ -120,15 +108,16 @@ export class UILeftPanelLayerService {
       this.findNodeInView()
       this.nodeIdsInView.dispatch()
     })
-    this.UILeftPanel.panelHeight.hook((panelHeight) => {
+    UILeftPanel.panelHeight.hook((panelHeight) => {
       this.nodeViewHeight.dispatch(panelHeight - this.pagePanelHeight.value - 32)
     })
     this.pagePanelHeight.hook((height) => {
-      this.nodeViewHeight.dispatch(this.UILeftPanel.panelHeight.value - height - 32)
+      this.nodeViewHeight.dispatch(UILeftPanel.panelHeight.value - height - 32)
     })
-    this.nodeViewHeight.dispatch(
-      this.UILeftPanel.panelHeight.value - this.pagePanelHeight.value - 32
-    )
+  }
+  init() {
+    this.initNodeStatus()
+    this.nodeViewHeight.dispatch(UILeftPanel.panelHeight.value - this.pagePanelHeight.value - 32)
   }
   getNodeStatus(id: string): ILeftPanelNodeStatus | undefined {
     return this.nodeStatusCache.get(id)
@@ -151,7 +140,7 @@ export class UILeftPanelLayerService {
   }
   calcNodeListHeight() {
     this.nodeListHeight.value = 0
-    this.SchemaUtil.traverse(({ id }) => {
+    SchemaUtil.traverse(({ id }) => {
       this.nodeListHeight.value += 32
       if (this.getNodeExpanded(id) === false) return false
     })
@@ -162,7 +151,7 @@ export class UILeftPanelLayerService {
     let inFrontCount = floor(this.nodeScrollHeight.value / 32)
     let inViewCount = ceil(this.nodeViewHeight.value / 32) + 1
     this.nodeScrollShift.value = this.nodeScrollHeight.value - inFrontCount * 32
-    this.SchemaUtil.traverse(({ id, abort }) => {
+    SchemaUtil.traverse(({ id, abort }) => {
       if (inFrontCount > 0) inFrontCount--
       else if (inViewCount !== 0) {
         inViewCount--
@@ -175,7 +164,7 @@ export class UILeftPanelLayerService {
   private searchNode() {
     this.nodeIdsInSearch.value.clear()
     if (this.searchSlice.value === '') return this.afterSearch.dispatch()
-    this.SchemaUtil.traverse(
+    SchemaUtil.traverse(
       ({ id, node }) => {
         node.name.includes(this.searchSlice.value) && this.nodeIdsInSearch.value.add(id)
       },
@@ -187,19 +176,19 @@ export class UILeftPanelLayerService {
     this.afterSearch.dispatch()
   }
   private initNodeStatus() {
-    this.SchemaUtil.traverse(({ id, depth, ancestors }) => {
+    SchemaUtil.traverse(({ id, depth, ancestors }) => {
       this.nodeStatusCache.set(id, { expanded: false, indent: depth, ancestors })
     })
   }
   private setAllNodeStatusExpanded(expanded: boolean) {
-    this.SchemaUtil.traverse(({ id }) => {
+    SchemaUtil.traverse(({ id }) => {
       this.setNodeExpanded(id, expanded)
     })
   }
   private autoScroll(ids: Set<string>) {
     if (ids.size === 0) return
     this.nodeScrollHeight.value = 0
-    this.SchemaUtil.traverse(({ id, abort, upLevelRef }) => {
+    SchemaUtil.traverse(({ id, abort, upLevelRef }) => {
       if (ids.has(id)) return abort.abort()
       if (!upLevelRef) return (this.nodeScrollHeight.value = this.nodeScrollHeight.value + 32)
       if (this.getNodeExpanded(upLevelRef.id)) {
@@ -209,4 +198,4 @@ export class UILeftPanelLayerService {
   }
 }
 
-export const injectUILeftPanelLayer = inject(UILeftPanelLayerService)
+export const UILeftPanelLayer = new UILeftPanelLayerService()

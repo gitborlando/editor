@@ -1,25 +1,21 @@
-import { injectable } from 'tsyringe'
 import { xy_new } from '~/editor/math/xy'
-import { OperateGeometryService, injectOperateGeometry } from '~/editor/operate/geometry'
-import { SchemaNodeService, injectSchemaNode } from '~/editor/schema/node'
-import { SchemaPageService, injectSchemaPage } from '~/editor/schema/page'
-import { DragService, injectDrag } from '~/global/drag'
-import { SettingService, injectSetting } from '~/global/setting'
-import { Hook, autobind } from '~/shared/decorator'
+import { OperateGeometry } from '~/editor/operate/geometry'
+import { SchemaNode } from '~/editor/schema/node'
+import { Drag } from '~/global/drag'
+import { Setting } from '~/global/setting'
+import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
-import { firstOne } from '~/shared/utils/normal'
-import { StageCursorService, injectStageCursor } from '../cursor'
-import { StageDrawService, injectStageDraw } from '../draw/draw'
-import { StageDrawPathService, injectStageDrawPath } from '../draw/path'
-import { StageElementService, injectStageElement } from '../element'
-import { StageCreateService, injectStageCreate } from '../interact/create'
-import { StageSelectService, injectStageSelect } from '../interact/select'
-import { StageTransformService, injectStageTransform } from '../interact/transform'
-import { PIXI, PixiService, injectPixi } from '../pixi'
-import { StageViewportService, injectStageViewport } from '../viewport'
+import { firstOne } from '~/shared/utils/array'
+import { StageCursor } from '../cursor'
+import { StageDraw } from '../draw/draw'
+import { StageElement } from '../element'
+import { StageCreate } from '../interact/create'
+import { StageSelect } from '../interact/select'
+import { StageTransform } from '../interact/transform'
+import { PIXI, Pixi } from '../pixi'
+import { StageViewport } from '../viewport'
 
 @autobind
-@injectable()
 export class StageWidgetTransformService {
   vertexTL_XY = XY.Of(0, 0)
   vertexTR_XY = XY.Of(0, 0)
@@ -36,30 +32,12 @@ export class StageWidgetTransformService {
   outlines = <PIXI.Graphics[]>[]
   transformContainer = new PIXI.Container()
   private renderType = <'reDraw' | 'clear' | 'reserve'>'reserve'
-  constructor(
-    @injectPixi private Pixi: PixiService,
-    @injectDrag private Drag: DragService,
-    @injectStageViewport private StageViewport: StageViewportService,
-    @injectSetting private Setting: SettingService,
-    @injectSchemaNode private SchemaNode: SchemaNodeService,
-    @injectOperateGeometry private OperateGeometry: OperateGeometryService,
-    @injectStageDrawPath private StageDrawPath: StageDrawPathService,
-    @injectStageTransform private StageTransform: StageTransformService,
-    @injectStageElement private StageElement: StageElementService,
-    @injectStageSelect private StageSelect: StageSelectService,
-    @injectSchemaPage private SchemaPage: SchemaPageService,
-    @injectStageCursor private StageCursor: StageCursorService,
-    @injectStageCreate private StageCreate: StageCreateService,
-    @injectStageDraw private StageDraw: StageDrawService
-  ) {
-    this.initialize()
-  }
-  @Hook('SchemaPage.isPageFirstRendered')
-  private initialize() {
-    if (this.SchemaPage.isPageFirstRendered.args[0] === false) return
-    this.addToStage()
+  initHook() {
+    Pixi.inited.hook(() => {
+      this.addToStage()
+      this.bindEvent()
+    })
     this.hookRender()
-    this.bindEvent()
   }
   private get vertexes() {
     return [this.vertexTL, this.vertexTR, this.vertexBL, this.vertexBR]
@@ -76,21 +54,21 @@ export class StageWidgetTransformService {
   private addToStage() {
     this.components.forEach((i) => i.setParent(this.transformContainer))
     this.transformContainer.zIndex = 990
-    this.transformContainer.setParent(this.Pixi.sceneStage)
+    this.transformContainer.setParent(Pixi.sceneStage)
   }
   private hookRender() {
-    this.Pixi.duringTicker.hook(() => {
+    Pixi.duringTicker.hook(() => {
       // this.draw()
       if (this.renderType === 'reDraw') this.draw()
       if (this.renderType === 'clear') this.clear()
     })
-    this.StageCreate.duringCreate.hook(() => (this.renderType = 'reDraw'))
-    this.OperateGeometry.beforeOperate.hook(() => (this.renderType = 'clear'))
-    this.OperateGeometry.afterOperate.hook(() => (this.renderType = 'reDraw'))
-    this.StageSelect.afterSelect.hook(() => (this.renderType = 'reDraw'))
-    this.StageViewport.beforeZoom.hook(() => (this.renderType = 'clear'))
-    this.StageViewport.afterZoom.hook(() => (this.renderType = 'reDraw'))
-    this.SchemaNode.selectIds.hook(() => (this.renderType = 'reDraw'))
+    StageCreate.duringCreate.hook(() => (this.renderType = 'reDraw'))
+    OperateGeometry.beforeOperate.hook(() => (this.renderType = 'clear'))
+    OperateGeometry.afterOperate.hook(() => (this.renderType = 'reDraw'))
+    StageSelect.afterSelect.hook(() => (this.renderType = 'reDraw'))
+    StageViewport.beforeZoom.hook(() => (this.renderType = 'clear'))
+    StageViewport.afterZoom.hook(() => (this.renderType = 'reDraw'))
+    SchemaNode.selectIds.hook(() => (this.renderType = 'reDraw'))
   }
   private bindEvent() {
     this.bindMoveEvent()
@@ -100,7 +78,7 @@ export class StageWidgetTransformService {
     this.bindLeftLineEvent()
   }
   private draw() {
-    if (this.SchemaNode.selectIds.value.size === 0) return this.clear()
+    if (SchemaNode.selectIds.value.size === 0) return this.clear()
     this.clear()
     this.calcVertexXY()
     this.drawVertexes()
@@ -113,7 +91,7 @@ export class StageWidgetTransformService {
     this.renderType = 'reserve'
   }
   private calcVertexXY() {
-    const { centerX, centerY, width, height, rotation } = this.StageTransform.data
+    const { centerX, centerY, width, height, rotation } = StageTransform.data
     const pivotX = centerX - width / 2
     const pivotY = centerY - height / 2
     const centerXY = XY.Of(centerX, centerY)
@@ -123,11 +101,11 @@ export class StageWidgetTransformService {
     this.vertexBR_XY = XY.Of(pivotX + width, pivotY + height).rotate(centerXY, rotation)
   }
   private drawVertexes() {
-    const size = 6 / this.StageViewport.zoom
-    const borderWidth = 1 / this.StageViewport.zoom
-    const radius = 1 / this.StageViewport.zoom
+    const size = 6 / StageViewport.zoom.value
+    const borderWidth = 1 / StageViewport.zoom.value
+    const radius = 1 / StageViewport.zoom.value
     this.vertexes.forEach((vertex, i) => {
-      vertex.lineStyle(borderWidth, this.Setting.color.value)
+      vertex.lineStyle(borderWidth, Setting.color.value)
       vertex.beginFill('white')
       vertex.drawRoundedRect(
         this.vertexXYs[i].x - size / 2,
@@ -139,9 +117,9 @@ export class StageWidgetTransformService {
     })
   }
   private drawLine() {
-    const lineWidth = 1 / this.StageViewport.zoom
+    const lineWidth = 1 / StageViewport.zoom.value
     this.lines.forEach((line) => {
-      line.lineStyle(lineWidth, this.Setting.color.value)
+      line.lineStyle(lineWidth, Setting.color.value)
     })
     this.lineT.moveTo(this.vertexTL_XY.x, this.vertexTL_XY.y)
     this.lineT.lineTo(this.vertexTR_XY.x, this.vertexTR_XY.y)
@@ -153,35 +131,35 @@ export class StageWidgetTransformService {
     this.lineL.lineTo(this.vertexBL_XY.x, this.vertexBL_XY.y)
   }
   private drawOutline() {
-    this.SchemaNode.selectIds.value.forEach((id) => {
-      const node = this.SchemaNode.find(id)
+    SchemaNode.selectIds.value.forEach((id) => {
+      const node = SchemaNode.find(id)
       const outline = new PIXI.Graphics()
-      const parent = this.StageElement.findParentElement(node.parentId)
+      const parent = StageElement.findParentElement(node.parentId)
       outline.setParent(parent)
       this.outlines.push(outline)
       if (node.type === 'vector') {
-        outline.lineStyle(0.5 / this.StageViewport.zoom, this.Setting.color.value)
-        this.StageDraw.drawShape(outline, node)
+        outline.lineStyle(0.5 / StageViewport.zoom.value, Setting.color.value)
+        StageDraw.drawShape(outline, node)
       }
     })
   }
   private bindMoveEvent() {
     const handleDrag = () => {
-      if (!this.SchemaNode.hoverIds.value.size) return
-      if (!this.SchemaNode.selectIds.value.has(firstOne(this.SchemaNode.hoverIds.value))) return
-      const { x, y } = this.OperateGeometry.data
-      this.Drag.onStart(() => (this.renderType = 'clear'))
+      if (!SchemaNode.hoverIds.value.size) return
+      if (!SchemaNode.selectIds.value.has(firstOne(SchemaNode.hoverIds.value))) return
+      const { x, y } = OperateGeometry.data
+      Drag.onStart(() => (this.renderType = 'clear'))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShiftXY(shift)
-          this.OperateGeometry.data.x = x + realShift.x
-          this.OperateGeometry.data.y = y + realShift.y
+          const realShift = StageViewport.toRealStageShiftXY(shift)
+          OperateGeometry.data.x = x + realShift.x
+          OperateGeometry.data.y = y + realShift.y
         })
         .onDestroy(() => {
-          this.OperateGeometry.afterOperate.dispatch()
+          OperateGeometry.afterOperate.dispatch()
           this.renderType = 'reDraw'
         })
     }
-    this.Pixi.addListener('mousedown', handleDrag)
+    Pixi.addListener('mousedown', handleDrag)
   }
   private bindTopLineEvent() {
     this.lineT.eventMode = 'dynamic'
@@ -194,20 +172,20 @@ export class StageWidgetTransformService {
           xy_new(this.vertexTR_XY.x - 5, this.vertexTR_XY.y - 5),
         ]).contains(x, y),
     }
-    this.lineT.on('mouseenter', () => this.StageCursor.setType('v-resize'))
-    this.lineT.on('mouseleave', () => this.StageCursor.setType('select'))
+    this.lineT.on('mouseenter', () => StageCursor.type.dispatch('v-resize'))
+    this.lineT.on('mouseleave', () => StageCursor.type.dispatch('select'))
     this.lineT.on('mousedown', () => {
-      this.Pixi.isForbidEvent = true
-      const { y, height } = this.OperateGeometry.data
-      this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['height']))
+      Pixi.isForbidEvent = true
+      const { y, height } = OperateGeometry.data
+      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch('height'))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShiftXY(shift)
-          this.OperateGeometry.data.height = height - realShift.y
-          this.OperateGeometry.data.y = y + realShift.y
+          const realShift = StageViewport.toRealStageShiftXY(shift)
+          OperateGeometry.data.height = height - realShift.y
+          OperateGeometry.data.y = y + realShift.y
         })
         .onEnd(({ dragService }) => {
-          this.Pixi.isForbidEvent = false
-          this.OperateGeometry.afterOperate.dispatch()
+          Pixi.isForbidEvent = false
+          OperateGeometry.afterOperate.dispatch()
           dragService.destroy()
         })
     })
@@ -223,19 +201,19 @@ export class StageWidgetTransformService {
           xy_new(this.vertexBR_XY.x - 5, this.vertexBR_XY.y - 5),
         ]).contains(x, y),
     }
-    this.lineR.on('mouseenter', () => this.StageCursor.setType('h-resize'))
-    this.lineR.on('mouseleave', () => this.StageCursor.setType('select'))
+    this.lineR.on('mouseenter', () => StageCursor.type.dispatch('h-resize'))
+    this.lineR.on('mouseleave', () => StageCursor.type.dispatch('select'))
     this.lineR.on('mousedown', () => {
-      this.Pixi.isForbidEvent = true
-      const { width } = this.OperateGeometry.data
-      this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['width']))
+      Pixi.isForbidEvent = true
+      const { width } = OperateGeometry.data
+      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch('width'))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShiftXY(shift)
-          this.OperateGeometry.data.width = width + realShift.x
+          const realShift = StageViewport.toRealStageShiftXY(shift)
+          OperateGeometry.data.width = width + realShift.x
         })
         .onEnd(({ dragService }) => {
-          this.Pixi.isForbidEvent = false
-          this.OperateGeometry.afterOperate.dispatch()
+          Pixi.isForbidEvent = false
+          OperateGeometry.afterOperate.dispatch()
           dragService.destroy()
         })
     })
@@ -251,19 +229,19 @@ export class StageWidgetTransformService {
           xy_new(this.vertexBL_XY.x + 5, this.vertexBL_XY.y + 5),
         ]).contains(x, y),
     }
-    this.lineB.on('mouseenter', () => this.StageCursor.setType('v-resize'))
-    this.lineB.on('mouseleave', () => this.StageCursor.setType('select'))
+    this.lineB.on('mouseenter', () => StageCursor.type.dispatch('v-resize'))
+    this.lineB.on('mouseleave', () => StageCursor.type.dispatch('select'))
     this.lineB.on('mousedown', () => {
-      this.Pixi.isForbidEvent = true
-      const { height } = this.OperateGeometry.data
-      this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['height']))
+      Pixi.isForbidEvent = true
+      const { height } = OperateGeometry.data
+      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch('height'))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShiftXY(shift)
-          this.OperateGeometry.data.height = height + realShift.y
+          const realShift = StageViewport.toRealStageShiftXY(shift)
+          OperateGeometry.data.height = height + realShift.y
         })
         .onEnd(({ dragService }) => {
-          this.Pixi.isForbidEvent = false
-          this.OperateGeometry.afterOperate.dispatch()
+          Pixi.isForbidEvent = false
+          OperateGeometry.afterOperate.dispatch()
           dragService.destroy()
         })
     })
@@ -279,22 +257,24 @@ export class StageWidgetTransformService {
           xy_new(this.vertexBL_XY.x - 5, this.vertexBL_XY.y - 5),
         ]).contains(x, y),
     }
-    this.lineL.on('mouseenter', () => this.StageCursor.setType('h-resize'))
-    this.lineL.on('mouseleave', () => this.StageCursor.setType('select'))
+    this.lineL.on('mouseenter', () => StageCursor.type.dispatch('h-resize'))
+    this.lineL.on('mouseleave', () => StageCursor.type.dispatch('select'))
     this.lineL.on('mousedown', () => {
-      this.Pixi.isForbidEvent = true
-      const { x, width } = this.OperateGeometry.data
-      this.Drag.onStart(() => this.OperateGeometry.beforeOperate.dispatch(['width']))
+      Pixi.isForbidEvent = true
+      const { x, width } = OperateGeometry.data
+      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch('width'))
         .onMove(({ shift }) => {
-          const realShift = this.StageViewport.toRealStageShiftXY(shift)
-          this.OperateGeometry.data.width = width - realShift.x
-          this.OperateGeometry.data.x = x + realShift.x
+          const realShift = StageViewport.toRealStageShiftXY(shift)
+          OperateGeometry.data.width = width - realShift.x
+          OperateGeometry.data.x = x + realShift.x
         })
         .onEnd(({ dragService }) => {
-          this.Pixi.isForbidEvent = false
-          this.OperateGeometry.afterOperate.dispatch()
+          Pixi.isForbidEvent = false
+          OperateGeometry.afterOperate.dispatch()
           dragService.destroy()
         })
     })
   }
 }
+
+export const StageWidgetTransform = new StageWidgetTransformService()
