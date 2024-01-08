@@ -13,21 +13,17 @@
   "dependencies": {
     "@emotion/react": "^11.10.4",
     "@pixi-essentials/cull": "^2.0.0",
-    "@zattoo/use-double-click": "^1.2.0",
     "class-autobind-decorator": "^3.0.1",
     "mobx": "^6.6.2",
-    "mobx-react": "^7.5.3",
+    "mobx-react": "^9.1.0",
     "nanoid": "^5.0.4",
     "pexels": "^1.4.0",
     "pixi": "^0.3.1",
     "react": "^18.2.0",
     "react-colorful": "^5.6.1",
     "react-dom": "^18.2.0",
-    "react-if": "^4.1.5",
     "react-promise-suspense": "^0.3.4",
-    "reflect-metadata": "^0.1.13",
-    "tss-react": "^4.3.0",
-    "tsyringe": "^4.8.0"
+    "tss-react": "^4.3.0"
   },
   "devDependencies": {
     "@svgr/core": "^8.1.0",

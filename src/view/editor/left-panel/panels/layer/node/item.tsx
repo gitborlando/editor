@@ -1,4 +1,3 @@
-import { useDoubleClick } from '@zattoo/use-double-click'
 import { FC, useCallback } from 'react'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaUtil } from '~/editor/schema/util'
@@ -111,7 +110,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
           <Flex
             layout='h'
             className={cx(searched && classes.searched)}
-            onClick={useDoubleClick(() => enterEdit.dispatch(true))}>
+            onDoubleClick={() => enterEdit.dispatch(true)}>
             {enterEdit.value ? (
               <input
                 ref={(el) => {

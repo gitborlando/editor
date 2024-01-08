@@ -1,20 +1,14 @@
-import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { When } from 'react-if'
 import { Menu } from '~/global/menu'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IMenuComp = {}
 
-export const MenuComp: FC<IMenuComp> = observer(({}) => {
+export const MenuComp: FC<IMenuComp> = ({}) => {
   const { classes } = useStyles({})
-  return (
-    <When condition={Menu.show}>
-      <Flex ref={Menu.setRef} className={classes.Menu}></Flex>
-    </When>
-  )
-})
+  return <>{Menu.show && <Flex ref={Menu.setRef} className={classes.Menu}></Flex>}</>
+}
 
 type IMenuCompStyle = {} /* & Required<Pick<IMenuComp>> */ /* & Pick<IMenuComp> */
 
