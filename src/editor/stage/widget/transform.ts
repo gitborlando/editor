@@ -8,6 +8,7 @@ import { XY } from '~/shared/structure/xy'
 import { lastOne } from '~/shared/utils/array'
 import { StageCursor } from '../cursor'
 import { StageDraw } from '../draw/draw'
+import { StageElement } from '../element'
 import { StageCreate } from '../interact/create'
 import { StageSelect } from '../interact/select'
 import { StageTransform } from '../interact/transform'
@@ -57,15 +58,15 @@ export class StageWidgetTransformService {
   }
   private hookRender() {
     Pixi.duringTicker.hook(() => {
-      this.draw()
-      // if (this.renderType === 'reDraw') this.draw()
-      // if (this.renderType === 'clear') this.clear()
+      // this.draw()
+      if (this.renderType === 'reDraw') this.draw()
+      if (this.renderType === 'clear') this.clear()
     })
-    StageCreate.duringCreate.hook(() => (this.renderType = 'reDraw'))
     OperateGeometry.beforeOperate.hook(() => (this.renderType = 'clear'))
+    StageViewport.beforeZoom.hook(() => (this.renderType = 'clear'))
+    StageCreate.duringCreate.hook(() => (this.renderType = 'reDraw'))
     OperateGeometry.afterOperate.hook(() => (this.renderType = 'reDraw'))
     StageSelect.afterSelect.hook(() => (this.renderType = 'reDraw'))
-    StageViewport.beforeZoom.hook(() => (this.renderType = 'clear'))
     StageViewport.afterZoom.hook(() => (this.renderType = 'reDraw'))
     SchemaNode.selectIds.hook(() => (this.renderType = 'reDraw'))
   }
@@ -146,7 +147,10 @@ export class StageWidgetTransformService {
       const hoverId = lastOne(SchemaNode.hoverIds.value)
       if (!hoverId || !SchemaNode.selectIds.value.has(hoverId)) return
       const { x, y } = OperateGeometry.data
-      Drag.onStart(() => (this.renderType = 'clear'))
+      Drag.onStart(() => {
+        this.renderType = 'clear'
+        StageElement.canHover = false
+      })
         .onMove(({ shift }) => {
           const realShift = StageViewport.toRealStageShiftXY(shift)
           OperateGeometry.data.x = x + realShift.x
@@ -154,7 +158,7 @@ export class StageWidgetTransformService {
         })
         .onDestroy(() => {
           OperateGeometry.afterOperate.dispatch()
-          this.renderType = 'reDraw'
+          StageElement.canHover = true
         })
     }
     Pixi.addListener('mousedown', handleDrag)
