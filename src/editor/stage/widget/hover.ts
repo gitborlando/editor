@@ -1,7 +1,8 @@
 import { SchemaNode } from '~/editor/schema/node'
+import { SchemaUtil } from '~/editor/schema/util'
 import { Setting } from '~/global/setting'
 import { autobind } from '~/shared/decorator'
-import { firstOne } from '~/shared/utils/array'
+import { lastOne } from '~/shared/utils/array'
 import { StageDraw } from '../draw/draw'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -10,23 +11,20 @@ import { StageViewport } from '../viewport'
 export class StageWidgetHoverService {
   hoverWidget = new PIXI.Graphics()
   private get hoverId() {
-    return firstOne(SchemaNode.hoverIds.value)
+    return lastOne(SchemaNode.hoverIds.value)
   }
   initHook() {
     SchemaNode.hoverIds.hook(this.autoDraw)
     StageViewport.duringZoom.hook(this.autoDraw)
   }
   private autoDraw() {
-    if (!this.hoverId || SchemaNode.selectIds.value.has(this.hoverId)) {
-      return this.hoverWidget.clear()
-    }
     this.hoverWidget.clear()
+    if (!this.hoverId || SchemaNode.selectIds.value.has(this.hoverId)) return
     this.hoverWidget.setParent(Pixi.sceneStage)
     const hoverNode = SchemaNode.find(this.hoverId)
-    if (hoverNode.type === 'vector') {
-      this.hoverWidget.lineStyle(1.5 / StageViewport.zoom.value, Setting.color.value)
-      StageDraw.drawShape(this.hoverWidget, hoverNode)
-    }
+    if (hoverNode.type === 'frame' && SchemaUtil.isPage(hoverNode.parentId)) return
+    this.hoverWidget.lineStyle(1.5 / StageViewport.zoom.value, Setting.color.value)
+    StageDraw.drawShape(this.hoverWidget, hoverNode)
   }
 }
 
