@@ -44,13 +44,12 @@ export class StageDrawService {
     })
   }
   drawShape(element: PIXI.Graphics, node: INode) {
-    const { id, parentId, x, y, width, height, rotation } = node
-    const parentNode = SchemaNode.find(parentId)
-    const fixedXY = this.fixElementXY(node)
-    element.x = fixedXY.x /*  - (parentNode?.x || 0) */
-    element.y = fixedXY.y /* - (parentNode?.y || 0) */
-    element.rotation = radianfy(rotation /* - (parentNode?.rotation || 0) */)
-    // this.drawHitArea(element)
+    const { width, height } = node
+    const rotation = radianfy(node.rotation)
+    const pivotXY = this.getElementPivotXY(node)
+    element.x = pivotXY.x
+    element.y = pivotXY.y
+    element.rotation = rotation
     if (node.type === 'frame') {
       return element.drawRect(0, 0, width, height)
     }
@@ -91,12 +90,11 @@ export class StageDrawService {
           evens.push({ x, y, z })
         }
       }
-      console.log([...odds, ...evens.reverse()])
       return new PIXI.Polygon([...odds, ...evens.reverse()]).contains(x, y)
     }
     element.hitArea = { contains }
   }
-  private fixElementXY(node: INode) {
+  private getElementPivotXY(node: INode) {
     const pivotX = node.centerX - node.width / 2
     const pivotY = node.centerY - node.height / 2
     return XY.Of(pivotX, pivotY).rotate(XY.From(node, 'center'), node.rotation)

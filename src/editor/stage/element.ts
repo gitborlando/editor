@@ -11,11 +11,12 @@ export type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 export class StageElementService {
-  private elementMap: Map<string, IStageElement> = new Map()
+  canHover = true
   OBBCache = createCache<OBB>()
   pathCache = createCache<Path>()
   outlineCache = createCache<PIXI.Graphics>()
   linearGradientCache = createCache<PIXI.Texture>()
+  private elementMap: Map<string, IStageElement> = new Map()
   initHook() {
     Pixi.inited.hook(this.bindHover)
     SchemaNode.beforeDelete.hook(({ id }) => this.delete(id))
@@ -55,15 +56,13 @@ export class StageElementService {
       return element
     }
   }
-  findParentElement(parentId: string) {
-    return this.find(parentId) || Pixi.sceneStage
-  }
   private setupElement(id: string, element: IStageElement) {
     const node = SchemaNode.find(id)
     if (!element.parent) element.setParent(Pixi.sceneStage)
   }
   private bindHover() {
     const handler = (e: Event) => {
+      if (!this.canHover) return
       const realXY = StageViewport.toViewportXY(XY.From(e, 'client'))
       this.elementMap.forEach((element, id) => {
         const hovered = element?.containsPoint(realXY)

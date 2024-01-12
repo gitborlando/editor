@@ -8,21 +8,26 @@ import { autobind } from '~/shared/decorator'
 import { macro_Match } from '~/shared/macro'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
+import { lastOne } from '~/shared/utils/array'
 import { createBound, isLeftMouse, isRightMouse, type IBound } from '~/shared/utils/normal'
 import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
+import { StageCreate } from './create'
+
+type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 
 @autobind
 export class StageSelectService {
   marquee = createSignal<IBound | undefined>()
   beforeSelect = createSignal()
-  afterSelect = createSignal<'panel' | 'stage-single' | 'marquee'>()
+  afterSelect = createSignal<ISelectType>()
   duringMarqueeSelect = createSignal()
   needExpandIds = new Set<string>()
   private marqueeOBB?: OBB
   initHook() {
     this.beforeSelect.hook(() => this.needExpandIds.clear())
+    StageCreate.createStarted.hook(this.onCreateSelect)
   }
   startInteract() {
     Pixi.addListener('mousedown', this.onMousedownSelect)
@@ -35,14 +40,24 @@ export class StageSelectService {
     Pixi.removeListener('mousedown', this.onMenu)
   }
   private get hoverId() {
-    const hoverIds = [...SchemaNode.hoverIds.value]
-    return hoverIds[hoverIds.length - 1]
+    return lastOne(SchemaNode.hoverIds.value)
   }
   onPanelSelect(id: string) {
     this.beforeSelect.dispatch()
     SchemaNode.clearSelect()
     SchemaNode.select(id)
     this.afterSelect.dispatch('panel')
+  }
+  onCreateSelect(id: string) {
+    this.beforeSelect.dispatch()
+    SchemaNode.clearSelect()
+    SchemaNode.select(id)
+    let node = SchemaNode.find(id)
+    while (node) {
+      this.needExpandIds.add(node.parentId)
+      node = SchemaNode.find(node.parentId)
+    }
+    this.afterSelect.dispatch('create')
   }
   private onMousedownSelect(e: Event) {
     if (!isLeftMouse(e)) return

@@ -19,6 +19,7 @@ type ICreateType = (typeof createTypes)[number]
 export class StageCreateService {
   types = createTypes
   type = createSignal<ICreateType>('frame')
+  createStarted = createSignal<string>()
   duringCreate = createSignal()
   private node!: INode
   private realStageStart!: IXY
@@ -39,9 +40,9 @@ export class StageCreateService {
     this.realStageStart = StageViewport.toRealStageXY(start)
     this.createNode()
     SchemaNode.add(this.node)
-    SchemaNode.collectRedraw(this.node.id)
     StageElement.findOrCreate(this.node.id, 'graphic')
     this.OBB = StageElement.OBBCache.get(this.node.id)
+    this.createStarted.dispatch(this.node.id)
   }
   private onCreateMove({ marquee, current }: IDragData) {
     const { x, y } = StageViewport.toRealStageXY(marquee)

@@ -32,8 +32,7 @@ export class SchemaNodeService {
     this.afterAdd.hook((node) => {
       this.connectAt(SchemaPage.currentPage.value, node)
       this.collectDirty(node.id)
-      this.clearSelect()
-      this.select(node.id)
+      SchemaNode.collectRedraw(node.id)
     })
   }
   get currentPageNodeMap() {
