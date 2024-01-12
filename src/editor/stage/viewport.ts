@@ -3,6 +3,7 @@ import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
+import { max } from '../math/base'
 import { SchemaPage } from '../schema/page'
 import { Pixi } from './pixi'
 
@@ -26,14 +27,17 @@ export class StageViewportService {
     })
     SchemaPage.currentPage.hook((page) => {
       this.zoom.dispatch(page.zoom)
-      this.stageOffset.dispatch(page.offset)
+      this.stageOffset.dispatch(XY.Of(page.x, page.y))
     })
     this.zoom.hook(() => {
       Pixi.sceneStage.scale.set(this.zoom.value, this.zoom.value)
+      SchemaPage.currentPage.value.zoom = this.zoom.value
     })
     this.stageOffset.hook(() => {
       const { x, y } = this.stageOffset.value
       Pixi.sceneStage.position.set(x, y)
+      SchemaPage.currentPage.value.x = x
+      SchemaPage.currentPage.value.y = y
     })
   }
   toViewportXY(xy: IXY) {
@@ -66,8 +70,7 @@ export class StageViewportService {
       const sign = deltaY > 0 ? -1 : 1
       const stepByZoom = getStepByZoom()
       const step = stepByZoom.find(([_zoom, _step]) => _zoom <= this.zoom.value)![1] * sign
-      let newZoom = this.zoom.value + step
-      if (newZoom <= 0.02) return (newZoom = 0.02)
+      const newZoom = max(0.02, this.zoom.value + step)
       const realStageXY = this.toRealStageXY(new XY(clientX, clientY))
       const newOffset = XY.From(this.stageOffset.value).plus(realStageXY.multiply(-step))
       this.zoom.dispatch(newZoom)

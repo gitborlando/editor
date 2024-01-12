@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import Asset from '~/assets'
 import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
 import { useHookSignal } from '~/shared/signal-react'
-import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -13,8 +13,8 @@ type ISwitchBarComp = {}
 export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
   const { switchBarPosition, switchBarSize, switchTag } = UILeftPanel
   const { classes, cx } = useStyles({ size: switchBarSize.value })
-  useHookSignal(switchBarPosition.hook)
-  useHookSignal(switchTag.hook)
+  useHookSignal(switchBarPosition)
+  useHookSignal(switchTag)
   return (
     <Flex
       layout={switchBarPosition.value === 'top' ? 'h' : 'v'}
@@ -66,7 +66,7 @@ const useStyles = makeStyles<ISwitchBarCompStyle>()((t, { size }) => ({
   SwitchBar: {
     backgroundColor: 'white',
     '& .button': {
-      borderRadius: 2,
+      //borderRadius: 2,
     },
   },
   top: {

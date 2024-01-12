@@ -60,9 +60,7 @@ export class StageElementService {
   }
   private setupElement(id: string, element: IStageElement) {
     const node = SchemaNode.find(id)
-    if (!element.parent) {
-      element.setParent(this.findParentElement(node.parentId))
-    }
+    if (!element.parent) element.setParent(Pixi.sceneStage)
   }
   private bindHover() {
     const handler = (e: Event) => {

@@ -37,7 +37,7 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
         centerX: 150,
         centerY: 50,
         parentId: 'frame1',
-        rotation: 30,
+        // rotation: 30,
       }),
       triangle1: schemaDefault.triangle({
         id: 'triangle1',
@@ -77,7 +77,8 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
         id: 'page1',
         name: '测试页面1',
         zoom: 1,
-        offset: { x: 100, y: 100 },
+        x: 100,
+        y: 100,
         childIds: ['frame1'],
       },
     ],

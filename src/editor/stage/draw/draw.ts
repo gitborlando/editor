@@ -2,6 +2,7 @@ import { radianfy } from '~/editor/math/base'
 import { SchemaNode } from '~/editor/schema/node'
 import { IFill, IIrregular, INode, IVector } from '~/editor/schema/type'
 import { autobind } from '~/shared/decorator'
+import { XY } from '~/shared/structure/xy'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { StageElement } from '../element'
 import { PIXI } from '../pixi'
@@ -13,6 +14,15 @@ type IStageElement = PIXI.Graphics | PIXI.Text
 @autobind
 export class StageDrawService {
   currentElement!: IStageElement
+  initHook() {
+    SchemaNode.afterFlushDirty.hook(() => {
+      SchemaNode.redrawIds.forEach((id) => {
+        const node = SchemaNode.find(id)
+        StageDraw.drawNode(node)
+      })
+      SchemaNode.redrawIds.clear()
+    })
+  }
   drawNode(node: INode) {
     const { id, fills } = node
     const element = StageElement.findOrCreate(id, 'graphic')
@@ -36,8 +46,9 @@ export class StageDrawService {
   drawShape(element: PIXI.Graphics, node: INode) {
     const { id, parentId, x, y, width, height, rotation } = node
     const parentNode = SchemaNode.find(parentId)
-    element.x = x /*  - (parentNode?.x || 0) */
-    element.y = y /* - (parentNode?.y || 0) */
+    const fixedXY = this.fixElementXY(node)
+    element.x = fixedXY.x /*  - (parentNode?.x || 0) */
+    element.y = fixedXY.y /* - (parentNode?.y || 0) */
     element.rotation = radianfy(rotation /* - (parentNode?.rotation || 0) */)
     // this.drawHitArea(element)
     if (node.type === 'frame') {
@@ -84,6 +95,11 @@ export class StageDrawService {
       return new PIXI.Polygon([...odds, ...evens.reverse()]).contains(x, y)
     }
     element.hitArea = { contains }
+  }
+  private fixElementXY(node: INode) {
+    const pivotX = node.centerX - node.width / 2
+    const pivotY = node.centerY - node.height / 2
+    return XY.Of(pivotX, pivotY).rotate(XY.From(node, 'center'), node.rotation)
   }
 }
 

@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { SchemaPage } from '~/editor/schema/page'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
-import { Drag } from '~/global/drag'
+import { Drag } from '~/global/event/drag'
 import { useHookSignal } from '~/shared/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'

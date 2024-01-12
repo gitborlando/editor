@@ -1,14 +1,14 @@
 import { FC, useCallback } from 'react'
+import Asset from '~/assets'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
 import { ILeftPanelNodeStatus, UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
-import { Drag } from '~/global/drag'
+import { Drag } from '~/global/event/drag'
 import { Signal } from '~/shared/signal'
 import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { noopFunc, stopPropagation } from '~/shared/utils/normal'
-import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -49,9 +49,10 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
     if (SchemaUtil.isContainerNode(id) && expanded && selected) return false
     return !subSelected && value
   })
-  useHookSignal(nodeIdsInView.hook)
-  useHookSignal(() =>
-    hovered.hook((isHover) => {
+  useHookSignal(nodeIdsInView)
+  useHookSignal(
+    hovered,
+    (isHover) => {
       isHover ? SchemaNode.hover(id) : SchemaNode.unHover(id)
       SchemaNode.hoverIds.dispatch()
       if (isHover && nodeMoveStarted.value.moveId) {
@@ -59,23 +60,20 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
         if (dropInSide.value === true) nodeMoveDropDetail.value = { id, type: 'in' }
         if (dropBehind.value === true) nodeMoveDropDetail.value = { id, type: 'after' }
       }
-    })
+    },
+    [id]
   )
-  useHookSignal((forceUpdate) =>
-    SchemaNode.beforeDelete.hook(({ parentId }) => {
-      if (parentId === id) forceUpdate()
-      if (SchemaUtil.isPage(parentId)) forceUpdate()
-    })
-  )
+  useHookSignal(SchemaNode.beforeDelete, ({ parentId }, forceUpdate) => {
+    if (parentId === id) forceUpdate()
+    if (SchemaUtil.isPage(parentId)) forceUpdate()
+  })
+  useHookSignal(nodeMoveEnded, () => (nodeMoveStarted.value.moveId = ''))
   const handleMouseDown = useCallback(() => {
     StageSelect.onPanelSelect(id)
     Drag.onStart(() => nodeMoveStarted.dispatch({ moveId: id }))
       .onMove(noopFunc)
       .onDestroy(() => nodeMoveEnded.dispatch())
   }, [])
-  useHookSignal(() => {
-    nodeMoveEnded.hook(() => (nodeMoveStarted.value.moveId = ''))
-  })
   const { classes, css, cx } = useStyles({ selected, subSelected, dropInSide })
   return (
     <Flex layout='v' className={css({ width: '100%' })} onHover={hovered.dispatch}>

@@ -1,8 +1,8 @@
+import { OBB } from '~/editor/math/obb'
 import { SchemaDefault } from '~/editor/schema/default'
 import { SchemaNode } from '~/editor/schema/node'
-import { SchemaPage } from '~/editor/schema/page'
 import { ILine, INode } from '~/editor/schema/type'
-import { Drag, type IDragData } from '~/global/drag'
+import { Drag, type IDragData } from '~/global/event/drag'
 import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
@@ -11,7 +11,6 @@ import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
-import { StageTransform } from './transform'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'polygon', 'line', 'text', 'img'] as const
 type ICreateType = (typeof createTypes)[number]
@@ -19,11 +18,12 @@ type ICreateType = (typeof createTypes)[number]
 @autobind
 export class StageCreateService {
   types = createTypes
-  type = createSignal(<ICreateType>'frame')
+  type = createSignal<ICreateType>('frame')
   duringCreate = createSignal()
   private node!: INode
   private realStageStart!: IXY
-  constructor() {
+  private OBB!: OBB
+  initHook() {
     this.type.hook(() => StageInteract.type.dispatch('create'))
   }
   startInteract() {
@@ -33,30 +33,20 @@ export class StageCreateService {
     Pixi.removeListener('mousedown', this.create)
   }
   private create() {
-    Drag.onStart(this.onCreateStart).onMove(this.onCreateMove).onEnd(this.onCreateEnd)
+    Drag.onDown(this.onCreateStart).onMove(this.onCreateMove).onDestroy(this.onCreateEnd)
   }
-  private onCreateStart({ start, dragService }: IDragData) {
-    if (!StageViewport.inViewport(start)) {
-      StageInteract.type.dispatch('select')
-      return dragService.destroy()
-    }
+  private onCreateStart({ start }: IDragData) {
     this.realStageStart = StageViewport.toRealStageXY(start)
-    if (this.type.value === 'frame') this.createFrameNode()
-    if (this.type.value === 'rect') this.createRectNode()
-    if (this.type.value === 'ellipse') this.createEllipseNode()
-    if (this.type.value === 'line') this.createLineNode()
-    if (this.type.value === 'text') this.createRectNode()
-    if (this.type.value === 'img') this.createRectNode()
-    this.addNodeToSchemaAndSelect()
+    this.createNode()
+    SchemaNode.add(this.node)
+    SchemaNode.collectRedraw(this.node.id)
     StageElement.findOrCreate(this.node.id, 'graphic')
+    this.OBB = StageElement.OBBCache.get(this.node.id)
   }
-  // @RunInAction
   private onCreateMove({ marquee, current }: IDragData) {
     const { x, y } = StageViewport.toRealStageXY(marquee)
-    const { x: width, y: height } = StageViewport.toRealStageShiftXY({
-      x: marquee.width,
-      y: marquee.height,
-    })
+    const width = StageViewport.toRealStageShift(marquee.width)
+    const height = StageViewport.toRealStageShift(marquee.height)
     if (this.type.value === 'ellipse') {
       this.node.x = x + width / 2
       this.node.y = y + height / 2
@@ -65,20 +55,35 @@ export class StageCreateService {
     } else if (this.type.value === 'line') {
       ;(this.node as ILine).end = StageViewport.toRealStageXY(current)
     } else {
-      const { data } = StageTransform
-      data.centerX = x + width / 2
-      data.centerY = x + height / 2
-      data.width = width
-      data.height = height
+      this.node.centerX = x + width / 2
+      this.node.centerY = y + height / 2
+      this.node.width = width
+      this.node.height = height
     }
+    this.OBB.reBound(width, height, this.node.centerX, this.node.centerY)
+    SchemaNode.collectRedraw(this.node.id)
     this.duringCreate.dispatch()
   }
-  // @RunInAction
-  private onCreateEnd({ dragService }: IDragData) {
-    if (!this.node.width) this.node.width = 100
-    if (!this.node.height) this.node.height = 100
+  private onCreateEnd() {
+    const [width, height, centerX, centerY] = [100, 100, this.node.x + 50, this.node.y + 50]
+    if (this.node.width === 0.01) {
+      this.node.width = width
+      this.node.height = height
+      this.node.centerX = centerX
+      this.node.centerY = centerY
+      this.OBB.reBound(width, height, centerX, centerY)
+    }
+    SchemaNode.collectRedraw(this.node.id)
+    this.duringCreate.dispatch()
     StageInteract.type.dispatch('select')
-    dragService.destroy()
+  }
+  private createNode() {
+    if (this.type.value === 'frame') this.createFrameNode()
+    if (this.type.value === 'rect') this.createRectNode()
+    if (this.type.value === 'ellipse') this.createEllipseNode()
+    if (this.type.value === 'line') this.createLineNode()
+    if (this.type.value === 'text') this.createRectNode()
+    if (this.type.value === 'img') this.createRectNode()
   }
   private createFrameNode() {
     this.node = SchemaDefault.frame({
@@ -102,18 +107,15 @@ export class StageCreateService {
     })
   }
   private createMousedownBound() {
+    const { x, y } = this.realStageStart
     return {
-      x: this.realStageStart.x,
-      y: this.realStageStart.y,
+      x,
+      y,
       width: 0.01,
       height: 0.01,
+      centerX: x + 0.005,
+      centerY: y + 0.005,
     }
-  }
-  private addNodeToSchemaAndSelect() {
-    SchemaNode.add(this.node)
-    SchemaNode.clearSelect()
-    SchemaNode.select(this.node.id)
-    SchemaNode.connectAt(SchemaPage.currentPage.value, this.node)
   }
 }
 

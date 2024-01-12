@@ -36,7 +36,7 @@ export class PixiService {
   }
   private initPixiApp() {
     this.app = new PIXI.Application({
-      backgroundColor: '#F5F5F5',
+      backgroundColor: /* '#F5F5F5' */ '#F7F8FA' /* '#F1F2F6' */,
       resizeTo: this.container,
       antialias: true,
       resolution: window.devicePixelRatio,

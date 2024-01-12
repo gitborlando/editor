@@ -1,7 +1,7 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC, ReactNode } from 'react'
 import { xy_new } from '~/editor/math/xy'
-import { Drag } from '~/global/drag'
+import { Drag } from '~/global/event/drag'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'

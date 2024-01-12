@@ -67,7 +67,7 @@
       "",
       "@autobind",
       "export class $1${TM_FILENAME_BASE}Service {",
-      "  constructor() {",
+      "  init() {",
       "  }",
       "}",
       "",

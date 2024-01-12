@@ -1,4 +1,4 @@
-import { Drag } from '~/global/drag'
+import { Drag } from '~/global/event/drag'
 import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { Pixi } from '../pixi'

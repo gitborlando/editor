@@ -1,10 +1,7 @@
-import { computed } from 'mobx'
 import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
-import { insertAt } from '~/shared/utils/array'
+import { firstOne, insertAt } from '~/shared/utils/array'
 import { Delete } from '~/shared/utils/normal'
-import { StageDraw } from '../stage/draw/draw'
-import { StageElement } from '../stage/element'
 import { Pixi } from '../stage/pixi'
 import { SchemaPage } from './page'
 import { INode, INodeParent, IPage } from './type'
@@ -14,37 +11,35 @@ import { SchemaUtil } from './util'
 export class SchemaNodeService {
   inited = createSignal(false)
   nodeMap = <Record<string, Record<string, INode>>>{}
+  datumId = createSignal('')
   dirtyIds = new Set<string>()
+  redrawIds = new Set<string>()
   hoverIds = createSignal(new Set<string>())
   selectIds = createSignal(new Set<string>())
-  afterAdd = createSignal('')
+  afterAdd = createSignal<INode>()
   afterConnect = createSignal({ id: '', parentId: '' })
   beforeDelete = createSignal({ id: '', parentId: '' })
   beforeFlushDirty = createSignal()
   duringFlushDirty = createSignal('')
   afterFlushDirty = createSignal()
-  datumId = createSignal('')
   initHook() {
-    SchemaPage.currentId.hook(() => {
-      StageElement.clearAll()
-      const nodeIds = SchemaPage.find(SchemaPage.currentId.value)!.childIds
-      nodeIds.forEach(SchemaNode.collectDirty)
-    })
-    this.duringFlushDirty.hook((id) => {
-      const node = SchemaNode.find(id)
-      StageDraw.drawNode(node)
-      if ('childIds' in node && SchemaPage.isPageFirstRendered.value === false) {
-        node.childIds.forEach(SchemaNode.collectDirty)
-      }
-    })
     Pixi.inited.hook(() => {
       Pixi.duringTicker.hook(this.flushDirty)
     })
+    this.selectIds.hook((selectIds) => {
+      this.autoGetDatumId(selectIds)
+    })
+    this.afterAdd.hook((node) => {
+      this.clearSelect()
+      this.select(node.id)
+      this.connectAt(SchemaPage.currentPage.value, node)
+      this.collectDirty(node.id)
+    })
   }
-  @computed get currentPageNodeMap() {
+  get currentPageNodeMap() {
     return this.nodeMap[SchemaPage.currentId.value]
   }
-  @computed get selectNodes() {
+  get selectNodes() {
     const nodes = <INode[]>[]
     this.selectIds.value.forEach((id) => nodes.push(this.find(id)))
     return nodes
@@ -54,9 +49,7 @@ export class SchemaNodeService {
   }
   add(node: INode) {
     this.currentPageNodeMap[node.id] = node
-    this.collectDirty(node.id)
-    this.afterAdd.dispatch(node.id)
-    return node
+    this.afterAdd.dispatch(node)
   }
   delete(id: string) {
     const node = this.find(id)
@@ -111,6 +104,21 @@ export class SchemaNodeService {
   }
   makeSelectDirty() {
     this.selectIds.value.forEach(this.collectDirty)
+  }
+  collectRedraw(id: string) {
+    this.redrawIds.add(id)
+  }
+  private autoGetDatumId(selectIds: Set<string>) {
+    if (selectIds.size === 0) return
+    if (selectIds.size === 1) {
+      this.datumId.dispatch(this.find(firstOne(selectIds)).parentId)
+    }
+    if (selectIds.size > 1) {
+      const parentIds = new Set<string>()
+      selectIds.forEach((id) => parentIds.add(this.find(id).parentId))
+      if (parentIds.size === 1) this.datumId.dispatch(firstOne(parentIds))
+      if (parentIds.size > 1) this.datumId.dispatch(SchemaPage.currentId.value)
+    }
   }
 }
 

@@ -12,7 +12,7 @@ type IOperatePanelComp = {}
 export const OperatePanelComp: FC<IOperatePanelComp> = ({}) => {
   const { afterSelect } = StageSelect
   const { classes } = useStyles({})
-  useHookSignal(afterSelect.hook)
+  useHookSignal(afterSelect)
   useHookSignal(SchemaNode.hoverIds)
   return (
     <Flex layout='v' className={classes.OperatePanel}>

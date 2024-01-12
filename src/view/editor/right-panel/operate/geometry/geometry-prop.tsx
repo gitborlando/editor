@@ -2,7 +2,7 @@ import { observer, useLocalObservable } from 'mobx-react'
 import { FC, useEffect, useRef } from 'react'
 import { numberHalfFix } from '~/editor/math/base'
 import { IGeometryData, OperateGeometry } from '~/editor/operate/geometry'
-import { Drag } from '~/global/drag'
+import { Drag } from '~/global/event/drag'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Input } from '~/view/ui-utility/widget/input'
 

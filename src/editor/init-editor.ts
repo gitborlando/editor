@@ -1,11 +1,14 @@
 import { createSignal } from '~/shared/signal'
-import { File } from './file'
+import { SchemaFile } from './file'
 import { OperateGeometry } from './operate/geometry'
 import { SchemaNode } from './schema/node'
 import { SchemaPage } from './schema/page'
 import { Schema } from './schema/schema'
+import { SchemaUtil } from './schema/util'
 import { StageCursor } from './stage/cursor'
+import { StageDraw } from './stage/draw/draw'
 import { StageElement } from './stage/element'
+import { StageCreate } from './stage/interact/create'
 import { StageInteract } from './stage/interact/interact'
 import { StageSelect } from './stage/interact/select'
 import { StageTransform } from './stage/interact/transform'
@@ -26,8 +29,10 @@ OperateGeometry.initHook()
 
 StageViewport.initHook()
 StageElement.initHook()
+StageDraw.initHook()
 StageInteract.initHook()
 StageSelect.initHook()
+StageCreate.initHook()
 StageCursor.initHook()
 StageTransform.initHook()
 
@@ -39,9 +44,11 @@ StageWidgetTransform.initHook()
 UILeftPanelLayer.initHook()
 
 export async function initEditor() {
-  const json = await File.mockFile()
+  SchemaFile.init()
+  const json = await SchemaFile.mockFile()
   Schema.setSchema(json)
   SchemaPage.select(json.pages[0].id)
+  SchemaUtil.init()
   Schema.inited.dispatch(true)
 
   UILeftPanelLayer.init()

@@ -46,7 +46,8 @@ export class SchemaDefaultService {
       id: nanoid(),
       childIds: [],
       zoom: 1,
-      offset: { x: 0, y: 0 },
+      x: 0,
+      y: 0,
       ...this.createNodeName('page'),
     }
   }

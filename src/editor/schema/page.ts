@@ -1,9 +1,11 @@
 import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { Delete } from '~/shared/utils/normal'
+import { StageElement } from '../stage/element'
 import { SchemaDefault } from './default'
 import { SchemaNode } from './node'
 import { type IPage } from './type'
+import { SchemaUtil } from './util'
 
 @autobind
 export class SchemaPageService {
@@ -19,6 +21,7 @@ export class SchemaPageService {
     })
     this.currentId.hook((id) => {
       this.currentPage.dispatch(this.find(id))
+      this.firstDraw()
     })
   }
   add() {
@@ -28,9 +31,7 @@ export class SchemaPageService {
   }
   delete(id: string) {
     if (this.pages.value.length <= 1) return
-    this.find(id)?.childIds.forEach((id) => {
-      Delete(SchemaNode.nodeMap, id)
-    })
+    this.find(id)?.childIds.forEach((id) => Delete(SchemaNode.currentPageNodeMap, id))
     Delete(this.pages.value, (page) => page.id === id)
     if (id === this.currentId.value) this.select(this.pages.value[0].id)
   }
@@ -43,6 +44,12 @@ export class SchemaPageService {
       this.inited.dispatch(true)
     }
     this.isPageFirstRendered.dispatch(false)
+  }
+  private firstDraw() {
+    StageElement.clearAll()
+    SchemaUtil.traverse(({ id }) => {
+      SchemaNode.collectRedraw(id)
+    })
   }
 }
 

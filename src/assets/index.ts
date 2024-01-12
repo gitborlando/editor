@@ -4,6 +4,9 @@ import EditorHeaderToolsSelect from './editor/header/tools/select.tsx'
 import EditorLeftPanelNodeCollapse from './editor/left-panel/node/collapse.tsx'
 import EditorLeftPanelPageAdd from './editor/left-panel/page/add.tsx'
 import EditorLeftPanelPageCollapse from './editor/left-panel/page/collapse.tsx'
+import EditorLeftPanelPagePageSelect from './editor/left-panel/page/page-select.tsx'
+import EditorLeftPanelSwitchBarComponent from './editor/left-panel/switch-bar/component.tsx'
+import EditorLeftPanelSwitchBarLayer from './editor/left-panel/switch-bar/layer.tsx'
 import EditorLeftPanelSwitchBarToLeft from './editor/left-panel/switch-bar/to-left.tsx'
 import EditorNodeEllipse from './editor/node/ellipse.tsx'
 import EditorNodeFrame from './editor/node/frame.tsx'
@@ -31,8 +34,11 @@ const Asset = {
       page: {
         add: EditorLeftPanelPageAdd,
         collapse: EditorLeftPanelPageCollapse,
+        pageSelect: EditorLeftPanelPagePageSelect,
       },
       switchBar: {
+        component: EditorLeftPanelSwitchBarComponent,
+        layer: EditorLeftPanelSwitchBarLayer,
         toLeft: EditorLeftPanelSwitchBarToLeft,
       },
     },

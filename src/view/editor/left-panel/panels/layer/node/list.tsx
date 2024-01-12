@@ -20,12 +20,10 @@ export const NodeListComp: FC<INodeListComp> = ({}) => {
     getNodeStatus,
     calcNodeListChange,
   } = UILeftPanelLayer
-  useHookSignal(nodeIdsInView.hook)
-  useHookSignal(() =>
-    EventWheel.duringWheel.hook(({ direction }) => {
-      nodeScrollHeight.dispatch(nodeScrollHeight.value + direction * 24)
-    })
-  )
+  useHookSignal(nodeIdsInView)
+  useHookSignal(EventWheel.duringWheel, ({ direction }) => {
+    nodeScrollHeight.dispatch(nodeScrollHeight.value + direction * 24)
+  })
   useEffect(() => calcNodeListChange(), [])
   return (
     <Flex layout='v' className={classes.NodeList} style={{ height: nodeViewHeight.value }}>

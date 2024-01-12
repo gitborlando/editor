@@ -5,6 +5,7 @@ import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { macro_StringMatch } from '~/shared/macro'
 import { createSignal } from '~/shared/signal'
+import { XY } from '~/shared/structure/xy'
 import { ValueOf } from '~/shared/utils/normal'
 import { xy_mutate, xy_rotate2 } from '../math/xy'
 import { SchemaNode } from '../schema/node'
@@ -27,9 +28,9 @@ export type IGeometryData = {
 export class OperateGeometryService {
   data = createInterceptData(initData())
   oneTickChange = createMomentChange<Record<keyof IGeometryData, any>>()
-  isGeometryChanged = false
   beforeOperate = createSignal<keyof IGeometryData>()
   afterOperate = createSignal()
+  isGeometryChanged = false
   initHook() {
     StageSelect.afterSelect.hook(() => {
       this.setupGeometryData()
@@ -44,9 +45,7 @@ export class OperateGeometryService {
     })
     SchemaNode.duringFlushDirty.hook((id) => {
       if (!this.isGeometryChanged) return
-      //this.patchChangeToVectorPoints(id)
       this.patchChangeToNode(id)
-      SchemaUtil.getChildIds(id).forEach(this.patchChangeToNode)
     })
     SchemaNode.afterFlushDirty.hook(() => {
       this.oneTickChange.endCurrent()
@@ -144,6 +143,24 @@ export class OperateGeometryService {
     if (changedKeys.has('sides') && sides) {
       ;(node as ITriangle).sides = sides.new
     }
+
+    const children = SchemaUtil.getChildren(id)
+    children.forEach((childNode) => {
+      if (changedKeys.has('rotation') && rotation) {
+        const childOBB = StageElement.OBBCache.get(childNode.id)
+        const rotationShift = rotation.new - rotation.old
+        childNode.rotation += rotationShift
+        const childCenterXY = XY.From(childNode, 'center')
+        childCenterXY.rotate(XY.From(node, 'center'), rotationShift).mutate(childNode, 'center')
+        XY.From(childNode).rotate(childCenterXY, rotationShift).mutate(childNode)
+        {
+          const { width, height, rotation, centerX, centerY } = childNode
+          childOBB.reRotation(rotation)
+          childOBB.reBound(width, height, centerX, centerY)
+        }
+      }
+    })
+
     // path.points.forEach((point, i) => {
     //   if (changedKeys.has('x') && x) {
     //     point.x += x.new - x.old

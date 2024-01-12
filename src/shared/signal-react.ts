@@ -9,34 +9,20 @@ export function useSignal<T extends any>(init?: T): Signal<T> {
 
 export function useAutoSignal<T extends any>(init?: T): Signal<T> {
   const signal = useRef(createSignal(init))
-  useHookSignal(signal.current.hook)
+  useHookSignal(signal.current)
   return signal.current
 }
 
-export function useHookSignal(
-  callback: Signal<any> | ((forceUpdate: INoopFunc) => any),
-  deps: DependencyList = []
-) {
-  const [_, setState] = useState({})
-  const forceUpdate = () => setState({})
-  useEffect(() => {
-    if (callback instanceof Signal) return callback.hook(forceUpdate)
-    return callback(forceUpdate)
-  }, deps)
-}
-
-export function useSignalHook<T>(
+export function useHookSignal<T>(
   signal: Signal<T>,
   callback?: (arg: T, forceUpdate: INoopFunc) => any,
   deps: DependencyList = []
 ) {
   const [_, setState] = useState({})
   const forceUpdate = () => setState({})
-  useEffect(
-    () =>
-      signal.hook((value) => {
-        callback ? callback(value, forceUpdate) : forceUpdate()
-      }),
-    deps
-  )
+  useEffect(() => {
+    return signal.hook((value) => {
+      callback ? callback(value, forceUpdate) : forceUpdate()
+    })
+  }, deps)
 }

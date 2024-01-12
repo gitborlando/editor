@@ -3,7 +3,7 @@ import { autobind } from '~/shared/decorator'
 import { SchemaNode } from './node'
 import { SchemaPage } from './page'
 import { Schema } from './schema'
-import { INode, INodeParent, IPage } from './type'
+import { IFrame, IGroup, INode, INodeParent, IPage } from './type'
 
 type ITraverseData = {
   id: string
@@ -23,7 +23,24 @@ type INodeRuntime = {
 
 @autobind
 export class SchemaUtilService {
-  nodeRuntime = createCache<INodeRuntime>()
+  nodeRuntimeCache = createCache<INodeRuntime>()
+  init() {
+    this.initNodeRuntime()
+  }
+  find(id: string) {
+    let res = SchemaNode.find(id)
+    if (!res && this.isPage(id)) return SchemaPage.find(id)
+    return res
+  }
+  findAncestors(id: string) {
+    const ancestors = <(INode | IPage)[]>[]
+    let ancestor = this.find(id)
+    while (ancestor && 'parentId' in ancestor) {
+      ancestor = this.find(ancestor.parentId)
+      ancestor && ancestors.push(ancestor)
+    }
+    return ancestors
+  }
   findParent(id: string) {
     const { parentId } = SchemaNode.find(id)
     if (this.isPage(parentId)) return SchemaPage.find(parentId)
@@ -52,7 +69,7 @@ export class SchemaUtilService {
   isFrame(id: string) {
     return SchemaNode.find(id).type === 'frame'
   }
-  isContainerNode(target: string | INode) {
+  isContainerNode(target: string | INode): target is IFrame | IGroup {
     const node = typeof target === 'string' ? SchemaNode.find(target) : target
     return 'childIds' in node
   }
@@ -97,8 +114,10 @@ export class SchemaUtilService {
     console.log(newSchema)
   }
   private initNodeRuntime() {
-    this.traverse(({ id, depth, ancestors }) => {
-      this.nodeRuntime.get(id).ancestorIds = ancestors
+    this.traverse(({ id, ancestors }) => {
+      const runtime = <INodeRuntime>{}
+      runtime.ancestorIds = ancestors
+      this.nodeRuntimeCache.set(id, runtime)
     })
   }
 }

@@ -1,3 +1,4 @@
+import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
 import { IBound, IXY } from '~/shared/utils/normal'
 import { abs, rcos, rsin } from './base'
@@ -5,6 +6,7 @@ import { xy_dot, xy_minus, xy_rotate3 } from './xy'
 
 type IAxis = { widthAxis: XY; heightAxis: XY }
 
+@autobind
 export class OBB {
   xy: IXY
   axis: IAxis

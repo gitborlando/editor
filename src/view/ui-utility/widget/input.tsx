@@ -1,9 +1,9 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { ComponentPropsWithRef, forwardRef } from 'react'
-import { Drag } from '~/global/drag'
+import Asset from '~/assets'
+import { Drag } from '~/global/event/drag'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import Asset from '../assets'
 import { Icon } from './icon'
 
 export interface IInput extends ComponentPropsWithRef<'div'> {

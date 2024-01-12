@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import Asset from '~/assets'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { useHookSignal } from '~/shared/signal-react'
-import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -14,8 +14,8 @@ export const NodeHeaderComp: FC<INodeHeaderComp> = observer(({}) => {
   const { classes } = useStyles({})
   const { allNodeExpanded, searchSlice } = UILeftPanelLayer
   const isCollapsed = allNodeExpanded.value === 'collapsed'
-  useHookSignal(allNodeExpanded.hook)
-  useHookSignal(searchSlice.hook)
+  useHookSignal(allNodeExpanded)
+  useHookSignal(searchSlice)
   return (
     <Flex layout='h' shrink={0} sidePadding={6} className={classes.NodeHeader}>
       <input

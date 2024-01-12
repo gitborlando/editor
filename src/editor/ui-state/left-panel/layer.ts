@@ -75,7 +75,7 @@ export class UILeftPanelLayerService {
       this.calcNodeListChange()
     })
     this.nodeMoveEnded.hook(() => {
-      if (!this.nodeMoveDropDetail.value) return
+      if (!this.nodeMoveDropDetail.value?.id) return
       const { moveId } = this.nodeMoveStarted.value
       const { type, id: dropId } = this.nodeMoveDropDetail.value
       const node = SchemaNode.find(moveId)

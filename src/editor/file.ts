@@ -1,32 +1,32 @@
+//@ts-ignore
+import { Upload } from '~/global/upload'
 import { mockJsonFile } from '~/mock/mock'
 import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { SchemaDefault } from './schema/default'
+import { SchemaNode } from './schema/node'
 import { SchemaPage } from './schema/page'
 import { Schema } from './schema/schema'
 import { ISchema } from './schema/type'
 
 @autobind
-export class FileService {
-  afterOpenFile = createSignal<File>()
-  private inputRef!: HTMLInputElement
-  constructor() {
-    window.addEventListener('keydown', (e) => {
-      if (!(e.altKey && e.key === 'l')) return
-      console.log(Schema.getSchema())
-    })
+export class SchemaFileService {
+  isSaved = createSignal(false)
+  init() {
+    this.debug()
+    this.autoSave()
   }
-  setInputRef(input: HTMLInputElement) {
-    this.inputRef = input
+  autoSave() {
+    setInterval(() => {
+      const schema = Schema.getSchema()
+      localStorage.setItem(schema.meta.id, JSON.stringify(schema))
+      this.isSaved.dispatch(true)
+    }, 1000 * 60 * 5)
   }
   async openFile() {
-    this.inputRef.click()
-    const file = await new Promise<File | undefined>((resolve) => {
-      this.inputRef.onchange = () => resolve(this.inputRef.files?.[0])
-    })
+    const file = await Upload.open()
     if (!file) return
-    this.afterOpenFile.dispatch(file)
-    const json = JSON.parse(await this.readAsText(file))
+    const json = JSON.parse(await Upload.readAsText(file))
     Schema.setSchema(json)
     SchemaPage.select(json.pages[0].id)
   }
@@ -44,27 +44,26 @@ export class FileService {
     })
   }
   exportFile() {
-    console.log(Schema.getSchema())
-    localStorage.setItem('file', JSON.stringify(Schema.getSchema()))
+    const schema = Schema.getSchema()
+    //this.store.set(schema.meta.id, JSON.stringify(schema))
     this.downloadJsonFile(Schema.getSchema())
   }
   downloadJsonFile(data: object): void {
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
-    const downloadLink = document.createElement('a')
-    downloadLink.href = URL.createObjectURL(blob)
-    downloadLink.download = '文件' + new Date().getTime()
-    document.body.appendChild(downloadLink)
-    downloadLink.click()
-    document.body.removeChild(downloadLink)
+    Upload.download(blob)
   }
-  private readAsText(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = (e) => resolve((e.target?.result || '') as string)
-      reader.onerror = (e) => reject(e.target?.error)
-      reader.readAsText(file)
+  private debug() {
+    window.addEventListener('keydown', (e) => {
+      if (!(e.altKey && e.key === 'l')) return
+      if (SchemaNode.selectIds.value.size) {
+        SchemaNode.selectIds.value.forEach((id) => {
+          console.log(SchemaNode.find(id))
+        })
+      } else {
+        console.log(Schema.getSchema())
+      }
     })
   }
 }
 
-export const File = new FileService()
+export const SchemaFile = new SchemaFileService()

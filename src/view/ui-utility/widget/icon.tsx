@@ -18,7 +18,12 @@ export const Icon: FC<IIconProps> = ({
   fill,
   ...rest
 }) => {
-  const { classes, cx } = useStyles({ size, rotate, scale, fill: fill || '#545454' })
+  const { classes, cx } = useStyles({
+    size,
+    rotate,
+    scale,
+    fill: fill || /* '#545454' */ '#7a7a7a',
+  })
   if (typeof children === 'string') {
     return <img src={children} className={cx(classes.Icon, className)} {...rest}></img>
   }

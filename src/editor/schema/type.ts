@@ -18,7 +18,8 @@ export type IPage = {
   id: string
   name: string
   zoom: number
-  offset: IXY
+  x: number
+  y: number
   childIds: string[]
 }
 

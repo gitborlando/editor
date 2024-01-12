@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { max } from '~/editor/math/base'
-import { Drag } from '~/global/drag'
-import { useAutoSignal, useSignal, useSignalHook } from '~/shared/signal-react'
+import { Drag } from '~/global/event/drag'
+import { useAutoSignal, useHookSignal, useSignal } from '~/shared/signal-react'
 import { makeStyles } from '../../../../../ui-utility/theme'
 import { Flex } from '../../../../../ui-utility/widget/flex'
 
@@ -20,7 +20,7 @@ export const ScrollComp: FC<IScrollComp> = observer(
     const { classes } = useStyles({ width: width.value })
     const rate = contentHeight !== 0 ? viewHeight / contentHeight : 0
     const sliderHeight = max(24, viewHeight * rate)
-    useSignalHook(dragging, (isDragging) => width.dispatch(isDragging ? 6 : 4))
+    useHookSignal(dragging, (isDragging) => width.dispatch(isDragging ? 6 : 4))
     return (
       <Flex layout='v' className={classes.Scroll} style={{ height: viewHeight }}>
         <Flex

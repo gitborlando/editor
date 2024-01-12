@@ -1,4 +1,3 @@
-import { toJS } from 'mobx'
 import { nanoid } from 'nanoid'
 import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
@@ -17,7 +16,7 @@ export class SchemaService {
     return {
       meta: this.meta,
       nodes: SchemaNode.nodeMap,
-      pages: toJS(SchemaPage.pages),
+      pages: SchemaPage.pages.value,
     }
   }
   setSchema({ meta, nodes, pages }: ISchema) {

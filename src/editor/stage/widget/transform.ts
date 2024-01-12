@@ -1,14 +1,13 @@
 import { xy_new } from '~/editor/math/xy'
 import { OperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNode } from '~/editor/schema/node'
-import { Drag } from '~/global/drag'
+import { Drag } from '~/global/event/drag'
 import { Setting } from '~/global/setting'
 import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
 import { firstOne } from '~/shared/utils/array'
 import { StageCursor } from '../cursor'
 import { StageDraw } from '../draw/draw'
-import { StageElement } from '../element'
 import { StageCreate } from '../interact/create'
 import { StageSelect } from '../interact/select'
 import { StageTransform } from '../interact/transform'
@@ -58,9 +57,9 @@ export class StageWidgetTransformService {
   }
   private hookRender() {
     Pixi.duringTicker.hook(() => {
-      // this.draw()
-      if (this.renderType === 'reDraw') this.draw()
-      if (this.renderType === 'clear') this.clear()
+      this.draw()
+      // if (this.renderType === 'reDraw') this.draw()
+      // if (this.renderType === 'clear') this.clear()
     })
     StageCreate.duringCreate.hook(() => (this.renderType = 'reDraw'))
     OperateGeometry.beforeOperate.hook(() => (this.renderType = 'clear'))
@@ -91,7 +90,7 @@ export class StageWidgetTransformService {
     this.renderType = 'reserve'
   }
   private calcVertexXY() {
-    const { centerX, centerY, width, height, rotation } = StageTransform.data
+    const { centerX, centerY, /* pivotX, pivotY, */ width, height, rotation } = StageTransform.data
     const pivotX = centerX - width / 2
     const pivotY = centerY - height / 2
     const centerXY = XY.Of(centerX, centerY)
@@ -134,8 +133,7 @@ export class StageWidgetTransformService {
     SchemaNode.selectIds.value.forEach((id) => {
       const node = SchemaNode.find(id)
       const outline = new PIXI.Graphics()
-      const parent = StageElement.findParentElement(node.parentId)
-      outline.setParent(parent)
+      outline.setParent(Pixi.sceneStage)
       this.outlines.push(outline)
       if (node.type === 'vector') {
         outline.lineStyle(0.5 / StageViewport.zoom.value, Setting.color.value)

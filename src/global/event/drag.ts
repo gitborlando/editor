@@ -1,7 +1,6 @@
 import { makeObservable, observable } from 'mobx'
 import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
-import {} from '~/shared/utils/mobx'
 import { IBound, IXY, noopFunc, type ICursor } from '~/shared/utils/normal'
 
 export type IDragData = {
@@ -16,6 +15,7 @@ export type IDragData = {
 export class DragService {
   @observable canMove = false
   @observable cursor: ICursor = 'auto'
+  afterDown = createSignal()
   beforeDrag = createSignal()
   duringDrag = createSignal()
   afterDrag = createSignal()
@@ -24,11 +24,31 @@ export class DragService {
   private start = { x: 0, y: 0 }
   private shift = { x: 0, y: 0 }
   private marquee = { x: 0, y: 0, width: 0, height: 0 }
+  private downHandler?: (event: MouseEvent) => any
   private startHandler?: (event: MouseEvent) => any
   private moveHandler?: (event: MouseEvent) => any
   private endHandler?: (event: MouseEvent) => any
   constructor() {
     makeObservable(this)
+  }
+  onDown(callback?: (data: IDragData) => void) {
+    if (this.downHandler) return this
+    this.downHandler = ({ clientX, clientY }) => {
+      this.canMove = true
+      this.current = { x: clientX, y: clientY }
+      this.start = { x: clientX, y: clientY }
+      this.marquee = this.calculateMarquee()
+      this.afterDown.dispatch()
+      callback?.({
+        dragService: this,
+        current: this.current,
+        start: this.start,
+        shift: this.shift,
+        marquee: this.marquee,
+      })
+    }
+    window.addEventListener('mousedown', this.downHandler)
+    return this
   }
   onStart(callback?: (data: IDragData) => void) {
     if (this.startHandler) return this
@@ -45,7 +65,9 @@ export class DragService {
         marquee: this.marquee,
       })
     }
-    window.addEventListener('mousedown', () => (this.canMove = true))
+    if (this.downHandler === undefined) {
+      window.addEventListener('mousedown', () => (this.canMove = true))
+    }
     return this
   }
   onMove(callback: (data: IDragData) => void) {
@@ -85,16 +107,14 @@ export class DragService {
       (this.endHandler = () => {
         if (!this.canMove) return
         this.marquee = this.calculateMarquee()
-        if (this.started) {
-          this.afterDrag.dispatch()
-          callback?.({
-            dragService: this,
-            current: this.current,
-            start: this.start,
-            shift: this.shift,
-            marquee: this.marquee,
-          })
-        }
+        this.afterDrag.dispatch()
+        callback?.({
+          dragService: this,
+          current: this.current,
+          start: this.start,
+          shift: this.shift,
+          marquee: this.marquee,
+        })
         this.setDataToDefault()
       })
     )
@@ -107,16 +127,14 @@ export class DragService {
       (this.endHandler = () => {
         if (!this.canMove) return
         this.marquee = this.calculateMarquee()
-        if (this.started) {
-          this.afterDrag.dispatch()
-          callback?.({
-            dragService: this,
-            current: this.current,
-            start: this.start,
-            shift: this.shift,
-            marquee: this.marquee,
-          })
-        }
+        this.afterDrag.dispatch()
+        callback?.({
+          dragService: this,
+          current: this.current,
+          start: this.start,
+          shift: this.shift,
+          marquee: this.marquee,
+        })
         this.setDataToDefault()
         this.destroy()
       })
@@ -130,9 +148,11 @@ export class DragService {
     return this
   }
   destroy() {
+    window.removeEventListener('mousedown', this.downHandler || noopFunc)
     window.removeEventListener('mousedown', this.startHandler || noopFunc)
     window.removeEventListener('mousemove', this.moveHandler || noopFunc)
     window.removeEventListener('mouseup', this.endHandler || noopFunc)
+    this.downHandler = undefined
     this.startHandler = undefined
     this.moveHandler = undefined
     this.endHandler = undefined

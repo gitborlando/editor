@@ -1,11 +1,12 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import Asset from '~/assets'
+import { SchemaFile } from '~/editor/file'
 import { StageCreate } from '~/editor/stage/interact/create'
 import { StageInteract } from '~/editor/stage/interact/interact'
 import { StageViewport } from '~/editor/stage/viewport'
-import { useSignalHook } from '~/shared/signal-react'
+import { useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
-import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Divide } from '~/view/ui-utility/widget/divide'
@@ -16,13 +17,16 @@ type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
   const { classes } = useStyles({ top: StageViewport.bound.value.y })
-  useSignalHook(StageInteract.type)
-  useSignalHook(StageViewport.zoom)
+  useHookSignal(StageInteract.type)
+  useHookSignal(StageViewport.zoom)
   return (
     <Flex layout='h' className={classes.Header}>
-      <Flex layout='c' className={classes.leftGroup}>
-        <Icon size={28}>{Asset.editor.header.shiyangyang}</Icon>
-        <h4 style={{ color: hslBlueColor(60) }}>屎羊羊编辑器</h4>
+      <Flex layout='h' className={classes.leftGroup}>
+        <Flex layout='c'>
+          <Icon size={28}>{Asset.editor.header.shiyangyang}</Icon>
+          <h4 style={{ color: hslBlueColor(60) }}>屎羊羊编辑器</h4>
+        </Flex>
+        <Flex className={classes.fileSave}>/{SchemaFile.isSaved.value ? '已保存' : '未保存'}</Flex>
       </Flex>
       <Flex layout='c' className={classes.centerGroup}>
         <Button
@@ -119,6 +123,9 @@ const useStyles = makeStyles<IHeaderCompStyle>()((t, { top }) => ({
   centerGroup: {
     ...t.absolute(0, 0, 0, 0),
     margin: 'auto',
+  },
+  fileSave: {
+    ...t.labelFont,
   },
 }))
 

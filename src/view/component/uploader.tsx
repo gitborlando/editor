@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
-import { File } from '~/editor/file'
+import { Upload } from '~/global/upload'
 import { makeStyles } from '~/view/ui-utility/theme'
 
 type IUploaderComp = {}
 
 export const UploaderComp: FC<IUploaderComp> = observer(({}) => {
   return (
-    <input ref={File.setInputRef} id='uploader' type='file' style={{ display: 'none' }}></input>
+    <input ref={Upload.setInputRef} id='uploader' type='file' style={{ display: 'none' }}></input>
   )
 })
 
