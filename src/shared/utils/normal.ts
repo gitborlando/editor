@@ -1,3 +1,5 @@
+import { runInAction } from 'mobx'
+
 export const This = globalThis as any
 
 export const isLeftMouse = (e: any): e is MouseEvent => e.button === 0
@@ -84,4 +86,10 @@ export function objEntries<T extends Record<string, any>, K extends keyof T = ke
 
 export function stopPropagation(e: any) {
   e.stopPropagation()
+}
+
+export function makeAction<T extends any>(callback?: (...args: T[]) => void) {
+  return (...args: T[]) => {
+    runInAction(() => callback?.(...args))
+  }
 }

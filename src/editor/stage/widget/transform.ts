@@ -5,7 +5,7 @@ import { Drag } from '~/global/event/drag'
 import { Setting } from '~/global/setting'
 import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
-import { firstOne } from '~/shared/utils/array'
+import { lastOne } from '~/shared/utils/array'
 import { StageCursor } from '../cursor'
 import { StageDraw } from '../draw/draw'
 import { StageCreate } from '../interact/create'
@@ -143,8 +143,8 @@ export class StageWidgetTransformService {
   }
   private bindMoveEvent() {
     const handleDrag = () => {
-      if (!SchemaNode.hoverIds.value.size) return
-      if (!SchemaNode.selectIds.value.has(firstOne(SchemaNode.hoverIds.value))) return
+      const hoverId = lastOne(SchemaNode.hoverIds.value)
+      if (!hoverId || !SchemaNode.selectIds.value.has(hoverId)) return
       const { x, y } = OperateGeometry.data
       Drag.onStart(() => (this.renderType = 'clear'))
         .onMove(({ shift }) => {

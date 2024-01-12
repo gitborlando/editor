@@ -1,7 +1,7 @@
 import { makeObservable, observable } from 'mobx'
 import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
-import { IBound, IXY, noopFunc, type ICursor } from '~/shared/utils/normal'
+import { IBound, IXY, makeAction, noopFunc, type ICursor } from '~/shared/utils/normal'
 
 export type IDragData = {
   dragService: DragService
@@ -39,7 +39,7 @@ export class DragService {
       this.start = { x: clientX, y: clientY }
       this.marquee = this.calculateMarquee()
       this.afterDown.dispatch()
-      callback?.({
+      makeAction(callback)?.({
         dragService: this,
         current: this.current,
         start: this.start,
@@ -57,7 +57,7 @@ export class DragService {
       this.start = { x: clientX, y: clientY }
       this.marquee = this.calculateMarquee()
       this.beforeDrag.dispatch()
-      callback?.({
+      makeAction(callback)?.({
         dragService: this,
         current: this.current,
         start: this.start,
@@ -89,7 +89,7 @@ export class DragService {
         }
         this.marquee = this.calculateMarquee()
         this.duringDrag.dispatch()
-        callback({
+        makeAction(callback)({
           dragService: this,
           current: this.current,
           start: this.start,
@@ -108,7 +108,7 @@ export class DragService {
         if (!this.canMove) return
         this.marquee = this.calculateMarquee()
         this.afterDrag.dispatch()
-        callback?.({
+        makeAction(callback)?.({
           dragService: this,
           current: this.current,
           start: this.start,
@@ -128,7 +128,7 @@ export class DragService {
         if (!this.canMove) return
         this.marquee = this.calculateMarquee()
         this.afterDrag.dispatch()
-        callback?.({
+        makeAction(callback)?.({
           dragService: this,
           current: this.current,
           start: this.start,
