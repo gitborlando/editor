@@ -30,10 +30,10 @@ export class SchemaNodeService {
       this.autoGetDatumId(selectIds)
     })
     this.afterAdd.hook((node) => {
-      this.clearSelect()
-      this.select(node.id)
       this.connectAt(SchemaPage.currentPage.value, node)
       this.collectDirty(node.id)
+      this.clearSelect()
+      this.select(node.id)
     })
   }
   get currentPageNodeMap() {
@@ -96,10 +96,8 @@ export class SchemaNodeService {
   }
   flushDirty() {
     this.beforeFlushDirty.dispatch()
-    this.dirtyIds.forEach((id) => {
-      this.duringFlushDirty.dispatch(id)
-      this.dirtyIds.delete(id)
-    })
+    this.dirtyIds.forEach(this.duringFlushDirty.dispatch)
+    this.dirtyIds.clear()
     this.afterFlushDirty.dispatch()
   }
   makeSelectDirty() {

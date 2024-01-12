@@ -144,8 +144,10 @@ export class OperateGeometryService {
       ;(node as ITriangle).sides = sides.new
     }
 
-    const children = SchemaUtil.getChildren(id)
-    children.forEach((childNode) => {
+    SchemaNode.collectRedraw(id)
+
+    SchemaUtil.getChildren(id).forEach((childNode) => {
+      SchemaNode.collectRedraw(childNode.id)
       if (changedKeys.has('rotation') && rotation) {
         const childOBB = StageElement.OBBCache.get(childNode.id)
         const rotationShift = rotation.new - rotation.old
