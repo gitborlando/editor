@@ -1,3 +1,4 @@
+import { OBB } from '~/editor/math/obb'
 import { xy_new } from '~/editor/math/xy'
 import { OperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNode } from '~/editor/schema/node'
@@ -5,7 +6,6 @@ import { Drag } from '~/global/event/drag'
 import { Setting } from '~/global/setting'
 import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
-import { lastOne } from '~/shared/utils/array'
 import { StageCursor } from '../cursor'
 import { StageDraw } from '../draw/draw'
 import { StageElement } from '../element'
@@ -32,12 +32,18 @@ export class StageWidgetTransformService {
   outlines = <PIXI.Graphics[]>[]
   transformContainer = new PIXI.Container()
   private renderType = <'reDraw' | 'clear' | 'reserve'>'reserve'
+  private transformOBB?: OBB
   initHook() {
     Pixi.inited.hook(() => {
       this.addToStage()
       this.bindEvent()
     })
     this.hookRender()
+  }
+  mouseIn(e: MouseEvent) {
+    const { x, y } = StageViewport.toRealStageXY(XY.From(e, 'client'))
+    const pointOBB = new OBB(x, y, 1, 1, 0)
+    return this.transformOBB?.obbHitTest(pointOBB)
   }
   private get vertexes() {
     return [this.vertexTL, this.vertexTR, this.vertexBL, this.vertexBR]
@@ -57,18 +63,21 @@ export class StageWidgetTransformService {
     this.transformContainer.setParent(Pixi.sceneStage)
   }
   private hookRender() {
+    const setClear = () => (this.renderType = 'clear')
+    const setRedraw = () => (this.renderType = 'reDraw')
     Pixi.duringTicker.hook(() => {
-      // this.draw()
-      if (this.renderType === 'reDraw') this.draw()
-      if (this.renderType === 'clear') this.clear()
+      this.draw()
+      // if (this.renderType === 'reDraw') this.draw()
+      // if (this.renderType === 'clear') this.clear()
     })
-    OperateGeometry.beforeOperate.hook(() => (this.renderType = 'clear'))
-    StageViewport.beforeZoom.hook(() => (this.renderType = 'clear'))
-    StageCreate.duringCreate.hook(() => (this.renderType = 'reDraw'))
-    OperateGeometry.afterOperate.hook(() => (this.renderType = 'reDraw'))
-    StageSelect.afterSelect.hook(() => (this.renderType = 'reDraw'))
-    StageViewport.afterZoom.hook(() => (this.renderType = 'reDraw'))
-    SchemaNode.selectIds.hook(() => (this.renderType = 'reDraw'))
+    OperateGeometry.beforeOperate.hook(setClear)
+    StageViewport.beforeZoom.hook(setClear)
+    StageSelect.afterClearSelect.hook(setClear)
+    StageCreate.duringCreate.hook(setRedraw)
+    OperateGeometry.afterOperate.hook(setRedraw)
+    StageSelect.afterSelect.hook(setRedraw)
+    StageViewport.afterZoom.hook(setRedraw)
+    SchemaNode.selectIds.hook(setRedraw)
   }
   private bindEvent() {
     this.bindMoveEvent()
@@ -91,7 +100,7 @@ export class StageWidgetTransformService {
     this.renderType = 'reserve'
   }
   private calcVertexXY() {
-    const { centerX, centerY, /* pivotX, pivotY, */ width, height, rotation } = StageTransform.data
+    const { centerX, centerY, width, height, rotation } = StageTransform.data
     const pivotX = centerX - width / 2
     const pivotY = centerY - height / 2
     const centerXY = XY.Of(centerX, centerY)
@@ -99,6 +108,7 @@ export class StageWidgetTransformService {
     this.vertexTR_XY = XY.Of(pivotX + width, pivotY).rotate(centerXY, rotation)
     this.vertexBL_XY = XY.Of(pivotX, pivotY + height).rotate(centerXY, rotation)
     this.vertexBR_XY = XY.Of(pivotX + width, pivotY + height).rotate(centerXY, rotation)
+    this.transformOBB = new OBB(centerX, centerY, width, height, rotation)
   }
   private drawVertexes() {
     const size = 6 / StageViewport.zoom.value
@@ -143,9 +153,8 @@ export class StageWidgetTransformService {
     })
   }
   private bindMoveEvent() {
-    const handleDrag = () => {
-      const hoverId = lastOne(SchemaNode.hoverIds.value)
-      if (!hoverId || !SchemaNode.selectIds.value.has(hoverId)) return
+    const handleDrag = (e: MouseEvent) => {
+      if (!this.mouseIn(e)) return
       const { x, y } = OperateGeometry.data
       Drag.onStart(() => {
         this.renderType = 'clear'
@@ -161,7 +170,7 @@ export class StageWidgetTransformService {
           StageElement.canHover = true
         })
     }
-    Pixi.addListener('mousedown', handleDrag)
+    Pixi.addListener('mousedown', (e) => handleDrag(e as MouseEvent))
   }
   private bindTopLineEvent() {
     this.lineT.eventMode = 'dynamic'

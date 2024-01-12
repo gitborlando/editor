@@ -13,6 +13,7 @@ import { createBound, isLeftMouse, isRightMouse, type IBound } from '~/shared/ut
 import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
+import { StageWidgetTransform } from '../widget/transform'
 import { StageCreate } from './create'
 
 type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
@@ -20,37 +21,50 @@ type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 @autobind
 export class StageSelectService {
   marquee = createSignal<IBound | undefined>()
-  beforeSelect = createSignal()
+  afterClearSelect = createSignal()
   afterSelect = createSignal<ISelectType>()
   duringMarqueeSelect = createSignal()
   needExpandIds = new Set<string>()
   private marqueeOBB?: OBB
   initHook() {
-    this.beforeSelect.hook(() => this.needExpandIds.clear())
+    this.afterClearSelect.hook(() => this.needExpandIds.clear())
     StageCreate.createStarted.hook(this.onCreateSelect)
   }
   startInteract() {
-    Pixi.addListener('mousedown', this.onMousedownSelect)
-    Pixi.addListener('mousedown', this.onMarqueeSelect)
+    Pixi.addListener('mousedown', this.onMouseDown)
     Pixi.addListener('mousedown', this.onMenu)
   }
   endInteract() {
-    Pixi.removeListener('mousedown', this.onMousedownSelect)
-    Pixi.removeListener('mousedown', this.onMarqueeSelect)
+    Pixi.removeListener('mousedown', this.onMouseDown)
     Pixi.removeListener('mousedown', this.onMenu)
   }
   private get hoverId() {
     return lastOne(SchemaNode.hoverIds.value)
   }
-  onPanelSelect(id: string) {
-    this.beforeSelect.dispatch()
+  private onMouseDown(_e: Event) {
+    const e = _e as MouseEvent
+    if (!isLeftMouse(e)) return
+    if (this.hoverId) {
+      this.onMousedownSelect()
+    }
+    if (!this.hoverId) {
+      if (!StageWidgetTransform.mouseIn(e)) {
+        SchemaNode.clearSelect()
+        this.onMarqueeSelect()
+      }
+    }
+  }
+  private clearSelect() {
     SchemaNode.clearSelect()
+    this.afterClearSelect.dispatch()
+  }
+  onPanelSelect(id: string) {
+    this.clearSelect()
     SchemaNode.select(id)
     this.afterSelect.dispatch('panel')
   }
   onCreateSelect(id: string) {
-    this.beforeSelect.dispatch()
-    SchemaNode.clearSelect()
+    this.clearSelect()
     SchemaNode.select(id)
     let node = SchemaNode.find(id)
     while (node) {
@@ -59,17 +73,11 @@ export class StageSelectService {
     }
     this.afterSelect.dispatch('create')
   }
-  private onMousedownSelect(e: Event) {
-    if (!isLeftMouse(e)) return
+  private onMousedownSelect() {
     if (Pixi.isForbidEvent) return
-    if (!this.hoverId) {
-      SchemaNode.clearSelect()
-      return this.afterSelect.dispatch('stage-single')
-    }
     if (SchemaNode.selectIds.value.has(this.hoverId)) return
-    if (SchemaUtil.parentIsPage(this.hoverId)) return
-    this.beforeSelect.dispatch()
-    SchemaNode.clearSelect()
+    if (SchemaUtil.isPageFrame(this.hoverId)) return
+    this.clearSelect()
     SchemaNode.select(this.hoverId)
     let node = SchemaNode.find(this.hoverId)
     while (node) {
@@ -78,10 +86,8 @@ export class StageSelectService {
     }
     this.afterSelect.dispatch('stage-single')
   }
-  private onMarqueeSelect(e: Event) {
-    if (!isLeftMouse(e)) return
+  private onMarqueeSelect() {
     if (Pixi.isForbidEvent) return
-    if (this.hoverId) return
     const hitTest = (marqueeOBB: OBB | undefined, obb: OBB) => {
       if (!marqueeOBB) return false
       const aabbResult = marqueeOBB.aabbHitTest(obb)
@@ -92,7 +98,7 @@ export class StageSelectService {
       ids.forEach((id) => {
         const OBB = StageElement.OBBCache.get(id)
         const node = SchemaNode.find(id)
-        if (node.type === 'frame' && SchemaUtil.parentIsPage(id)) {
+        if (SchemaUtil.isPageFrame(id)) {
           return traverseTest(SchemaUtil.getChildIds(id))
         }
         if (hitTest(this.marqueeOBB, OBB)) {
@@ -106,8 +112,6 @@ export class StageSelectService {
     }
     Drag.onStart(() => {
       this.marquee.value = createBound(0, 0, 0, 0)
-      this.beforeSelect.dispatch()
-      SchemaNode.clearSelect()
     })
       .onMove(({ marquee }) => {
         this.marquee.dispatch(marquee)
@@ -127,13 +131,11 @@ export class StageSelectService {
     Menu.setXY(e.clientX, e.clientY)
   }
   private calcMarqueeOBB() {
-    if (!this.marquee) return
-    const { x, y } = StageViewport.toRealStageXY(
-      XY.Of(this.marquee.value!.x, this.marquee.value!.y)
-    )
-    const { x: width, y: height } = StageViewport.toRealStageShiftXY(
-      XY.Of(this.marquee.value!.width, this.marquee.value!.height)
-    )
+    if (!this.marquee.value) return
+    const marquee = this.marquee.value!
+    const { x, y } = StageViewport.toRealStageXY(XY.Of(marquee.x, marquee.y))
+    const width = StageViewport.toRealStageShift(marquee.width)
+    const height = StageViewport.toRealStageShift(marquee.height)
     return new OBB(x + width / 2, y + height / 2, width, height, 0)
   }
 }

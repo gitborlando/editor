@@ -69,6 +69,10 @@ export class SchemaUtilService {
   isFrame(id: string) {
     return SchemaNode.find(id).type === 'frame'
   }
+  isPageFrame(id: string) {
+    const node = SchemaNode.find(id)
+    return node.type === 'frame' && this.isPage(node.parentId)
+  }
   isContainerNode(target: string | INode): target is IFrame | IGroup {
     const node = typeof target === 'string' ? SchemaNode.find(target) : target
     return 'childIds' in node

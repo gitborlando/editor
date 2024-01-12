@@ -1,7 +1,7 @@
-export function firstOne(input: any[] | Set<any>) {
+export function firstOne<T extends any = any>(input: T[] | Set<T>) {
   return [...input][0]
 }
-export function lastOne(input: any[] | Set<any>) {
+export function lastOne<T extends any = any>(input: T[] | Set<T>) {
   const arr = [...input]
   return arr[arr.length - 1]
 }
