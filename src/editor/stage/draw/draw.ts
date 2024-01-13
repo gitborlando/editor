@@ -4,10 +4,10 @@ import { IFill, IIrregular, INode, IVector } from '~/editor/schema/type'
 import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
+import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
 import { StageElement } from '../element'
 import { PIXI } from '../pixi'
 import { StageDrawPath } from './path'
-import { drawRegularPolygon } from './pixi/regular-polygon'
 
 type IStageElement = PIXI.Graphics | PIXI.Text
 
@@ -58,13 +58,16 @@ export class StageDrawService {
         element.drawRect(0, 0, width, height)
       }
       if (node.vectorType === 'triangle') {
-        return drawRegularPolygon(element, width / 2, height / 2, width / 2, node.sides, rotation)
+        const polygon = createRegularPolygon(width, height, node.sides, rotation)
+        return element.drawPolygon(polygon)
       }
       if (node.vectorType === 'star') {
-        return drawRegularPolygon(element, width / 2, height / 2, width / 2, node.sides, rotation)
+        const polygon = createRegularPolygon(width, height, node.sides, rotation)
+        return element.drawPolygon(polygon)
       }
       if (node.vectorType === 'line') {
-        return drawRegularPolygon(element, width / 2, height / 2, width / 2, rotation)
+        // const polygon = createRegularPolygon(width, height, node.sides, rotation)
+        // return element.drawPolygon(polygon)
       }
       if (node.vectorType === 'irregular') {
         const path = StageElement.pathCache.getSet(node.id, () =>
