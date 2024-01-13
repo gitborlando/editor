@@ -41,19 +41,25 @@ export class StageSelectService {
   private get hoverId() {
     return lastOne(SchemaNode.hoverIds.value)
   }
-  private onMouseDown(_e: Event) {
-    const e = _e as MouseEvent
-    if (!isLeftMouse(e)) return
+  private onMouseDown(e: Event) {
+    if (isLeftMouse(e)) this.onLeftMouseDown(e as MouseEvent)
+    if (isRightMouse(e)) this.onRightMouseDown(e as MouseEvent)
+  }
+  private onLeftMouseDown(e: MouseEvent) {
+    if (StageWidgetTransform.mouseIn(e)) return
     if (this.hoverId) {
-      this.onMousedownSelect()
-    }
-    if (!this.hoverId) {
-      if (!StageWidgetTransform.mouseIn(e)) {
-        SchemaNode.clearSelect()
-        this.onMarqueeSelect()
+      if (SchemaUtil.isPageFrame(this.hoverId)) {
+        this.clearSelect()
+      } else {
+        this.onMousedownSelect()
       }
     }
+    if (!this.hoverId) {
+      SchemaNode.clearSelect()
+      this.onMarqueeSelect()
+    }
   }
+  private onRightMouseDown(e: MouseEvent) {}
   private clearSelect() {
     SchemaNode.clearSelect()
     this.afterClearSelect.dispatch()
@@ -63,7 +69,7 @@ export class StageSelectService {
     SchemaNode.select(id)
     this.afterSelect.dispatch('panel')
   }
-  onCreateSelect(id: string) {
+  private onCreateSelect(id: string) {
     this.clearSelect()
     SchemaNode.select(id)
     let node = SchemaNode.find(id)
