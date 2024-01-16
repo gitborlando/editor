@@ -1,19 +1,21 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { StageViewport } from '~/editor/stage/viewport'
+import { UIRightPanel } from '~/editor/ui-state/right-planel/right-panel'
+import { useHookSignal } from '~/shared/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { OperatePanelComp } from './operate/operate-panel'
-import { rightPanelShareState } from './shared-state'
 
 type IRightPanelComp = {}
 
 export const RightPanelComp: FC<IRightPanelComp> = observer(({}) => {
   const { classes } = useStyles({ right: StageViewport.bound.value.right })
-  const { type } = rightPanelShareState
+  const { currentTab } = UIRightPanel
+  useHookSignal(currentTab)
   return (
     <Flex layout='v' className={classes.RightPanel}>
-      {type === 'operate' && <OperatePanelComp />}
+      {currentTab.value === 'operate' && <OperatePanelComp />}
     </Flex>
   )
 })

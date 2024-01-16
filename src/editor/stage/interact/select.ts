@@ -1,10 +1,12 @@
 import { OBB } from '~/editor/math/obb'
+import { Record } from '~/editor/record'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaPage } from '~/editor/schema/page'
 import { SchemaUtil } from '~/editor/schema/util'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu'
 import { autobind } from '~/shared/decorator'
+import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { macro_Match } from '~/shared/macro'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
@@ -16,7 +18,7 @@ import { StageViewport } from '../viewport'
 import { StageWidgetTransform } from '../widget/transform'
 import { StageCreate } from './create'
 
-type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
+type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee' | 'undoRedo'
 
 @autobind
 export class StageSelectService {
@@ -26,9 +28,18 @@ export class StageSelectService {
   duringMarqueeSelect = createSignal()
   needExpandIds = new Set<string>()
   private marqueeOBB?: OBB
+  private oneSelectChange = createMomentChange({ selectIds: new Set<string>() })
   initHook() {
-    this.afterClearSelect.hook(() => this.needExpandIds.clear())
     StageCreate.createStarted.hook(this.onCreateSelect)
+    this.afterClearSelect.hook(() => {
+      this.needExpandIds.clear()
+      this.oneSelectChange.endCurrent()
+    })
+    this.afterSelect.hook((type) => {
+      const selectIds = structuredClone(SchemaNode.selectIds.value)
+      this.oneSelectChange.update('selectIds', selectIds)
+      if (type !== 'undoRedo') this.undoRedo()
+    })
   }
   startInteract() {
     Pixi.addListener('mousedown', this.onMouseDown)
@@ -50,6 +61,7 @@ export class StageSelectService {
     if (this.hoverId) {
       if (SchemaUtil.isPageFrame(this.hoverId)) {
         this.clearSelect()
+        this.onMarqueeSelect()
       } else {
         this.onMousedownSelect()
       }
@@ -143,6 +155,19 @@ export class StageSelectService {
     const width = StageViewport.toRealStageShift(marquee.width)
     const height = StageViewport.toRealStageShift(marquee.height)
     return new OBB(x + width / 2, y + height / 2, width, height, 0)
+  }
+  private undoRedo() {
+    const { last, current } = this.oneSelectChange.record.selectIds
+    Record.push({
+      undo: () => {
+        SchemaNode.selectIds.dispatch(last)
+        this.afterSelect.dispatch('undoRedo')
+      },
+      redo: () => {
+        SchemaNode.selectIds.dispatch(current)
+        this.afterSelect.dispatch('undoRedo')
+      },
+    })
   }
 }
 

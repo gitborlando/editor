@@ -1,7 +1,9 @@
 import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
+import { XY } from '~/shared/structure/xy'
 import { firstOne, insertAt } from '~/shared/utils/array'
 import { Delete } from '~/shared/utils/normal'
+import { StageElement } from '../stage/element'
 import { Pixi } from '../stage/pixi'
 import { SchemaPage } from './page'
 import { INode, INodeParent, IPage } from './type'
@@ -12,6 +14,7 @@ export class SchemaNodeService {
   inited = createSignal(false)
   nodeMap = <Record<string, Record<string, INode>>>{}
   datumId = createSignal('')
+  datumXY = XY.Of(0, 0)
   dirtyIds = new Set<string>()
   redrawIds = new Set<string>()
   hoverIds = createSignal(new Set<string>())
@@ -26,13 +29,21 @@ export class SchemaNodeService {
     Pixi.inited.hook(() => {
       Pixi.duringTicker.hook(this.flushDirty)
     })
-    this.selectIds.hook((selectIds) => {
-      this.autoGetDatumId(selectIds)
-    })
     this.afterAdd.hook((node) => {
       this.connectAt(SchemaPage.currentPage.value, node)
       this.collectDirty(node.id)
       SchemaNode.collectRedraw(node.id)
+    })
+    this.selectIds.hook((selectIds) => {
+      this.autoGetDatumId(selectIds)
+    })
+    this.datumId.hook((id) => {
+      if (id === '' || SchemaUtil.isPage(id)) {
+        this.datumXY = XY.Of(0, 0)
+      } else {
+        const OBB = StageElement.OBBCache.get(this.datumId.value)
+        this.datumXY = XY.Of(OBB.aabb.x, OBB.aabb.y)
+      }
     })
   }
   get currentPageNodeMap() {
@@ -106,7 +117,9 @@ export class SchemaNodeService {
     this.redrawIds.add(id)
   }
   private autoGetDatumId(selectIds: Set<string>) {
-    if (selectIds.size === 0) return
+    if (selectIds.size === 0) {
+      this.datumId.dispatch('')
+    }
     if (selectIds.size === 1) {
       this.datumId.dispatch(this.find(firstOne(selectIds)).parentId)
     }

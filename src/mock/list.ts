@@ -19,7 +19,7 @@ export function mockList(schemaDefault: SchemaDefaultService) {
       centerY: 50,
       parentId: frameId,
     })
-    const triangle = schemaDefault.triangle({
+    const triangle = schemaDefault.polygon({
       id: '多边形' + i,
       // id: nanoid(),
       width: 100,

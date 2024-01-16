@@ -159,6 +159,7 @@ export class StageWidgetTransformService {
       Drag.onStart(() => {
         this.renderType = 'clear'
         StageElement.canHover = false
+        OperateGeometry.beforeOperate.dispatch(['x', 'y'])
       })
         .onMove(({ shift }) => {
           const realShift = StageViewport.toRealStageShiftXY(shift)
@@ -188,7 +189,7 @@ export class StageWidgetTransformService {
     this.lineT.on('mousedown', () => {
       Pixi.isForbidEvent = true
       const { y, height } = OperateGeometry.data
-      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch('height'))
+      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['height']))
         .onMove(({ shift }) => {
           const realShift = StageViewport.toRealStageShiftXY(shift)
           OperateGeometry.data.height = height - realShift.y
@@ -217,7 +218,7 @@ export class StageWidgetTransformService {
     this.lineR.on('mousedown', () => {
       Pixi.isForbidEvent = true
       const { width } = OperateGeometry.data
-      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch('width'))
+      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['width']))
         .onMove(({ shift }) => {
           const realShift = StageViewport.toRealStageShiftXY(shift)
           OperateGeometry.data.width = width + realShift.x
@@ -245,7 +246,7 @@ export class StageWidgetTransformService {
     this.lineB.on('mousedown', () => {
       Pixi.isForbidEvent = true
       const { height } = OperateGeometry.data
-      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch('height'))
+      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['height']))
         .onMove(({ shift }) => {
           const realShift = StageViewport.toRealStageShiftXY(shift)
           OperateGeometry.data.height = height + realShift.y
@@ -273,7 +274,7 @@ export class StageWidgetTransformService {
     this.lineL.on('mousedown', () => {
       Pixi.isForbidEvent = true
       const { x, width } = OperateGeometry.data
-      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch('width'))
+      Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['width']))
         .onMove(({ shift }) => {
           const realShift = StageViewport.toRealStageShiftXY(shift)
           OperateGeometry.data.width = width - realShift.x

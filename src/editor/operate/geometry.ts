@@ -8,8 +8,9 @@ import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { ValueOf } from '~/shared/utils/normal'
 import { xy_mutate, xy_rotate2 } from '../math/xy'
+import { Record } from '../record'
 import { SchemaNode } from '../schema/node'
-import { ITriangle } from '../schema/type'
+import { IPolygon } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
 import { StageElement } from '../stage/element'
 import { StageSelect } from '../stage/interact/select'
@@ -27,9 +28,10 @@ export type IGeometryData = {
 @autobind
 export class OperateGeometryService {
   data = createInterceptData(initData())
-  oneTickChange = createMomentChange<Record<keyof IGeometryData, any>>()
-  beforeOperate = createSignal<keyof IGeometryData>()
-  afterOperate = createSignal()
+  oneTickChange = createMomentChange(initData())
+  oneOperateChange = createMomentChange(initData())
+  beforeOperate = createSignal<(keyof IGeometryData)[]>()
+  afterOperate = createSignal<'record'>()
   isGeometryChanged = false
   initHook() {
     StageSelect.afterSelect.hook(() => {
@@ -40,6 +42,7 @@ export class OperateGeometryService {
     })
     this.data._whenDataDidChange.hook(({ key, val }) => {
       this.oneTickChange.update(key, val)
+      this.oneOperateChange.update(key, val)
       SchemaNode.makeSelectDirty()
       this.isGeometryChanged = true
     })
@@ -50,6 +53,12 @@ export class OperateGeometryService {
     SchemaNode.afterFlushDirty.hook(() => {
       this.oneTickChange.endCurrent()
       this.isGeometryChanged = false
+    })
+    this.beforeOperate.hook(() => {
+      this.oneOperateChange.endCurrent()
+    })
+    this.afterOperate.hook((type) => {
+      if (type !== 'record') this.undoRedo()
     })
   }
   private fixBeforeChange(key: keyof IGeometryData, ctx: IValueWillChange<ValueOf<IGeometryData>>) {
@@ -87,6 +96,7 @@ export class OperateGeometryService {
 
     const { x, y, width, height, rotation, radius, sides } = this.data
     this.oneTickChange.reset({ x, y, width, height, rotation, radius, sides })
+    this.oneOperateChange.reset({ x, y, width, height, rotation, radius, sides })
   }
   private patchChangeToVectorPoints(id: string) {
     const node = SchemaNode.find(id)
@@ -113,48 +123,67 @@ export class OperateGeometryService {
     const { record, changedKeys } = this.oneTickChange
     const { x, y, width, height, rotation, sides } = record
     if (changedKeys.has('x') && x) {
-      node.x += x.new - x.old
-      node.centerX += x.new - x.old
-      OBB.shift(x.new - x.old)
+      node.x += x.current - x.last
+      node.centerX += x.current - x.last
+      OBB.shift(x.current - x.last)
     }
     if (changedKeys.has('y') && y) {
-      node.y += y.new - y.old
-      node.centerY += y.new - y.old
-      OBB.shift(undefined, y.new - y.old)
+      node.y += y.current - y.last
+      node.centerY += y.current - y.last
+      OBB.shift(undefined, y.current - y.last)
     }
     if (changedKeys.has('width') && width) {
-      node.width += width.new - width.old
-      node.centerX += (rcos(node.rotation) * (width.new - width.old)) / 2
-      node.centerY += (rsin(node.rotation) * (width.new - width.old)) / 2
+      node.width += width.current - width.last
+      node.centerX += (rcos(node.rotation) * (width.current - width.last)) / 2
+      node.centerY += (rsin(node.rotation) * (width.current - width.last)) / 2
       OBB.reBound(node.width, undefined, node.centerX, node.centerY)
     }
     if (changedKeys.has('height') && height) {
-      node.height += height.new - height.old
-      node.centerX -= (rsin(node.rotation) * (height.new - height.old)) / 2
-      node.centerY += (rcos(node.rotation) * (height.new - height.old)) / 2
+      node.height += height.current - height.last
+      node.centerX -= (rsin(node.rotation) * (height.current - height.last)) / 2
+      node.centerY += (rcos(node.rotation) * (height.current - height.last)) / 2
       OBB.reBound(undefined, node.height, node.centerX, node.centerY)
     }
     if (changedKeys.has('rotation') && rotation) {
-      node.rotation += rotation.new - rotation.old
-      const rotatedXY = xy_rotate2(node, node.centerX, node.centerY, rotation.new - rotation.old)
+      node.rotation += rotation.current - rotation.last
+      const rotatedXY = xy_rotate2(
+        node,
+        node.centerX,
+        node.centerY,
+        rotation.current - rotation.last
+      )
       xy_mutate(node, rotatedXY)
       OBB.reRotation(node.rotation)
     }
     if (changedKeys.has('sides') && sides) {
-      ;(node as ITriangle).sides = sides.new
+      ;(node as IPolygon).sides = sides.current
     }
 
     SchemaNode.collectRedraw(id)
 
     SchemaUtil.getChildren(id).forEach((childNode) => {
       SchemaNode.collectRedraw(childNode.id)
+      if (changedKeys.has('x') && x) {
+        const childOBB = StageElement.OBBCache.get(childNode.id)
+        const shift = x.current - x.last
+        childNode.x += shift
+        childNode.centerX += x.current - x.last
+        childOBB.shift(x.current - x.last)
+      }
+      if (changedKeys.has('y') && y) {
+        const childOBB = StageElement.OBBCache.get(childNode.id)
+        const shift = y.current - y.last
+        childNode.y += shift
+        childNode.centerY += y.current - y.last
+        childOBB.shift(y.current - y.last)
+      }
       if (changedKeys.has('rotation') && rotation) {
         const childOBB = StageElement.OBBCache.get(childNode.id)
-        const rotationShift = rotation.new - rotation.old
-        childNode.rotation += rotationShift
+        const shift = rotation.current - rotation.last
+        childNode.rotation += shift
         const childCenterXY = XY.From(childNode, 'center')
-        childCenterXY.rotate(XY.From(node, 'center'), rotationShift).mutate(childNode, 'center')
-        XY.From(childNode).rotate(childCenterXY, rotationShift).mutate(childNode)
+        childCenterXY.rotate(XY.From(node, 'center'), shift).mutate(childNode, 'center')
+        XY.From(childNode).rotate(childCenterXY, shift).mutate(childNode)
         {
           const { width, height, rotation, centerX, centerY } = childNode
           childOBB.reRotation(rotation)
@@ -178,6 +207,22 @@ export class OperateGeometryService {
     // })
     StageElement.pathCache.set(id, path)
     StageElement.OBBCache.set(id, OBB)
+  }
+  private undoRedo() {
+    const keys = this.beforeOperate.value
+    const record = structuredClone(this.oneOperateChange.record)
+    Record.push({
+      undo: () => {
+        this.beforeOperate.dispatch(keys)
+        keys.forEach((key) => (this.data[key] = record[key].last))
+        this.afterOperate.dispatch('record')
+      },
+      redo: () => {
+        this.beforeOperate.dispatch(keys)
+        keys.forEach((key) => (this.data[key] = record[key].current))
+        this.afterOperate.dispatch('record')
+      },
+    })
   }
 }
 

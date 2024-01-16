@@ -1,12 +1,12 @@
-import { observer } from 'mobx-react'
-import { FC } from 'react'
-import Asset from '~/assets'
+import { FC, memo, useCallback } from 'react'
 import { SchemaFile } from '~/editor/file'
-import { StageCreate } from '~/editor/stage/interact/create'
+import { Record } from '~/editor/record'
+import { IStageCreateType, StageCreate } from '~/editor/stage/interact/create'
 import { StageInteract } from '~/editor/stage/interact/interact'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
+import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Divide } from '~/view/ui-utility/widget/divide'
@@ -15,10 +15,51 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 
 type IHeaderComp = {}
 
-export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
-  const { classes } = useStyles({ top: StageViewport.bound.value.y })
+export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageInteract.type)
   useHookSignal(StageViewport.zoom)
+  const { classes } = useStyles({ top: StageViewport.bound.value.y })
+
+  const RecordIcons: FC<{}> = useCallback(() => {
+    useHookSignal(Record.index)
+    return (
+      <>
+        <Button disabled={!Record.canUndo} onClick={Record.undo}>
+          <Icon size={20} fill={Record.canUndo ? '' : '#E6E6E6'}>
+            {Asset.editor.header.record.undo}
+          </Icon>
+        </Button>
+        <Button disabled={!Record.canRedo} onClick={Record.redo}>
+          <Icon size={20} fill={Record.canRedo ? '' : '#E6E6E6'}>
+            {Asset.editor.header.record.redo}
+          </Icon>
+        </Button>
+      </>
+    )
+  }, [])
+
+  const StageOperateIcon: FC<{ type: 'select' | 'move' }> = ({ type }) => {
+    const isActive = StageInteract.type.value === type
+    return (
+      <Button active={isActive} onClick={() => StageInteract.type.dispatch(type)}>
+        <Icon size={20} fill={isActive ? hslBlueColor(65) : ''}>
+          {Asset.editor.header.stageOperate[type]}
+        </Icon>
+      </Button>
+    )
+  }
+
+  const CreateShapeIcon: FC<{ type: IStageCreateType }> = ({ type }) => {
+    const isActive = StageInteract.type.value === 'create' && StageCreate.currentType.value === type
+    return (
+      <Button active={isActive} onClick={() => StageCreate.currentType.dispatch(type)}>
+        <Icon size={20} fill={isActive ? hslBlueColor(65) : ''}>
+          {Asset.editor.node[type as keyof typeof Asset.editor.node]}
+        </Icon>
+      </Button>
+    )
+  }
+
   return (
     <Flex layout='h' className={classes.Header}>
       <Flex layout='h' className={classes.leftGroup}>
@@ -29,77 +70,16 @@ export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
         <Flex className={classes.fileSave}>/{SchemaFile.isSaved.value ? '已保存' : '未保存'}</Flex>
       </Flex>
       <Flex layout='c' className={classes.centerGroup}>
-        <Button
-          type='icon'
-          active={StageInteract.type.value === 'select'}
-          onClick={() => StageInteract.type.dispatch('select')}>
-          <Icon size={22} fill={StageInteract.type.value === 'select' ? hslBlueColor(65) : ''}>
-            {Asset.editor.header.tools.select}
-          </Icon>
-        </Button>
-        <Button
-          type='icon'
-          active={StageInteract.type.value === 'move'}
-          onClick={() => StageInteract.type.dispatch('move')}>
-          <Icon size={22} fill={StageInteract.type.value === 'move' ? hslBlueColor(65) : ''}>
-            {Asset.editor.header.tools.move}
-          </Icon>
-        </Button>
-        <Button
-          type='icon'
-          active={StageInteract.type.value === 'create' && StageCreate.type.value === 'frame'}
-          onClick={() => StageCreate.type.dispatch('frame')}>
-          <Icon
-            size={22}
-            fill={
-              StageInteract.type.value === 'create' && StageCreate.type.value === 'frame'
-                ? hslBlueColor(65)
-                : ''
-            }>
-            {Asset.editor.node.frame}
-          </Icon>
-        </Button>
-        <Button
-          type='icon'
-          active={StageInteract.type.value === 'create' && StageCreate.type.value === 'rect'}
-          onClick={() => StageCreate.type.dispatch('rect')}>
-          <Icon
-            size={22}
-            fill={
-              StageInteract.type.value === 'create' && StageCreate.type.value === 'rect'
-                ? hslBlueColor(65)
-                : ''
-            }>
-            {Asset.editor.node.rect}
-          </Icon>
-        </Button>
-        <Button
-          active={StageInteract.type.value === 'create' && StageCreate.type.value === 'ellipse'}
-          onClick={() => StageCreate.type.dispatch('ellipse')}>
-          <Icon
-            size={22}
-            fill={
-              StageInteract.type.value === 'create' && StageCreate.type.value === 'ellipse'
-                ? hslBlueColor(65)
-                : ''
-            }>
-            {Asset.editor.node.ellipse}
-          </Icon>
-        </Button>
-        <Button
-          active={StageInteract.type.value === 'create' && StageCreate.type.value === 'line'}
-          onClick={() => StageCreate.type.dispatch('line')}>
-          <Icon
-            size={22}
-            fill={
-              StageInteract.type.value === 'create' && StageCreate.type.value === 'line'
-                ? hslBlueColor(65)
-                : ''
-            }>
-            {Asset.editor.node.line}
-          </Icon>
-        </Button>
-        <Divide />
+        <RecordIcons />
+        <Divide length={16} />
+        {(['select', 'move'] as const).map((type) => (
+          <StageOperateIcon key={type} type={type} />
+        ))}
+        <Divide length={16} />
+        {StageCreate.createTypes.map((type) => (
+          <CreateShapeIcon key={type} type={type} />
+        ))}
+        <Divide length={16} />
         <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
       </Flex>
     </Flex>

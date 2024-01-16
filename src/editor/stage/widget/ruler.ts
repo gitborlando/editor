@@ -1,4 +1,5 @@
 import { radianfy } from '~/editor/math/base'
+import { SchemaNode } from '~/editor/schema/node'
 import { autobind } from '~/shared/decorator'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -10,15 +11,11 @@ export class StageWidgetRulerService {
   private corner = new PIXI.Graphics()
   private container = new PIXI.Container()
   private labels = <PIXI.Text[]>[]
-  private baseX = 0
-  private baseY = 0
   get zoom() {
     return StageViewport.zoom.value
   }
   initHook() {
     Pixi.inited.hook(() => {
-      this.baseX = StageViewport.stageOffset.value.x / this.zoom
-      this.baseY = StageViewport.stageOffset.value.y / this.zoom
       this.horizontal.setParent(this.container)
       this.vertical.setParent(this.container)
       this.corner.setParent(this.container)
@@ -26,6 +23,7 @@ export class StageWidgetRulerService {
       this.autoDraw()
       this.drawCorner()
     })
+    SchemaNode.datumId.hook(this.autoDraw)
     StageViewport.zoom.hook(this.autoDraw)
     StageViewport.stageOffset.hook(this.autoDraw)
   }
@@ -38,7 +36,7 @@ export class StageWidgetRulerService {
   }
   private drawHorizontal() {
     const width = StageViewport.bound.value.width / this.zoom
-    const offsetX = StageViewport.stageOffset.value.x / this.zoom
+    const offsetX = (StageViewport.stageOffset.value.x + SchemaNode.datumXY.x) / this.zoom
     // this.horizontal.beginFill('#F5F5F5')
     // this.horizontal.drawRect(0, 0, width, 20)
     const step = this.getStepByZoom()
@@ -60,7 +58,7 @@ export class StageWidgetRulerService {
   }
   private drawVertical() {
     const height = StageViewport.bound.value.height / this.zoom
-    const offsetY = StageViewport.stageOffset.value.y / this.zoom
+    const offsetY = (StageViewport.stageOffset.value.y + SchemaNode.datumXY.y) / this.zoom
     // this.vertical.beginFill('#F5F5F5')
     // this.vertical.drawRect(0, 0, 20, height)
     const step = this.getStepByZoom()

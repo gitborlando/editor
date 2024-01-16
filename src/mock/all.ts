@@ -64,8 +64,8 @@ export function mockAll(schemaDefault: SchemaDefaultService) {
       end: XY.Of(400, 100),
       parentId: 'page1',
     }),
-    triangle1: schemaDefault.triangle({
-      id: 'triangle1',
+    polygon1: schemaDefault.polygon({
+      id: 'polygon1',
       width: 100,
       height: 100,
       x: 300,

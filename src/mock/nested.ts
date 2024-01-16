@@ -39,7 +39,7 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
         parentId: 'frame1',
         // rotation: 30,
       }),
-      triangle1: schemaDefault.triangle({
+      triangle1: schemaDefault.polygon({
         id: 'triangle1',
         width: 100,
         height: 100,

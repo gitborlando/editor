@@ -39,10 +39,10 @@
     "scope": ["typescriptreact"],
     "body": [
       "import { ComponentPropsWithRef, forwardRef } from 'react'",
-      "import { makeStyles } from '../theme'",
-      "import { Flex } from './flex'",
+      "import { makeStyles } from '~/view/ui-utility/theme'",
+      "import { Flex } from '~/view/ui-utility/widget/flex'",
       "",
-      "interface I$1${TM_FILENAME_BASE} extends ComponentPropsWithRef<'div'> {}",
+      "export type I$1${TM_FILENAME_BASE} = ComponentPropsWithRef<'div'> & {}",
       "",
       "export const $1${TM_FILENAME_BASE} = forwardRef<HTMLDivElement, I$1${TM_FILENAME_BASE}>(({ className, ...rest }, ref) => {",
       "  const { classes, cx } = useStyles({})",

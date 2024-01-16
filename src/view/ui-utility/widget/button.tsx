@@ -3,13 +3,13 @@ import { hslBlueColor } from '~/shared/utils/color'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
-type IButton = ComponentPropsWithRef<'div'> & {
+export type IButtonProps = ComponentPropsWithRef<'div'> & {
   type?: 'text' | 'normal' | 'icon'
   active?: boolean
   disabled?: boolean
 }
 
-export const Button = forwardRef<HTMLDivElement, IButton>(
+export const Button = forwardRef<HTMLDivElement, IButtonProps>(
   ({ type = 'normal', active = false, disabled = false, className, children, ...rest }, ref) => {
     const { classes, cx } = useStyles({ active, disabled })
     return (
@@ -30,7 +30,7 @@ export const Button = forwardRef<HTMLDivElement, IButton>(
   }
 )
 
-type IButtonStyle = {} /* & Required<Pick<IButton>> */ & Pick<IButton, 'active' | 'disabled'>
+type IButtonStyle = {} /* & Required<Pick<IButton>> */ & Pick<IButtonProps, 'active' | 'disabled'>
 
 const useStyles = makeStyles<IButtonStyle>()((t, { active, disabled }) => ({
   Button: {

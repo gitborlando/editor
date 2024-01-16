@@ -60,14 +60,15 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
   }
   console.log('mock time: ', new Date().getTime() - s)
   return {
-    meta: { id: 'mock1', name: '测试文件1', user: 'myself' },
+    meta: { id: 'mock1', name: '测试文件1', user: 'myself', version: 0 },
     nodes: { page1: nodes },
     pages: [
       {
         id: 'page1',
         name: '测试页面1',
         zoom: 0.05,
-        offset: { x: 100, y: 100 },
+        x: 100,
+        y: 100,
         childIds: Object.keys(nodes),
       },
     ],

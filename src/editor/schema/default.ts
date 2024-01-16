@@ -16,11 +16,11 @@ import {
   INodeMeta,
   IPage,
   IPoint,
+  IPolygon,
   IRect,
   ISchema,
   IStar,
   IText,
-  ITriangle,
 } from './type'
 
 @autobind
@@ -105,13 +105,13 @@ export class SchemaDefaultService {
       ...option,
     }
   }
-  triangle(option?: Partial<ITriangle>): ITriangle {
-    const name = this.createNodeName('triangle')
+  polygon(option?: Partial<IPolygon>): IPolygon {
+    const name = this.createNodeName('polygon')
     const nodeBase = this.createNodeBase()
     const points = this.createTrianglePoints(option?.width ?? 100, option?.height ?? 100)
     return {
       type: 'vector',
-      vectorType: 'triangle',
+      vectorType: 'polygon',
       sides: 3,
       radius: 0,
       ...nodeBase,
@@ -246,7 +246,7 @@ export class SchemaDefaultService {
       | 'rect'
       | 'group'
       | 'ellipse'
-      | 'triangle'
+      | 'polygon'
       | 'star'
       | 'irregular'
       | 'text'
@@ -261,7 +261,7 @@ export class SchemaDefaultService {
           group: ['分组', 1],
           rect: ['矩形', 1],
           ellipse: ['椭圆', 1],
-          triangle: ['多边形', 1],
+          polygon: ['多边形', 1],
           star: ['星形', 1],
           irregular: ['矢量图形', 1],
           line: ['线段', 1],

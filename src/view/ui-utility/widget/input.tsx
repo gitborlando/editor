@@ -1,7 +1,7 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { ComponentPropsWithRef, forwardRef } from 'react'
-import Asset from '~/assets'
 import { Drag } from '~/global/event/drag'
+import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from './icon'

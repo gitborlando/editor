@@ -12,20 +12,21 @@ import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
 
-const createTypes = ['frame', 'rect', 'ellipse', 'polygon', 'line', 'text', 'img'] as const
-type ICreateType = (typeof createTypes)[number]
+// const createTypes = ['text'] as const
+const createTypes = ['frame', 'rect', 'ellipse', 'polygon', 'line', 'image', 'star'] as const
+export type IStageCreateType = (typeof createTypes)[number]
 
 @autobind
 export class StageCreateService {
-  types = createTypes
-  type = createSignal<ICreateType>('frame')
+  createTypes = createTypes
+  currentType = createSignal<IStageCreateType>('frame')
   createStarted = createSignal<string>()
   duringCreate = createSignal()
   private node!: INode
   private realStageStart!: IXY
   private OBB!: OBB
   initHook() {
-    this.type.hook(() => StageInteract.type.dispatch('create'))
+    this.currentType.hook(() => StageInteract.type.dispatch('create'))
   }
   startInteract() {
     Pixi.addListener('mousedown', this.create)
@@ -48,12 +49,12 @@ export class StageCreateService {
     const { x, y } = StageViewport.toRealStageXY(marquee)
     const width = StageViewport.toRealStageShift(marquee.width)
     const height = StageViewport.toRealStageShift(marquee.height)
-    if (this.type.value === 'ellipse') {
+    if (this.currentType.value === 'ellipse') {
       this.node.x = x + width / 2
       this.node.y = y + height / 2
       this.node.width = width
       this.node.height = height
-    } else if (this.type.value === 'line') {
+    } else if (this.currentType.value === 'line') {
       ;(this.node as ILine).end = StageViewport.toRealStageXY(current)
     } else {
       this.node.centerX = x + width / 2
@@ -79,12 +80,13 @@ export class StageCreateService {
     StageInteract.type.dispatch('select')
   }
   private createNode() {
-    if (this.type.value === 'frame') this.createFrameNode()
-    if (this.type.value === 'rect') this.createRectNode()
-    if (this.type.value === 'ellipse') this.createEllipseNode()
-    if (this.type.value === 'line') this.createLineNode()
-    if (this.type.value === 'text') this.createRectNode()
-    if (this.type.value === 'img') this.createRectNode()
+    if (this.currentType.value === 'frame') this.createFrameNode()
+    if (this.currentType.value === 'rect') this.createRectNode()
+    if (this.currentType.value === 'polygon') this.createPolygonNode()
+    if (this.currentType.value === 'ellipse') this.createEllipseNode()
+    if (this.currentType.value === 'line') this.createLineNode()
+    // if (this.currentType.value === 'text') this.createRectNode()
+    // if (this.currentType.value === 'img') this.createRectNode()
   }
   private createFrameNode() {
     this.node = SchemaDefault.frame({
@@ -93,6 +95,11 @@ export class StageCreateService {
   }
   private createRectNode() {
     this.node = SchemaDefault.rect({
+      ...this.createMousedownBound(),
+    })
+  }
+  private createPolygonNode() {
+    this.node = SchemaDefault.polygon({
       ...this.createMousedownBound(),
     })
   }

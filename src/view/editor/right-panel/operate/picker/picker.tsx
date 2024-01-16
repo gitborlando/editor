@@ -1,34 +1,43 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import { UIOperatePanel } from '~/editor/ui-state/right-planel/operate'
+import { useHookSignal } from '~/shared/signal-react'
 import { DraggableComp } from '~/view/component/draggable'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PickerColorComp } from './color'
-import { pickerShareState } from './share-state'
 
 type IPickerComp = {}
 
 export const PickerComp: FC<IPickerComp> = observer(({}) => {
   const { classes } = useStyles({})
-  const { show, type, setType, setShow } = pickerShareState
+  const { pickerShow, pickerType } = UIOperatePanel
+  useHookSignal(pickerShow)
+  useHookSignal(pickerType)
   return (
     <>
-      {show && (
-        <DraggableComp headerSlot={<h6>颜色</h6>} closeFunc={() => setShow(false)}>
+      {pickerShow.value && (
+        <DraggableComp headerSlot={<h6>颜色</h6>} closeFunc={() => pickerShow.dispatch(false)}>
           <Flex layout='v' className={classes.Picker} style={{}}>
             <Flex layout='h' className={classes.typeSwitcher} justify={'space-around'}>
-              <Button type='text' active={type === 'color'} onClick={() => setType('color')}>
+              <Button
+                active={pickerType.value === 'color'}
+                onClick={() => pickerType.dispatch('color')}>
                 颜色
               </Button>
-              <Button type='text' active={type === 'linear'} onClick={() => setType('linear')}>
+              <Button
+                active={pickerType.value === 'linear'}
+                onClick={() => pickerType.dispatch('linear')}>
                 线性
               </Button>
-              <Button type='text' active={type === 'photo'} onClick={() => setType('photo')}>
+              <Button
+                active={pickerType.value === 'photo'}
+                onClick={() => pickerType.dispatch('photo')}>
                 图片
               </Button>
             </Flex>
-            {type === 'color' && <PickerColorComp />}
+            {pickerType.value === 'color' && <PickerColorComp />}
           </Flex>
         </DraggableComp>
       )}

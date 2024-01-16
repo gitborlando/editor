@@ -1,8 +1,9 @@
-import { CSSProperties, ComponentPropsWithRef, FC, createElement } from 'react'
+import { CSSProperties, FC, createElement } from 'react'
 import { makeStyles } from '../theme'
 
-interface IIconProps extends ComponentPropsWithRef<'img'> {
+export type IIconProps = {
   children: any
+  className?: string
   size?: number
   rotate?: number
   scale?: number

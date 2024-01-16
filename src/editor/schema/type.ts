@@ -30,7 +30,7 @@ export type INode =
   | IEllipse
   | IText
   | ILine
-  | ITriangle
+  | IPolygon
   | IStar
   | IIrregular
 export type INodeParent = IFrame | IGroup | IPage
@@ -87,7 +87,7 @@ export type IPoint = {
   jumpToRight?: boolean
 }
 
-export type IVector = IRect | IEllipse | ITriangle | IStar | ILine | IIrregular
+export type IVector = IRect | IEllipse | IPolygon | IStar | ILine | IIrregular
 
 export type IVectorType = { type: 'vector' }
 
@@ -112,9 +112,9 @@ export type IEllipse = INodeBase &
     endAngle: number
   }
 
-export type ITriangle = INodeBase &
+export type IPolygon = INodeBase &
   IVectorType & {
-    vectorType: 'triangle'
+    vectorType: 'polygon'
     sides: number
     radius: number
   }

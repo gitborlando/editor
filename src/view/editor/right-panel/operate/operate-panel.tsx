@@ -5,7 +5,9 @@ import { useHookSignal } from '~/shared/signal-react'
 import { lastOne } from '~/shared/utils/array'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
+import { FillPropComp } from './fill/fill-prop'
 import { GeometryPropsComp } from './geometry/geometry-props'
+import { PickerComp } from './picker/picker'
 
 type IOperatePanelComp = {}
 
@@ -16,8 +18,9 @@ export const OperatePanelComp: FC<IOperatePanelComp> = ({}) => {
   useHookSignal(SchemaNode.hoverIds)
   return (
     <Flex layout='v' className={classes.OperatePanel}>
-      {SchemaNode.selectIds.value.size !== 0 && <GeometryPropsComp />}
-      {/* <PickerComp /> */}
+      {<GeometryPropsComp />}
+      {<FillPropComp />}
+      <PickerComp />
       <Flex style={{ marginTop: 'auto' }}>{lastOne(SchemaNode.hoverIds.value)}</Flex>
     </Flex>
   )

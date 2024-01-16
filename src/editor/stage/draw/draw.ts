@@ -57,7 +57,7 @@ export class StageDrawService {
       if (node.vectorType === 'rect') {
         element.drawRect(0, 0, width, height)
       }
-      if (node.vectorType === 'triangle') {
+      if (node.vectorType === 'polygon') {
         const polygon = createRegularPolygon(width, height, node.sides, rotation)
         return element.drawPolygon(polygon)
       }

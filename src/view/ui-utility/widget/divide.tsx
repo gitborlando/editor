@@ -17,6 +17,8 @@ export const Divide = forwardRef<HTMLDivElement, IDivide>(
     const { classes, cx } = useStyles({ length, bgColor, margin })
     return (
       <Flex
+        layout='c'
+        shrink={0}
         className={cx(
           classes.Divide,
           className,

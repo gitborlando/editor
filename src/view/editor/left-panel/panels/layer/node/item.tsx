@@ -1,5 +1,4 @@
 import { FC, useCallback } from 'react'
-import Asset from '~/assets'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
@@ -9,6 +8,7 @@ import { Signal } from '~/shared/signal'
 import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { noopFunc, stopPropagation } from '~/shared/utils/normal'
+import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -99,7 +99,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
               if (node.type === 'frame') return Asset.editor.node.frame
               if (node.type === 'vector') {
                 if (node.vectorType === 'rect') return Asset.editor.node.rect
-                if (node.vectorType === 'triangle') return Asset.editor.node.triangle
+                if (node.vectorType === 'polygon') return Asset.editor.node.polygon
               }
             })()}
           </Icon>

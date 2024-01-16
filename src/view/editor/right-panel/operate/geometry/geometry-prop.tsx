@@ -2,6 +2,7 @@ import { observer, useLocalObservable } from 'mobx-react'
 import { FC, useEffect, useRef } from 'react'
 import { numberHalfFix } from '~/editor/math/base'
 import { IGeometryData, OperateGeometry } from '~/editor/operate/geometry'
+import { SchemaNode } from '~/editor/schema/node'
 import { Drag } from '~/global/event/drag'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Input } from '~/view/ui-utility/widget/input'
@@ -39,12 +40,24 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(
       })
     }, [])
 
+    const produceValue = () => {
+      if (operateKey === 'x') {
+        const datum = SchemaNode.datumXY.x
+        return data[operateKey] - datum
+      }
+      if (operateKey === 'y') {
+        const datum = SchemaNode.datumXY.y
+        return data[operateKey] - datum
+      }
+      return data[operateKey]
+    }
+
     return (
       <Input
         ref={ref}
         className={classes.input}
         label={label}
-        value={numberHalfFix(data[operateKey])}
+        value={numberHalfFix(produceValue())}
         onNewValueApply={(v) => (data[operateKey] = v)}
         slideRate={slideRate}
       />

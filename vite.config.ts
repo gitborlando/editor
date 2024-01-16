@@ -1,13 +1,10 @@
 import react from '@vitejs/plugin-react'
-import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import { defineConfig } from 'vite'
 
-export default defineConfig(({ mode }) => {
-  const isReact = mode === 'react'
-  const isVue = mode === 'vue'
+export default defineConfig(() => {
   return {
-    plugins: [react(), vue()],
+    plugins: [react()],
     resolve: {
       alias: {
         '~': path.resolve(__dirname, 'src'),
@@ -15,10 +12,6 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 3000,
-    },
-    define: {
-      __REACT__: isReact,
-      __VUE__: isVue,
     },
   }
 })

@@ -93,3 +93,7 @@ export function makeAction<T extends any>(callback?: (...args: T[]) => void) {
     runInAction(() => callback?.(...args))
   }
 }
+
+export function iife(callback: () => any) {
+  return callback()
+}
