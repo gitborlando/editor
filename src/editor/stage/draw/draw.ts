@@ -5,6 +5,7 @@ import { IFill, IIrregular, INode, IVector } from '~/editor/schema/type'
 import { XY } from '~/shared/structure/xy'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
+import { createStarPolygon } from '~/shared/utils/pixi/star'
 import { StageElement } from '../element'
 import { PIXI } from '../pixi'
 import { StageDrawPath } from './path'
@@ -13,7 +14,6 @@ type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 export class StageDrawService {
-  currentElement!: IStageElement
   initHook() {
     SchemaNode.afterFlushDirty.hook(() => {
       SchemaNode.redrawIds.forEach((id) => {
@@ -23,13 +23,13 @@ export class StageDrawService {
       SchemaNode.redrawIds.clear()
     })
   }
-  drawNode(node: INode) {
+  private drawNode(node: INode) {
     const { id, fills } = node
     const element = StageElement.findOrCreate(id, 'graphic')
     element.clear()
     this.drawFills(element, node, fills)
   }
-  drawFills<T extends INode = INode>(element: PIXI.Graphics, node: T, fills: IFill[]) {
+  private drawFills<T extends INode = INode>(element: PIXI.Graphics, node: T, fills: IFill[]) {
     fills.forEach((fill) => {
       if (fill.type === 'color') {
         element.beginFill(fill.color)
@@ -62,8 +62,8 @@ export class StageDrawService {
         return element.drawPolygon(polygon)
       }
       if (node.vectorType === 'star') {
-        const polygon = createRegularPolygon(width, height, node.sides, rotation)
-        return element.drawPolygon(polygon)
+        const star = createStarPolygon(width, height, node.points, node.innerRate, rotation)
+        return element.drawPolygon(star)
       }
       if (node.vectorType === 'line') {
         // const polygon = createRegularPolygon(width, height, node.sides, rotation)

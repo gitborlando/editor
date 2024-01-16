@@ -126,9 +126,9 @@ export class SchemaDefaultService {
     return {
       type: 'vector',
       vectorType: 'star',
-      sides: 3,
+      points: 5,
       radius: 0,
-      innerRate: 0.3,
+      innerRate: 0.382,
       ...nodeBase,
       ...name,
       ...option,

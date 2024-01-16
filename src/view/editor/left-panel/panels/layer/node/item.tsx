@@ -7,7 +7,7 @@ import { Drag } from '~/global/event/drag'
 import { Signal } from '~/shared/signal'
 import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
-import { noopFunc, stopPropagation } from '~/shared/utils/normal'
+import { iife, noopFunc, stopPropagation } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -95,13 +95,11 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
         </Flex>
         <Flex layout='c' sidePadding={6}>
           <Icon size={12} scale={12 / 10}>
-            {(() => {
+            {iife(() => {
               if (node.type === 'frame') return Asset.editor.node.frame
-              if (node.type === 'vector') {
-                if (node.vectorType === 'rect') return Asset.editor.node.rect
-                if (node.vectorType === 'polygon') return Asset.editor.node.polygon
-              }
-            })()}
+              if (node.type === 'vector')
+                return Asset.editor.node[node.vectorType as keyof typeof Asset.editor.node]
+            })}
           </Icon>
         </Flex>
         <Flex layout='h' justify='space-between' style={{ width: '100%' }}>

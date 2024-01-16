@@ -31,8 +31,6 @@ export class SchemaNodeService {
     })
     this.afterAdd.hook((node) => {
       this.connectAt(SchemaPage.currentPage.value, node)
-      this.collectDirty(node.id)
-      SchemaNode.collectRedraw(node.id)
     })
     this.selectIds.hook((selectIds) => {
       this.autoGetDatumId(selectIds)

@@ -23,10 +23,12 @@ export class StageCreateService {
   createStarted = createSignal<string>()
   duringCreate = createSignal()
   private node!: INode
-  private realStageStart!: IXY
+  private sceneStageStart!: IXY
   private OBB!: OBB
   initHook() {
-    this.currentType.hook(() => StageInteract.type.dispatch('create'))
+    this.currentType.hook(() => {
+      StageInteract.type.dispatch('create')
+    })
   }
   startInteract() {
     Pixi.addListener('mousedown', this.create)
@@ -38,7 +40,7 @@ export class StageCreateService {
     Drag.onDown(this.onCreateStart).onMove(this.onCreateMove).onDestroy(this.onCreateEnd)
   }
   private onCreateStart({ start }: IDragData) {
-    this.realStageStart = StageViewport.toRealStageXY(start)
+    this.sceneStageStart = StageViewport.toRealStageXY(start)
     this.createNode()
     SchemaNode.add(this.node)
     StageElement.findOrCreate(this.node.id, 'graphic')
@@ -80,42 +82,42 @@ export class StageCreateService {
     StageInteract.type.dispatch('select')
   }
   private createNode() {
-    if (this.currentType.value === 'frame') this.createFrameNode()
-    if (this.currentType.value === 'rect') this.createRectNode()
-    if (this.currentType.value === 'polygon') this.createPolygonNode()
-    if (this.currentType.value === 'ellipse') this.createEllipseNode()
-    if (this.currentType.value === 'line') this.createLineNode()
+    if (this.currentType.value === 'frame') {
+      this.node = SchemaDefault.frame({
+        ...this.createMousedownBound(),
+      })
+    }
+    if (this.currentType.value === 'rect') {
+      this.node = SchemaDefault.rect({
+        ...this.createMousedownBound(),
+      })
+    }
+    if (this.currentType.value === 'polygon') {
+      this.node = SchemaDefault.polygon({
+        ...this.createMousedownBound(),
+      })
+    }
+    if (this.currentType.value === 'ellipse') {
+      this.node = SchemaDefault.ellipse({
+        ...this.createMousedownBound(),
+      })
+    }
+    if (this.currentType.value === 'star') {
+      this.node = SchemaDefault.star({
+        ...this.createMousedownBound(),
+      })
+    }
+    if (this.currentType.value === 'line') {
+      this.node = SchemaDefault.line({
+        start: XY.From(this.sceneStageStart),
+        end: new XY(0, 0),
+      })
+    }
     // if (this.currentType.value === 'text') this.createRectNode()
     // if (this.currentType.value === 'img') this.createRectNode()
   }
-  private createFrameNode() {
-    this.node = SchemaDefault.frame({
-      ...this.createMousedownBound(),
-    })
-  }
-  private createRectNode() {
-    this.node = SchemaDefault.rect({
-      ...this.createMousedownBound(),
-    })
-  }
-  private createPolygonNode() {
-    this.node = SchemaDefault.polygon({
-      ...this.createMousedownBound(),
-    })
-  }
-  private createEllipseNode() {
-    this.node = SchemaDefault.ellipse({
-      ...this.createMousedownBound(),
-    })
-  }
-  private createLineNode() {
-    this.node = SchemaDefault.line({
-      start: XY.From(this.realStageStart),
-      end: new XY(0, 0),
-    })
-  }
   private createMousedownBound() {
-    const { x, y } = this.realStageStart
+    const { x, y } = this.sceneStageStart
     return {
       x,
       y,

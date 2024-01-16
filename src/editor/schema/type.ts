@@ -122,7 +122,7 @@ export type IPolygon = INodeBase &
 export type IStar = INodeBase &
   IVectorType & {
     vectorType: 'star'
-    sides: number
+    points: number
     radius: number
     innerRate: number
   }

@@ -7,23 +7,27 @@ import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { macro_StringMatch } from '~/shared/utils/macro'
 import { ValueOf } from '~/shared/utils/normal'
-import { xy_mutate, xy_rotate2 } from '../math/xy'
 import { Record } from '../record'
 import { SchemaNode } from '../schema/node'
-import { IPolygon } from '../schema/type'
+import { IPolygon, IStar } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
 import { StageElement } from '../stage/element'
 import { StageSelect } from '../stage/interact/select'
 
-export type IGeometryData = {
-  x: number
-  y: number
-  width: number
-  height: number
-  rotation: number
-  radius: number
-  sides: number
+function initData() {
+  return {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    rotation: 0,
+    radius: 0,
+    sides: 3,
+    points: 5,
+  }
 }
+
+export type IGeometryData = ReturnType<typeof initData>
 
 @autobind
 export class OperateGeometryService {
@@ -94,10 +98,10 @@ export class OperateGeometryService {
       })
     }
     this.data._noIntercept = false
-
-    const { x, y, width, height, rotation, radius, sides } = this.data
-    this.oneTickChange.reset({ x, y, width, height, rotation, radius, sides })
-    this.oneOperateChange.reset({ x, y, width, height, rotation, radius, sides })
+    const { x, y, width, height, rotation, radius, sides, points } = this.data
+    const newData = { x, y, width, height, rotation, radius, sides, points }
+    this.oneTickChange.reset(newData)
+    this.oneOperateChange.reset(newData)
   }
   private patchChangeToVectorPoints(id: string) {
     const node = SchemaNode.find(id)
@@ -122,7 +126,7 @@ export class OperateGeometryService {
     const OBB = StageElement.OBBCache.get(id)
     const path = StageElement.pathCache.get(id)
     const { record, changedKeys } = this.oneTickChange
-    const { x, y, width, height, rotation, sides } = record
+    const { x, y, width, height, rotation, sides, points } = record
     if (changedKeys.has('x') && x) {
       node.x += x.current - x.last
       node.centerX += x.current - x.last
@@ -147,17 +151,16 @@ export class OperateGeometryService {
     }
     if (changedKeys.has('rotation') && rotation) {
       node.rotation += rotation.current - rotation.last
-      const rotatedXY = xy_rotate2(
-        node,
-        node.centerX,
-        node.centerY,
-        rotation.current - rotation.last
-      )
-      xy_mutate(node, rotatedXY)
+      XY.From(node)
+        .rotate(XY.From(node, 'center'), rotation.current - rotation.last)
+        .mutate(node)
       OBB.reRotation(node.rotation)
     }
     if (changedKeys.has('sides') && sides) {
       ;(node as IPolygon).sides = sides.current
+    }
+    if (changedKeys.has('points') && points) {
+      ;(node as IStar).points = points.current
     }
 
     SchemaNode.collectRedraw(id)
@@ -228,15 +231,3 @@ export class OperateGeometryService {
 }
 
 export const OperateGeometry = new OperateGeometryService()
-
-function initData() {
-  return {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-    rotation: 0,
-    radius: 0,
-    sides: 3,
-  }
-}
