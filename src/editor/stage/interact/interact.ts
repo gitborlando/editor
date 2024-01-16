@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { Drag } from '~/global/event/drag'
-import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { Pixi } from '../pixi'
 import { StageCreate } from './create'

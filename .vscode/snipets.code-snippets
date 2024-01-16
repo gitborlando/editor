@@ -63,7 +63,7 @@
   "Service": {
     "prefix": "service",
     "body": [
-      "import { autobind } from '~/shared/decorator'",
+      "import autobind from 'class-autobind-decorator'",
       "",
       "@autobind",
       "export class $1${TM_FILENAME_BASE}Service {",

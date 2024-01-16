@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { WheelEvent as ReactWheelEvent } from 'react'
-import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 
 type IWheelData = { e: WheelEvent | ReactWheelEvent; direction: 1 | -1 }

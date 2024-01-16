@@ -1,4 +1,4 @@
-import { autobind } from '~/shared/decorator'
+import autobind from 'class-autobind-decorator'
 import { ILoopArrayCallbackData, LoopArray } from '~/shared/structure/loop-array'
 import { PathCurve } from './curve'
 import { PathLine } from './line'

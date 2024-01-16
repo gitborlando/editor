@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
-import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { SchemaNode } from './node'
 import { SchemaPage } from './page'

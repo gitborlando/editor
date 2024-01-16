@@ -1,7 +1,7 @@
 //@ts-ignore
+import autobind from 'class-autobind-decorator'
 import { Upload } from '~/global/upload'
 import { mockJsonFile } from '~/mock/mock'
-import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { SchemaDefault } from './schema/default'
 import { SchemaNode } from './schema/node'

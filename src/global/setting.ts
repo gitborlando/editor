@@ -1,7 +1,7 @@
-import { autobind } from '~/shared/decorator'
-import { macro_StringMatch } from '~/shared/macro'
+import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal'
 import { hslBlueColor } from '~/shared/utils/color'
+import { macro_StringMatch } from '~/shared/utils/macro'
 
 type ISettingKey = keyof Omit<SettingService, 'key' | 'inited' | 'init'>
 

@@ -1,7 +1,7 @@
+import autobind from 'class-autobind-decorator'
 import { max, min } from '~/editor/math/base'
 import { OperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNode } from '~/editor/schema/node'
-import { WrapToggle, autobind } from '~/shared/decorator'
 import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { firstOne } from '~/shared/utils/array'
 import { StageElement } from '../element'
@@ -19,8 +19,8 @@ export class StageTransformService {
       SchemaNode.afterFlushDirty.hookOnce(this.calcTransformData)
     })
   }
-  @WrapToggle('data._noIntercept')
   private calcTransformData() {
+    this.data._noIntercept = true
     const selectIds = SchemaNode.selectIds
     if (selectIds.value.size === 1) {
       const id = firstOne(selectIds.value)
@@ -47,6 +47,7 @@ export class StageTransformService {
       this.data.centerY = this.data.y + this.data.height / 2
       this.data.rotation = 0
     }
+    this.data._noIntercept = false
   }
 }
 

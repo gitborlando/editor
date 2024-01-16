@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { createCache } from '~/shared/cache'
-import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
 import { OBB } from '../math/obb'
 import { Path } from '../math/path/path'

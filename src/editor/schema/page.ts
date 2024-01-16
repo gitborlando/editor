@@ -1,4 +1,4 @@
-import { autobind } from '~/shared/decorator'
+import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal'
 import { Delete } from '~/shared/utils/normal'
 import { StageElement } from '../stage/element'

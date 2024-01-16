@@ -1,6 +1,6 @@
+import autobind from 'class-autobind-decorator'
 import { radianfy } from '~/editor/math/base'
 import { SchemaNode } from '~/editor/schema/node'
-import { autobind } from '~/shared/decorator'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 

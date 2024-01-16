@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { createCache } from '~/shared/cache'
-import { autobind } from '~/shared/decorator'
 import { SchemaNode } from './node'
 import { SchemaPage } from './page'
 import { Schema } from './schema'

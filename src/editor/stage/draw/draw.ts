@@ -1,7 +1,7 @@
+import autobind from 'class-autobind-decorator'
 import { radianfy } from '~/editor/math/base'
 import { SchemaNode } from '~/editor/schema/node'
 import { IFill, IIrregular, INode, IVector } from '~/editor/schema/type'
-import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'

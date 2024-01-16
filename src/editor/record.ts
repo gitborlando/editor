@@ -1,4 +1,4 @@
-import { autobind } from '~/shared/decorator'
+import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal'
 import { INoopFunc } from '~/shared/utils/normal'
 

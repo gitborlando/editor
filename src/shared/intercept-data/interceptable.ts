@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { IValueWillChange, intercept, observable } from 'mobx'
-import { autobind } from '../decorator'
 import { createSignal } from '../signal'
 
 @autobind

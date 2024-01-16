@@ -1,4 +1,4 @@
-import { autobind } from '~/shared/decorator'
+import autobind from 'class-autobind-decorator'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 

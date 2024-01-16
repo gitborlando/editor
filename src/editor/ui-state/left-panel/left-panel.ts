@@ -1,6 +1,6 @@
+import autobind from 'class-autobind-decorator'
 import { StageViewport } from '~/editor/stage/viewport'
 import { Setting } from '~/global/setting'
-import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 
 @autobind

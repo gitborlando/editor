@@ -1,7 +1,7 @@
+import autobind from 'class-autobind-decorator'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaUtil } from '~/editor/schema/util'
 import { Setting } from '~/global/setting'
-import { autobind } from '~/shared/decorator'
 import { lastOne } from '~/shared/utils/array'
 import { StageDraw } from '../draw/draw'
 import { PIXI, Pixi } from '../pixi'

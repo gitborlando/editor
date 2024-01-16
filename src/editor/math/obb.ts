@@ -1,4 +1,4 @@
-import { autobind } from '~/shared/decorator'
+import autobind from 'class-autobind-decorator'
 import { XY } from '~/shared/structure/xy'
 import { IBound, IXY } from '~/shared/utils/normal'
 import { abs, rcos, rsin } from './base'

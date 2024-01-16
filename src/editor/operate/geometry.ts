@@ -1,11 +1,11 @@
+import autobind from 'class-autobind-decorator'
 import { IValueWillChange } from 'mobx'
 import { max, min, rcos, rsin } from '~/editor/math/base'
-import { WrapToggle, autobind } from '~/shared/decorator'
 import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
-import { macro_StringMatch } from '~/shared/macro'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
+import { macro_StringMatch } from '~/shared/utils/macro'
 import { ValueOf } from '~/shared/utils/normal'
 import { xy_mutate, xy_rotate2 } from '../math/xy'
 import { Record } from '../record'
@@ -69,8 +69,8 @@ export class OperateGeometryService {
       ctx.newValue = max(-180, min(180, ctx.newValue))
     }
   }
-  @WrapToggle('data._noIntercept')
   private setupGeometryData() {
+    this.data._noIntercept = true
     if (SchemaNode.selectIds.value.size === 1) {
       const node = SchemaNode.selectNodes[0]
       void (<const>['x', 'y', 'width', 'height', 'rotation']).forEach(
@@ -93,6 +93,7 @@ export class OperateGeometryService {
         else this.data[key] = 0
       })
     }
+    this.data._noIntercept = false
 
     const { x, y, width, height, rotation, radius, sides } = this.data
     this.oneTickChange.reset({ x, y, width, height, rotation, radius, sides })

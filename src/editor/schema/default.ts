@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
-import { autobind } from '~/shared/decorator'
 import { COLOR, rgba } from '~/shared/utils/color'
 import { IBound, IXY } from '~/shared/utils/normal'
 import {

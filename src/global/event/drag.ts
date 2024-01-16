@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { makeObservable, observable } from 'mobx'
-import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { IBound, IXY, makeAction, noopFunc, type ICursor } from '~/shared/utils/normal'
 

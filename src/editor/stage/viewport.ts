@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { EventWheelService } from '~/global/event/wheel'
-import { autobind } from '~/shared/decorator'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'

@@ -1,5 +1,5 @@
+import autobind from 'class-autobind-decorator'
 import { Setting } from '~/global/setting'
-import { autobind } from '~/shared/decorator'
 import { XY } from '~/shared/structure/xy'
 import { StageSelect } from '../interact/select'
 import { PIXI, Pixi } from '../pixi'

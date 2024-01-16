@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
-import { macro_StringMatch } from '~/shared/macro'
 import { timeRecord } from '~/shared/utils/dev'
+import { macro_StringMatch } from '~/shared/utils/macro'
 import { This } from '~/shared/utils/normal'
 This.ids = <string[]>[]
 

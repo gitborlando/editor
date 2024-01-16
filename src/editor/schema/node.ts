@@ -1,4 +1,4 @@
-import { autobind } from '~/shared/decorator'
+import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { firstOne, insertAt } from '~/shared/utils/array'
