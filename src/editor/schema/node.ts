@@ -27,7 +27,7 @@ export class SchemaNodeService {
   afterFlushDirty = createSignal()
   initHook() {
     Pixi.inited.hook(() => {
-      Pixi.duringTicker.hook(this.flushDirty)
+      Pixi.duringTicker.hook(this.flushDirty, { id: 'flushDirty' })
     })
     this.selectIds.hook((selectIds) => {
       this.autoGetDatumId(selectIds)

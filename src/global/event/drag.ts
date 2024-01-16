@@ -65,7 +65,7 @@ export class DragService {
         marquee: this.marquee,
       })
     }
-    if (this.downHandler === undefined) {
+    if (!this.downHandler) {
       window.addEventListener('mousedown', () => (this.canMove = true))
     }
     return this

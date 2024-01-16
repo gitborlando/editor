@@ -16,26 +16,30 @@ import { StageViewport } from '../viewport'
 
 @autobind
 export class StageWidgetTransformService {
-  vertexTL_XY = XY.Of(0, 0)
-  vertexTR_XY = XY.Of(0, 0)
-  vertexBL_XY = XY.Of(0, 0)
-  vertexBR_XY = XY.Of(0, 0)
-  vertexTL = new PIXI.Graphics()
-  vertexTR = new PIXI.Graphics()
-  vertexBL = new PIXI.Graphics()
-  vertexBR = new PIXI.Graphics()
-  lineL = new PIXI.Graphics()
-  lineT = new PIXI.Graphics()
-  lineR = new PIXI.Graphics()
-  lineB = new PIXI.Graphics()
-  outlines = <PIXI.Graphics[]>[]
-  transformContainer = new PIXI.Container()
   private renderType = <'reDraw' | 'clear' | 'reserve'>'reserve'
   private transformOBB?: OBB
+  private vertexTL_XY = XY.Of(0, 0)
+  private vertexTR_XY = XY.Of(0, 0)
+  private vertexBL_XY = XY.Of(0, 0)
+  private vertexBR_XY = XY.Of(0, 0)
+  private vertexTL = new PIXI.Graphics()
+  private vertexTR = new PIXI.Graphics()
+  private vertexBL = new PIXI.Graphics()
+  private vertexBR = new PIXI.Graphics()
+  private lineL = new PIXI.Graphics()
+  private lineT = new PIXI.Graphics()
+  private lineR = new PIXI.Graphics()
+  private lineB = new PIXI.Graphics()
+  private outlines = <PIXI.Graphics[]>[]
+  private transformContainer = new PIXI.Container()
   initHook() {
     Pixi.inited.hook(() => {
       this.addToStage()
       this.bindEvent()
+    })
+    Pixi.duringTicker.priorityHook('after:flushDirty', () => {
+      if (this.renderType === 'reDraw') this.draw()
+      if (this.renderType === 'clear') this.clear()
     })
     this.hookRender()
   }
@@ -64,11 +68,6 @@ export class StageWidgetTransformService {
   private hookRender() {
     const setClear = () => (this.renderType = 'clear')
     const setRedraw = () => (this.renderType = 'reDraw')
-    Pixi.duringTicker.hook(() => {
-      this.draw()
-      // if (this.renderType === 'reDraw') this.draw()
-      // if (this.renderType === 'clear') this.clear()
-    })
     OperateGeometry.beforeOperate.hook(setClear)
     StageViewport.beforeZoom.hook(setClear)
     StageSelect.afterClearSelect.hook(setClear)
@@ -96,6 +95,7 @@ export class StageWidgetTransformService {
   private clear() {
     this.components.forEach((i) => i.clear())
     this.renderType = 'reserve'
+    this.transformOBB = undefined
   }
   private calcVertexXY() {
     const { centerX, centerY, width, height, rotation } = StageTransform.data
@@ -151,8 +151,7 @@ export class StageWidgetTransformService {
     })
   }
   private bindMoveEvent() {
-    const handleDrag = (e: MouseEvent) => {
-      if (!this.mouseIn(e)) return
+    const handleDrag = () => {
       const { x, y } = OperateGeometry.data
       Drag.onStart(() => {
         this.renderType = 'clear'
@@ -169,7 +168,12 @@ export class StageWidgetTransformService {
           StageElement.canHover = true
         })
     }
-    Pixi.addListener('mousedown', (e) => handleDrag(e as MouseEvent))
+    Pixi.addListener('mousedown', (e) => {
+      if (this.mouseIn(e as MouseEvent)) handleDrag()
+    })
+    StageSelect.afterSelect.hook((type) => {
+      if (type === 'stage-single') handleDrag()
+    })
   }
   private bindTopLineEvent() {
     this.lineT.eventMode = 'dynamic'
