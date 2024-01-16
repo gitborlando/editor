@@ -51,12 +51,7 @@ export class StageCreateService {
     const { x, y } = StageViewport.toRealStageXY(marquee)
     const width = StageViewport.toRealStageShift(marquee.width)
     const height = StageViewport.toRealStageShift(marquee.height)
-    if (this.currentType.value === 'ellipse') {
-      this.node.x = x + width / 2
-      this.node.y = y + height / 2
-      this.node.width = width
-      this.node.height = height
-    } else if (this.currentType.value === 'line') {
+    if (this.currentType.value === 'line') {
       ;(this.node as ILine).end = StageViewport.toRealStageXY(current)
     } else {
       this.node.centerX = x + width / 2

@@ -57,6 +57,9 @@ export class StageDrawService {
       if (node.vectorType === 'rect') {
         element.drawRect(0, 0, width, height)
       }
+      if (node.vectorType === 'ellipse') {
+        element.drawEllipse(width / 2, height / 2, width / 2, height / 2)
+      }
       if (node.vectorType === 'polygon') {
         const polygon = createRegularPolygon(width, height, node.sides, rotation)
         return element.drawPolygon(polygon)
