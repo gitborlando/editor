@@ -2,7 +2,9 @@ import autobind from 'class-autobind-decorator'
 import { OperateGeometry } from '~/editor/operate/geometry'
 import { SchemaDefault } from '~/editor/schema/default'
 import { SchemaNode } from '~/editor/schema/node'
-import { ILine, INode } from '~/editor/schema/type'
+import { SchemaPage } from '~/editor/schema/page'
+import { IFrame, ILine, INode } from '~/editor/schema/type'
+import { SchemaUtil } from '~/editor/schema/util'
 import { Drag, type IDragData } from '~/global/event/drag'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
@@ -12,8 +14,7 @@ import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
 
-// const createTypes = ['text'] as const
-const createTypes = ['frame', 'rect', 'ellipse', 'polygon', 'line', 'image', 'star'] as const
+const createTypes = ['frame', 'rect', 'ellipse', 'line', 'polygon', 'star', 'image'] as const
 export type IStageCreateType = (typeof createTypes)[number]
 
 @autobind
@@ -41,6 +42,7 @@ export class StageCreateService {
     this.sceneStageStart = StageViewport.toSceneStageXY(start)
     this.createNode()
     SchemaNode.add(this.node)
+    SchemaNode.connectAt(this.findContainer(), this.node)
     StageElement.findOrCreate(this.node.id, 'graphic')
     this.createStarted.dispatch(this.node.id)
   }
@@ -98,19 +100,16 @@ export class StageCreateService {
         end: new XY(0, 0),
       })
     }
-    // if (this.currentType.value === 'text') this.createRectNode()
-    // if (this.currentType.value === 'img') this.createRectNode()
   }
   private createMousedownBound() {
     const { x, y } = this.sceneStageStart
-    return {
-      x,
-      y,
-      width: 0,
-      height: 0,
-      centerX: x,
-      centerY: y,
-    }
+    const [width, height, centerX, centerY] = [0, 0, x, y]
+    return { x, y, width, height, centerX, centerY }
+  }
+  private findContainer() {
+    const frameId = [...SchemaNode.hoverIds.value].reverse().find(SchemaUtil.isFrame)
+    if (frameId) return SchemaNode.find(frameId) as IFrame
+    return SchemaPage.currentPage.value
   }
 }
 

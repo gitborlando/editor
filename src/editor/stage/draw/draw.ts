@@ -103,6 +103,7 @@ export class StageDrawService {
   private getElementPivotXY(node: INode) {
     const pivotX = node.centerX - node.width / 2
     const pivotY = node.centerY - node.height / 2
+    if (node.rotation === 0) return XY.Of(pivotX, pivotY)
     return XY.Of(pivotX, pivotY).rotate(XY.From(node, 'center'), node.rotation)
   }
 }

@@ -29,9 +29,6 @@ export class SchemaNodeService {
     Pixi.inited.hook(() => {
       Pixi.duringTicker.hook(this.flushDirty)
     })
-    this.afterAdd.hook((node) => {
-      this.connectAt(SchemaPage.currentPage.value, node)
-    })
     this.selectIds.hook((selectIds) => {
       this.autoGetDatumId(selectIds)
     })
