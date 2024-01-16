@@ -64,7 +64,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     <Flex layout='h' className={classes.Header}>
       <Flex layout='h' className={classes.leftGroup}>
         <Flex layout='c'>
-          <Icon size={28}>{Asset.editor.header.shiyangyang}</Icon>
+          <Icon size={28}>{Asset.favIcon.shiyangyang}</Icon>
           <h4 style={{ color: hslBlueColor(60) }}>屎羊羊编辑器</h4>
         </Flex>
         <Flex className={classes.fileSave}>/{SchemaFile.isSaved.value ? '已保存' : '未保存'}</Flex>

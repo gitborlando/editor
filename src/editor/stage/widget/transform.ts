@@ -9,7 +9,6 @@ import { XY } from '~/shared/structure/xy'
 import { StageCursor } from '../cursor'
 import { StageDraw } from '../draw/draw'
 import { StageElement } from '../element'
-import { StageCreate } from '../interact/create'
 import { StageSelect } from '../interact/select'
 import { StageTransform } from '../interact/transform'
 import { PIXI, Pixi } from '../pixi'
@@ -41,7 +40,7 @@ export class StageWidgetTransformService {
     this.hookRender()
   }
   mouseIn(e: MouseEvent) {
-    const { x, y } = StageViewport.toRealStageXY(XY.From(e, 'client'))
+    const { x, y } = StageViewport.toSceneStageXY(XY.From(e, 'client'))
     const pointOBB = new OBB(x, y, 1, 1, 0)
     return this.transformOBB?.obbHitTest(pointOBB)
   }
@@ -73,7 +72,6 @@ export class StageWidgetTransformService {
     OperateGeometry.beforeOperate.hook(setClear)
     StageViewport.beforeZoom.hook(setClear)
     StageSelect.afterClearSelect.hook(setClear)
-    StageCreate.duringCreate.hook(setRedraw)
     OperateGeometry.afterOperate.hook(setRedraw)
     StageSelect.afterSelect.hook(setRedraw)
     StageViewport.afterZoom.hook(setRedraw)
@@ -162,9 +160,9 @@ export class StageWidgetTransformService {
         OperateGeometry.beforeOperate.dispatch(['x', 'y'])
       })
         .onMove(({ shift }) => {
-          const realShift = StageViewport.toRealStageShiftXY(shift)
-          OperateGeometry.data.x = x + realShift.x
-          OperateGeometry.data.y = y + realShift.y
+          const sceneShiftXY = StageViewport.toSceneStageShiftXY(shift)
+          OperateGeometry.data.x = x + sceneShiftXY.x
+          OperateGeometry.data.y = y + sceneShiftXY.y
         })
         .onDestroy(() => {
           OperateGeometry.afterOperate.dispatch()
@@ -191,14 +189,13 @@ export class StageWidgetTransformService {
       const { y, height } = OperateGeometry.data
       Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['height']))
         .onMove(({ shift }) => {
-          const realShift = StageViewport.toRealStageShiftXY(shift)
-          OperateGeometry.data.height = height - realShift.y
-          OperateGeometry.data.y = y + realShift.y
+          const sceneShiftXY = StageViewport.toSceneStageShiftXY(shift)
+          OperateGeometry.data.height = height - sceneShiftXY.y
+          OperateGeometry.data.y = y + sceneShiftXY.y
         })
-        .onEnd(({ dragService }) => {
+        .onDestroy(() => {
           Pixi.isForbidEvent = false
           OperateGeometry.afterOperate.dispatch()
-          dragService.destroy()
         })
     })
   }
@@ -220,13 +217,12 @@ export class StageWidgetTransformService {
       const { width } = OperateGeometry.data
       Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['width']))
         .onMove(({ shift }) => {
-          const realShift = StageViewport.toRealStageShiftXY(shift)
-          OperateGeometry.data.width = width + realShift.x
+          const sceneShiftXY = StageViewport.toSceneStageShiftXY(shift)
+          OperateGeometry.data.width = width + sceneShiftXY.x
         })
-        .onEnd(({ dragService }) => {
+        .onDestroy(() => {
           Pixi.isForbidEvent = false
           OperateGeometry.afterOperate.dispatch()
-          dragService.destroy()
         })
     })
   }
@@ -248,13 +244,12 @@ export class StageWidgetTransformService {
       const { height } = OperateGeometry.data
       Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['height']))
         .onMove(({ shift }) => {
-          const realShift = StageViewport.toRealStageShiftXY(shift)
-          OperateGeometry.data.height = height + realShift.y
+          const sceneShiftXY = StageViewport.toSceneStageShiftXY(shift)
+          OperateGeometry.data.height = height + sceneShiftXY.y
         })
-        .onEnd(({ dragService }) => {
+        .onDestroy(() => {
           Pixi.isForbidEvent = false
           OperateGeometry.afterOperate.dispatch()
-          dragService.destroy()
         })
     })
   }
@@ -276,14 +271,13 @@ export class StageWidgetTransformService {
       const { x, width } = OperateGeometry.data
       Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['width']))
         .onMove(({ shift }) => {
-          const realShift = StageViewport.toRealStageShiftXY(shift)
-          OperateGeometry.data.width = width - realShift.x
-          OperateGeometry.data.x = x + realShift.x
+          const sceneShiftXY = StageViewport.toSceneStageShiftXY(shift)
+          OperateGeometry.data.width = width - sceneShiftXY.x
+          OperateGeometry.data.x = x + sceneShiftXY.x
         })
-        .onEnd(({ dragService }) => {
+        .onDestroy(() => {
           Pixi.isForbidEvent = false
           OperateGeometry.afterOperate.dispatch()
-          dragService.destroy()
         })
     })
   }

@@ -40,7 +40,18 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(
       })
     }, [])
 
-    const produceValue = () => {
+    const produceValue = (newValue?: number) => {
+      if (newValue !== undefined) {
+        if (operateKey === 'x') {
+          const datum = SchemaNode.datumXY.x
+          return newValue + datum
+        }
+        if (operateKey === 'y') {
+          const datum = SchemaNode.datumXY.y
+          return newValue + datum
+        }
+        return newValue
+      }
       if (operateKey === 'x') {
         const datum = SchemaNode.datumXY.x
         return data[operateKey] - datum
@@ -58,7 +69,7 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(
         className={classes.input}
         label={label}
         value={numberHalfFix(produceValue())}
-        onNewValueApply={(v) => (data[operateKey] = v)}
+        onNewValueApply={(v) => (data[operateKey] = produceValue(v))}
         slideRate={slideRate}
       />
     )

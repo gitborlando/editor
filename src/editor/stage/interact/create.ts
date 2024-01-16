@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { OBB } from '~/editor/math/obb'
+import { OperateGeometry } from '~/editor/operate/geometry'
 import { SchemaDefault } from '~/editor/schema/default'
 import { SchemaNode } from '~/editor/schema/node'
 import { ILine, INode } from '~/editor/schema/type'
@@ -21,10 +21,8 @@ export class StageCreateService {
   createTypes = createTypes
   currentType = createSignal<IStageCreateType>('frame')
   createStarted = createSignal<string>()
-  duringCreate = createSignal()
   private node!: INode
   private sceneStageStart!: IXY
-  private OBB!: OBB
   initHook() {
     this.currentType.hook(() => {
       StageInteract.type.dispatch('create')
@@ -40,40 +38,32 @@ export class StageCreateService {
     Drag.onDown(this.onCreateStart).onMove(this.onCreateMove).onDestroy(this.onCreateEnd)
   }
   private onCreateStart({ start }: IDragData) {
-    this.sceneStageStart = StageViewport.toRealStageXY(start)
+    this.sceneStageStart = StageViewport.toSceneStageXY(start)
     this.createNode()
     SchemaNode.add(this.node)
     StageElement.findOrCreate(this.node.id, 'graphic')
-    this.OBB = StageElement.OBBCache.get(this.node.id)
     this.createStarted.dispatch(this.node.id)
   }
   private onCreateMove({ marquee, current }: IDragData) {
-    const { x, y } = StageViewport.toRealStageXY(marquee)
-    const width = StageViewport.toRealStageShift(marquee.width)
-    const height = StageViewport.toRealStageShift(marquee.height)
+    const { x, y } = StageViewport.toSceneStageXY(marquee)
+    const width = StageViewport.toSceneStageShift(marquee.width)
+    const height = StageViewport.toSceneStageShift(marquee.height)
     if (this.currentType.value === 'line') {
-      ;(this.node as ILine).end = StageViewport.toRealStageXY(current)
+      ;(this.node as ILine).end = StageViewport.toSceneStageXY(current)
     } else {
-      this.node.centerX = x + width / 2
-      this.node.centerY = y + height / 2
-      this.node.width = width
-      this.node.height = height
+      OperateGeometry.data.x = x
+      OperateGeometry.data.y = y
+      OperateGeometry.data.width = width
+      OperateGeometry.data.height = height
     }
-    this.OBB.reBound(width, height, this.node.centerX, this.node.centerY)
-    SchemaNode.collectRedraw(this.node.id)
-    this.duringCreate.dispatch()
+    OperateGeometry.afterOperate.dispatch()
   }
   private onCreateEnd() {
-    const [width, height, centerX, centerY] = [100, 100, this.node.x + 50, this.node.y + 50]
-    if (this.node.width === 0.01) {
-      this.node.width = width
-      this.node.height = height
-      this.node.centerX = centerX
-      this.node.centerY = centerY
-      this.OBB.reBound(width, height, centerX, centerY)
+    if (OperateGeometry.data.width === 0) {
+      OperateGeometry.data.width = 100
+      OperateGeometry.data.height = 100
+      OperateGeometry.afterOperate.dispatch()
     }
-    SchemaNode.collectRedraw(this.node.id)
-    this.duringCreate.dispatch()
     StageInteract.type.dispatch('select')
   }
   private createNode() {
@@ -116,10 +106,10 @@ export class StageCreateService {
     return {
       x,
       y,
-      width: 0.01,
-      height: 0.01,
-      centerX: x + 0.005,
-      centerY: y + 0.005,
+      width: 0,
+      height: 0,
+      centerX: x,
+      centerY: y,
     }
   }
 }

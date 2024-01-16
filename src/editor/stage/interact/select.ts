@@ -151,9 +151,9 @@ export class StageSelectService {
   private calcMarqueeOBB() {
     if (!this.marquee.value) return
     const marquee = this.marquee.value!
-    const { x, y } = StageViewport.toRealStageXY(XY.Of(marquee.x, marquee.y))
-    const width = StageViewport.toRealStageShift(marquee.width)
-    const height = StageViewport.toRealStageShift(marquee.height)
+    const { x, y } = StageViewport.toSceneStageXY(XY.Of(marquee.x, marquee.y))
+    const width = StageViewport.toSceneStageShift(marquee.width)
+    const height = StageViewport.toSceneStageShift(marquee.height)
     return new OBB(x + width / 2, y + height / 2, width, height, 0)
   }
   private undoRedo() {

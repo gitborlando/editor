@@ -5,14 +5,12 @@ import { SchemaNode } from '~/editor/schema/node'
 import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { firstOne } from '~/shared/utils/array'
 import { StageElement } from '../element'
-import { StageCreate } from './create'
 import { StageSelect } from './select'
 
 @autobind
 export class StageTransformService {
   data = createInterceptData(initData())
   initHook() {
-    StageCreate.duringCreate.hook(this.calcTransformData)
     StageSelect.duringMarqueeSelect.hook(this.calcTransformData)
     StageSelect.afterSelect.hook(this.calcTransformData)
     OperateGeometry.afterOperate.hook(() => {
@@ -21,14 +19,13 @@ export class StageTransformService {
   }
   private calcTransformData() {
     this.data._noIntercept = true
-    const selectIds = SchemaNode.selectIds
-    if (selectIds.value.size === 1) {
-      const id = firstOne(selectIds.value)
-      const OBB = StageElement.OBBCache.get(id)
+    const selectIds = SchemaNode.selectIds.value
+    if (selectIds.size === 1) {
+      const OBB = StageElement.OBBCache.get(firstOne(selectIds))
       const keys = <const>['width', 'height', 'centerX', 'centerY', 'rotation']
       keys.forEach((key) => (this.data[key] = OBB[key]))
     }
-    if (selectIds.value.size > 1) {
+    if (selectIds.size > 1) {
       let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
       SchemaNode.selectNodes.forEach((node) => {
         const OBB = StageElement.OBBCache.get(node.id)

@@ -18,11 +18,11 @@ export class StageWidgetMarqueeService {
       this.marqueeElement.setParent(Pixi.sceneStage)
     }
     const { x, y, width, height } = StageSelect.marquee.value
-    const realStart = StageViewport.toRealStageXY(XY.Of(x, y))
-    const realShift = StageViewport.toRealStageShiftXY(XY.Of(width, height))
+    const sceneStartXY = StageViewport.toSceneStageXY(XY.Of(x, y))
+    const sceneShiftXY = StageViewport.toSceneStageShiftXY(XY.Of(width, height))
     this.marqueeElement.beginFill(Setting.color.value, 0.1)
     this.marqueeElement.lineStyle(1 / StageViewport.zoom.value, Setting.color.value)
-    this.marqueeElement.drawRect(realStart.x, realStart.y, realShift.x, realShift.y)
+    this.marqueeElement.drawRect(sceneStartXY.x, sceneStartXY.y, sceneShiftXY.x, sceneShiftXY.y)
   }
 }
 

@@ -1,7 +1,6 @@
 import EditorHeaderMenu from './editor/header/menu.tsx'
 import EditorHeaderRecordRedo from './editor/header/record/redo.tsx'
 import EditorHeaderRecordUndo from './editor/header/record/undo.tsx'
-import EditorHeaderShiyangyang from './editor/header/shiyangyang.png'
 import EditorHeaderStageOperateMove from './editor/header/stage-operate/move.tsx'
 import EditorHeaderStageOperateSelect from './editor/header/stage-operate/select.tsx'
 import EditorLeftPanelNodeCollapse from './editor/left-panel/node/collapse.tsx'
@@ -21,10 +20,11 @@ import EditorNodeStar from './editor/node/star.tsx'
 import EditorSharedDelete from './editor/shared/Delete.tsx'
 import EditorSharedLock from './editor/shared/lock.tsx'
 import EditorSharedMinus from './editor/shared/minus.tsx'
-import EditorSharedUnlock from './editor/shared/unlock.tsx'
-import EditorSharedUnvisible from './editor/shared/unvisible.tsx'
+import EditorSharedUnLock from './editor/shared/un-lock.tsx'
+import EditorSharedUnVisible from './editor/shared/un-visible.tsx'
 import EditorSharedVisible from './editor/shared/visible.tsx'
 import EditorWidgetNumberInputOperateUp from './editor/widget/number-input/operate-up.tsx'
+import FavIconShiyangyang from './fav-icon/shiyangyang.png'
 
 const Asset = {
   editor: {
@@ -34,7 +34,6 @@ const Asset = {
         redo: EditorHeaderRecordRedo,
         undo: EditorHeaderRecordUndo,
       },
-      shiyangyang: EditorHeaderShiyangyang,
       stageOperate: {
         move: EditorHeaderStageOperateMove,
         select: EditorHeaderStageOperateSelect,
@@ -68,8 +67,8 @@ const Asset = {
       delete: EditorSharedDelete,
       lock: EditorSharedLock,
       minus: EditorSharedMinus,
-      unlock: EditorSharedUnlock,
-      unvisible: EditorSharedUnvisible,
+      unLock: EditorSharedUnLock,
+      unVisible: EditorSharedUnVisible,
       visible: EditorSharedVisible,
     },
     widget: {
@@ -77,6 +76,9 @@ const Asset = {
         operateUp: EditorWidgetNumberInputOperateUp,
       },
     },
+  },
+  favIcon: {
+    shiyangyang: FavIconShiyangyang,
   },
 }
 

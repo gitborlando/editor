@@ -46,18 +46,18 @@ export class StageViewportService {
   toStageXY(xy: IXY) {
     return this.toViewportXY(xy).minus(this.stageOffset.value)
   }
-  toRealStageXY(xy: IXY) {
+  toSceneStageXY(xy: IXY) {
     return this.toViewportXY(xy).minus(this.stageOffset.value).divide(this.zoom.value)
   }
-  toRealStage(key: 'x' | 'y', num: number) {
+  toSceneStage(key: 'x' | 'y', num: number) {
     const viewportXY = num - this.bound.value[key]
     const stageXY = viewportXY - this.stageOffset.value[key]
     return stageXY / this.zoom.value
   }
-  toRealStageShiftXY(xy: IXY) {
+  toSceneStageShiftXY(xy: IXY) {
     return XY.From(xy).divide(this.zoom.value)
   }
-  toRealStageShift(shift: number) {
+  toSceneStageShift(shift: number) {
     return shift / this.zoom.value
   }
   inViewport(xy: IXY) {
@@ -71,8 +71,8 @@ export class StageViewportService {
       const stepByZoom = getStepByZoom()
       const step = stepByZoom.find(([_zoom, _step]) => _zoom <= this.zoom.value)![1] * sign
       const newZoom = max(0.02, this.zoom.value + step)
-      const realStageXY = this.toRealStageXY(new XY(clientX, clientY))
-      const newOffset = XY.From(this.stageOffset.value).plus(realStageXY.multiply(-step))
+      const sceneStageXY = this.toSceneStageXY(new XY(clientX, clientY))
+      const newOffset = XY.From(this.stageOffset.value).plus(sceneStageXY.multiply(-step))
       this.zoom.dispatch(newZoom)
       this.stageOffset.dispatch(newOffset)
       this.duringZoom.dispatch()
