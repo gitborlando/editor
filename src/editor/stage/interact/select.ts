@@ -7,9 +7,10 @@ import { SchemaUtil } from '~/editor/schema/util'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
-import { createSignal } from '~/shared/signal'
+import { batchSignal, createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { lastOne } from '~/shared/utils/array'
+import { rectInAnotherRect } from '~/shared/utils/collision'
 import { macro_Match } from '~/shared/utils/macro'
 import { createBound, isLeftMouse, isRightMouse, type IBound } from '~/shared/utils/normal'
 import { StageElement } from '../element'
@@ -63,7 +64,7 @@ export class StageSelectService {
       this.onMarqueeSelect()
     }
     if (this.hoverId) {
-      if (SchemaUtil.isPageFrame(this.hoverId)) {
+      if (SchemaUtil.isPageFrameId(this.hoverId)) {
         this.clearSelect()
         this.onMarqueeSelect()
       } else {
@@ -94,7 +95,7 @@ export class StageSelectService {
   private onMousedownSelect() {
     if (Pixi.isForbidEvent) return
     if (SchemaNode.selectIds.value.has(this.hoverId)) return
-    if (SchemaUtil.isPageFrame(this.hoverId)) return
+    if (SchemaUtil.isPageFrameId(this.hoverId)) return
     this.clearSelect()
     SchemaNode.select(this.hoverId)
     let node = SchemaNode.find(this.hoverId)
@@ -116,8 +117,18 @@ export class StageSelectService {
       ids.forEach((id) => {
         const OBB = StageElement.OBBCache.get(id)
         const node = SchemaNode.find(id)
-        if (SchemaUtil.isPageFrame(id)) {
-          return traverseTest(SchemaUtil.getChildIds(id))
+        if (SchemaUtil.isPageFrameNode(node) && node.childIds.length) {
+          if (rectInAnotherRect(OBB.aabb, this.marqueeOBB!.aabb)) {
+            SchemaNode.select(id)
+            this.needExpandIds.add(id)
+            SchemaUtil.traverseFromSomeId(id, ({ id }) => {
+              id !== node.id && SchemaNode.unSelect(id)
+            })
+          } else {
+            SchemaNode.unSelect(id)
+            traverseTest(SchemaUtil.getChildIds(id))
+          }
+          return
         }
         if (hitTest(this.marqueeOBB, OBB)) {
           SchemaNode.select(id)
@@ -134,7 +145,8 @@ export class StageSelectService {
       .onMove(({ marquee }) => {
         this.marquee.dispatch(marquee)
         this.marqueeOBB = this.calcMarqueeOBB()
-        traverseTest(SchemaPage.currentPage.value.childIds)
+        const batchTest = batchSignal([SchemaNode.selectIds], traverseTest)
+        batchTest(SchemaPage.currentPage.value.childIds)
         this.duringMarqueeSelect.dispatch()
       })
       .onDestroy(() => {

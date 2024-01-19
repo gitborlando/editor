@@ -65,11 +65,17 @@ export class SchemaUtilService {
   isPage(id: string) {
     return id.startsWith('page')
   }
-  isFrame(id: string) {
+  isFrameId(id: string) {
     return SchemaNode.find(id).type === 'frame'
   }
-  isPageFrame(id: string) {
+  isFrameNode(node: INode): node is IFrame {
+    return node.type === 'frame'
+  }
+  isPageFrameId(id: string) {
     const node = SchemaNode.find(id)
+    return node.type === 'frame' && this.isPage(node.parentId)
+  }
+  isPageFrameNode(node: INode): node is IFrame {
     return node.type === 'frame' && this.isPage(node.parentId)
   }
   isContainerNode(target: string | INode): target is IFrame | IGroup {

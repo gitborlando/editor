@@ -1,5 +1,5 @@
 import autoBindMethods from 'class-autobind-decorator'
-import { IAnyFunc, INoopFunc } from './utils/normal'
+import { INoopFunc } from './utils/normal'
 
 type IHook<T> = (value: T, oldValue: T) => void
 
@@ -58,9 +58,16 @@ export class Signal<T extends any> {
     }
     this.hook(once, descriptions)
   }
-  dispatch(value?: T) {
-    this.value = value === undefined ? this.newValue : value
-    if (isBatching) return batchSignals.add(this)
+  dispatch(value?: T | ((value: T) => any)) {
+    if (value === undefined) {
+      this.value = this.newValue
+    } else if (typeof value === 'function') {
+      ;(value as Function)(this.newValue)
+      this.value = this.newValue
+    } else {
+      this.value = value
+    }
+    if (isBatching) return
     this.hooks.forEach(this.runHook)
   }
   intercept(handle: (value: T) => T | void) {
@@ -118,12 +125,15 @@ export function multiSignal(signals: Signal<any>[], callback: INoopFunc) {
 }
 
 let isBatching = false
-const batchSignals = new Set<Signal<any>>()
 
-export function batchSignal(callback: IAnyFunc) {
-  isBatching = true
-  callback()
-  isBatching = false
-  batchSignals.forEach((signal) => signal.dispatch())
-  batchSignals.clear()
+export function batchSignal<T extends any[]>(
+  toBatchSignals: Signal<any>[],
+  callback: (...args: T) => any
+) {
+  return (...args: T) => {
+    isBatching = true
+    callback(...args)
+    isBatching = false
+    toBatchSignals.forEach((signal) => signal.dispatch())
+  }
 }

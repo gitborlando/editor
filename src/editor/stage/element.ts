@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { createCache } from '~/shared/cache'
+import { batchSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { OBB } from '../math/obb'
 import { Path } from '../math/path/path'
@@ -61,15 +62,14 @@ export class StageElementService {
     if (!element.parent) element.setParent(Pixi.sceneStage)
   }
   private bindHover() {
-    const handler = (e: Event) => {
+    const handler = batchSignal([SchemaNode.hoverIds], (e: Event) => {
       if (!this.canHover) return
       const realXY = StageViewport.toViewportXY(XY.From(e, 'client'))
       this.elementMap.forEach((element, id) => {
         const hovered = element?.containsPoint(realXY)
         hovered ? SchemaNode.hover(id) : SchemaNode.unHover(id)
       })
-      SchemaNode.hoverIds.dispatch()
-    }
+    })
     Pixi.addListener('mousemove', handler, { capture: true })
   }
   private initOBB(id: string) {

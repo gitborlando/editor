@@ -77,20 +77,18 @@ export class SchemaNodeService {
     Delete(parent.childIds, node.id)
   }
   hover(id: string) {
-    this.hoverIds.value.add(id)
+    this.hoverIds.dispatch((ids) => ids.add(id))
   }
   unHover(id: string) {
-    this.hoverIds.value.delete(id)
+    this.hoverIds.dispatch((ids) => ids.delete(id))
   }
   select(id: string) {
     if (this.selectIds.value.has(id)) return
-    this.selectIds.value.add(id)
-    this.selectIds.dispatch()
+    this.selectIds.dispatch((ids) => ids.add(id))
   }
   unSelect(id: string) {
     if (!this.selectIds.value.has(id)) return
-    this.selectIds.value.delete(id)
-    this.selectIds.dispatch()
+    this.selectIds.dispatch((ids) => ids.delete(id))
   }
   clearSelect() {
     this.selectIds.value.forEach(this.collectDirty)

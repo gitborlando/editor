@@ -54,7 +54,6 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
     hovered,
     (isHover) => {
       isHover ? SchemaNode.hover(id) : SchemaNode.unHover(id)
-      SchemaNode.hoverIds.dispatch()
       if (isHover && nodeMoveStarted.value.moveId) {
         if (dropInFront.value === true) nodeMoveDropDetail.value = { id, type: 'before' }
         if (dropInSide.value === true) nodeMoveDropDetail.value = { id, type: 'in' }

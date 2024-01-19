@@ -107,7 +107,7 @@ export class StageCreateService {
     return { x, y, width, height, centerX, centerY }
   }
   private findContainer() {
-    const frameId = [...SchemaNode.hoverIds.value].reverse().find(SchemaUtil.isFrame)
+    const frameId = [...SchemaNode.hoverIds.value].reverse().find(SchemaUtil.isFrameId)
     if (frameId) return SchemaNode.find(frameId) as IFrame
     return SchemaPage.currentPage.value
   }
