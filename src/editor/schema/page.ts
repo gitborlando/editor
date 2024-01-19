@@ -1,6 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal'
 import { Delete } from '~/shared/utils/normal'
+import { StageDraw } from '../stage/draw/draw'
 import { StageElement } from '../stage/element'
 import { SchemaDefault } from './default'
 import { SchemaNode } from './node'
@@ -10,9 +11,9 @@ import { SchemaUtil } from './util'
 @autobind
 export class SchemaPageService {
   inited = createSignal(false)
-  pages = createSignal(<IPage[]>[])
+  pages = createSignal<IPage[]>([])
   currentId = createSignal('')
-  currentPage = createSignal(<IPage>null!)
+  currentPage = createSignal<IPage>(null!)
   isPageFirstRendered = createSignal(false)
   initHook() {
     SchemaNode.afterFlushDirty.hook(() => {
@@ -48,7 +49,7 @@ export class SchemaPageService {
   private firstDraw() {
     StageElement.clearAll()
     SchemaUtil.traverse(({ id }) => {
-      SchemaNode.collectRedraw(id)
+      StageDraw.collectRedraw(id)
     })
   }
 }

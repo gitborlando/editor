@@ -11,6 +11,7 @@ import { Record } from '../record'
 import { SchemaNode } from '../schema/node'
 import { IPolygon, IStar } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
+import { StageDraw } from '../stage/draw/draw'
 import { StageElement } from '../stage/element'
 import { StageSelect } from '../stage/interact/select'
 
@@ -166,10 +167,9 @@ export class OperateGeometryService {
       ;(node as IStar).points = points.current
     }
 
-    SchemaNode.collectRedraw(id)
+    StageDraw.collectRedraw(id)
 
     SchemaUtil.getChildren(id).forEach((childNode) => {
-      SchemaNode.collectRedraw(childNode.id)
       if (changedKeys.has('x') && x) {
         const childOBB = StageElement.OBBCache.get(childNode.id)
         childNode.x += x.shift
@@ -194,6 +194,7 @@ export class OperateGeometryService {
           childOBB.reBound(width, height, centerX, centerY)
         }
       }
+      StageDraw.collectRedraw(childNode.id)
     })
 
     // path.points.forEach((point, i) => {

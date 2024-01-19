@@ -15,15 +15,16 @@ import { StageDrawPath } from './path'
 
 @autobind
 export class StageDrawService {
+  private redrawIds = new Set<string>()
   private frameNameCache = createCache<Text>()
   initHook() {
     SchemaNode.afterFlushDirty.hook(() => {
-      SchemaNode.redrawIds.forEach((id) => {
-        const node = SchemaNode.find(id)
-        StageDraw.drawNode(node)
-      })
-      SchemaNode.redrawIds.clear()
+      this.redrawIds.forEach((id) => this.drawNode(SchemaNode.find(id)))
+      this.redrawIds.clear()
     })
+  }
+  collectRedraw(id: string) {
+    this.redrawIds.add(id)
   }
   private drawNode(node: INode) {
     const { id, fills } = node
@@ -111,16 +112,19 @@ export class StageDrawService {
   }
   private drawFrameName(frame: IFrame) {
     const name = this.frameNameCache.getSet(frame.id, () => {
-      const name = new Text(frame.name, {
+      const nameText = new Text(frame.name, {
         fontSize: 11 / StageViewport.zoom.value,
         fill: '#9F9F9F',
       })
-      name.setParent(Pixi.sceneStage)
+      nameText.setParent(Pixi.sceneStage)
       StageViewport.zoom.hook((zoom) => {
-        name.scale.set(1 / zoom, 1 / zoom)
+        nameText.scale.set(1 / zoom, 1 / zoom)
         this.drawFrameName(frame)
       })
-      return name
+      SchemaNode.afterReName.hook(({ id, name }) => {
+        if (id === frame.id) nameText.text = name
+      })
+      return nameText
     })
     const pivotX = frame.centerX - frame.width / 2
     const pivotY = frame.centerY - frame.height / 2 - 15 / StageViewport.zoom.value

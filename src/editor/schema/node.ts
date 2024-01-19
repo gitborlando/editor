@@ -16,15 +16,14 @@ export class SchemaNodeService {
   datumId = createSignal('')
   datumXY = XY.Of(0, 0)
   dirtyIds = new Set<string>()
-  redrawIds = new Set<string>()
   hoverIds = createSignal(new Set<string>())
   selectIds = createSignal(new Set<string>())
-  afterAdd = createSignal<INode>()
   afterConnect = createSignal({ id: '', parentId: '' })
   beforeDelete = createSignal({ id: '', parentId: '' })
   beforeFlushDirty = createSignal()
   duringFlushDirty = createSignal('')
   afterFlushDirty = createSignal()
+  afterReName = createSignal({ id: '', name: '' })
   initHook() {
     Pixi.inited.hook(() => {
       Pixi.duringTicker.hook(this.flushDirty, ['id:flushDirty'])
@@ -54,7 +53,6 @@ export class SchemaNodeService {
   }
   add(node: INode) {
     this.currentPageNodeMap[node.id] = node
-    this.afterAdd.dispatch(node)
   }
   delete(id: string) {
     const node = this.find(id)
@@ -105,9 +103,6 @@ export class SchemaNodeService {
   }
   makeSelectDirty() {
     this.selectIds.value.forEach(this.collectDirty)
-  }
-  collectRedraw(id: string) {
-    this.redrawIds.add(id)
   }
   private autoGetDatumId(selectIds: Set<string>) {
     if (selectIds.size === 0) {

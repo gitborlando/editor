@@ -117,6 +117,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
                 onChange={(e) => {
                   node.name = e.target.value
                   duringEdit.dispatch()
+                  SchemaNode.afterReName.dispatch({ id: node.id, name: node.name })
                 }}
                 onBlur={() => enterEdit.dispatch(false)}></input>
             ) : (
