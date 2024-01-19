@@ -1,5 +1,6 @@
 import { createSignal } from '~/shared/signal'
 import { SchemaFile } from './file'
+import { OperateAlign } from './operate/align'
 import { OperateGeometry } from './operate/geometry'
 import { SchemaNode } from './schema/node'
 import { SchemaPage } from './schema/page'
@@ -25,6 +26,7 @@ export const editorInited = createSignal(false)
 SchemaPage.initHook()
 SchemaNode.initHook()
 
+OperateAlign.initHook()
 OperateGeometry.initHook()
 
 StageViewport.initHook()

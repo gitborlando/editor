@@ -17,6 +17,7 @@ export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
   useHookSignal(switchTag)
   return (
     <Flex
+      shrink={0}
       layout={switchBarPosition.value === 'top' ? 'h' : 'v'}
       sidePadding={switchBarPosition.value === 'top' ? 4 : 8}
       className={cx(

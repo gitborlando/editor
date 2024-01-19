@@ -17,6 +17,12 @@ import EditorNodeLine from './editor/node/line.tsx'
 import EditorNodePolygon from './editor/node/polygon.tsx'
 import EditorNodeRect from './editor/node/rect.tsx'
 import EditorNodeStar from './editor/node/star.tsx'
+import EditorRightPanelOperateAlignAlignCenter from './editor/right-panel/operate/align/align-center.tsx'
+import EditorRightPanelOperateAlignAlignLeft from './editor/right-panel/operate/align/align-left.tsx'
+import EditorRightPanelOperateAlignAlignRight from './editor/right-panel/operate/align/align-right.tsx'
+import EditorRightPanelOperateAlignVerticalBottom from './editor/right-panel/operate/align/vertical-bottom.tsx'
+import EditorRightPanelOperateAlignVerticalCenter from './editor/right-panel/operate/align/vertical-center.tsx'
+import EditorRightPanelOperateAlignVerticalTop from './editor/right-panel/operate/align/vertical-top.tsx'
 import EditorSharedDelete from './editor/shared/Delete.tsx'
 import EditorSharedLock from './editor/shared/lock.tsx'
 import EditorSharedMinus from './editor/shared/minus.tsx'
@@ -62,6 +68,18 @@ const Asset = {
       polygon: EditorNodePolygon,
       rect: EditorNodeRect,
       star: EditorNodeStar,
+    },
+    rightPanel: {
+      operate: {
+        align: {
+          alignCenter: EditorRightPanelOperateAlignAlignCenter,
+          alignLeft: EditorRightPanelOperateAlignAlignLeft,
+          alignRight: EditorRightPanelOperateAlignAlignRight,
+          verticalBottom: EditorRightPanelOperateAlignVerticalBottom,
+          verticalCenter: EditorRightPanelOperateAlignVerticalCenter,
+          verticalTop: EditorRightPanelOperateAlignVerticalTop,
+        },
+      },
     },
     shared: {
       delete: EditorSharedDelete,

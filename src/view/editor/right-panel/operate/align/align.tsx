@@ -1,0 +1,39 @@
+import { observer } from 'mobx-react'
+import { FC } from 'react'
+import { OperateAlign } from '~/editor/operate/align'
+import { useHookSignal } from '~/shared/signal-react'
+import Asset from '~/view/ui-utility/assets'
+import { makeStyles } from '~/view/ui-utility/theme'
+import { Button } from '~/view/ui-utility/widget/button'
+import { Flex } from '~/view/ui-utility/widget/flex'
+import { Icon } from '~/view/ui-utility/widget/icon'
+
+type IAlignComp = {}
+
+export const AlignComp: FC<IAlignComp> = observer(({}) => {
+  const { classes } = useStyles({})
+  const { alignTypes, canSetAlign } = OperateAlign
+  useHookSignal(canSetAlign)
+  return (
+    <Flex layout='h' justify='space-around' className={classes.Align}>
+      {alignTypes.map((type) => (
+        <Button key={type} disabled={!canSetAlign.value}>
+          <Icon size={16} fill={canSetAlign.value ? '' : '#E6E6E6'}>
+            {Asset.editor.rightPanel.operate.align[type]}
+          </Icon>
+        </Button>
+      ))}
+    </Flex>
+  )
+})
+
+type IAlignCompStyle = {} /* & Required<Pick<IAlignComp>> */ /* & Pick<IAlignComp> */
+
+const useStyles = makeStyles<IAlignCompStyle>()((t) => ({
+  Align: {
+    ...t.rect('100%', 36),
+    ...t.default$.borderBottom,
+  },
+}))
+
+AlignComp.displayName = 'AlignComp'
