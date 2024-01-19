@@ -1,12 +1,9 @@
 import autobind from 'class-autobind-decorator'
-import { IValueWillChange } from 'mobx'
-import { max, min, rcos, rsin } from '~/editor/math/base'
+import { rcos, rsin } from '~/editor/math/base'
 import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
-import { macro_StringMatch } from '~/shared/utils/macro'
-import { ValueOf } from '~/shared/utils/normal'
 import { Record } from '../record'
 import { SchemaNode } from '../schema/node'
 import { IPolygon, IStar } from '../schema/type'
@@ -37,13 +34,12 @@ export class OperateGeometryService {
   oneOperateChange = createMomentChange(initData())
   beforeOperate = createSignal<(keyof IGeometryData)[]>()
   afterOperate = createSignal<'record'>()
+  operateKeys = <Set<keyof IGeometryData>>new Set(['x', 'y', 'width', 'height', 'rotation'])
   isGeometryChanged = false
   initHook() {
     StageSelect.afterSelect.hook(() => {
+      this.setupOperateKeys()
       this.setupGeometryData()
-    })
-    this.data._whenDataWillChange.hook(({ key, ctx }) => {
-      //this.fixBeforeChange(key, ctx)
     })
     this.data._whenDataDidChange.hook(({ key, val }) => {
       this.oneTickChange.update(key, val)
@@ -66,31 +62,23 @@ export class OperateGeometryService {
       if (type !== 'record') this.undoRedo()
     })
   }
-  private fixBeforeChange(key: keyof IGeometryData, ctx: IValueWillChange<ValueOf<IGeometryData>>) {
-    if (macro_StringMatch`width|height`(key)) {
-      ctx.newValue = max(0, ctx.newValue)
-    }
-    if (macro_StringMatch`rotation`(key)) {
-      ctx.newValue = max(-180, min(180, ctx.newValue))
-    }
-  }
   private setupGeometryData() {
     this.data._noIntercept = true
     if (SchemaNode.selectIds.value.size === 1) {
       const node = SchemaNode.selectNodes[0]
-      void (<const>['x', 'y', 'width', 'height', 'rotation']).forEach(
-        (key) => (this.data[key] = node[key])
-      )
+      //@ts-ignore
+      this.operateKeys.forEach((key) => (this.data[key] = node[key]))
     }
     if (SchemaNode.selectIds.value.size > 1) {
-      const propKeys = <const>['x', 'y', 'width', 'height', 'rotation']
+      const propKeys = [...this.operateKeys]
       const tempObj = <Record<(typeof propKeys)[number], number>>{}
       const multiValueArr = <string[]>[]
       SchemaNode.selectNodes.forEach((node, i) => {
         propKeys.forEach((key) => {
-          if (i === 0) {
-            tempObj[key] = node[key]
-          } else if (tempObj[key] !== node[key]) multiValueArr.push(key)
+          //@ts-ignore
+          if (i === 0) tempObj[key] = node[key]
+          //@ts-ignore
+          else if (tempObj[key] !== node[key]) multiValueArr.push(key)
         })
       })
       propKeys.forEach((key) => {
@@ -103,6 +91,15 @@ export class OperateGeometryService {
     const newData = { x, y, width, height, rotation, radius, sides, points }
     this.oneTickChange.reset(newData)
     this.oneOperateChange.reset(newData)
+  }
+  private setupOperateKeys() {
+    this.operateKeys = new Set(['x', 'y', 'width', 'height', 'rotation'])
+    SchemaNode.selectNodes.forEach((node) => {
+      if (node.type !== 'vector') return
+      if (node.vectorType === 'rect') return this.operateKeys.add('radius')
+      if (node.vectorType === 'polygon') return this.operateKeys.add('sides')
+      if (node.vectorType === 'star') return this.operateKeys.add('points')
+    })
   }
   private patchChangeToVectorPoints(id: string) {
     const node = SchemaNode.find(id)

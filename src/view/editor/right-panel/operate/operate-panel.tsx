@@ -1,6 +1,5 @@
 import { FC } from 'react'
 import { SchemaNode } from '~/editor/schema/node'
-import { StageSelect } from '~/editor/stage/interact/select'
 import { useHookSignal } from '~/shared/signal-react'
 import { lastOne } from '~/shared/utils/array'
 import { makeStyles } from '~/view/ui-utility/theme'
@@ -13,7 +12,6 @@ type IOperatePanelComp = {}
 
 export const OperatePanelComp: FC<IOperatePanelComp> = ({}) => {
   const { classes } = useStyles({})
-  useHookSignal(StageSelect.afterSelect)
   useHookSignal(SchemaNode.hoverIds)
   return (
     <Flex layout='v' className={classes.OperatePanel}>

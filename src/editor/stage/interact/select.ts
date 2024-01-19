@@ -152,9 +152,7 @@ export class StageSelectService {
       .onDestroy(() => {
         this.marquee.value = undefined
         this.marquee.dispatch()
-        if (SchemaNode.selectIds.value.size) {
-          this.afterSelect.dispatch('marquee')
-        }
+        this.afterSelect.dispatch('marquee')
       })
   }
   private onMenu(e: Event) {

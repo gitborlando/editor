@@ -1,24 +1,29 @@
-import { observer } from 'mobx-react'
-import { FC } from 'react'
-import { StageViewport } from '~/editor/stage/viewport'
+import { FC, memo } from 'react'
+import { OperateGeometry } from '~/editor/operate/geometry'
+import { SchemaNode } from '~/editor/schema/node'
+import { StageSelect } from '~/editor/stage/interact/select'
+import { useHookSignal } from '~/shared/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { GeometryPropComp } from './geometry-prop'
 
 type IGeometryPropsComp = {}
 
-export const GeometryPropsComp: FC<IGeometryPropsComp> = observer(({}) => {
+export const GeometryPropsComp: FC<IGeometryPropsComp> = memo(({}) => {
   const { classes } = useStyles({})
+  const { operateKeys } = OperateGeometry
+  useHookSignal(StageSelect.afterSelect)
+  if (SchemaNode.selectNodes.length === 0) return null
   return (
     <Flex layout='h' className={classes.SchemaBase}>
-      <GeometryPropComp label='横坐标' operateKey='x' slideRate={1 / StageViewport.zoom.value} />
-      <GeometryPropComp label='纵坐标' operateKey='y' slideRate={1 / StageViewport.zoom.value} />
+      <GeometryPropComp label='横坐标' operateKey='x' />
+      <GeometryPropComp label='纵坐标' operateKey='y' />
       <GeometryPropComp label='宽度' operateKey='width' />
       <GeometryPropComp label='高度' operateKey='height' />
       <GeometryPropComp label='旋转' operateKey='rotation' />
-      <GeometryPropComp label='边数' operateKey='sides' />
-      <GeometryPropComp label='角数' operateKey='points' />
-      <GeometryPropComp label='圆角' operateKey='radius' />
+      {operateKeys.has('radius') && <GeometryPropComp label='圆角' operateKey='radius' />}
+      {operateKeys.has('sides') && <GeometryPropComp label='边数' operateKey='sides' />}
+      {operateKeys.has('points') && <GeometryPropComp label='角数' operateKey='points' />}
     </Flex>
   )
 })
