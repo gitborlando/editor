@@ -57,7 +57,7 @@ export class OperateGeometryService {
     SchemaNode.afterFlushDirty.hook(() => {
       this.oneTickChange.endCurrent()
       this.isGeometryChanged = false
-    })
+    }, ['id:operateGeometryReset'])
     this.beforeOperate.hook(() => {
       this.oneOperateChange.endCurrent()
     })
@@ -169,25 +169,22 @@ export class OperateGeometryService {
       SchemaNode.collectRedraw(childNode.id)
       if (changedKeys.has('x') && x) {
         const childOBB = StageElement.OBBCache.get(childNode.id)
-        const shift = x.current - x.last
-        childNode.x += shift
-        childNode.centerX += x.current - x.last
-        childOBB.shift(x.current - x.last)
+        childNode.x += x.shift
+        childNode.centerX += x.shift
+        childOBB.shift(x.shift)
       }
       if (changedKeys.has('y') && y) {
         const childOBB = StageElement.OBBCache.get(childNode.id)
-        const shift = y.current - y.last
-        childNode.y += shift
-        childNode.centerY += y.current - y.last
-        childOBB.shift(y.current - y.last)
+        childNode.y += y.shift
+        childNode.centerY += y.shift
+        childOBB.shift(y.shift)
       }
       if (changedKeys.has('rotation') && rotation) {
         const childOBB = StageElement.OBBCache.get(childNode.id)
-        const shift = rotation.current - rotation.last
-        childNode.rotation += shift
+        childNode.rotation += rotation.shift
         const childCenterXY = XY.From(childNode, 'center')
-        childCenterXY.rotate(XY.From(node, 'center'), shift).mutate(childNode, 'center')
-        XY.From(childNode).rotate(childCenterXY, shift).mutate(childNode)
+        childCenterXY.rotate(XY.From(node, 'center'), rotation.shift).mutate(childNode, 'center')
+        XY.From(childNode).rotate(childCenterXY, rotation.shift).mutate(childNode)
         {
           const { width, height, rotation, centerX, centerY } = childNode
           childOBB.reRotation(rotation)
@@ -212,6 +209,7 @@ export class OperateGeometryService {
     StageElement.pathCache.set(id, path)
     StageElement.OBBCache.set(id, OBB)
   }
+
   private undoRedo() {
     const keys = this.beforeOperate.value
     const record = structuredClone(this.oneOperateChange.record)

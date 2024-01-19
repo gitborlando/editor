@@ -97,3 +97,7 @@ export function makeAction<T extends any>(callback?: (...args: T[]) => void) {
 export function iife<T extends any = any>(callback: () => T): T {
   return callback()
 }
+
+export function isNumberEqual(a: number, b: number) {
+  return Math.abs(a - b) < 0.00001
+}

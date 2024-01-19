@@ -2,7 +2,6 @@ import autobind from 'class-autobind-decorator'
 import { createCache } from '~/shared/cache'
 import { SchemaNode } from './node'
 import { SchemaPage } from './page'
-import { Schema } from './schema'
 import { IFrame, IGroup, INode, INodeParent, IPage } from './type'
 
 type ITraverseData = {
@@ -112,10 +111,6 @@ export class SchemaUtilService {
       })
     }
     traverse(ids, 0)
-  }
-  logSchema() {
-    const newSchema = structuredClone(Schema.getSchema())
-    console.log(newSchema)
   }
   private initNodeRuntime() {
     this.traverse(({ id, ancestors }) => {

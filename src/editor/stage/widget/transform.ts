@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import { max, min } from '~/editor/math/base'
 import { OBB } from '~/editor/math/obb'
 import { xy_new } from '~/editor/math/xy'
 import { OperateGeometry } from '~/editor/operate/geometry'
@@ -6,18 +7,18 @@ import { SchemaNode } from '~/editor/schema/node'
 import { Drag } from '~/global/event/drag'
 import { Setting } from '~/global/setting'
 import { XY } from '~/shared/structure/xy'
+import { firstOne } from '~/shared/utils/array'
 import { StageCursor } from '../cursor'
 import { StageDraw } from '../draw/draw'
 import { StageElement } from '../element'
 import { StageSelect } from '../interact/select'
-import { StageTransform } from '../interact/transform'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 
 @autobind
 export class StageWidgetTransformService {
-  private renderType = <'reDraw' | 'clear' | 'reserve'>'reserve'
-  private transformOBB?: OBB
+  transformOBB: OBB = new OBB(0, 0, 0, 0, 0)
+  private renderType = <'reDraw' | 'clear'>'clear'
   private vertexTL_XY = XY.Of(0, 0)
   private vertexTR_XY = XY.Of(0, 0)
   private vertexBL_XY = XY.Of(0, 0)
@@ -37,16 +38,21 @@ export class StageWidgetTransformService {
       this.addToStage()
       this.bindEvent()
     })
-    Pixi.duringTicker.priorityHook('after:flushDirty', () => {
+    Pixi.duringTicker.hook(() => {
       if (this.renderType === 'reDraw') this.draw()
       if (this.renderType === 'clear') this.clear()
-    })
+    }, ['after:flushDirty'])
+    this.hookTransform()
     this.hookRender()
   }
   mouseIn(e: MouseEvent) {
+    if (this.renderType === 'clear') return false
     const { x, y } = StageViewport.toSceneStageXY(XY.From(e, 'client'))
     const pointOBB = new OBB(x, y, 1, 1, 0)
-    return this.transformOBB?.obbHitTest(pointOBB)
+    return this.transformOBB.obbHitTest(pointOBB)
+  }
+  private get selectIds() {
+    return SchemaNode.selectIds.value
   }
   private get vertexes() {
     return [this.vertexTL, this.vertexTR, this.vertexBL, this.vertexBR]
@@ -65,17 +71,6 @@ export class StageWidgetTransformService {
     this.transformContainer.zIndex = 990
     this.transformContainer.setParent(Pixi.sceneStage)
   }
-  private hookRender() {
-    const setClear = () => (this.renderType = 'clear')
-    const setRedraw = () => (this.renderType = 'reDraw')
-    OperateGeometry.beforeOperate.hook(setClear)
-    StageViewport.beforeZoom.hook(setClear)
-    StageSelect.afterClearSelect.hook(setClear)
-    OperateGeometry.afterOperate.hook(setRedraw)
-    StageSelect.afterSelect.hook(setRedraw)
-    StageViewport.afterZoom.hook(setRedraw)
-    SchemaNode.selectIds.hook(setRedraw)
-  }
   private bindEvent() {
     this.bindMoveEvent()
     this.bindTopLineEvent()
@@ -83,22 +78,59 @@ export class StageWidgetTransformService {
     this.bindBottomLineEvent()
     this.bindLeftLineEvent()
   }
+  private hookTransform() {
+    StageSelect.duringMarqueeSelect.hook(this.calcTransformOBB)
+    StageSelect.afterSelect.hook(this.calcTransformOBB)
+    SchemaNode.afterFlushDirty.hook(() => {
+      if (OperateGeometry.isGeometryChanged) this.calcTransformOBB()
+    }, ['id:calcTransformOBB', 'before:operateGeometryReset'])
+  }
+  private hookRender() {
+    const setClear = () => (this.renderType = 'clear')
+    const setReDraw = () => (this.renderType = 'reDraw')
+    OperateGeometry.beforeOperate.hook(setClear)
+    StageViewport.beforeZoom.hook(setClear)
+    StageSelect.afterClearSelect.hook(setClear)
+    OperateGeometry.afterOperate.hook(setReDraw)
+    StageViewport.afterZoom.hook(setReDraw)
+    SchemaNode.selectIds.hook((selectIds) => {
+      selectIds.size === 0 ? setClear() : setReDraw()
+    })
+  }
+  private clear() {
+    this.components.forEach((i) => i.clear())
+  }
   private draw() {
-    if (SchemaNode.selectIds.value.size === 0) return this.clear()
     this.clear()
+    if (this.selectIds.size === 0) return
     this.calcVertexXY()
     this.drawVertexes()
     this.drawLine()
     this.drawOutline()
-    this.renderType = 'reserve'
   }
-  private clear() {
-    this.components.forEach((i) => i.clear())
-    this.renderType = 'reserve'
-    this.transformOBB = undefined
+  private calcTransformOBB() {
+    if (this.selectIds.size === 1) {
+      const nodeOBB = StageElement.OBBCache.get(firstOne(this.selectIds))
+      const { centerX, centerY, width, height, rotation } = nodeOBB
+      this.transformOBB = new OBB(centerX, centerY, width, height, rotation)
+    }
+    if (this.selectIds.size > 1) {
+      let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
+      SchemaNode.selectNodes.forEach((node) => {
+        const nodeOBB = StageElement.OBBCache.get(node.id)
+        nodeOBB.vertexes.forEach((xy) => {
+          xMin = min(xMin, xy.x)
+          yMin = min(yMin, xy.y)
+          xMax = max(xMax, xy.x)
+          yMax = max(yMax, xy.y)
+        })
+      })
+      const [x, y, width, height] = [xMin, yMin, xMax - xMin, yMax - yMin]
+      this.transformOBB = new OBB(x + width / 2, y + height / 2, width, height, 0)
+    }
   }
   private calcVertexXY() {
-    const { centerX, centerY, width, height, rotation } = StageTransform.data
+    const { centerX, centerY, width, height, rotation } = this.transformOBB!
     const pivotX = centerX - width / 2
     const pivotY = centerY - height / 2
     const centerXY = XY.Of(centerX, centerY)
@@ -106,7 +138,6 @@ export class StageWidgetTransformService {
     this.vertexTR_XY = XY.Of(pivotX + width, pivotY).rotate(centerXY, rotation)
     this.vertexBL_XY = XY.Of(pivotX, pivotY + height).rotate(centerXY, rotation)
     this.vertexBR_XY = XY.Of(pivotX + width, pivotY + height).rotate(centerXY, rotation)
-    this.transformOBB = new OBB(centerX, centerY, width, height, rotation)
   }
   private drawVertexes() {
     const size = 6 / StageViewport.zoom.value

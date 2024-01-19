@@ -27,7 +27,7 @@ export class SchemaNodeService {
   afterFlushDirty = createSignal()
   initHook() {
     Pixi.inited.hook(() => {
-      Pixi.duringTicker.hook(this.flushDirty, { id: 'flushDirty' })
+      Pixi.duringTicker.hook(this.flushDirty, ['id:flushDirty'])
     })
     this.selectIds.hook((selectIds) => {
       this.autoGetDatumId(selectIds)
@@ -122,7 +122,7 @@ export class SchemaNodeService {
       const parentIds = new Set<string>()
       selectIds.forEach((id) => parentIds.add(this.find(id).parentId))
       if (parentIds.size === 1) this.datumId.dispatch(firstOne(parentIds))
-      if (parentIds.size > 1) this.datumId.dispatch(SchemaPage.currentId.value)
+      if (parentIds.size > 1) this.datumId.dispatch('')
     }
   }
 }

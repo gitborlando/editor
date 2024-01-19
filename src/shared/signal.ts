@@ -1,16 +1,20 @@
 import autoBindMethods from 'class-autobind-decorator'
 import { IAnyFunc, INoopFunc } from './utils/normal'
 
-type IHook = {
-  (value: any, oldValue: any): void
-  option?: {
-    id?: string
-    immediately?: boolean
-    priority?: `after:${string}`
-  }
+type IHook<T> = (value: T, oldValue: T) => void
+
+type IHookOption = {
+  id?: string
+  immediately?: boolean
+  before?: string
+  after?: string
 }
 
-export const signalMap = new Map<Signal<any>, IHook[]>()
+type IHookDescription = `id:${string}` | 'immediately' | `before:${string}` | `after:${string}`
+
+export const signalMap = new Map<Signal<any>, IHook<any>[]>()
+
+const hookOptionMap = new Map<Signal<any>, Map<IHook<any>, IHookOption>>()
 
 @autoBindMethods
 export class Signal<T extends any> {
@@ -21,6 +25,7 @@ export class Signal<T extends any> {
     this.newValue = value ?? this.newValue
     this.oldValue = value ?? this.oldValue
     signalMap.set(this, [])
+    hookOptionMap.set(this, new Map())
   }
   get value(): T {
     return this.newValue
@@ -33,28 +38,25 @@ export class Signal<T extends any> {
   private get hooks() {
     return signalMap.get(this)!
   }
-  hook(hook: IHook, option?: IHook['option']) {
-    hook.option = option
+  private get optionMap() {
+    return hookOptionMap.get(this)!
+  }
+  hook(hook: IHook<T>, descriptions?: IHookDescription[]) {
+    const { immediately } = this.processDescription(hook, descriptions || [])
+    if (immediately) hook(this.newValue, this.oldValue)
     this.hooks.push(hook)
-    if (option?.immediately) hook(this.newValue, this.oldValue)
     return () => this.unHook(hook)
   }
-  unHook(hook: IHook) {
+  private unHook(hook: IHook<T>) {
     const index = this.hooks.findIndex((i) => i === hook)
     index !== -1 && this.hooks.splice(index, 1)
   }
-  hookOnce(hook: IHook) {
+  hookOnce(hook: IHook<T>, descriptions?: IHookDescription[]) {
     const once = (value: T, oldValue: T) => {
       hook(value, oldValue)
       this.unHook(once)
     }
-    this.hook(once)
-  }
-  immediateHook(hook: IHook, option?: IHook['option']) {
-    return this.hook(hook, { ...option, immediately: true })
-  }
-  priorityHook(priority: `after:${string}`, hook: IHook, option?: IHook['option']) {
-    return this.hook(hook, { ...option, priority })
+    this.hook(once, descriptions)
   }
   dispatch(value?: T) {
     this.value = value === undefined ? this.newValue : value
@@ -64,18 +66,45 @@ export class Signal<T extends any> {
   intercept(handle: (value: T) => T | void) {
     this._intercept = handle
   }
-  private runHook(hook: IHook) {
-    const priority = hook.option?.priority
-    if (priority) {
-      const selfIndex = this.hooks.findIndex((i) => i === hook)
-      const anotherIndex = this.hooks.findIndex((i) => i.option?.id === priority.split(':')[1])
-      if (selfIndex > anotherIndex) hook(this.newValue, this.oldValue)
-      else {
+  private processDescription(hook: IHook<T>, descriptions: IHookDescription[]) {
+    const option = <IHookOption>{}
+    this.optionMap.set(hook, option)
+    descriptions.map((desc) => {
+      if (desc.includes(':')) {
+        const [key, val] = desc.split(':')
+        option[key as keyof IHookOption] = val as any
+      }
+      if (desc === 'immediately') option['immediately'] = true
+    })
+    return option
+  }
+  private runHook(hook: IHook<T>) {
+    const { before, after } = this.optionMap.get(hook)!
+    if (!before && !after) {
+      return hook(this.newValue, this.oldValue)
+    }
+    const selfIndex = this.hooks.findIndex((i) => i === hook)
+    if (before) {
+      const anotherIndex = this.hooks.findIndex((i) => {
+        return this.optionMap.get(i)?.id === before
+      })
+      if (selfIndex < anotherIndex) {
+        hook(this.newValue, this.oldValue)
+      } else {
+        this.hooks.splice(selfIndex, 1)
+        this.hooks.splice(anotherIndex, 0, hook)
+      }
+    }
+    if (after) {
+      const anotherIndex = this.hooks.findIndex((i) => {
+        return this.optionMap.get(i)?.id === after
+      })
+      if (selfIndex > anotherIndex) {
+        hook(this.newValue, this.oldValue)
+      } else {
         this.hooks.splice(selfIndex, 1)
         this.hooks.splice(anotherIndex + 1, 0, hook)
       }
-    } else {
-      hook(this.newValue, this.oldValue)
     }
   }
 }

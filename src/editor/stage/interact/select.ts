@@ -58,6 +58,10 @@ export class StageSelectService {
   }
   private onLeftMouseDown(e: MouseEvent) {
     if (StageWidgetTransform.mouseIn(e)) return
+    if (!this.hoverId) {
+      SchemaNode.clearSelect()
+      this.onMarqueeSelect()
+    }
     if (this.hoverId) {
       if (SchemaUtil.isPageFrame(this.hoverId)) {
         this.clearSelect()
@@ -65,10 +69,6 @@ export class StageSelectService {
       } else {
         this.onMousedownSelect()
       }
-    }
-    if (!this.hoverId) {
-      SchemaNode.clearSelect()
-      this.onMarqueeSelect()
     }
   }
   private onRightMouseDown(e: MouseEvent) {}
@@ -140,7 +140,9 @@ export class StageSelectService {
       .onDestroy(() => {
         this.marquee.value = undefined
         this.marquee.dispatch()
-        this.afterSelect.dispatch('marquee')
+        if (SchemaNode.selectIds.value.size) {
+          this.afterSelect.dispatch('marquee')
+        }
       })
   }
   private onMenu(e: Event) {

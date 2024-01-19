@@ -19,7 +19,7 @@ export class StageViewportService {
   private wheeler = new EventWheelService()
   initHook() {
     Pixi.inited.hook(() => {
-      this.bound.immediateHook(this.onResizeBound)
+      this.bound.hook(this.onResizeBound, ['immediately'])
       window.addEventListener('resize', this.onResizeBound)
       this.onWheelZoom()
       Pixi.addListener('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))

@@ -13,23 +13,26 @@ export class UILeftPanelService {
   }
   init() {
     const originX = StageViewport.bound.value.x
-    this.switchBarPosition.immediateHook((value, oldValue) => {
-      if (value === 'top') {
-        this.switchBarSize.dispatch(36)
-        this.panelHeight.value =
-          window.innerHeight - StageViewport.bound.value.y - this.switchBarSize.value
-        StageViewport.bound.value.x = originX
-      }
-      if (value === 'left') {
-        this.panelHeight.value = window.innerHeight - StageViewport.bound.value.y
-        this.switchBarSize.dispatch(40)
-        if (oldValue === 'top') {
-          StageViewport.bound.value.x = originX + this.switchBarSize.value
+    this.switchBarPosition.hook(
+      (value, oldValue) => {
+        if (value === 'top') {
+          this.switchBarSize.dispatch(36)
+          this.panelHeight.value =
+            window.innerHeight - StageViewport.bound.value.y - this.switchBarSize.value
+          StageViewport.bound.value.x = originX
         }
-      }
-      StageViewport.bound.dispatch()
-      this.panelHeight.dispatch()
-    })
+        if (value === 'left') {
+          this.panelHeight.value = window.innerHeight - StageViewport.bound.value.y
+          this.switchBarSize.dispatch(40)
+          if (oldValue === 'top') {
+            StageViewport.bound.value.x = originX + this.switchBarSize.value
+          }
+        }
+        StageViewport.bound.dispatch()
+        this.panelHeight.dispatch()
+      },
+      ['immediately']
+    )
   }
 }
 

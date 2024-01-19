@@ -1,30 +1,39 @@
 import autobind from 'class-autobind-decorator'
 
 @autobind
-export class Cache<T> {
-  cache = new Map<string, any>()
-  get(id: string) {
-    return this.cache.get(id) as T
+export class Cache<K, V> {
+  cache = new Map<K, V>()
+  get(key: K) {
+    return this.cache.get(key) as V
   }
-  set(id: string, value: T) {
-    this.cache.set(id, value)
+  set(key: K, value: V) {
+    this.cache.set(key, value)
     return value
   }
-  delete(id: string) {
-    this.cache.delete(id)
+  delete(key: K) {
+    this.cache.delete(key)
   }
-  getSet<T>(id: string, fn: () => T) {
-    let value = this.cache.get(id)
-    if (value) return value as T
+  getSet(key: K, fn: () => V) {
+    let value = this.cache.get(key)
+    if (value) return value
     value = fn()
-    this.cache.set(id, value)
-    return value as T
+    this.cache.set(key, value)
+    return value
   }
   clear() {
     this.cache.clear()
   }
+  forEach(callback: (key: K, value: V, map: Map<K, V>) => void) {
+    this.cache.forEach((v, k, m) => callback(k, v, m))
+  }
+  keys() {
+    return this.cache.keys()
+  }
+  values() {
+    return this.cache.values()
+  }
 }
 
-export function createCache<T extends any>() {
-  return new Cache<T>()
+export function createCache<V extends any, K extends any = string>() {
+  return new Cache<K, V>()
 }

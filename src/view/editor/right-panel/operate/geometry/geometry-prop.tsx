@@ -1,6 +1,5 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC, useEffect, useRef } from 'react'
-import { numberHalfFix } from '~/editor/math/base'
 import { IGeometryData, OperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNode } from '~/editor/schema/node'
 import { Drag } from '~/global/event/drag'
@@ -68,7 +67,7 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(
         ref={ref}
         className={classes.input}
         label={label}
-        value={numberHalfFix(produceValue())}
+        value={Number(produceValue().toFixed(2))}
         onNewValueApply={(v) => (data[operateKey] = produceValue(v))}
         slideRate={slideRate}
       />

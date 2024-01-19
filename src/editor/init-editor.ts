@@ -11,8 +11,8 @@ import { StageElement } from './stage/element'
 import { StageCreate } from './stage/interact/create'
 import { StageInteract } from './stage/interact/interact'
 import { StageSelect } from './stage/interact/select'
-import { StageTransform } from './stage/interact/transform'
 import { StageViewport } from './stage/viewport'
+import { StageWidgetAdsorption } from './stage/widget/adsorption'
 import { StageWidgetHover } from './stage/widget/hover'
 import { StageWidgetMarquee } from './stage/widget/marquee'
 import { StageWidgetRuler } from './stage/widget/ruler'
@@ -34,11 +34,11 @@ StageInteract.initHook()
 StageSelect.initHook()
 StageCreate.initHook()
 StageCursor.initHook()
-StageTransform.initHook()
 
 StageWidgetHover.initHook()
 StageWidgetMarquee.initHook()
 StageWidgetRuler.initHook()
+StageWidgetAdsorption.initHook()
 StageWidgetTransform.initHook()
 
 UILeftPanelLayer.initHook()
