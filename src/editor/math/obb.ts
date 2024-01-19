@@ -27,17 +27,17 @@ export class OBB {
   get center() {
     return { x: this.centerX, y: this.centerY }
   }
-  shift(x?: number, y?: number) {
-    this.xy.x += x ?? 0
-    this.xy.y += y ?? 0
-    this.centerX += x ?? 0
-    this.centerY += y ?? 0
-    this.aabb.x += x ?? 0
-    this.aabb.y += y ?? 0
-    this.vertexes.forEach((vertex) => {
-      vertex.x += x ?? 0
-      vertex.y += y ?? 0
-    })
+  shiftX(x: number) {
+    this.xy.x += x
+    this.centerX += x
+    this.aabb.x += x
+    this.vertexes.forEach((vertex) => (vertex.x += x))
+  }
+  shiftY(y: number) {
+    this.xy.y += y
+    this.centerY += y
+    this.aabb.y += y
+    this.vertexes.forEach((vertex) => (vertex.y += y))
   }
   reBound(width?: number, height?: number, centerX?: number, centerY?: number) {
     if (width) this.width = width

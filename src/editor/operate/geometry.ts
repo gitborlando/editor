@@ -130,12 +130,12 @@ export class OperateGeometryService {
     if (changedKeys.has('x') && x) {
       node.x += x.current - x.last
       node.centerX += x.current - x.last
-      OBB.shift(x.current - x.last)
+      OBB.shiftX(x.current - x.last)
     }
     if (changedKeys.has('y') && y) {
       node.y += y.current - y.last
       node.centerY += y.current - y.last
-      OBB.shift(undefined, y.current - y.last)
+      OBB.shiftY(y.current - y.last)
     }
     if (changedKeys.has('width') && width) {
       node.width += width.current - width.last
@@ -174,13 +174,13 @@ export class OperateGeometryService {
         const childOBB = StageElement.OBBCache.get(childNode.id)
         childNode.x += x.shift
         childNode.centerX += x.shift
-        childOBB.shift(x.shift)
+        childOBB.shiftX(x.shift)
       }
       if (changedKeys.has('y') && y) {
         const childOBB = StageElement.OBBCache.get(childNode.id)
         childNode.y += y.shift
         childNode.centerY += y.shift
-        childOBB.shift(y.shift)
+        childOBB.shiftY(y.shift)
       }
       if (changedKeys.has('rotation') && rotation) {
         const childOBB = StageElement.OBBCache.get(childNode.id)
