@@ -1,19 +1,20 @@
 import autobind from 'class-autobind-decorator'
+import { Text } from 'pixi.js'
 import { radianfy } from '~/editor/math/base'
 import { SchemaNode } from '~/editor/schema/node'
-import { IFill, IIrregular, INode, IVector } from '~/editor/schema/type'
+import { IFill, IFrame, IIrregular, INode, IVector } from '~/editor/schema/type'
+import { createCache } from '~/shared/cache'
 import { XY } from '~/shared/structure/xy'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
 import { createStarPolygon } from '~/shared/utils/pixi/star'
 import { StageElement } from '../element'
-import { PIXI } from '../pixi'
+import { PIXI, Pixi } from '../pixi'
 import { StageDrawPath } from './path'
-
-type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 export class StageDrawService {
+  private frameNameCache = createCache<Text>()
   initHook() {
     SchemaNode.afterFlushDirty.hook(() => {
       SchemaNode.redrawIds.forEach((id) => {
@@ -51,6 +52,7 @@ export class StageDrawService {
     element.y = pivotXY.y
     element.rotation = rotation
     if (node.type === 'frame') {
+      this.drawFrameName(node)
       return element.drawRect(0, 0, width, height)
     }
     if (node.type === 'vector') {
@@ -105,6 +107,19 @@ export class StageDrawService {
     const pivotY = node.centerY - node.height / 2
     if (node.rotation === 0) return XY.Of(pivotX, pivotY)
     return XY.Of(pivotX, pivotY).rotate(XY.From(node, 'center'), node.rotation)
+  }
+  private drawFrameName(frame: IFrame) {
+    const name = this.frameNameCache.getSet(frame.id, () => {
+      const name = new Text(frame.name, { fontSize: 11, fill: '#9F9F9F' })
+      name.setParent(Pixi.sceneStage)
+      return name
+    })
+    const pivotX = frame.centerX - frame.width / 2
+    const pivotY = frame.centerY - frame.height / 2 - 15
+    const { x, y } = XY.Of(pivotX, pivotY).rotate(XY.From(frame, 'center'), frame.rotation)
+    name.x = x
+    name.y = y
+    name.rotation = radianfy(frame.rotation)
   }
 }
 
