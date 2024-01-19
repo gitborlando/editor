@@ -1,5 +1,6 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC, useEffect, useRef } from 'react'
+import { max } from '~/editor/math/base'
 import { IGeometryData, OperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNode } from '~/editor/schema/node'
 import { Drag } from '~/global/event/drag'
@@ -49,6 +50,15 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(
           const datum = SchemaNode.datumXY.y
           return newValue + datum
         }
+        if (['width', 'height', 'radius'].includes(operateKey)) {
+          return max(0, newValue)
+        }
+        if (operateKey === 'rotation') {
+          return newValue > 180 ? 180 : newValue < -180 ? -180 : newValue
+        }
+        if (['sides', 'points'].includes(operateKey)) {
+          return max(3, newValue)
+        }
         return newValue
       }
       if (operateKey === 'x') {
@@ -59,6 +69,7 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(
         const datum = SchemaNode.datumXY.y
         return data[operateKey] - datum
       }
+
       return data[operateKey]
     }
 
