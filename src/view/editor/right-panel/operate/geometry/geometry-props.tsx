@@ -18,14 +18,7 @@ export const GeometryPropsComp: FC<IGeometryPropsComp> = observer(({}) => {
       <GeometryPropComp label='旋转' operateKey='rotation' />
       <GeometryPropComp label='边数' operateKey='sides' />
       <GeometryPropComp label='角数' operateKey='points' />
-      {/* {SchemaOperateGeometry.type === 'vector' && 'radius' in SchemaOperateGeometry && (
-        <GeometryPropComp
-          className={classes.input}
-          label='圆角'
-          value={SchemaOperateGeometry.radius}
-          onNewValueApply={(v) => (SchemaOperateGeometry.radius = v)}
-        />
-      )} */}
+      <GeometryPropComp label='圆角' operateKey='radius' />
     </Flex>
   )
 })

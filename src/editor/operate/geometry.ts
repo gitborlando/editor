@@ -126,7 +126,7 @@ export class OperateGeometryService {
     const OBB = StageElement.OBBCache.get(id)
     const path = StageElement.pathCache.get(id)
     const { record, changedKeys } = this.oneTickChange
-    const { x, y, width, height, rotation, sides, points } = record
+    const { x, y, width, height, rotation, radius, sides, points } = record
     if (changedKeys.has('x') && x) {
       node.x += x.current - x.last
       node.centerX += x.current - x.last
@@ -155,6 +155,9 @@ export class OperateGeometryService {
         .rotate(XY.From(node, 'center'), rotation.current - rotation.last)
         .mutate(node)
       OBB.reRotation(node.rotation)
+    }
+    if (changedKeys.has('radius') && radius) {
+      ;(node as IStar).radius = radius.current
     }
     if (changedKeys.has('sides') && sides) {
       ;(node as IPolygon).sides = sides.current

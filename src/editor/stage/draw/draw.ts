@@ -55,7 +55,7 @@ export class StageDrawService {
     }
     if (node.type === 'vector') {
       if (node.vectorType === 'rect') {
-        element.drawRect(0, 0, width, height)
+        element.drawRoundedRect(0, 0, width, height, node.radius)
       }
       if (node.vectorType === 'ellipse') {
         element.drawEllipse(width / 2, height / 2, width / 2, height / 2)

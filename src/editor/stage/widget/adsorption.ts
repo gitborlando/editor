@@ -57,8 +57,8 @@ export class StageWidgetAdsorptionService {
   private adsorption({ key, ctx }: { key: keyof IGeometryData; ctx: IValueWillChange<number> }) {
     this.cloneTransformOBB.shift(ctx.newValue - this.cloneTransformOBB.xy.x)
     this.cloneTransformOBB.shift(undefined, ctx.newValue - this.cloneTransformOBB.xy.y)
-    key === 'y' && this.horizontalAdsorption(key, ctx)
-    key === 'x' && this.verticalAdsorption(key, ctx)
+    if (key === 'y' /* || key === 'height' */) this.horizontalAdsorption(key, ctx)
+    if (key === 'x' /* || key === 'width' */) this.verticalAdsorption(key, ctx)
   }
   private horizontalAdsorption(key: keyof IGeometryData, ctx: IValueWillChange<number>) {
     const { top, bottom, centerY } = this.getAdsorptionBound(this.cloneTransformOBB)
