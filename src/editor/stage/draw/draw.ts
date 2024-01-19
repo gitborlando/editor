@@ -10,6 +10,7 @@ import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
 import { createStarPolygon } from '~/shared/utils/pixi/star'
 import { StageElement } from '../element'
 import { PIXI, Pixi } from '../pixi'
+import { StageViewport } from '../viewport'
 import { StageDrawPath } from './path'
 
 @autobind
@@ -110,12 +111,19 @@ export class StageDrawService {
   }
   private drawFrameName(frame: IFrame) {
     const name = this.frameNameCache.getSet(frame.id, () => {
-      const name = new Text(frame.name, { fontSize: 11, fill: '#9F9F9F' })
+      const name = new Text(frame.name, {
+        fontSize: 11 / StageViewport.zoom.value,
+        fill: '#9F9F9F',
+      })
       name.setParent(Pixi.sceneStage)
+      StageViewport.zoom.hook((zoom) => {
+        name.scale.set(1 / zoom, 1 / zoom)
+        this.drawFrameName(frame)
+      })
       return name
     })
     const pivotX = frame.centerX - frame.width / 2
-    const pivotY = frame.centerY - frame.height / 2 - 15
+    const pivotY = frame.centerY - frame.height / 2 - 15 / StageViewport.zoom.value
     const { x, y } = XY.Of(pivotX, pivotY).rotate(XY.From(frame, 'center'), frame.rotation)
     name.x = x
     name.y = y
