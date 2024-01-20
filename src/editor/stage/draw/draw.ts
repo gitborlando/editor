@@ -113,7 +113,7 @@ export class StageDrawService {
   private drawFrameName(frame: IFrame) {
     const name = this.frameNameCache.getSet(frame.id, () => {
       const nameText = new Text(frame.name, {
-        fontSize: 11 / StageViewport.zoom.value,
+        fontSize: 12 / StageViewport.zoom.value,
         fill: '#9F9F9F',
       })
       nameText.setParent(Pixi.sceneStage)

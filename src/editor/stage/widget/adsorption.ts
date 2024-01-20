@@ -162,11 +162,11 @@ export class StageWidgetAdsorptionService {
       : sortedArr[left]
   }
   private autoDraw() {
-    this.adsorptionElement.clear()
-    if (!this.needDraw) return
+    if (!this.needDraw) return this.clear()
     if (!this.adsorptionElement.parent) {
       this.adsorptionElement.setParent(Pixi.sceneStage)
     }
+    this.adsorptionElement.clear()
     this.adsorptionElement.lineStyle(1 / StageViewport.zoom.value, '#FF6227')
     this.toDrawHLines.forEach(({ y, xs }) => {
       const [start, end] = [min(...xs), max(...xs)]
