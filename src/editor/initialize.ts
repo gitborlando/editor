@@ -1,5 +1,6 @@
 import { createSignal } from '~/shared/signal'
 import { SchemaFile } from './file'
+import { Hotkey } from './hotkey'
 import { OperateAlign } from './operate/align'
 import { OperateGeometry } from './operate/geometry'
 import { SchemaNode } from './schema/node'
@@ -23,6 +24,8 @@ import { UILeftPanel } from './ui-state/left-panel/left-panel'
 
 export const editorInited = createSignal(false)
 
+Hotkey.initHook()
+
 SchemaPage.initHook()
 SchemaNode.initHook()
 
@@ -44,6 +47,7 @@ StageWidgetAdsorption.initHook()
 StageWidgetTransform.initHook()
 
 UILeftPanelLayer.initHook()
+UILeftPanel.initHook()
 
 export async function initEditor() {
   SchemaFile.init()

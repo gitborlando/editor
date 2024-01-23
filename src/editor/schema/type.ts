@@ -26,7 +26,7 @@ export type IPage = {
 export type INode =
   | IFrame
   | IGroup
-  | IRect
+  | IRectangle
   | IEllipse
   | IText
   | ILine
@@ -41,6 +41,7 @@ export type INodeMeta = {
   lock: boolean
   visible: boolean
   parentId: string
+  DELETE?: boolean
 }
 
 export type IGeometryDetail = {
@@ -87,7 +88,7 @@ export type IPoint = {
   jumpToRight?: boolean
 }
 
-export type IVector = IRect | IEllipse | IPolygon | IStar | ILine | IIrregular
+export type IVector = IRectangle | IEllipse | IPolygon | IStar | ILine | IIrregular
 
 export type IVectorType = { type: 'vector' }
 
@@ -98,7 +99,7 @@ export type IIrregular = INodeBase &
     points: IPoint[]
   }
 
-export type IRect = INodeBase &
+export type IRectangle = INodeBase &
   IVectorType & {
     vectorType: 'rect'
     radius: number

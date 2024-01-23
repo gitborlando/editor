@@ -5,84 +5,79 @@ import { useHookSignal } from '~/shared/signal-react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
+import { Divide } from '~/view/ui-utility/widget/divide'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from '~/view/ui-utility/widget/icon'
 
 type ISwitchBarComp = {}
 
 export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
-  const { switchBarPosition, switchBarSize, switchTag } = UILeftPanel
-  const { classes, cx } = useStyles({ size: switchBarSize.value })
-  useHookSignal(switchBarPosition)
-  useHookSignal(switchTag)
+  const {
+    showLeftPanel,
+    currentTabId,
+    switchTabMap,
+    popupTabIds,
+    switchTabIds,
+    findSwitchTab,
+    popupCurrentPanel,
+  } = UILeftPanel
+  const { classes, cx } = useStyles({})
+  useHookSignal(currentTabId)
+  useHookSignal(popupTabIds)
+  useHookSignal(switchTabMap)
   return (
-    <Flex
-      shrink={0}
-      layout={switchBarPosition.value === 'top' ? 'h' : 'v'}
-      sidePadding={switchBarPosition.value === 'top' ? 4 : 8}
-      className={cx(
-        classes.SwitchBar,
-        switchBarPosition.value === 'top' && classes.top,
-        switchBarPosition.value === 'left' && classes.left
-      )}>
-      <Flex layout={switchBarPosition.value === 'top' ? 'h' : 'v'} className={cx('group')}>
-        <Button
-          className='button'
-          active={switchTag.value === 'layer'}
-          onClick={() => switchTag.dispatch('layer')}>
-          <h4>图层</h4>
+    <Flex shrink={0} layout='v' className={classes.SwitchBar}>
+      <Flex layout='v' className={classes.group}>
+        {switchTabIds
+          .filter((id) => !popupTabIds.value.has(id))
+          .map((id) => {
+            const tab = findSwitchTab(id)
+            return (
+              <Button
+                key={id}
+                active={currentTabId.value === id}
+                className={cx(classes.tab)}
+                onClick={() => currentTabId.dispatch(id)}>
+                <h4>{tab.name}</h4>
+              </Button>
+            )
+          })}
+      </Flex>
+      <Flex layout='v' style={{ gap: 4, marginTop: 'auto' }}>
+        <Divide direction='h' length={'50%'} />
+        <Button onClick={popupCurrentPanel}>
+          <Icon size={16} scale={0.9}>
+            {Asset.editor.leftPanel.switchBar.popup}
+          </Icon>
         </Button>
-        <Button
-          className='button'
-          active={switchTag.value === 'component'}
-          onClick={() => switchTag.dispatch('component')}>
-          <h4>组件</h4>
-        </Button>
-        <Button
-          className='button'
-          active={switchTag.value === 'source'}
-          onClick={() => switchTag.dispatch('source')}>
-          <h4>资源</h4>
+        <Button onClick={() => showLeftPanel.dispatch(!showLeftPanel.value)}>
+          <Icon size={16}>{Asset.editor.leftPanel.switchBar.toLeft}</Icon>
         </Button>
       </Flex>
-      <Button
-        type='icon'
-        style={{
-          ...(switchBarPosition.value === 'top' ? { marginLeft: 'auto' } : { marginTop: 'auto' }),
-        }}
-        onClick={() =>
-          switchBarPosition.dispatch(switchBarPosition.value === 'left' ? 'top' : 'left')
-        }>
-        <Icon size={16}>{Asset.editor.leftPanel.switchBar.toLeft}</Icon>
-      </Button>
     </Flex>
   )
 })
 
-type ISwitchBarCompStyle = {
-  size: number
-} /* & Required<Pick<ISwitchBarComp>> */ /* & Pick<ISwitchBarComp> */
+type ISwitchBarCompStyle = {} /* & Required<Pick<ISwitchBarComp>> */ /* & Pick<ISwitchBarComp> */
 
-const useStyles = makeStyles<ISwitchBarCompStyle>()((t, { size }) => ({
+const useStyles = makeStyles<ISwitchBarCompStyle>()((t) => ({
   SwitchBar: {
-    backgroundColor: 'white',
-    '& .button': {
-      //borderRadius: 2,
-    },
-  },
-  top: {
-    ...t.rect('100%', size, 'no-radius', 'white'),
-    ...t.default$.border('bottom'),
-    '& .group': {
-      gap: 8,
-    },
-  },
-  left: {
-    ...t.rect(size, '100%', 'no-radius', 'white'),
+    ...t.rect(40, '100%', 'no-radius', 'white'),
     ...t.default$.border('right'),
-    '& .group': {
-      gap: 16,
-    },
+    backgroundColor: 'white',
+    paddingBlock: 8,
+  },
+  group: {
+    ...t.rect('100%', 'fit-content'),
+    gap: 10,
+  },
+  tab: {
+    // ...t.rect('100%', 'fit-content'),
+    // ...t.labelFont,
+    // paddingBlock: 10,
+    // '&.active': {
+    //   ...t.default$.active.background,
+    // },
   },
 }))
 

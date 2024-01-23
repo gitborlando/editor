@@ -1,12 +1,12 @@
 import { observer } from 'mobx-react'
 import { FC, Suspense } from 'react'
-import { Setting } from '~/global/setting'
+import { initApp } from '~/global/initialize'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { UploaderComp } from './component/uploader'
 import { EditorComp } from './editor/editor'
 
-Setting.init()
+initApp()
 
 type IAppProps = {}
 

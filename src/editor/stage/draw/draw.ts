@@ -3,7 +3,6 @@ import { Text } from 'pixi.js'
 import { radianfy } from '~/editor/math/base'
 import { SchemaNode } from '~/editor/schema/node'
 import { IFill, IFrame, IIrregular, INode, IVector } from '~/editor/schema/type'
-import { createCache } from '~/shared/cache'
 import { XY } from '~/shared/structure/xy'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
@@ -16,7 +15,6 @@ import { StageDrawPath } from './path'
 @autobind
 export class StageDrawService {
   private redrawIds = new Set<string>()
-  private frameNameCache = createCache<Text>()
   initHook() {
     SchemaNode.afterFlushDirty.hook(() => {
       this.redrawIds.forEach((id) => this.drawNode(SchemaNode.find(id)))
@@ -111,7 +109,7 @@ export class StageDrawService {
     return XY.Of(pivotX, pivotY).rotate(XY.From(node, 'center'), node.rotation)
   }
   private drawFrameName(frame: IFrame) {
-    const name = this.frameNameCache.getSet(frame.id, () => {
+    const name = StageElement.frameNameCache.getSet(frame.id, () => {
       const nameText = new Text(frame.name, {
         fontSize: 12 / StageViewport.zoom.value,
         fill: '#9F9F9F',

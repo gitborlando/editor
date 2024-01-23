@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { XY } from '~/shared/structure/xy'
-import { IBound, IXY } from '~/shared/utils/normal'
+import { IRect, IXY } from '~/shared/utils/normal'
 import { abs, rcos, rsin } from './base'
 import { xy_dot, xy_minus, xy_rotate3 } from './xy'
 
@@ -10,7 +10,7 @@ type IAxis = { widthAxis: XY; heightAxis: XY }
 export class OBB {
   xy: IXY
   axis: IAxis
-  aabb: IBound
+  aabb: IRect
   vertexes: [IXY, IXY, IXY, IXY]
   constructor(
     public centerX: number,
@@ -146,5 +146,12 @@ export class OBB {
       abs(xy_dot(widthAxis, anotherAxis)) * this.width +
       abs(xy_dot(heightAxis, anotherAxis)) * this.height
     )
+  }
+  getAABBBound(aabb?: IRect) {
+    const { x, y, width, height } = aabb || this.aabb
+    const [left, right] = [x, x + width]
+    const [top, bottom] = [y, y + height]
+    const [centerX, centerY] = [x + width / 2, y + height / 2]
+    return { left, right, top, bottom, centerX, centerY }
   }
 }

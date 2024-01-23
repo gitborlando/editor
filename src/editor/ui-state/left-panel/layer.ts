@@ -64,9 +64,9 @@ export class UILeftPanelLayerService {
       this.singleNodeExpanded.dispatch(true)
     })
     this.singleNodeExpanded.hook(this.calcNodeListChange)
-    SchemaNode.beforeDelete.hook(this.calcNodeListChange)
-    SchemaNode.afterConnect.hook(({ id: currentId }) => {
-      SchemaUtil.traverseFromSomeId(currentId, ({ id, upLevelRef }) => {
+    SchemaNode.afterDelete.hook(this.calcNodeListChange)
+    SchemaNode.afterConnect.hook(({ node }) => {
+      SchemaUtil.traverseFromSomeId(node.id, ({ id, upLevelRef }) => {
         const parentId = upLevelRef?.id ?? ''
         const indent = (this.getNodeStatus(parentId)?.indent ?? -1) + 1
         const ancestors = this.getNodeStatus(parentId)?.ancestors ?? []
@@ -108,16 +108,13 @@ export class UILeftPanelLayerService {
       this.findNodeInView()
       this.nodeIdsInView.dispatch()
     })
-    UILeftPanel.panelHeight.hook((panelHeight) => {
-      this.nodeViewHeight.dispatch(panelHeight - this.pagePanelHeight.value - 32)
-    })
     this.pagePanelHeight.hook((height) => {
-      this.nodeViewHeight.dispatch(UILeftPanel.panelHeight.value - height - 32)
+      this.nodeViewHeight.dispatch(UILeftPanel.panelHeight - height - 32)
     })
   }
   init() {
     this.initNodeStatus()
-    this.nodeViewHeight.dispatch(UILeftPanel.panelHeight.value - this.pagePanelHeight.value - 32)
+    this.nodeViewHeight.dispatch(UILeftPanel.panelHeight - this.pagePanelHeight.value - 32)
   }
   getNodeStatus(id: string): ILeftPanelNodeStatus | undefined {
     return this.nodeStatusCache.get(id)

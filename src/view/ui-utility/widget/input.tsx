@@ -84,7 +84,7 @@ const useStyles = makeStyles<IInputStyle>()((t) => ({
     paddingLeft: 10,
   },
   active: {
-    ...t.default$.active.border,
+    ...t.default$.active.boxShadow,
   },
   label: {
     width: 44,

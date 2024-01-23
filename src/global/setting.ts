@@ -10,7 +10,7 @@ export class SettingService {
   private key = 'setting'
   inited = createSignal(false)
   color = createSignal(hslBlueColor(65))
-  switchBarPosition = createSignal(<'left' | 'top'>'top')
+  showLeftPanel = createSignal(true)
   init() {
     this.load()
     this.autoStore()

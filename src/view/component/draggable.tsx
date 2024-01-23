@@ -1,33 +1,54 @@
 import { observer, useLocalObservable } from 'mobx-react'
-import { FC, ReactNode } from 'react'
+import { FC, ReactNode, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { xy_new } from '~/editor/math/xy'
 import { Drag } from '~/global/event/drag'
+import { createSignal } from '~/shared/signal'
+import { useAutoSignal } from '~/shared/signal-react'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
+import Asset from '../ui-utility/assets'
 import { Button } from '../ui-utility/widget/button'
+import { Icon } from '../ui-utility/widget/icon'
 
 type IDraggableComp = {
   closeFunc: () => void
   children: ReactNode
   xy?: IXY
   headerSlot?: ReactNode
+  width?: number
+  height?: number
 }
 
+const maxZIndex = createSignal(0)
+
 export const DraggableComp: FC<IDraggableComp> = observer(
-  ({ closeFunc, children, xy, headerSlot }) => {
+  ({ closeFunc, children, xy, headerSlot, width, height }) => {
     const { classes } = useStyles({})
     const state = useLocalObservable(() => ({
       xy: xy || xy_new(480, 240),
     }))
-    return (
-      <Flex layout='v' className={classes.Draggable} style={{ left: state.xy.x, top: state.xy.y }}>
+    const zIndex = useAutoSignal(0)
+    useEffect(() => void maxZIndex.value++, [])
+    return createPortal(
+      <Flex
+        layout='v'
+        className={classes.Draggable}
+        style={{
+          left: state.xy.x,
+          top: state.xy.y,
+          ...(width && { width }),
+          ...(height && { height }),
+          zIndex: zIndex.value,
+        }}
+        onMouseDownCapture={() => zIndex.dispatch(maxZIndex.value++)}>
         <Flex
           layout='h'
+          shrink={0}
           className={classes.header}
           justify='space-between'
-          sidePadding={4}
           onMouseDown={() => {
             const start = state.xy
             const { innerWidth, innerHeight } = window
@@ -38,14 +59,18 @@ export const DraggableComp: FC<IDraggableComp> = observer(
           }}>
           {headerSlot}
           <Button
+            type='icon'
             onMouseDown={(e) => e.stopPropagation()}
             onClick={closeFunc}
             style={{ marginLeft: 'auto', cursor: 'pointer' }}>
-            关闭
+            <Icon size={16} rotate={45}>
+              {Asset.editor.leftPanel.page.add}
+            </Icon>
           </Button>
         </Flex>
         {children}
-      </Flex>
+      </Flex>,
+      document.querySelector('#draggable-portal')!
     )
   }
 )
@@ -54,7 +79,7 @@ type IDraggableCompStyle = {} /* & Required<Pick<IDraggableComp>> */ /* & Pick<I
 
 const useStyles = makeStyles<IDraggableCompStyle>()((t) => ({
   Draggable: {
-    ...t.rect('fit-content', 'fit-content', 6, 'white'),
+    ...t.rect(240, 'fit-content', 6, 'white'),
     ...t.fixed(),
     overflow: 'hidden',
     boxShadow: '0px 0px 4px  rgba(0, 0, 0, 0.25)',
@@ -62,7 +87,8 @@ const useStyles = makeStyles<IDraggableCompStyle>()((t) => ({
   header: {
     ...t.rect('100%', 30),
     ...t.default$.borderBottom,
-    cursor: 'move',
+    paddingLeft: 10,
+    paddingRight: 4,
   },
 }))
 

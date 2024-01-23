@@ -1,8 +1,7 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import usePromise from 'react-promise-suspense'
-import { initEditor } from '~/editor/init-editor'
-import { Drag } from '~/global/event/drag'
+import { initEditor } from '~/editor/initialize'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { HeaderComp } from './header/header'
@@ -23,12 +22,6 @@ export const EditorComp: FC<IEditorComp> = observer(({}) => {
         <StageComp />
         <RightPanelComp />
       </Flex>
-      <Flex
-        className={classes.dragMask}
-        vshow={Drag.canMove && false}
-        style={{
-          cursor: Drag.cursor,
-        }}></Flex>
     </Flex>
   )
 })
@@ -41,11 +34,7 @@ const useStyles = makeStyles<IEditorCompStyle>()((t) => ({
   },
   main: {
     ...t.rect('100%', '100%'),
-  },
-  dragMask: {
-    ...t.rect('100vw', '100vh', 'no-radius', 'rgba(0,0,0,0)'),
-    ...t.fixed(0, 0),
-    zIndex: 999,
+    overflow: 'hidden',
   },
 }))
 

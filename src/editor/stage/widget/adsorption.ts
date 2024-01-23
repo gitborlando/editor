@@ -27,7 +27,9 @@ export class StageWidgetAdsorptionService {
   private cloneTransformOBB = new OBB(0, 0, 0, 0, 0)
   private needDraw = false
   initHook() {
-    OperateGeometry.beforeOperate.hook(this.setupAdsorption)
+    OperateGeometry.beforeOperate.hook(() => {
+      this.setupAdsorption()
+    })
     OperateGeometry.data._whenDataWillChange.hook(this.adsorption, ['id:adsorption'])
     OperateGeometry.afterOperate.hook(() => (this.needDraw = false))
     SchemaNode.afterFlushDirty.hook(this.autoDraw, ['after:operateGeometryReset'])

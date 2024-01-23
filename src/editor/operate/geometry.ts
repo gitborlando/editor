@@ -4,7 +4,8 @@ import { createInterceptData } from '~/shared/intercept-data/interceptable'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
-import { Record } from '../record'
+import { iife } from '~/shared/utils/normal'
+import { Record, recordSignalContext } from '../record'
 import { SchemaNode } from '../schema/node'
 import { IPolygon, IStar } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
@@ -33,7 +34,7 @@ export class OperateGeometryService {
   oneTickChange = createMomentChange(initData())
   oneOperateChange = createMomentChange(initData())
   beforeOperate = createSignal<(keyof IGeometryData)[]>()
-  afterOperate = createSignal<'record'>()
+  afterOperate = createSignal()
   operateKeys = <Set<keyof IGeometryData>>new Set(['x', 'y', 'width', 'height', 'rotation'])
   isGeometryChanged = false
   initHook() {
@@ -58,9 +59,7 @@ export class OperateGeometryService {
     this.beforeOperate.hook(() => {
       this.oneOperateChange.endCurrent()
     })
-    this.afterOperate.hook((type) => {
-      if (type !== 'record') this.undoRedo()
-    })
+    this.afterOperate.hook(this.record)
   }
   private setupGeometryData() {
     this.data._noIntercept = true
@@ -128,12 +127,12 @@ export class OperateGeometryService {
     if (changedKeys.has('x') && x) {
       node.x += x.current - x.last
       node.centerX += x.current - x.last
-      OBB.shiftX(x.current - x.last)
+      OBB.shiftX(x.shift)
     }
     if (changedKeys.has('y') && y) {
       node.y += y.current - y.last
       node.centerY += y.current - y.last
-      OBB.shiftY(y.current - y.last)
+      OBB.shiftY(y.shift)
     }
     if (changedKeys.has('width') && width) {
       node.width += width.current - width.last
@@ -211,20 +210,25 @@ export class OperateGeometryService {
     StageElement.OBBCache.set(id, OBB)
   }
 
-  private undoRedo() {
+  private record() {
+    if (recordSignalContext()) return
     const keys = this.beforeOperate.value
     const record = structuredClone(this.oneOperateChange.record)
+    const travel = (type: 'last' | 'current') => {
+      this.beforeOperate.dispatch(keys)
+      keys.forEach((key) => (this.data[key] = record[key][type]))
+      this.afterOperate.dispatch()
+    }
     Record.push({
-      undo: () => {
-        this.beforeOperate.dispatch(keys)
-        keys.forEach((key) => (this.data[key] = record[key].last))
-        this.afterOperate.dispatch('record')
-      },
-      redo: () => {
-        this.beforeOperate.dispatch(keys)
-        keys.forEach((key) => (this.data[key] = record[key].current))
-        this.afterOperate.dispatch('record')
-      },
+      description: '操作几何数据',
+      detail: iife(() => {
+        const keysToValues = keys
+          .filter((key) => record[key]['last'] !== record[key]['current'])
+          .map((key) => [key, { last: record[key]['last'], current: record[key]['current'] }])
+        return Object.fromEntries(keysToValues)
+      }),
+      undo: () => travel('last'),
+      redo: () => travel('current'),
     })
   }
 }

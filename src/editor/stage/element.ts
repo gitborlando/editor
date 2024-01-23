@@ -5,6 +5,7 @@ import { XY } from '~/shared/structure/xy'
 import { OBB } from '../math/obb'
 import { Path } from '../math/path/path'
 import { SchemaNode } from '../schema/node'
+import { StageDraw } from './draw/draw'
 import { PIXI, Pixi } from './pixi'
 import { StageViewport } from './viewport'
 
@@ -16,24 +17,35 @@ export class StageElementService {
   OBBCache = createCache<OBB>()
   pathCache = createCache<Path>()
   outlineCache = createCache<PIXI.Graphics>()
+  frameNameCache = createCache<PIXI.Text>()
   linearGradientCache = createCache<PIXI.Texture>()
   private elementMap: Map<string, IStageElement> = new Map()
   initHook() {
     Pixi.inited.hook(this.bindHover)
-    SchemaNode.beforeDelete.hook(({ id }) => this.delete(id))
+    SchemaNode.afterAdd.hook((nodes) => {
+      nodes.forEach((node) => this.add(node.id, node.type === 'text' ? 'text' : 'graphic'))
+    })
+    SchemaNode.afterDelete.hook((nodes) => {
+      nodes.forEach((node) => this.delete(node.id))
+    })
   }
-  add(id: string, element: IStageElement) {
+  add(id: string, type: 'graphic' | 'text') {
+    const element = type === 'graphic' ? new PIXI.Graphics() : new PIXI.Text()
+    this.elementMap.set(id, element)
+    element.setParent(Pixi.sceneStage)
     this.initOBB(id)
     this.initOutline(id)
-    this.elementMap.set(id, element)
-    this.setupElement(id, element)
+    StageDraw.collectRedraw(id)
   }
   delete(id: string) {
     this.elementMap.get(id)?.destroy()
     this.elementMap.delete(id)
     this.OBBCache.delete(id)
     this.pathCache.delete(id)
+    this.outlineCache.get(id).destroy()
     this.outlineCache.delete(id)
+    this.frameNameCache.get(id)?.destroy()
+    this.frameNameCache.delete(id)
   }
   find(id: string) {
     return this.elementMap.get(id)
@@ -52,14 +64,9 @@ export class StageElementService {
     if (element) {
       return type === 'graphic' ? <PIXI.Graphics>element : <PIXI.Text>element
     } else {
-      element = type === 'graphic' ? new PIXI.Graphics() : new PIXI.Text()
-      this.add(id, element)
-      return element
+      this.add(id, type)
+      return this.find(id)
     }
-  }
-  private setupElement(id: string, element: IStageElement) {
-    const node = SchemaNode.find(id)
-    if (!element.parent) element.setParent(Pixi.sceneStage)
   }
   private bindHover() {
     const handler = batchSignal([SchemaNode.hoverIds], (e: Event) => {

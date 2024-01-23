@@ -16,7 +16,7 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
-  useHookSignal(StageInteract.type)
+  useHookSignal(StageInteract.currentType)
   useHookSignal(StageViewport.zoom)
   const { classes } = useStyles({ top: StageViewport.bound.value.y })
 
@@ -39,9 +39,9 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   }, [])
 
   const StageOperateIcon: FC<{ type: 'select' | 'move' }> = ({ type }) => {
-    const isActive = StageInteract.type.value === type
+    const isActive = StageInteract.currentType.value === type
     return (
-      <Button active={isActive} onClick={() => StageInteract.type.dispatch(type)}>
+      <Button active={isActive} onClick={() => StageInteract.currentType.dispatch(type)}>
         <Icon size={20} fill={isActive ? hslBlueColor(65) : ''}>
           {Asset.editor.header.stageOperate[type]}
         </Icon>
@@ -50,7 +50,8 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   }
 
   const CreateShapeIcon: FC<{ type: IStageCreateType }> = ({ type }) => {
-    const isActive = StageInteract.type.value === 'create' && StageCreate.currentType.value === type
+    const isActive =
+      StageInteract.currentType.value === 'create' && StageCreate.currentType.value === type
     return (
       <Button active={isActive} onClick={() => StageCreate.currentType.dispatch(type)}>
         <Icon size={20} fill={isActive ? hslBlueColor(65) : ''}>
@@ -65,7 +66,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
       <Flex layout='h' className={classes.leftGroup}>
         <Flex layout='c'>
           <Icon size={28}>{Asset.favIcon.shiyangyang}</Icon>
-          <h4 style={{ color: hslBlueColor(60) }}>屎羊羊编辑器</h4>
+          <h4 style={{ color: hslBlueColor(60), fontSize: 16 }}>屎羊羊编辑器</h4>
         </Flex>
         <Flex className={classes.fileSave}>/{SchemaFile.isSaved.value ? '已保存' : '未保存'}</Flex>
       </Flex>

@@ -33,7 +33,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
   const subSelected = ancestors.some((i) => SchemaNode.selectIds.value.has(i)) && !selected
   const searched = nodeIdsInSearch.value.has(id)
   const isContainerNode = SchemaUtil.isContainerNode(id)
-  const childIds = SchemaUtil.getChildIds(id)
+  const children = SchemaUtil.getChildren(id)
   const hovered = useAutoSignal(false)
   const enterEdit = useAutoSignal(false)
   const duringEdit = useAutoSignal(false)
@@ -62,10 +62,6 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
     },
     [id]
   )
-  useHookSignal(SchemaNode.beforeDelete, ({ parentId }, forceUpdate) => {
-    if (parentId === id) forceUpdate()
-    if (SchemaUtil.isPage(parentId)) forceUpdate()
-  })
   useHookSignal(nodeMoveEnded, () => (nodeMoveStarted.value.moveId = ''))
   const handleMouseDown = useCallback(() => {
     StageSelect.onPanelSelect(id)
@@ -86,7 +82,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
             singleNodeExpanded.dispatch(!expanded)
           }}
           style={{ width: 8, cursor: 'pointer' }}>
-          {childIds.length > 0 && (
+          {children.length > 0 && (
             <Icon size={8} scale={8 / 9} rotate={expanded ? 90 : 0}>
               {Asset.editor.leftPanel.node.collapse}
             </Icon>
@@ -125,7 +121,9 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
             )}
           </Flex>
           {hovered.value && (
-            <Button onMouseDown={stopPropagation} onClick={() => SchemaNode.delete(id)}>
+            <Button
+              onMouseDown={stopPropagation}
+              onClick={() => SchemaUtil.traverseDelete(new Set([id]))}>
               <Icon size={12}>{Asset.editor.shared.delete}</Icon>
             </Button>
           )}
@@ -186,7 +184,7 @@ const useStyles = makeStyles<INodeItemCompStyle>()((t, { selected, subSelected, 
   dropArea: {
     ...t.rect('100%', 32),
     ...t.absolute(),
-    ...(dropInSide.value && { ...t.default$.active.border }),
+    ...(dropInSide.value && { ...t.default$.active.boxShadow }),
     '& .dropLayer': {
       ...t.rect('100%', '100%'),
     },

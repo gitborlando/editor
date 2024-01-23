@@ -1,38 +1,77 @@
 import autobind from 'class-autobind-decorator'
+import { FC } from 'react'
 import { StageViewport } from '~/editor/stage/viewport'
 import { Setting } from '~/global/setting'
 import { createSignal } from '~/shared/signal'
+import { LayerComp } from '~/view/editor/left-panel/panels/layer/layer'
+import { RecordComp } from '~/view/editor/left-panel/panels/record/record'
+import Asset from '~/view/ui-utility/assets'
+
+type ISwitchTabOption = {
+  id: string
+  name: string
+  icon: FC<any>
+  panel: FC<any>
+}
 
 @autobind
 export class UILeftPanelService {
-  panelHeight = createSignal(0)
-  switchBarSize = createSignal(36)
-  switchTag = createSignal(<'layer' | 'component' | 'source'>'layer')
-  get switchBarPosition() {
-    return Setting.switchBarPosition
+  currentTabId = createSignal('record')
+  switchTabMap = createSignal(new Map<string, ISwitchTabOption>())
+  popupTabIds = createSignal(new Set<string>())
+  switchTabIds = <string[]>[]
+  panelHeight = window.innerHeight - 48
+  get showLeftPanel() {
+    return Setting.showLeftPanel
+  }
+  initHook() {
+    this.switchTabMap.hook(() => {
+      this.switchTabIds = [...this.switchTabMap.value.keys()]
+    })
   }
   init() {
-    const originX = StageViewport.bound.value.x
-    this.switchBarPosition.hook(
-      (value, oldValue) => {
-        if (value === 'top') {
-          this.switchBarSize.dispatch(36)
-          this.panelHeight.value =
-            window.innerHeight - StageViewport.bound.value.y - this.switchBarSize.value
-          StageViewport.bound.value.x = originX
-        }
-        if (value === 'left') {
-          this.panelHeight.value = window.innerHeight - StageViewport.bound.value.y
-          this.switchBarSize.dispatch(40)
-          if (oldValue === 'top') {
-            StageViewport.bound.value.x = originX + this.switchBarSize.value
-          }
-        }
-        StageViewport.bound.dispatch()
-        this.panelHeight.dispatch()
-      },
+    Setting.showLeftPanel.hook(
+      (show) => StageViewport.bound.dispatch((bound) => (bound.x = show ? 280 : 40)),
       ['immediately']
     )
+    this.registerSwitchTab({
+      id: 'layer',
+      name: '图层',
+      icon: Asset.editor.leftPanel.switchBar.layer,
+      panel: LayerComp,
+    })
+    this.registerSwitchTab({
+      id: 'component',
+      name: '组件',
+      icon: Asset.editor.leftPanel.switchBar.component,
+      panel: () => '',
+    })
+    this.registerSwitchTab({
+      id: 'source',
+      name: '图片',
+      icon: Asset.editor.leftPanel.switchBar.image,
+      panel: () => '',
+    })
+    this.registerSwitchTab({
+      id: 'record',
+      name: '记录',
+      icon: Asset.editor.leftPanel.switchBar.record,
+      panel: RecordComp,
+    })
+  }
+  registerSwitchTab(option: ISwitchTabOption) {
+    this.switchTabMap.dispatch((map) => map.set(option.id, option))
+  }
+  findSwitchTab(id: string) {
+    return this.switchTabMap.value.get(id)!
+  }
+  popDownPanel(id: string) {
+    this.popupTabIds.dispatch((ids) => ids.delete(id))
+    this.currentTabId.dispatch(id)
+  }
+  popupCurrentPanel() {
+    this.popupTabIds.dispatch((ids) => ids.add(this.currentTabId.value))
+    this.currentTabId.dispatch(this.switchTabIds.find((id) => !this.popupTabIds.value.has(id)))
   }
 }
 

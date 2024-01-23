@@ -10,7 +10,7 @@ export type IStageInteractType = 'select' | 'move' | 'create'
 
 @autobind
 export class StageInteractService {
-  type = createSignal(<IStageInteractType>'select')
+  currentType = createSignal(<IStageInteractType>'select')
   private previousType?: IStageInteractType
   private interactHandlerMap = new Map<
     IStageInteractType,
@@ -20,17 +20,17 @@ export class StageInteractService {
     this.interactHandlerMap.set('create', StageCreate)
     this.interactHandlerMap.set('move', StageMove)
     this.interactHandlerMap.set('select', StageSelect)
-    this.type.hook(this.autoInteract)
-    this.type.hook(this.autoCursor)
-    Pixi.inited.hook(() => this.type.dispatch('select'))
+    this.currentType.hook(this.autoInteract)
+    this.currentType.hook(this.autoCursor)
+    Pixi.inited.hook(() => this.currentType.dispatch('select'))
   }
   private autoInteract() {
-    this.interactHandlerMap.get(this.type.value)?.startInteract()
+    this.interactHandlerMap.get(this.currentType.value)?.startInteract()
     this.interactHandlerMap.get(this.previousType!)?.endInteract()
-    this.previousType = this.type.value
+    this.previousType = this.currentType.value
   }
   private autoCursor() {
-    const cursor = interactCursorMap[this.type.value]
+    const cursor = interactCursorMap[this.currentType.value]
     Drag.setCursor(cursor)
     Pixi.container.style.cursor = cursor
   }

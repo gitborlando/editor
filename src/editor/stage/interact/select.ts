@@ -1,8 +1,9 @@
 import autobind from 'class-autobind-decorator'
 import { OBB } from '~/editor/math/obb'
-import { Record } from '~/editor/record'
+import { Record, recordSignalContext } from '~/editor/record'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaPage } from '~/editor/schema/page'
+import { INode } from '~/editor/schema/type'
 import { SchemaUtil } from '~/editor/schema/util'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu'
@@ -12,34 +13,39 @@ import { XY } from '~/shared/structure/xy'
 import { lastOne } from '~/shared/utils/array'
 import { rectInAnotherRect } from '~/shared/utils/collision'
 import { macro_Match } from '~/shared/utils/macro'
-import { createBound, isLeftMouse, isRightMouse, type IBound } from '~/shared/utils/normal'
+import {
+  createBound,
+  fastDeepEqual,
+  isLeftMouse,
+  isRightMouse,
+  type IRect,
+} from '~/shared/utils/normal'
 import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageWidgetTransform } from '../widget/transform'
 import { StageCreate } from './create'
 
-type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee' | 'undoRedo'
+type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 
 @autobind
 export class StageSelectService {
-  marquee = createSignal<IBound | undefined>()
+  marquee = createSignal<IRect | undefined>()
   afterClearSelect = createSignal()
   afterSelect = createSignal<ISelectType>()
   duringMarqueeSelect = createSignal()
   needExpandIds = new Set<string>()
   private marqueeOBB?: OBB
-  private oneSelectChange = createMomentChange({ selectIds: new Set<string>() })
+  private oneSelectChange = createMomentChange({ selectIds: <string[]>[] })
   initHook() {
     StageCreate.createStarted.hook(this.onCreateSelect)
     this.afterClearSelect.hook(() => {
       this.needExpandIds.clear()
-      this.oneSelectChange.endCurrent()
     })
-    this.afterSelect.hook((type) => {
-      const selectIds = structuredClone(SchemaNode.selectIds.value)
-      this.oneSelectChange.update('selectIds', selectIds)
-      if (type !== 'undoRedo') this.undoRedo()
+    this.afterSelect.hook(() => {
+      this.oneSelectChange.update('selectIds', [...SchemaNode.selectIds.value])
+      this.recordSelect()
+      this.oneSelectChange.endCurrent()
     })
   }
   startInteract() {
@@ -82,7 +88,7 @@ export class StageSelectService {
     SchemaNode.select(id)
     this.afterSelect.dispatch('panel')
   }
-  private onCreateSelect(id: string) {
+  onCreateSelect(id: string) {
     this.clearSelect()
     SchemaNode.select(id)
     let node = SchemaNode.find(id)
@@ -113,29 +119,26 @@ export class StageSelectService {
       if (macro_Match`-180|-90|0|90|180`(obb.rotation)) return aabbResult
       return aabbResult && marqueeOBB.obbHitTest(obb)
     }
-    const traverseTest = (ids: string[]) => {
-      ids.forEach((id) => {
-        const OBB = StageElement.OBBCache.get(id)
-        const node = SchemaNode.find(id)
+    const traverseTest = (nodes: INode[]) => {
+      nodes.forEach((node) => {
+        const OBB = StageElement.OBBCache.get(node.id)
         if (SchemaUtil.isPageFrameNode(node) && node.childIds.length) {
           if (rectInAnotherRect(OBB.aabb, this.marqueeOBB!.aabb)) {
-            SchemaNode.select(id)
-            this.needExpandIds.add(id)
-            SchemaUtil.traverseFromSomeId(id, ({ id }) => {
-              id !== node.id && SchemaNode.unSelect(id)
-            })
+            SchemaNode.select(node.id)
+            this.needExpandIds.add(node.id)
+            SchemaUtil.traverseIds(node.childIds, ({ id }) => SchemaNode.unSelect(id))
           } else {
-            SchemaNode.unSelect(id)
-            traverseTest(SchemaUtil.getChildIds(id))
+            SchemaNode.unSelect(node.id)
+            traverseTest(SchemaUtil.getChildren(node.id))
           }
           return
         }
         if (hitTest(this.marqueeOBB, OBB)) {
-          SchemaNode.select(id)
+          SchemaNode.select(node.id)
           this.needExpandIds.add(node.parentId)
-          traverseTest(SchemaUtil.getChildIds(id))
+          traverseTest(SchemaUtil.getChildren(node.id))
         } else {
-          SchemaNode.unSelect(id)
+          SchemaNode.unSelect(node.id)
         }
       })
     }
@@ -146,7 +149,7 @@ export class StageSelectService {
         this.marquee.dispatch(marquee)
         this.marqueeOBB = this.calcMarqueeOBB()
         const batchTest = batchSignal([SchemaNode.selectIds], traverseTest)
-        batchTest(SchemaPage.currentPage.value.childIds)
+        batchTest(SchemaPage.currentPage.value.childIds.map((id) => SchemaNode.find(id)))
         this.duringMarqueeSelect.dispatch()
       })
       .onDestroy(() => {
@@ -168,16 +171,20 @@ export class StageSelectService {
     const height = StageViewport.toSceneStageShift(marquee.height)
     return new OBB(x + width / 2, y + height / 2, width, height, 0)
   }
-  private undoRedo() {
+  private recordSelect() {
+    if (recordSignalContext()) return
     const { last, current } = this.oneSelectChange.record.selectIds
+    if (fastDeepEqual(last, current)) return
     Record.push({
+      description: '选择节点',
+      detail: { last: [...last], current: [...current] },
       undo: () => {
-        SchemaNode.selectIds.dispatch(last)
-        this.afterSelect.dispatch('undoRedo')
+        SchemaNode.selectIds.dispatch(new Set(last))
+        this.afterSelect.dispatch()
       },
       redo: () => {
-        SchemaNode.selectIds.dispatch(current)
-        this.afterSelect.dispatch('undoRedo')
+        SchemaNode.selectIds.dispatch(new Set(current))
+        this.afterSelect.dispatch()
       },
     })
   }

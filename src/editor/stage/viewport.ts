@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import hotkeys from 'hotkeys-js'
 import { EventWheelService } from '~/global/event/wheel'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
@@ -65,8 +66,15 @@ export class StageViewportService {
     return xy.x > x && xy.x < x + width && xy.y > y
   }
   private onWheelZoom() {
-    this.wheeler.beforeWheel.hook(this.beforeZoom.dispatch)
-    this.wheeler.duringWheel.hook(({ e: { deltaY, clientX, clientY } }) => {
+    this.wheeler.beforeWheel.hook(({ e }) => {
+      if (!hotkeys.ctrl) return
+      e.preventDefault()
+      this.beforeZoom.dispatch()
+    })
+    this.wheeler.duringWheel.hook(({ e }) => {
+      const { deltaY, clientX, clientY } = e
+      if (!hotkeys.ctrl) return
+      e.preventDefault()
       const sign = deltaY > 0 ? -1 : 1
       const stepByZoom = getStepByZoom()
       const step = stepByZoom.find(([_zoom, _step]) => _zoom <= this.zoom.value)![1] * sign
@@ -77,7 +85,11 @@ export class StageViewportService {
       this.stageOffset.dispatch(newOffset)
       this.duringZoom.dispatch()
     })
-    this.wheeler.afterWheel.hook(this.afterZoom.dispatch)
+    this.wheeler.afterWheel.hook(({ e }) => {
+      if (!hotkeys.ctrl) return
+      e.preventDefault()
+      this.afterZoom.dispatch()
+    })
   }
   private onResizeBound() {
     const { x, y, right } = this.bound.value

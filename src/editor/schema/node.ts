@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { firstOne, insertAt } from '~/shared/utils/array'
-import { Delete } from '~/shared/utils/normal'
+import { Record, recordSignalContext } from '../record'
 import { StageElement } from '../stage/element'
 import { Pixi } from '../stage/pixi'
 import { SchemaPage } from './page'
@@ -18,8 +18,10 @@ export class SchemaNodeService {
   dirtyIds = new Set<string>()
   hoverIds = createSignal(new Set<string>())
   selectIds = createSignal(new Set<string>())
-  afterConnect = createSignal({ id: '', parentId: '' })
-  beforeDelete = createSignal({ id: '', parentId: '' })
+  afterAdd = createSignal<INode[]>()
+  afterDelete = createSignal<INode[]>()
+  afterConnect = createSignal<{ parent: INodeParent; node: INode; index?: number }>()
+  afterDisconnect = createSignal<{ node: INode }>()
   beforeFlushDirty = createSignal()
   duringFlushDirty = createSignal('')
   afterFlushDirty = createSignal()
@@ -30,6 +32,11 @@ export class SchemaNodeService {
     })
     this.selectIds.hook((selectIds) => {
       this.autoGetDatumId(selectIds)
+    })
+    this.afterDelete.hook((nodes) => {
+      nodes.forEach(({ id }) => this.dirtyIds.delete(id))
+      this.selectIds.dispatch((ids) => ids.clear())
+      this.hoverIds.dispatch((ids) => nodes.forEach(({ id }) => ids.delete(id)))
     })
     this.datumId.hook((id) => {
       if (id === '' || SchemaUtil.isPage(id)) {
@@ -51,28 +58,35 @@ export class SchemaNodeService {
   setMap(map: typeof this.nodeMap) {
     this.nodeMap = map
   }
-  add(node: INode) {
-    this.currentPageNodeMap[node.id] = node
+  addNodes(nodes: INode[]) {
+    nodes.forEach((node) => {
+      delete node.DELETE
+      this.currentPageNodeMap[node.id] = node
+    })
+    this.afterAdd.dispatch(nodes)
+    this.recordAddNode(nodes)
   }
-  delete(id: string) {
-    const node = this.find(id)
-    this.beforeDelete.dispatch({ id, parentId: node.parentId })
-    if ('childIds' in node) node.childIds.forEach((i) => this.delete(i))
-    Delete(SchemaUtil.getChildIds(node.parentId), node.id)
-    Delete(this.currentPageNodeMap, id)
-  }
-  find(id: string) {
-    return this.currentPageNodeMap[id]
+  deleteNodes(nodes: INode[]) {
+    nodes.forEach((node) => (node.DELETE = true))
+    this.afterDelete.dispatch(nodes)
+    this.recordDelete(nodes)
   }
   connectAt(parent: INodeParent | IPage, node: INode, index?: number) {
     if (index !== undefined && !(index < 0 || index > parent.childIds.length - 1)) {
       insertAt(parent.childIds, index, node.id)
     } else parent.childIds.push(node.id)
     node.parentId = parent.id
-    this.afterConnect.dispatch({ id: node.id, parentId: parent.id })
+    this.afterConnect.dispatch({ parent, node, index })
+    this.recordConnect(parent, node, index)
   }
   disconnect(parent: INodeParent | IPage, node: INode) {
-    Delete(parent.childIds, node.id)
+    const index = parent.childIds.findIndex((i) => i === node.id)
+    parent.childIds.splice(index, 1)
+    this.afterDisconnect.dispatch({ node })
+    this.recordDisconnect(parent, node, index)
+  }
+  find(id: string) {
+    return this.currentPageNodeMap[id]
   }
   hover(id: string) {
     this.hoverIds.dispatch((ids) => ids.add(id))
@@ -89,7 +103,6 @@ export class SchemaNodeService {
     this.selectIds.dispatch((ids) => ids.delete(id))
   }
   clearSelect() {
-    this.selectIds.value.forEach(this.collectDirty)
     this.selectIds.dispatch(new Set())
   }
   collectDirty(id: string) {
@@ -117,6 +130,42 @@ export class SchemaNodeService {
       if (parentIds.size === 1) this.datumId.dispatch(firstOne(parentIds))
       if (parentIds.size > 1) this.datumId.dispatch('')
     }
+  }
+  private recordAddNode(addNodes: INode[]) {
+    if (recordSignalContext()) return
+    Record.push({
+      description: '添加节点',
+      detail: addNodes.map((node) => node.id),
+      undo: () => this.deleteNodes(addNodes),
+      redo: () => this.addNodes(addNodes),
+    })
+  }
+  private recordDelete(deleteNodes: INode[]) {
+    if (recordSignalContext()) return
+    Record.push({
+      description: '删除节点',
+      detail: deleteNodes.map((node) => node.id),
+      undo: () => this.addNodes(deleteNodes),
+      redo: () => this.deleteNodes(deleteNodes),
+    })
+  }
+  private recordConnect(parent: INodeParent, node: INode, index?: number) {
+    if (recordSignalContext()) return
+    Record.push({
+      description: '关联父子结点',
+      detail: { parent: parent.name || 'currentPage', node: node.name },
+      undo: () => this.disconnect(parent, node),
+      redo: () => this.connectAt(parent, node, index),
+    })
+  }
+  private recordDisconnect(parent: INodeParent, node: INode, index?: number) {
+    if (recordSignalContext()) return
+    Record.push({
+      description: '取消关联父子结点',
+      detail: { parent: parent.name || 'currentPage', node: node.name },
+      undo: () => this.connectAt(parent, node, index),
+      redo: () => this.disconnect(parent, node),
+    })
   }
 }
 

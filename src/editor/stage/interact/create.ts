@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { OperateGeometry } from '~/editor/operate/geometry'
+import { Record } from '~/editor/record'
 import { SchemaDefault } from '~/editor/schema/default'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaPage } from '~/editor/schema/page'
@@ -9,10 +10,10 @@ import { Drag, type IDragData } from '~/global/event/drag'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
-import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
+import { StageSelect } from './select'
 
 const createTypes = ['frame', 'rect', 'ellipse', 'line', 'polygon', 'star', 'image'] as const
 export type IStageCreateType = (typeof createTypes)[number]
@@ -22,11 +23,12 @@ export class StageCreateService {
   createTypes = createTypes
   currentType = createSignal<IStageCreateType>('frame')
   createStarted = createSignal<string>()
+  createFinished = createSignal()
   private node!: INode
   private sceneStageStart!: IXY
   initHook() {
     this.currentType.hook(() => {
-      StageInteract.type.dispatch('create')
+      StageInteract.currentType.dispatch('create')
     })
   }
   startInteract() {
@@ -40,11 +42,12 @@ export class StageCreateService {
   }
   private onCreateStart({ start }: IDragData) {
     this.sceneStageStart = StageViewport.toSceneStageXY(start)
+    Record.startAction()
     this.createNode()
-    SchemaNode.add(this.node)
+    SchemaNode.addNodes([this.node])
     SchemaNode.connectAt(this.findContainer(), this.node)
-    StageElement.findOrCreate(this.node.id, 'graphic')
-    this.createStarted.dispatch(this.node.id)
+    StageSelect.onCreateSelect(this.node.id)
+    OperateGeometry.beforeOperate.dispatch(['x', 'y', 'width', 'height'])
   }
   private onCreateMove({ marquee, current }: IDragData) {
     const { x, y } = StageViewport.toSceneStageXY(marquee)
@@ -58,15 +61,16 @@ export class StageCreateService {
       OperateGeometry.data.width = width
       OperateGeometry.data.height = height
     }
-    OperateGeometry.afterOperate.dispatch()
   }
   private onCreateEnd() {
     if (OperateGeometry.data.width === 0) {
       OperateGeometry.data.width = 100
       OperateGeometry.data.height = 100
-      OperateGeometry.afterOperate.dispatch()
     }
-    StageInteract.type.dispatch('select')
+    OperateGeometry.afterOperate.dispatch()
+    StageInteract.currentType.dispatch('select')
+    Record.endAction('创建节点')
+    this.createFinished.dispatch()
   }
   private createNode() {
     if (this.currentType.value === 'frame') {

@@ -10,7 +10,6 @@ import { SchemaUtil } from './util'
 
 @autobind
 export class SchemaPageService {
-  inited = createSignal(false)
   pages = createSignal<IPage[]>([])
   currentId = createSignal('')
   currentPage = createSignal<IPage>(null!)
@@ -41,9 +40,6 @@ export class SchemaPageService {
   }
   select(id: string) {
     this.currentId.dispatch(id)
-    if (this.inited.value === false) {
-      this.inited.dispatch(true)
-    }
     this.isPageFirstRendered.dispatch(false)
   }
   private firstDraw() {

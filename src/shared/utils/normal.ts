@@ -1,6 +1,8 @@
+import fastDeepEqual from 'deep-equal'
 import { runInAction } from 'mobx'
 
 export const This = globalThis as any
+export { fastDeepEqual }
 
 export const isLeftMouse = (e: any): e is MouseEvent => e.button === 0
 export const isRightMouse = (e: any): e is MouseEvent => e.button === 2
@@ -11,10 +13,21 @@ export function noopFunc() {}
 export type IAnyFunc = typeof anyFunc
 export function anyFunc(...args: any[]): any {}
 
+export type IAnyObject = Record<string, any>
+export const AnyObject = <IAnyObject>{}
+
 export type ValueOf<T extends Record<string, any>> = T[keyof T]
 
 export type IXY = { x: number; y: number }
-export type IBound = IXY & { width: number; height: number }
+export type IRect = IXY & { width: number; height: number }
+export type IBound = {
+  left: number
+  right: number
+  top: number
+  bottom: number
+  centerX: number
+  centerY: number
+}
 export type ICursor = 'auto' | 'n-resize' | 'e-resize' | 'grab' | (string & {})
 
 export function createBound(x: number, y: number, width: number, height: number) {

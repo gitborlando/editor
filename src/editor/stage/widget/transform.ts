@@ -2,7 +2,9 @@ import autobind from 'class-autobind-decorator'
 import { max, min } from '~/editor/math/base'
 import { OBB } from '~/editor/math/obb'
 import { xy_new } from '~/editor/math/xy'
+import { OperateAlign } from '~/editor/operate/align'
 import { OperateGeometry } from '~/editor/operate/geometry'
+import { recordSignalContext } from '~/editor/record'
 import { SchemaNode } from '~/editor/schema/node'
 import { Drag } from '~/global/event/drag'
 import { Setting } from '~/global/setting'
@@ -81,6 +83,7 @@ export class StageWidgetTransformService {
   private hookTransform() {
     StageSelect.duringMarqueeSelect.hook(this.calcTransformOBB)
     StageSelect.afterSelect.hook(this.calcTransformOBB)
+    OperateAlign.afterAlign.hook(() => this.calcTransformOBB(), ['id:calcTransformOBB'])
     SchemaNode.afterFlushDirty.hook(() => {
       if (OperateGeometry.isGeometryChanged) this.calcTransformOBB()
     }, ['id:calcTransformOBB', 'before:operateGeometryReset'])
@@ -194,15 +197,18 @@ export class StageWidgetTransformService {
           OperateGeometry.data.x = x + sceneShiftXY.x
           OperateGeometry.data.y = y + sceneShiftXY.y
         })
-        .onDestroy(() => {
-          OperateGeometry.afterOperate.dispatch()
-          StageElement.canHover = true
+        .onDestroy(({ dragService }) => {
+          if (dragService.started) {
+            OperateGeometry.afterOperate.dispatch()
+            StageElement.canHover = true
+          }
         })
     }
     Pixi.addListener('mousedown', (e) => {
       if (this.mouseIn(e as MouseEvent)) handleDrag()
     })
     StageSelect.afterSelect.hook((type) => {
+      if (recordSignalContext()) return
       if (type === 'stage-single') handleDrag()
     })
   }

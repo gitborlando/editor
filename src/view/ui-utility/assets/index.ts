@@ -8,7 +8,10 @@ import EditorLeftPanelPageAdd from './editor/left-panel/page/add.tsx'
 import EditorLeftPanelPageCollapse from './editor/left-panel/page/collapse.tsx'
 import EditorLeftPanelPagePageSelect from './editor/left-panel/page/page-select.tsx'
 import EditorLeftPanelSwitchBarComponent from './editor/left-panel/switch-bar/component.tsx'
+import EditorLeftPanelSwitchBarImage from './editor/left-panel/switch-bar/image.tsx'
 import EditorLeftPanelSwitchBarLayer from './editor/left-panel/switch-bar/layer.tsx'
+import EditorLeftPanelSwitchBarPopup from './editor/left-panel/switch-bar/popup.tsx'
+import EditorLeftPanelSwitchBarRecord from './editor/left-panel/switch-bar/record.tsx'
 import EditorLeftPanelSwitchBarToLeft from './editor/left-panel/switch-bar/to-left.tsx'
 import EditorNodeEllipse from './editor/node/ellipse.tsx'
 import EditorNodeFrame from './editor/node/frame.tsx'
@@ -56,7 +59,10 @@ const Asset = {
       },
       switchBar: {
         component: EditorLeftPanelSwitchBarComponent,
+        image: EditorLeftPanelSwitchBarImage,
         layer: EditorLeftPanelSwitchBarLayer,
+        popup: EditorLeftPanelSwitchBarPopup,
+        record: EditorLeftPanelSwitchBarRecord,
         toLeft: EditorLeftPanelSwitchBarToLeft,
       },
     },

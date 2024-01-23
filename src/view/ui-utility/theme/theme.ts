@@ -49,7 +49,9 @@ export const default$ = {
     if (type === 'bottom') return { borderBottom: '1px solid #E3E3E3' }
     return { border: '1px solid #E3E3E3' }
   },
-  borderBottom: { borderBottom: '1px solid #E3E3E3' },
+  borderBottom: {
+    borderBottom: '1px solid #E3E3E3',
+  },
   hover: {
     border: {
       '&:hover': {
@@ -70,6 +72,9 @@ export const default$ = {
   },
   active: {
     border: {
+      border: '1px solid ' + hslBlueColor(50),
+    },
+    boxShadow: {
       boxShadow: 'inset 0 0 0px 0.7px ' + hslBlueColor(50),
     },
     background: {
@@ -94,6 +99,15 @@ export const default$ = {
     background: {
       // backgroundColor: 'rgba(234, 224, 255, 1)',
       backgroundColor: hslBlueColor(94),
+    },
+  },
+  scrollBar: {
+    '&::-webkit-scrollbar': {
+      width: 4,
+      height: 4,
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: 'rgba(204, 204, 204, 0.5)',
     },
   },
 }

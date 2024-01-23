@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { COLOR, rgba } from '~/shared/utils/color'
-import { IBound, IXY } from '~/shared/utils/normal'
+import { IRect, IXY } from '~/shared/utils/normal'
 import {
   IEllipse,
   IFillColor,
@@ -17,7 +17,7 @@ import {
   IPage,
   IPoint,
   IPolygon,
-  IRect,
+  IRectangle,
   ISchema,
   IStar,
   IText,
@@ -86,7 +86,7 @@ export class SchemaDefaultService {
       ...option,
     }
   }
-  rect(option?: Partial<IRect>): IRect {
+  rect(option?: Partial<IRectangle>): IRectangle {
     const name = this.createNodeName('rect')
     const nodeBase = this.createNodeBase()
     return { type: 'vector', vectorType: 'rect', radius: 0, ...nodeBase, ...name, ...option }
@@ -196,7 +196,7 @@ export class SchemaDefaultService {
   fillImage(url: string): IFillImage {
     return { type: 'image', url, matrix: [0, 0, 0, 0, 0, 0] }
   }
-  geometryDetail({ x, y, width, height }: IBound) {
+  geometryDetail({ x, y, width, height }: IRect) {
     return {
       x: x,
       y: y,

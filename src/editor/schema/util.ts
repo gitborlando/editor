@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { createCache } from '~/shared/cache'
+import { iife } from '~/shared/utils/normal'
 import { SchemaNode } from './node'
 import { SchemaPage } from './page'
 import { IFrame, IGroup, INode, INodeParent, IPage } from './type'
@@ -46,6 +47,23 @@ export class SchemaUtilService {
     const node = SchemaNode.find(parentId)
     if ('childIds' in node) return node
   }
+  traverseDelete(ids: Set<string>) {
+    const deleteNodes: INode[] = []
+    let isDeepDelete = false
+    SchemaUtil.traverse(
+      ({ id, node, childIds }) => {
+        if (isDeepDelete) return deleteNodes.push(node)
+        if (ids.has(id)) {
+          deleteNodes.push(node)
+          if (childIds?.length) isDeepDelete = true
+        }
+      },
+      ({ id }) => {
+        if (ids.has(id) && isDeepDelete) isDeepDelete = false
+      }
+    )
+    SchemaNode.deleteNodes(deleteNodes)
+  }
   insertBefore(parent: INodeParent | IPage, node: INode, anotherId: string) {
     const index = parent.childIds.findIndex((i) => i === anotherId)
     SchemaNode.connectAt(parent, node, index - 1)
@@ -54,13 +72,17 @@ export class SchemaUtilService {
     const index = parent.childIds.findIndex((i) => i === anotherId)
     SchemaNode.connectAt(parent, node, index + 1)
   }
-  getChildIds(id: string) {
-    if (this.isPage(id)) return SchemaPage.find(id)?.childIds || []
-    const node = SchemaNode.find(id)
-    return 'childIds' in node ? node.childIds : []
-  }
   getChildren(id: string) {
-    return this.getChildIds(id).map((id) => SchemaNode.find(id))
+    const nodes = <INode[]>[]
+    iife(() => {
+      if (this.isPage(id)) return SchemaPage.find(id)?.childIds || []
+      const node = SchemaNode.find(id)
+      return 'childIds' in node ? node.childIds : []
+    }).forEach((id) => {
+      const node = SchemaNode.find(id)
+      if (!node.DELETE) nodes.push(node)
+    })
+    return nodes
   }
   isPage(id: string) {
     return id.startsWith('page')
@@ -97,8 +119,8 @@ export class SchemaUtilService {
         return callback(props)
       },
       (props) => {
-        if (props.id === id) props.abort.abort()
         bubbleCallback?.(props)
+        if (props.id === id) props.abort.abort()
       }
     )
   }
@@ -108,6 +130,7 @@ export class SchemaUtilService {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
         const node = SchemaNode.find(id)
+        if (node.DELETE) return
         const childIds = 'childIds' in node ? node.childIds : undefined
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []
         const props = { id, node, index, childIds, depth, abort, upLevelRef, ancestors }

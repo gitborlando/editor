@@ -23,6 +23,10 @@ export function hslToRgba(h: number, s: number, l: number) {
   return { r: 255 * f(0), g: 255 * f(8), b: 255 * f(4), a: 1 }
 }
 
+export function hslColor(h: number, s: number, l: number) {
+  return rgbaString(hslToRgba(h, s, l))
+}
+
 export function hslBlueColor(l: number) {
-  return rgbaString(hslToRgba(217, 100, l))
+  return hslColor(217, 100, l)
 }

@@ -1,6 +1,6 @@
-import { IBound } from './normal'
+import { IRect } from './normal'
 
-export function rectInAnotherRect(rectA: IBound, rectB: IBound) {
+export function rectInAnotherRect(rectA: IRect, rectB: IRect) {
   if (rectA.x < rectB.x) return false
   if (rectA.y < rectB.y) return false
   if (rectA.x + rectA.width > rectB.x + rectB.width) return false
