@@ -67,13 +67,16 @@ export class StageViewportService {
   }
   private onWheelZoom() {
     this.wheeler.beforeWheel.hook(({ e }) => {
-      if (!hotkeys.ctrl) return
-      e.preventDefault()
+      if (hotkeys.ctrl) e.preventDefault()
       this.beforeZoom.dispatch()
     })
     this.wheeler.duringWheel.hook(({ e }) => {
       const { deltaY, clientX, clientY } = e
-      if (!hotkeys.ctrl) return
+      if (!hotkeys.ctrl) {
+        return this.stageOffset.dispatch((offset) => {
+          offset[hotkeys.shift ? 'x' : 'y'] -= deltaY
+        })
+      }
       e.preventDefault()
       const sign = deltaY > 0 ? -1 : 1
       const stepByZoom = getStepByZoom()
@@ -86,8 +89,7 @@ export class StageViewportService {
       this.duringZoom.dispatch()
     })
     this.wheeler.afterWheel.hook(({ e }) => {
-      if (!hotkeys.ctrl) return
-      e.preventDefault()
+      if (hotkeys.ctrl) e.preventDefault()
       this.afterZoom.dispatch()
     })
   }
