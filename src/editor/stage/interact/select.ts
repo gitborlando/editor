@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import hotkeys from 'hotkeys-js'
 import { OBB } from '~/editor/math/obb'
 import { Record, recordSignalContext } from '~/editor/record'
 import { SchemaNode } from '~/editor/schema/node'
@@ -66,7 +67,7 @@ export class StageSelectService {
   private onLeftMouseDown(e: MouseEvent) {
     if (StageWidgetTransform.mouseIn(e)) return
     if (!this.hoverId) {
-      SchemaNode.clearSelect()
+      this.clearSelect()
       this.onMarqueeSelect()
     }
     if (this.hoverId) {
@@ -80,8 +81,13 @@ export class StageSelectService {
   }
   private onRightMouseDown(e: MouseEvent) {}
   private clearSelect() {
+    if (hotkeys.shift) return
     SchemaNode.clearSelect()
     this.afterClearSelect.dispatch()
+  }
+  private unSelect(id: string) {
+    if (hotkeys.shift) return
+    SchemaNode.unSelect(id)
   }
   onPanelSelect(id: string) {
     this.clearSelect()
@@ -119,6 +125,10 @@ export class StageSelectService {
       if (macro_Match`-180|-90|0|90|180`(obb.rotation)) return aabbResult
       return aabbResult && marqueeOBB.obbHitTest(obb)
     }
+    const unSelect = (id: string) => {
+      if (hotkeys.shift && SchemaNode.selectIds.value.has(id)) return
+      SchemaNode.unSelect(id)
+    }
     const traverseTest = (nodes: INode[]) => {
       nodes.forEach((node) => {
         const OBB = StageElement.OBBCache.get(node.id)
@@ -128,7 +138,7 @@ export class StageSelectService {
             this.needExpandIds.add(node.id)
             SchemaUtil.traverseIds(node.childIds, ({ id }) => SchemaNode.unSelect(id))
           } else {
-            SchemaNode.unSelect(node.id)
+            unSelect(node.id)
             traverseTest(SchemaUtil.getChildren(node.id))
           }
           return
@@ -138,7 +148,7 @@ export class StageSelectService {
           this.needExpandIds.add(node.parentId)
           traverseTest(SchemaUtil.getChildren(node.id))
         } else {
-          SchemaNode.unSelect(node.id)
+          unSelect(node.id)
         }
       })
     }
