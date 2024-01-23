@@ -20,8 +20,12 @@ export class StageElementService {
   frameNameCache = createCache<PIXI.Text>()
   linearGradientCache = createCache<PIXI.Texture>()
   private elementMap: Map<string, IStageElement> = new Map()
+  private elementContainer = new PIXI.Container()
   initHook() {
-    Pixi.inited.hook(this.bindHover)
+    Pixi.inited.hook(() => {
+      this.bindHover()
+      this.elementContainer.setParent(Pixi.sceneStage)
+    })
     SchemaNode.afterAdd.hook((nodes) => {
       nodes.forEach((node) => this.add(node.id, node.type === 'text' ? 'text' : 'graphic'))
     })
@@ -32,7 +36,7 @@ export class StageElementService {
   add(id: string, type: 'graphic' | 'text') {
     const element = type === 'graphic' ? new PIXI.Graphics() : new PIXI.Text()
     this.elementMap.set(id, element)
-    element.setParent(Pixi.sceneStage)
+    element.setParent(this.elementContainer)
     this.initOBB(id)
     this.initOutline(id)
     StageDraw.collectRedraw(id)
