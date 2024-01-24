@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import { Record } from '~/editor/record'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
@@ -75,23 +76,28 @@ export class UILeftPanelLayerService {
       this.calcNodeListChange()
     })
     this.nodeMoveEnded.hook(() => {
-      if (!this.nodeMoveDropDetail.value?.id) return
       const { moveId } = this.nodeMoveStarted.value
       const { type, id: dropId } = this.nodeMoveDropDetail.value
-      const node = SchemaNode.find(moveId)
-      let parent = SchemaUtil.findParent(dropId)
-      if (parent) {
-        SchemaNode.disconnect(parent, node)
-        if (type === 'before') SchemaUtil.insertBefore(parent, node, dropId)
-        if (type === 'in') {
-          ;(parent as INode) = SchemaNode.find(dropId)
-          SchemaNode.connectAt(parent, node, 0)
-          this.setNodeExpanded(dropId, true)
-        }
-        if (type === 'after') SchemaUtil.insertAfter(parent, node, dropId)
-        this.findNodeInView()
-        this.nodeIdsInView.dispatch()
+      if (!moveId || !dropId) {
+        return (this.nodeMoveStarted.value.moveId = '')
       }
+      Record.startAction()
+      const moveNode = SchemaNode.find(moveId)
+      const dropNode = SchemaNode.find(dropId)
+      let newParent = SchemaUtil.findParent(dropId)!
+      const oldParent = SchemaUtil.findParent(moveNode.id)!
+      SchemaNode.disconnect(oldParent, moveNode)
+      if (type === 'before') SchemaUtil.insertBefore(newParent, moveNode, dropNode)
+      if (type === 'in') {
+        ;(newParent as INode) = SchemaNode.find(dropId)
+        SchemaNode.connectAt(newParent, moveNode, 0)
+        this.setNodeExpanded(dropId, true)
+      }
+      if (type === 'after') SchemaUtil.insertAfter(newParent, moveNode, dropNode)
+      Record.endAction('移动节点: ' + moveNode.name)
+      this.findNodeInView()
+      this.nodeIdsInView.dispatch()
+      this.nodeMoveStarted.value.moveId = ''
     })
     this.nodeScrollHeight.intercept((value) => {
       return max(0, min(this.nodeListHeight.value - this.nodeViewHeight.value, value))

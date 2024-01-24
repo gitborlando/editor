@@ -35,7 +35,7 @@ export class OperateGeometryService {
   oneOperateChange = createMomentChange(initData())
   beforeOperate = createSignal<(keyof IGeometryData)[]>()
   afterOperate = createSignal()
-  operateKeys = <Set<keyof IGeometryData>>new Set(['x', 'y', 'width', 'height', 'rotation'])
+  operateKeys = new Set(<(keyof IGeometryData)[]>['x', 'y', 'width', 'height', 'rotation'])
   isGeometryChanged = false
   initHook() {
     StageSelect.afterSelect.hook(() => {
@@ -45,8 +45,8 @@ export class OperateGeometryService {
     this.data._whenDataDidChange.hook(({ key, val }) => {
       this.oneTickChange.update(key, val)
       this.oneOperateChange.update(key, val)
-      SchemaNode.makeSelectDirty()
       this.isGeometryChanged = true
+      SchemaNode.makeSelectDirty()
     })
     SchemaNode.duringFlushDirty.hook((id) => {
       if (!this.isGeometryChanged) return

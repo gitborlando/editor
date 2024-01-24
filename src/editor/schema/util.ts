@@ -44,8 +44,7 @@ export class SchemaUtilService {
   findParent(id: string) {
     const { parentId } = SchemaNode.find(id)
     if (this.isPage(parentId)) return SchemaPage.find(parentId)
-    const node = SchemaNode.find(parentId)
-    if ('childIds' in node) return node
+    return SchemaNode.find(parentId) as INodeParent
   }
   traverseDelete(ids: Set<string>) {
     const deleteNodes: INode[] = []
@@ -64,12 +63,12 @@ export class SchemaUtilService {
     )
     SchemaNode.deleteNodes(deleteNodes)
   }
-  insertBefore(parent: INodeParent | IPage, node: INode, anotherId: string) {
-    const index = parent.childIds.findIndex((i) => i === anotherId)
+  insertBefore(parent: INodeParent | IPage, node: INode, another: INode) {
+    const index = parent.childIds.findIndex((i) => i === another.id)
     SchemaNode.connectAt(parent, node, index - 1)
   }
-  insertAfter(parent: INodeParent | IPage, node: INode, anotherId: string) {
-    const index = parent.childIds.findIndex((i) => i === anotherId)
+  insertAfter(parent: INodeParent | IPage, node: INode, another: INode) {
+    const index = parent.childIds.findIndex((i) => i === another.id)
     SchemaNode.connectAt(parent, node, index + 1)
   }
   getChildren(id: string) {

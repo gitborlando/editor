@@ -26,7 +26,7 @@ export class StageDrawService {
   }
   private drawNode(node: INode) {
     const { id, fills } = node
-    const element = StageElement.findOrCreate(id, 'graphic')
+    const element = StageElement.findOrCreate(node)
     element.clear()
     this.drawFills(element, node, fills)
   }

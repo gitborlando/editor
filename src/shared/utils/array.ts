@@ -7,6 +7,7 @@ export function lastOne<T extends any = any>(input: T[] | Set<T>) {
 }
 
 export function insertAt<T>(array: T[], index: number, item: T) {
-  if (index < 0 || index > array.length - 1) return
-  array.splice(index, 0, item)
+  if (index < 0) return array.unshift(item)
+  if (index > array.length - 1) return array.push(item)
+  return array.splice(index, 0, item)
 }

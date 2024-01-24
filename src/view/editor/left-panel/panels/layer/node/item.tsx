@@ -1,4 +1,4 @@
-import { FC, useCallback } from 'react'
+import { FC } from 'react'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
@@ -50,25 +50,20 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestor
     return !subSelected && value
   })
   useHookSignal(nodeIdsInView)
-  useHookSignal(
-    hovered,
-    (isHover) => {
-      isHover ? SchemaNode.hover(id) : SchemaNode.unHover(id)
-      if (isHover && nodeMoveStarted.value.moveId) {
-        if (dropInFront.value === true) nodeMoveDropDetail.value = { id, type: 'before' }
-        if (dropInSide.value === true) nodeMoveDropDetail.value = { id, type: 'in' }
-        if (dropBehind.value === true) nodeMoveDropDetail.value = { id, type: 'after' }
-      }
-    },
-    [id]
-  )
-  useHookSignal(nodeMoveEnded, () => (nodeMoveStarted.value.moveId = ''))
-  const handleMouseDown = useCallback(() => {
+  useHookSignal(hovered, (isHover) => {
+    isHover ? SchemaNode.hover(id) : SchemaNode.unHover(id)
+    if (isHover && nodeMoveStarted.value.moveId) {
+      if (dropInFront.value === true) nodeMoveDropDetail.value = { id, type: 'before' }
+      if (dropInSide.value === true) nodeMoveDropDetail.value = { id, type: 'in' }
+      if (dropBehind.value === true) nodeMoveDropDetail.value = { id, type: 'after' }
+    }
+  })
+  const handleMouseDown = () => {
     StageSelect.onPanelSelect(id)
     Drag.onStart(() => nodeMoveStarted.dispatch({ moveId: id }))
       .onMove(noopFunc)
       .onDestroy(() => nodeMoveEnded.dispatch())
-  }, [])
+  }
   const { classes, css, cx } = useStyles({ selected, subSelected, dropInSide })
   return (
     <Flex layout='v' className={css({ width: '100%' })} onHover={hovered.dispatch}>
@@ -168,7 +163,6 @@ const useStyles = makeStyles<INodeItemCompStyle>()((t, { selected, subSelected, 
     fontSize: 12,
     paddingInline: 6,
     ...(selected && { ...t.default$.select.background }),
-    // ...(subSelected && { backgroundColor: '#F4EFFF' }),
     ...(subSelected && { backgroundColor: hslBlueColor(97) }),
     ...t.default$.hover.border,
   },

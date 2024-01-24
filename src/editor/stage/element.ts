@@ -5,6 +5,8 @@ import { XY } from '~/shared/structure/xy'
 import { OBB } from '../math/obb'
 import { Path } from '../math/path/path'
 import { SchemaNode } from '../schema/node'
+import { INode } from '../schema/type'
+import { SchemaUtil } from '../schema/util'
 import { StageDraw } from './draw/draw'
 import { PIXI, Pixi } from './pixi'
 import { StageViewport } from './viewport'
@@ -14,6 +16,7 @@ export type IStageElement = PIXI.Graphics | PIXI.Text
 @autobind
 export class StageElementService {
   canHover = true
+  containerCache = createCache<PIXI.Container>()
   OBBCache = createCache<OBB>()
   pathCache = createCache<Path>()
   outlineCache = createCache<PIXI.Graphics>()
@@ -27,16 +30,24 @@ export class StageElementService {
       this.elementContainer.setParent(Pixi.sceneStage)
     })
     SchemaNode.afterAdd.hook((nodes) => {
-      nodes.forEach((node) => this.add(node.id, node.type === 'text' ? 'text' : 'graphic'))
+      nodes.forEach((node) => this.add(node))
     })
     SchemaNode.afterDelete.hook((nodes) => {
       nodes.forEach((node) => this.delete(node.id))
     })
   }
-  add(id: string, type: 'graphic' | 'text') {
-    const element = type === 'graphic' ? new PIXI.Graphics() : new PIXI.Text()
+  add(node: INode) {
+    const { id, parentId, type } = node
+    const element = type === 'text' ? new PIXI.Text() : new PIXI.Graphics()
     this.elementMap.set(id, element)
-    element.setParent(this.elementContainer)
+    if (SchemaUtil.isContainerNode(node) && !this.containerCache.get(id)) {
+      const container = new PIXI.Container()
+      container.setParent(this.elementContainer)
+      this.containerCache.set(id, container)
+    }
+    const selfContainer = this.containerCache.get(id)
+    const parentContainer = this.containerCache.get(parentId)
+    element.setParent(selfContainer || parentContainer || this.elementContainer)
     this.initOBB(id)
     this.initOutline(id)
     StageDraw.collectRedraw(id)
@@ -61,16 +72,12 @@ export class StageElementService {
     this.pathCache.clear()
     this.outlineCache.clear()
   }
-  findOrCreate(id: string, type: 'graphic'): PIXI.Graphics
-  findOrCreate(id: string, type: 'text'): PIXI.Text
-  findOrCreate(id: string, type: 'graphic' | 'text') {
-    let element = this.find(id)
-    if (element) {
-      return type === 'graphic' ? <PIXI.Graphics>element : <PIXI.Text>element
-    } else {
-      this.add(id, type)
-      return this.find(id)
-    }
+  findOrCreate<T extends IStageElement = PIXI.Graphics>(node: INode): T {
+    const { id } = node
+    const element = this.find(id)
+    if (element) return element as T
+    this.add(node)
+    return this.find(id) as T
   }
   private bindHover() {
     const handler = batchSignal([SchemaNode.hoverIds], (e: Event) => {

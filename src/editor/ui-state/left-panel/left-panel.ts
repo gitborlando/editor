@@ -17,7 +17,7 @@ type ISwitchTabOption = {
 
 @autobind
 export class UILeftPanelService {
-  currentTabId = createSignal('record')
+  currentTabId = createSignal('layer')
   switchTabMap = createSignal(new Map<string, ISwitchTabOption>())
   popupTabIds = createSignal(new Set<string>())
   switchTabIds = <string[]>[]

@@ -72,9 +72,8 @@ export class SchemaNodeService {
     this.recordDelete(nodes)
   }
   connectAt(parent: INodeParent | IPage, node: INode, index?: number) {
-    if (index !== undefined && !(index < 0 || index > parent.childIds.length - 1)) {
-      insertAt(parent.childIds, index, node.id)
-    } else parent.childIds.push(node.id)
+    if (index === undefined) parent.childIds.push(node.id)
+    else insertAt(parent.childIds, index, node.id)
     node.parentId = parent.id
     this.afterConnect.dispatch({ parent, node, index })
     this.recordConnect(parent, node, index)

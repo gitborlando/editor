@@ -25,7 +25,7 @@ export const RecordComp: FC<IRecordComp> = observer(({}) => {
         className={classes.head}
         sidePadding={4}
         style={{ ...theme.default$.borderBottom }}>
-        {index.value > 0 && (
+        {index.value >= 0 && (
           <Flex
             layout='c'
             style={{

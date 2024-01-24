@@ -107,7 +107,7 @@ export class StageCreateService {
   }
   private createMousedownBound() {
     const { x, y } = this.sceneStageStart
-    const [width, height, centerX, centerY] = [0, 0, x, y]
+    const [width, height, centerX, centerY] = [1, 1, x + 0.5, y + 0.5]
     return { x, y, width, height, centerX, centerY }
   }
   private findContainer() {
