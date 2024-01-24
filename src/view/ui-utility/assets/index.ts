@@ -27,6 +27,7 @@ import EditorRightPanelOperateAlignVerticalBottom from './editor/right-panel/ope
 import EditorRightPanelOperateAlignVerticalCenter from './editor/right-panel/operate/align/vertical-center.tsx'
 import EditorRightPanelOperateAlignVerticalTop from './editor/right-panel/operate/align/vertical-top.tsx'
 import EditorSharedDelete from './editor/shared/Delete.tsx'
+import EditorSharedLoading from './editor/shared/loading.tsx'
 import EditorSharedLock from './editor/shared/lock.tsx'
 import EditorSharedMinus from './editor/shared/minus.tsx'
 import EditorSharedUnLock from './editor/shared/un-lock.tsx'
@@ -89,6 +90,7 @@ const Asset = {
     },
     shared: {
       delete: EditorSharedDelete,
+      loading: EditorSharedLoading,
       lock: EditorSharedLock,
       minus: EditorSharedMinus,
       unLock: EditorSharedUnLock,

@@ -3,6 +3,7 @@ import { FC } from 'react'
 import { StageViewport } from '~/editor/stage/viewport'
 import { Setting } from '~/global/setting'
 import { createSignal } from '~/shared/signal'
+import { GalleryComp } from '~/view/editor/left-panel/panels/gallery/gallery'
 import { LayerComp } from '~/view/editor/left-panel/panels/layer/layer'
 import { RecordComp } from '~/view/editor/left-panel/panels/record/record'
 import Asset from '~/view/ui-utility/assets'
@@ -50,7 +51,7 @@ export class UILeftPanelService {
       id: 'source',
       name: '图片',
       icon: Asset.editor.leftPanel.switchBar.image,
-      panel: () => '',
+      panel: GalleryComp,
     })
     this.registerSwitchTab({
       id: 'record',
