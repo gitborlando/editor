@@ -15,7 +15,7 @@ import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
 import { StageSelect } from './select'
 
-const createTypes = ['frame', 'rect', 'ellipse', 'line', 'polygon', 'star', 'image'] as const
+const createTypes = ['frame', 'rect', 'ellipse', 'line', 'polygon', 'star'] as const
 export type IStageCreateType = (typeof createTypes)[number]
 
 @autobind

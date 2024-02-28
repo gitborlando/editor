@@ -3,11 +3,14 @@ import EditorHeaderRecordRedo from './editor/header/record/redo.tsx'
 import EditorHeaderRecordUndo from './editor/header/record/undo.tsx'
 import EditorHeaderStageOperateMove from './editor/header/stage-operate/move.tsx'
 import EditorHeaderStageOperateSelect from './editor/header/stage-operate/select.tsx'
+import EditorLeftPanelFileNewFile from './editor/left-panel/file/new-file.tsx'
+import EditorLeftPanelFileNewFolder from './editor/left-panel/file/new-folder.tsx'
 import EditorLeftPanelNodeCollapse from './editor/left-panel/node/collapse.tsx'
 import EditorLeftPanelPageAdd from './editor/left-panel/page/add.tsx'
 import EditorLeftPanelPageCollapse from './editor/left-panel/page/collapse.tsx'
 import EditorLeftPanelPagePageSelect from './editor/left-panel/page/page-select.tsx'
 import EditorLeftPanelSwitchBarComponent from './editor/left-panel/switch-bar/component.tsx'
+import EditorLeftPanelSwitchBarFile from './editor/left-panel/switch-bar/file.tsx'
 import EditorLeftPanelSwitchBarImage from './editor/left-panel/switch-bar/image.tsx'
 import EditorLeftPanelSwitchBarLayer from './editor/left-panel/switch-bar/layer.tsx'
 import EditorLeftPanelSwitchBarPopup from './editor/left-panel/switch-bar/popup.tsx'
@@ -26,6 +29,8 @@ import EditorRightPanelOperateAlignAlignRight from './editor/right-panel/operate
 import EditorRightPanelOperateAlignVerticalBottom from './editor/right-panel/operate/align/vertical-bottom.tsx'
 import EditorRightPanelOperateAlignVerticalCenter from './editor/right-panel/operate/align/vertical-center.tsx'
 import EditorRightPanelOperateAlignVerticalTop from './editor/right-panel/operate/align/vertical-top.tsx'
+import EditorRightPanelOperateFillNone from './editor/right-panel/operate/fill/none.png'
+import EditorRightPanelOperatePickerDefaultImage from './editor/right-panel/operate/picker/default-image.png'
 import EditorSharedDelete from './editor/shared/Delete.tsx'
 import EditorSharedLoading from './editor/shared/loading.tsx'
 import EditorSharedLock from './editor/shared/lock.tsx'
@@ -50,6 +55,10 @@ const Asset = {
       },
     },
     leftPanel: {
+      file: {
+        newFile: EditorLeftPanelFileNewFile,
+        newFolder: EditorLeftPanelFileNewFolder,
+      },
       node: {
         collapse: EditorLeftPanelNodeCollapse,
       },
@@ -60,6 +69,7 @@ const Asset = {
       },
       switchBar: {
         component: EditorLeftPanelSwitchBarComponent,
+        file: EditorLeftPanelSwitchBarFile,
         image: EditorLeftPanelSwitchBarImage,
         layer: EditorLeftPanelSwitchBarLayer,
         popup: EditorLeftPanelSwitchBarPopup,
@@ -85,6 +95,12 @@ const Asset = {
           verticalBottom: EditorRightPanelOperateAlignVerticalBottom,
           verticalCenter: EditorRightPanelOperateAlignVerticalCenter,
           verticalTop: EditorRightPanelOperateAlignVerticalTop,
+        },
+        fill: {
+          none: EditorRightPanelOperateFillNone,
+        },
+        picker: {
+          defaultImage: EditorRightPanelOperatePickerDefaultImage,
         },
       },
     },

@@ -23,7 +23,7 @@ export const Icon: FC<IIconProps> = ({
     size,
     rotate,
     scale,
-    fill: fill || /* '#545454' */ '#7a7a7a',
+    fill: fill || /* '#545454' */ /* '#7a7a7a' */ '#393939',
   })
   if (typeof children === 'string') {
     return <img src={children} className={cx(classes.Icon, className)} {...rest}></img>

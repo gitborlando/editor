@@ -9,14 +9,13 @@
   "Component": {
     "prefix": "comp",
     "body": [
-      "import { observer, useLocalObservable } from 'mobx-react'",
-      "import { FC } from 'react'",
+      "import { FC, memo } from 'react'",
       "import { makeStyles } from '~/view/ui-utility/theme'",
       "import { Flex } from '~/view/ui-utility/widget/flex'",
       "",
       "type I$1${TM_FILENAME_BASE}Comp = {}",
       "",
-      "export const $1${TM_FILENAME_BASE}Comp: FC<I$1${TM_FILENAME_BASE}Comp> = observer(({}) => {",
+      "export const $1${TM_FILENAME_BASE}Comp: FC<I$1${TM_FILENAME_BASE}Comp> = memo(({}) => {",
       "  const { classes } = useStyles({})",
       "  return <Flex className={classes.$1${TM_FILENAME_BASE}}></Flex>",
       "})",
@@ -67,7 +66,7 @@
       "",
       "@autobind",
       "export class $1${TM_FILENAME_BASE}Service {",
-      "  init() {",
+      "  initHook() {",
       "  }",
       "}",
       "",
@@ -78,7 +77,7 @@
   },
   "Flex": {
     "prefix": "flex",
-    "body": ["<Flex layout='$1' className={classes.$2}></Flex>"],
+    "body": ["<Flex layout='$1' className={}></Flex>"],
     "description": "flex"
   }
 }

@@ -1,5 +1,6 @@
 import fastDeepEqual from 'deep-equal'
 import { runInAction } from 'mobx'
+import { useEffect } from 'react'
 
 export const This = globalThis as any
 export { fastDeepEqual }
@@ -102,9 +103,7 @@ export function stopPropagation(e: any) {
 }
 
 export function makeAction<T extends any>(callback?: (...args: T[]) => void) {
-  return (...args: T[]) => {
-    runInAction(() => callback?.(...args))
-  }
+  return (...args: T[]) => runInAction(() => callback?.(...args))
 }
 
 export function iife<T extends any = any>(callback: () => T): T {
@@ -113,4 +112,15 @@ export function iife<T extends any = any>(callback: () => T): T {
 
 export function isNumberEqual(a: number, b: number) {
   return Math.abs(a - b) < 0.00001
+}
+
+export function once<T extends any[]>(fn?: (...args: T) => void) {
+  return (...args: T) => {
+    fn?.(...args)
+    fn = undefined
+  }
+}
+
+export function useAsyncEffect(callback: Function, deps = []) {
+  useEffect(() => void (async () => callback())(), deps)
 }

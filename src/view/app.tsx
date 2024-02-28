@@ -29,11 +29,6 @@ const useStyles = makeStyles<IAppStyleProps>()((t) => ({
   App: {
     ...t.rect('100vw', '100vh', 'no-radius', 'white'),
   },
-  canvas: {
-    width: 1200,
-    height: 1200,
-    border: '1px solid black',
-  },
 }))
 
 App.displayName = 'App'

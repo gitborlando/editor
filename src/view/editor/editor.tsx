@@ -31,6 +31,7 @@ type IEditorCompStyle = {} /* & Required<Pick<IEditorComp>> */ /* & Pick<IEditor
 const useStyles = makeStyles<IEditorCompStyle>()((t) => ({
   Editor: {
     ...t.rect('100vw', '100vh', 'no-radius', 'white'),
+    ...t.relative(),
   },
   main: {
     ...t.rect('100%', '100%'),

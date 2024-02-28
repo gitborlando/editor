@@ -11,7 +11,7 @@ import { Pixi } from './pixi'
 @autobind
 export class StageViewportService {
   inited = createSignal(false)
-  bound = createSignal({ x: 240, y: 48, width: 0, height: 0, right: 240 })
+  bound = createSignal({ x: 240, y: 44, width: 0, height: 0, right: 240 })
   zoom = createSignal(1)
   stageOffset = createSignal({ x: 0, y: 0 })
   beforeZoom = createSignal()

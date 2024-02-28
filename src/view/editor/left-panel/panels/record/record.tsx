@@ -14,7 +14,7 @@ type IRecordComp = {}
 
 export const RecordComp: FC<IRecordComp> = observer(({}) => {
   const { index, stack } = Record
-  const allExpanded = useAutoSignal(true)
+  const allExpanded = useAutoSignal(false)
   const { classes, cx, theme } = useStyles({})
   useHookSignal(index)
 

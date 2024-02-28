@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import { cloneDeep } from 'lodash-es'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
@@ -146,7 +147,7 @@ export class OperateAlignService {
   private undoRedo() {
     if (recordSignalContext()) return
     const toAlignNodeIds = this.toAlignNodes.map((node) => node.id)
-    const record = structuredClone(this.oneAlignChange.record)
+    const record = cloneDeep(this.oneAlignChange.record)
     const travel = (type: 'last' | 'current') => {
       toAlignNodeIds.forEach((id) => {
         const node = SchemaNode.find(id)

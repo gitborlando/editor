@@ -26,4 +26,4 @@ function _font(
 }
 
 export const font = _font
-export const labelFont = { fontSize: 11, color: 'gray' }
+export const labelFont = { fontSize: 11, color: '#626262' }

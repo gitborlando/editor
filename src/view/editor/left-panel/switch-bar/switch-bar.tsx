@@ -12,15 +12,8 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 type ISwitchBarComp = {}
 
 export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
-  const {
-    showLeftPanel,
-    currentTabId,
-    switchTabMap,
-    popupTabIds,
-    switchTabIds,
-    findSwitchTab,
-    popupCurrentPanel,
-  } = UILeftPanel
+  const { showLeftPanel, currentTabId, switchTabMap, popupTabIds } = UILeftPanel
+  const { switchTabIds, findSwitchTab, popupCurrentPanel } = UILeftPanel
   const { classes, cx } = useStyles({})
   useHookSignal(currentTabId)
   useHookSignal(popupTabIds)
