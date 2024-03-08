@@ -1,8 +1,9 @@
 import autobind from 'class-autobind-decorator'
-import { Text } from 'pixi.js'
+import { Matrix, Text, Texture } from 'pixi.js'
+import { IImage, Img } from '~/editor/img'
 import { radianfy } from '~/editor/math/base'
 import { SchemaNode } from '~/editor/schema/node'
-import { IFill, IFrame, IIrregular, INode, IVector } from '~/editor/schema/type'
+import { IFrame, IIrregular, INode, IVector } from '~/editor/schema/type'
 import { XY } from '~/shared/structure/xy'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
@@ -25,23 +26,71 @@ export class StageDrawService {
     this.redrawIds.add(id)
   }
   private drawNode(node: INode) {
-    const { id, fills } = node
     const element = StageElement.findOrCreate(node)
     element.clear()
-    this.drawFills(element, node, fills)
+    this.drawFills(element, node)
+    this.drawStrokes(element, node)
   }
-  private drawFills<T extends INode = INode>(element: PIXI.Graphics, node: T, fills: IFill[]) {
-    fills.forEach((fill) => {
+  private drawFills<T extends INode = INode>(element: PIXI.Graphics, node: T) {
+    node.fills.forEach((fill) => {
+      if (!fill.visible) return
       if (fill.type === 'color') {
         element.beginFill(fill.color)
+        this.drawShape(element, <IVector>node)
+      }
+      if (fill.type === 'image') {
+        const image = Img.getImage(fill.url)
+        const draw = (image: IImage) => {
+          const nodeRate = node.width / node.height
+          const imageRate = image.width / image.height
+          const texture = Texture.from(image.objectUrl)
+          const matrix = new Matrix()
+          if (nodeRate > imageRate) {
+            matrix.scale(node.width / image.width, node.width / image.width)
+          } else {
+            matrix.scale(node.height / image.height, node.height / image.height)
+          }
+          element.beginTextureFill({ texture, matrix })
+          this.drawShape(element, <IVector>node)
+        }
+        image ? draw(image) : Img.getImageAsync(fill.url).then(draw)
       }
       if (fill.type === 'linearGradient') {
         const texture = StageElement.linearGradientCache.getSet(node.id, () =>
           createLinearGradientTexture(fill)
         )
         element.beginTextureFill({ texture })
+        this.drawShape(element, <IVector>node)
       }
-      this.drawShape(element, <IVector>node)
+    })
+  }
+  drawStrokes(element: PIXI.Graphics, node: INode) {
+    node.strokes.forEach((stroke) => {
+      const { fill, width } = stroke
+      if (fill.type === 'color') {
+        element.lineStyle(width, fill.color)
+        this.drawShape(element, <IVector>node)
+      }
+      if (fill.type === 'image') {
+        const image = Img.getImage(fill.url)
+        const draw = (objectUrl: string) => {
+          const texture = PIXI.Texture.from(objectUrl)
+          element.lineTextureStyle({ width, texture })
+          this.drawShape(element, <IVector>node)
+        }
+        if (image) {
+          draw(image.objectUrl)
+        } else {
+          Img.getImageAsync(fill.url).then(({ objectUrl }) => draw(objectUrl))
+        }
+      }
+      if (fill.type === 'linearGradient') {
+        const texture = StageElement.linearGradientCache.getSet(node.id, () =>
+          createLinearGradientTexture(fill)
+        )
+        element.lineTextureStyle({ width, texture })
+        this.drawShape(element, <IVector>node)
+      }
     })
   }
   drawShape(element: PIXI.Graphics, node: INode) {
@@ -53,6 +102,9 @@ export class StageDrawService {
     element.rotation = rotation
     if (node.type === 'frame') {
       this.drawFrameName(node)
+      // const mask = new PIXI.Graphics()
+      // mask.drawRect(0, 0, width, height)
+      // element.mask = mask
       return element.drawRect(0, 0, width, height)
     }
     if (node.type === 'vector') {
