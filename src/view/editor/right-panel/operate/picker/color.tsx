@@ -1,17 +1,31 @@
 import { observer } from 'mobx-react'
-import { FC } from 'react'
-import { HexAlphaColorPicker } from 'react-colorful'
+import { FC, useEffect } from 'react'
+import { RgbaStringColorPicker } from 'react-colorful'
+import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
+import { useHookSignal } from '~/shared/signal-react'
+import { downUpTracker } from '~/shared/utils/down-up-tracker'
 import { makeStyles } from '~/view/ui-utility/theme'
-import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IPickerColorComp = {}
 
 export const PickerColorComp: FC<IPickerColorComp> = observer(({}) => {
-  const { classes } = useStyles({})
+  const { currentSolidFill, beforeOperate, afterOperate } = UIPicker
+  const { classes, cx } = useStyles({})
+  useHookSignal(currentSolidFill)
+  useEffect(() => {
+    return downUpTracker(
+      document.getElementById('colorPicker$$$')!,
+      () => beforeOperate.dispatch({ type: 'solid-color' }),
+      () => afterOperate.dispatch({ type: 'solid-color' })
+    )
+  }, [])
   return (
-    <Flex className={classes.PickerColor}>
-      <HexAlphaColorPicker className={classes.colorPicker} />
-    </Flex>
+    <RgbaStringColorPicker
+      id='colorPicker$$$'
+      className={classes.colorPicker}
+      color={currentSolidFill.value.color}
+      onChange={(c) => currentSolidFill.dispatch((fill) => (fill.color = c))}
+    />
   )
 })
 
@@ -20,9 +34,13 @@ type IPickerColorCompStyle =
 
 const useStyles = makeStyles<IPickerColorCompStyle>()((t) => ({
   PickerColor: {
-    ...t.rect('100%', 'fit-content', 'no-radius', 'white'),
+    ...t.rect(240, 'fit-content', 'no-radius', 'white'),
   },
   colorPicker: {
+    '&.react-colorful': {
+      width: 240,
+      height: 240,
+    },
     '& .react-colorful__pointer': {
       width: 12,
       height: 12,
