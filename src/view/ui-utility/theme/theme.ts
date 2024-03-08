@@ -30,7 +30,12 @@ export const border = (width: number, color: CSSProperties['color']) => ({
 
 const position =
   (position: CSSProperties['position']) =>
-  (left?: number, top?: number, right?: number, bottom?: number) => ({
+  (
+    left?: number | (string & {}),
+    top?: number | (string & {}),
+    right?: number | (string & {}),
+    bottom?: number | (string & {})
+  ) => ({
     position,
     left,
     top,
@@ -40,6 +45,25 @@ const position =
 export const fixed = position('fixed')
 export const relative = position('relative')
 export const absolute = position('absolute')
+
+export const transform = ({
+  translateX,
+  translateY,
+  rotate,
+}: {
+  translateX?: '50%' | (string & {})
+  translateY?: '50%' | (string & {})
+  rotate?: number
+}) => {
+  const _translateX = translateX ? `translateX(${translateX})` : ''
+  const _translateY = translateY ? `translateY(${translateY})` : ''
+  const _rotate = rotate ? `rotate(${rotate}deg)` : ''
+  return { transform: `${_translateX} ${_translateY} ${_rotate}` }
+}
+
+export const cursor = (type: 'pointer') => {
+  return { cursor: type }
+}
 
 export const default$ = {
   border: (type?: 'left' | 'top' | 'right' | 'bottom') => {
@@ -109,5 +133,10 @@ export const default$ = {
     '&::-webkit-scrollbar-thumb': {
       background: 'rgba(204, 204, 204, 0.5)',
     },
+  },
+  input: {
+    border: 'none',
+    outline: 'none',
+    backgroundColor: 'transparent',
   },
 }

@@ -33,7 +33,6 @@ type IGeometryPropsCompStyle =
 
 const useStyles = makeStyles<IGeometryPropsCompStyle>()((t) => ({
   SchemaBase: {
-    justifyContent: 'space-around',
     flexWrap: 'wrap',
     ...t.default$.borderBottom,
   },

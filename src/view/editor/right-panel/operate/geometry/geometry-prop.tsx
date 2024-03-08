@@ -6,8 +6,8 @@ import { SchemaNode } from '~/editor/schema/node'
 import { StageViewport } from '~/editor/stage/viewport'
 import { Drag } from '~/global/event/drag'
 import { useHookSignal } from '~/shared/signal-react'
+import { Input } from '~/view/editor/right-panel/operate/geometry/input'
 import { makeStyles } from '~/view/ui-utility/theme'
-import { Input } from '~/view/ui-utility/widget/input'
 
 type IGeometryPropComp = {
   label: string
@@ -80,7 +80,7 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(({ label, operat
       ref={ref}
       className={classes.input}
       label={label}
-      value={Number(produceValue().toFixed(2))}
+      value={produceValue()}
       onNewValueApply={(v) => (data[operateKey] = produceValue(v))}
       slideRate={slideRate}
     />
