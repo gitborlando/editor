@@ -5,9 +5,10 @@ import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { iife } from '~/shared/utils/normal'
+import { Diff, createNodeDiffPath } from '../diff'
 import { Record, recordSignalContext } from '../record'
 import { SchemaNode } from '../schema/node'
-import { IPolygon, IStar } from '../schema/type'
+import { IGeometryDetail, IPolygon, IStar } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
 import { StageDraw } from '../stage/draw/draw'
 import { StageElement } from '../stage/element'
@@ -59,7 +60,10 @@ export class OperateGeometryService {
     this.beforeOperate.hook(() => {
       this.oneOperateChange.endCurrent()
     })
-    this.afterOperate.hook(this.record)
+    this.afterOperate.hook(() => {
+      this.record()
+      Diff.commitCurrentDiffs('操作几何数据')
+    })
   }
   private setupGeometryData() {
     this.data._noIntercept = true
@@ -124,27 +128,36 @@ export class OperateGeometryService {
     const path = StageElement.pathCache.get(id)
     const { record, changedKeys } = this.oneTickChange
     const { x, y, width, height, rotation, radius, sides, points } = record
+    const makeDiff = (...props: (keyof IGeometryData | 'centerX' | 'centerY')[]) => {
+      props.forEach((prop) => {
+        Diff.setDiffReplace(createNodeDiffPath(id, prop), node[prop as keyof IGeometryDetail])
+      })
+    }
     if (changedKeys.has('x') && x) {
       node.x += x.current - x.last
       node.centerX += x.current - x.last
       OBB.shiftX(x.shift)
+      makeDiff('x', 'centerX')
     }
     if (changedKeys.has('y') && y) {
       node.y += y.current - y.last
       node.centerY += y.current - y.last
       OBB.shiftY(y.shift)
+      makeDiff('y', 'centerY')
     }
     if (changedKeys.has('width') && width) {
       node.width += width.current - width.last
       node.centerX += (rcos(node.rotation) * (width.current - width.last)) / 2
       node.centerY += (rsin(node.rotation) * (width.current - width.last)) / 2
       OBB.reBound(node.width, undefined, node.centerX, node.centerY)
+      makeDiff('width', 'centerX', 'centerY')
     }
     if (changedKeys.has('height') && height) {
       node.height += height.current - height.last
       node.centerX -= (rsin(node.rotation) * (height.current - height.last)) / 2
       node.centerY += (rcos(node.rotation) * (height.current - height.last)) / 2
       OBB.reBound(undefined, node.height, node.centerX, node.centerY)
+      makeDiff('height', 'centerX', 'centerY')
     }
     if (changedKeys.has('rotation') && rotation) {
       node.rotation += rotation.current - rotation.last
@@ -152,15 +165,19 @@ export class OperateGeometryService {
         .rotate(XY.From(node, 'center'), rotation.current - rotation.last)
         .mutate(node)
       OBB.reRotation(node.rotation)
+      makeDiff('rotation')
     }
     if (changedKeys.has('radius') && radius) {
       ;(node as IStar).radius = radius.current
+      makeDiff('radius')
     }
     if (changedKeys.has('sides') && sides) {
       ;(node as IPolygon).sides = sides.current
+      makeDiff('sides')
     }
     if (changedKeys.has('points') && points) {
       ;(node as IStar).points = points.current
+      makeDiff('points')
     }
 
     StageDraw.collectRedraw(id)
