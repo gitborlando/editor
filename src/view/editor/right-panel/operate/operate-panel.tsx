@@ -8,6 +8,7 @@ import { AlignComp } from './align/align'
 import { FillPropComp } from './fill/fill-prop'
 import { GeometryPropsComp } from './geometry/geometry-props'
 import { PickerComp } from './picker/picker'
+import { StrokeComp } from './stroke/stroke'
 
 type IOperatePanelComp = {}
 
@@ -19,6 +20,7 @@ export const OperatePanelComp: FC<IOperatePanelComp> = ({}) => {
       <AlignComp />
       <GeometryPropsComp />
       <FillPropComp />
+      <StrokeComp />
       <PickerComp />
       <Flex style={{ marginTop: 'auto' }}>{lastOne(SchemaNode.hoverIds.value)}</Flex>
     </Flex>
