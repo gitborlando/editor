@@ -1,10 +1,11 @@
 import autobind from 'class-autobind-decorator'
-import { createCache } from '~/shared/cache'
+import { Cache, createCache } from '~/shared/cache'
 import { batchSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { OBB } from '../math/obb'
 import { Path } from '../math/path/path'
 import { SchemaNode } from '../schema/node'
+import { SchemaPage } from '../schema/page'
 import { INode } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
 import { StageDraw } from './draw/draw'
@@ -22,12 +23,15 @@ export class StageElementService {
   outlineCache = createCache<PIXI.Graphics>()
   frameNameCache = createCache<PIXI.Text>()
   linearGradientCache = createCache<PIXI.Texture>()
-  private elementMap: Map<string, IStageElement> = new Map()
-  private elementContainer = new PIXI.Container()
+  private pagesElementMap = createCache<Cache<string, IStageElement>>()
+  private elementsContainer = new PIXI.Container()
+  private get elementMap() {
+    return this.pagesElementMap.getSet(SchemaPage.currentId.value, () => createCache())
+  }
   initHook() {
     Pixi.inited.hook(() => {
       this.bindHover()
-      this.elementContainer.setParent(Pixi.sceneStage)
+      this.elementsContainer.setParent(Pixi.sceneStage)
     })
     SchemaNode.afterAdd.hook((nodes) => {
       nodes.forEach((node) => this.add(node))
@@ -42,12 +46,12 @@ export class StageElementService {
     this.elementMap.set(id, element)
     if (SchemaUtil.isContainerNode(node) && !this.containerCache.get(id)) {
       const container = new PIXI.Container()
-      container.setParent(this.elementContainer)
+      container.setParent(this.elementsContainer)
       this.containerCache.set(id, container)
     }
     const selfContainer = this.containerCache.get(id)
     const parentContainer = this.containerCache.get(parentId)
-    element.setParent(selfContainer || parentContainer || this.elementContainer)
+    element.setParent(selfContainer || parentContainer || this.elementsContainer)
     this.initOBB(id)
     this.initOutline(id)
     StageDraw.collectRedraw(id)
@@ -66,11 +70,12 @@ export class StageElementService {
     return this.elementMap.get(id)
   }
   clearAll() {
-    Pixi.sceneStage.removeChildren()
-    this.elementMap = new Map()
+    this.elementMap.clear()
     this.OBBCache.clear()
     this.pathCache.clear()
     this.outlineCache.clear()
+    this.containerCache.clear()
+    this.elementsContainer.removeChildren()
   }
   findOrCreate<T extends IStageElement = PIXI.Graphics>(node: INode): T {
     const { id } = node
@@ -83,7 +88,7 @@ export class StageElementService {
     const handler = batchSignal([SchemaNode.hoverIds], (e: Event) => {
       if (!this.canHover) return
       const realXY = StageViewport.toViewportXY(XY.From(e, 'client'))
-      this.elementMap.forEach((element, id) => {
+      this.elementMap.forEach((id, element) => {
         const hovered = element?.containsPoint(realXY)
         hovered ? SchemaNode.hover(id) : SchemaNode.unHover(id)
       })

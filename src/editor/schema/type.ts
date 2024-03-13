@@ -1,4 +1,3 @@
-import { IRGBA } from '~/shared/utils/color'
 import { IXY } from '~/shared/utils/normal'
 
 export type ISchema = {
@@ -15,7 +14,8 @@ export type IMeta = {
 }
 
 export type IPage = {
-  id: string
+  DELETE?: boolean
+  id: `page:${string}`
   name: string
   zoom: number
   x: number
@@ -60,7 +60,7 @@ export type INodeBase = INodeMeta &
     hFlip: boolean
     vFlip: boolean
     fills: IFill[]
-    strokes: any[]
+    strokes: IStroke[]
     blurs: any[]
     shadows: any[]
   }
@@ -143,16 +143,20 @@ export type IText = INodeBase & {
 
 export type IFill = IFillColor | IFillLinearGradient | IFillImage
 
-export type IFillColor = {
-  type: 'color'
-  color: IRGBA
+type IFillMeta = {
+  visible: boolean
 }
 
-export type IFillLinearGradient = {
+export type IFillColor = IFillMeta & {
+  type: 'color'
+  color: string
+}
+
+export type IFillLinearGradient = IFillMeta & {
   type: 'linearGradient'
   start: IXY
   end: IXY
-  stops: { offset: number; color: IRGBA }[]
+  stops: { offset: number; color: string }[]
 }
 
 // export type IFillRadialGradient = {
@@ -170,8 +174,16 @@ export type IFillLinearGradient = {
 //   stops: { xy: IXY; color: string }[]
 // }
 
-export type IFillImage = {
+export type IFillImage = IFillMeta & {
   type: 'image'
   url: string
   matrix: number[]
+}
+
+export type IStroke = {
+  visible: boolean
+  fill: IFill
+  position: 'inner' | 'center' | 'outer'
+  width: number
+  vertex: ''
 }
