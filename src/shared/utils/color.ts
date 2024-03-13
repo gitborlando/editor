@@ -1,3 +1,7 @@
+import rgbToHex from 'rgb-hex'
+
+export { rgbToHex }
+
 export const COLOR = {
   white: rgba(255, 255, 255),
   blue: rgba(0, 200, 255),
@@ -7,7 +11,7 @@ export const COLOR = {
 export type IRGBA = { r: number; g: number; b: number; a: number }
 
 export function rgba(r: number, g: number, b: number, a: number = 1) {
-  return { r, g, b, a }
+  return `rgba(${r},${g},${b},${a})`
 }
 
 export function rgbaString({ r, g, b, a }: IRGBA) {

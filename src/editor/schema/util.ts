@@ -46,10 +46,15 @@ export class SchemaUtilService {
     if (this.isPage(parentId)) return SchemaPage.find(parentId)
     return SchemaNode.find(parentId) as INodeParent
   }
+  deleteSelectNodes() {
+    if (SchemaNode.selectIds.value.size) {
+      this.traverseDelete(SchemaNode.selectIds.value)
+    }
+  }
   traverseDelete(ids: Set<string>) {
     const deleteNodes: INode[] = []
     let isDeepDelete = false
-    SchemaUtil.traverse(
+    this.traverse(
       ({ id, node, childIds }) => {
         if (isDeepDelete) return deleteNodes.push(node)
         if (ids.has(id)) {

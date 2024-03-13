@@ -2,6 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { COLOR, rgba } from '~/shared/utils/color'
 import { IRect, IXY } from '~/shared/utils/normal'
+import Asset from '~/view/ui-utility/assets'
 import {
   IEllipse,
   IFillColor,
@@ -20,6 +21,7 @@ import {
   IRectangle,
   ISchema,
   IStar,
+  IStroke,
   IText,
 } from './type'
 
@@ -43,7 +45,7 @@ export class SchemaDefaultService {
   }
   page(): IPage {
     return {
-      id: nanoid(),
+      id: `page:${nanoid()}`,
       childIds: [],
       zoom: 1,
       x: 0,
@@ -108,7 +110,6 @@ export class SchemaDefaultService {
   polygon(option?: Partial<IPolygon>): IPolygon {
     const name = this.createNodeName('polygon')
     const nodeBase = this.createNodeBase()
-    const points = this.createTrianglePoints(option?.width ?? 100, option?.height ?? 100)
     return {
       type: 'vector',
       vectorType: 'polygon',
@@ -116,7 +117,6 @@ export class SchemaDefaultService {
       radius: 0,
       ...nodeBase,
       ...name,
-      ...points,
       ...option,
     }
   }
@@ -165,11 +165,12 @@ export class SchemaDefaultService {
     }
   }
   fillColor(color = rgba(204, 204, 204, 1)): IFillColor {
-    return { type: 'color', color }
+    return { type: 'color', visible: true, color }
   }
   fillLinearGradient(start: IXY, end: IXY): IFillLinearGradient {
     return {
       type: 'linearGradient',
+      visible: true,
       start,
       end,
       stops: [
@@ -193,8 +194,18 @@ export class SchemaDefaultService {
   // fillGonicGradient(startAngle: number, center: IXY): IFillGonicGradient {
   //   return { type: 'gonicGradient', startAngle, center, stops: [{ xy: center, color: 'skyBlue' }] }
   // }
-  fillImage(url: string): IFillImage {
-    return { type: 'image', url, matrix: [0, 0, 0, 0, 0, 0] }
+  fillImage(url: string = Asset.editor.rightPanel.operate.picker.defaultImage): IFillImage {
+    return { type: 'image', visible: true, url, matrix: [0, 0, 0, 0, 0, 0] }
+  }
+  stroke(option?: Partial<IStroke>) {
+    return <IStroke>{
+      visible: true,
+      fill: this.fillColor(rgba(0, 0, 0, 1)),
+      position: 'center',
+      width: 1,
+      vertex: '',
+      ...option,
+    }
   }
   geometryDetail({ x, y, width, height }: IRect) {
     return {
@@ -219,6 +230,7 @@ export class SchemaDefaultService {
   private createNodeBase(): INodeBase {
     const colorFill = <IFillColor>{
       type: 'color',
+      visible: true,
       color: rgba(204, 204, 204, 1),
     }
     return {
@@ -270,57 +282,6 @@ export class SchemaDefaultService {
         }
     let nameIndex = this.typeIndexMap[type]!
     return { name: nameIndex[0] + ' ' + (nameIndex[1] as number)++ }
-  }
-  private createRectPoints(width: number, height: number) {
-    const halfWidth = width / 2
-    const halfHeight = height / 2
-    return {
-      points: [
-        this.createPoint(-halfWidth, -halfHeight, 'no-bezier', 0),
-        this.createPoint(halfWidth, -halfHeight, 'no-bezier', 0),
-        this.createPoint(halfWidth, halfHeight, 'no-bezier', 0),
-        this.createPoint(-halfWidth, halfHeight, 'no-bezier', 0),
-      ],
-    }
-  }
-  private createTrianglePoints(width: number, height: number) {
-    const halfWidth = width / 2
-    const halfHeight = height / 2
-    return {
-      points: [
-        this.createPoint(0, -halfHeight, 'no-bezier', 0),
-        this.createPoint(halfWidth, halfHeight, 'no-bezier', 0),
-        this.createPoint(-halfWidth, halfHeight, 'no-bezier', 0),
-      ],
-    }
-  }
-  private createLinePoints(start: IXY, end: IXY) {
-    return {
-      points: [
-        this.createPoint(start.x, start.y, 'no-bezier', 0),
-        this.createPoint(end.x, end.y, 'no-bezier', 0, undefined, undefined, true),
-      ],
-    }
-  }
-  public createPoint(
-    x: number,
-    y: number,
-    bezierType: IPoint['bezierType'],
-    radius: number = 0,
-    handleLeft?: IPoint['handleLeft'],
-    handleRight?: IPoint['handleRight'],
-    jumpToRight?: IPoint['jumpToRight']
-  ) {
-    return {
-      type: 'point',
-      x,
-      y,
-      bezierType,
-      radius,
-      handleLeft,
-      handleRight,
-      jumpToRight,
-    } as IPoint
   }
 }
 

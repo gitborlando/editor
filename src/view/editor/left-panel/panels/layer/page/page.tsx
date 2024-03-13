@@ -25,9 +25,11 @@ export const PageComp: FC<IPageComp> = ({}) => {
         vshow={allPageExpanded.value}
         shrink={1}
         style={{ height: pagePanelHeight.value - 37 }}>
-        {SchemaPage.pages.value.map((page) => (
-          <PageItemComp key={page.id} name={page.name} id={page.id} />
-        ))}
+        {SchemaPage.pages.value
+          .filter((page) => !page.DELETE)
+          .map((page) => (
+            <PageItemComp key={page.id} name={page.name} id={page.id} />
+          ))}
       </Flex>
       <Flex
         layout='c'
@@ -56,6 +58,7 @@ const useStyles = makeStyles<IPageCompStyle>()((t) => ({
   pageList: {
     ...t.rect('100%', '100%'),
     overflow: 'overlay',
+    ...t.default$.scrollBar,
   },
   move: {
     ...t.rect('100%', 5, 'no-radius'),

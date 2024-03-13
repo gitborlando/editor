@@ -2,7 +2,9 @@ import { createSignal } from '~/shared/signal'
 import { SchemaFile } from './file'
 import { Hotkey } from './hotkey'
 import { OperateAlign } from './operate/align'
+import { OperateFill } from './operate/fill'
 import { OperateGeometry } from './operate/geometry'
+import { OperateStroke } from './operate/stroke'
 import { SchemaNode } from './schema/node'
 import { SchemaPage } from './schema/page'
 import { Schema } from './schema/schema'
@@ -21,6 +23,7 @@ import { StageWidgetRuler } from './stage/widget/ruler'
 import { StageWidgetTransform } from './stage/widget/transform'
 import { UILeftPanelLayer } from './ui-state/left-panel/layer'
 import { UILeftPanel } from './ui-state/left-panel/left-panel'
+import { UIPicker } from './ui-state/right-planel/operate/picker'
 
 export const editorInited = createSignal(false)
 
@@ -31,6 +34,8 @@ SchemaNode.initHook()
 
 OperateAlign.initHook()
 OperateGeometry.initHook()
+OperateFill.initHook()
+OperateStroke.initHook()
 
 StageViewport.initHook()
 StageElement.initHook()
@@ -48,6 +53,7 @@ StageWidgetTransform.initHook()
 
 UILeftPanelLayer.initHook()
 UILeftPanel.initHook()
+UIPicker.initHook()
 
 export async function initEditor() {
   SchemaFile.init()
