@@ -1,11 +1,11 @@
-import { SchemaDefaultService } from '~/editor/schema/default'
+import { SchemaDefault, SchemaDefaultService } from '~/editor/schema/default'
 import { ISchema } from '~/editor/schema/type'
 import { COLOR } from '~/shared/utils/color'
 
 export function mockNested(schemaDefault: SchemaDefaultService) {
   const [x, y, width, height] = [100, 0, 100, 100]
   const nodes: ISchema['nodes'] = {
-    page1: {
+    'page:1': {
       // frame0: schemaDefault.frame({
       //   id: 'frame0',
       //   name: '测试画板0',
@@ -25,7 +25,7 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
         x: 0,
         centerX: 200,
         centerY: 200,
-        parentId: 'page1',
+        parentId: 'page:1',
         childIds: ['rect2', 'triangle1'],
       }),
       rect2: schemaDefault.rect({
@@ -38,6 +38,7 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
         centerY: 50,
         parentId: 'frame1',
         // rotation: 30,
+        strokes: [SchemaDefault.stroke()],
       }),
       triangle1: schemaDefault.polygon({
         id: 'triangle1',
@@ -74,7 +75,7 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
     nodes,
     pages: [
       {
-        id: 'page1',
+        id: 'page:1',
         name: '测试页面1',
         zoom: 1,
         x: 100,

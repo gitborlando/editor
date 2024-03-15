@@ -1,4 +1,5 @@
 import { FC } from 'react'
+import { SchemaDefault } from '~/editor/schema/default'
 import { SchemaPage } from '~/editor/schema/page'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { useHookSignal } from '~/shared/signal-react'
@@ -25,8 +26,9 @@ export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
         style={{ marginLeft: 'auto' }}
         onClick={() => {
           if (allPageExpanded.value === false) allPageExpanded.dispatch(true)
-          SchemaPage.add()
-          SchemaPage.pages.dispatch()
+          const page = SchemaDefault.page()
+          SchemaPage.add(page)
+          SchemaPage.afterAdd.dispatch(page)
         }}>
         <Icon size={16}>{Asset.editor.leftPanel.page.add}</Icon>
       </Button>

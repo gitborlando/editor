@@ -46,6 +46,12 @@ export class SchemaNodeService {
         this.datumXY = XY.Of(OBB.aabb.x, OBB.aabb.y)
       }
     })
+    SchemaPage.afterAdd.hook(
+      (page) => {
+        this.nodeMap[page.id] = {}
+      },
+      ['id:addToNodeMap']
+    )
   }
   get currentPageNodeMap() {
     return this.nodeMap[SchemaPage.currentId.value]
@@ -71,6 +77,7 @@ export class SchemaNodeService {
     this.afterDelete.dispatch(nodes)
     this.recordDelete(nodes)
   }
+  copyNodes(nodes: INode[]) {}
   connectAt(parent: INodeParent | IPage, node: INode, index?: number) {
     if (index === undefined) parent.childIds.push(node.id)
     else insertAt(parent.childIds, index, node.id)

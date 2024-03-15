@@ -1,5 +1,4 @@
 import { FC, memo, useCallback } from 'react'
-import { SchemaFile } from '~/editor/file'
 import { Record } from '~/editor/record'
 import { IStageCreateType, StageCreate } from '~/editor/stage/interact/create'
 import { StageInteract } from '~/editor/stage/interact/interact'
@@ -68,7 +67,6 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
           <Icon size={28}>{Asset.favIcon.shiyangyang}</Icon>
           <h4 style={{ color: hslBlueColor(60), fontSize: 16 }}>屎羊羊编辑器</h4>
         </Flex>
-        <Flex className={classes.fileSave}>/{SchemaFile.isSaved.value ? '已保存' : '未保存'}</Flex>
       </Flex>
       <Flex layout='c' className={classes.centerGroup}>
         <RecordIcons />
@@ -82,6 +80,8 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
         ))}
         <Divide length={16} />
         <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
+        {/* <Button onClick={() => SchemaFile.openFile()}>导入</Button>
+        <Button onClick={() => SchemaFile.downloadJsonFile(Schema.getSchema())}>下载</Button> */}
       </Flex>
     </Flex>
   )
