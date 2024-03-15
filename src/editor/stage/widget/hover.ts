@@ -1,8 +1,8 @@
 import autobind from 'class-autobind-decorator'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaUtil } from '~/editor/schema/util'
-import { Setting } from '~/global/setting'
 import { lastOne } from '~/shared/utils/array'
+import { hslBlueColor } from '~/shared/utils/color'
 import { StageDraw } from '../draw/draw'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -23,7 +23,7 @@ export class StageWidgetHoverService {
     this.hoverWidget.setParent(Pixi.sceneStage)
     const hoverNode = SchemaNode.find(this.hoverId)
     if (hoverNode.type === 'frame' && SchemaUtil.isPage(hoverNode.parentId)) return
-    this.hoverWidget.lineStyle(1.5 / StageViewport.zoom.value, Setting.color.value)
+    this.hoverWidget.lineStyle(1.5 / StageViewport.zoom.value, hslBlueColor(65))
     StageDraw.drawShape(this.hoverWidget, hoverNode)
   }
 }

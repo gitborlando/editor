@@ -7,12 +7,13 @@ import { OperateGeometry } from '~/editor/operate/geometry'
 import { recordSignalContext } from '~/editor/record'
 import { SchemaNode } from '~/editor/schema/node'
 import { Drag } from '~/global/event/drag'
-import { Setting } from '~/global/setting'
 import { XY } from '~/shared/structure/xy'
 import { firstOne } from '~/shared/utils/array'
+import { hslBlueColor } from '~/shared/utils/color'
 import { StageCursor } from '../cursor'
 import { StageDraw } from '../draw/draw'
 import { StageElement } from '../element'
+import { StageInteract } from '../interact/interact'
 import { StageSelect } from '../interact/select'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -147,7 +148,7 @@ export class StageWidgetTransformService {
     const borderWidth = 1 / StageViewport.zoom.value
     const radius = 1 / StageViewport.zoom.value
     this.vertexes.forEach((vertex, i) => {
-      vertex.lineStyle(borderWidth, Setting.color.value)
+      vertex.lineStyle(borderWidth, hslBlueColor(65))
       vertex.beginFill('white')
       vertex.drawRoundedRect(
         this.vertexXYs[i].x - size / 2,
@@ -161,7 +162,7 @@ export class StageWidgetTransformService {
   private drawLine() {
     const lineWidth = 1 / StageViewport.zoom.value
     this.lines.forEach((line) => {
-      line.lineStyle(lineWidth, Setting.color.value)
+      line.lineStyle(lineWidth, hslBlueColor(65))
     })
     this.lineT.moveTo(this.vertexTL_XY.x, this.vertexTL_XY.y)
     this.lineT.lineTo(this.vertexTR_XY.x, this.vertexTR_XY.y)
@@ -179,7 +180,7 @@ export class StageWidgetTransformService {
       outline.setParent(Pixi.sceneStage)
       this.outlines.push(outline)
       if (node.type === 'vector') {
-        outline.lineStyle(0.5 / StageViewport.zoom.value, Setting.color.value)
+        outline.lineStyle(0.5 / StageViewport.zoom.value, hslBlueColor(65))
         StageDraw.drawShape(outline, node)
       }
     })
@@ -204,10 +205,15 @@ export class StageWidgetTransformService {
           }
         })
     }
+    const canDrag = () => {
+      return StageInteract.currentType.value === 'select'
+    }
     Pixi.addListener('mousedown', (e) => {
+      if (!canDrag()) return
       if (this.mouseIn(e as MouseEvent)) handleDrag()
     })
     StageSelect.afterSelect.hook((type) => {
+      if (!canDrag()) return
       if (recordSignalContext()) return
       if (type === 'stage-single') handleDrag()
     })

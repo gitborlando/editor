@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { Setting } from '~/global/setting'
 import { XY } from '~/shared/structure/xy'
+import { hslBlueColor } from '~/shared/utils/color'
 import { StageSelect } from '../interact/select'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -20,8 +20,8 @@ export class StageWidgetMarqueeService {
     const { x, y, width, height } = StageSelect.marquee.value
     const sceneStartXY = StageViewport.toSceneStageXY(XY.Of(x, y))
     const sceneShiftXY = StageViewport.toSceneStageShiftXY(XY.Of(width, height))
-    this.marqueeElement.beginFill(Setting.color.value, 0.1)
-    this.marqueeElement.lineStyle(1 / StageViewport.zoom.value, Setting.color.value)
+    this.marqueeElement.beginFill(hslBlueColor(65), 0.1)
+    this.marqueeElement.lineStyle(1 / StageViewport.zoom.value, hslBlueColor(65))
     this.marqueeElement.drawRect(sceneStartXY.x, sceneStartXY.y, sceneShiftXY.x, sceneShiftXY.y)
   }
 }
