@@ -12,7 +12,7 @@ type IHookOption = {
   after?: string
 }
 
-type IHookDescription =
+export type IHookDescription =
   | `id:${string}`
   | 'immediately'
   | 'once'
@@ -21,8 +21,8 @@ type IHookDescription =
 
 @autoBindMethods
 export class Signal<T extends any> {
-  private newValue!: T
-  private oldValue!: T
+  newValue!: T
+  oldValue!: T
   private _intercept?: (value: T) => T | void
   private hooks = <IHook<T>[]>[]
   private optionCache = createCache<IHookOption, IHook<T>>()
@@ -74,6 +74,7 @@ export class Signal<T extends any> {
     if (isBatching) return
     this.reArrangeHook()
     this.hooks.forEach((hook) => hook(this.value, this.oldValue))
+    argsCache.forEach((key) => argsCache.set(key, undefined))
   }
   private processDescription(hook: IHook<T>, descriptions: IHookDescription[]) {
     const option = this.optionCache.getSet(hook, () => ({}))
@@ -120,6 +121,15 @@ export function createSignal<T extends any>(value?: T) {
 const contextCache = createCache<any>()
 export function createSignalContext<T extends any>(key: string) {
   return (context?: T): T => contextCache.getSet(key, () => context)
+}
+
+const argsCache = createCache<any, symbol>()
+export function createSignalArgs<T extends any>() {
+  const key = Symbol()
+  return (args?: T): T | undefined => {
+    if (args !== undefined) return argsCache.set(key, args)
+    return argsCache.get(key)
+  }
 }
 
 export function multiSignal(signals: Signal<any>[], callback: INoopFunc) {
