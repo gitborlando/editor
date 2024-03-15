@@ -1,8 +1,10 @@
 import autobind from 'class-autobind-decorator'
 import { Record } from '~/editor/record'
 import { SchemaNode } from '~/editor/schema/node'
+import { SchemaPage } from '~/editor/schema/page'
 import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
+import { createSetting } from '~/global/setting'
 import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal'
 import { ceil, floor, max, min } from '../../math/base'
@@ -20,7 +22,7 @@ type IAllNodeExpanded = 'expanded' | 'collapsed' | 'partial-expanded'
 @autobind
 export class UILeftPanelLayerService {
   nodeStatusCache = createCache<ILeftPanelNodeStatus>()
-  allPageExpanded = createSignal(true)
+  allPageExpanded = createSetting('LeftPanel.LayerPanel.pagePanelExpanded', true)
   pagePanelHeight = createSignal(200)
   nodeViewHeight = createSignal(0)
   nodeListHeight = createSignal(0)
@@ -116,6 +118,10 @@ export class UILeftPanelLayerService {
     })
     this.pagePanelHeight.hook((height) => {
       this.nodeViewHeight.dispatch(UILeftPanel.panelHeight - height - 32)
+    })
+    SchemaPage.currentId.hook(() => {
+      this.findNodeInView()
+      this.nodeIdsInView.dispatch()
     })
   }
   init() {
