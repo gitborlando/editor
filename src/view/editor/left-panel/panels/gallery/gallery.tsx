@@ -2,27 +2,29 @@ import { observer } from 'mobx-react'
 import { Photo, createClient } from 'pexels'
 import { FC, useRef } from 'react'
 import { InView } from 'react-intersection-observer'
-import { useAutoSignal } from '~/shared/signal-react'
+import { Img } from '~/editor/img'
+import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
+import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
+import { rgba } from '~/shared/utils/color'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from '~/view/ui-utility/widget/icon'
 
+const pexels = createClient('1vbcKedpSbDaktXlI6jmDczCNUBMqDkXL3Gndwp7HMblwGoENO4xlDnm')
+
 type IGalleryComp = {}
 
 export const GalleryComp: FC<IGalleryComp> = observer(({}) => {
-  return null
-  const pexels = useRef(createClient('1vbcKedpSbDaktXlI6jmDczCNUBMqDkXL3Gndwp7HMblwGoENO4xlDnm'))
   const page = useAutoSignal(1)
   const leftList = useRef({ list: [] as Photo[], height: 0 })
   const rightList = useRef({ list: [] as Photo[], height: 0 })
   const load = async () => {
-    const response = await pexels.current.photos.curated({ page: page.value, per_page: 20 })
+    const response = await pexels.photos.curated({ page: page.value, per_page: 12 })
     if ('error' in response) return
-    const { photos } = response
-    photos.forEach((photo) => {
-      const displayHeight = (photo.height / photo.width) * 120
-      photo.width = 120
+    response.photos.forEach((photo) => {
+      const displayHeight = (photo.height / photo.width) * 116
+      photo.width = 116
       photo.height = displayHeight
       const shortList = leftList.current.height < rightList.current.height ? leftList : rightList
       shortList.current.height += displayHeight
@@ -31,26 +33,48 @@ export const GalleryComp: FC<IGalleryComp> = observer(({}) => {
     page.dispatch(page.value + 1)
   }
   const { theme, css, classes } = useStyles({})
+
+  const PhotoComp: FC<{ photo: Photo }> = ({ photo }) => {
+    const photoUrl = photo.src.original
+    const applyImageFill = async () => {
+      UIPicker.loadingWebImageUrl.dispatch(photoUrl)
+      await Img.getImageAsync(photoUrl)
+      UIPicker.loadingWebImageUrl.dispatch('')
+      if (UIPicker.type.value !== 'image') {
+        UIPicker.type.dispatch('image')
+      }
+      UIPicker.currentImageFill.dispatch((fill) => (fill.url = photoUrl))
+    }
+    useHookSignal(UIPicker.loadingWebImageUrl)
+    return (
+      <Flex
+        layout='c'
+        className={classes.photo}
+        style={{ width: photo.width, height: photo.height }}>
+        <img src={photo.src.small} onClick={applyImageFill}></img>
+        {UIPicker.loadingWebImageUrl.value === photoUrl && (
+          <Flex layout='c' className={'mask'}>
+            <Icon size={20} className={'loadingIcon'}>
+              {Asset.editor.shared.loading}
+            </Icon>
+          </Flex>
+        )}
+      </Flex>
+    )
+  }
+
   return (
     <Flex shrink={0} className={css({ ...theme.rect('100%', '100%') })}>
       <Flex layout='v' className={classes.Gallery}>
         <Flex className={classes.list}>
           <Flex layout='v'>
-            {leftList.current.list.map((photo) => (
-              <img
-                key={photo.id + photo.height}
-                className={classes.photo}
-                src={photo.src.medium}
-                style={{ width: photo.width, height: photo.height }}></img>
+            {leftList.current.list.map((photo, i) => (
+              <PhotoComp key={photo.id + i} photo={photo} />
             ))}
           </Flex>
           <Flex layout='v'>
-            {rightList.current.list.map((photo) => (
-              <img
-                key={photo.id + photo.height}
-                className={classes.photo}
-                src={photo.src.medium}
-                style={{ width: photo.width, height: photo.height }}></img>
+            {rightList.current.list.map((photo, i) => (
+              <PhotoComp key={photo.id + i} photo={photo} />
             ))}
           </Flex>
         </Flex>
@@ -76,6 +100,16 @@ const useStyles = makeStyles<IGalleryCompStyle>()((t) => ({
   },
   photo: {
     marginBottom: 4,
+    '& .mask': {
+      ...t.rect('100%', '100%', 'no-radius', rgba(0, 0, 0, 0.5)),
+      position: 'absolute',
+    },
+    '& img': {
+      ...t.rect('100%', '100%'),
+    },
+    '& .loadingIcon': {
+      position: 'absolute',
+    },
   },
   inView: {
     ...t.rect('100%', 40),
