@@ -1,12 +1,15 @@
 import autobind from 'class-autobind-decorator'
 
+export type IUploadFileAcceptType = 'image/*' | (string & {})
+
 @autobind
-export class UploadService {
+export class UploaderService {
   private inputRef!: HTMLInputElement
   setInputRef(input: HTMLInputElement) {
     this.inputRef = input
   }
-  async open() {
+  async open({ accept }: { accept: IUploadFileAcceptType }) {
+    this.inputRef.accept = accept
     this.inputRef.click()
     const file = await new Promise<File | undefined>((resolve) => {
       this.inputRef.onchange = () => resolve(this.inputRef.files?.[0])
@@ -31,4 +34,4 @@ export class UploadService {
   }
 }
 
-export const Upload = new UploadService()
+export const Uploader = new UploaderService()
