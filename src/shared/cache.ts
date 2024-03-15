@@ -15,7 +15,7 @@ export class Cache<K, V> {
   }
   getSet(key: K, fn: () => V) {
     let value = this.cache.get(key)
-    if (value) return value
+    if (value !== undefined) return value
     value = fn()
     this.cache.set(key, value)
     return value
@@ -31,6 +31,14 @@ export class Cache<K, V> {
   }
   values() {
     return this.cache.values()
+  }
+  fromObject(obj: Record<string | number | symbol, V>) {
+    this.cache = new Map(Object.entries(obj)) as Map<K, V>
+  }
+  toObject() {
+    return Object.fromEntries(
+      [...this.cache.entries()].map(([key, value]) => [key, value])
+    ) as Record<string | number | symbol, V>
   }
 }
 
