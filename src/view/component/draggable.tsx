@@ -20,18 +20,24 @@ type IDraggableComp = {
   headerSlot?: ReactNode
   width?: number
   height?: number
+  onXYChange?(newXY: IXY): void
 }
 
+let draggableCount = 0
 const maxZIndex = createSignal(0)
 
 export const DraggableComp: FC<IDraggableComp> = observer(
-  ({ closeFunc, children, xy, headerSlot, width, height }) => {
+  ({ closeFunc, children, xy, headerSlot, width, height, onXYChange }) => {
     const { classes } = useStyles({})
     const state = useLocalObservable(() => ({
       xy: xy || xy_new(480, 240),
     }))
     const zIndex = useAutoSignal(0)
-    useEffect(() => void maxZIndex.value++, [])
+    useEffect(() => {
+      draggableCount++
+      maxZIndex.value++
+      return () => void draggableCount--
+    }, [])
     return createPortal(
       <Flex
         layout='v'
@@ -43,7 +49,9 @@ export const DraggableComp: FC<IDraggableComp> = observer(
           ...(height && { height }),
           zIndex: zIndex.value,
         }}
-        onMouseDownCapture={() => zIndex.dispatch(maxZIndex.value++)}>
+        onMouseDownCapture={() => {
+          draggableCount > 1 && zIndex.dispatch(maxZIndex.value++)
+        }}>
         <Flex
           layout='h'
           shrink={0}
@@ -55,6 +63,7 @@ export const DraggableComp: FC<IDraggableComp> = observer(
             Drag.onSlide(({ shift, current }) => {
               if (current.x > innerWidth || current.y > innerHeight) return
               state.xy = XY.From(start).plus(shift)
+              onXYChange?.(state.xy)
             })
           }}>
           {headerSlot}
