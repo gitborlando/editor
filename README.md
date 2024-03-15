@@ -11,10 +11,7 @@
 
 ### 编辑器截图
 
-![](https://pic.imgdb.cn/item/65f4110c9f345e8d03d7525f.gif)
-
-![](https://pic.imgdb.cn/item/65f4110b9f345e8d03d74ee3.jpg)
-
-![](https://pic.imgdb.cn/item/65f4110b9f345e8d03d74f83.jpg)
-
-![](https://pic.imgdb.cn/item/65f4110c9f345e8d03d75042.jpg)
+![](https://github.com/gitborlando/editor/blob/main/src/view/ui-utility/assets/snapshots/1.gif)
+![](https://github.com/gitborlando/editor/blob/main/src/view/ui-utility/assets/snapshots/2.jpeg)
+![](https://github.com/gitborlando/editor/blob/main/src/view/ui-utility/assets/snapshots/3.jpeg)
+![](https://github.com/gitborlando/editor/blob/main/src/view/ui-utility/assets/snapshots/1.jpeg)
