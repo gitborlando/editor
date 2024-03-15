@@ -3,17 +3,16 @@ import { FC, createElement } from 'react'
 import { StageViewport } from '~/editor/stage/viewport'
 import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
 import { useHookSignal } from '~/shared/signal-react'
-import { DraggableComp } from '~/view/component/draggable'
+import { iife } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { Icon } from '~/view/ui-utility/widget/icon'
+import { PopupPanelComp } from './popup'
 import { SwitchBarComp } from './switch-bar/switch-bar'
 
 type ILeftPanelComp = {}
 
 export const LeftPanelComp: FC<ILeftPanelComp> = observer(({}) => {
-  const { showLeftPanel, currentTabId, switchTabMap, popDownPanel, popupTabIds, findSwitchTab } =
-    UILeftPanel
+  const { showLeftPanel, currentTabId, switchTabMap, popupTabIds, switchTabIds } = UILeftPanel
   const { classes } = useStyles({ left: StageViewport.bound.value.x })
   useHookSignal(showLeftPanel)
   useHookSignal(currentTabId)
@@ -22,27 +21,21 @@ export const LeftPanelComp: FC<ILeftPanelComp> = observer(({}) => {
     <Flex shrink={0} layout='h' className={classes.LeftPanel}>
       <SwitchBarComp />
       <Flex layout='v' vshow={showLeftPanel.value} className={classes.panels}>
-        {createElement(switchTabMap.value.get(currentTabId.value)!.panel)}
-      </Flex>
-      {[...popupTabIds.value].map((id) => {
-        const { name, panel, icon } = findSwitchTab(id)
-        return (
-          <DraggableComp
-            key={id}
-            headerSlot={
-              <Flex layout='h' style={{ gap: 4 }}>
-                <Icon size={18}>{icon}</Icon>
-                <h4>{name}</h4>
-              </Flex>
+        {createElement(
+          iife(() => {
+            if (!popupTabIds.value.has(currentTabId.value)) {
+              return switchTabMap.value.get(currentTabId.value)
             }
-            closeFunc={() => popDownPanel(id)}
-            xy={{ x: window.innerWidth - 480, y: 100 }}
-            width={240}
-            height={840}>
-            {createElement(panel)}
-          </DraggableComp>
-        )
-      })}
+            const id = switchTabIds.find(
+              (id) => id !== currentTabId.value && !popupTabIds.value.has(id)
+            )!
+            return switchTabMap.value.get(id)
+          })!.panel
+        )}
+      </Flex>
+      {[...popupTabIds.value].map((id) => (
+        <PopupPanelComp key={id} id={id} />
+      ))}
     </Flex>
   )
 })
