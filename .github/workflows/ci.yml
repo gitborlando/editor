@@ -46,8 +46,7 @@ jobs:
 
       - name: Run scripts
         run: |
-          npm i cnpm -D
-          npx cnpm i
+          npm i --legacy-peer-deps
           npm run build
 
       - name: Configure pages
