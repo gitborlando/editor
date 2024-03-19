@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig(() => {
   return {
-    base: 'a-editor',
+    base: 'editor',
     plugins: [react()],
     resolve: {
       alias: {
