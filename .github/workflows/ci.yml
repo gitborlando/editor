@@ -46,7 +46,7 @@ jobs:
 
       - name: Run scripts
         run: |
-          npm i -D cnpm
+          npm i cnpm -D
           npx cnpm i
           npm run build
 
