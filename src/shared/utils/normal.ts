@@ -98,8 +98,11 @@ export function objEntries<T extends Record<string, any>, K extends keyof T = ke
   Object.entries(obj).forEach(([key, val], i) => callback(key as K, val, i))
 }
 
-export function stopPropagation(e: any) {
-  e.stopPropagation()
+export function stopPropagation(callback: (e?: any) => any) {
+  return (e: any) => {
+    callback(e)
+    e.stopPropagation()
+  }
 }
 
 export function makeAction<T extends any>(callback?: (...args: T[]) => void) {

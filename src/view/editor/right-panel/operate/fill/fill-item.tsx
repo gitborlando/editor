@@ -17,7 +17,7 @@ export const FillItemComp: FC<IFillItemComp> = memo(({ fill, index }) => {
 
   return (
     <Flex layout='h' className={classes.FillItem}>
-      <FillComp fill={fill} index={index} />
+      <FillComp fill={fill} index={index} impact='fill' />
       <IconButton
         size={16}
         style={{ marginLeft: 'auto' }}

@@ -14,10 +14,10 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     <Flex layout='h' sidePadding={10} className={classes.Header}>
       <InputComp placeholder='搜索' />
       <Flex layout='h' className={classes.iconGroup}>
-        <IconButton size={14} onClick={() => SchemaFile.a()}>
+        <IconButton size={14} onClick={() => {}}>
           {Asset.editor.leftPanel.file.newFolder}
         </IconButton>
-        <IconButton size={13} onClick={() => SchemaFile.b()}>
+        <IconButton size={13} onClick={() => SchemaFile.newFile()}>
           {Asset.editor.leftPanel.file.newFile}
         </IconButton>
       </Flex>

@@ -1,71 +1,71 @@
 //@ts-ignore
 import autobind from 'class-autobind-decorator'
+import hotkeys from 'hotkeys-js'
 import { Uploader } from '~/global/upload'
-import { mockJsonFile } from '~/mock/mock'
 import { createIDBStore } from '~/shared/idb-store'
 import { createSignal } from '~/shared/signal'
+import { Delete } from '~/shared/utils/normal'
 import { SchemaDefault } from './schema/default'
 import { SchemaNode } from './schema/node'
-import { SchemaPage } from './schema/page'
 import { Schema } from './schema/schema'
-import { ISchema } from './schema/type'
-
-type IFileDict = {
-  [id: string]: IFileDict | string
-}
-
-const defaultFileName = 'defaultFileName'
+import { IMeta, ISchema } from './schema/type'
 
 @autobind
 export class SchemaFileService {
   fileStore = createIDBStore<ISchema>('schema-files')
-  fileDictStore = createIDBStore<IFileDict>('schema-file-dict')
-  fileMetaStore = createIDBStore<ISchema['meta']>('schema-files-meta')
   isSaved = createSignal(false)
+  allFileMeta = createSignal(<IMeta[]>[])
+  allFileMetaStore = createIDBStore<IMeta[]>('allFileMeta')
   init() {
     this.debug()
     this.autoSave()
   }
-  async loadFile() {
-    return await this.fileStore[defaultFileName]
+  initHook() {
+    this.allFileMeta.hook((allMeta) => {
+      this.allFileMetaStore.set('allFileMeta', allMeta)
+    })
+  }
+  async getAllFileMeta() {
+    const allFileMeta = await this.allFileMetaStore.get('allFileMeta')
+    this.allFileMeta.dispatch(allFileMeta)
+  }
+  loadJsonFile(json: ISchema) {
+    Schema.setSchema(json)
   }
   autoSave() {
     setInterval(() => {
-      this.saveFile()
+      this.saveJsonFile(Schema.getSchema())
       this.isSaved.dispatch(true)
-    }, 1000 * 5)
+    }, 1000)
   }
   async openFile() {
     const file = await Uploader.open({ accept: '' })
     if (!file) return
     const json = JSON.parse(await Uploader.readAsText(file))
-    Schema.setSchema(json)
-    SchemaPage.select(json.pages[0].id)
+    this.loadJsonFile(json)
   }
   newFile() {
-    const json = SchemaDefault.schema()
-    Schema.setSchema(json)
-    SchemaPage.select(json.pages[0].id)
+    const schema = SchemaDefault.schema()
+    this.allFileMeta.dispatch((allMeta) => allMeta.push(schema.meta))
+    this.fileStore.set(schema.meta.id, schema)
+    this.openInNewTab(schema.meta.id)
   }
-  async mockFile() {
-    return new Promise<ISchema>((resolve) => {
-      setTimeout(() => {
-        const json = mockJsonFile(SchemaDefault)
-        resolve(json)
-      })
-    })
+  deleteFile(id: string) {
+    this.allFileMeta.dispatch((allMeta) => Delete(allMeta, (meta) => meta.id === id))
+    this.fileStore.delete(id)
   }
-  saveFile() {
-    const schema = Schema.getSchema()
-    this.fileStore[schema.meta.id] = schema
+  saveJsonFile(json: ISchema) {
+    this.fileStore.set(json.meta.id, json)
   }
   downloadJsonFile(data: object): void {
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
     Uploader.download(blob)
   }
+  openInNewTab(id: string) {
+    window.open(`${location.href.split('#')[0]}#${id}`)
+  }
   private debug() {
-    window.addEventListener('keydown', (e) => {
-      if (!(e.altKey && e.key === 'l')) return
+    hotkeys('alt+l', () => {
       if (SchemaNode.selectIds.value.size) {
         SchemaNode.selectIds.value.forEach((id) => {
           console.log(SchemaNode.find(id))

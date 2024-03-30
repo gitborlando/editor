@@ -14,20 +14,28 @@ import { InputComp } from '~/view/ui-utility/widget/input'
 type IFillComp = {
   fill: IFill
   index: number
+  impact: typeof UIPicker.impact
 }
 
-export const FillComp: FC<IFillComp> = memo(({ fill, index }) => {
+export const FillComp: FC<IFillComp> = memo(({ fill, index, impact }) => {
   const isColorType = fill.type === 'color'
   const isImageType = fill.type === 'image'
   const showPicker = (xy: IXY, type: typeof UIPicker.type.value) => {
     UIPicker.xy.value = XY.Of(window.innerWidth - 480 - 10, xy.y - 10)
     UIPicker.type.value = type
+    UIPicker.impact = impact
     UIPicker.show.dispatch(true)
   }
   const { currentFill, currentImage } = UIPicker
   const { theme, css, classes } = useStyles({})
 
-  useHookSignal(currentFill, undefined, ['id:fill-comp'])
+  useHookSignal(
+    currentFill,
+    (_, f) => {
+      if (UIPicker.impact === impact) f()
+    },
+    ['id:fill-comp']
+  )
   useHookSignal(OperateFill.fills)
 
   return (

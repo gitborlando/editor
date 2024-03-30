@@ -9,6 +9,7 @@ import { SchemaNode } from '../schema/node'
 import { INode, IStroke } from '../schema/type'
 import { StageDraw } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
+import { UIPicker } from '../ui-state/right-planel/operate/picker'
 
 @autobind
 export class OperateStrokeService {
@@ -27,6 +28,12 @@ export class OperateStrokeService {
     this.beforeOperate.hook(() => {
       this.oneOperateChange.endCurrent()
     })
+    UIPicker.currentFill.hook(() => {
+      if (UIPicker.impact !== 'stroke') return
+      this.strokes.dispatch((strokes) => {
+        strokes[UIPicker.currentIndex].fill = UIPicker.currentFill.value
+      })
+    })
     this.strokes.hook(() => {
       if (this.strokesSignalArgs()?.isSetup) return
       this.isStrokesChanged = true
@@ -35,6 +42,7 @@ export class OperateStrokeService {
     SchemaNode.duringFlushDirty.hook((id) => {
       if (!this.isStrokesChanged) return
       this.applyChange(SchemaNode.find(id))
+      this.isStrokesChanged = false
     })
     this.afterOperate.hook(() => {
       this.oneOperateChange.update('strokes', cloneDeep(this.strokes.value))

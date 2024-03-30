@@ -35,7 +35,7 @@ export const GalleryComp: FC<IGalleryComp> = observer(({}) => {
   const { theme, css, classes } = useStyles({})
 
   const PhotoComp: FC<{ photo: Photo }> = ({ photo }) => {
-    const photoUrl = photo.src.original
+    const photoUrl = photo.src.large
     const applyImageFill = async () => {
       UIPicker.loadingWebImageUrl.dispatch(photoUrl)
       await Img.getImageAsync(photoUrl)

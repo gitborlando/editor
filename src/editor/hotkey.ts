@@ -22,7 +22,7 @@ export class HotkeyService {
     this.bindHotkeys()
     this['ctrl+z'].hook(Record.undo)
     this['ctrl+shift+z'].hook(Record.redo)
-    this['ctrl+s'].hook(SchemaFile.saveFile)
+    this['ctrl+s'].hook(SchemaFile.saveJsonFile)
     this['del'].hook(SchemaUtil.deleteSelectNodes)
   }
   private bindHotkeys() {

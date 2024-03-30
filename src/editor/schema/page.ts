@@ -4,6 +4,7 @@ import { createSignal } from '~/shared/signal'
 import { Record, recordSignalContext } from '../record'
 import { StageDraw } from '../stage/draw/draw'
 import { StageElement } from '../stage/element'
+import { Schema } from './schema'
 import { type IPage } from './type'
 import { SchemaUtil } from './util'
 
@@ -15,6 +16,9 @@ export class SchemaPageService {
   afterAdd = createSignal<IPage>()
   afterDelete = createSignal<IPage>()
   initHook() {
+    Schema.afterSetSchema.hook((schema) => {
+      this.select(schema.pages[0].id)
+    })
     this.currentId.hook((id) => {
       this.currentPage.dispatch(this.find(id))
       StageElement.clearAll()

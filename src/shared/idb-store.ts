@@ -4,22 +4,24 @@ import Vault from 'vault-storage/vault'
 
 @autobind
 export class IDBStore<T> {
-  [key: string]: T
+  vault: any
   constructor(name: string) {
-    const vault = new Vault(name)
-    return new Proxy(this, {
-      async get(_, key) {
-        return await vault.getItem(<string>key)
-      },
-      set(_, key, value) {
-        vault.setItem(<string>key, value)
-        return true
-      },
-      deleteProperty(_, key) {
-        vault.removeItem(<string>key)
-        return true
-      },
-    })
+    this.vault = new Vault(name)
+  }
+  async length() {
+    return await this.vault.length()
+  }
+  async get(key: string): Promise<T> {
+    return await this.vault.getItem(key)
+  }
+  set(key: string, value: T) {
+    this.vault.setItem(key, value)
+  }
+  delete(key: string) {
+    this.vault.removeItem(key)
+  }
+  async getMeta(key: string) {
+    return await this.vault.getItemMeta(key)
   }
 }
 

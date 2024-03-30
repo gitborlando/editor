@@ -13,7 +13,7 @@ export const StrokeItemComp: FC<IStrokeItemComp> = memo(({ stroke, index }) => {
   const { classes } = useStyles({})
   return (
     <Flex className={classes.StrokeItem}>
-      <FillComp fill={stroke.fill} index={0} />
+      <FillComp fill={stroke.fill} index={0} impact='stroke' />
     </Flex>
   )
 })

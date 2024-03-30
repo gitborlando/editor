@@ -71,7 +71,7 @@ export function mockNested(schemaDefault: SchemaDefaultService) {
   }
 
   return <ISchema>{
-    meta: { id: 'mock1', name: '测试文件1', user: 'myself', version: 0 },
+    meta: { id: 'testFile1', name: '测试文件1', user: 'myself', version: 0 },
     nodes,
     pages: [
       {

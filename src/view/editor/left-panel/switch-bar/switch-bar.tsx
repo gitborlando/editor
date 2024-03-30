@@ -31,6 +31,7 @@ export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
                 active={currentTabId.value === id}
                 className={cx(classes.tab)}
                 onClick={() => currentTabId.dispatch(id)}>
+                {/* <Icon size={20}>{tab.icon}</Icon> */}
                 <h4>{tab.name}</h4>
               </Button>
             )

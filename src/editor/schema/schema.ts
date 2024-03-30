@@ -8,7 +8,8 @@ import { IMeta, ISchema } from './type'
 @autobind
 export class SchemaService {
   inited = createSignal(false)
-  private meta!: IMeta
+  afterSetSchema = createSignal<ISchema>()
+  meta!: IMeta
   setMeta(option: Partial<IMeta>) {
     this.meta = { ...this.meta, ...option }
   }
@@ -19,10 +20,12 @@ export class SchemaService {
       pages: SchemaPage.pages.value,
     }
   }
-  setSchema({ meta, nodes, pages }: ISchema) {
+  setSchema(schema: ISchema) {
+    const { meta, nodes, pages } = schema
     this.meta = meta
     SchemaNode.setMap(nodes)
     SchemaPage.pages.value = pages
+    this.afterSetSchema.dispatch(schema)
   }
   createId() {
     return this.meta.version + nanoid()

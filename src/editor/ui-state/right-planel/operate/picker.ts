@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { IImage, Img } from '~/editor/img'
-import { OperateFill } from '~/editor/operate/fill'
+import { recordSignalContext } from '~/editor/record'
 import { SchemaDefault } from '~/editor/schema/default'
 import { IFill, IFillColor, IFillImage } from '~/editor/schema/type'
 import { StageSelect } from '~/editor/stage/interact/select'
@@ -18,9 +18,10 @@ export class UIPickerService {
   currentFill = createSignal(<IFill>{})
   beforeOperate = createSignal(<{ type: IOperateType }>{})
   afterOperate = createSignal(<{ type: IOperateType; value?: any }>{})
-  currentIndex = 0
   loadingWebImageUrl = createSignal('')
   currentImage = createSignal(<IImage>{ objectUrl: '' })
+  currentIndex = 0
+  impact = <'fill' | 'stroke'>''
   get currentSolidFill() {
     return this.currentFill as Signal<IFillColor>
   }
@@ -30,11 +31,6 @@ export class UIPickerService {
   initHook() {
     StageSelect.afterClearSelect.hook(() => {
       this.show.dispatch(false)
-    })
-    this.currentFill.hook(() => {
-      OperateFill.fills.dispatch((fills) => {
-        fills[this.currentIndex] = this.currentFill.value
-      })
     })
     this.currentFill.hook(
       (fill) => {
@@ -58,6 +54,9 @@ export class UIPickerService {
       if (type === 'image') return SchemaDefault.fillImage()
     })
     this.currentFill.dispatch(fill)
+  }
+  private recordCurrentFill() {
+    if (recordSignalContext()) return
   }
 }
 

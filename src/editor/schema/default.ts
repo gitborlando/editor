@@ -37,10 +37,11 @@ export class SchemaDefaultService {
     }
   }
   schema(): ISchema {
+    const page = this.page()
     return {
       meta: this.meta(),
-      nodes: {},
-      pages: [this.page()],
+      nodes: { [page.id]: {} },
+      pages: [page],
     }
   }
   page(): IPage {

@@ -10,6 +10,7 @@ import { SchemaNode } from '../schema/node'
 import { IFill, INode } from '../schema/type'
 import { StageDraw } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
+import { UIPicker } from '../ui-state/right-planel/operate/picker'
 
 @autobind
 export class OperateFillService {
@@ -28,6 +29,12 @@ export class OperateFillService {
     this.beforeOperate.hook(() => {
       this.oneOperateChange.endCurrent()
     })
+    UIPicker.currentFill.hook(() => {
+      if (UIPicker.impact !== 'fill') return
+      this.fills.dispatch((fills) => {
+        fills[UIPicker.currentIndex] = UIPicker.currentFill.value
+      })
+    })
     this.fills.hook(() => {
       if (this.fillsSignalArgs()?.isSetup) return
       this.isFillsChanged = true
@@ -36,6 +43,7 @@ export class OperateFillService {
     SchemaNode.duringFlushDirty.hook((id) => {
       if (!this.isFillsChanged) return
       this.applyChange(SchemaNode.find(id))
+      this.isFillsChanged = false
     })
     this.afterOperate.hook(() => {
       this.oneOperateChange.update('fills', cloneDeep(this.fills.value))

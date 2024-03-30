@@ -1,3 +1,4 @@
+import { mockFile } from '~/mock/mock-file'
 import { createSignal } from '~/shared/signal'
 import { SchemaFile } from './file'
 import { Hotkey } from './hotkey'
@@ -5,10 +6,10 @@ import { OperateAlign } from './operate/align'
 import { OperateFill } from './operate/fill'
 import { OperateGeometry } from './operate/geometry'
 import { OperateStroke } from './operate/stroke'
+import { SchemaDefault } from './schema/default'
 import { SchemaNode } from './schema/node'
 import { SchemaPage } from './schema/page'
 import { Schema } from './schema/schema'
-import { SchemaUtil } from './schema/util'
 import { StageCursor } from './stage/cursor'
 import { StageDraw } from './stage/draw/draw'
 import { StageElement } from './stage/element'
@@ -29,6 +30,7 @@ export const editorInited = createSignal(false)
 
 Hotkey.initHook()
 
+SchemaFile.initHook()
 SchemaPage.initHook()
 SchemaNode.initHook()
 
@@ -57,14 +59,17 @@ UIPicker.initHook()
 
 export async function initEditor() {
   SchemaFile.init()
-  const json = await SchemaFile.mockFile()
-  Schema.setSchema(json)
-  SchemaPage.select(json.pages[0].id)
-  SchemaUtil.init()
-  Schema.inited.dispatch(true)
-
+  const allFileMeta = await SchemaFile.allFileMetaStore.get('allFileMeta')
+  if (!allFileMeta || allFileMeta.length === 0) {
+    mockFile(SchemaDefault)
+  }
+  if (location.hash === '') {
+    location.hash = 'testFile1'
+  }
+  const fileId = location.hash.slice(1)
+  const file = await SchemaFile.fileStore.get(fileId)
+  Schema.setSchema(file)
   UILeftPanelLayer.init()
-  UILeftPanel.init()
 
   editorInited.dispatch(true)
 }

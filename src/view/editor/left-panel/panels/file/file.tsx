@@ -1,15 +1,19 @@
-import { FC, memo } from 'react'
+import { FC, Suspense, memo } from 'react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { HeaderComp } from './header'
+import { ListComp } from './list'
 
 type IFileComp = {}
 
 export const FileComp: FC<IFileComp> = memo(({}) => {
   const { classes, theme, css } = useStyles({})
   return (
-    <Flex className={classes.File}>
+    <Flex layout='v' className={classes.File}>
       <HeaderComp />
+      <Suspense>
+        <ListComp />
+      </Suspense>
     </Flex>
   )
 })

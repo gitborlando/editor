@@ -26,14 +26,14 @@ export class ImgService {
   }
   async uploadLocal(file: File) {
     const url = prefix + nanoid()
-    this.imageStore[url] = await file.arrayBuffer()
+    this.imageStore.set(url, await file.arrayBuffer())
     return url
   }
   private async loadImage(url: string) {
     const image = <IImage>{}
     const htmlImage = new Image()
     if (url.startsWith(prefix)) {
-      image.arrayBuffer = await this.imageStore[url]
+      image.arrayBuffer = await this.imageStore.get(url)
     } else {
       image.arrayBuffer = await (await fetch(url)).arrayBuffer()
     }

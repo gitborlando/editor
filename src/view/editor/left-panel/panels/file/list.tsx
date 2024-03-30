@@ -1,0 +1,71 @@
+import { FC, memo } from 'react'
+import { SchemaFile } from '~/editor/file'
+import { Schema } from '~/editor/schema/schema'
+import { IMeta } from '~/editor/schema/type'
+import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
+import { stopPropagation, useAsyncEffect } from '~/shared/utils/normal'
+import Asset from '~/view/ui-utility/assets'
+import { makeStyles } from '~/view/ui-utility/theme'
+import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
+import { Flex } from '~/view/ui-utility/widget/flex'
+
+type IListComp = {}
+
+export const ListComp: FC<IListComp> = memo(({}) => {
+  const { classes, cx } = useStyles({})
+  const { allFileMeta, getAllFileMeta, openInNewTab, deleteFile } = SchemaFile
+  useHookSignal(allFileMeta)
+  useAsyncEffect(getAllFileMeta)
+
+  const ListItemComp: FC<{ meta: IMeta }> = memo(({ meta }) => {
+    const selected = meta.id === Schema.meta.id
+    const isHover = useAutoSignal(false)
+    return (
+      <Flex
+        key={meta.id}
+        layout='h'
+        sidePadding={10}
+        className={cx(classes.listItem, selected && classes.selectedListItem)}
+        onHover={isHover.dispatch}
+        onClick={() => openInNewTab(meta.id)}>
+        {meta.name}
+        {isHover.value && (
+          <IconButton
+            size={12}
+            style={{ marginLeft: 'auto' }}
+            onClick={stopPropagation(() => deleteFile(meta.id))}>
+            {Asset.editor.shared.delete}
+          </IconButton>
+        )}
+      </Flex>
+    )
+  })
+
+  return (
+    <Flex layout='v' className={classes.List}>
+      {allFileMeta.value.map((meta) => (
+        <ListItemComp key={meta.id} meta={meta} />
+      ))}
+    </Flex>
+  )
+})
+
+type IListCompStyle = {} /* & Required<Pick<IListComp>> */ /* & Pick<IListComp> */
+
+const useStyles = makeStyles<IListCompStyle>()((t) => ({
+  List: {
+    ...t.rect('100%', '100%'),
+  },
+  listItem: {
+    ...t.rect('100%', 32),
+    ...t.font(undefined, 12),
+    ...t.default$.borderBottom,
+    ...t.cursor('pointer'),
+    ...t.default$.hover.border,
+  },
+  selectedListItem: {
+    ...t.default$.select.background,
+  },
+}))
+
+ListComp.displayName = 'ListComp'

@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid'
 import { xy_new } from '~/editor/math/xy'
 import { COLOR } from '~/shared/utils/color'
 import { SchemaDefaultService } from '../editor/schema/default'
-import { IFillLinearGradient, INode } from '../editor/schema/type'
+import { IFillLinearGradient, INode, ISchema } from '../editor/schema/type'
 import { mockNested } from './nested'
 
 export const mockJsonFile = mockNested
@@ -38,7 +38,7 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
       centerX: 50 + j * (size + 30),
       centerY: 50 + k * (size + 30),
       radius: 10,
-      parentId: 'page1',
+      parentId: 'page:1',
       fills: [schemaDefault.fillColor(COLOR.blue)], //'#CCCCCC',
     })
     // node = schemaDefault.star({
@@ -54,17 +54,17 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
     //     schemaDefault.createPoint(50, 0, 'no-bezier', 0),
     //     schemaDefault.createPoint(-50, 50, 'no-bezier', 0, undefined, XY.Of(-100, 50)),
     //   ],
-    //   parentId: 'page1',
+    //   parentId: 'page:1',
     // })
     nodes[id] = node
   }
   console.log('mock time: ', new Date().getTime() - s)
   return {
     meta: { id: 'mock1', name: '测试文件1', user: 'myself', version: 0 },
-    nodes: { page1: nodes },
+    nodes: { 'page:1': nodes },
     pages: [
       {
-        id: 'page1',
+        id: 'page:1',
         name: '测试页面1',
         zoom: 0.05,
         x: 100,
@@ -106,7 +106,7 @@ export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
       centerX: 50 + j * (size + 30),
       centerY: 50 + k * (size + 30),
       radius: 10,
-      parentId: 'page1',
+      parentId: 'page:1',
       fills: [schemaDefault.fillColor(COLOR.blue)], //'#CCCCCC',
     })
     // node = schemaDefault.star({
@@ -122,20 +122,21 @@ export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
     //     schemaDefault.createPoint(50, 0, 'no-bezier', 0),
     //     schemaDefault.createPoint(-50, 50, 'no-bezier', 0, undefined, XY.Of(-100, 50)),
     //   ],
-    //   parentId: 'page1',
+    //   parentId: 'page:1',
     // })
     nodes[id] = node
   }
   console.log('mock time: ', new Date().getTime() - s)
-  return {
-    meta: { id: 'mock1', name: '测试文件1', user: 'myself' },
-    nodes: { page1: nodes },
+  return <ISchema>{
+    meta: { id: 'testFile4', name: '测试文件4', user: 'myself', version: 1 },
+    nodes: { 'page:1': nodes },
     pages: [
       {
-        id: 'page1',
+        id: 'page:1',
         name: '测试页面1',
         zoom: 0.05,
-        offset: { x: 100, y: 100 },
+        x: 100,
+        y: 100,
         childIds: Object.keys(nodes),
       },
     ],

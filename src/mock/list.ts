@@ -3,7 +3,7 @@ import { ISchema } from '~/editor/schema/type'
 
 export function mockList(schemaDefault: SchemaDefaultService) {
   const nodes: ISchema['nodes'] = {
-    page1: {},
+    'page:1': {},
   }
   // const frames = new Array(3).fill('').map((i) => nanoid())
   const frames = new Array(30).fill('').map((_, i) => '画板' + (i + 1))
@@ -37,20 +37,20 @@ export function mockList(schemaDefault: SchemaDefaultService) {
       x: 400 * i + 50,
       centerX: 100 * i + 200,
       centerY: 200,
-      parentId: 'page1',
+      parentId: 'page:1',
       childIds: [rect.id, triangle.id],
     })
-    nodes.page1[frame.id] = frame
-    nodes.page1[rect.id] = rect
-    nodes.page1[triangle.id] = triangle
+    nodes['page:1'][frame.id] = frame
+    nodes['page:1'][rect.id] = rect
+    nodes['page:1'][triangle.id] = triangle
   })
 
   return <ISchema>{
-    meta: { id: 'mock1', name: '测试文件1', user: 'myself', version: 0 },
+    meta: { id: 'testFile2', name: '测试文件2', user: 'myself', version: 0 },
     nodes,
     pages: [
       {
-        id: 'page1',
+        id: 'page:1',
         name: '测试页面1',
         zoom: 1,
         x: 100,
