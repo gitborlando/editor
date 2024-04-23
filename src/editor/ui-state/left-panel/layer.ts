@@ -37,6 +37,7 @@ export class UILeftPanelLayerService {
   nodeMoveDropDetail = createSignal({ type: <'before' | 'in' | 'after'>'', id: '' })
   nodeMoveStarted = createSignal({ moveId: '' })
   nodeMoveEnded = createSignal()
+  enterReName = createSignal<string>()
   initHook() {
     this.singleNodeExpanded.hook((expanded) => {
       if (expanded === false) return
@@ -66,8 +67,12 @@ export class UILeftPanelLayerService {
       this.autoScroll(this.nodeIdsInSearch.value)
       this.singleNodeExpanded.dispatch(true)
     })
-    this.singleNodeExpanded.hook(this.calcNodeListChange)
-    SchemaNode.afterDelete.hook(this.calcNodeListChange)
+    this.singleNodeExpanded.hook(() => {
+      this.calcNodeListChange()
+    })
+    SchemaNode.afterDelete.hook(() => {
+      this.calcNodeListChange()
+    })
     SchemaNode.afterConnect.hook(({ node }) => {
       SchemaUtil.traverseFromSomeId(node.id, ({ id, upLevelRef }) => {
         const parentId = upLevelRef?.id ?? ''

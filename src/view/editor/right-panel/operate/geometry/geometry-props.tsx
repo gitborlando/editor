@@ -35,6 +35,8 @@ const useStyles = makeStyles<IGeometryPropsCompStyle>()((t) => ({
   SchemaBase: {
     flexWrap: 'wrap',
     ...t.default$.borderBottom,
+    gap: '4px 4px',
+    padding: 8,
   },
 }))
 

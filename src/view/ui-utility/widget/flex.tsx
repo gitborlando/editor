@@ -1,7 +1,7 @@
 import { ComponentPropsWithRef, forwardRef } from 'react'
 import { makeStyles } from '../theme'
 
-interface IFlexProps extends ComponentPropsWithRef<'div'> {
+export interface IFlexProps extends ComponentPropsWithRef<'div'> {
   layout?: 'c' | 'h' | 'v'
   sidePadding?: number
   vshow?: boolean
@@ -20,7 +20,7 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
       justify,
       className,
       onHover,
-      onMouseOver,
+      onMouseEnter,
       onMouseLeave,
       ...rest
     },
@@ -36,9 +36,9 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
           classes.Flex,
           className
         )}
-        onMouseOver={(e) => {
+        onMouseEnter={(e) => {
           onHover?.(true)
-          onMouseOver?.(e)
+          onMouseEnter?.(e)
         }}
         onMouseLeave={(e) => {
           onHover?.(false)

@@ -3,7 +3,7 @@ import { createCache } from '~/shared/cache'
 import { iife } from '~/shared/utils/normal'
 import { SchemaNode } from './node'
 import { SchemaPage } from './page'
-import { IFrame, IGroup, INode, INodeParent, IPage } from './type'
+import { IFrame, IGroup, INode, INodeParent, IPage, IVector } from './type'
 
 type ITraverseData = {
   id: string
@@ -14,6 +14,7 @@ type ITraverseData = {
   ancestors: string[]
   abort: AbortController
   upLevelRef: ITraverseData | undefined
+  custom?: any
 }
 type ITraverseCallback = (arg: ITraverseData) => any
 
@@ -66,7 +67,7 @@ export class SchemaUtilService {
         if (ids.has(id) && isDeepDelete) isDeepDelete = false
       }
     )
-    SchemaNode.deleteNodes(deleteNodes)
+    SchemaNode.removeNodes(deleteNodes)
   }
   insertBefore(parent: INodeParent | IPage, node: INode, another: INode) {
     const index = parent.childIds.findIndex((i) => i === another.id)
@@ -84,9 +85,12 @@ export class SchemaUtilService {
       return 'childIds' in node ? node.childIds : []
     }).forEach((id) => {
       const node = SchemaNode.find(id)
-      if (!node.DELETE) nodes.push(node)
+      if (!node?.DELETE) nodes.push(node)
     })
     return nodes
+  }
+  isVector(node: INode, type: IVector['vectorType']) {
+    return node.type === 'vector' && node.vectorType === type
   }
   isPage(id: string) {
     return id.startsWith('page')
@@ -112,7 +116,15 @@ export class SchemaUtilService {
     return SchemaNode.find(id).parentId.startsWith('page')
   }
   traverse(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
-    this.traverseIds(SchemaPage.currentPage.value.childIds, callback, bubbleCallback)
+    this.traverseOnePageIds(
+      SchemaPage.currentPage.value.childIds,
+      SchemaPage.currentId.value,
+      callback,
+      bubbleCallback
+    )
+  }
+  traverseSelectIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
+    this.traverseCurrentPageIds([...SchemaNode.selectIds.value], callback, bubbleCallback)
   }
   traverseFromSomeId(id: string, callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
     let canTraverse = false
@@ -128,13 +140,25 @@ export class SchemaUtilService {
       }
     )
   }
-  traverseIds(ids: string[], callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
+  traverseCurrentPageIds(
+    ids: string[],
+    callback: ITraverseCallback,
+    bubbleCallback?: ITraverseCallback
+  ) {
+    this.traverseOnePageIds(ids, SchemaPage.currentId.value, callback, bubbleCallback)
+  }
+  traverseOnePageIds(
+    ids: string[],
+    pageId: string,
+    callback: ITraverseCallback,
+    bubbleCallback?: ITraverseCallback
+  ) {
     const abort = new AbortController()
     const traverse = (ids: string[], depth: number, upLevelRef?: ITraverseData) => {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
-        const node = SchemaNode.find(id)
-        if (node.DELETE) return
+        const node = SchemaNode.nodeMap[pageId][id]
+        if (!node || node.DELETE) return
         const childIds = 'childIds' in node ? node.childIds : undefined
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []
         const props = { id, node, index, childIds, depth, abort, upLevelRef, ancestors }

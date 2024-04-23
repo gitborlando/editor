@@ -39,7 +39,7 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({}) => {
       if (fill.type !== 'image') return
       Img.getImageAsync(fill.url).then((img) => image.dispatch(img))
     },
-    ['immediately']
+    { immediately: true }
   )
 
   return (

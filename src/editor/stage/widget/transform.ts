@@ -4,8 +4,9 @@ import { OBB } from '~/editor/math/obb'
 import { xy_new } from '~/editor/math/xy'
 import { OperateAlign } from '~/editor/operate/align'
 import { OperateGeometry } from '~/editor/operate/geometry'
-import { recordSignalContext } from '~/editor/record'
+import { Record } from '~/editor/record'
 import { SchemaNode } from '~/editor/schema/node'
+import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
 import { Drag } from '~/global/event/drag'
 import { XY } from '~/shared/structure/xy'
 import { firstOne } from '~/shared/utils/array'
@@ -21,6 +22,7 @@ import { StageViewport } from '../viewport'
 @autobind
 export class StageWidgetTransformService {
   transformOBB: OBB = new OBB(0, 0, 0, 0, 0)
+  mouseOnEdge = false
   private renderType = <'reDraw' | 'clear'>'clear'
   private vertexTL_XY = XY.Of(0, 0)
   private vertexTR_XY = XY.Of(0, 0)
@@ -35,16 +37,16 @@ export class StageWidgetTransformService {
   private lineR = new PIXI.Graphics()
   private lineB = new PIXI.Graphics()
   private outlines = <PIXI.Graphics[]>[]
-  private transformContainer = new PIXI.Container()
+  private container = new PIXI.Container()
   initHook() {
     Pixi.inited.hook(() => {
-      this.addToStage()
+      this.setupContainer()
       this.bindEvent()
     })
-    Pixi.duringTicker.hook(() => {
+    Pixi.duringTicker.hook({ after: 'flushDirty' }, () => {
       if (this.renderType === 'reDraw') this.draw()
       if (this.renderType === 'clear') this.clear()
-    }, ['after:flushDirty'])
+    })
     this.hookTransform()
     this.hookRender()
   }
@@ -69,10 +71,9 @@ export class StageWidgetTransformService {
   private get components() {
     return [...this.lines, ...this.outlines, ...this.vertexes]
   }
-  private addToStage() {
-    this.components.forEach((i) => i.setParent(this.transformContainer))
-    this.transformContainer.zIndex = 990
-    this.transformContainer.setParent(Pixi.sceneStage)
+  private setupContainer() {
+    this.container.zIndex = 990
+    this.container.setParent(Pixi.sceneStage)
   }
   private bindEvent() {
     this.bindMoveEvent()
@@ -84,33 +85,42 @@ export class StageWidgetTransformService {
   private hookTransform() {
     StageSelect.duringMarqueeSelect.hook(this.calcTransformOBB)
     StageSelect.afterSelect.hook(this.calcTransformOBB)
-    OperateAlign.afterAlign.hook(() => this.calcTransformOBB(), ['id:calcTransformOBB'])
-    SchemaNode.afterFlushDirty.hook(() => {
-      if (OperateGeometry.isGeometryChanged) this.calcTransformOBB()
-    }, ['id:calcTransformOBB', 'before:operateGeometryReset'])
+    OperateAlign.afterAlign.hook({ id: 'calcTransformOBB' }, () => this.calcTransformOBB())
+    SchemaNode.afterFlushDirty.hook(
+      { id: 'calcTransformOBB', before: 'operateGeometryReset' },
+      () => OperateGeometry.isGeometryChanged && this.calcTransformOBB()
+    )
   }
   private hookRender() {
     const setClear = () => (this.renderType = 'clear')
     const setReDraw = () => (this.renderType = 'reDraw')
-    OperateGeometry.beforeOperate.hook(setClear)
-    StageViewport.beforeZoom.hook(setClear)
-    StageSelect.afterClearSelect.hook(setClear)
-    OperateGeometry.afterOperate.hook(setReDraw)
-    StageViewport.afterZoom.hook(setReDraw)
+    OperateGeometry.beforeOperate.hook((operateKeys) => {
+      operateKeys.some((k) => k !== 'width' && k !== 'height') && setClear()
+    })
+    StageViewport.beforeZoom.hook(() => setClear())
+    StageSelect.afterClearSelect.hook(() => setClear())
+    OperateGeometry.afterOperate.hook(() => {
+      const operateKeys = OperateGeometry.beforeOperate.value
+      operateKeys.some((k) => k !== 'width' && k !== 'height') && setReDraw()
+    })
+    StageViewport.afterZoom.hook(() => setReDraw())
+    UIPicker.show.hook((show) => (show ? setClear() : setReDraw()))
     SchemaNode.selectIds.hook((selectIds) => {
       selectIds.size === 0 ? setClear() : setReDraw()
     })
   }
-  private clear() {
-    this.components.forEach((i) => i.clear())
-  }
   private draw() {
     this.clear()
     if (this.selectIds.size === 0) return
+    this.components.forEach((i) => i.setParent(this.container))
     this.calcVertexXY()
     this.drawVertexes()
     this.drawLine()
     this.drawOutline()
+  }
+  private clear() {
+    this.components.forEach((i) => i.clear())
+    this.container.removeChildren()
   }
   private calcTransformOBB() {
     if (this.selectIds.size === 1) {
@@ -210,11 +220,12 @@ export class StageWidgetTransformService {
     }
     Pixi.addListener('mousedown', (e) => {
       if (!canDrag()) return
+      if (this.mouseOnEdge) return
       if (this.mouseIn(e as MouseEvent)) handleDrag()
     })
     StageSelect.afterSelect.hook((type) => {
       if (!canDrag()) return
-      if (recordSignalContext()) return
+      if (Record.isInRedoUndo) return
       if (type === 'stage-single') handleDrag()
     })
   }
@@ -232,6 +243,7 @@ export class StageWidgetTransformService {
     this.lineT.on('mouseenter', () => StageCursor.type.dispatch('v-resize'))
     this.lineT.on('mouseleave', () => StageCursor.type.dispatch('select'))
     this.lineT.on('mousedown', () => {
+      this.mouseOnEdge = true
       Pixi.isForbidEvent = true
       const { y, height } = OperateGeometry.data
       Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['height']))
@@ -241,6 +253,7 @@ export class StageWidgetTransformService {
           OperateGeometry.data.y = y + sceneShiftXY.y
         })
         .onDestroy(() => {
+          this.mouseOnEdge = false
           Pixi.isForbidEvent = false
           OperateGeometry.afterOperate.dispatch()
         })
@@ -260,6 +273,7 @@ export class StageWidgetTransformService {
     this.lineR.on('mouseenter', () => StageCursor.type.dispatch('h-resize'))
     this.lineR.on('mouseleave', () => StageCursor.type.dispatch('select'))
     this.lineR.on('mousedown', () => {
+      this.mouseOnEdge = true
       Pixi.isForbidEvent = true
       const { width } = OperateGeometry.data
       Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['width']))
@@ -268,6 +282,7 @@ export class StageWidgetTransformService {
           OperateGeometry.data.width = width + sceneShiftXY.x
         })
         .onDestroy(() => {
+          this.mouseOnEdge = false
           Pixi.isForbidEvent = false
           OperateGeometry.afterOperate.dispatch()
         })
@@ -287,6 +302,7 @@ export class StageWidgetTransformService {
     this.lineB.on('mouseenter', () => StageCursor.type.dispatch('v-resize'))
     this.lineB.on('mouseleave', () => StageCursor.type.dispatch('select'))
     this.lineB.on('mousedown', () => {
+      this.mouseOnEdge = true
       Pixi.isForbidEvent = true
       const { height } = OperateGeometry.data
       Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['height']))
@@ -295,6 +311,7 @@ export class StageWidgetTransformService {
           OperateGeometry.data.height = height + sceneShiftXY.y
         })
         .onDestroy(() => {
+          this.mouseOnEdge = false
           Pixi.isForbidEvent = false
           OperateGeometry.afterOperate.dispatch()
         })
@@ -314,6 +331,7 @@ export class StageWidgetTransformService {
     this.lineL.on('mouseenter', () => StageCursor.type.dispatch('h-resize'))
     this.lineL.on('mouseleave', () => StageCursor.type.dispatch('select'))
     this.lineL.on('mousedown', () => {
+      this.mouseOnEdge = true
       Pixi.isForbidEvent = true
       const { x, width } = OperateGeometry.data
       Drag.onStart(() => OperateGeometry.beforeOperate.dispatch(['width']))
@@ -323,6 +341,7 @@ export class StageWidgetTransformService {
           OperateGeometry.data.x = x + sceneShiftXY.x
         })
         .onDestroy(() => {
+          this.mouseOnEdge = false
           Pixi.isForbidEvent = false
           OperateGeometry.afterOperate.dispatch()
         })

@@ -1,4 +1,3 @@
-import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
 import { useHookSignal } from '~/shared/signal-react'
@@ -8,17 +7,29 @@ import { PickerColorComp } from './color'
 
 type IPickerSolidComp = {}
 
-export const PickerSolidComp: FC<IPickerSolidComp> = observer(({}) => {
+export const PickerSolidComp: FC<IPickerSolidComp> = ({}) => {
   const { classes } = useStyles({})
   const { currentSolidFill } = UIPicker
+  const onChange = (color: string) => {
+    const [, r, g, b, a] = color.match(/rgba\((\d+), (\d+), (\d+), (\d+(\.\d+)?)\)/)!
+    currentSolidFill.dispatch((fill) => {
+      fill.color = `rgb(${r}, ${g}, ${b})`
+      fill.alpha = Number(a)
+    })
+  }
+  const getColor = () => {
+    const { color, alpha } = currentSolidFill.value
+    return color.replace('rgb', 'rgba').replace(')', `,${alpha})`)
+  }
   useHookSignal(currentSolidFill)
+
   return (
     <Flex layout='v' className={classes.PickerSolid}>
-      <PickerColorComp />
-      <Flex layout='h'>{currentSolidFill.value.color}</Flex>
+      <PickerColorComp color={getColor()} onChange={onChange} />
+      <Flex layout='h'>{getColor()}</Flex>
     </Flex>
   )
-})
+}
 
 type IPickerSolidCompStyle =
   {} /* & Required<Pick<IPickerSolidComp>> */ /* & Pick<IPickerSolidComp> */
@@ -26,22 +37,6 @@ type IPickerSolidCompStyle =
 const useStyles = makeStyles<IPickerSolidCompStyle>()((t) => ({
   PickerSolid: {
     ...t.rect(240, 'fit-content', 'no-radius', 'white'),
-  },
-  colorPicker: {
-    '&.react-colorful': {
-      width: 240,
-      height: 240,
-    },
-    '& .react-colorful__pointer': {
-      width: 12,
-      height: 12,
-    },
-    '& .react-colorful__alpha, .react-colorful__hue': {
-      height: 12,
-    },
-    '& .react-colorful__last-control, .react-colorful__saturation': {
-      borderRadius: 0,
-    },
   },
 }))
 

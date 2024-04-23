@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { cloneDeep } from 'lodash-es'
 import { createSignal } from '~/shared/signal'
-import { Record, recordSignalContext } from '../record'
+import { Record } from '../record'
 import { StageDraw } from '../stage/draw/draw'
 import { StageElement } from '../stage/element'
 import { Schema } from './schema'
@@ -26,13 +26,10 @@ export class SchemaPageService {
         StageDraw.collectRedraw(id)
       })
     })
-    this.afterAdd.hook(
-      (page) => {
-        this.select(page.id)
-        Record.endAction('新建页面并选中')
-      },
-      ['after:addToNodeMap']
-    )
+    this.afterAdd.hook({ after: 'addToNodeMap' }, (page) => {
+      this.select(page.id)
+      Record.endAction('新建页面并选中')
+    })
     this.afterDelete.hook((page) => {
       if (page.id === this.currentId.value) {
         this.select(this.pages.value[0].id)
@@ -42,6 +39,7 @@ export class SchemaPageService {
   add(page: IPage) {
     delete page.DELETE
     this.pages.dispatch((pages) => pages.push(page))
+    this.afterAdd.dispatch(page)
     Record.startAction()
     this.recordAddPage(page)
   }
@@ -59,7 +57,7 @@ export class SchemaPageService {
     this.recordSelectPage()
   }
   private recordSelectPage() {
-    if (recordSignalContext()) return
+    if (Record.isInRedoUndo) return
     if (!this.currentId.oldValue) return
     Record.push({
       description: '选择页面',
@@ -72,7 +70,7 @@ export class SchemaPageService {
     })
   }
   private recordAddPage(page: IPage) {
-    if (recordSignalContext()) return
+    if (Record.isInRedoUndo) return
     Record.push({
       description: '添加页面',
       detail: cloneDeep(page),

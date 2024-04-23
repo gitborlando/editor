@@ -26,9 +26,8 @@ export class UILeftPanelService {
   panelHeight = window.innerHeight - 48
   switchTabIds = <string[]>[]
   initHook() {
-    this.showLeftPanel.hook(
-      (show) => StageViewport.bound.dispatch((bound) => (bound.x = show ? 280 : 40)),
-      ['immediately']
+    this.showLeftPanel.hook({ immediately: true }, (show) =>
+      StageViewport.bound.dispatch((bound) => (bound.x = show ? 280 : 40))
     )
   }
   registerSwitchTab(option: ISwitchTabOption) {

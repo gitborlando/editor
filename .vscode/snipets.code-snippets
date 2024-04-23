@@ -33,6 +33,15 @@
     ],
     "description": "Component"
   },
+  "Sub Component": {
+    "prefix": "subcomp",
+    "body": [
+      "const $1Comp = useSubComponent([], ({}) => {",
+      "  return (<Flex className={''}></Flex>)",
+      "})"
+    ],
+    "description": "Sub Component"
+  },
   "Widget": {
     "prefix": "widget",
     "scope": ["typescriptreact"],

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import type { SVGProps } from 'react'
 import { Ref, forwardRef, memo } from 'react'
 const SvgComponent = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
@@ -6,7 +5,6 @@ const SvgComponent = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) =
     <path
       d='m4.646.146-4.5 4.5A.498.498 0 0 0 .5 5.5a.5.5 0 0 0 .354-.146L5 1.206l4.145 4.145.001.002A.498.498 0 0 0 10 5a.5.5 0 0 0-.146-.354l-4.5-4.5a.5.5 0 0 0-.708 0'
       style={{
-        fill: '#000',
         opacity: 1,
       }}
     />

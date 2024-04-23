@@ -5,16 +5,25 @@ import { Flex } from './flex'
 interface IDivide extends ComponentPropsWithRef<'div'> {
   direction?: 'h' | 'v'
   length?: number | `${number}%`
+  thickness?: number
   bgColor?: string
   margin?: number
 }
 
 export const Divide = forwardRef<HTMLDivElement, IDivide>(
   (
-    { direction = 'v', length = '55%', bgColor = '#C7C7C7', margin = 8, className, ...rest },
+    {
+      direction = 'v',
+      length = '55%',
+      thickness = 0.4,
+      bgColor = '#C7C7C7',
+      margin = 8,
+      className,
+      ...rest
+    },
     ref
   ) => {
-    const { classes, cx } = useStyles({ length, bgColor, margin })
+    const { classes, cx } = useStyles({ length, bgColor, margin, thickness })
     return (
       <Flex
         layout='c'
@@ -32,19 +41,19 @@ export const Divide = forwardRef<HTMLDivElement, IDivide>(
 )
 
 type IDivideStyle = {} & Required<
-  Pick<IDivide, 'length' | 'bgColor' | 'margin'>
+  Pick<IDivide, 'length' | 'bgColor' | 'margin' | 'thickness'>
 > /* & Pick<IDivide> */
 
-const useStyles = makeStyles<IDivideStyle>()((t, { length, bgColor, margin }) => ({
+const useStyles = makeStyles<IDivideStyle>()((t, { length, bgColor, thickness, margin }) => ({
   Divide: {
-    backgroundColor: bgColor,
+    boxShadow: `0 0 0 ${thickness}px ${bgColor}`,
   },
   h: {
-    ...t.rect(length, 1),
+    ...t.rect(length, 0),
     marginBlock: margin,
   },
   v: {
-    ...t.rect(1, length),
+    ...t.rect(0, length),
     marginInline: margin,
   },
 }))

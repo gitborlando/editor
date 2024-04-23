@@ -1,10 +1,11 @@
 import autobind from 'class-autobind-decorator'
+import equal from 'fast-deep-equal'
 import { cloneDeep } from 'lodash-es'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { createSignal, createSignalArgs } from '~/shared/signal'
 import { rgba } from '~/shared/utils/color'
 import { Delete } from '~/shared/utils/normal'
-import { Record, recordSignalContext } from '../record'
+import { Record } from '../record'
 import { SchemaDefault } from '../schema/default'
 import { SchemaNode } from '../schema/node'
 import { IFill, INode } from '../schema/type'
@@ -12,15 +13,16 @@ import { StageDraw } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
 import { UIPicker } from '../ui-state/right-planel/operate/picker'
 
+type IInitFills = Map<string, IFill[]>
+
 @autobind
 export class OperateFillService {
-  fills = createSignal<IFill[]>([])
+  fills = createSignal<IFill[] | IInitFills>([])
   beforeOperate = createSignal()
   afterOperate = createSignal()
-  isMultiFills = false
   private isFillsChanged = false
   private initFills = new Map<string, IFill[]>()
-  private oneOperateChange = createMomentChange({ fills: <IFill[] | 'multi'>[] })
+  private oneOperateChange = createMomentChange<{ fills: IFill[] | IInitFills }>({ fills: [] })
   private fillsSignalArgs = createSignalArgs<{ isSetup: boolean }>()
   initHook() {
     StageSelect.afterSelect.hook(() => {
@@ -29,11 +31,19 @@ export class OperateFillService {
     this.beforeOperate.hook(() => {
       this.oneOperateChange.endCurrent()
     })
+    UIPicker.beforeOperate.hook(({ type }) => {
+      if (type !== 'solid-color') return
+      this.beforeOperate.dispatch()
+    })
     UIPicker.currentFill.hook(() => {
       if (UIPicker.impact !== 'fill') return
-      this.fills.dispatch((fills) => {
-        fills[UIPicker.currentIndex] = UIPicker.currentFill.value
-      })
+      if (!this.isFillsArray(this.fills.value)) return
+      this.fills.value[UIPicker.currentIndex] = UIPicker.currentFill.value
+      this.fills.dispatch()
+    })
+    UIPicker.afterOperate.hook(({ type }) => {
+      if (type !== 'solid-color') return
+      this.afterOperate.dispatch()
     })
     this.fills.hook(() => {
       if (this.fillsSignalArgs()?.isSetup) return
@@ -43,22 +53,27 @@ export class OperateFillService {
     SchemaNode.duringFlushDirty.hook((id) => {
       if (!this.isFillsChanged) return
       this.applyChange(SchemaNode.find(id))
+    })
+    SchemaNode.afterFlushDirty.hook(() => {
       this.isFillsChanged = false
     })
     this.afterOperate.hook(() => {
-      this.oneOperateChange.update('fills', cloneDeep(this.fills.value))
-      this.record()
+      this.oneOperateChange.update('fills', cloneDeep(this.fills.value as IFill[]))
+      this.recordOperate()
     })
   }
   addFill() {
     this.beforeOperate.dispatch()
-    const fill = SchemaDefault.fillColor(rgba(204, 204, 204, this.fills.value.length ? 0.25 : 1))
-    this.fills.dispatch((fills) => fills.push(fill))
+    const fillsLength = this.isFillsArray(this.fills.value) ? this.fills.value.length : 0
+    const fill = SchemaDefault.fillColor(rgba(204, 204, 204, fillsLength ? 0.25 : 1))
+    if (!this.isFillsArray(this.fills.value)) this.fills.value = []
+    this.fills.value.push(fill)
+    this.fills.dispatch()
     this.afterOperate.dispatch()
   }
   deleteFill(fill: IFill) {
     this.beforeOperate.dispatch()
-    Delete(this.fills.value, (f) => f === fill)
+    Delete(this.fills.value as IFill[], (f) => f === fill)
     this.fills.dispatch()
     this.afterOperate.dispatch()
   }
@@ -68,39 +83,62 @@ export class OperateFillService {
     this.fills.dispatch()
     this.afterOperate.dispatch()
   }
+  isFillsArray(fills: IFill[] | IInitFills): fills is IFill[] {
+    return Array.isArray(fills)
+  }
   private setupFills() {
-    this.isMultiFills = false
     this.initFills.clear()
     this.oneOperateChange.endCurrent()
     this.fillsSignalArgs({ isSetup: true })
-    if (SchemaNode.selectIds.value.size === 0) {
+    const selectNodes = SchemaNode.selectNodes
+    if (selectNodes.length === 0) {
       this.fills.dispatch([])
     }
-    if (SchemaNode.selectNodes.length === 1) {
-      const node = SchemaNode.selectNodes[0]
+    if (selectNodes.length === 1) {
+      const node = selectNodes[0]
       this.oneOperateChange.reset({ fills: cloneDeep(node.fills) })
       this.fills.dispatch(node.fills)
     }
-    if (SchemaNode.selectNodes.length > 1) {
-      const nodes = SchemaNode.selectNodes
-      nodes.forEach(({ id, fills }) => this.initFills.set(id, fills))
-      this.oneOperateChange.reset({ fills: /* 'multi' */ [] })
-      this.fills.dispatch([])
-      this.isMultiFills = true
+    if (selectNodes.length > 1) {
+      const isSame = this.sameFills(selectNodes)
+      const fills = isSame ? cloneDeep(selectNodes[0].fills) : this.initFills
+      this.oneOperateChange.reset({ fills })
+      this.fills.dispatch(fills)
     }
   }
   private applyChange(node: INode) {
-    node.fills = this.fills.value
+    if (this.isFillsArray(this.fills.value)) {
+      node.fills = this.fills.value
+    } else node.fills = this.fills.value.get(node.id)!
     StageDraw.collectRedraw(node.id)
   }
-  private record() {
-    if (recordSignalContext()) return
+  private sameFills(nodes: INode[]) {
+    let isSame = true
+    const firstNode = nodes[0]
+    nodes.forEach(({ id, fills }) => {
+      if (!isSame) return this.initFills.set(id, fills)
+      if (fills.length !== firstNode.fills.length) return (isSame = false)
+      firstNode.fills.forEach((fill, index) => {
+        const otherFill = fills[index]
+        if (fill.type !== otherFill.type) return (isSame = false)
+        if (!equal(fill, otherFill)) return (isSame = false)
+      })
+    })
+    if (!isSame) this.initFills.set(firstNode.id, firstNode.fills)
+    return isSame
+  }
+  private recordOperate() {
+    if (Record.isInRedoUndo) return
     const { last, current } = cloneDeep(this.oneOperateChange.record.fills)
+    const travel = (fills: IFill[] | IInitFills) => {
+      this.fills.dispatch(fills)
+      UIPicker.show.dispatch(false)
+    }
     Record.push({
       description: '改变fills属性',
       detail: { last, current },
-      undo: () => this.fills.dispatch(last as IFill[]),
-      redo: () => this.fills.dispatch(current as IFill[]),
+      undo: () => travel(last),
+      redo: () => travel(current),
     })
   }
 }

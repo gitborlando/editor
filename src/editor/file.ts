@@ -34,6 +34,7 @@ export class SchemaFileService {
   }
   autoSave() {
     setInterval(() => {
+      if (import.meta.env.DEV && Schema.getSchema().meta.id.match('testFile')) return
       this.saveJsonFile(Schema.getSchema())
       this.isSaved.dispatch(true)
     }, 1000)

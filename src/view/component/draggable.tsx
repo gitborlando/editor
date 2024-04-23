@@ -1,11 +1,12 @@
 import { observer, useLocalObservable } from 'mobx-react'
-import { FC, ReactNode, useEffect } from 'react'
+import { FC, ReactNode, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { xy_new } from '~/editor/math/xy'
 import { Drag } from '~/global/event/drag'
 import { createSignal } from '~/shared/signal'
 import { useAutoSignal } from '~/shared/signal-react'
 import { XY } from '~/shared/structure/xy'
+import { useClickAway } from '~/shared/utils/event'
 import { IXY } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -14,12 +15,13 @@ import { Button } from '../ui-utility/widget/button'
 import { Icon } from '../ui-utility/widget/icon'
 
 type IDraggableComp = {
-  closeFunc: () => void
   children: ReactNode
   xy?: IXY
   headerSlot?: ReactNode
   width?: number
   height?: number
+  closeFunc: () => void
+  clickAwayClose?: () => boolean
   onXYChange?(newXY: IXY): void
 }
 
@@ -27,7 +29,8 @@ let draggableCount = 0
 const maxZIndex = createSignal(0)
 
 export const DraggableComp: FC<IDraggableComp> = observer(
-  ({ closeFunc, children, xy, headerSlot, width, height, onXYChange }) => {
+  ({ closeFunc, clickAwayClose, children, xy, headerSlot, width, height, onXYChange }) => {
+    const ref = useRef<HTMLDivElement>(null)
     const { classes } = useStyles({})
     const state = useLocalObservable(() => ({
       xy: xy || xy_new(480, 240),
@@ -38,10 +41,16 @@ export const DraggableComp: FC<IDraggableComp> = observer(
       maxZIndex.value++
       return () => void draggableCount--
     }, [])
+    useClickAway({
+      when: () => !!clickAwayClose?.(),
+      insideTest: (dom) => dom === ref.current,
+      callback: () => closeFunc(),
+    })
     return createPortal(
       <Flex
         layout='v'
         className={classes.Draggable}
+        ref={ref}
         style={{
           left: state.xy.x,
           top: state.xy.y,

@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal, createSignalContext } from '~/shared/signal'
+import { createSignal } from '~/shared/signal'
 import { INoopFunc } from '~/shared/utils/normal'
 
 export type IUndoRedoRecord = {
@@ -16,12 +16,11 @@ export type IActionRecord = {
   redo: INoopFunc
 }
 
-export const recordSignalContext = createSignalContext<boolean>('record')
-
 @autobind
 export class RecordService {
   stack = <(IUndoRedoRecord | IActionRecord)[]>[]
   index = createSignal(-1)
+  isInRedoUndo = false
   private isInAction = false
   private subStack = <IUndoRedoRecord[]>[]
   get canUndo() {
@@ -51,22 +50,23 @@ export class RecordService {
       undo: () => [...actionRecord.subStack].reverse().forEach((i) => i.undo()),
       redo: () => actionRecord.subStack.forEach((i) => i.redo()),
     }
+    console.log([...actionRecord.subStack].reverse())
     this.push(actionRecord)
     this.subStack = []
   }
   undo() {
     if (!this.canUndo) return
-    recordSignalContext(true)
+    this.isInRedoUndo = true
     this.stack[this.index.value].undo()
     this.index.dispatch(this.index.value - 1)
-    recordSignalContext(false)
+    this.isInRedoUndo = false
   }
   redo() {
     if (!this.canRedo) return
-    recordSignalContext(true)
+    this.isInRedoUndo = true
     this.stack[this.index.value + 1].redo()
     this.index.dispatch(this.index.value + 1)
-    recordSignalContext(false)
+    this.isInRedoUndo = false
   }
 }
 

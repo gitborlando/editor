@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { IHookDescription, Signal, createSignal } from './signal'
+import { IHookOption, Signal, createSignal } from './signal'
 import { INoopFunc } from './utils/normal'
 
 export function useSignal<T extends any>(init?: T): Signal<T> {
@@ -16,13 +16,13 @@ export function useAutoSignal<T extends any>(init?: T): Signal<T> {
 export function useHookSignal<T>(
   signal: Signal<T>,
   callback?: (arg: T, forceUpdate: INoopFunc) => any,
-  description: IHookDescription[] = []
+  option: IHookOption = {}
 ) {
   const [_, setState] = useState({})
   const forceUpdate = () => setState({})
   useEffect(() => {
-    return signal.hook((value) => {
+    return signal.hook(option, (value) => {
       callback ? callback(value, forceUpdate) : forceUpdate()
-    }, description)
+    })
   }, [])
 }

@@ -1,8 +1,11 @@
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
-import { COLOR, rgba } from '~/shared/utils/color'
+import { createCache } from '~/shared/cache'
+import { COLOR, rgb } from '~/shared/utils/color'
 import { IRect, IXY } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
+import { xy_new } from '../math/xy'
+import { SchemaPage } from './page'
 import {
   IEllipse,
   IFillColor,
@@ -20,6 +23,7 @@ import {
   IPolygon,
   IRectangle,
   ISchema,
+  IShadow,
   IStar,
   IStroke,
   IText,
@@ -27,7 +31,8 @@ import {
 
 @autobind
 export class SchemaDefaultService {
-  typeIndexMap: Record<string, [string, number]> = {}
+  devFileId?: string
+  typeIndexMapCache = createCache<Record<string, [string, number]>>()
   meta(): ISchema['meta'] {
     return {
       id: nanoid(),
@@ -46,6 +51,7 @@ export class SchemaDefaultService {
   }
   page(): IPage {
     return {
+      type: 'page',
       id: `page:${nanoid()}`,
       childIds: [],
       zoom: 1,
@@ -71,6 +77,7 @@ export class SchemaDefaultService {
     const nodeBase = this.createNodeBase()
     return {
       type: 'frame',
+      radius: 0,
       childIds: [],
       ...nodeBase,
       ...name,
@@ -141,12 +148,11 @@ export class SchemaDefaultService {
     return {
       type: 'vector',
       vectorType: 'line',
-      start: { x: 0, y: 100 },
-      end: { x: 100, y: 100 },
-      length: 100,
       ...nodeBase,
       ...name,
       ...option,
+      fills: [],
+      height: 0,
     }
   }
   image(option?: Partial<IRect>): IRect {
@@ -159,16 +165,26 @@ export class SchemaDefaultService {
     const nodeBase = this.createNodeBase()
     return {
       type: 'text',
-      font: [],
+      content: '文本1',
+      style: {
+        fontSize: 16,
+        fontWeight: '500',
+        align: 'center',
+        breakWords: true,
+        fontFamily: '',
+        fontStyle: 'normal',
+        letterSpacing: 0,
+        lineHeight: 1,
+      },
       ...nodeBase,
       ...name,
       ...option,
     }
   }
-  fillColor(color = rgba(204, 204, 204, 1)): IFillColor {
-    return { type: 'color', visible: true, color }
+  fillColor(color = rgb(204, 204, 204), alpha = 1): IFillColor {
+    return { type: 'color', visible: true, color, alpha }
   }
-  fillLinearGradient(start: IXY, end: IXY): IFillLinearGradient {
+  fillLinearGradient(start: IXY = xy_new(0, 0), end: IXY = xy_new(1, 1)): IFillLinearGradient {
     return {
       type: 'linearGradient',
       visible: true,
@@ -178,6 +194,7 @@ export class SchemaDefaultService {
         { offset: 0, color: COLOR.blue },
         { offset: 1, color: COLOR.pinkRed },
       ],
+      alpha: 1,
     }
   }
   // fillRadialGradient(center: IXY, radiusA: IXY, radiusB: IXY): IFillRadialGradient {
@@ -196,15 +213,27 @@ export class SchemaDefaultService {
   //   return { type: 'gonicGradient', startAngle, center, stops: [{ xy: center, color: 'skyBlue' }] }
   // }
   fillImage(url: string = Asset.editor.rightPanel.operate.picker.defaultImage): IFillImage {
-    return { type: 'image', visible: true, url, matrix: [0, 0, 0, 0, 0, 0] }
+    return { type: 'image', visible: true, url, matrix: [0, 0, 0, 0, 0, 0], alpha: 1 }
   }
   stroke(option?: Partial<IStroke>) {
     return <IStroke>{
       visible: true,
-      fill: this.fillColor(rgba(0, 0, 0, 1)),
-      position: 'center',
+      fill: this.fillColor(rgb(0, 0, 0)),
+      align: 'center',
       width: 1,
-      vertex: '',
+      cap: 0,
+      join: 0,
+      ...option,
+    }
+  }
+  shadow(option?: Partial<IShadow>) {
+    return <IShadow>{
+      visible: true,
+      offsetX: 5,
+      offsetY: 5,
+      blur: 2,
+      spread: 2,
+      fill: this.fillColor(rgb(0, 0, 0)),
       ...option,
     }
   }
@@ -229,11 +258,6 @@ export class SchemaDefaultService {
     }
   }
   private createNodeBase(): INodeBase {
-    const colorFill = <IFillColor>{
-      type: 'color',
-      visible: true,
-      color: rgba(204, 204, 204, 1),
-    }
     return {
       ...this.createSchemaMeta(),
       x: 0,
@@ -246,13 +270,13 @@ export class SchemaDefaultService {
       rotation: 0,
       hFlip: false,
       vFlip: false,
-      fills: [colorFill],
+      fills: [this.fillColor(rgb(204, 204, 204), 1)],
       strokes: [],
       blurs: [],
       shadows: [],
     }
   }
-  private createNodeName(
+  createNodeName(
     type:
       | 'page'
       | 'frame'
@@ -266,9 +290,10 @@ export class SchemaDefaultService {
       | 'line'
       | 'image'
   ) {
-    this.typeIndexMap = Object.keys(this.typeIndexMap).length
-      ? this.typeIndexMap
-      : {
+    const typeIndexMap = this.typeIndexMapCache.getSet(
+      this.devFileId || SchemaPage.currentId.value,
+      () => {
+        return {
           page: ['页面', 1],
           frame: ['画板', 1],
           group: ['分组', 1],
@@ -281,7 +306,9 @@ export class SchemaDefaultService {
           text: ['文本', 1],
           image: ['图片', 1],
         }
-    let nameIndex = this.typeIndexMap[type]!
+      }
+    )
+    let nameIndex = typeIndexMap[type]!
     return { name: nameIndex[0] + ' ' + (nameIndex[1] as number)++ }
   }
 }

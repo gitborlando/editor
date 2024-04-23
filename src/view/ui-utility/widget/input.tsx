@@ -20,7 +20,7 @@ type IInputCompStyle = {} /* & Required<Pick<IInputComp>> */ /* & Pick<IInputCom
 
 const useStyles = makeStyles<IInputCompStyle>()((t) => ({
   Input: {
-    ...t.labelFont,
+    ...t.default$.font.normal,
     border: 'none',
     outline: 'none',
     backgroundColor: 'transparent',

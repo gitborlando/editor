@@ -1,4 +1,7 @@
+import { TextStyleAlign, TextStyleFontStyle, TextStyleFontWeight } from 'pixi.js'
 import { IXY } from '~/shared/utils/normal'
+
+export type ID = string
 
 export type ISchema = {
   meta: IMeta
@@ -14,6 +17,7 @@ export type IMeta = {
 }
 
 export type IPage = {
+  type: 'page'
   DELETE?: boolean
   id: `page:${string}`
   name: string
@@ -62,12 +66,13 @@ export type INodeBase = INodeMeta &
     fills: IFill[]
     strokes: IStroke[]
     blurs: any[]
-    shadows: any[]
+    shadows: IShadow[]
   }
 
 export type IFrame = INodeBase & {
   type: 'frame'
   childIds: string[]
+  radius: number
 }
 
 export type IGroup = INodeBase & {
@@ -131,20 +136,47 @@ export type IStar = INodeBase &
 export type ILine = INodeBase &
   IVectorType & {
     vectorType: 'line'
-    start: IXY
-    end: IXY
-    length: number
   }
+
+export type ISvg = INodeBase & {
+  type: 'svg'
+  svg: string
+}
 
 export type IText = INodeBase & {
   type: 'text'
-  font: {}
+  content: string
+  style: {
+    align: TextStyleAlign
+    breakWords: boolean
+    // dropShadow: boolean
+    // dropShadowAlpha: number
+    // dropShadowAngle: number
+    // dropShadowBlur: number
+    // dropShadowColor: string | number
+    // dropShadowDistance: number
+    fontFamily: string | string[]
+    fontSize: number
+    fontStyle: TextStyleFontStyle
+    fontWeight: TextStyleFontWeight
+    letterSpacing: number
+    lineHeight: number
+    // lineJoin: TextStyleLineJoin
+    // miterLimit: number
+    // padding: number
+    // textBaseline: TextStyleTextBaseline
+    // whiteSpace: TextStyleWhiteSpace
+    wordWrap: boolean
+    // wordWrapWidth: number
+    // leading: number
+  }
 }
 
 export type IFill = IFillColor | IFillLinearGradient | IFillImage
 
 type IFillMeta = {
   visible: boolean
+  alpha: number
 }
 
 export type IFillColor = IFillMeta & {
@@ -157,6 +189,12 @@ export type IFillLinearGradient = IFillMeta & {
   start: IXY
   end: IXY
   stops: { offset: number; color: string }[]
+}
+
+export type IFillImage = IFillMeta & {
+  type: 'image'
+  url: string
+  matrix: number[]
 }
 
 // export type IFillRadialGradient = {
@@ -174,16 +212,21 @@ export type IFillLinearGradient = IFillMeta & {
 //   stops: { xy: IXY; color: string }[]
 // }
 
-export type IFillImage = IFillMeta & {
-  type: 'image'
-  url: string
-  matrix: number[]
-}
-
 export type IStroke = {
   visible: boolean
   fill: IFill
-  position: 'inner' | 'center' | 'outer'
+  align: 'inner' | 'center' | 'outer'
   width: number
   vertex: ''
+  cap: number
+  join: number
+}
+
+export type IShadow = {
+  visible: boolean
+  offsetX: number
+  offsetY: number
+  blur: number
+  spread: number
+  fill: IFill
 }

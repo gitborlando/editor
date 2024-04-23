@@ -1,11 +1,12 @@
 import { FC, memo } from 'react'
 import { OperateFill } from '~/editor/operate/fill'
 import { IFill } from '~/editor/schema/type'
+import { useHookSignal } from '~/shared/signal-react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { FillComp } from '../fill-comp'
+import { PickerOpener } from '../picker-opener'
 
 type IFillItemComp = {
   fill: IFill
@@ -14,10 +15,12 @@ type IFillItemComp = {
 
 export const FillItemComp: FC<IFillItemComp> = memo(({ fill, index }) => {
   const { classes } = useStyles({})
+  const { fills } = OperateFill
+  useHookSignal(fills)
 
   return (
     <Flex layout='h' className={classes.FillItem}>
-      <FillComp fill={fill} index={index} impact='fill' />
+      <PickerOpener fill={fill} index={index} impact='fill' />
       <IconButton
         size={16}
         style={{ marginLeft: 'auto' }}
@@ -35,8 +38,7 @@ type IFillItemCompStyle = {} /* & Required<Pick<IFillItemComp>> */ /* & Pick<IFi
 
 const useStyles = makeStyles<IFillItemCompStyle>()((t) => ({
   FillItem: {
-    ...t.rect('100%', 'fit-content'),
-    marginTop: 8,
+    ...t.rect('100%', 28),
   },
 }))
 

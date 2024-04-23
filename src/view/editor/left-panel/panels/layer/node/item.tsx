@@ -1,16 +1,17 @@
-import { FC } from 'react'
+import { FC, memo, useCallback } from 'react'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
 import { ILeftPanelNodeStatus, UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
-import { Signal } from '~/shared/signal'
+import { Menu } from '~/global/menu/menu'
 import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
-import { iife, noopFunc, stopPropagation } from '~/shared/utils/normal'
+import { stopPropagation } from '~/shared/utils/event'
+import { iife, noopFunc, useSubComponent } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
-import { Button } from '~/view/ui-utility/widget/button'
+import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from '~/view/ui-utility/widget/icon'
 
@@ -18,145 +19,172 @@ type INodeItemComp = ILeftPanelNodeStatus & {
   id: string
 }
 
-export const NodeItemComp: FC<INodeItemComp> = ({ id, expanded, indent, ancestors }) => {
-  const {
-    nodeIdsInSearch,
-    singleNodeExpanded,
-    nodeIdsInView,
-    setNodeExpanded,
-    nodeMoveDropDetail,
-    nodeMoveStarted,
-    nodeMoveEnded,
-  } = UILeftPanelLayer
+export const NodeItemComp: FC<INodeItemComp> = memo(({ id, expanded, indent, ancestors }) => {
+  const { nodeIdsInSearch, singleNodeExpanded, nodeIdsInView, setNodeExpanded } = UILeftPanelLayer
+  const { nodeMoveDropDetail, nodeMoveStarted, nodeMoveEnded, enterReName } = UILeftPanelLayer
   const node = SchemaNode.find(id)
   const selected = SchemaNode.selectIds.value.has(id)
   const subSelected = ancestors.some((i) => SchemaNode.selectIds.value.has(i)) && !selected
   const searched = nodeIdsInSearch.value.has(id)
+  console.log(id)
+  console.log(SchemaNode.nodeMap)
   const isContainerNode = SchemaUtil.isContainerNode(id)
   const children = SchemaUtil.getChildren(id)
   const hovered = useAutoSignal(false)
-  const enterEdit = useAutoSignal(false)
-  const duringEdit = useAutoSignal(false)
-  const dropInFront = useAutoSignal(false)
-  const dropInSide = useAutoSignal(false)
-  const dropBehind = useAutoSignal(false)
-  dropInFront.intercept((value) => !subSelected && value)
-  dropInSide.intercept((value) => {
-    if (SchemaUtil.isContainerNode(id) && expanded && selected) return false
-    return value
-  })
-  dropBehind.intercept((value) => {
-    if (SchemaUtil.isContainerNode(id) && expanded && selected) return false
-    return !subSelected && value
+  const { classes, css, cx, theme } = useStyles({
+    selected,
+    subSelected,
+    nodeMoving: !!nodeMoveStarted.value.moveId,
   })
   useHookSignal(nodeIdsInView)
   useHookSignal(hovered, (isHover) => {
     isHover ? SchemaNode.hover(id) : SchemaNode.unHover(id)
-    if (isHover && nodeMoveStarted.value.moveId) {
-      if (dropInFront.value === true) nodeMoveDropDetail.value = { id, type: 'before' }
-      if (dropInSide.value === true) nodeMoveDropDetail.value = { id, type: 'in' }
-      if (dropBehind.value === true) nodeMoveDropDetail.value = { id, type: 'after' }
-    }
   })
+  // useHookSignal(SchemaNode.hoverIds, (ids) => {
+  //   hovered.dispatch(lastOne(ids) === id)
+  // })
   const handleMouseDown = () => {
     StageSelect.onPanelSelect(id)
-    Drag.onStart(() => nodeMoveStarted.dispatch({ moveId: id }))
-      .onMove(noopFunc)
-      .onDestroy(() => nodeMoveEnded.dispatch())
+    if (!enterReName.value) {
+      Drag.onStart(() => nodeMoveStarted.dispatch({ moveId: id }))
+        .onMove(noopFunc)
+        .onDestroy(() => nodeMoveEnded.dispatch())
+    }
   }
-  const { classes, css, cx } = useStyles({ selected, subSelected, dropInSide })
-  return (
-    <Flex layout='v' className={css({ width: '100%' })} onHover={hovered.dispatch}>
-      <Flex layout='h' className={classes.NodeItem} onMouseDown={handleMouseDown}>
-        <Flex className={css({ width: indent * 16 })}></Flex>
-        <Flex
-          layout='c'
-          onMouseDown={stopPropagation}
-          onClick={() => {
-            setNodeExpanded(id, !expanded)
-            singleNodeExpanded.dispatch(!expanded)
-          }}
-          style={{ width: 8, cursor: 'pointer' }}>
-          {children.length > 0 && (
-            <Icon size={8} scale={8 / 9} rotate={expanded ? 90 : 0}>
-              {Asset.editor.leftPanel.node.collapse}
-            </Icon>
-          )}
-        </Flex>
-        <Flex layout='c' sidePadding={6}>
-          <Icon size={12} scale={12 / 10}>
-            {iife(() => {
-              if (node.type === 'frame') return Asset.editor.node.frame
-              if (node.type === 'vector')
-                return Asset.editor.node[node.vectorType as keyof typeof Asset.editor.node]
-            })}
+  const makeMenu = () => {
+    const { nodeGroup } = Menu.menuConfig
+    Menu.context = { id }
+    Menu.menuOptions.dispatch([nodeGroup])
+  }
+
+  const ExpandComp = useSubComponent([expanded], ({}) => {
+    return (
+      <Flex
+        layout='c'
+        onMouseDown={stopPropagation()}
+        onClick={() => {
+          setNodeExpanded(id, !expanded)
+          singleNodeExpanded.dispatch(!expanded)
+        }}
+        style={{ width: 8, cursor: 'pointer' }}>
+        {children.length > 0 && (
+          <Icon size={8} scale={8 / 9} rotate={expanded ? 90 : 0}>
+            {Asset.editor.leftPanel.node.collapse}
           </Icon>
-        </Flex>
-        <Flex layout='h' justify='space-between' style={{ width: '100%' }}>
-          <Flex
-            layout='h'
-            className={cx(searched && classes.searched)}
-            onDoubleClick={() => enterEdit.dispatch(true)}>
-            {enterEdit.value ? (
-              <input
-                ref={(el) => {
-                  el?.focus()
-                  el?.setSelectionRange(0, node.name.length)
-                }}
-                className={classes.input}
-                value={node.name}
-                onChange={(e) => {
-                  node.name = e.target.value
-                  duringEdit.dispatch()
-                  SchemaNode.afterReName.dispatch({ id: node.id, name: node.name })
-                }}
-                onBlur={() => enterEdit.dispatch(false)}></input>
-            ) : (
-              <div>{node.name}</div>
-            )}
-          </Flex>
-          {hovered.value && (
-            <Button
-              onMouseDown={stopPropagation}
-              onClick={() => SchemaUtil.traverseDelete(new Set([id]))}>
-              <Icon size={12}>{Asset.editor.shared.delete}</Icon>
-            </Button>
-          )}
-        </Flex>
+        )}
       </Flex>
+    )
+  })
+
+  const IconComp: FC<{}> = useCallback(({}) => {
+    return (
+      <Flex layout='c' sidePadding={6}>
+        <Icon size={12} scale={12 / 10}>
+          {iife(() => {
+            if (node.type === 'frame') return Asset.editor.node.frame
+            if (node.type === 'vector')
+              return Asset.editor.node[node.vectorType as keyof typeof Asset.editor.node]
+            if (node.type === 'text') return Asset.editor.node.text
+          })}
+        </Icon>
+      </Flex>
+    )
+  }, [])
+
+  const LabelComp = useSubComponent([searched, id], ({}) => {
+    return (
+      <Flex
+        layout='h'
+        style={{ width: '100%' }}
+        className={cx(searched && classes.searched)}
+        onDoubleClick={() => enterReName.dispatch(id)}>
+        {enterReName.value === id ? (
+          <CompositeInput
+            type='text'
+            needLabelDrag={false}
+            needStepHandler={false}
+            className={cx(classes.input, css({ padding: 0 }))}
+            value={node.name}
+            onNewValueApply={(value) => {
+              node.name = value
+              SchemaNode.afterReName.dispatch({ id: node.id, name: value })
+            }}
+            afterOperate={() => enterReName.dispatch('')}
+            styles={{ needHover: false }}
+          />
+        ) : (
+          <div>{node.name}</div>
+        )}
+      </Flex>
+    )
+  })
+
+  const DropAreaComp = useSubComponent([subSelected, expanded, selected], ({}) => {
+    const dropInFront = useAutoSignal(false)
+    const dropInSide = useAutoSignal(false)
+    const dropBehind = useAutoSignal(false)
+    dropInFront.intercept((value) => !subSelected && value)
+    dropInSide.intercept((value) => {
+      if (SchemaUtil.isContainerNode(id) && expanded && selected) return false
+      return value
+    })
+    dropBehind.intercept((value) => {
+      if (SchemaUtil.isContainerNode(id) && expanded && selected) return false
+      return !subSelected && value
+    })
+    useHookSignal(dropInFront, (value) => {
+      if (value === true) nodeMoveDropDetail.value = { id, type: 'before' }
+    })
+    useHookSignal(dropInSide, (value) => {
+      if (value === true) nodeMoveDropDetail.value = { id, type: 'in' }
+    })
+    useHookSignal(dropBehind, (value) => {
+      if (value === true) nodeMoveDropDetail.value = { id, type: 'after' }
+    })
+
+    return (
       <Flex
         layout='v'
         className={classes.dropArea}
-        style={{ ...(!nodeMoveStarted.value.moveId && { pointerEvents: 'none' }) }}>
-        {dropInFront.value && (
-          <Flex
-            className='dropLine'
-            style={{ paddingLeft: indent * 16 + 16, transform: 'translateY(-0.5px)' }}>
-            <Flex className='line'></Flex>
-          </Flex>
-        )}
-        <Flex className='dropLayer' onHover={dropInFront.dispatch}></Flex>
+        style={{
+          ...(!nodeMoveStarted.value.moveId && { pointerEvents: 'none' }),
+          ...(dropInSide.value && { ...theme.default$.active.boxShadow }),
+        }}>
+        <Flex className='dropLayer' onHover={dropInFront.dispatch}>
+          {dropInFront.value && (
+            <Flex className='dropLine' style={{ paddingLeft: indent * 16 + 16 }}></Flex>
+          )}
+        </Flex>
         {isContainerNode && <Flex className='dropLayer' onHover={dropInSide.dispatch}></Flex>}
-        <Flex layout='v' className='dropLayer' onHover={dropBehind.dispatch}></Flex>
-        {dropBehind.value && (
-          <Flex
-            className='dropLine'
-            style={{ bottom: 0, paddingLeft: indent * 16 + 16, transform: 'translateY(0.5px)' }}>
-            <Flex className='line'></Flex>
-          </Flex>
-        )}
+        <Flex layout='v' className='dropLayer' onHover={dropBehind.dispatch}>
+          {dropBehind.value && (
+            <Flex className='dropLine' style={{ bottom: 0, paddingLeft: indent * 16 + 16 }}></Flex>
+          )}
+        </Flex>
+      </Flex>
+    )
+  })
+
+  return (
+    <Flex layout='v' style={{ width: '100%' }} onHover={hovered.dispatch} onContextMenu={makeMenu}>
+      <Flex layout='h' className={classes.NodeItem} onMouseDown={handleMouseDown}>
+        <Flex className={css({ width: indent * 16 })}></Flex>
+        <ExpandComp />
+        <IconComp />
+        <LabelComp />
+        <DropAreaComp />
       </Flex>
     </Flex>
   )
-}
+})
 
 type INodeItemCompStyle = {
   selected: boolean
   subSelected: boolean
-  dropInSide: Signal<boolean>
+  nodeMoving: boolean
 } /* & Required<Pick<INodeItemComp>> */ /* & Pick<INodeItemComp> */
 
-const useStyles = makeStyles<INodeItemCompStyle>()((t, { selected, subSelected, dropInSide }) => ({
+const useStyles = makeStyles<INodeItemCompStyle>()((t, { selected, subSelected, nodeMoving }) => ({
   NodeItem: {
     ...t.rect('100%', 32, 'no-radius', 'white'),
     minWidth: '100%',
@@ -164,7 +192,7 @@ const useStyles = makeStyles<INodeItemCompStyle>()((t, { selected, subSelected, 
     paddingInline: 6,
     ...(selected && { ...t.default$.select.background }),
     ...(subSelected && { backgroundColor: hslBlueColor(97) }),
-    ...t.default$.hover.border,
+    ...(!nodeMoving && t.default$.hover.border),
   },
   input: {
     ...t.rect('100%', 'fit-content', 'no-radius', 'transparent'),
@@ -178,16 +206,13 @@ const useStyles = makeStyles<INodeItemCompStyle>()((t, { selected, subSelected, 
   dropArea: {
     ...t.rect('100%', 32),
     ...t.absolute(),
-    ...(dropInSide.value && { ...t.default$.active.boxShadow }),
     '& .dropLayer': {
       ...t.rect('100%', '100%'),
     },
     '& .dropLine': {
-      ...t.rect('100%', 1),
+      ...t.rect('100%', 2, 'no-radius', hslBlueColor(50)),
+      ...t.absolute(),
       pointerEvents: 'none',
-      '& .line': {
-        ...t.rect('100%', 1, 'no-radius', hslBlueColor(50)),
-      },
     },
   },
 }))

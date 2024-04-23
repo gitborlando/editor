@@ -1,5 +1,6 @@
 import { FC } from 'react'
 import { SchemaPage } from '~/editor/schema/page'
+import { Menu } from '~/global/menu/menu'
 import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import Asset from '~/view/ui-utility/assets'
@@ -17,13 +18,18 @@ export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
   const selected = SchemaPage.currentId.value === id
   const { classes } = useStyles({ selected })
   const isHover = useAutoSignal(false)
+  const makeMenu = () => {
+    Menu.context = { id }
+    Menu.menuOptions.dispatch([Menu.menuConfig.pageGroup])
+  }
   return (
     <Flex
       layout='h'
       justify='space-between'
       className={classes.PageItem}
       onHover={isHover.dispatch}
-      onClick={() => SchemaPage.select(id)}>
+      onClick={() => SchemaPage.select(id)}
+      onContextMenu={makeMenu}>
       <Flex layout='h' sidePadding={10} className={classes.name}>
         {name}
       </Flex>
@@ -36,7 +42,7 @@ export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
         <Button
           onClick={(e) => {
             e.stopPropagation()
-            SchemaPage.delete(id)
+            SchemaPage.delete(SchemaPage.find(id)!)
           }}>
           <Icon>{Asset.editor.shared.delete}</Icon>
         </Button>

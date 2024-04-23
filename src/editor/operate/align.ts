@@ -6,7 +6,7 @@ import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
 import { OBB } from '../math/obb'
 import { xy_new } from '../math/xy'
-import { Record, recordSignalContext } from '../record'
+import { Record } from '../record'
 import { SchemaNode } from '../schema/node'
 import { INode } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
@@ -145,7 +145,7 @@ export class OperateAlignService {
     return { nodeOBB, nodeBound }
   }
   private undoRedo() {
-    if (recordSignalContext()) return
+    if (Record.isInRedoUndo) return
     const toAlignNodeIds = this.toAlignNodes.map((node) => node.id)
     const record = cloneDeep(this.oneAlignChange.record)
     const travel = (type: 'last' | 'current') => {
@@ -163,7 +163,7 @@ export class OperateAlignService {
         this.afterAlign.dispatch()
         StageDraw.collectRedraw(id)
       })
-      recordSignalContext(false)
+      Record.isInRedoUndo = false
     }
     Record.push({
       description: '设置对齐 ' + this.currentAlign.value,

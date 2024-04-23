@@ -15,7 +15,7 @@ export const AlignComp: FC<IAlignComp> = observer(({}) => {
   const { alignTypes, canAlign, currentAlign: setAlign } = OperateAlign
   useHookSignal(canAlign)
   return (
-    <Flex layout='h' justify='space-around' className={classes.Align}>
+    <Flex layout='h' shrink={0} justify='space-around' className={classes.Align}>
       {alignTypes.map((type) => (
         <Button key={type} disabled={!canAlign.value} onClick={() => setAlign.dispatch(type)}>
           <Icon size={16} fill={canAlign.value ? '' : '#E6E6E6'}>

@@ -1,17 +1,36 @@
 import rgbToHex from 'rgb-hex'
+import { atan, degreefy } from '~/editor/math/base'
+import { IFillLinearGradient } from '~/editor/schema/type'
 
 export { rgbToHex }
 
-export const COLOR = {
-  white: rgba(255, 255, 255),
-  blue: rgba(0, 200, 255),
-  pinkRed: rgba(255, 117, 193),
+export function hexToRgb(hex: string) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)!
+  return rgb(parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16))
+}
+export function isHexColor(hex: string) {
+  return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex)
 }
 
+export const COLOR = {
+  white: rgb(255, 255, 255),
+  blue: rgb(0, 200, 255),
+  pinkRed: rgb(255, 117, 193),
+}
+
+export type IRGB = { r: number; g: number; b: number }
 export type IRGBA = { r: number; g: number; b: number; a: number }
+
+export function rgb(r: number, g: number, b: number) {
+  return `rgb(${r},${g},${b})`
+}
 
 export function rgba(r: number, g: number, b: number, a: number = 1) {
   return `rgba(${r},${g},${b},${a})`
+}
+
+export function rgbToRgba(rgbString: string, alpha: number) {
+  return rgbString.replace(/rgb/, 'rgba').replace(/\)/, `,${alpha})`)
 }
 
 export function rgbaString({ r, g, b, a }: IRGBA) {
@@ -33,4 +52,11 @@ export function hslColor(h: number, s: number, l: number) {
 
 export function hslBlueColor(l: number) {
   return hslColor(217, 100, l)
+}
+
+export function makeLinearGradientCss({ start, end, stops }: IFillLinearGradient) {
+  const degree = degreefy(atan((end.x - start.x) / (end.y - start.y))) + 90
+  return `linear-gradient(${degree}deg, ${stops[0].color} 0%, ${stops
+    .map(({ color, offset }) => `${color} ${offset * 100}%`)
+    .join(', ')}, ${stops[stops.length - 1].color} 100%)`
 }

@@ -1,8 +1,9 @@
 import { FC, memo } from 'react'
 import ReactJson from 'react-json-view'
-import { Diff, IDiff } from '~/editor/diff'
+import { Diff, IOperateDiff } from '~/editor/diff'
 import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
+import { useSubComponent } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
@@ -13,7 +14,10 @@ type IDiffComp = {}
 export const DiffComp: FC<IDiffComp> = memo(({}) => {
   const { classes } = useStyles({})
   const { allDiffs } = Diff
-  const Card: FC<{ description: string; diffs: IDiff[] }> = memo(({ description, diffs }) => {
+  useHookSignal(allDiffs)
+
+  const CardComp = useSubComponent<{ operateDiff: IOperateDiff }>([], ({ operateDiff }) => {
+    const { description, diffs, inverseDiffs } = operateDiff
     const collapsed = useAutoSignal(true)
     return (
       <Flex layout='v' className={classes.diff}>
@@ -29,7 +33,7 @@ export const DiffComp: FC<IDiffComp> = memo(({}) => {
         </Flex>
         <Flex layout='h' className='detail'>
           <ReactJson
-            src={diffs}
+            src={{ diffs, inverseDiffs }}
             style={{ fontFamily: 'consolas', fontSize: 12 }}
             indentWidth={2}
             displayDataTypes={false}
@@ -42,11 +46,10 @@ export const DiffComp: FC<IDiffComp> = memo(({}) => {
     )
   })
 
-  useHookSignal(allDiffs)
   return (
     <Flex layout='v' className={classes.Diffs}>
-      {allDiffs.value.map(({ description, diffs }, i) => (
-        <Card key={description + i} description={description} diffs={diffs} />
+      {allDiffs.value.map((operateDiff, i) => (
+        <CardComp operateDiff={operateDiff} key={operateDiff.description + i} />
       ))}
     </Flex>
   )

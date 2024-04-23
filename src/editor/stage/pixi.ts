@@ -2,23 +2,30 @@ import { Cull } from '@pixi-essentials/cull'
 import autobind from 'class-autobind-decorator'
 import * as PIXI from 'pixi.js'
 import { createSignal } from '~/shared/signal'
+import Asset from '~/view/ui-utility/assets'
 
 export * as PIXI from 'pixi.js'
 
 @autobind
 export class PixiService {
   inited = createSignal(false)
-  container!: HTMLDivElement
+  htmlContainer!: HTMLDivElement
   app!: PIXI.Application
   sceneStage = new PIXI.Container()
   isForbidEvent = false
   duringTicker = createSignal()
   setContainer(div: HTMLDivElement) {
-    this.container = div
+    this.htmlContainer = div
     this.initPixiApp()
     this.cull()
     this.app.ticker.add(this.duringTicker.dispatch)
-    this.inited.dispatch(true)
+    PIXI.Assets.addBundle('fonts', [
+      { alias: 'textFoscscscnt1', src: Asset.editor.font.华光钢铁直黑中黑 },
+    ])
+    // Load the font bundle
+    PIXI.Assets.loadBundle('fonts').then(() => {
+      this.inited.dispatch(true)
+    })
   }
   addListener(
     type: string,
@@ -37,7 +44,7 @@ export class PixiService {
   private initPixiApp() {
     this.app = new PIXI.Application({
       backgroundColor: '#F5F5F5' /* '#F7F8FA' */ /* '#F1F2F6' */,
-      resizeTo: this.container,
+      resizeTo: this.htmlContainer,
       antialias: true,
       resolution: window.devicePixelRatio,
       eventMode: 'passive',
@@ -48,7 +55,7 @@ export class PixiService {
         wheel: true,
       },
     })
-    this.container.appendChild(this.app.view as any)
+    this.htmlContainer.appendChild(this.app.view as any)
     this.sceneStage.setParent(this.app.stage)
     this.app.stage.sortableChildren = true
     this.sceneStage.sortableChildren = true

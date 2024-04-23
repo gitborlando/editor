@@ -1,26 +1,22 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
 import { OBB } from '~/editor/math/obb'
-import { Record, recordSignalContext } from '~/editor/record'
+import { OperateText } from '~/editor/operate/text'
+import { Record } from '~/editor/record'
 import { SchemaNode } from '~/editor/schema/node'
 import { SchemaPage } from '~/editor/schema/page'
 import { INode } from '~/editor/schema/type'
 import { SchemaUtil } from '~/editor/schema/util'
 import { Drag } from '~/global/event/drag'
-import { Menu } from '~/global/menu'
+import { Menu } from '~/global/menu/menu'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { batchSignal, createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { lastOne } from '~/shared/utils/array'
 import { rectInAnotherRect } from '~/shared/utils/collision'
+import { isLeftMouse, isRightMouse } from '~/shared/utils/event'
 import { macro_Match } from '~/shared/utils/macro'
-import {
-  createBound,
-  fastDeepEqual,
-  isLeftMouse,
-  isRightMouse,
-  type IRect,
-} from '~/shared/utils/normal'
+import { createBound, fastDeepEqual, type IRect } from '~/shared/utils/normal'
 import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -38,6 +34,7 @@ export class StageSelectService {
   needExpandIds = new Set<string>()
   private marqueeOBB?: OBB
   private oneSelectChange = createMomentChange({ selectIds: <string[]>[] })
+  private doubleClickTimeStamp?: number
   initHook() {
     StageCreate.createStarted.hook(this.onCreateSelect)
     this.afterClearSelect.hook(() => {
@@ -51,11 +48,11 @@ export class StageSelectService {
   }
   startInteract() {
     Pixi.addListener('mousedown', this.onMouseDown)
-    Pixi.addListener('mousedown', this.onMenu)
+    Pixi.addListener('click', this.onClick)
   }
   endInteract() {
     Pixi.removeListener('mousedown', this.onMouseDown)
-    Pixi.removeListener('mousedown', this.onMenu)
+    Pixi.removeListener('mousedown', this.onClick)
   }
   private get hoverId() {
     return lastOne(SchemaNode.hoverIds.value)
@@ -64,7 +61,19 @@ export class StageSelectService {
     if (isLeftMouse(e)) this.onLeftMouseDown(e as MouseEvent)
     if (isRightMouse(e)) this.onRightMouseDown(e as MouseEvent)
   }
+  private onClick(e: Event) {
+    if (this.hasDoubleClick(e)) this.onDoubleClick(e)
+  }
+  private onDoubleClick(e: Event) {
+    this.onEditText()
+  }
+  private onEditText() {
+    const hoverNode = SchemaNode.find(this.hoverId)
+    if (hoverNode?.type !== 'text') return
+    OperateText.intoEditing.dispatch(hoverNode)
+  }
   private onLeftMouseDown(e: MouseEvent) {
+    if (StageWidgetTransform.mouseOnEdge) return
     if (StageWidgetTransform.mouseIn(e)) return
     if (!this.hoverId) {
       this.clearSelect()
@@ -79,7 +88,18 @@ export class StageSelectService {
       }
     }
   }
-  private onRightMouseDown(e: MouseEvent) {}
+  private onRightMouseDown(e: MouseEvent) {
+    if (this.hoverId) this.onMousedownSelect()
+    this.onMenu()
+  }
+  private onMenu() {
+    const { copyPasteGroup, undoRedoGroup, nodeGroup } = Menu.menuConfig
+    if (SchemaNode.selectNodes.length) {
+      const menuOptions = [copyPasteGroup, undoRedoGroup, nodeGroup]
+      return Menu.menuOptions.dispatch(menuOptions)
+    }
+    Menu.menuOptions.dispatch([undoRedoGroup])
+  }
   private clearSelect() {
     if (hotkeys.shift) return
     SchemaNode.clearSelect()
@@ -131,12 +151,13 @@ export class StageSelectService {
     }
     const traverseTest = (nodes: INode[]) => {
       nodes.forEach((node) => {
+        if (node.DELETE) return
         const OBB = StageElement.OBBCache.get(node.id)
         if (SchemaUtil.isPageFrameNode(node) && node.childIds.length) {
           if (rectInAnotherRect(OBB.aabb, this.marqueeOBB!.aabb)) {
             SchemaNode.select(node.id)
             this.needExpandIds.add(node.id)
-            SchemaUtil.traverseIds(node.childIds, ({ id }) => SchemaNode.unSelect(id))
+            SchemaUtil.traverseCurrentPageIds(node.childIds, ({ id }) => SchemaNode.unSelect(id))
           } else {
             unSelect(node.id)
             traverseTest(SchemaUtil.getChildren(node.id))
@@ -168,11 +189,6 @@ export class StageSelectService {
         this.afterSelect.dispatch('marquee')
       })
   }
-  private onMenu(e: Event) {
-    if (!isRightMouse(e)) return
-    Menu.setShow(true)
-    Menu.setXY(e.clientX, e.clientY)
-  }
   private calcMarqueeOBB() {
     if (!this.marquee.value) return
     const marquee = this.marquee.value!
@@ -181,8 +197,16 @@ export class StageSelectService {
     const height = StageViewport.toSceneStageShift(marquee.height)
     return new OBB(x + width / 2, y + height / 2, width, height, 0)
   }
+  private hasDoubleClick(e: Event) {
+    if (this.doubleClickTimeStamp && e.timeStamp - this.doubleClickTimeStamp <= 300) {
+      this.doubleClickTimeStamp = undefined
+      return true
+    }
+    this.doubleClickTimeStamp = e.timeStamp
+    return false
+  }
   private recordSelect() {
-    if (recordSignalContext()) return
+    if (Record.isInRedoUndo) return
     const { last, current } = this.oneSelectChange.record.selectIds
     if (fastDeepEqual(last, current)) return
     Record.push({

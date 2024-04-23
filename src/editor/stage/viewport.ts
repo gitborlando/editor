@@ -20,13 +20,14 @@ export class StageViewportService {
   private wheeler = new EventWheelService()
   initHook() {
     Pixi.inited.hook(() => {
-      this.bound.hook(this.onResizeBound, ['immediately'])
+      this.bound.hook({ immediately: true }, this.onResizeBound)
       window.addEventListener('resize', this.onResizeBound)
       this.onWheelZoom()
       Pixi.addListener('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))
       this.inited.dispatch()
     })
     SchemaPage.currentPage.hook((page) => {
+      this.zoom.arguments.pageChangeCause = true
       this.zoom.dispatch(page.zoom)
       this.stageOffset.dispatch(XY.Of(page.x, page.y))
     })
@@ -54,6 +55,9 @@ export class StageViewportService {
     const viewportXY = num - this.bound.value[key]
     const stageXY = viewportXY - this.stageOffset.value[key]
     return stageXY / this.zoom.value
+  }
+  sceneStageToClientXY(xy: IXY) {
+    return XY.From(xy).multiply(this.zoom.value).plus(this.stageOffset.value).plus(this.bound.value)
   }
   toSceneStageShiftXY(xy: IXY) {
     return XY.From(xy).divide(this.zoom.value)
@@ -100,8 +104,8 @@ export class StageViewportService {
       width: window.innerWidth - x - right,
       height: window.innerHeight - y + 1,
     }
-    Pixi.container.style.width = this.bound.value.width + 'px'
-    Pixi.container.style.height = this.bound.value.height + 'px'
+    Pixi.htmlContainer.style.width = this.bound.value.width + 'px'
+    Pixi.htmlContainer.style.height = this.bound.value.height + 'px'
     Pixi.app.resize()
   }
 }

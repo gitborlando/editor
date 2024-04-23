@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid'
 import { xy_new } from '~/editor/math/xy'
 import { COLOR } from '~/shared/utils/color'
-import { SchemaDefaultService } from '../editor/schema/default'
+import { SchemaDefault, SchemaDefaultService } from '../editor/schema/default'
 import { IFillLinearGradient, INode, ISchema } from '../editor/schema/type'
 import { mockNested } from './nested'
 
@@ -75,7 +75,7 @@ export function mockJsonFile2(schemaDefault: SchemaDefaultService) {
   }
 }
 
-export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
+export function mockJsonFile3() {
   let s = new Date().getTime()
 
   let size = 100
@@ -97,7 +97,7 @@ export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
 
     k = ~~(i / 100)
 
-    let node: any = schemaDefault.rect({
+    let node: any = SchemaDefault.rect({
       id,
       width: size,
       height: size,
@@ -107,9 +107,9 @@ export function mockJsonFile3(schemaDefault: SchemaDefaultService) {
       centerY: 50 + k * (size + 30),
       radius: 10,
       parentId: 'page:1',
-      fills: [schemaDefault.fillColor(COLOR.blue)], //'#CCCCCC',
+      fills: [SchemaDefault.fillColor(COLOR.blue)], //'#CCCCCC',
     })
-    // node = schemaDefault.star({
+    // node = SchemaDefault.star({
     //   id,
     //   x: 0 + j * 101,
     //   y: 0 + k * 101,

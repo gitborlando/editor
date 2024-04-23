@@ -3,6 +3,7 @@ import { FC, Suspense } from 'react'
 import { initApp } from '~/global/initialize'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
+import { MenuComp } from './component/menu'
 import { UploaderComp } from './component/uploader'
 import { EditorComp } from './editor/editor'
 
@@ -17,7 +18,7 @@ export const App: FC<IAppProps> = observer(() => {
       <Suspense fallback={'加载中...'}>
         <EditorComp />
       </Suspense>
-      {/* <MenuComp /> */}
+      <MenuComp />
       <UploaderComp />
     </Flex>
   )

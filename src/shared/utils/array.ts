@@ -11,3 +11,5 @@ export function insertAt<T>(array: T[], index: number, item: T) {
   if (index > array.length - 1) return array.push(item)
   return array.splice(index, 0, item)
 }
+
+export function arrayTotalCount() {}

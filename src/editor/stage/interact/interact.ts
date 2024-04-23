@@ -32,7 +32,7 @@ export class StageInteractService {
   private autoCursor() {
     const cursor = interactCursorMap[this.currentType.value]
     Drag.setCursor(cursor)
-    Pixi.container.style.cursor = cursor
+    Pixi.htmlContainer.style.cursor = cursor
   }
 }
 

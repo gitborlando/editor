@@ -1,3 +1,4 @@
+import EditorFont华光钢铁直黑中黑 from './editor/font/华光钢铁直黑-中黑.ttf'
 import EditorHeaderMenu from './editor/header/menu.tsx'
 import EditorHeaderRecordRedo from './editor/header/record/redo.tsx'
 import EditorHeaderRecordUndo from './editor/header/record/undo.tsx'
@@ -23,6 +24,7 @@ import EditorNodeLine from './editor/node/line.tsx'
 import EditorNodePolygon from './editor/node/polygon.tsx'
 import EditorNodeRect from './editor/node/rect.tsx'
 import EditorNodeStar from './editor/node/star.tsx'
+import EditorNodeText from './editor/node/text.tsx'
 import EditorRightPanelOperateAlignAlignCenter from './editor/right-panel/operate/align/align-center.tsx'
 import EditorRightPanelOperateAlignAlignLeft from './editor/right-panel/operate/align/align-left.tsx'
 import EditorRightPanelOperateAlignAlignRight from './editor/right-panel/operate/align/align-right.tsx'
@@ -43,6 +45,9 @@ import FavIconShiyangyang from './fav-icon/shiyangyang.png'
 
 const Asset = {
   editor: {
+    font: {
+      华光钢铁直黑中黑: EditorFont华光钢铁直黑中黑,
+    },
     header: {
       menu: EditorHeaderMenu,
       record: {
@@ -85,6 +90,7 @@ const Asset = {
       polygon: EditorNodePolygon,
       rect: EditorNodeRect,
       star: EditorNodeStar,
+      text: EditorNodeText,
     },
     rightPanel: {
       operate: {

@@ -70,15 +70,15 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
       </Flex>
       <Flex layout='c' className={classes.centerGroup}>
         <RecordIcons />
-        <Divide length={16} />
+        <Divide length={16} thickness={0.5} />
         {(['select', 'move'] as const).map((type) => (
           <StageOperateIcon key={type} type={type} />
         ))}
-        <Divide length={16} />
+        <Divide length={16} thickness={0.5} />
         {StageCreate.createTypes.map((type) => (
           <CreateShapeIcon key={type} type={type} />
         ))}
-        <Divide length={16} />
+        <Divide length={16} thickness={0.5} />
         <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
         {/* <Button onClick={() => SchemaFile.openFile()}>导入</Button>
         <Button onClick={() => SchemaFile.downloadJsonFile(Schema.getSchema())}>下载</Button> */}

@@ -1,22 +1,27 @@
 import { SchemaFile } from '~/editor/file'
-import { SchemaDefaultService } from '~/editor/schema/default'
 import { IMeta, ISchema } from '~/editor/schema/type'
+import { mock10000Nested } from './10000nested'
 import { mockAll } from './all'
-import { mockList } from './list'
+import loginJson from './json/login.json' assert { type: 'json' }
 import { mockJsonFile3 } from './mock'
 import { mockNested } from './nested'
 
 const allFileMeta = <IMeta[]>[]
+const mockFiles = [mockNested(), mockAll(), mockJsonFile3(), mock10000Nested(), loginJson]
 
-export function mockFile(schemaDefault: SchemaDefaultService) {
-  setupMock(mockNested(schemaDefault))
-  setupMock(mockList(schemaDefault))
-  setupMock(mockAll(schemaDefault))
-  setupMock(mockJsonFile3(schemaDefault))
+export function mockFile() {
+  mockFiles.forEach((file) => {
+    // if (!file.meta.id.match(/testFile/)) {
+    SchemaFile.fileStore.set(file.meta.id, file)
+    // }
+    allFileMeta.push(file.meta)
+  })
   SchemaFile.allFileMetaStore.set('allFileMeta', allFileMeta)
+  SchemaFile.allFileMeta.dispatch((all) => {
+    all.push(...allFileMeta)
+  })
 }
 
-export function setupMock(schema: ISchema) {
-  SchemaFile.fileStore.set(schema.meta.id, schema)
-  allFileMeta.push(schema.meta)
+export function getMockFile(id: string) {
+  return mockFiles.find((file) => file.meta.id === id) as ISchema
 }

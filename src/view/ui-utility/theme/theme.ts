@@ -76,6 +76,9 @@ export const default$ = {
   borderBottom: {
     borderBottom: '1px solid #E3E3E3',
   },
+  background: {
+    backgroundColor: '#F7F7F7' /* '#F5F5F5' */,
+  },
   hover: {
     border: {
       '&:hover': {
@@ -92,6 +95,9 @@ export const default$ = {
       '&:hover': {
         color: 'rgba(162, 112, 255, 1)',
       },
+    },
+    none: {
+      '&:hover': {},
     },
   },
   active: {
@@ -124,6 +130,10 @@ export const default$ = {
       // backgroundColor: 'rgba(234, 224, 255, 1)',
       backgroundColor: hslBlueColor(94),
     },
+  },
+  font: {
+    label: { fontSize: 11, color: '#626262' },
+    normal: { fontSize: 12 },
   },
   scrollBar: {
     '&::-webkit-scrollbar': {

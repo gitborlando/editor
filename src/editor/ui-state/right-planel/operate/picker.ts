@@ -1,9 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { IImage, Img } from '~/editor/img'
-import { recordSignalContext } from '~/editor/record'
 import { SchemaDefault } from '~/editor/schema/default'
-import { IFill, IFillColor, IFillImage } from '~/editor/schema/type'
-import { StageSelect } from '~/editor/stage/interact/select'
+import { IFill, IFillColor, IFillImage, IFillLinearGradient } from '~/editor/schema/type'
 import { Signal, createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { IXY, iife } from '~/shared/utils/normal'
@@ -21,42 +19,43 @@ export class UIPickerService {
   loadingWebImageUrl = createSignal('')
   currentImage = createSignal(<IImage>{ objectUrl: '' })
   currentIndex = 0
-  impact = <'fill' | 'stroke'>''
+  impact = <'fill' | 'stroke' | 'shadow'>''
+  private fillCache = this.createFillCache()
   get currentSolidFill() {
     return this.currentFill as Signal<IFillColor>
+  }
+  get currentLinearFill() {
+    return this.currentFill as Signal<IFillLinearGradient>
   }
   get currentImageFill() {
     return this.currentFill as Signal<IFillImage>
   }
   initHook() {
-    StageSelect.afterClearSelect.hook(() => {
-      this.show.dispatch(false)
+    this.show.hook((show) => {
+      if (show) this.fillCache = this.createFillCache()
     })
-    this.currentFill.hook(
-      (fill) => {
-        if (fill.type !== 'image') return
-        iife(async () => {
-          const image = Img.getImage(fill.url)
-          if (image) this.currentImage.dispatch(image)
-          else this.currentImage.dispatch(await Img.getImageAsync(fill.url))
-        })
-      },
-      ['before:fill-comp']
-    )
-    this.type.hook(() => {
-      this.autoChangeFillType()
+    this.type.hook((type) => {
+      this.currentFill.dispatch(this.fillCache[type])
+    })
+    this.currentFill.hook((fill) => {
+      //@ts-ignore
+      this.fillCache[fill.type] = fill
+    })
+    this.currentFill.hook({ before: 'fill-comp' }, (fill) => {
+      if (fill.type !== 'image') return
+      iife(async () => {
+        const image = Img.getImage(fill.url)
+        if (image) this.currentImage.dispatch(image)
+        else this.currentImage.dispatch(await Img.getImageAsync(fill.url))
+      })
     })
   }
-  private autoChangeFillType() {
-    const fill = iife(() => {
-      const type = this.type.value
-      if (type === 'color') return SchemaDefault.fillColor()
-      if (type === 'image') return SchemaDefault.fillImage()
-    })
-    this.currentFill.dispatch(fill)
-  }
-  private recordCurrentFill() {
-    if (recordSignalContext()) return
+  private createFillCache() {
+    return {
+      color: SchemaDefault.fillColor(),
+      linearGradient: SchemaDefault.fillLinearGradient(),
+      image: SchemaDefault.fillImage(),
+    }
   }
 }
 

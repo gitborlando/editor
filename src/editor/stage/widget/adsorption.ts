@@ -27,13 +27,11 @@ export class StageWidgetAdsorptionService {
   private cloneTransformOBB = new OBB(0, 0, 0, 0, 0)
   private needDraw = false
   initHook() {
-    OperateGeometry.beforeOperate.hook(() => {
-      this.setupAdsorption()
-    })
-    OperateGeometry.data._whenDataWillChange.hook(this.adsorption, ['id:adsorption'])
+    OperateGeometry.beforeOperate.hook(() => this.setupAdsorption())
+    OperateGeometry.data._whenDataWillChange.hook({ id: 'adsorption' }, this.adsorption)
     OperateGeometry.afterOperate.hook(() => (this.needDraw = false))
-    SchemaNode.afterFlushDirty.hook(this.autoDraw, ['after:operateGeometryReset'])
-    SchemaNode.afterFlushDirty.hook(this.updateCloneTransformOBB, ['after:calcTransformOBB'])
+    SchemaNode.afterFlushDirty.hook({ after: 'operateGeometryReset' }, this.autoDraw)
+    SchemaNode.afterFlushDirty.hook({ after: 'calcTransformOBB' }, this.updateCloneTransformOBB)
   }
   private updateCloneTransformOBB() {
     const { centerX, centerY, width, height, rotation } = StageWidgetTransform.transformOBB
@@ -43,6 +41,7 @@ export class StageWidgetAdsorptionService {
     this.updateCloneTransformOBB()
     if (SchemaNode.datumId.value === '' || SchemaUtil.isPage(SchemaNode.datumId.value)) {
       SchemaPage.currentPage.value.childIds.forEach((id) => {
+        if (SchemaNode.find(id).DELETE) return
         if (SchemaNode.selectIds.value.has(id)) return
         this.collectAdsorption(StageElement.OBBCache.get(id))
       })
@@ -50,6 +49,7 @@ export class StageWidgetAdsorptionService {
       const node = SchemaNode.find(SchemaNode.datumId.value) as IFrame
       ;[node.id, ...node.childIds].forEach((id) => {
         if (SchemaNode.selectIds.value.has(id)) return
+        if (SchemaNode.find(id).DELETE) return
         this.collectAdsorption(StageElement.OBBCache.get(id))
       })
     }

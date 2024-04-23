@@ -1,13 +1,13 @@
-import { observer, useLocalObservable } from 'mobx-react'
-import { FC, useEffect, useRef } from 'react'
+import { observer } from 'mobx-react'
+import { FC, useRef } from 'react'
 import { max } from '~/editor/math/base'
 import { IGeometryData, OperateGeometry } from '~/editor/operate/geometry'
 import { SchemaNode } from '~/editor/schema/node'
 import { StageViewport } from '~/editor/stage/viewport'
-import { Drag } from '~/global/event/drag'
-import { useHookSignal } from '~/shared/signal-react'
-import { Input } from '~/view/editor/right-panel/operate/geometry/input'
+import { useHookSignal, useSignal } from '~/shared/signal-react'
+import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import { makeStyles } from '~/view/ui-utility/theme'
+import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 
 type IGeometryPropComp = {
   label: string
@@ -18,29 +18,21 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(({ label, operat
   const { classes } = useStyles({})
   const { data } = OperateGeometry
   const ref = useRef<HTMLDivElement>(null)
-  const state = useLocalObservable(() => ({
-    operateType: '' as typeof operateKey | '',
-  }))
+  const operateDataCache = useSignal(0)
   const slideRate = 1 / StageViewport.zoom.value
+
   useHookSignal(StageViewport.zoom)
-  useEffect(() => {
-    const label = ref.current?.querySelector('.label')
-    const operator = ref.current?.querySelector('.operator')
-    operator?.addEventListener('mousedown', () =>
+  useDownUpTracker(
+    () => ref.current,
+    () => {
+      operateDataCache.value = data[operateKey]
       OperateGeometry.beforeOperate.dispatch([operateKey])
-    )
-    operator?.addEventListener('mouseup', () => OperateGeometry.afterOperate.dispatch())
-    label?.addEventListener('mousedown', () => (state.operateType = operateKey))
-    Drag.beforeDrag.hook(() => {
-      if (!state.operateType) return
-      OperateGeometry.beforeOperate.dispatch([state.operateType])
-    })
-    Drag.afterDrag.hook(() => {
-      if (!state.operateType) return
+    },
+    () => {
+      if (operateDataCache.value === data[operateKey]) return
       OperateGeometry.afterOperate.dispatch()
-      state.operateType = ''
-    })
-  }, [])
+    }
+  )
 
   const produceValue = (newValue?: number) => {
     if (newValue !== undefined) {
@@ -76,12 +68,12 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(({ label, operat
   }
 
   return (
-    <Input
+    <CompositeInput
       ref={ref}
       className={classes.input}
       label={label}
-      value={produceValue()}
-      onNewValueApply={(v) => (data[operateKey] = produceValue(v))}
+      value={produceValue().toString()}
+      onNewValueApply={(v) => (data[operateKey] = produceValue(Number(v)))}
       slideRate={slideRate}
     />
   )
@@ -91,9 +83,7 @@ type IGeometryPropCompStyle =
   {} /* & Required<Pick<ISchemaGeometryPropComp>> */ /* & Pick<ISchemaGeometryPropComp> */
 
 const useStyles = makeStyles<IGeometryPropCompStyle>()((t) => ({
-  input: {
-    width: '50%',
-  },
+  input: {},
 }))
 
 GeometryPropComp.displayName = 'SchemaGeometryPropComp'

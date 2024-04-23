@@ -42,7 +42,7 @@ export const RecordCardComp: FC<IRecordCardComp> = observer((props) => {
           record.detail
         ) : (
           <ReactJson
-            src={record.detail}
+            src={mapToObj(record.detail)}
             style={{ fontFamily: 'consolas', fontSize: 12 }}
             indentWidth={2}
             displayDataTypes={false}
@@ -83,3 +83,10 @@ const useStyles = makeStyles<IRecordCardCompStyle>()((t, { isAction }) => ({
 }))
 
 RecordCardComp.displayName = 'RecordCardComp'
+
+function mapToObj(obj: Record<string, any>) {
+  for (const [k, v] of Object.entries(obj)) {
+    if (v instanceof Map) obj[k] = Object.fromEntries(v.entries())
+  }
+  return obj
+}

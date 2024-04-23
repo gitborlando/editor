@@ -4,16 +4,18 @@ import fs, { readFileSync, unlinkSync, writeFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-let reg = /.(svg|png|jpg|jpeg|webp|gif|tsx)$/
+let reg = /.(svg|png|jpg|jpeg|webp|gif|tsx|ttf)$/
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '')
 const imports = []
 const names = []
 const asset = {}
+const ignore = ['snapshots']
 
 function recurse(root, dirs = []) {
   fs.readdirSync(root).forEach((file) => {
     const fPath = path.resolve(root, file)
+    if (ignore.includes(file)) return
     if (fs.lstatSync(fPath).isDirectory()) {
       let dir = file
       dirs.push(dir)

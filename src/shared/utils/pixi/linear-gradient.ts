@@ -1,4 +1,4 @@
-import { xy_distance } from '~/editor/math/xy'
+import { abs } from '~/editor/math/base'
 import { IFillLinearGradient } from '~/editor/schema/type'
 import { PIXI } from '~/editor/stage/pixi'
 
@@ -8,13 +8,12 @@ export function createLinearGradientTexture({
   stops,
 }: Omit<IFillLinearGradient, 'type'>) {
   const canvas = document.createElement('canvas')
-  const length = xy_distance(start, end)
-  canvas.width = length
-  canvas.height = 1
+  canvas.width = abs(start.x - end.x)
+  canvas.height = abs(start.y - end.y)
   const ctx = canvas.getContext('2d')!
-  const gradient = ctx.createLinearGradient(0, 0, length, 1)
+  const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y)
   stops.forEach(({ offset, color }) => gradient.addColorStop(offset, color))
   ctx.fillStyle = gradient
-  ctx.fillRect(0, 0, length, 1)
+  ctx.fillRect(start.x, start.y, end.x, end.y)
   return PIXI.Texture.from(canvas)
 }

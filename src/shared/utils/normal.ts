@@ -1,12 +1,9 @@
 import fastDeepEqual from 'deep-equal'
 import { runInAction } from 'mobx'
-import { useEffect } from 'react'
+import { FC, memo, useCallback, useEffect } from 'react'
 
 export const This = globalThis as any
 export { fastDeepEqual }
-
-export const isLeftMouse = (e: any): e is MouseEvent => e.button === 0
-export const isRightMouse = (e: any): e is MouseEvent => e.button === 2
 
 export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
@@ -98,13 +95,6 @@ export function objEntries<T extends Record<string, any>, K extends keyof T = ke
   Object.entries(obj).forEach(([key, val], i) => callback(key as K, val, i))
 }
 
-export function stopPropagation(callback: (e?: any) => any) {
-  return (e: any) => {
-    callback(e)
-    e.stopPropagation()
-  }
-}
-
 export function makeAction<T extends any>(callback?: (...args: T[]) => void) {
   return (...args: T[]) => runInAction(() => callback?.(...args))
 }
@@ -126,4 +116,17 @@ export function once<T extends any[]>(fn?: (...args: T) => void) {
 
 export function useAsyncEffect(callback: Function, deps = []) {
   useEffect(() => void (async () => callback())(), deps)
+}
+
+export function useSubComponent<P extends {}>(deps: any[], component: FC<P>) {
+  return useCallback(component, deps)
+}
+
+export function useMemoSubComponent<P extends {}>(deps: any[], component: FC<P>) {
+  return useCallback(memo(component), deps)
+}
+
+//保留两位小数
+export function toFixed2(num: number) {
+  return Number(num.toFixed(2))
 }

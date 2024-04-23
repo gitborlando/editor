@@ -7,7 +7,7 @@ import { iife } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PopupPanelComp } from './popup'
-import { SwitchBarComp } from './switch-bar/switch-bar'
+import { SwitchBarComp } from './switch-bar'
 
 type ILeftPanelComp = {}
 

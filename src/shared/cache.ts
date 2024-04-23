@@ -3,6 +3,7 @@ import autobind from 'class-autobind-decorator'
 @autobind
 export class Cache<K, V> {
   cache = new Map<K, V>()
+  private compareCache = new Map<K, any[]>()
   get(key: K) {
     return this.cache.get(key) as V
   }
@@ -13,11 +14,19 @@ export class Cache<K, V> {
   delete(key: K) {
     this.cache.delete(key)
   }
-  getSet(key: K, fn: () => V) {
-    let value = this.cache.get(key)
-    if (value !== undefined) return value
-    value = fn()
-    this.cache.set(key, value)
+  getSet(key: K, fn: () => V, compare?: unknown[]) {
+    const value = this.cache.get(key)
+    if (value === undefined) {
+      return this.set(key, fn())
+    }
+    if (compare) {
+      const lastCompare = this.compareCache.get(key)
+      const expired = compare?.some((i, index) => i !== lastCompare?.[index])
+      if (expired) {
+        this.compareCache.set(key, compare)
+        return this.set(key, fn())
+      }
+    }
     return value
   }
   clear() {

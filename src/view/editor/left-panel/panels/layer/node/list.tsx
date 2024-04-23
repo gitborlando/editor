@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react'
+import { FC, memo, useEffect } from 'react'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { EventWheel } from '~/global/event/wheel'
 import { useHookSignal } from '~/shared/signal-react'
@@ -9,7 +9,7 @@ import { NodeItemComp } from './item'
 
 type INodeListComp = {}
 
-export const NodeListComp: FC<INodeListComp> = ({}) => {
+export const NodeListComp: FC<INodeListComp> = memo(({}) => {
   const { classes } = useStyles({})
   const {
     nodeViewHeight,
@@ -46,8 +46,7 @@ export const NodeListComp: FC<INodeListComp> = ({}) => {
       )}
     </Flex>
   )
-}
-
+})
 type INodeListCompStyle = {} /* & Required<Pick<INodeListComp>> */ /* & Pick<INodeListComp> */
 
 const useStyles = makeStyles<INodeListCompStyle>()((t) => ({

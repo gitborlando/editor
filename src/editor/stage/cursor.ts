@@ -14,7 +14,7 @@ export class StageCursorService {
     this.type.hook(this.autoChange)
   }
   private autoChange() {
-    Pixi.container.style.cursor = (<const>{
+    Pixi.htmlContainer.style.cursor = (<const>{
       select: 'auto',
       'h-resize': 'e-resize',
       'v-resize': 's-resize',

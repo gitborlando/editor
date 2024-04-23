@@ -1,28 +1,23 @@
 import autoBindMethods from 'class-autobind-decorator'
 import { createCache } from './cache'
-import { INoopFunc } from './utils/normal'
+import { INoopFunc, iife } from './utils/normal'
 
 type IHook<T> = (value: T, oldValue: T) => void
 
-type IHookOption = {
+export type IHookOption = {
   id?: string
   immediately?: boolean
   once?: boolean
   before?: string
   after?: string
+  afterAll?: boolean
 }
-
-export type IHookDescription =
-  | `id:${string}`
-  | 'immediately'
-  | 'once'
-  | `before:${string}`
-  | `after:${string}`
 
 @autoBindMethods
 export class Signal<T extends any> {
   newValue!: T
   oldValue!: T
+  arguments = <any>{}
   private _intercept?: (value: T) => T | void
   private hooks = <IHook<T>[]>[]
   private optionCache = createCache<IHookOption, IHook<T>>()
@@ -38,9 +33,14 @@ export class Signal<T extends any> {
     const interceptRes = this._intercept?.(value)
     this.newValue = interceptRes ?? value
   }
-  hook(hook: IHook<T>, descriptions?: IHookDescription[]) {
-    const option = this.processDescription(hook, descriptions || [])
-    const { immediately, once } = option
+  hook(hook: IHook<T>): () => void
+  hook(option: IHookOption, hook: IHook<T>): () => void
+  hook(hookOrOption: IHook<T> | IHookOption, hookCallback?: IHook<T>) {
+    const [hook, option] = iife<[IHook<T>, IHookOption]>(() => {
+      if (hookCallback) return [hookCallback, hookOrOption as IHookOption]
+      return [hookOrOption as IHook<T>, {} as IHookOption]
+    })
+    const { immediately, once } = this.optionCache.set(hook, option)
     if (immediately && once) {
       hook(this.value, this.oldValue)
     } else if (immediately) {
@@ -75,23 +75,17 @@ export class Signal<T extends any> {
     this.reArrangeHook()
     this.hooks.forEach((hook) => hook(this.value, this.oldValue))
     argsCache.forEach((key) => argsCache.set(key, undefined))
-  }
-  private processDescription(hook: IHook<T>, descriptions: IHookDescription[]) {
-    const option = this.optionCache.getSet(hook, () => ({}))
-    descriptions.forEach((desc) => {
-      if (desc.includes(':')) {
-        const [key, val] = desc.split(':')
-        option[key as keyof IHookOption] = val as any
-      }
-      if (desc === 'immediately') option.immediately = true
-      if (desc === 'once') option.once = true
-    })
-    return option
+    this.arguments = {}
   }
   private reArrangeHook() {
     this.hooks.forEach((hook) => {
-      const { before, after } = this.optionCache.get(hook)
+      const { before, after, afterAll } = this.optionCache.get(hook)
       const selfIndex = this.hooks.findIndex((i) => i === hook)
+      if (afterAll) {
+        this.hooks.splice(selfIndex, 1)
+        this.hooks.push(hook)
+        return
+      }
       if (before) {
         const anotherIndex = this.hooks.findIndex((i) => {
           return this.optionCache.get(i).id === before
@@ -118,11 +112,6 @@ export function createSignal<T extends any>(value?: T) {
   return new Signal<T>(value)
 }
 
-const contextCache = createCache<any>()
-export function createSignalContext<T extends any>(key: string) {
-  return (context?: T): T => contextCache.getSet(key, () => context)
-}
-
 const argsCache = createCache<any, symbol>()
 export function createSignalArgs<T extends any>() {
   const key = Symbol()
@@ -133,18 +122,26 @@ export function createSignalArgs<T extends any>() {
 }
 
 export function multiSignal(signals: Signal<any>[], callback: INoopFunc) {
-  signals.forEach((signal) => signal.hook(callback))
+  let signalsFullFillArray = new Array(signals.length).fill(false)
+  signals.forEach((signal, index) => {
+    signal.hook(() => {
+      if (signalsFullFillArray.every((i) => i === true)) {
+        callback()
+        signalsFullFillArray = new Array(signals.length).fill(false)
+      } else signalsFullFillArray[index] = true
+    })
+  })
 }
 
 let isBatching = false
 export function batchSignal<T extends any[]>(
-  toBatchSignals: Signal<any>[],
+  signals: Signal<any>[],
   callback: (...args: T) => any
 ) {
   return (...args: T) => {
     isBatching = true
     callback(...args)
     isBatching = false
-    toBatchSignals.forEach((signal) => signal.dispatch())
+    signals.forEach((signal) => signal.dispatch())
   }
 }

@@ -19,6 +19,7 @@ export function mockFill(schemaDefault: SchemaDefaultService) {
       { offset: 0, color: rgba(255, 200, 200, 0.5) },
       { offset: 1, color: rgba(200, 200, 255, 0.5) },
     ],
+    visible: true,
   }
   const nodes = <Record<string, INode>>{
     rect2: schemaDefault.rect({

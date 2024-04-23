@@ -1,7 +1,12 @@
 import { useEffect } from 'react'
 import { INoopFunc } from './normal'
 
-export function downUpTracker(el: HTMLElement, _downCallback: INoopFunc, _upCallback: INoopFunc) {
+export function downUpTracker(
+  el: HTMLElement | null,
+  _downCallback: INoopFunc,
+  _upCallback: INoopFunc
+) {
+  if (!el) return
   const downCallback = () => {
     _downCallback()
     window.addEventListener('mouseup', upCallback)
@@ -14,6 +19,10 @@ export function downUpTracker(el: HTMLElement, _downCallback: INoopFunc, _upCall
   return () => el.removeEventListener('mousedown', downCallback)
 }
 
-export function useDownUpTracker(el: HTMLElement, downCallback: INoopFunc, upCallback: INoopFunc) {
-  useEffect(() => downUpTracker(el, downCallback, upCallback))
+export function useDownUpTracker(
+  elCallback: () => HTMLElement | null,
+  downCallback: INoopFunc,
+  upCallback: INoopFunc
+) {
+  useEffect(() => downUpTracker(elCallback(), downCallback, upCallback), [])
 }

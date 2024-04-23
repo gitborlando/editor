@@ -1,5 +1,5 @@
-import { observer } from 'mobx-react'
-import { FC } from 'react'
+import { FC, memo } from 'react'
+import { OperateFill } from '~/editor/operate/fill'
 import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
 import { useHookSignal } from '~/shared/signal-react'
 import { DraggableComp } from '~/view/component/draggable'
@@ -7,18 +7,25 @@ import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PickerImageComp } from './image'
+import { PickerLinearGradientComp } from './linear'
 import { PickerSolidComp } from './solid'
 
 type IPickerComp = {}
 
-export const PickerComp: FC<IPickerComp> = observer(({}) => {
+export const PickerComp: FC<IPickerComp> = memo(({}) => {
   const { classes } = useStyles({})
   const { show, type, xy } = UIPicker
   useHookSignal(show)
   useHookSignal(type)
+  useHookSignal(OperateFill.fills)
+
   if (!show.value) return null
   return (
-    <DraggableComp headerSlot={<h6>颜色</h6>} closeFunc={() => show.dispatch(false)} xy={xy.value}>
+    <DraggableComp
+      headerSlot={<h6>颜色</h6>}
+      closeFunc={() => show.dispatch(false)}
+      clickAwayClose={() => show.value}
+      xy={xy.value}>
       <Flex layout='v' className={classes.Picker} style={{}}>
         <Flex layout='h' className={classes.typeSwitcher} justify={'space-around'}>
           <Button active={type.value === 'color'} onClick={() => type.dispatch('color')}>
@@ -34,6 +41,7 @@ export const PickerComp: FC<IPickerComp> = observer(({}) => {
           </Button>
         </Flex>
         {type.value === 'color' && <PickerSolidComp />}
+        {type.value === 'linearGradient' && <PickerLinearGradientComp />}
         {type.value === 'image' && <PickerImageComp />}
       </Flex>
     </DraggableComp>

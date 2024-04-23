@@ -1,12 +1,12 @@
 import { xy_new } from '~/editor/math/xy'
-import { SchemaDefaultService } from '~/editor/schema/default'
+import { SchemaDefault } from '~/editor/schema/default'
 import { ISchema } from '~/editor/schema/type'
 
-export function mockAll(schemaDefault: SchemaDefaultService) {
+export function mockAll() {
   const [x, y, width, height] = [100, 0, 100, 100]
   const nodes: ISchema['nodes'] = {
     'page:1': {
-      frame1: schemaDefault.frame({
+      frame1: SchemaDefault.frame({
         id: 'frame1',
         name: '测试画板1',
         width: 500,
@@ -16,7 +16,7 @@ export function mockAll(schemaDefault: SchemaDefaultService) {
         centerY: 250,
         parentId: 'page:1',
       }),
-      rect2: schemaDefault.rect({
+      rect2: SchemaDefault.rect({
         id: 'rect2',
         name: '测试矩形1',
         width: 100,
@@ -26,7 +26,7 @@ export function mockAll(schemaDefault: SchemaDefaultService) {
         centerY: 50,
         parentId: 'page:1',
       }),
-      rect7: schemaDefault.rect({
+      rect7: SchemaDefault.rect({
         id: 'rect7',
         name: '测试矩形1',
         width: 100,
@@ -36,7 +36,7 @@ export function mockAll(schemaDefault: SchemaDefaultService) {
         centerY: 50,
         parentId: 'page:1',
       }),
-      rect10: schemaDefault.rect({
+      rect10: SchemaDefault.rect({
         id: 'rect10',
         name: '测试矩形1',
         width: 200,
@@ -47,7 +47,7 @@ export function mockAll(schemaDefault: SchemaDefaultService) {
         centerY: 150,
         parentId: 'page:1',
       }),
-      rect3: schemaDefault.rect({
+      rect3: SchemaDefault.rect({
         id: 'rect3',
         name: '测试矩形1',
         width: 200,
@@ -56,7 +56,7 @@ export function mockAll(schemaDefault: SchemaDefaultService) {
         centerX: 300,
         parentId: 'page:1',
       }),
-      line1: schemaDefault.line({
+      line1: SchemaDefault.line({
         id: 'line1',
         name: '测试线段1',
         height: 1,
@@ -64,7 +64,7 @@ export function mockAll(schemaDefault: SchemaDefaultService) {
         end: xy_new(400, 100),
         parentId: 'page:1',
       }),
-      polygon1: schemaDefault.polygon({
+      polygon1: SchemaDefault.polygon({
         id: 'polygon1',
         width: 100,
         height: 100,
@@ -74,16 +74,16 @@ export function mockAll(schemaDefault: SchemaDefaultService) {
         centerY: 250,
         parentId: 'page:1',
       }),
-      // irregular1: schemaDefault.star({
+      // irregular1: SchemaDefault.star({
       //   id: 'irregular1',
       //   width: 100,
       //   height: 100,
       //   x: 500,
       //   centerX: 525,
       //   points: [
-      //     schemaDefault.createPoint(500, 0, 'no-bezier', 0,xy_new(400, 0)),
-      //     schemaDefault.createPoint(500, 0, 'no-bezier', 0),
-      //     schemaDefault.createPoint(500, 100, 'no-bezier', 0, undefined,xy_new(400, 100)),
+      //     SchemaDefault.createPoint(500, 0, 'no-bezier', 0,xy_new(400, 0)),
+      //     SchemaDefault.createPoint(500, 0, 'no-bezier', 0),
+      //     SchemaDefault.createPoint(500, 100, 'no-bezier', 0, undefined,xy_new(400, 100)),
       //   ],
       //   parentId: 'page:1',
       // }),

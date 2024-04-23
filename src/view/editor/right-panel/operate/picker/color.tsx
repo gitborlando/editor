@@ -1,17 +1,17 @@
-import { observer } from 'mobx-react'
-import { FC, useEffect } from 'react'
+import { FC, memo, useEffect } from 'react'
 import { RgbaStringColorPicker } from 'react-colorful'
 import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
-import { useHookSignal } from '~/shared/signal-react'
 import { downUpTracker } from '~/shared/utils/down-up-tracker'
 import { makeStyles } from '~/view/ui-utility/theme'
 
-type IPickerColorComp = {}
+type IPickerColorComp = {
+  color: string
+  onChange: (color: string) => void
+}
 
-export const PickerColorComp: FC<IPickerColorComp> = observer(({}) => {
-  const { currentSolidFill, beforeOperate, afterOperate } = UIPicker
+export const PickerColorComp: FC<IPickerColorComp> = memo(({ color, onChange }) => {
+  const { beforeOperate, afterOperate } = UIPicker
   const { classes, cx } = useStyles({})
-  useHookSignal(currentSolidFill)
   useEffect(() => {
     return downUpTracker(
       document.getElementById('colorPicker$$$')!,
@@ -23,8 +23,8 @@ export const PickerColorComp: FC<IPickerColorComp> = observer(({}) => {
     <RgbaStringColorPicker
       id='colorPicker$$$'
       className={classes.colorPicker}
-      color={currentSolidFill.value.color}
-      onChange={(c) => currentSolidFill.dispatch((fill) => (fill.color = c))}
+      color={color}
+      onChange={onChange}
     />
   )
 })

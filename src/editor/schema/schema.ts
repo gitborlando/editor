@@ -1,6 +1,8 @@
 import autobind from 'class-autobind-decorator'
+import { diffApply } from 'just-diff-apply'
 import { nanoid } from 'nanoid'
 import { createSignal } from '~/shared/signal'
+import { IDiff } from '../diff'
 import { SchemaNode } from './node'
 import { SchemaPage } from './page'
 import { IMeta, ISchema } from './type'
@@ -26,6 +28,9 @@ export class SchemaService {
     SchemaNode.setMap(nodes)
     SchemaPage.pages.value = pages
     this.afterSetSchema.dispatch(schema)
+  }
+  applyDiff(diffs: IDiff[]) {
+    diffApply(this.getSchema(), diffs)
   }
   createId() {
     return this.meta.version + nanoid()
