@@ -1,39 +1,88 @@
-import autobind from 'class-autobind-decorator'
-import { diffApply } from 'just-diff-apply'
+import autobind from 'class-autobind-decorator' //@ts-ignore
+import { diffApply, jsonPatchPathConverter } from 'just-diff-apply'
 import { nanoid } from 'nanoid'
+import { createCache2 } from '~/shared/cache'
 import { createSignal } from '~/shared/signal'
-import { IDiff } from '../diff'
-import { SchemaNode } from './node'
-import { SchemaPage } from './page'
-import { IMeta, ISchema } from './type'
+import { IPatch, SchemaDiff } from './diff'
+import { SchemaHistory } from './history'
+import { MutateSchemaItem } from './mutate'
+import {
+  IClient,
+  ID,
+  IMeta,
+  INodeOrPage,
+  IPage,
+  ISchema,
+  ISchemaChangeType,
+  ISchemaItem,
+  ISchemaListener,
+  ISchemaOperation,
+  ISchemaPropKey,
+} from './type'
 
 @autobind
 export class SchemaService {
-  inited = createSignal(false)
-  afterSetSchema = createSignal<ISchema>()
+  schema!: ISchema
   meta!: IMeta
-  setMeta(option: Partial<IMeta>) {
-    this.meta = { ...this.meta, ...option }
+  client!: IClient
+  pages = <IPage[]>[]
+  afterSetSchema = createSignal()
+  operationList = <ISchemaOperation[]>[]
+  listenerMap = createCache2<ISchemaChangeType, ISchemaListener['callback']>()
+  initSchema(schema: ISchema) {
+    this.schema = schema
+    this.meta = this.find<IMeta>('meta')
+    this.pages = this.meta.pageIds.map(this.find<IPage>)
+    this.afterSetSchema.dispatch()
   }
-  getSchema() {
-    return {
-      meta: this.meta,
-      nodes: SchemaNode.nodeMap,
-      pages: SchemaPage.pages.value,
-    }
+  addItem(item: INodeOrPage) {
+    this.schema[item.id] = item
+    SchemaDiff.atomAddDiff(item.id, item)
   }
-  setSchema(schema: ISchema) {
-    const { meta, nodes, pages } = schema
-    this.meta = meta
-    SchemaNode.setMap(nodes)
-    SchemaPage.pages.value = pages
-    this.afterSetSchema.dispatch(schema)
+  removeItem(item: INodeOrPage) {
+    delete this.schema[item.id]
+    SchemaDiff.atomRemoveDiff(item.id, item)
   }
-  applyDiff(diffs: IDiff[]) {
-    diffApply(this.getSchema(), diffs)
+  itemAdd(item: ISchemaItem, keypath: (ISchemaPropKey | (string & {}) | number)[], value: any) {
+    MutateSchemaItem.add(item, keypath, value)
   }
-  createId() {
-    return this.meta.version + nanoid()
+  itemReset(item: ISchemaItem, keypath: (ISchemaPropKey | (string & {}) | number)[], value: any) {
+    MutateSchemaItem.reset(item, keypath, value)
+  }
+  itemDelete(item: ISchemaItem, keypath: (ISchemaPropKey | (string & {}) | number)[]) {
+    MutateSchemaItem.delete(item, keypath)
+  }
+  itemGet<T = any>(item: ISchemaItem, keypath: (ISchemaPropKey | (string & {}) | number)[]) {
+    return MutateSchemaItem.get<T>(item, keypath)
+  }
+  find<T extends ISchemaItem>(id: ID): T {
+    return this.schema[id] as T
+  }
+  applyPatch(patches: IPatch[]) {
+    //@ts-ignore
+    return diffApply(this.schema, patches, jsonPatchPathConverter)
+  }
+  registerListener(type: ISchemaChangeType, callback: ISchemaListener['callback']) {
+    this.listenerMap.set(type, callback)
+  }
+  broadcast(operation: ISchemaOperation) {
+    this.listenerMap.get(operation.changeType)?.(operation)
+  }
+  commitOperation(
+    changeType: ISchemaChangeType,
+    changeIds: ID[],
+    description: string,
+    option?: Partial<ISchemaOperation>
+  ) {
+    const id = nanoid()
+    const diff = SchemaDiff.commitOperateDiff(description)
+    const timestamp = performance.now()
+    const operation = { id, diff, changeIds, changeType, description, timestamp, ...option }
+    this.operationList.push(operation)
+    this.broadcast(operation)
+  }
+  commitHistory(description: string) {
+    SchemaHistory.commit(description)
   }
 }
 

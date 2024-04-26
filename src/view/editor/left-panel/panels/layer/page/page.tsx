@@ -1,5 +1,7 @@
 import { FC } from 'react'
-import { SchemaPage } from '~/editor/schema/page'
+import { OperateMeta } from '~/editor/operate/meta'
+import { Schema } from '~/editor/schema/schema'
+import { IPage } from '~/editor/schema/type'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { useHookSignal } from '~/shared/signal-react'
@@ -15,7 +17,7 @@ export const PageComp: FC<IPageComp> = ({}) => {
   const { allPageExpanded, pagePanelHeight } = UILeftPanelLayer
   useHookSignal(pagePanelHeight)
   useHookSignal(allPageExpanded)
-  useHookSignal(SchemaPage.pages)
+  useHookSignal(OperateMeta.afterChangePages)
   return (
     <Flex layout='v' shrink={0} className={classes.Page}>
       <PageHeaderComp />
@@ -25,11 +27,10 @@ export const PageComp: FC<IPageComp> = ({}) => {
         vshow={allPageExpanded.value}
         shrink={1}
         style={{ height: pagePanelHeight.value - 37 }}>
-        {SchemaPage.pages.value
-          .filter((page) => !page.DELETE)
-          .map((page) => (
-            <PageItemComp key={page.id} name={page.name} id={page.id} />
-          ))}
+        {Schema.meta.pageIds.map((id) => {
+          const page = Schema.find<IPage>(id)
+          return <PageItemComp key={page.id} name={page.name} id={page.id} />
+        })}
       </Flex>
       <Flex
         layout='c'

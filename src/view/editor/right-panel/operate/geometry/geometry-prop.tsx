@@ -1,35 +1,35 @@
-import { observer } from 'mobx-react'
 import { FC, useRef } from 'react'
 import { max } from '~/editor/math/base'
-import { IGeometryData, OperateGeometry } from '~/editor/operate/geometry'
-import { SchemaNode } from '~/editor/schema/node'
+import { IGeometry, OperateGeometry } from '~/editor/operate/geometry'
+import { OperateNode } from '~/editor/operate/node'
 import { StageViewport } from '~/editor/stage/viewport'
-import { useHookSignal, useSignal } from '~/shared/signal-react'
+import { useHookSignal2, useSignal } from '~/shared/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 
 type IGeometryPropComp = {
   label: string
-  operateKey: keyof IGeometryData
+  operateKey: keyof IGeometry
 }
 
-export const GeometryPropComp: FC<IGeometryPropComp> = observer(({ label, operateKey }) => {
+export const GeometryPropComp: FC<IGeometryPropComp> = ({ label, operateKey }) => {
   const { classes } = useStyles({})
-  const { data } = OperateGeometry
+  const { geometry, isChangedGeometry, setGeometry } = OperateGeometry
   const ref = useRef<HTMLDivElement>(null)
   const operateDataCache = useSignal(0)
   const slideRate = 1 / StageViewport.zoom.value
 
-  useHookSignal(StageViewport.zoom)
+  useHookSignal2(StageViewport.zoom)
+  useHookSignal2(isChangedGeometry)
   useDownUpTracker(
     () => ref.current,
     () => {
-      operateDataCache.value = data[operateKey]
+      operateDataCache.value = geometry[operateKey]
       OperateGeometry.beforeOperate.dispatch([operateKey])
     },
     () => {
-      if (operateDataCache.value === data[operateKey]) return
+      if (operateDataCache.value === geometry[operateKey]) return
       OperateGeometry.afterOperate.dispatch()
     }
   )
@@ -37,11 +37,11 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(({ label, operat
   const produceValue = (newValue?: number) => {
     if (newValue !== undefined) {
       if (operateKey === 'x') {
-        const datum = SchemaNode.datumXY.x
+        const datum = OperateNode.datumXY.x
         return newValue + datum
       }
       if (operateKey === 'y') {
-        const datum = SchemaNode.datumXY.y
+        const datum = OperateNode.datumXY.y
         return newValue + datum
       }
       if (['width', 'height', 'radius'].includes(operateKey)) {
@@ -55,16 +55,24 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(({ label, operat
       }
       return newValue
     }
+
     if (operateKey === 'x') {
-      const datum = SchemaNode.datumXY.x
-      return data[operateKey] - datum
+      const datum = OperateNode.datumXY.x
+      return geometry[operateKey] - datum
     }
     if (operateKey === 'y') {
-      const datum = SchemaNode.datumXY.y
-      return data[operateKey] - datum
+      const datum = OperateNode.datumXY.y
+      return geometry[operateKey] - datum
     }
+    return geometry[operateKey]
+  }
 
-    return data[operateKey]
+  const formatNumber = (value: number): string => {
+    if (Number.isInteger(value)) {
+      return value.toString()
+    } else {
+      return value.toFixed(2)
+    }
   }
 
   return (
@@ -72,12 +80,12 @@ export const GeometryPropComp: FC<IGeometryPropComp> = observer(({ label, operat
       ref={ref}
       className={classes.input}
       label={label}
-      value={produceValue().toString()}
-      onNewValueApply={(v) => (data[operateKey] = produceValue(Number(v)))}
+      value={formatNumber(produceValue())}
+      onNewValueApply={(v) => setGeometry(operateKey, produceValue(Number(v)))}
       slideRate={slideRate}
     />
   )
-})
+}
 
 type IGeometryPropCompStyle =
   {} /* & Required<Pick<ISchemaGeometryPropComp>> */ /* & Pick<ISchemaGeometryPropComp> */

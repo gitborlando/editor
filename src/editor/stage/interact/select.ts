@@ -1,22 +1,20 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
 import { OBB } from '~/editor/math/obb'
+import { OperateNode } from '~/editor/operate/node'
 import { OperateText } from '~/editor/operate/text'
-import { Record } from '~/editor/record'
-import { SchemaNode } from '~/editor/schema/node'
-import { SchemaPage } from '~/editor/schema/page'
-import { INode } from '~/editor/schema/type'
+import { Schema } from '~/editor/schema/schema'
 import { SchemaUtil } from '~/editor/schema/util'
+import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu/menu'
-import { createMomentChange } from '~/shared/intercept-data/moment-change'
-import { batchSignal, createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
-import { lastOne } from '~/shared/utils/array'
 import { rectInAnotherRect } from '~/shared/utils/collision'
 import { isLeftMouse, isRightMouse } from '~/shared/utils/event'
+import { lastOne } from '~/shared/utils/list'
 import { macro_Match } from '~/shared/utils/macro'
-import { createBound, fastDeepEqual, type IRect } from '~/shared/utils/normal'
+import { createBound, type IRect } from '~/shared/utils/normal'
 import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -28,23 +26,12 @@ type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 @autobind
 export class StageSelectService {
   marquee = createSignal<IRect | undefined>()
-  afterClearSelect = createSignal()
   afterSelect = createSignal<ISelectType>()
   duringMarqueeSelect = createSignal()
-  needExpandIds = new Set<string>()
   private marqueeOBB?: OBB
-  private oneSelectChange = createMomentChange({ selectIds: <string[]>[] })
   private doubleClickTimeStamp?: number
   initHook() {
     StageCreate.createStarted.hook(this.onCreateSelect)
-    this.afterClearSelect.hook(() => {
-      this.needExpandIds.clear()
-    })
-    this.afterSelect.hook(() => {
-      this.oneSelectChange.update('selectIds', [...SchemaNode.selectIds.value])
-      this.recordSelect()
-      this.oneSelectChange.endCurrent()
-    })
   }
   startInteract() {
     Pixi.addListener('mousedown', this.onMouseDown)
@@ -52,10 +39,10 @@ export class StageSelectService {
   }
   endInteract() {
     Pixi.removeListener('mousedown', this.onMouseDown)
-    Pixi.removeListener('mousedown', this.onClick)
+    Pixi.removeListener('click', this.onClick)
   }
   private get hoverId() {
-    return lastOne(SchemaNode.hoverIds.value)
+    return lastOne(OperateNode.hoverIds.value)
   }
   private onMouseDown(e: Event) {
     if (isLeftMouse(e)) this.onLeftMouseDown(e as MouseEvent)
@@ -68,7 +55,7 @@ export class StageSelectService {
     this.onEditText()
   }
   private onEditText() {
-    const hoverNode = SchemaNode.find(this.hoverId)
+    const hoverNode = Schema.find(this.hoverId)
     if (hoverNode?.type !== 'text') return
     OperateText.intoEditing.dispatch(hoverNode)
   }
@@ -80,7 +67,7 @@ export class StageSelectService {
       this.onMarqueeSelect()
     }
     if (this.hoverId) {
-      if (SchemaUtil.isPageFrameId(this.hoverId)) {
+      if (SchemaUtil.isPageFrame(this.hoverId)) {
         this.clearSelect()
         this.onMarqueeSelect()
       } else {
@@ -94,7 +81,7 @@ export class StageSelectService {
   }
   private onMenu() {
     const { copyPasteGroup, undoRedoGroup, nodeGroup } = Menu.menuConfig
-    if (SchemaNode.selectNodes.length) {
+    if (OperateNode.selectNodes.length) {
       const menuOptions = [copyPasteGroup, undoRedoGroup, nodeGroup]
       return Menu.menuOptions.dispatch(menuOptions)
     }
@@ -102,39 +89,29 @@ export class StageSelectService {
   }
   private clearSelect() {
     if (hotkeys.shift) return
-    SchemaNode.clearSelect()
-    this.afterClearSelect.dispatch()
-  }
-  private unSelect(id: string) {
-    if (hotkeys.shift) return
-    SchemaNode.unSelect(id)
+    OperateNode.clearSelect()
   }
   onPanelSelect(id: string) {
     this.clearSelect()
-    SchemaNode.select(id)
+    OperateNode.select(id)
     this.afterSelect.dispatch('panel')
+    OperateNode.afterSelect.dispatch()
   }
   onCreateSelect(id: string) {
     this.clearSelect()
-    SchemaNode.select(id)
-    let node = SchemaNode.find(id)
-    while (node) {
-      this.needExpandIds.add(node.parentId)
-      node = SchemaNode.find(node.parentId)
-    }
+    OperateNode.select(id)
+    UILeftPanelLayer.expandAncestor(id)
     this.afterSelect.dispatch('create')
+    OperateNode.afterSelect.dispatch()
   }
   private onMousedownSelect() {
     if (Pixi.isForbidEvent) return
-    if (SchemaNode.selectIds.value.has(this.hoverId)) return
-    if (SchemaUtil.isPageFrameId(this.hoverId)) return
+    if (OperateNode.selectIds.value.has(this.hoverId)) return
+    if (SchemaUtil.isPageFrame(this.hoverId)) return
     this.clearSelect()
-    SchemaNode.select(this.hoverId)
-    let node = SchemaNode.find(this.hoverId)
-    while (node) {
-      this.needExpandIds.add(node.parentId)
-      node = SchemaNode.find(node.parentId)
-    }
+    OperateNode.select(this.hoverId)
+    OperateNode.afterSelect.dispatch()
+    UILeftPanelLayer.expandAncestor(this.hoverId)
     this.afterSelect.dispatch('stage-single')
   }
   private onMarqueeSelect() {
@@ -145,32 +122,24 @@ export class StageSelectService {
       if (macro_Match`-180|-90|0|90|180`(obb.rotation)) return aabbResult
       return aabbResult && marqueeOBB.obbHitTest(obb)
     }
-    const unSelect = (id: string) => {
-      if (hotkeys.shift && SchemaNode.selectIds.value.has(id)) return
-      SchemaNode.unSelect(id)
-    }
-    const traverseTest = (nodes: INode[]) => {
-      nodes.forEach((node) => {
-        if (node.DELETE) return
+    const traverseTest = () => {
+      this.clearSelect()
+      SchemaUtil.traverseCurPageChildIds(({ id, node, childIds, depth }) => {
         const OBB = StageElement.OBBCache.get(node.id)
-        if (SchemaUtil.isPageFrameNode(node) && node.childIds.length) {
+        if (childIds?.length && depth === 0) {
           if (rectInAnotherRect(OBB.aabb, this.marqueeOBB!.aabb)) {
-            SchemaNode.select(node.id)
-            this.needExpandIds.add(node.id)
-            SchemaUtil.traverseCurrentPageIds(node.childIds, ({ id }) => SchemaNode.unSelect(id))
-          } else {
-            unSelect(node.id)
-            traverseTest(SchemaUtil.getChildren(node.id))
+            OperateNode.select(node.id)
+            UILeftPanelLayer.needExpandIds.add(node.id)
+            return false
           }
           return
         }
         if (hitTest(this.marqueeOBB, OBB)) {
-          SchemaNode.select(node.id)
-          this.needExpandIds.add(node.parentId)
-          traverseTest(SchemaUtil.getChildren(node.id))
-        } else {
-          unSelect(node.id)
+          OperateNode.select(id)
+          UILeftPanelLayer.needExpandIds.add(node.parentId)
+          return
         }
+        return false
       })
     }
     Drag.onStart(() => {
@@ -179,14 +148,14 @@ export class StageSelectService {
       .onMove(({ marquee }) => {
         this.marquee.dispatch(marquee)
         this.marqueeOBB = this.calcMarqueeOBB()
-        const batchTest = batchSignal([SchemaNode.selectIds], traverseTest)
-        batchTest(SchemaPage.currentPage.value.childIds.map((id) => SchemaNode.find(id)))
+        traverseTest()
         this.duringMarqueeSelect.dispatch()
       })
       .onDestroy(() => {
         this.marquee.value = undefined
         this.marquee.dispatch()
         this.afterSelect.dispatch('marquee')
+        OperateNode.afterSelect.dispatch()
       })
   }
   private calcMarqueeOBB() {
@@ -204,23 +173,6 @@ export class StageSelectService {
     }
     this.doubleClickTimeStamp = e.timeStamp
     return false
-  }
-  private recordSelect() {
-    if (Record.isInRedoUndo) return
-    const { last, current } = this.oneSelectChange.record.selectIds
-    if (fastDeepEqual(last, current)) return
-    Record.push({
-      description: '选择节点',
-      detail: { last: [...last], current: [...current] },
-      undo: () => {
-        SchemaNode.selectIds.dispatch(new Set(last))
-        this.afterSelect.dispatch()
-      },
-      redo: () => {
-        SchemaNode.selectIds.dispatch(new Set(current))
-        this.afterSelect.dispatch()
-      },
-    })
   }
 }
 

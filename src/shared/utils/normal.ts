@@ -46,30 +46,21 @@ export function stringPathProxy(target: any) {
 }
 
 export function Delete<T>(object: Record<string, T>, key: string): void
-export function Delete<T>(target: T[], find: string | ((value: T) => void)): void
-export function Delete<T>(target: Record<string, T> | T[], filter: string | ((value: T) => void)) {
+export function Delete<T>(target: T[], find: string | ((value: T) => void)): number
+export function Delete<T>(
+  target: Record<string, T> | T[],
+  filter: string | ((value: T) => void | number)
+) {
   if (Array.isArray(target)) {
     const index =
       typeof filter === 'function'
         ? target.findIndex(filter)
         : target.findIndex((i) => i === filter)
     index >= 0 && target.splice(index, 1)
+    return index
   } else {
     delete target[filter as string]
   }
-}
-
-export function hierarchyUp<T>(target: T[], filter: string | ((value: T) => void)) {
-  const index =
-    typeof filter === 'function' ? target.findIndex(filter) : target.findIndex((i) => i === filter)
-  if (index <= 0) return
-  ;[target[index - 1], target[index]] = [target[index], target[index - 1]]
-}
-export function hierarchyDown<T>(target: T[], filter: string | ((value: T) => void)) {
-  const index =
-    typeof filter === 'function' ? target.findIndex(filter) : target.findIndex((i) => i === filter)
-  if (index >= target.length - 1) return
-  ;[target[index], target[index + 1]] = [target[index + 1], target[index]]
 }
 
 export function pipe<T>(raw: T) {
@@ -126,7 +117,13 @@ export function useMemoSubComponent<P extends {}>(deps: any[], component: FC<P>)
   return useCallback(memo(component), deps)
 }
 
-//保留两位小数
-export function toFixed2(num: number) {
-  return Number(num.toFixed(2))
+export function ObjectGetSet(obj: any, keys: (string | number)[], value?: any) {
+  if (keys.length === 0)
+    keys.forEach((key, i) => {
+      if (value !== undefined && i === keys.length - 1) {
+        obj[key] = value
+      }
+      obj = obj[key]
+    })
+  return obj
 }

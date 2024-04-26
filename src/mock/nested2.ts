@@ -3,7 +3,7 @@ import { SchemaDefault } from '~/editor/schema/default'
 import { IFillLinearGradient, ISchema } from '~/editor/schema/type'
 import { COLOR } from '~/shared/utils/color'
 
-export function mockNested() {
+export function mockNested2() {
   const [x, y, width, height] = [100, 0, 100, 100]
   const LinearGradient = <IFillLinearGradient>{
     type: 'linearGradient',
@@ -16,12 +16,12 @@ export function mockNested() {
     alpha: 1,
     visible: true,
   }
-  return <ISchema>{
+  const schema: ISchema = {
     meta: {
       type: 'meta',
       id: 'meta',
-      fileId: 'testFile2',
-      name: '测试文件2',
+      fileId: 'testFile1',
+      name: '测试文件1',
       version: 0,
       pageIds: ['page_1'],
       clients: {},
@@ -35,7 +35,6 @@ export function mockNested() {
       y: 100,
       childIds: ['frame:1'],
     },
-
     // frame0: schemaDefault.frame({
     //   id: 'frame0',
     //   name: '测试画板0',
@@ -55,7 +54,8 @@ export function mockNested() {
       x: 0,
       centerX: 200,
       centerY: 200,
-      parentId: 'page:1',
+      radius: 20,
+      parentId: 'page_1',
       childIds: ['text2', 'triangle1', 'line1', /* 'rect2', */ 'rect3'],
     }),
     // rect2: SchemaDefault.rect({
@@ -92,7 +92,6 @@ export function mockNested() {
       centerY: 200,
       parentId: 'frame:1',
       fills: [LinearGradient],
-      shadows: [SchemaDefault.shadow()],
     }),
     triangle1: SchemaDefault.polygon({
       id: 'triangle1',
@@ -133,4 +132,6 @@ export function mockNested() {
     //   parentId: 'page1',
     // }),
   }
+
+  return schema
 }

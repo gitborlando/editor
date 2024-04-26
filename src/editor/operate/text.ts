@@ -1,13 +1,10 @@
 import autobind from 'class-autobind-decorator'
-import { diffApply } from 'just-diff-apply'
-import { createSignal, multiSignal as multiSignals } from '~/shared/signal'
-import { Diff, IOperateDiff, createNodeDiffPath } from '../diff'
-import { Record } from '../record'
-import { SchemaNode } from '../schema/node'
+import { createSignal, mergeSignal } from '~/shared/signal'
 import { Schema } from '../schema/schema'
 import { IText } from '../schema/type'
 import { StageDraw } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
+import { OperateNode } from './node'
 
 type ITextStyle = IText['style']
 export type ITextStyleKey = keyof ITextStyle
@@ -48,32 +45,35 @@ export class OperateTextService {
   textStyleOptions = createTextStyleOptions()
   initHook() {
     StageSelect.afterSelect.hook(() => {
-      this.textNodes = SchemaNode.selectNodes.filter((node) => {
+      this.textNodes = OperateNode.selectNodes.filter((node) => {
         return node.type === 'text'
       }) as IText[]
       if (!this.textNodes.length) return
       this.setupTextStyle()
     })
-    this.beforeOperate.hook(() => {
-      this.setDiff('inverse')
+    this.textStyle.hook((_, args) => {
+      if (args?.isSetupCause) return
+      this.textNodes.forEach((node) => OperateNode.collectDirty(node.id))
     })
-    this.textStyle.hook(() => {
-      if (this.textStyle.arguments.isSetupCause) return
-      this.textNodes.forEach((node) => SchemaNode.collectDirty(node.id))
-    })
-    SchemaNode.duringFlushDirty.hook((id) => {
-      const node = SchemaNode.find(id)
+    OperateNode.duringFlushDirty.hook((id) => {
+      const node = Schema.find(id)
       if (node.type !== 'text') return
       this.applyChange(node)
     })
-    multiSignals([SchemaNode.afterFlushDirty, this.afterOperate], () => {
+    mergeSignal(OperateNode.afterFlushDirty, this.afterOperate).hook(() => {
       const operateKey = this.beforeOperate.value!
-      this.setDiff('not inverse')
-      const operateDiff = Diff.commitOperateDiff(
-        operateKey === 'content' ? '改变 text content' : '改变 text style'
-      )
-      this.recordOperate(operateDiff)
+      const changeType = operateKey === 'content' ? 'changeTextContent' : 'changeTextStyle'
+      const changeDescription = operateKey === 'content' ? '改变 text content' : '改变 text style'
+      Schema.commitOperation(changeType, [...OperateNode.dirtyIds], changeDescription)
+      Schema.commitHistory(changeDescription)
       this.beforeOperate.value = null
+    })
+    Schema.registerListener('changeTextContent', () => {
+      this.textNodes.forEach((node) => StageDraw.collectRedraw(node.id))
+    })
+    Schema.registerListener('changeTextStyle', () => {
+      this.setupTextStyle()
+      this.textNodes.forEach((node) => StageDraw.collectRedraw(node.id))
     })
   }
   setTextStyle(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
@@ -83,8 +83,7 @@ export class OperateTextService {
     })
   }
   toggleTextStyle(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
-    this.beforeOperate.dispatch(key)
-    //@ts-ignore
+    this.beforeOperate.dispatch(key) //@ts-ignore
     this.textStyle.dispatch((style) => (style[key] = value))
     this.afterOperate.dispatch()
   }
@@ -96,39 +95,12 @@ export class OperateTextService {
         // if (style[key] !== firstNodeStyleValue) this.textStyle.value[key] = 0
       })
     })
-    this.textStyle.arguments.isSetupCause = true
-    this.textStyle.dispatch()
+    this.textStyle.dispatch(undefined, { isSetupCause: true })
   }
   private applyChange(node: IText) {
     const operateKey = this.beforeOperate.value! //@ts-ignore
-    node.style[operateKey] = this.textStyle.value[operateKey]
+    Schema.itemReset(node, `style.${operateKey}`, this.textStyle.value[operateKey])
     StageDraw.collectRedraw(node.id)
-  }
-  private setDiff(type: 'inverse' | 'not inverse') {
-    const operateKey = this.beforeOperate.value!
-    const isContent = operateKey === 'content'
-    this.textNodes.forEach((node) => {
-      ;(type === 'inverse' ? Diff.setInverseReplacePatch : Diff.setReplacePatch)(
-        createNodeDiffPath(node.id, isContent ? [operateKey] : ['style', operateKey]),
-        isContent ? node.content : node.style[operateKey]
-      )
-    })
-  }
-  private recordOperate(operateDiff: IOperateDiff) {
-    if (Record.isInRedoUndo) return
-    const operateKey = this.beforeOperate.value!
-    const travel = (type: 'undo' | 'redo') => {
-      const { diffs, inverseDiffs } = operateDiff
-      diffApply(Schema.getSchema(), type === 'undo' ? inverseDiffs : diffs)
-      operateKey !== 'content' && this.setupTextStyle()
-      this.textNodes.forEach((node) => StageDraw.collectRedraw(node.id))
-    }
-    Record.push({
-      description: '改变textNode属性',
-      detail: { type: operateKey },
-      undo: () => travel('undo'),
-      redo: () => travel('redo'),
-    })
   }
 }
 

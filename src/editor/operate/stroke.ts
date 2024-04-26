@@ -1,16 +1,17 @@
 import autobind from 'class-autobind-decorator'
 import { cloneDeep } from 'lodash-es'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
-import { createSignal, createSignalArgs } from '~/shared/signal'
+import { createSignal } from '~/shared/signal'
 import { rgb } from '~/shared/utils/color'
 import { Delete } from '~/shared/utils/normal'
 import { Record } from '../record'
 import { SchemaDefault } from '../schema/default'
-import { SchemaNode } from '../schema/node'
+import { Schema } from '../schema/schema'
 import { INode, IStroke } from '../schema/type'
 import { StageDraw } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
 import { UIPicker } from '../ui-state/right-planel/operate/picker'
+import { OperateNode } from './node'
 
 type IInitStrokes = Map<string, IStroke[]>
 
@@ -24,7 +25,6 @@ export class OperateStrokeService {
   private oneOperateChange = createMomentChange<{ strokes: IStroke[] | IInitStrokes }>({
     strokes: [],
   })
-  private strokesSignalArgs = createSignalArgs<{ isSetup: boolean }>()
   initHook() {
     StageSelect.afterSelect.hook(() => {
       this.setupStrokes()
@@ -33,6 +33,7 @@ export class OperateStrokeService {
       this.oneOperateChange.endCurrent()
     })
     UIPicker.beforeOperate.hook(({ type }) => {
+      if (UIPicker.impact !== 'stroke') return
       if (type !== 'solid-color') return
       this.beforeOperate.dispatch()
     })
@@ -43,19 +44,20 @@ export class OperateStrokeService {
       this.strokes.dispatch()
     })
     UIPicker.afterOperate.hook(({ type }) => {
+      if (UIPicker.impact !== 'stroke') return
       if (type !== 'solid-color') return
       this.afterOperate.dispatch()
     })
     this.strokes.hook(() => {
-      if (this.strokesSignalArgs()?.isSetup) return
+      // if (this.strokesSignalArgs()?.isSetup) return
       this.isStrokesChanged = true
-      SchemaNode.makeSelectDirty()
+      OperateNode.makeSelectDirty()
     })
-    SchemaNode.duringFlushDirty.hook((id) => {
+    OperateNode.duringFlushDirty.hook((id) => {
       if (!this.isStrokesChanged) return
-      this.applyChange(SchemaNode.find(id))
+      this.applyChange(Schema.find(id))
     })
-    SchemaNode.afterFlushDirty.hook(() => {
+    OperateNode.afterFlushDirty.hook(() => {
       this.isStrokesChanged = false
     })
     this.afterOperate.hook(() => {
@@ -102,17 +104,17 @@ export class OperateStrokeService {
   private setupStrokes() {
     this.initStrokes.clear()
     this.oneOperateChange.endCurrent()
-    this.strokesSignalArgs({ isSetup: true })
-    if (SchemaNode.selectIds.value.size === 0) {
+    // this.strokesSignalArgs({ isSetup: true })
+    if (OperateNode.selectIds.value.size === 0) {
       this.strokes.dispatch([])
     }
-    if (SchemaNode.selectNodes.length === 1) {
-      const node = SchemaNode.selectNodes[0]
+    if (OperateNode.selectNodes.length === 1) {
+      const node = OperateNode.selectNodes[0]
       this.oneOperateChange.reset({ strokes: cloneDeep(node.strokes) })
       this.strokes.dispatch(node.strokes)
     }
-    if (SchemaNode.selectNodes.length > 1) {
-      const nodes = SchemaNode.selectNodes
+    if (OperateNode.selectNodes.length > 1) {
+      const nodes = OperateNode.selectNodes
       nodes.forEach(({ id, strokes }) => this.initStrokes.set(id, strokes))
       this.oneOperateChange.reset({ strokes: this.initStrokes })
       this.strokes.dispatch(this.initStrokes)

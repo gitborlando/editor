@@ -12,4 +12,16 @@ export function insertAt<T>(array: T[], index: number, item: T) {
   return array.splice(index, 0, item)
 }
 
-export function arrayTotalCount() {}
+export function flushList<T extends any = any>(
+  input: T[] | Set<T>,
+  callback: (item: T, index: number) => void
+) {
+  if (Array.isArray(input)) {
+    input.forEach(callback)
+    input.length = 0
+  } else {
+    let i = 0
+    input.forEach((item) => callback(item, i++))
+    input.clear()
+  }
+}

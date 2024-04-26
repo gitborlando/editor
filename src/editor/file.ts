@@ -5,8 +5,8 @@ import { Uploader } from '~/global/upload'
 import { createIDBStore } from '~/shared/idb-store'
 import { createSignal } from '~/shared/signal'
 import { Delete } from '~/shared/utils/normal'
+import { OperateNode } from './operate/node'
 import { SchemaDefault } from './schema/default'
-import { SchemaNode } from './schema/node'
 import { Schema } from './schema/schema'
 import { IMeta, ISchema } from './schema/type'
 
@@ -29,13 +29,13 @@ export class SchemaFileService {
     const allFileMeta = await this.allFileMetaStore.get('allFileMeta')
     this.allFileMeta.dispatch(allFileMeta)
   }
-  loadJsonFile(json: ISchema) {
-    Schema.setSchema(json)
-  }
+  // loadJsonFile(json: ISchema) {
+  //   Schema.setSchema(json)
+  // }
   autoSave() {
     setInterval(() => {
-      if (import.meta.env.DEV && Schema.getSchema().meta.id.match('testFile')) return
-      this.saveJsonFile(Schema.getSchema())
+      if (import.meta.env.DEV && Schema.schema.meta.id.match('testFile')) return
+      this.saveJsonFile(Schema.schema)
       this.isSaved.dispatch(true)
     }, 1000)
   }
@@ -43,7 +43,7 @@ export class SchemaFileService {
     const file = await Uploader.open({ accept: '' })
     if (!file) return
     const json = JSON.parse(await Uploader.readAsText(file))
-    this.loadJsonFile(json)
+    //  this.loadJsonFile(json)
   }
   newFile() {
     const schema = SchemaDefault.schema()
@@ -67,12 +67,12 @@ export class SchemaFileService {
   }
   private debug() {
     hotkeys('alt+l', () => {
-      if (SchemaNode.selectIds.value.size) {
-        SchemaNode.selectIds.value.forEach((id) => {
-          console.log(SchemaNode.find(id))
+      if (OperateNode.selectIds.value.size) {
+        OperateNode.selectIds.value.forEach((id) => {
+          console.log(Schema.find(id))
         })
       } else {
-        console.log(Schema.getSchema())
+        console.log(Schema.schema)
       }
     })
   }

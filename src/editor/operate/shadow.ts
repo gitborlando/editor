@@ -1,15 +1,16 @@
 import autobind from 'class-autobind-decorator'
 import { cloneDeep } from 'lodash-es'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
-import { createSignal, createSignalArgs } from '~/shared/signal'
+import { createSignal } from '~/shared/signal'
 import { Delete } from '~/shared/utils/normal'
 import { Record } from '../record'
 import { SchemaDefault } from '../schema/default'
-import { SchemaNode } from '../schema/node'
+import { Schema } from '../schema/schema'
 import { IFillColor, INode, IShadow } from '../schema/type'
 import { StageDraw } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
 import { UIPicker } from '../ui-state/right-planel/operate/picker'
+import { OperateNode } from './node'
 
 type IInitShadows = Map<string, IShadow[]>
 
@@ -23,7 +24,6 @@ export class OperateShadowService {
   private oneOperateChange = createMomentChange<{ shadows: IShadow[] | IInitShadows }>({
     shadows: [],
   })
-  private shadowsSignalArgs = createSignalArgs<{ isSetup: boolean }>()
   initHook() {
     StageSelect.afterSelect.hook(() => {
       this.setupShadows()
@@ -32,6 +32,7 @@ export class OperateShadowService {
       this.oneOperateChange.endCurrent()
     })
     UIPicker.beforeOperate.hook(({ type }) => {
+      if (UIPicker.impact !== 'shadow') return
       if (type !== 'solid-color') return
       this.beforeOperate.dispatch()
     })
@@ -42,19 +43,20 @@ export class OperateShadowService {
       this.shadows.dispatch()
     })
     UIPicker.afterOperate.hook(({ type }) => {
+      if (UIPicker.impact !== 'shadow') return
       if (type !== 'solid-color') return
       this.afterOperate.dispatch()
     })
     this.shadows.hook(() => {
-      if (this.shadowsSignalArgs()?.isSetup) return
+      // if (this.shadowsSignalArgs()?.isSetup) return
       this.isShadowsChanged = true
-      SchemaNode.makeSelectDirty()
+      OperateNode.makeSelectDirty()
     })
-    SchemaNode.duringFlushDirty.hook((id) => {
+    OperateNode.duringFlushDirty.hook((id) => {
       if (!this.isShadowsChanged) return
-      this.applyChange(SchemaNode.find(id))
+      this.applyChange(Schema.find(id))
     })
-    SchemaNode.afterFlushDirty.hook(() => {
+    OperateNode.afterFlushDirty.hook(() => {
       this.isShadowsChanged = false
     })
     this.afterOperate.hook(() => {
@@ -92,17 +94,17 @@ export class OperateShadowService {
   private setupShadows() {
     this.initShadows.clear()
     this.oneOperateChange.endCurrent()
-    this.shadowsSignalArgs({ isSetup: true })
-    if (SchemaNode.selectIds.value.size === 0) {
+    // this.shadowsSignalArgs({ isSetup: true })
+    if (OperateNode.selectIds.value.size === 0) {
       this.shadows.dispatch([])
     }
-    if (SchemaNode.selectNodes.length === 1) {
-      const node = SchemaNode.selectNodes[0]
+    if (OperateNode.selectNodes.length === 1) {
+      const node = OperateNode.selectNodes[0]
       this.oneOperateChange.reset({ shadows: cloneDeep(node.shadows) })
       this.shadows.dispatch(node.shadows)
     }
-    if (SchemaNode.selectNodes.length > 1) {
-      const nodes = SchemaNode.selectNodes
+    if (OperateNode.selectNodes.length > 1) {
+      const nodes = OperateNode.selectNodes
       nodes.forEach(({ id, shadows }) => this.initShadows.set(id, shadows))
       this.oneOperateChange.reset({ shadows: this.initShadows })
       this.shadows.dispatch(this.initShadows)

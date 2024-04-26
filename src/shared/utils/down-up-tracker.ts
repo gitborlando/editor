@@ -22,7 +22,8 @@ export function downUpTracker(
 export function useDownUpTracker(
   elCallback: () => HTMLElement | null,
   downCallback: INoopFunc,
-  upCallback: INoopFunc
+  upCallback: INoopFunc,
+  deps?: any[]
 ) {
-  useEffect(() => downUpTracker(elCallback(), downCallback, upCallback), [])
+  useEffect(() => downUpTracker(elCallback(), downCallback, upCallback), deps)
 }

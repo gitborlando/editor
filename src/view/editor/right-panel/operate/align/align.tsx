@@ -1,5 +1,4 @@
-import { observer } from 'mobx-react'
-import { FC } from 'react'
+import { FC, memo } from 'react'
 import { OperateAlign } from '~/editor/operate/align'
 import { useHookSignal } from '~/shared/signal-react'
 import Asset from '~/view/ui-utility/assets'
@@ -10,7 +9,7 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 
 type IAlignComp = {}
 
-export const AlignComp: FC<IAlignComp> = observer(({}) => {
+export const AlignComp: FC<IAlignComp> = memo(({}) => {
   const { classes } = useStyles({})
   const { alignTypes, canAlign, currentAlign: setAlign } = OperateAlign
   useHookSignal(canAlign)

@@ -3,11 +3,10 @@ import { FC } from 'react'
 import { StageViewport } from '~/editor/stage/viewport'
 import { createSetting } from '~/global/setting'
 import { createSignal } from '~/shared/signal'
-import { DiffComp } from '~/view/editor/left-panel/panels/diff/diff'
 import { FileComp } from '~/view/editor/left-panel/panels/file/file'
-import { GalleryComp } from '~/view/editor/left-panel/panels/gallery/gallery'
+import { GalleryComp } from '~/view/editor/left-panel/panels/gallery'
+import { HistoryComp } from '~/view/editor/left-panel/panels/history'
 import { LayerComp } from '~/view/editor/left-panel/panels/layer/layer'
-import { RecordComp } from '~/view/editor/left-panel/panels/record/record'
 import Asset from '~/view/ui-utility/assets'
 
 type ISwitchTabOption = {
@@ -40,9 +39,11 @@ export class UILeftPanelService {
     this.popupTabIds.dispatch((ids) => ids.delete(id))
     this.currentTabId.dispatch(id)
   }
-  popupCurrentPanel() {
-    this.popupTabIds.dispatch((ids) => ids.add(this.currentTabId.value))
-    this.currentTabId.dispatch(this.switchTabIds.find((id) => !this.popupTabIds.value.has(id)))
+  popUpPanel(id: string) {
+    this.popupTabIds.dispatch((ids) => ids.add(id))
+    if (this.currentTabId.value === id) {
+      this.currentTabId.dispatch(this.switchTabIds.find((id) => !this.popupTabIds.value.has(id)))
+    }
   }
 }
 
@@ -75,15 +76,15 @@ UILeftPanel.registerSwitchTab({
   icon: Asset.editor.leftPanel.switchBar.image,
   panel: GalleryComp,
 })
+// UILeftPanel.registerSwitchTab({
+//   id: 'record',
+//   name: '记录',
+//   icon: Asset.editor.leftPanel.switchBar.record,
+//   panel: RecordComp,
+// })
 UILeftPanel.registerSwitchTab({
-  id: 'record',
-  name: '记录',
+  id: 'history',
+  name: '历史',
   icon: Asset.editor.leftPanel.switchBar.record,
-  panel: RecordComp,
-})
-UILeftPanel.registerSwitchTab({
-  id: 'diff',
-  name: 'Diff',
-  icon: Asset.editor.leftPanel.switchBar.record,
-  panel: DiffComp,
+  panel: HistoryComp,
 })

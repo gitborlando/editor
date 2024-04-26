@@ -1,12 +1,11 @@
 import autobind from 'class-autobind-decorator'
-import { createCache } from '~/shared/cache'
-import { iife } from '~/shared/utils/normal'
-import { SchemaNode } from './node'
-import { SchemaPage } from './page'
-import { IFrame, IGroup, INode, INodeParent, IPage, IVector } from './type'
+import { OperateMeta } from '../operate/meta'
+import { OperateNode } from '../operate/node'
+import { Schema } from './schema'
+import { ID, INode, INodeParent, ISchemaItem } from './type'
 
-type ITraverseData = {
-  id: string
+export type ITraverseData = {
+  id: ID
   node: INode
   index: number
   depth: number
@@ -18,147 +17,62 @@ type ITraverseData = {
 }
 type ITraverseCallback = (arg: ITraverseData) => any
 
-type INodeRuntime = {
-  ancestorIds: string[]
-}
-
 @autobind
 export class SchemaUtilService {
-  nodeRuntimeCache = createCache<INodeRuntime>()
-  init() {
-    this.initNodeRuntime()
-  }
-  find(id: string) {
-    let res = SchemaNode.find(id)
-    if (!res && this.isPage(id)) return SchemaPage.find(id)
-    return res
-  }
-  findAncestors(id: string) {
-    const ancestors = <(INode | IPage)[]>[]
-    let ancestor = this.find(id)
+  findAncestors(id: ID) {
+    const ancestors = <ISchemaItem[]>[]
+    let ancestor = Schema.find(id)
     while (ancestor && 'parentId' in ancestor) {
-      ancestor = this.find(ancestor.parentId)
+      ancestor = Schema.find(ancestor.parentId)
       ancestor && ancestors.push(ancestor)
     }
     return ancestors
   }
-  findParent(id: string) {
-    const { parentId } = SchemaNode.find(id)
-    if (this.isPage(parentId)) return SchemaPage.find(parentId)
-    return SchemaNode.find(parentId) as INodeParent
-  }
   deleteSelectNodes() {
-    if (SchemaNode.selectIds.value.size) {
-      this.traverseDelete(SchemaNode.selectIds.value)
+    if (OperateNode.selectIds.value.size) {
+      this.traverseDelete(OperateNode.selectIds.value)
     }
   }
   traverseDelete(ids: Set<string>) {
     const deleteNodes: INode[] = []
-    let isDeepDelete = false
-    this.traverse(
-      ({ id, node, childIds }) => {
-        if (isDeepDelete) return deleteNodes.push(node)
-        if (ids.has(id)) {
-          deleteNodes.push(node)
-          if (childIds?.length) isDeepDelete = true
-        }
-      },
-      ({ id }) => {
-        if (ids.has(id) && isDeepDelete) isDeepDelete = false
-      }
-    )
-    SchemaNode.removeNodes(deleteNodes)
+    this.traverseIds([...ids], ({ node }) => deleteNodes.push(node))
+    OperateNode.removeNodes(deleteNodes)
   }
-  insertBefore(parent: INodeParent | IPage, node: INode, another: INode) {
+  insertBefore(parent: INodeParent, node: INode, another: INode) {
+    let index = parent.childIds.findIndex((i) => i === another.id)
+    OperateNode.insertAt(parent, node, index)
+  }
+  insertAfter(parent: INodeParent, node: INode, another: INode) {
     const index = parent.childIds.findIndex((i) => i === another.id)
-    SchemaNode.connectAt(parent, node, index - 1)
+    OperateNode.insertAt(parent, node, index + 1)
   }
-  insertAfter(parent: INodeParent | IPage, node: INode, another: INode) {
-    const index = parent.childIds.findIndex((i) => i === another.id)
-    SchemaNode.connectAt(parent, node, index + 1)
+  getChildren(id: ID | INodeParent) {
+    const childIds = (typeof id !== 'string' ? id : Schema.find<INodeParent>(id)).childIds || []
+    return childIds.map((id) => Schema.find<INode>(id))
   }
-  getChildren(id: string) {
-    const nodes = <INode[]>[]
-    iife(() => {
-      if (this.isPage(id)) return SchemaPage.find(id)?.childIds || []
-      const node = SchemaNode.find(id)
-      return 'childIds' in node ? node.childIds : []
-    }).forEach((id) => {
-      const node = SchemaNode.find(id)
-      if (!node?.DELETE) nodes.push(node)
-    })
-    return nodes
+  isPage(id: ID) {
+    return id.startsWith('page_')
   }
-  isVector(node: INode, type: IVector['vectorType']) {
-    return node.type === 'vector' && node.vectorType === type
+  is<T extends ISchemaItem>(item: ISchemaItem, type: ISchemaItem['type']): item is T {
+    return item.type === type
   }
-  isPage(id: string) {
-    return id.startsWith('page')
+  isById(id: ID, type: ISchemaItem['type'] | 'nodeParent'): boolean {
+    if (type === 'nodeParent') return ['page', 'frame', 'group'].includes(Schema.find(id).type)
+    return Schema.find(id).type === type
   }
-  isFrameId(id: string) {
-    return SchemaNode.find(id).type === 'frame'
-  }
-  isFrameNode(node: INode): node is IFrame {
-    return node.type === 'frame'
-  }
-  isPageFrameId(id: string) {
-    const node = SchemaNode.find(id)
+  isPageFrame(id: ID) {
+    const node = Schema.find(id)
     return node.type === 'frame' && this.isPage(node.parentId)
   }
-  isPageFrameNode(node: INode): node is IFrame {
-    return node.type === 'frame' && this.isPage(node.parentId)
+  traverseCurPageChildIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
+    this.traverseIds(OperateMeta.curPage.value.childIds, callback, bubbleCallback)
   }
-  isContainerNode(target: string | INode): target is IFrame | IGroup {
-    const node = typeof target === 'string' ? SchemaNode.find(target) : target
-    return 'childIds' in node
-  }
-  parentIsPage(id: string) {
-    return SchemaNode.find(id).parentId.startsWith('page')
-  }
-  traverse(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
-    this.traverseOnePageIds(
-      SchemaPage.currentPage.value.childIds,
-      SchemaPage.currentId.value,
-      callback,
-      bubbleCallback
-    )
-  }
-  traverseSelectIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
-    this.traverseCurrentPageIds([...SchemaNode.selectIds.value], callback, bubbleCallback)
-  }
-  traverseFromSomeId(id: string, callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
-    let canTraverse = false
-    this.traverse(
-      (props) => {
-        if (props.id === id) canTraverse = true
-        if (!canTraverse) return
-        return callback(props)
-      },
-      (props) => {
-        bubbleCallback?.(props)
-        if (props.id === id) props.abort.abort()
-      }
-    )
-  }
-  traverseCurrentPageIds(
-    ids: string[],
-    callback: ITraverseCallback,
-    bubbleCallback?: ITraverseCallback
-  ) {
-    this.traverseOnePageIds(ids, SchemaPage.currentId.value, callback, bubbleCallback)
-  }
-  traverseOnePageIds(
-    ids: string[],
-    pageId: string,
-    callback: ITraverseCallback,
-    bubbleCallback?: ITraverseCallback
-  ) {
+  traverseIds(ids: string[], callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
     const abort = new AbortController()
     const traverse = (ids: string[], depth: number, upLevelRef?: ITraverseData) => {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
-        const node = SchemaNode.nodeMap[pageId][id]
-        if (!node || node.DELETE) return
+        const node = Schema.find<INode>(id)
         const childIds = 'childIds' in node ? node.childIds : undefined
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []
         const props = { id, node, index, childIds, depth, abort, upLevelRef, ancestors }
@@ -169,12 +83,12 @@ export class SchemaUtilService {
     }
     traverse(ids, 0)
   }
-  private initNodeRuntime() {
-    this.traverse(({ id, ancestors }) => {
-      const runtime = <INodeRuntime>{}
-      runtime.ancestorIds = ancestors
-      this.nodeRuntimeCache.set(id, runtime)
-    })
+  reverse(id: ID, callback: (node: INode) => any) {
+    let node = Schema.find<INode>(id)
+    while (node) {
+      callback(node)
+      node = Schema.find(node.parentId)
+    }
   }
 }
 

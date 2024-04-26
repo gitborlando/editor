@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { radianfy } from '~/editor/math/base'
-import { SchemaNode } from '~/editor/schema/node'
+import { OperateNode } from '~/editor/operate/node'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 
@@ -23,7 +23,7 @@ export class StageWidgetRulerService {
       this.autoDraw()
       this.drawCorner()
     })
-    SchemaNode.datumId.hook(this.autoDraw)
+    OperateNode.datumId.hook(this.autoDraw)
     StageViewport.zoom.hook(this.autoDraw)
     StageViewport.stageOffset.hook(this.autoDraw)
   }
@@ -36,7 +36,7 @@ export class StageWidgetRulerService {
   }
   private drawHorizontal() {
     const width = StageViewport.bound.value.width / this.zoom
-    const offsetX = (StageViewport.stageOffset.value.x + SchemaNode.datumXY.x) / this.zoom
+    const offsetX = (StageViewport.stageOffset.value.x + OperateNode.datumXY.x) / this.zoom
     // this.horizontal.beginFill('#F5F5F5')
     // this.horizontal.drawRect(0, 0, width, 20)
     const step = this.getStepByZoom()
@@ -58,7 +58,7 @@ export class StageWidgetRulerService {
   }
   private drawVertical() {
     const height = StageViewport.bound.value.height / this.zoom
-    const offsetY = (StageViewport.stageOffset.value.y + SchemaNode.datumXY.y) / this.zoom
+    const offsetY = (StageViewport.stageOffset.value.y + OperateNode.datumXY.y) / this.zoom
     // this.vertical.beginFill('#F5F5F5')
     // this.vertical.drawRect(0, 0, 20, height)
     const step = this.getStepByZoom()

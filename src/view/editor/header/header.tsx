@@ -1,10 +1,12 @@
 import { FC, memo, useCallback } from 'react'
-import { Record } from '~/editor/record'
+import { SchemaHistory } from '~/editor/schema/history'
+import { Schema } from '~/editor/schema/schema'
 import { IStageCreateType, StageCreate } from '~/editor/stage/interact/create'
 import { StageInteract } from '~/editor/stage/interact/interact'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
+import { useSubComponent } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -17,19 +19,30 @@ type IHeaderComp = {}
 export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageInteract.currentType)
   useHookSignal(StageViewport.zoom)
-  const { classes } = useStyles({ top: StageViewport.bound.value.y })
+  const { classes, theme, css } = useStyles({ top: StageViewport.bound.value.y })
+
+  const ClientComp = useSubComponent([], ({}) => {
+    return (
+      <Flex
+        className={css({
+          ...theme.labelFont,
+        })}>
+        {Schema.client.id}
+      </Flex>
+    )
+  })
 
   const RecordIcons: FC<{}> = useCallback(() => {
-    useHookSignal(Record.index)
+    useHookSignal(SchemaHistory.index)
     return (
       <>
-        <Button disabled={!Record.canUndo} onClick={Record.undo}>
-          <Icon size={20} fill={Record.canUndo ? '' : '#E6E6E6'}>
+        <Button disabled={!SchemaHistory.canUndo} onClick={SchemaHistory.undo}>
+          <Icon size={20} fill={SchemaHistory.canUndo ? '' : '#E6E6E6'}>
             {Asset.editor.header.record.undo}
           </Icon>
         </Button>
-        <Button disabled={!Record.canRedo} onClick={Record.redo}>
-          <Icon size={20} fill={Record.canRedo ? '' : '#E6E6E6'}>
+        <Button disabled={!SchemaHistory.canRedo} onClick={SchemaHistory.redo}>
+          <Icon size={20} fill={SchemaHistory.canRedo ? '' : '#E6E6E6'}>
             {Asset.editor.header.record.redo}
           </Icon>
         </Button>
@@ -52,7 +65,13 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     const isActive =
       StageInteract.currentType.value === 'create' && StageCreate.currentType.value === type
     return (
-      <Button active={isActive} onClick={() => StageCreate.currentType.dispatch(type)}>
+      <Button
+        active={isActive}
+        onClick={(e) => {
+          StageInteract.currentType.dispatch('create')
+          StageCreate.currentType.dispatch(type)
+          // e.stopPropagation()
+        }}>
         <Icon size={20} fill={isActive ? hslBlueColor(65) : ''}>
           {Asset.editor.node[type as keyof typeof Asset.editor.node]}
         </Icon>
@@ -66,6 +85,8 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
         <Flex layout='c'>
           <Icon size={28}>{Asset.favIcon.shiyangyang}</Icon>
           <h4 style={{ color: hslBlueColor(60), fontSize: 16 }}>屎羊羊编辑器</h4>
+          {'/'}
+          <ClientComp />
         </Flex>
       </Flex>
       <Flex layout='c' className={classes.centerGroup}>
@@ -80,8 +101,6 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
         ))}
         <Divide length={16} thickness={0.5} />
         <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
-        {/* <Button onClick={() => SchemaFile.openFile()}>导入</Button>
-        <Button onClick={() => SchemaFile.downloadJsonFile(Schema.getSchema())}>下载</Button> */}
       </Flex>
     </Flex>
   )

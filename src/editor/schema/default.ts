@@ -5,8 +5,9 @@ import { COLOR, rgb } from '~/shared/utils/color'
 import { IRect, IXY } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { xy_new } from '../math/xy'
-import { SchemaPage } from './page'
+import { OperateMeta } from '../operate/meta'
 import {
+  IClient,
   IEllipse,
   IFillColor,
   // IFillGonicGradient,
@@ -16,6 +17,7 @@ import {
   IFrame,
   IGroup,
   ILine,
+  IMeta,
   INodeBase,
   INodeMeta,
   IPage,
@@ -33,26 +35,39 @@ import {
 export class SchemaDefaultService {
   devFileId?: string
   typeIndexMapCache = createCache<Record<string, [string, number]>>()
-  meta(): ISchema['meta'] {
+  meta(): IMeta {
+    return {
+      type: 'meta',
+      id: 'meta',
+      fileId: nanoid(),
+      name: '无标题',
+      version: 0,
+      pageIds: [],
+      clients: {},
+    }
+  }
+  client(option?: Partial<IClient>): IClient {
     return {
       id: nanoid(),
-      name: '无标题',
-      user: 'myself',
-      version: 0,
+      selectIds: [],
+      selectPageId: '',
+      mouse: xy_new(0, 0),
+      ...option,
     }
   }
   schema(): ISchema {
     const page = this.page()
+    const meta = this.meta()
+    meta.pageIds = [page.id]
     return {
-      meta: this.meta(),
-      nodes: { [page.id]: {} },
-      pages: [page],
+      meta: meta,
+      [page.id]: page,
     }
   }
   page(): IPage {
     return {
       type: 'page',
-      id: `page:${nanoid()}`,
+      id: `page_${nanoid()}`,
       childIds: [],
       zoom: 1,
       x: 0,
@@ -175,6 +190,7 @@ export class SchemaDefaultService {
         fontStyle: 'normal',
         letterSpacing: 0,
         lineHeight: 1,
+        wordWrap: true,
       },
       ...nodeBase,
       ...name,
@@ -291,7 +307,7 @@ export class SchemaDefaultService {
       | 'image'
   ) {
     const typeIndexMap = this.typeIndexMapCache.getSet(
-      this.devFileId || SchemaPage.currentId.value,
+      'this.devFileId' || OperateMeta.curPage.value.id,
       () => {
         return {
           page: ['页面', 1],

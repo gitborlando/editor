@@ -1,7 +1,5 @@
-import { FC, memo, useEffect } from 'react'
+import { FC, memo } from 'react'
 import { RgbaStringColorPicker } from 'react-colorful'
-import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
-import { downUpTracker } from '~/shared/utils/down-up-tracker'
 import { makeStyles } from '~/view/ui-utility/theme'
 
 type IPickerColorComp = {
@@ -10,23 +8,9 @@ type IPickerColorComp = {
 }
 
 export const PickerColorComp: FC<IPickerColorComp> = memo(({ color, onChange }) => {
-  const { beforeOperate, afterOperate } = UIPicker
   const { classes, cx } = useStyles({})
-  useEffect(() => {
-    return downUpTracker(
-      document.getElementById('colorPicker$$$')!,
-      () => beforeOperate.dispatch({ type: 'solid-color' }),
-      () => afterOperate.dispatch({ type: 'solid-color' })
-    )
-  }, [])
-  return (
-    <RgbaStringColorPicker
-      id='colorPicker$$$'
-      className={classes.colorPicker}
-      color={color}
-      onChange={onChange}
-    />
-  )
+
+  return <RgbaStringColorPicker className={classes.colorPicker} color={color} onChange={onChange} />
 })
 
 type IPickerColorCompStyle =

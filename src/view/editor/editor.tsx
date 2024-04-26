@@ -7,7 +7,7 @@ import { Flex } from '~/view/ui-utility/widget/flex'
 import { HeaderComp } from './header/header'
 import { LeftPanelComp } from './left-panel/left-panel'
 import { RightPanelComp } from './right-panel/right-panel'
-import { StageComp } from './stage/stage'
+import { MainStageComp } from './stage/stage'
 
 type IEditorComp = {}
 
@@ -19,7 +19,7 @@ export const EditorComp: FC<IEditorComp> = observer(({}) => {
       <HeaderComp />
       <Flex layout='h' className={classes.main}>
         <LeftPanelComp />
-        <StageComp />
+        <MainStageComp />
         <RightPanelComp />
       </Flex>
     </Flex>

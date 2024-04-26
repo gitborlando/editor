@@ -3,7 +3,6 @@ import hotkeys, { HotkeysEvent } from 'hotkeys-js'
 import { Record } from '~/editor/record'
 import { createSignal } from '~/shared/signal'
 import { addListener } from '~/shared/utils/event'
-import { SchemaNode } from './schema/node'
 import { SchemaUtil } from './schema/util'
 
 type IHotKeys = keyof Omit<HotkeyService, 'init' | 'initHook' | 'isKeyDown'>
@@ -28,8 +27,8 @@ export class HotkeyService {
     this['ctrl+shift+z'].hook(Record.redo)
     // this['ctrl+s'].hook(SchemaFile.saveJsonFile)
     this['del'].hook(SchemaUtil.deleteSelectNodes)
-    this['ctrl+c'].hook(SchemaNode.copyNodes)
-    this['ctrl+v'].hook(SchemaNode.pasteNodes)
+    // this['ctrl+c'].hook(NewSchema.copyNodes)
+    // this['ctrl+v'].hook(NewSchema.pasteNodes)
   }
   private bindHotkeys() {
     addListener('keyup', () => (this.isKeyDown = false))

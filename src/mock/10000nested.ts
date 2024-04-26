@@ -50,17 +50,24 @@ export function mock10000Nested() {
   }
   console.log('mock time: ', new Date().getTime() - s)
   return <ISchema>{
-    meta: { id: 'testFile10000Nested', name: '测试文件10000Nested', user: 'myself', version: 1 },
-    nodes: { 'page:1': nodes },
-    pages: [
-      {
-        id: 'page:1',
-        name: '测试页面1',
-        zoom: 0.05,
-        x: 100,
-        y: 100,
-        childIds: frameIds,
-      },
-    ],
+    meta: {
+      type: 'meta',
+      id: 'meta',
+      fileId: 'testFile10000Nested',
+      name: '测试文件10000Nested',
+      version: 0,
+      pageIds: ['page_1'],
+      clients: {},
+    },
+    page_1: {
+      id: 'page_1',
+      type: 'page',
+      name: '测试页面1',
+      zoom: 0.05,
+      x: 100,
+      y: 100,
+      childIds: frameIds,
+    },
+    ...nodes,
   }
 }

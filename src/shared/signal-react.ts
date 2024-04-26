@@ -26,3 +26,34 @@ export function useHookSignal<T>(
     })
   }, [])
 }
+
+type ICallback<T> = (value: T, forceUpdate: INoopFunc) => any
+export function useHookSignal2<T>(signal: Signal<T>): void
+export function useHookSignal2<T>(signal: Signal<T>, option?: IHookOption): void
+export function useHookSignal2<T>(signal: Signal<T>, callback: ICallback<T>): void
+export function useHookSignal2<T>(
+  signal: Signal<T>,
+  option: IHookOption,
+  callback: ICallback<T>
+): void
+export function useHookSignal2<T>(
+  signal: Signal<T>,
+  option?: IHookOption | ICallback<T>,
+  callback?: ICallback<T>
+) {
+  const [_, setState] = useState({})
+  const forceUpdate = () => setState({})
+  useEffect(() => {
+    if (callback) {
+      return signal.hook(option as IHookOption, (value) => {
+        callback(value, forceUpdate)
+      })
+    }
+    if (typeof option === 'function') {
+      return signal.hook({}, (value) => {
+        option(value, forceUpdate)
+      })
+    }
+    return signal.hook(option || {}, forceUpdate)
+  }, [])
+}

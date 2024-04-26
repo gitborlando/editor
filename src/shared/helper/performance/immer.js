@@ -1,6 +1,6 @@
 import { createDraft } from 'immer'
-import { observable } from 'mobx'
 import { Record } from 'immutable'
+import { observable } from 'mobx'
 
 let api = null
 
@@ -9,7 +9,7 @@ const Api = [observable, createDraft, Record, (a) => a]
 function test(k1, k2, k3, text) {
   const s = new Date().getTime()
 
-  const obj = {}
+  const obj = api({})
 
   for (let i = 0; i < k1 / 2; i++) {
     const o2 = {}
@@ -22,18 +22,18 @@ function test(k1, k2, k3, text) {
       for (let i = 0; i < k3; i++) {
         o3['a' + i] = 'b' + i
       }
-      o2['a' + i] = api(o3)
+      o2['a' + i] = o3
     }
-    obj['a' + i] = api(o2)
+    obj['a' + i] = o2
   }
   for (let i = 0; i < k1 / 2; i++) {
-    obj['a' + i] = api({ x: 0, y: 0, id: 'abc', type: 'normal' })
+    obj['a' + i] = { x: 0, y: 0, id: 'abc', type: 'normal' }
   }
 
   console.log(`${k1} ${k2} ${k3}` + ' -> ', new Date().getTime() - s + ' ms')
 }
 
-for (let i = 0; i < Api.length; i++) {
+for (let i = 0; i < Api.length - 1; i++) {
   api = Api[i]
 
   console.log(`\n=========${['mobx', 'immer', 'immutable', 'raw'][i]}==========`)

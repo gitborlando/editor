@@ -4,10 +4,12 @@ import { Graphics, Matrix, Text, Texture } from 'pixi.js'
 import { IImage, Img } from '~/editor/img'
 import { radianfy } from '~/editor/math/base'
 import { xy_new } from '~/editor/math/xy'
-import { SchemaNode } from '~/editor/schema/node'
+import { OperateNode } from '~/editor/operate/node'
+import { Schema } from '~/editor/schema/schema'
 import { IFillLinearGradient, IFrame, IIrregular, INode, IVector } from '~/editor/schema/type'
 import { XY } from '~/shared/structure/xy'
 import { rgb, rgbToHex, rgbToRgba } from '~/shared/utils/color'
+import { flushList } from '~/shared/utils/list'
 import { iife } from '~/shared/utils/normal'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
@@ -20,20 +22,27 @@ import { StageDrawPath } from './path'
 @autobind
 export class StageDrawService {
   private redrawIds = new Set<string>()
+  private hasShadowNodes = new Set<INode>()
   initHook() {
-    SchemaNode.afterFlushDirty.hook(() => {
-      this.redrawIds.forEach((id) => {
-        const node = SchemaNode.find(id)
+    OperateNode.afterFlushDirty.hook({ after: 'reHierarchy' }, () => {
+      flushList(this.redrawIds, (id) => {
+        const node = Schema.find<INode>(id)
         node && this.drawNode(node)
       })
-      this.redrawIds.clear()
+    })
+    StageViewport.zoom.hook((_, args) => {
+      if (args?.pageChangeCause) return
+      this.hasShadowNodes.forEach((node) => {
+        const element = StageElement.findElement(node.id)
+        this.drawShadows(element, node)
+      })
     })
   }
   collectRedraw(id: string) {
     this.redrawIds.add(id)
   }
   private drawNode(node: INode) {
-    const element = StageElement.findOrCreate(node)
+    const element = StageElement.findElement(node.id)
     if ('clear' in element) element.clear()
     this.drawFills(element, node)
     this.drawStrokes(element, node)
@@ -96,17 +105,19 @@ export class StageDrawService {
     })
   }
   drawShadows(element: IStageElement, node: INode) {
+    node.shadows.length ? this.hasShadowNodes.add(node) : this.hasShadowNodes.delete(node)
     element.filters = []
     node.shadows.forEach((shadow) => {
       if (!shadow.visible) return
       if (this.isText(element)) return
       const { fill, offsetX, offsetY, blur } = shadow
       if (fill.type !== 'color') return
+      const zoom = StageViewport.zoom.value
       const filter = new DropShadowFilter({
-        offset: { x: offsetX, y: offsetY },
+        offset: { x: offsetX * zoom, y: offsetY * zoom },
         color: Number(`0x${rgbToHex(fill.color)}`),
         alpha: fill.alpha,
-        blur,
+        blur: blur * zoom,
         quality: 60,
       })
       element.filters?.push(filter)
@@ -129,8 +140,8 @@ export class StageDrawService {
       // this.drawFrameName(node)
       const mask = StageElement.maskCache.get(node.id)
       this.setGeometry(mask, node)
-      mask.drawRoundedRect(0, 0, width, height, node.radius)
       graphics.drawRoundedRect(0, 0, width, height, node.radius)
+      mask.drawRoundedRect(0, 0, width, height, node.radius)
     }
     if (node.type === 'text') {
       text.text = node.content
@@ -212,9 +223,9 @@ export class StageDrawService {
         nameText.scale.set(1 / zoom, 1 / zoom)
         this.drawFrameName(frame)
       })
-      SchemaNode.afterReName.hook(({ id, name }) => {
-        if (id === frame.id) nameText.text = name
-      })
+      // Schema.afterReName.hook(({ id, name }) => {
+      //   if (id === frame.id) nameText.text = name
+      // })
       return nameText
     })
     const pivotX = frame.centerX - frame.width / 2

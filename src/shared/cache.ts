@@ -54,3 +54,7 @@ export class Cache<K, V> {
 export function createCache<V extends any, K extends any = string>() {
   return new Cache<K, V>()
 }
+
+export function createCache2<K, V>() {
+  return new Cache<K, V>()
+}

@@ -1,6 +1,7 @@
-import { FC } from 'react'
+import { FC, useRef } from 'react'
 import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
-import { useHookSignal } from '~/shared/signal-react'
+import { useHookSignal, useSignal } from '~/shared/signal-react'
+import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PickerColorComp } from './color'
@@ -9,7 +10,8 @@ type IPickerSolidComp = {}
 
 export const PickerSolidComp: FC<IPickerSolidComp> = ({}) => {
   const { classes } = useStyles({})
-  const { currentSolidFill } = UIPicker
+  const ref = useRef<HTMLDivElement>(null)
+  const { currentSolidFill, beforeOperate, afterOperate } = UIPicker
   const onChange = (color: string) => {
     const [, r, g, b, a] = color.match(/rgba\((\d+), (\d+), (\d+), (\d+(\.\d+)?)\)/)!
     currentSolidFill.dispatch((fill) => {
@@ -21,10 +23,22 @@ export const PickerSolidComp: FC<IPickerSolidComp> = ({}) => {
     const { color, alpha } = currentSolidFill.value
     return color.replace('rgb', 'rgba').replace(')', `,${alpha})`)
   }
+  const lastColor = useSignal(getColor())
+  useDownUpTracker(
+    () => ref.current,
+    () => {
+      beforeOperate.dispatch({ type: 'solid-color' })
+    },
+    () => {
+      if (lastColor.value === getColor()) return
+      afterOperate.dispatch({ type: 'solid-color' })
+      lastColor.value = getColor()
+    }
+  )
   useHookSignal(currentSolidFill)
 
   return (
-    <Flex layout='v' className={classes.PickerSolid}>
+    <Flex layout='v' ref={ref} className={classes.PickerSolid}>
       <PickerColorComp color={getColor()} onChange={onChange} />
       <Flex layout='h'>{getColor()}</Flex>
     </Flex>

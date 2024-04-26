@@ -1,31 +1,49 @@
 import { TextStyleAlign, TextStyleFontStyle, TextStyleFontWeight } from 'pixi.js'
 import { IXY } from '~/shared/utils/normal'
+import { IOperateDiff } from './diff'
 
 export type ID = string
 
 export type ISchema = {
   meta: IMeta
-  pages: IPage[]
-  nodes: Record<string, Record<string, INode>>
+  [id: string]: IPage | INode | IMeta
 }
+
+export type ISchemaItem = INode | IPage | IMeta
+
+export type INodeOrPage = INode | IPage
 
 export type IMeta = {
-  id: string
+  type: 'meta'
+  id: 'meta'
+  fileId: string
   name: string
-  user: string
   version: number
+  pageIds: string[]
+  clients: Record<ID, IClient>
 }
 
-export type IPage = {
+export type IClient = {
+  id: ID
+  selectIds: ID[]
+  selectPageId: ID
+  mouse: IXY
+}
+
+export type INodeParentBase = {
+  childIds: string[]
+}
+
+export type IPage = INodeParentBase & {
   type: 'page'
-  DELETE?: boolean
-  id: `page:${string}`
+  id: `page_${string}`
   name: string
   zoom: number
   x: number
   y: number
-  childIds: string[]
 }
+
+export type INodeParent = IFrame | IGroup | IPage
 
 export type INode =
   | IFrame
@@ -37,7 +55,6 @@ export type INode =
   | IPolygon
   | IStar
   | IIrregular
-export type INodeParent = IFrame | IGroup | IPage
 
 export type INodeMeta = {
   id: string
@@ -45,7 +62,6 @@ export type INodeMeta = {
   lock: boolean
   visible: boolean
   parentId: string
-  DELETE?: boolean
 }
 
 export type IGeometryDetail = {
@@ -69,16 +85,16 @@ export type INodeBase = INodeMeta &
     shadows: IShadow[]
   }
 
-export type IFrame = INodeBase & {
-  type: 'frame'
-  childIds: string[]
-  radius: number
-}
+export type IFrame = INodeBase &
+  INodeParentBase & {
+    type: 'frame'
+    radius: number
+  }
 
-export type IGroup = INodeBase & {
-  type: 'group'
-  childIds: string[]
-}
+export type IGroup = INodeBase &
+  INodeParentBase & {
+    type: 'group'
+  }
 
 export type IBezierType = 'no-bezier' | 'symmetric' | 'angle-symmetric' | 'no-symmetric'
 
@@ -229,4 +245,76 @@ export type IShadow = {
   blur: number
   spread: number
   fill: IFill
+}
+
+export type ISchemaPropKey =
+  | keyof IMeta
+  | keyof IClient
+  | keyof IPage
+  | keyof INodeMeta
+  | keyof IFrame
+  | keyof IGroup
+  | keyof IRectangle
+  | keyof IPolygon
+  | keyof IStar
+  | keyof IIrregular
+  | keyof IEllipse
+  | keyof ILine
+  | keyof IFillColor
+  | keyof IFillLinearGradient
+  | keyof IFillImage
+  | keyof IShadow
+  | keyof IStroke
+  | keyof IText
+  | keyof IText['style']
+  | keyof IPoint
+  | keyof INodeBase
+
+export type ISchemaChangeType =
+  | 'addClient'
+  | 'selectPage'
+  | 'syncMouse'
+  | 'selectIds'
+  | 'changePages'
+  | 'reHierarchy'
+  | 'addNodes'
+  | 'removeNodes'
+  | 'changeNodeAlign'
+  | 'changeNodeGeometry'
+  | 'changeTextContent'
+  | 'changeTextStyle'
+
+export const SchemaChangeType = <ISchemaChangeType[]>[
+  'addClient',
+  'selectPage',
+  'syncMouse',
+  'selectIds',
+  'changePages',
+  'reHierarchy',
+  'addNodes',
+  'removeNodes',
+  'changeNodeAlign',
+  'changeNodeGeometry',
+  'changeTextContent',
+  'changeTextStyle',
+]
+
+export type ISchemaOperation = {
+  id: ID
+  timestamp: number
+  changeType: ISchemaChangeType
+  changeIds: ID[]
+  diff: IOperateDiff
+  inverseType?: ISchemaChangeType
+  description?: string
+}
+
+export type ISchemaListener = {
+  listenType: ISchemaChangeType
+  callback: (operation: ISchemaOperation) => void
+}
+
+export type ISchemaHistory = {
+  operations: ISchemaOperation[]
+  description: string
 }

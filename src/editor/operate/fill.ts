@@ -2,16 +2,17 @@ import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import { cloneDeep } from 'lodash-es'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
-import { createSignal, createSignalArgs } from '~/shared/signal'
+import { createSignal } from '~/shared/signal'
 import { rgba } from '~/shared/utils/color'
 import { Delete } from '~/shared/utils/normal'
 import { Record } from '../record'
 import { SchemaDefault } from '../schema/default'
-import { SchemaNode } from '../schema/node'
+import { Schema } from '../schema/schema'
 import { IFill, INode } from '../schema/type'
 import { StageDraw } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
 import { UIPicker } from '../ui-state/right-planel/operate/picker'
+import { OperateNode } from './node'
 
 type IInitFills = Map<string, IFill[]>
 
@@ -23,7 +24,6 @@ export class OperateFillService {
   private isFillsChanged = false
   private initFills = new Map<string, IFill[]>()
   private oneOperateChange = createMomentChange<{ fills: IFill[] | IInitFills }>({ fills: [] })
-  private fillsSignalArgs = createSignalArgs<{ isSetup: boolean }>()
   initHook() {
     StageSelect.afterSelect.hook(() => {
       this.setupFills()
@@ -45,16 +45,16 @@ export class OperateFillService {
       if (type !== 'solid-color') return
       this.afterOperate.dispatch()
     })
-    this.fills.hook(() => {
-      if (this.fillsSignalArgs()?.isSetup) return
+    this.fills.hook((_, args) => {
+      if (args?.isSetup) return
       this.isFillsChanged = true
-      SchemaNode.makeSelectDirty()
+      OperateNode.makeSelectDirty()
     })
-    SchemaNode.duringFlushDirty.hook((id) => {
+    OperateNode.duringFlushDirty.hook((id) => {
       if (!this.isFillsChanged) return
-      this.applyChange(SchemaNode.find(id))
+      this.applyChange(Schema.find(id))
     })
-    SchemaNode.afterFlushDirty.hook(() => {
+    OperateNode.afterFlushDirty.hook(() => {
       this.isFillsChanged = false
     })
     this.afterOperate.hook(() => {
@@ -89,21 +89,20 @@ export class OperateFillService {
   private setupFills() {
     this.initFills.clear()
     this.oneOperateChange.endCurrent()
-    this.fillsSignalArgs({ isSetup: true })
-    const selectNodes = SchemaNode.selectNodes
+    const selectNodes = OperateNode.selectNodes
     if (selectNodes.length === 0) {
-      this.fills.dispatch([])
+      this.fills.dispatch([], { isSetup: true })
     }
     if (selectNodes.length === 1) {
       const node = selectNodes[0]
       this.oneOperateChange.reset({ fills: cloneDeep(node.fills) })
-      this.fills.dispatch(node.fills)
+      this.fills.dispatch(node.fills, { isSetup: true })
     }
     if (selectNodes.length > 1) {
       const isSame = this.sameFills(selectNodes)
       const fills = isSame ? cloneDeep(selectNodes[0].fills) : this.initFills
       this.oneOperateChange.reset({ fills })
-      this.fills.dispatch(fills)
+      this.fills.dispatch(fills, { isSetup: true })
     }
   }
   private applyChange(node: INode) {

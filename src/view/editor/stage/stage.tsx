@@ -6,14 +6,16 @@ import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IStageComp = {}
 
-export const StageComp: FC<IStageComp> = observer(({}) => {
+export const MainStageComp: FC<IStageComp> = observer(({}) => {
   const { classes } = useStyles({})
   return (
     <Flex
       shrink={0}
       ref={Pixi.setContainer}
       className={classes.Stage}
-      onContextMenu={(e) => e.preventDefault()}></Flex>
+      onContextMenu={(e) => e.preventDefault()}>
+      {/* <SceneStageComp /> */}
+    </Flex>
   )
 })
 
@@ -26,4 +28,4 @@ const useStyles = makeStyles<IStageCompStyle>()((t) => ({
   },
 }))
 
-StageComp.displayName = 'StageComp'
+MainStageComp.displayName = 'StageComp'

@@ -1,5 +1,6 @@
 import { FC } from 'react'
-import { SchemaPage } from '~/editor/schema/page'
+import { OperateMeta } from '~/editor/operate/meta'
+import { Schema } from '~/editor/schema/schema'
 import { Menu } from '~/global/menu/menu'
 import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
@@ -14,9 +15,9 @@ type IPageItemComp = {
 }
 
 export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
-  useHookSignal(SchemaPage.currentId)
-  const selected = SchemaPage.currentId.value === id
-  const { classes } = useStyles({ selected })
+  useHookSignal(OperateMeta.curPage)
+  const selected = OperateMeta.curPage.value.id === id
+  const { classes, css } = useStyles({ selected })
   const isHover = useAutoSignal(false)
   const makeMenu = () => {
     Menu.context = { id }
@@ -28,13 +29,19 @@ export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
       justify='space-between'
       className={classes.PageItem}
       onHover={isHover.dispatch}
-      onClick={() => SchemaPage.select(id)}
+      onClick={() => {
+        OperateMeta.selectPage(id)
+        Schema.commitHistory('选中页面 ' + name)
+      }}
       onContextMenu={makeMenu}>
       <Flex layout='h' sidePadding={10} className={classes.name}>
         {name}
       </Flex>
       {selected && (
-        <Icon size={18} fill={selected ? hslBlueColor(60) : ''} style={{ marginRight: 10 }}>
+        <Icon
+          size={18}
+          fill={selected ? hslBlueColor(60) : ''}
+          className={css({ marginRight: 10 })}>
           {Asset.editor.leftPanel.page.pageSelect}
         </Icon>
       )}

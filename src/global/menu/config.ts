@@ -1,8 +1,8 @@
 import { Record } from '~/editor/record'
-import { SchemaNode } from '~/editor/schema/node'
-import { SchemaPage } from '~/editor/schema/page'
 import { SchemaUtil } from '~/editor/schema/util'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
+import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
+import { noopFunc } from '~/shared/utils/normal'
 import { IMenuItem, Menu } from './menu'
 
 export const menuConfig = <const>{
@@ -10,12 +10,12 @@ export const menuConfig = <const>{
     {
       label: '复制',
       shortcut: 'ctrl+c',
-      callback: SchemaNode.copyNodes,
+      callback: noopFunc,
     },
     {
       label: '黏贴',
       shortcut: 'ctrl+v',
-      callback: SchemaNode.pasteNodes,
+      callback: noopFunc,
     },
   ],
   undoRedoGroup: <IMenuItem[]>[
@@ -35,7 +35,7 @@ export const menuConfig = <const>{
       label: '删除页面',
       callback: () => {
         const { id } = Menu.context
-        SchemaPage.delete(SchemaPage.find(id)!)
+        // SchemaPage.delete(SchemaPage.find(id)!)
       },
     },
   ],
@@ -53,8 +53,13 @@ export const menuConfig = <const>{
       callback: SchemaUtil.deleteSelectNodes,
     },
   ],
-  elementUp: <IMenuItem>{
-    label: '向上移动一层',
-    callback: () => {},
-  },
+  UIleftPanelSwitchBarGroup: <IMenuItem[]>[
+    {
+      label: '弹出面板',
+      callback: () => {
+        const { id } = Menu.context
+        UILeftPanel.popUpPanel(id)
+      },
+    },
+  ],
 }

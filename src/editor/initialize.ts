@@ -1,15 +1,16 @@
+import { OperateGeometry } from '~/editor/operate/geometry'
 import { getMockFile, mockFile } from '~/mock/mock-file'
 import { createSignal } from '~/shared/signal'
 import { SchemaFile } from './file'
 import { Hotkey } from './hotkey'
 import { OperateAlign } from './operate/align'
 import { OperateFill } from './operate/fill'
-import { OperateGeometry } from './operate/geometry'
+import { OperateMeta } from './operate/meta'
+import { OperateNode } from './operate/node'
 import { OperateShadow } from './operate/shadow'
 import { OperateStroke } from './operate/stroke'
 import { OperateText } from './operate/text'
-import { SchemaNode } from './schema/node'
-import { SchemaPage } from './schema/page'
+import { SchemaHistory } from './schema/history'
 import { Schema } from './schema/schema'
 import { ISchema } from './schema/type'
 import { StageCursor } from './stage/cursor'
@@ -34,9 +35,10 @@ export const editorInited = createSignal(false)
 Hotkey.initHook()
 
 SchemaFile.initHook()
-SchemaPage.initHook()
-SchemaNode.initHook()
+SchemaHistory.initHook()
 
+OperateMeta.initHook()
+OperateNode.initHook()
 OperateAlign.initHook()
 OperateGeometry.initHook()
 OperateFill.initHook()
@@ -51,7 +53,6 @@ StageInteract.initHook()
 StageSelect.initHook()
 StageCreate.initHook()
 StageCursor.initHook()
-
 StageWidgetHover.initHook()
 StageWidgetMarquee.initHook()
 StageWidgetRuler.initHook()
@@ -81,8 +82,8 @@ export async function initEditor() {
   } else {
     file = await SchemaFile.fileStore.get(fileId)
   }
-
-  Schema.setSchema(file)
+  console.log(fileId)
+  Schema.initSchema(file)
   UILeftPanelLayer.init()
 
   editorInited.dispatch(true)

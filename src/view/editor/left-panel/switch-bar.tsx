@@ -1,19 +1,17 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
+import { Menu } from '~/global/menu/menu'
 import { useHookSignal } from '~/shared/signal-react'
-import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
-import { Divide } from '~/view/ui-utility/widget/divide'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { Icon } from '~/view/ui-utility/widget/icon'
 
 type ISwitchBarComp = {}
 
 export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
   const { showLeftPanel, currentTabId, switchTabMap, popupTabIds } = UILeftPanel
-  const { switchTabIds, findSwitchTab, popupCurrentPanel } = UILeftPanel
+  const { switchTabIds, findSwitchTab } = UILeftPanel
   const { classes, cx } = useStyles({})
   useHookSignal(currentTabId)
   useHookSignal(popupTabIds)
@@ -30,16 +28,22 @@ export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
                 key={id}
                 active={currentTabId.value === id}
                 className={cx(classes.tab)}
-                onClick={() => currentTabId.dispatch(id)}>
+                onClick={() => currentTabId.dispatch(id)}
+                onDoubleClick={() => showLeftPanel.dispatch(!showLeftPanel.value)}
+                onContextMenu={() => {
+                  const { UIleftPanelSwitchBarGroup } = Menu.menuConfig
+                  Menu.context = { id }
+                  Menu.menuOptions.dispatch([UIleftPanelSwitchBarGroup])
+                }}>
                 {/* <Icon size={20}>{tab.icon}</Icon> */}
                 <h4>{tab.name}</h4>
               </Button>
             )
           })}
       </Flex>
-      <Flex layout='v' style={{ gap: 4, marginTop: 'auto' }}>
+      {/* <Flex layout='v' style={{ gap: 4, marginTop: 'auto' }}>
         <Divide direction='h' length={'50%'} />
-        <Button onClick={popupCurrentPanel}>
+        <Button onClick={() => popUpPanel(currentTabId.value)}>
           <Icon size={16} scale={0.9}>
             {Asset.editor.leftPanel.switchBar.popup}
           </Icon>
@@ -47,7 +51,7 @@ export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
         <Button onClick={() => showLeftPanel.dispatch(!showLeftPanel.value)}>
           <Icon size={16}>{Asset.editor.leftPanel.switchBar.toLeft}</Icon>
         </Button>
-      </Flex>
+      </Flex> */}
     </Flex>
   )
 })

@@ -1,11 +1,13 @@
 import { FC, memo, useCallback } from 'react'
-import { SchemaNode } from '~/editor/schema/node'
+import { INodeRuntime, OperateNode } from '~/editor/operate/node'
+import { Schema } from '~/editor/schema/schema'
+import { INode } from '~/editor/schema/type'
 import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
-import { ILeftPanelNodeStatus, UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
+import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu/menu'
-import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
+import { useAutoSignal, useHookSignal2 } from '~/shared/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { stopPropagation } from '~/shared/utils/event'
 import { iife, noopFunc, useSubComponent } from '~/shared/utils/normal'
@@ -15,20 +17,18 @@ import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from '~/view/ui-utility/widget/icon'
 
-type INodeItemComp = ILeftPanelNodeStatus & {
+type INodeItemComp = INodeRuntime & {
   id: string
 }
 
-export const NodeItemComp: FC<INodeItemComp> = memo(({ id, expanded, indent, ancestors }) => {
+export const NodeItemComp: FC<INodeItemComp> = memo(({ id, expand, indent, ancestors }) => {
   const { nodeIdsInSearch, singleNodeExpanded, nodeIdsInView, setNodeExpanded } = UILeftPanelLayer
   const { nodeMoveDropDetail, nodeMoveStarted, nodeMoveEnded, enterReName } = UILeftPanelLayer
-  const node = SchemaNode.find(id)
-  const selected = SchemaNode.selectIds.value.has(id)
-  const subSelected = ancestors.some((i) => SchemaNode.selectIds.value.has(i)) && !selected
+  const node = Schema.find<INode>(id)
+  const selected = OperateNode.selectIds.value.has(id)
+  const subSelected = ancestors.some((i) => OperateNode.selectIds.value.has(i)) && !selected
   const searched = nodeIdsInSearch.value.has(id)
-  console.log(id)
-  console.log(SchemaNode.nodeMap)
-  const isContainerNode = SchemaUtil.isContainerNode(id)
+  const isContainerNode = SchemaUtil.isById(id, 'nodeParent')
   const children = SchemaUtil.getChildren(id)
   const hovered = useAutoSignal(false)
   const { classes, css, cx, theme } = useStyles({
@@ -36,11 +36,11 @@ export const NodeItemComp: FC<INodeItemComp> = memo(({ id, expanded, indent, anc
     subSelected,
     nodeMoving: !!nodeMoveStarted.value.moveId,
   })
-  useHookSignal(nodeIdsInView)
-  useHookSignal(hovered, (isHover) => {
-    isHover ? SchemaNode.hover(id) : SchemaNode.unHover(id)
+  useHookSignal2(nodeIdsInView)
+  useHookSignal2(hovered, (isHover) => {
+    isHover ? OperateNode.hover(id) : OperateNode.unHover(id)
   })
-  // useHookSignal(SchemaNode.hoverIds, (ids) => {
+  // useHookSignal2(NewOperateNode.hoverIds, (ids) => {
   //   hovered.dispatch(lastOne(ids) === id)
   // })
   const handleMouseDown = () => {
@@ -57,18 +57,18 @@ export const NodeItemComp: FC<INodeItemComp> = memo(({ id, expanded, indent, anc
     Menu.menuOptions.dispatch([nodeGroup])
   }
 
-  const ExpandComp = useSubComponent([expanded], ({}) => {
+  const ExpandComp = useSubComponent([expand], ({}) => {
     return (
       <Flex
         layout='c'
         onMouseDown={stopPropagation()}
         onClick={() => {
-          setNodeExpanded(id, !expanded)
-          singleNodeExpanded.dispatch(!expanded)
+          setNodeExpanded(id, !expand)
+          singleNodeExpanded.dispatch(!expand)
         }}
         style={{ width: 8, cursor: 'pointer' }}>
         {children.length > 0 && (
-          <Icon size={8} scale={8 / 9} rotate={expanded ? 90 : 0}>
+          <Icon size={8} scale={8 / 9} rotate={expand ? 90 : 0}>
             {Asset.editor.leftPanel.node.collapse}
           </Icon>
         )}
@@ -107,7 +107,7 @@ export const NodeItemComp: FC<INodeItemComp> = memo(({ id, expanded, indent, anc
             value={node.name}
             onNewValueApply={(value) => {
               node.name = value
-              SchemaNode.afterReName.dispatch({ id: node.id, name: value })
+              // Schema.afterReName.dispatch({ id: node.id, name: value })
             }}
             afterOperate={() => enterReName.dispatch('')}
             styles={{ needHover: false }}
@@ -119,26 +119,26 @@ export const NodeItemComp: FC<INodeItemComp> = memo(({ id, expanded, indent, anc
     )
   })
 
-  const DropAreaComp = useSubComponent([subSelected, expanded, selected], ({}) => {
+  const DropAreaComp = useSubComponent([subSelected, expand, selected], ({}) => {
     const dropInFront = useAutoSignal(false)
     const dropInSide = useAutoSignal(false)
     const dropBehind = useAutoSignal(false)
     dropInFront.intercept((value) => !subSelected && value)
     dropInSide.intercept((value) => {
-      if (SchemaUtil.isContainerNode(id) && expanded && selected) return false
+      if (SchemaUtil.isById(id, 'nodeParent') && expand && selected) return false
       return value
     })
     dropBehind.intercept((value) => {
-      if (SchemaUtil.isContainerNode(id) && expanded && selected) return false
+      if (SchemaUtil.isById(id, 'nodeParent') && expand && selected) return false
       return !subSelected && value
     })
-    useHookSignal(dropInFront, (value) => {
+    useHookSignal2(dropInFront, (value) => {
       if (value === true) nodeMoveDropDetail.value = { id, type: 'before' }
     })
-    useHookSignal(dropInSide, (value) => {
+    useHookSignal2(dropInSide, (value) => {
       if (value === true) nodeMoveDropDetail.value = { id, type: 'in' }
     })
-    useHookSignal(dropBehind, (value) => {
+    useHookSignal2(dropBehind, (value) => {
       if (value === true) nodeMoveDropDetail.value = { id, type: 'after' }
     })
 

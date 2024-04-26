@@ -149,4 +149,10 @@ export const default$ = {
     outline: 'none',
     backgroundColor: 'transparent',
   },
+  description: {
+    width: '100%',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
 }

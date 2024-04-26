@@ -5,7 +5,7 @@ import { createSignal } from '~/shared/signal'
 import { XY } from '~/shared/structure/xy'
 import { IXY } from '~/shared/utils/normal'
 import { max } from '../math/base'
-import { SchemaPage } from '../schema/page'
+import { OperateMeta } from '../operate/meta'
 import { Pixi } from './pixi'
 
 @autobind
@@ -26,20 +26,19 @@ export class StageViewportService {
       Pixi.addListener('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))
       this.inited.dispatch()
     })
-    SchemaPage.currentPage.hook((page) => {
-      this.zoom.arguments.pageChangeCause = true
-      this.zoom.dispatch(page.zoom)
+    OperateMeta.curPage.hook((page) => {
+      this.zoom.dispatch(page.zoom, { pageChangeCause: true })
       this.stageOffset.dispatch(XY.Of(page.x, page.y))
     })
     this.zoom.hook(() => {
       Pixi.sceneStage.scale.set(this.zoom.value, this.zoom.value)
-      SchemaPage.currentPage.value.zoom = this.zoom.value
+      OperateMeta.curPage.value.zoom = this.zoom.value
     })
     this.stageOffset.hook(() => {
       const { x, y } = this.stageOffset.value
       Pixi.sceneStage.position.set(x, y)
-      SchemaPage.currentPage.value.x = x
-      SchemaPage.currentPage.value.y = y
+      OperateMeta.curPage.value.x = x
+      OperateMeta.curPage.value.y = y
     })
   }
   toViewportXY(xy: IXY) {

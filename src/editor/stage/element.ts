@@ -1,13 +1,12 @@
 import autobind from 'class-autobind-decorator'
-import { Cache, createCache } from '~/shared/cache'
-import { batchSignal } from '~/shared/signal'
-import { XY } from '~/shared/structure/xy'
+import { createCache2 } from '~/shared/cache'
+import { flushList } from '~/shared/utils/list'
 import { max } from '../math/base'
 import { OBB } from '../math/obb'
 import { Path } from '../math/path/path'
-import { SchemaNode } from '../schema/node'
-import { SchemaPage } from '../schema/page'
-import { IFill, INode } from '../schema/type'
+import { OperateNode } from '../operate/node'
+import { Schema } from '../schema/schema'
+import { ID, IFill, INode, INodeParent } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
 import { StageDraw } from './draw/draw'
 import { PIXI, Pixi } from './pixi'
@@ -17,59 +16,49 @@ export type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 export class StageElementService {
-  canHover = true
-  OBBCache = createCache<OBB>()
-  pathCache = createCache<Path>()
-  outlineCache = createCache<PIXI.Graphics>()
-  hitAreaCache = createCache<(x: number, y: number) => boolean>()
-  frameNameCache = createCache<PIXI.Text>()
-  linearGradientCache = createCache<PIXI.Texture, IFill>()
-  maskCache = createCache<PIXI.Graphics>()
-  private containerMap = createCache<PIXI.Container>()
-  private pagesElementMap = createCache<Cache<string, IStageElement>>()
+  OBBCache = createCache2<ID, OBB>()
+  pathCache = createCache2<ID, Path>()
+  outlineCache = createCache2<ID, PIXI.Graphics>()
+  hitAreaCache = createCache2<ID, (x: number, y: number) => boolean>()
+  frameNameCache = createCache2<ID, PIXI.Text>()
+  linearGradientCache = createCache2<IFill, PIXI.Texture>()
+  maskCache = createCache2<ID, PIXI.Graphics>()
+  private elementCache = createCache2<ID, IStageElement>()
+  private containerCache = createCache2<ID, PIXI.Container>()
   private mainContainer = new PIXI.Container()
-  private get elementMap() {
-    return this.pagesElementMap.getSet(SchemaPage.currentId.value, () => createCache())
-  }
+  private reHierarchyIds = new Set<ID>()
   initHook() {
+    OperateNode.afterFlushDirty.hook({ id: 'reHierarchy' }, () => {
+      this.reHierarchy()
+    })
     Pixi.inited.hook(() => {
-      this.bindHover()
       this.mainContainer.setParent(Pixi.sceneStage)
     })
-    SchemaNode.afterNodesAdded.hook((ids) => {
-      ids.forEach((id) => this.create(SchemaNode.find(id)))
+    OperateNode.afterAddNodes.hook((ids) => {
+      ids.forEach((id) => this.create(Schema.find<INode>(id)))
     })
-    SchemaNode.afterNodesRemoved.hook((ids) => {
+    OperateNode.afterRemoveNodes.hook((ids) => {
       ids.forEach((id) => this.delete(id))
     })
-    SchemaNode.afterDelete.hook((nodes) => {
-      nodes.forEach((node) => this.delete(node.id))
-    })
-    SchemaNode.afterConnect.hook(({ node, index }) => {
-      this.connect(node)
-    })
-    SchemaNode.afterDisconnect.hook(({ node }) => {
-      this.disConnect(node)
+    OperateNode.afterReHierarchy.hook((parentId) => {
+      this.collectReHierarchy(parentId)
+      this.reHierarchy()
     })
   }
   create(node: INode) {
     const { id, type } = node
     const element = type === 'text' ? new PIXI.Text() : new PIXI.Graphics()
-    this.elementMap.set(id, element)
-    if (SchemaUtil.isContainerNode(node)) {
-      const container = new PIXI.Container()
-      const mask = new PIXI.Graphics()
-      this.containerMap.set(id, container)
-      this.maskCache.set(id, mask)
-    }
-    this.initOBB(id)
+    this.elementCache.set(id, element)
+    this.setupOBB(id)
     this.initOutline(id)
     this.initTextResolution(node, element as PIXI.Text)
     return element
   }
   delete(id: string) {
-    this.elementMap.get(id)?.destroy()
-    this.elementMap.delete(id)
+    this.elementCache.get(id)?.destroy()
+    this.elementCache.delete(id)
+    this.containerCache.get(id)?.destroy()
+    this.containerCache.delete(id)
     this.maskCache.get(id)?.destroy()
     this.maskCache.delete(id)
     this.OBBCache.delete(id)
@@ -80,62 +69,53 @@ export class StageElementService {
     this.frameNameCache.delete(id)
   }
   findElement(id: string) {
-    return this.elementMap.get(id)
+    return this.elementCache.getSet(id, () => {
+      return this.create(Schema.find(id))
+    })
   }
   findContainer(id: string) {
-    if (SchemaUtil.isPage(id)) return this.mainContainer
-    return this.containerMap.get(id)
-  }
-  connect(node: INode) {
-    const element = this.findElement(node.id)
-    const selfContainer = this.findContainer(node.id)
-    const parentContainer = this.findContainer(node.parentId)
-    if (selfContainer) {
-      selfContainer.setParent(parentContainer)
-      element.setParent(selfContainer)
-      const mask = this.maskCache.get(node.id)
-      selfContainer.mask = mask
-      mask.setParent(selfContainer)
-    } else {
-      element.setParent(parentContainer)
-    }
-  }
-  disConnect(node: INode) {
-    const container = this.findContainer(node.parentId)
-    const element = this.findElement(node.id)
-    container.removeChild(element)
+    if (SchemaUtil.isById(id, 'page')) return this.mainContainer
+    return this.containerCache.getSet(id, () => {
+      const container = new PIXI.Container()
+      const mask = new PIXI.Graphics()
+      const element = this.findElement(id)
+      this.containerCache.set(id, container)
+      this.maskCache.set(id, mask)
+      container.mask = mask
+      element.setParent(container)
+      mask.setParent(container)
+      return container
+    })
   }
   clearAll() {
-    this.elementMap.clear()
+    this.elementCache.clear()
+    this.containerCache.clear()
+    this.maskCache.clear()
     this.OBBCache.clear()
     this.pathCache.clear()
     this.outlineCache.clear()
-    // this.containerMap.clear()
     this.mainContainer.removeChildren()
   }
-  findOrCreate(node: INode): IStageElement {
-    let element = this.findElement(node.id)
-    if (element) return element
-    element = this.create(node)
-    this.connect(node)
-    return element
+  collectReHierarchy(id: ID) {
+    this.reHierarchyIds.add(id)
   }
-  private bindHover() {
-    const handler = batchSignal([SchemaNode.hoverIds], (e: Event) => {
-      if (!this.canHover) return
-      SchemaNode.clearHover()
-      const realXY = StageViewport.toViewportXY(XY.From(e, 'client'))
-      SchemaUtil.traverse(({ id }) => {
-        const element = this.findElement(id)
-        const hovered = element?.containsPoint(realXY)
-        hovered ? SchemaNode.hover(id) : SchemaNode.unHover(id)
-        return hovered
+  private reHierarchy() {
+    flushList(this.reHierarchyIds, (id) => {
+      const nodeParent = Schema.find<INodeParent>(id)
+      const nodeParentContainer = this.findContainer(id)
+      nodeParent.childIds.forEach((childId) => {
+        const element = this.findElement(childId)
+        if (SchemaUtil.isById(childId, 'nodeParent')) {
+          const selfContainer = this.findContainer(childId)
+          selfContainer.setParent(nodeParentContainer)
+        } else {
+          element.setParent(nodeParentContainer)
+        }
       })
     })
-    Pixi.addListener('mousemove', handler, { capture: true })
   }
-  private initOBB(id: string) {
-    const { centerX, centerY, width, height, rotation } = SchemaNode.find(id)
+  setupOBB(id: string) {
+    const { centerX, centerY, width, height, rotation } = Schema.find<INode>(id)
     const obb = new OBB(centerX, centerY, width, height, rotation)
     this.OBBCache.set(id, obb)
   }

@@ -1,14 +1,15 @@
 import autobind from 'class-autobind-decorator'
 import { sqrt } from '~/editor/math/base'
 import { OperateGeometry } from '~/editor/operate/geometry'
-import { Record } from '~/editor/record'
+import { OperateMeta } from '~/editor/operate/meta'
+import { OperateNode } from '~/editor/operate/node'
 import { SchemaDefault } from '~/editor/schema/default'
-import { SchemaNode } from '~/editor/schema/node'
-import { SchemaPage } from '~/editor/schema/page'
-import { IFrame, INode } from '~/editor/schema/type'
+import { SchemaHistory } from '~/editor/schema/history'
+import { Schema } from '~/editor/schema/schema'
+import { INode, INodeParent } from '~/editor/schema/type'
 import { SchemaUtil } from '~/editor/schema/util'
 import { Drag, type IDragData } from '~/global/event/drag'
-import { createSignal } from '~/shared/signal'
+import { createSignal, mergeSignal } from '~/shared/signal'
 import { IXY } from '~/shared/utils/normal'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -26,11 +27,7 @@ export class StageCreateService {
   createFinished = createSignal()
   private node!: INode
   private sceneStageStart!: IXY
-  initHook() {
-    this.currentType.hook(() => {
-      StageInteract.currentType.dispatch('create')
-    })
-  }
+  initHook() {}
   startInteract() {
     Pixi.addListener('mousedown', this.create)
   }
@@ -42,10 +39,10 @@ export class StageCreateService {
   }
   private onCreateStart({ start }: IDragData) {
     this.sceneStageStart = StageViewport.toSceneStageXY(start)
-    Record.startAction()
     this.createNode()
-    SchemaNode.addNodes([this.node])
-    SchemaNode.connectAt(this.findContainer(), this.node)
+    SchemaHistory.startAction()
+    OperateNode.addNodes([this.node])
+    OperateNode.insertAt(this.findParent(), this.node)
     StageSelect.onCreateSelect(this.node.id)
     OperateGeometry.beforeOperate.dispatch(['width', 'height'])
   }
@@ -53,25 +50,29 @@ export class StageCreateService {
     const { x, y } = StageViewport.toSceneStageXY(marquee)
     const width = StageViewport.toSceneStageShift(marquee.width)
     const height = StageViewport.toSceneStageShift(marquee.height)
-    OperateGeometry.data.x = x
-    OperateGeometry.data.y = y
+    OperateGeometry.setGeometry('x', x)
+    OperateGeometry.setGeometry('y', y)
     if (this.currentType.value === 'line') {
-      OperateGeometry.data.width = sqrt(width ** 2 + height ** 2)
+      OperateGeometry.setGeometry('width', sqrt(width ** 2 + height ** 2))
     } else {
-      OperateGeometry.data.x = x
-      OperateGeometry.data.y = y
-      OperateGeometry.data.width = width
-      OperateGeometry.data.height = height
+      OperateGeometry.setGeometry('x', x)
+      OperateGeometry.setGeometry('y', y)
+      OperateGeometry.setGeometry('width', width)
+      OperateGeometry.setGeometry('height', height)
     }
   }
   private onCreateEnd() {
-    if (OperateGeometry.data.width === 0) {
-      OperateGeometry.data.width = 100
-      OperateGeometry.data.height = 100
+    if (OperateGeometry.geometry.width === 0) {
+      OperateGeometry.setGeometry('width', 100)
+      OperateGeometry.setGeometry('height', 100)
     }
+    const tempSignal = mergeSignal(OperateGeometry.afterOperate, OperateNode.afterFlushDirty)
+    tempSignal.hook({ afterAll: true, once: true }, () => {
+      SchemaHistory.endAction()
+      SchemaHistory.commit('创建节点')
+    })
     OperateGeometry.afterOperate.dispatch()
     StageInteract.currentType.dispatch('select')
-    Record.endAction('创建节点')
     this.createFinished.dispatch()
   }
   private createNode() {
@@ -116,10 +117,13 @@ export class StageCreateService {
     const [width, height, centerX, centerY] = [0, 0, x, y]
     return { x, y, width, height, centerX, centerY }
   }
-  private findContainer() {
-    const frameId = [...SchemaNode.hoverIds.value].reverse().find(SchemaUtil.isFrameId)
-    if (frameId) return SchemaNode.find(frameId) as IFrame
-    return SchemaPage.currentPage.value
+  private findParent() {
+    console.log(OperateNode.hoverIds.value)
+    const frameId = [...OperateNode.hoverIds.value]
+      .reverse()
+      .find((id) => SchemaUtil.isById(id, 'frame'))
+    if (frameId) return Schema.find<INodeParent>(frameId)
+    return OperateMeta.curPage.value
   }
 }
 

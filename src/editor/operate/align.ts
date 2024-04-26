@@ -1,19 +1,15 @@
 import autobind from 'class-autobind-decorator'
-import { cloneDeep } from 'lodash-es'
-import { createMomentChange } from '~/shared/intercept-data/moment-change'
 import { createSignal } from '~/shared/signal'
-import { XY } from '~/shared/structure/xy'
-import { IXY } from '~/shared/utils/normal'
 import { OBB } from '../math/obb'
-import { xy_new } from '../math/xy'
-import { Record } from '../record'
-import { SchemaNode } from '../schema/node'
-import { INode } from '../schema/type'
+import { SchemaHistory } from '../schema/history'
+import { Schema } from '../schema/schema'
+import { INode, INodeParent } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
 import { StageDraw } from '../stage/draw/draw'
 import { StageElement } from '../stage/element'
 import { StageSelect } from '../stage/interact/select'
 import { StageWidgetTransform } from '../stage/widget/transform'
+import { OperateNode } from './node'
 
 const alignTypes = <const>[
   'alignLeft',
@@ -27,42 +23,44 @@ const alignTypes = <const>[
 export type IAlignType = (typeof alignTypes)[number]
 
 @autobind
-export class OperateAlignService {
+class OperateAlignService {
   alignTypes = alignTypes
   canAlign = createSignal(false)
   currentAlign = createSignal<IAlignType>()
   afterAlign = createSignal()
   private needAlign = false
   private toAlignNodes = <INode[]>[]
-  private oneAlignChange = createMomentChange(<Record<string, IXY>>{})
   initHook() {
     StageSelect.afterSelect.hook(this.setupAlign)
     this.currentAlign.hook(this.autoAlign)
+    Schema.registerListener('changeNodeAlign', ({ changeIds }) => {
+      SchemaUtil.traverseIds(changeIds, ({ id, depth }) => {
+        if (depth > 1) return false
+        StageElement.setupOBB(id)
+        StageDraw.collectRedraw(id)
+      })
+    })
   }
   private setupAlign() {
-    if (SchemaNode.selectNodes.length === 0) {
+    const { selectNodes } = OperateNode
+    if (selectNodes.length === 0) {
       this.canAlign.dispatch(false)
-    } else if (SchemaNode.selectNodes.length > 1) {
-      this.toAlignNodes = [...SchemaNode.selectNodes]
-      this.canAlign.dispatch(true)
-    } else if (
-      SchemaNode.selectNodes.length === 1 &&
-      SchemaUtil.isContainerNode(SchemaNode.selectNodes[0])
-    ) {
-      const node = SchemaNode.selectNodes[0]
-      this.toAlignNodes = SchemaUtil.getChildren(node.id)
+    }
+    if (selectNodes.length > 1) {
+      this.toAlignNodes = [...selectNodes]
       this.canAlign.dispatch(true)
     }
-    const nodeXYDataMap = Object.fromEntries(
-      this.toAlignNodes.map((node) => [node.id, XY.Of(0, 0).toObject()])
-    )
-    this.oneAlignChange.reset(nodeXYDataMap)
+    if (selectNodes.length === 1 && SchemaUtil.isById(selectNodes[0].id, 'nodeParent')) {
+      this.toAlignNodes = SchemaUtil.getChildren(<INodeParent>selectNodes[0])
+      this.canAlign.dispatch(true)
+    }
   }
   private autoAlign() {
     this[this.currentAlign.value]()
     if (this.needAlign) {
-      this.afterAlign.dispatch()
-      this.undoRedo()
+      const changedIds = this.toAlignNodes.map((node) => node.id)
+      Schema.commitOperation('changeNodeAlign', changedIds, '设置对齐')
+      SchemaHistory.commit('设置对齐')
       this.needAlign = false
     }
   }
@@ -115,62 +113,37 @@ export class OperateAlignService {
     })
   }
   private horizontalAlign(node: INode, nodeOBB: OBB, shift: number) {
-    this.oneAlignChange.update(node.id, xy_new(shift, 0))
     if (shift === 0) return
     this.needAlign = true
-    node.x += shift
-    node.centerX += shift
-    nodeOBB.shiftX(shift)
-    StageDraw.collectRedraw(node.id)
+    SchemaUtil.traverseIds([node.id], ({ node }) => {
+      Schema.itemReset(node, ['x'], node.x + shift)
+      Schema.itemReset(node, ['centerX'], node.centerX + shift)
+      nodeOBB.shiftX(shift)
+      StageDraw.collectRedraw(node.id)
+    })
   }
   private verticalAlign(node: INode, nodeOBB: OBB, shift: number) {
-    this.oneAlignChange.update(node.id, xy_new(0, shift))
     if (shift === 0) return
     this.needAlign = true
-    node.y += shift
-    node.centerY += shift
-    nodeOBB.shiftY(shift)
-    StageDraw.collectRedraw(node.id)
+    SchemaUtil.traverseIds([node.id], ({ node }) => {
+      Schema.itemReset(node, ['y'], node.y + shift)
+      Schema.itemReset(node, ['centerY'], node.centerY + shift)
+      nodeOBB.shiftY(shift)
+      StageDraw.collectRedraw(node.id)
+    })
   }
   private getAlignBound() {
-    if (SchemaNode.selectNodes.length > 1) {
+    const { selectNodes } = OperateNode
+    if (selectNodes.length > 1) {
       return StageWidgetTransform.transformOBB.getAABBBound()
     } else {
-      return StageElement.OBBCache.get(SchemaNode.selectNodes[0].id).getAABBBound()
+      return StageElement.OBBCache.get(selectNodes[0].id).getAABBBound()
     }
   }
   private getOBBAndBound(node: INode) {
     const nodeOBB = StageElement.OBBCache.get(node.id)
     const nodeBound = nodeOBB.getAABBBound()
     return { nodeOBB, nodeBound }
-  }
-  private undoRedo() {
-    if (Record.isInRedoUndo) return
-    const toAlignNodeIds = this.toAlignNodes.map((node) => node.id)
-    const record = cloneDeep(this.oneAlignChange.record)
-    const travel = (type: 'last' | 'current') => {
-      toAlignNodeIds.forEach((id) => {
-        const node = SchemaNode.find(id)
-        const nodeOBB = StageElement.OBBCache.get(id)
-        let { x, y } = record[node.id]['current']
-        const direction = type === 'last' ? 1 : -1
-        node.x -= x * direction
-        node.y -= y * direction
-        node.centerX -= x * direction
-        node.centerY -= y * direction
-        nodeOBB.shiftX(-(x * direction))
-        nodeOBB.shiftY(-(y * direction))
-        this.afterAlign.dispatch()
-        StageDraw.collectRedraw(id)
-      })
-      Record.isInRedoUndo = false
-    }
-    Record.push({
-      description: '设置对齐 ' + this.currentAlign.value,
-      detail: Object.fromEntries(Object.entries(record).map(([k, v]) => [k, record[k].current])),
-      undo: () => travel('last'),
-      redo: () => travel('current'),
-    })
   }
 }
 

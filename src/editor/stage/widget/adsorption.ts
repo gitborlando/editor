@@ -3,9 +3,10 @@ import { IValueWillChange } from 'mobx'
 import { Graphics } from 'pixi.js'
 import { abs, max, min, sqrt } from '~/editor/math/base'
 import { OBB } from '~/editor/math/obb'
-import { IGeometryData, OperateGeometry } from '~/editor/operate/geometry'
-import { SchemaNode } from '~/editor/schema/node'
-import { SchemaPage } from '~/editor/schema/page'
+import { OperateGeometry } from '~/editor/operate/geometry'
+import { OperateMeta } from '~/editor/operate/meta'
+import { OperateNode } from '~/editor/operate/node'
+import { Schema } from '~/editor/schema/schema'
 import { IFrame } from '~/editor/schema/type'
 import { SchemaUtil } from '~/editor/schema/util'
 import { createCache } from '~/shared/cache'
@@ -27,11 +28,11 @@ export class StageWidgetAdsorptionService {
   private cloneTransformOBB = new OBB(0, 0, 0, 0, 0)
   private needDraw = false
   initHook() {
-    OperateGeometry.beforeOperate.hook(() => this.setupAdsorption())
-    OperateGeometry.data._whenDataWillChange.hook({ id: 'adsorption' }, this.adsorption)
-    OperateGeometry.afterOperate.hook(() => (this.needDraw = false))
-    SchemaNode.afterFlushDirty.hook({ after: 'operateGeometryReset' }, this.autoDraw)
-    SchemaNode.afterFlushDirty.hook({ after: 'calcTransformOBB' }, this.updateCloneTransformOBB)
+    // OperateGeometry.beforeOperate.hook(() => this.setupAdsorption())
+    // OperateGeometry.isChangedGeometry.hook({ id: 'adsorption' }, this.adsorption)
+    // OperateGeometry.afterOperate.hook(() => (this.needDraw = false))
+    // OperateNode.afterFlushDirty.hook({ after: 'operateGeometryReset' }, this.autoDraw)
+    // OperateNode.afterFlushDirty.hook({ after: 'calcTransformOBB' }, this.updateCloneTransformOBB)
   }
   private updateCloneTransformOBB() {
     const { centerX, centerY, width, height, rotation } = StageWidgetTransform.transformOBB
@@ -39,26 +40,24 @@ export class StageWidgetAdsorptionService {
   }
   private setupAdsorption() {
     this.updateCloneTransformOBB()
-    if (SchemaNode.datumId.value === '' || SchemaUtil.isPage(SchemaNode.datumId.value)) {
-      SchemaPage.currentPage.value.childIds.forEach((id) => {
-        if (SchemaNode.find(id).DELETE) return
-        if (SchemaNode.selectIds.value.has(id)) return
+    if (OperateNode.datumId.value === '' || SchemaUtil.isPage(OperateNode.datumId.value)) {
+      OperateMeta.curPage.value.childIds.forEach((id) => {
+        if (OperateNode.selectIds.value.has(id)) return
         this.collectAdsorption(StageElement.OBBCache.get(id))
       })
     } else {
-      const node = SchemaNode.find(SchemaNode.datumId.value) as IFrame
+      const node = Schema.find(OperateNode.datumId.value) as IFrame
       ;[node.id, ...node.childIds].forEach((id) => {
-        if (SchemaNode.selectIds.value.has(id)) return
-        if (SchemaNode.find(id).DELETE) return
+        if (OperateNode.selectIds.value.has(id)) return
         this.collectAdsorption(StageElement.OBBCache.get(id))
       })
     }
     this.sortedAdsorptionX = [...this.vAdsorptionMap.keys()].sort()
     this.sortedAdsorptionY = [...this.hAdsorptionMap.keys()].sort()
   }
-  private adsorption({ key, ctx }: { key: keyof IGeometryData; ctx: IValueWillChange<number> }) {
-    this.cloneTransformOBB.shiftX(ctx.newValue - this.cloneTransformOBB.xy.x)
-    this.cloneTransformOBB.shiftY(ctx.newValue - this.cloneTransformOBB.xy.y)
+  private adsorption() {
+    this.cloneTransformOBB.shiftX(OperateGeometry.geometry.x - this.cloneTransformOBB.xy.x)
+    this.cloneTransformOBB.shiftY(OperateGeometry.geometry.y - this.cloneTransformOBB.xy.y)
     if (key === 'y' /* || key === 'height' */) this.horizontalAdsorption(key, ctx)
     if (key === 'x' /* || key === 'width' */) this.verticalAdsorption(key, ctx)
   }

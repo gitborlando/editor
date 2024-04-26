@@ -50,7 +50,6 @@ export class RecordService {
       undo: () => [...actionRecord.subStack].reverse().forEach((i) => i.undo()),
       redo: () => actionRecord.subStack.forEach((i) => i.redo()),
     }
-    console.log([...actionRecord.subStack].reverse())
     this.push(actionRecord)
     this.subStack = []
   }

@@ -1,8 +1,10 @@
 import autoBindMethods from 'class-autobind-decorator'
-import { createCache } from './cache'
-import { INoopFunc, iife } from './utils/normal'
+import { nanoid } from 'nanoid'
+import { ID } from '~/editor/schema/type'
+import { createCache2 } from './cache'
+import { iife } from './utils/normal'
 
-type IHook<T> = (value: T, oldValue: T) => void
+type IHook<T> = (value: T, args?: any) => void
 
 export type IHookOption = {
   id?: string
@@ -17,10 +19,10 @@ export type IHookOption = {
 export class Signal<T extends any> {
   newValue!: T
   oldValue!: T
-  arguments = <any>{}
   private _intercept?: (value: T) => T | void
   private hooks = <IHook<T>[]>[]
-  private optionCache = createCache<IHookOption, IHook<T>>()
+  private optionCache = createCache2<IHook<T>, IHookOption>()
+  private args: any
   constructor(value?: T) {
     this.newValue = value ?? this.newValue
     this.oldValue = value ?? this.oldValue
@@ -42,12 +44,12 @@ export class Signal<T extends any> {
     })
     const { immediately, once } = this.optionCache.set(hook, option)
     if (immediately && once) {
-      hook(this.value, this.oldValue)
+      hook(this.value)
     } else if (immediately) {
-      hook(this.value, this.oldValue)
+      hook(this.value)
       this.hooks.push(hook)
     } else if (once) {
-      const onceFunc = () => void hook(this.value, this.oldValue) || this.unHook(onceFunc)
+      const onceFunc = () => void hook(this.value) || this.unHook(onceFunc)
       this.optionCache.set(onceFunc, option)
       this.hooks.push(onceFunc)
     } else {
@@ -55,12 +57,13 @@ export class Signal<T extends any> {
     }
     return () => this.unHook(hook)
   }
-  dispatch(value?: T | ((value: T) => void)) {
+  dispatch(value?: T | ((value: T) => void), args?: any) {
     if (typeof value === 'function') {
       ;(value as Function)(this.value)
     } else if (value !== undefined) {
       this.value = value
     }
+    this.args = args
     this.runHooks()
   }
   intercept(handle: (value: T) => T | void) {
@@ -71,13 +74,12 @@ export class Signal<T extends any> {
     index !== -1 && this.hooks.splice(index, 1)
   }
   private runHooks() {
-    if (isBatching) return
-    this.reArrangeHook()
-    this.hooks.forEach((hook) => hook(this.value, this.oldValue))
-    argsCache.forEach((key) => argsCache.set(key, undefined))
-    this.arguments = {}
+    if (signalBatchMap.get(this)) return
+    this.reHierarchy()
+    this.hooks.forEach((hook) => hook(this.value, this.args))
+    this.args = undefined
   }
-  private reArrangeHook() {
+  private reHierarchy() {
     this.hooks.forEach((hook) => {
       const { before, after, afterAll } = this.optionCache.get(hook)
       const selfIndex = this.hooks.findIndex((i) => i === hook)
@@ -112,36 +114,34 @@ export function createSignal<T extends any>(value?: T) {
   return new Signal<T>(value)
 }
 
-const argsCache = createCache<any, symbol>()
-export function createSignalArgs<T extends any>() {
-  const key = Symbol()
-  return (args?: T): T | undefined => {
-    if (args !== undefined) return argsCache.set(key, args)
-    return argsCache.get(key)
-  }
-}
+const mergeSignalCache = createCache2<string, Signal<any>>()
+const mergeSignalIdCache = createCache2<Signal<any>, ID>()
 
-export function multiSignal(signals: Signal<any>[], callback: INoopFunc) {
-  let signalsFullFillArray = new Array(signals.length).fill(false)
-  signals.forEach((signal, index) => {
-    signal.hook(() => {
-      if (signalsFullFillArray.every((i) => i === true)) {
-        callback()
-        signalsFullFillArray = new Array(signals.length).fill(false)
-      } else signalsFullFillArray[index] = true
+export function mergeSignal(...signals: Signal<any>[]) {
+  const id = signals.reduce((allId, signal) => {
+    return allId + '-' + mergeSignalIdCache.getSet(signal, () => nanoid())
+  }, '')
+  return mergeSignalCache.getSet(id, () => {
+    const mergedSignal = createSignal<void>()
+    let fullFillArray = new Array(signals.length).fill(false)
+    signals.forEach((signal, index) => {
+      signal.hook(() => {
+        if (fullFillArray.every((i) => i === true)) {
+          mergedSignal.dispatch()
+          fullFillArray = new Array(signals.length).fill(false)
+        } else fullFillArray[index] = true
+      })
     })
+    return mergedSignal
   })
 }
 
-let isBatching = false
-export function batchSignal<T extends any[]>(
-  signals: Signal<any>[],
-  callback: (...args: T) => any
-) {
-  return (...args: T) => {
-    isBatching = true
-    callback(...args)
-    isBatching = false
+const signalBatchMap = createCache2<Signal<any>, boolean>()
+
+export function batchSignal(...signals: Signal<any>[]) {
+  signals.forEach((signal) => signalBatchMap.set(signal, true))
+  return () => {
+    signals.forEach((signal) => signalBatchMap.set(signal, false))
     signals.forEach((signal) => signal.dispatch())
   }
 }

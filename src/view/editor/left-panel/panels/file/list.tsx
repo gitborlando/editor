@@ -19,7 +19,7 @@ export const ListComp: FC<IListComp> = memo(({}) => {
   useAsyncEffect(getAllFileMeta)
 
   const ListItemComp: FC<{ meta: IMeta }> = memo(({ meta }) => {
-    const selected = meta.id === Schema.meta.id
+    const selected = meta.fileId === Schema.meta.fileId
     const isHover = useAutoSignal(false)
     return (
       <Flex
