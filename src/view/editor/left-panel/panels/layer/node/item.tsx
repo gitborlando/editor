@@ -7,7 +7,7 @@ import { StageSelect } from '~/editor/stage/interact/select'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu/menu'
-import { useAutoSignal, useHookSignal2 } from '~/shared/signal-react'
+import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { stopPropagation } from '~/shared/utils/event'
 import { iife, noopFunc, useSubComponent } from '~/shared/utils/normal'
@@ -36,11 +36,11 @@ export const NodeItemComp: FC<INodeItemComp> = memo(({ id, expand, indent, ances
     subSelected,
     nodeMoving: !!nodeMoveStarted.value.moveId,
   })
-  useHookSignal2(nodeIdsInView)
-  useHookSignal2(hovered, (isHover) => {
+  useHookSignal(nodeIdsInView)
+  useHookSignal(hovered, (isHover) => {
     isHover ? OperateNode.hover(id) : OperateNode.unHover(id)
   })
-  // useHookSignal2(NewOperateNode.hoverIds, (ids) => {
+  // useHookSignal(NewOperateNode.hoverIds, (ids) => {
   //   hovered.dispatch(lastOne(ids) === id)
   // })
   const handleMouseDown = () => {
@@ -132,13 +132,13 @@ export const NodeItemComp: FC<INodeItemComp> = memo(({ id, expand, indent, ances
       if (SchemaUtil.isById(id, 'nodeParent') && expand && selected) return false
       return !subSelected && value
     })
-    useHookSignal2(dropInFront, (value) => {
+    useHookSignal(dropInFront, (value) => {
       if (value === true) nodeMoveDropDetail.value = { id, type: 'before' }
     })
-    useHookSignal2(dropInSide, (value) => {
+    useHookSignal(dropInSide, (value) => {
       if (value === true) nodeMoveDropDetail.value = { id, type: 'in' }
     })
-    useHookSignal2(dropBehind, (value) => {
+    useHookSignal(dropBehind, (value) => {
       if (value === true) nodeMoveDropDetail.value = { id, type: 'after' }
     })
 

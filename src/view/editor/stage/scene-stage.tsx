@@ -1,7 +1,7 @@
 import { Container, Graphics, Stage } from '@pixi/react'
 import { FC, memo } from 'react'
 import { StageViewport } from '~/editor/stage/viewport'
-import { useHookSignal2 } from '~/shared/signal-react'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 
 type ISceneStageComp = {}
@@ -9,7 +9,7 @@ type ISceneStageComp = {}
 export const SceneStageComp: FC<ISceneStageComp> = memo(({}) => {
   const { classes } = useStyles({})
   const { bound } = StageViewport
-  useHookSignal2(bound)
+  useHookSignal(bound)
   return (
     <Stage
       options={{

@@ -1,7 +1,7 @@
 import { FC, memo } from 'react'
 import { OperateShadow } from '~/editor/operate/shadow'
 import { IShadow } from '~/editor/schema/type'
-import { useHookSignal } from '~/shared/signal-react'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { useSubComponent } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'

@@ -1,6 +1,6 @@
 import { FC, useRef } from 'react'
-import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
-import { useHookSignal, useSignal } from '~/shared/signal-react'
+import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
+import { useHookSignal, useSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'

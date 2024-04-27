@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { XY } from '~/shared/structure/xy'
 import { hslBlueColor } from '~/shared/utils/color'
+import { XY } from '~/shared/xy'
 import { StageSelect } from '../interact/select'
 import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'

@@ -1,6 +1,6 @@
 import { FC, memo } from 'react'
 import { IMenuItem, Menu } from '~/global/menu/menu'
-import { useHookSignal } from '~/shared/signal-react'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { useSubComponent } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Divide } from '~/view/ui-utility/widget/divide'

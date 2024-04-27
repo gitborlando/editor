@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { xy_new } from '~/editor/math/xy'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { addListenerCapture, clickAway } from '~/shared/utils/event'
 import { IAnyFunc, IAnyObject, INoopFunc } from '~/shared/utils/normal'
 import { menuConfig } from './config'

@@ -1,6 +1,6 @@
 import { OperateGeometry } from '~/editor/operate/geometry'
 import { getMockFile, mockFile } from '~/mock/mock-file'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { SchemaFile } from './file'
 import { Hotkey } from './hotkey'
 import { OperateAlign } from './operate/align'
@@ -28,7 +28,7 @@ import { StageWidgetRuler } from './stage/widget/ruler'
 import { StageWidgetTransform } from './stage/widget/transform'
 import { UILeftPanelLayer } from './ui-state/left-panel/layer'
 import { UILeftPanel } from './ui-state/left-panel/left-panel'
-import { UIPicker } from './ui-state/right-planel/operate/picker'
+import { UIPicker } from './ui-state/right-panel/operate/picker'
 
 export const editorInited = createSignal(false)
 

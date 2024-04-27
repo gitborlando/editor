@@ -1,8 +1,8 @@
 import autoBindMethods from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { ID } from '~/editor/schema/type'
-import { createCache2 } from './cache'
-import { iife } from './utils/normal'
+import { createCache } from '../cache'
+import { iife } from '../utils/normal'
 
 type IHook<T> = (value: T, args?: any) => void
 
@@ -21,7 +21,7 @@ export class Signal<T extends any> {
   oldValue!: T
   private _intercept?: (value: T) => T | void
   private hooks = <IHook<T>[]>[]
-  private optionCache = createCache2<IHook<T>, IHookOption>()
+  private optionCache = createCache<IHook<T>, IHookOption>()
   private args: any
   constructor(value?: T) {
     this.newValue = value ?? this.newValue
@@ -114,8 +114,8 @@ export function createSignal<T extends any>(value?: T) {
   return new Signal<T>(value)
 }
 
-const mergeSignalCache = createCache2<string, Signal<any>>()
-const mergeSignalIdCache = createCache2<Signal<any>, ID>()
+const mergeSignalCache = createCache<string, Signal<any>>()
+const mergeSignalIdCache = createCache<Signal<any>, ID>()
 
 export function mergeSignal(...signals: Signal<any>[]) {
   const id = signals.reduce((allId, signal) => {
@@ -136,7 +136,7 @@ export function mergeSignal(...signals: Signal<any>[]) {
   })
 }
 
-const signalBatchMap = createCache2<Signal<any>, boolean>()
+const signalBatchMap = createCache<Signal<any>, boolean>()
 
 export function batchSignal(...signals: Signal<any>[]) {
   signals.forEach((signal) => signalBatchMap.set(signal, true))

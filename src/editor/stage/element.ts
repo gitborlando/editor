@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createCache2 } from '~/shared/cache'
+import { createCache } from '~/shared/cache'
 import { flushList } from '~/shared/utils/list'
 import { max } from '../math/base'
 import { OBB } from '../math/obb'
@@ -16,15 +16,15 @@ export type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 export class StageElementService {
-  OBBCache = createCache2<ID, OBB>()
-  pathCache = createCache2<ID, Path>()
-  outlineCache = createCache2<ID, PIXI.Graphics>()
-  hitAreaCache = createCache2<ID, (x: number, y: number) => boolean>()
-  frameNameCache = createCache2<ID, PIXI.Text>()
-  linearGradientCache = createCache2<IFill, PIXI.Texture>()
-  maskCache = createCache2<ID, PIXI.Graphics>()
-  private elementCache = createCache2<ID, IStageElement>()
-  private containerCache = createCache2<ID, PIXI.Container>()
+  OBBCache = createCache<ID, OBB>()
+  pathCache = createCache<ID, Path>()
+  outlineCache = createCache<ID, PIXI.Graphics>()
+  hitAreaCache = createCache<ID, (x: number, y: number) => boolean>()
+  frameNameCache = createCache<ID, PIXI.Text>()
+  linearGradientCache = createCache<IFill, PIXI.Texture>()
+  maskCache = createCache<ID, PIXI.Graphics>()
+  private elementCache = createCache<ID, IStageElement>()
+  private containerCache = createCache<ID, PIXI.Container>()
   private mainContainer = new PIXI.Container()
   private reHierarchyIds = new Set<ID>()
   initHook() {

@@ -6,8 +6,7 @@ import { Schema } from '~/editor/schema/schema'
 import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
 import { createSetting } from '~/global/setting'
-import { createCache } from '~/shared/cache'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { ceil, floor, max, min } from '../../math/base'
 import { ID, INode, INodeParent } from '../../schema/type'
 import { UILeftPanel } from './left-panel'
@@ -22,7 +21,6 @@ type IAllNodeExpanded = 'expanded' | 'collapsed' | 'partial-expanded'
 
 @autobind
 export class UILeftPanelLayerService {
-  nodeStatusCache = createCache<ILeftPanelNodeStatus>()
   allPageExpanded = createSetting('LeftPanel.LayerPanel.pagePanelExpanded', true)
   pagePanelHeight = createSignal(200)
   nodeViewHeight = createSignal(0)

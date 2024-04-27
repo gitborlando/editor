@@ -1,10 +1,10 @@
 import { FC, memo } from 'react'
 import { IFill, IFillColor } from '~/editor/schema/type'
-import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
-import { useHookSignal } from '~/shared/signal-react'
-import { XY } from '~/shared/structure/xy'
+import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { hexToRgb, makeLinearGradientCss, rgbToHex, rgbToRgba } from '~/shared/utils/color'
 import { IXY, iife, useSubComponent } from '~/shared/utils/normal'
+import { XY } from '~/shared/xy'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
@@ -34,13 +34,9 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   const { currentFill, currentImage } = UIPicker
   const { theme, css, classes } = useStyles({})
 
-  useHookSignal(
-    currentFill,
-    (_, forceUpdate) => {
-      if (UIPicker.impact === impact) forceUpdate()
-    },
-    { id: 'fill-comp' }
-  )
+  useHookSignal(currentFill, { id: 'fill-comp' }, (_, forceUpdate) => {
+    if (UIPicker.impact === impact) forceUpdate()
+  })
 
   const ColorInputComp = useSubComponent<{ fill: IFill }>([fill.type], ({ fill }) => {
     return (

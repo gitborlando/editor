@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { makeObservable, observable } from 'mobx'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { IRect, IXY, makeAction, noopFunc, type ICursor } from '~/shared/utils/normal'
 
 export type IDragData = {

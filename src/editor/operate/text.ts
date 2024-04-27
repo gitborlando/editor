@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal, mergeSignal } from '~/shared/signal'
+import { createSignal, mergeSignal } from '~/shared/signal/signal'
 import { Schema } from '../schema/schema'
 import { IText } from '../schema/type'
 import { StageDraw } from '../stage/draw/draw'

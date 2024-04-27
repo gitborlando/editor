@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { INoopFunc } from '~/shared/utils/normal'
 
 export type IUndoRedoRecord = {

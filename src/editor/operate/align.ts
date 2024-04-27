@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { OBB } from '../math/obb'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'

@@ -2,9 +2,9 @@ import autobind from 'class-autobind-decorator'
 import { IImage, Img } from '~/editor/img'
 import { SchemaDefault } from '~/editor/schema/default'
 import { IFill, IFillColor, IFillImage, IFillLinearGradient } from '~/editor/schema/type'
-import { Signal, createSignal } from '~/shared/signal'
-import { XY } from '~/shared/structure/xy'
+import { Signal, createSignal } from '~/shared/signal/signal'
 import { IXY, iife } from '~/shared/utils/normal'
+import { XY } from '~/shared/xy'
 
 type IOperateType = 'solid-color'
 

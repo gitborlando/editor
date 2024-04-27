@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys, { HotkeysEvent } from 'hotkeys-js'
 import { Record } from '~/editor/record'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { addListener } from '~/shared/utils/event'
 import { SchemaUtil } from './schema/util'
 

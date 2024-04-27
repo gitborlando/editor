@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { xy_new } from '../math/xy'
 import { Pixi } from './pixi'
 

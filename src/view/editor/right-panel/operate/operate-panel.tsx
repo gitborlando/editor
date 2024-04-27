@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { OperateText } from '~/editor/operate/text'
 import { StageSelect } from '~/editor/stage/interact/select'
-import { useHookSignal2 } from '~/shared/signal-react'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { AlignComp } from './align/align'
@@ -16,7 +16,7 @@ type IOperatePanelComp = {}
 
 export const OperatePanelComp: FC<IOperatePanelComp> = ({}) => {
   const { classes } = useStyles({})
-  useHookSignal2(StageSelect.afterSelect, { afterAll: true })
+  useHookSignal(StageSelect.afterSelect, { afterAll: true })
 
   return (
     <Flex layout='v' className={classes.OperatePanel}>

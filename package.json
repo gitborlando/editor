@@ -24,6 +24,7 @@
     "idb-kv-store": "^4.5.0",
     "immer": "^10.0.4",
     "immutable": "^5.0.0-beta.5",
+    "immutable-set": "^2.2.2",
     "just-diff": "^6.0.2",
     "just-diff-apply": "^5.5.0",
     "lodash-es": "^4.17.21",

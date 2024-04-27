@@ -1,8 +1,8 @@
 import autobind from 'class-autobind-decorator'
-import { createCache2 } from '~/shared/cache'
-import { createSignal } from '~/shared/signal'
-import { XY } from '~/shared/structure/xy'
+import { createCache } from '~/shared/cache'
+import { createSignal } from '~/shared/signal/signal'
 import { firstOne, flushList } from '~/shared/utils/list'
+import { XY } from '~/shared/xy'
 import { Schema } from '../schema/schema'
 import { ID, INode, INodeParent } from '../schema/type'
 import { StageElement } from '../stage/element'
@@ -28,7 +28,7 @@ class OperateNodeService {
   afterRemoveNodes = createSignal<ID[]>()
   afterReHierarchy = createSignal<ID>()
   afterSelect = createSignal()
-  private nodeRuntimeCache = createCache2<ID, INodeRuntime>()
+  private nodeRuntimeCache = createCache<ID, INodeRuntime>()
   initHook() {
     Pixi.inited.hook(() => {
       Pixi.duringTicker.hook({ id: 'flushDirty' }, this.flushDirty)
@@ -59,13 +59,13 @@ class OperateNodeService {
     Schema.registerListener('selectIds', () => {
       this.selectIds.dispatch(new Set(Schema.client.selectIds))
     })
-    Schema.registerListener('addNodes', ({ changeIds }) => {
-      this.afterAddNodes.dispatch(changeIds)
-    })
-    Schema.registerListener('removeNodes', ({ changeIds }) => {
-      this.afterRemoveNodes.dispatch(changeIds)
-    })
-    Schema.registerListener('reHierarchy', ({ changeIds }) => {
+    // Schema.registerListener('addNodes', ({ changeIds }) => {
+    //   this.afterAddNodes.dispatch(changeIds)
+    // })
+    // Schema.registerListener('removeNodes', ({ changeIds }) => {
+    //   this.afterRemoveNodes.dispatch(changeIds)
+    // })
+    Schema.registerListener('changeNodeHierarchy', ({ changeIds }) => {
       this.afterReHierarchy.dispatch(changeIds[0])
     })
   }
@@ -110,24 +110,24 @@ class OperateNodeService {
   addNodes(nodes: INode[]) {
     nodes.forEach(Schema.addItem)
     const changeIds = nodes.map(({ id }) => id)
-    Schema.commitOperation('addNodes', changeIds, '添加节点', { inverseType: 'removeNodes' })
+    Schema.commitOperation('changeNodesCount', changeIds, '添加节点')
   }
   removeNodes(nodes: INode[]) {
     nodes.forEach(Schema.removeItem)
     const changeIds = nodes.map(({ id }) => id)
-    Schema.commitOperation('removeNodes', changeIds, '移除节点', { inverseType: 'addNodes' })
+    Schema.commitOperation('changeNodesCount', changeIds, '移除节点')
   }
   insertAt(parent: INodeParent, node: INode, index?: number) {
     index ??= parent.childIds.length
     Schema.itemAdd(parent, ['childIds', index], node.id)
     Schema.itemReset(node, ['parentId'], parent.id)
-    Schema.commitOperation('reHierarchy', [parent.id], '插入子节点')
+    Schema.commitOperation('changeNodeHierarchy', [parent.id], '插入子节点')
   }
   splice(parent: INodeParent, node: INode) {
     const index = parent.childIds.indexOf(node.id)
     Schema.itemDelete(parent, ['childIds', index])
     Schema.itemReset(node, ['parentId'], '')
-    Schema.commitOperation('reHierarchy', [parent.id], '移除子节点')
+    Schema.commitOperation('changeNodeHierarchy', [parent.id], '移除子节点')
   }
   setNodeRuntime(id: ID, runtime: Partial<INodeRuntime>) {
     const prevRuntime = this.getNodeRuntime(id)

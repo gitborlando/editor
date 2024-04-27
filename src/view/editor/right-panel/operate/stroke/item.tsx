@@ -1,7 +1,7 @@
 import { FC, memo, useRef } from 'react'
 import { OperateStroke } from '~/editor/operate/stroke'
 import { IStroke } from '~/editor/schema/type'
-import { useHookSignal } from '~/shared/signal-react'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'

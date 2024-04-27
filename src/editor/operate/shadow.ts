@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { cloneDeep } from 'lodash-es'
 import { createMomentChange } from '~/shared/intercept-data/moment-change'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { Delete } from '~/shared/utils/normal'
 import { Record } from '../record'
 import { SchemaDefault } from '../schema/default'
@@ -9,7 +9,7 @@ import { Schema } from '../schema/schema'
 import { IFillColor, INode, IShadow } from '../schema/type'
 import { StageDraw } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
-import { UIPicker } from '../ui-state/right-planel/operate/picker'
+import { UIPicker } from '../ui-state/right-panel/operate/picker'
 import { OperateNode } from './node'
 
 type IInitShadows = Map<string, IShadow[]>

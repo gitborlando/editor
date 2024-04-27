@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createCache2 } from '~/shared/cache'
+import { createCache } from '~/shared/cache'
 import { firstOne, lastOne } from '~/shared/utils/list'
 
 export type IPatch<T = any> = IPatchAdd<T> | IPatchReplace<T> | IPatchRemove
@@ -33,12 +33,12 @@ export type IOperateDiff = {
 
 @autobind
 export class SchemaDiffService {
-  patchAddMap = createCache2<IPatchPath, IPatch<any>[]>()
-  patchReplaceMap = createCache2<IPatchPath, IPatch<any>[]>()
-  patchRemoveMap = createCache2<IPatchPath, IPatch<any>[]>()
-  inversePatchAddMap = createCache2<IPatchPath, IPatch<any>[]>()
-  inversePatchReplaceMap = createCache2<IPatchPath, IPatch<any>[]>()
-  inversePatchRemoveMap = createCache2<IPatchPath, IPatch<any>[]>()
+  patchAddMap = createCache<IPatchPath, IPatch<any>[]>()
+  patchReplaceMap = createCache<IPatchPath, IPatch<any>[]>()
+  patchRemoveMap = createCache<IPatchPath, IPatch<any>[]>()
+  inversePatchAddMap = createCache<IPatchPath, IPatch<any>[]>()
+  inversePatchReplaceMap = createCache<IPatchPath, IPatch<any>[]>()
+  inversePatchRemoveMap = createCache<IPatchPath, IPatch<any>[]>()
   setAddPatch(path: IPatchPath, value: any) {
     this.patchAddMap.getSet(path, () => []).push({ op: 'add', path: `/${path}`, value })
   }

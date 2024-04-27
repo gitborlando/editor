@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { XY } from '~/shared/structure/xy'
 import { IRect, IXY } from '~/shared/utils/normal'
+import { XY } from '~/shared/xy'
 import { abs, rcos, rsin } from './base'
 import { xy_dot, xy_minus, xy_rotate3 } from './xy'
 

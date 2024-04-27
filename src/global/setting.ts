@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { toJS } from 'mobx'
 import { createCache } from '~/shared/cache'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { iife } from '~/shared/utils/normal'
 
 type ISetting = {
@@ -12,7 +12,7 @@ type ISetting = {
 @autobind
 export class SettingService {
   inited = createSignal(false)
-  private settings = createCache<ISetting>()
+  private settings = createCache<string, ISetting>()
   private key = 'setting'
   init() {
     this.load()

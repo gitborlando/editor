@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { addListener } from '~/shared/utils/event'
 import { SchemaDefault } from '../schema/default'
 import { Schema } from '../schema/schema'
@@ -19,7 +19,7 @@ export class OperateMetaService {
       const page = Schema.find<IPage>(Schema.client.selectPageId)
       this.curPage.dispatch(page)
     })
-    Schema.registerListener('changePages', () => {
+    Schema.registerListener('changePagesCount', () => {
       this.afterChangePages.dispatch()
     })
     Schema.registerListener('syncMouse', (o) => {})
@@ -53,12 +53,12 @@ export class OperateMetaService {
   addPage(page: IPage) {
     Schema.addItem(page)
     Schema.itemAdd(Schema.meta, ['pageIds', Schema.meta.pageIds.length], page.id)
-    Schema.commitOperation('changePages', ['meta', page.id], '添加页面')
+    Schema.commitOperation('changePagesCount', ['meta', page.id], '添加页面')
   }
   removePage(page: IPage) {
     Schema.removeItem(page)
     Schema.itemDelete(Schema.meta, ['pageIds', Schema.meta.pageIds.indexOf(page.id)])
-    Schema.commitOperation('changePages', ['meta', page.id], '移除页面')
+    Schema.commitOperation('changePagesCount', ['meta', page.id], '移除页面')
   }
   syncMouse(x: number, y: number) {
     Schema.itemReset(Schema.meta, ['clients', Schema.client.id, 'mouse'], { x, y })

@@ -1,8 +1,8 @@
 import { FC, memo } from 'react'
 import { IImage, Img } from '~/editor/img'
-import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
+import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
 import { Uploader } from '~/global/upload'
-import { useAutoSignal, useHookSignal, useSignal } from '~/shared/signal-react'
+import { useAutoSignal, useHookSignal, useSignal } from '~/shared/signal/signal-react'
 import { rgba } from '~/shared/utils/color'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -33,14 +33,10 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({}) => {
     }
   })
 
-  useHookSignal(
-    currentImageFill,
-    (fill) => {
-      if (fill.type !== 'image') return
-      Img.getImageAsync(fill.url).then((img) => image.dispatch(img))
-    },
-    { immediately: true }
-  )
+  useHookSignal(currentImageFill, { immediately: true }, (fill) => {
+    if (fill.type !== 'image') return
+    Img.getImageAsync(fill.url).then((img) => image.dispatch(img))
+  })
 
   return (
     <Flex layout='v' className={classes.PickerImage}>

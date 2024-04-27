@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { IValueWillChange, intercept, observable } from 'mobx'
-import { createSignal } from '../signal'
+import { createSignal } from '../signal/signal'
 
 @autobind
 class Interceptable<T extends Record<string, any>, K extends keyof T = keyof T> {

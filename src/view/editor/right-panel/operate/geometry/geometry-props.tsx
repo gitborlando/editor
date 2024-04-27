@@ -2,7 +2,7 @@ import { FC, memo } from 'react'
 import { OperateGeometry } from '~/editor/operate/geometry'
 import { OperateNode } from '~/editor/operate/node'
 import { StageSelect } from '~/editor/stage/interact/select'
-import { useHookSignal2 } from '~/shared/signal-react'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { GeometryPropComp } from './geometry-prop'
@@ -12,8 +12,8 @@ type IGeometryPropsComp = {}
 export const GeometryPropsComp: FC<IGeometryPropsComp> = memo(({}) => {
   const { classes } = useStyles({})
   const { geometryKeys, isChangedGeometry } = OperateGeometry
-  useHookSignal2(StageSelect.afterSelect, { after: 'setupGeometry' })
-  useHookSignal2(isChangedGeometry)
+  useHookSignal(StageSelect.afterSelect, { after: 'setupGeometry' })
+  useHookSignal(isChangedGeometry)
 
   return (
     OperateNode.selectIds.value.size !== 0 && (

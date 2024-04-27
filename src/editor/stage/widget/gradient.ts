@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { Graphics } from 'pixi.js'
 import { IFillLinearGradient } from '~/editor/schema/type'
-import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
+import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
 import { PIXI } from '../pixi'
 
 @autobind

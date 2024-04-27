@@ -1,4 +1,4 @@
-import { XY } from '~/shared/structure/xy'
+import { XY } from '~/shared/xy'
 import { abs, pow2, pow3 } from './base'
 
 /* 贝塞尔参数方程 */

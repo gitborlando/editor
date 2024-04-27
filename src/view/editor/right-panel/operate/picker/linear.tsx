@@ -1,6 +1,6 @@
 import { FC, memo } from 'react'
-import { UIPicker } from '~/editor/ui-state/right-planel/operate/picker'
-import { useAutoSignal, useHookSignal } from '~/shared/signal-react'
+import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
+import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { makeLinearGradientCss } from '~/shared/utils/color'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'

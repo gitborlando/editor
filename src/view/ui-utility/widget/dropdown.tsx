@@ -1,6 +1,6 @@
 import { ComponentPropsWithRef, forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { useAutoSignal, useSignal } from '~/shared/signal-react'
+import { useAutoSignal, useSignal } from '~/shared/signal/signal-react'
 import { stopPropagation, useClickAway } from '~/shared/utils/event'
 import { iife } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'

@@ -275,10 +275,10 @@ export type ISchemaChangeType =
   | 'selectPage'
   | 'syncMouse'
   | 'selectIds'
-  | 'changePages'
-  | 'reHierarchy'
-  | 'addNodes'
-  | 'removeNodes'
+  | 'clientsChange'
+  | 'changePagesCount'
+  | 'changeNodesCount'
+  | 'changeNodeHierarchy'
   | 'changeNodeAlign'
   | 'changeNodeGeometry'
   | 'changeTextContent'
@@ -289,10 +289,10 @@ export const SchemaChangeType = <ISchemaChangeType[]>[
   'selectPage',
   'syncMouse',
   'selectIds',
-  'changePages',
-  'reHierarchy',
-  'addNodes',
-  'removeNodes',
+  'clientsChange',
+  'changePagesCount',
+  'changeNodesCount',
+  'changeNodeHierarchy',
   'changeNodeAlign',
   'changeNodeGeometry',
   'changeTextContent',
@@ -305,7 +305,6 @@ export type ISchemaOperation = {
   changeType: ISchemaChangeType
   changeIds: ID[]
   diff: IOperateDiff
-  inverseType?: ISchemaChangeType
   description?: string
 }
 

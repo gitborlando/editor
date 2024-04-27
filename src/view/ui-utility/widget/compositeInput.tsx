@@ -1,7 +1,7 @@
 import RCInput, { InputProps } from 'rc-input'
 import { ComponentPropsWithRef, forwardRef, memo, useRef } from 'react'
 import { Drag } from '~/global/event/drag'
-import { useAutoSignal } from '~/shared/signal-react'
+import { useAutoSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import { iife, noopFunc, useSubComponent } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'

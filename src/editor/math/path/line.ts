@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { abs, atan, radianfy } from '~/editor/math/base'
-import { XY } from '~/shared/structure/xy'
 import { pipe } from '~/shared/utils/normal'
+import { XY } from '~/shared/xy'
 import { PathPoint } from './point'
 
 @autobind

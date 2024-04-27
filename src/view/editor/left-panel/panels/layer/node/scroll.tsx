@@ -2,7 +2,7 @@ import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { max } from '~/editor/math/base'
 import { Drag } from '~/global/event/drag'
-import { useAutoSignal, useHookSignal, useSignal } from '~/shared/signal-react'
+import { useAutoSignal, useHookSignal, useSignal } from '~/shared/signal/signal-react'
 import { makeStyles } from '../../../../../ui-utility/theme'
 import { Flex } from '../../../../../ui-utility/widget/flex'
 

@@ -1,11 +1,11 @@
 import autobind from 'class-autobind-decorator' //@ts-ignore
 import { diffApply, jsonPatchPathConverter } from 'just-diff-apply'
 import { nanoid } from 'nanoid'
-import { createCache2 } from '~/shared/cache'
-import { createSignal } from '~/shared/signal'
+import { createCache } from '~/shared/cache'
+import { createSignal } from '~/shared/signal/signal'
+import { Immui } from '../../shared/immui/immui'
 import { IPatch, SchemaDiff } from './diff'
 import { SchemaHistory } from './history'
-import { MutateSchemaItem } from './mutate'
 import {
   IClient,
   ID,
@@ -28,7 +28,7 @@ export class SchemaService {
   pages = <IPage[]>[]
   afterSetSchema = createSignal()
   operationList = <ISchemaOperation[]>[]
-  listenerMap = createCache2<ISchemaChangeType, ISchemaListener['callback']>()
+  listenerMap = createCache<ISchemaChangeType, ISchemaListener['callback']>()
   initSchema(schema: ISchema) {
     this.schema = schema
     this.meta = this.find<IMeta>('meta')
@@ -37,23 +37,30 @@ export class SchemaService {
   }
   addItem(item: INodeOrPage) {
     this.schema[item.id] = item
+    Immui.add(this.schema, [item.id], item)
     SchemaDiff.atomAddDiff(item.id, item)
   }
   removeItem(item: INodeOrPage) {
-    delete this.schema[item.id]
+    Immui.delete(this.schema, [item.id])
     SchemaDiff.atomRemoveDiff(item.id, item)
   }
   itemAdd(item: ISchemaItem, keypath: (ISchemaPropKey | (string & {}) | number)[], value: any) {
-    MutateSchemaItem.add(item, keypath, value)
+    Immui.add(item, keypath, value)
+    SchemaDiff.atomAddDiff(`/${item.id}/${keypath.join('/')}`, value)
   }
   itemReset(item: ISchemaItem, keypath: (ISchemaPropKey | (string & {}) | number)[], value: any) {
-    MutateSchemaItem.reset(item, keypath, value)
+    const oldValue = Immui.reset(item, keypath, value)
+    SchemaDiff.atomReplaceDiff(`/${item.id}/${keypath.join('/')}`, value, oldValue)
   }
   itemDelete(item: ISchemaItem, keypath: (ISchemaPropKey | (string & {}) | number)[]) {
-    MutateSchemaItem.delete(item, keypath)
+    const oldValue = Immui.delete(item, keypath)
+    SchemaDiff.atomRemoveDiff(`/${item.id}/${keypath.join('/')}`, oldValue)
   }
   itemGet<T = any>(item: ISchemaItem, keypath: (ISchemaPropKey | (string & {}) | number)[]) {
-    return MutateSchemaItem.get<T>(item, keypath)
+    return Immui.get<T>(item, keypath)
+  }
+  commitNewSchema() {
+    this.schema = Immui.commit(this.schema)
   }
   find<T extends ISchemaItem>(id: ID): T {
     return this.schema[id] as T
@@ -80,6 +87,7 @@ export class SchemaService {
     const operation = { id, diff, changeIds, changeType, description, timestamp, ...option }
     this.operationList.push(operation)
     this.broadcast(operation)
+    this.commitNewSchema()
   }
   commitHistory(description: string) {
     SchemaHistory.commit(description)

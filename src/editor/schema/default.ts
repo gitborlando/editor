@@ -34,7 +34,7 @@ import {
 @autobind
 export class SchemaDefaultService {
   devFileId?: string
-  typeIndexMapCache = createCache<Record<string, [string, number]>>()
+  typeIndexMapCache = createCache<string, Record<string, [string, number]>>()
   meta(): IMeta {
     return {
       type: 'meta',

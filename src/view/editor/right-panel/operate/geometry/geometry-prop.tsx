@@ -3,7 +3,7 @@ import { max } from '~/editor/math/base'
 import { IGeometry, OperateGeometry } from '~/editor/operate/geometry'
 import { OperateNode } from '~/editor/operate/node'
 import { StageViewport } from '~/editor/stage/viewport'
-import { useHookSignal2, useSignal } from '~/shared/signal-react'
+import { useHookSignal, useSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
@@ -20,8 +20,8 @@ export const GeometryPropComp: FC<IGeometryPropComp> = ({ label, operateKey }) =
   const operateDataCache = useSignal(0)
   const slideRate = 1 / StageViewport.zoom.value
 
-  useHookSignal2(StageViewport.zoom)
-  useHookSignal2(isChangedGeometry)
+  useHookSignal(StageViewport.zoom)
+  useHookSignal(isChangedGeometry)
   useDownUpTracker(
     () => ref.current,
     () => {

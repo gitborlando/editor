@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { ILoopArrayCallbackData, LoopArray } from '~/shared/structure/loop-array'
+import { ILoopArrayCallbackData, LoopArray } from '~/editor/math/path/loop-array'
 import { PathCurve } from './curve'
 import { PathLine } from './line'
 import { PathNull } from './null'

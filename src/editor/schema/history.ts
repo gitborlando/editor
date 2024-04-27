@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { Schema } from './schema'
 import { ISchemaHistory, ISchemaOperation } from './type'
 
@@ -52,12 +52,10 @@ export class SchemaHistoryService {
     this.lastOperationsLength = Schema.operationList.length
   }
   private replayOperations(type: 'undo' | 'redo', operations: ISchemaOperation[]) {
-    operations.forEach((operation, i) => {
-      const { diff, inverseType } = operation
+    operations.forEach((operation) => {
+      const { diff } = operation
       Schema.applyPatch(type === 'undo' ? diff.inversePatches : diff.patches)
-      if (type === 'undo' && inverseType)
-        Schema.broadcast({ ...operation, changeType: inverseType })
-      else Schema.broadcast(operation)
+      Schema.broadcast(operation)
     })
   }
 }

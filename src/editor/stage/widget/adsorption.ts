@@ -19,8 +19,8 @@ import { StageWidgetTransform } from './transform'
 @autobind
 export class StageWidgetAdsorptionService {
   adsorptionElement = new Graphics()
-  hAdsorptionMap = createCache<number[], number>()
-  vAdsorptionMap = createCache<number[], number>()
+  hAdsorptionMap = createCache<number, number[]>()
+  vAdsorptionMap = createCache<number, number[]>()
   sortedAdsorptionX = <number[]>[]
   sortedAdsorptionY = <number[]>[]
   toDrawHLines = <{ y: number; xs: number[] }[]>[]
