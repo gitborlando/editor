@@ -1,6 +1,23 @@
-type IKey = string | number
+export type IKey = string | number
+
+export type IPatch =
+  | {
+      type: 'add'
+      path: string
+      value: any
+    }
+  | {
+      type: 'replace'
+      path: string
+      value: any
+    }
+  | {
+      type: 'remove'
+      path: string
+    }
 
 let keyPathDiffMap = <any>{}
+let needDiff = true
 
 export const Immui = {
   get<T>(object: object, keyPath: string | IKey[]): T {
@@ -70,6 +87,9 @@ export const Immui = {
     keyPathDiffMap = {}
     return newObject
   },
+  applyPatch<T>(object: T, patches: IPatch[]): T {
+    return applyPatch(object, patches)
+  },
 }
 
 const makeDiff = (
@@ -88,6 +108,7 @@ const makeDiff = (
         curKeyPathDiffMap[key] = {}
       } else {
         curKeyPathDiffMap[key] = undefined
+        if (!needDiff) return
         if (type === 'add') {
           patch = { type, path, value: newValue }
           inversePatch = { type: 'remove', path }
@@ -123,8 +144,26 @@ const traverse = (oldObj: any, newObj: any = {}) => {
   return newObj
 }
 
+function applyPatch(object: any, patches: IPatch[]) {
+  needDiff = false
+  patches.forEach((patch) => {
+    const keys = patch.path.split('/').filter(Boolean)
+    switch (patch.type) {
+      case 'add':
+        return Immui.add(object, keys, patch.value)
+      case 'replace':
+        return Immui.reset(object, keys, patch.value)
+      case 'remove':
+        console.log(object, keys)
+        return Immui.delete(object, keys)
+    }
+  })
+  needDiff = true
+  return Immui.commit(object)
+}
+
 const testImmuiPerformance = (isGeek: boolean = false) => {
-  const object = {
+  let object = {
     foo: {
       bar: {
         baz: {
@@ -133,6 +172,8 @@ const testImmuiPerformance = (isGeek: boolean = false) => {
       },
     },
   }
+
+  const patches = <IPatch[]>[]
 
   isGeek && console.log('Immui Geek')
   console.time('Immui get')
@@ -143,7 +184,8 @@ const testImmuiPerformance = (isGeek: boolean = false) => {
 
   console.time('Immui add')
   for (let i = 0; i < 1; i++) {
-    Immui.add(object, ['foo', 'bar', 'baz', 'newValue'], 'i')
+    patches.push(Immui.add(object, ['foo', 'bar', 'baz', 'newValue'], 'i').inversePatch)
+    console.log(object)
     !isGeek && Immui.commit(object)
   }
   console.timeEnd('Immui add')
@@ -169,6 +211,13 @@ const testImmuiPerformance = (isGeek: boolean = false) => {
     }
     console.timeEnd('Immui commit')
   }
+
+  console.time('Immui applyPatch')
+  for (let i = 0; i < 1; i++) {
+    object = Immui.applyPatch(object, patches)
+    console.log(object)
+  }
+  console.timeEnd('Immui applyPatch')
 }
 
 // testImmuiPerformance()
