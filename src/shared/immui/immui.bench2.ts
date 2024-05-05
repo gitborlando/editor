@@ -69,7 +69,7 @@ for (let i = 0; i < iterations; i++) {
       Immui.reset(state, ['count'], state.count - 1)
       break
   }
-  state = Immui.commit(state)
+  state = Immui.next(state)
 }
 console.timeEnd('Immui reducer')
 

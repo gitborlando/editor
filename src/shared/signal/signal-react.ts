@@ -15,7 +15,7 @@ export function useAutoSignal<T extends any>(init?: T): Signal<T> {
 
 type ICallback<T> = (value: T, forceUpdate: INoopFunc) => any
 export function useHookSignal<T>(signal: Signal<T>): void
-export function useHookSignal<T>(signal: Signal<T>, option?: IHookOption): void
+export function useHookSignal<T>(signal: Signal<T>, option: IHookOption): void
 export function useHookSignal<T>(signal: Signal<T>, callback: ICallback<T>): void
 export function useHookSignal<T>(
   signal: Signal<T>,

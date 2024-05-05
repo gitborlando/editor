@@ -8,7 +8,7 @@ import { Record } from '../record'
 import { SchemaDefault } from '../schema/default'
 import { Schema } from '../schema/schema'
 import { INode, IStroke } from '../schema/type'
-import { StageDraw } from '../stage/draw/draw'
+import { StageDraw2 } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
 import { UIPicker } from '../ui-state/right-panel/operate/picker'
 import { OperateNode } from './node'
@@ -16,7 +16,7 @@ import { OperateNode } from './node'
 type IInitStrokes = Map<string, IStroke[]>
 
 @autobind
-export class OperateStrokeService {
+class OperateStrokeService {
   strokes = createSignal<IStroke[] | IInitStrokes>([])
   beforeOperate = createSignal()
   afterOperate = createSignal()
@@ -124,7 +124,7 @@ export class OperateStrokeService {
     if (this.isStrokesArray(this.strokes.value)) {
       node.strokes = this.strokes.value
     } else node.strokes = this.strokes.value.get(node.id)!
-    StageDraw.collectRedraw(node.id)
+    StageDraw2.collectRedraw(node.id)
   }
   private recordOperate() {
     if (Record.isInRedoUndo) return

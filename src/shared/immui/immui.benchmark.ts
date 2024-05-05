@@ -1,9 +1,10 @@
 import { produce, produceWithPatches } from 'immer'
 import { Map } from 'immutable'
-import set from 'immutable-set'
-import { Immui } from './immui'
+import Immui from './immui'
 
 const testImmuiPerformance = (isGeek: boolean = false) => {
+  const immui = new Immui()
+
   const object = {
     foo: {
       bar: {
@@ -14,40 +15,40 @@ const testImmuiPerformance = (isGeek: boolean = false) => {
     },
   }
 
-  isGeek && console.log('Immui Geek')
-  console.time('Immui get')
+  isGeek && console.log('immui Geek')
+  console.time('immui get')
   for (let i = 0; i < 1000000; i++) {
-    Immui.get(object, ['foo', 'bar', 'baz', 'value'])
+    object.foo.bar.baz.value
   }
-  console.timeEnd('Immui get')
+  console.timeEnd('immui get')
 
-  console.time('Immui add')
+  console.time('immui add')
   for (let i = 0; i < 1000000; i++) {
-    Immui.add(object, ['foo', 'bar', 'baz', 'newValue'], i)
-    !isGeek && Immui.commit(object)
+    immui.add(object, ['foo', 'bar', 'baz', 'newValue'], i)
+    !isGeek && immui.next(object)
   }
-  console.timeEnd('Immui add')
+  console.timeEnd('immui add')
 
-  console.time('Immui reset')
+  console.time('immui reset')
   for (let i = 0; i < 1000000; i++) {
-    Immui.reset(object, ['foo', 'bar', 'baz', 'value'], i)
-    !isGeek && Immui.commit(object)
+    immui.reset(object, ['foo', 'bar', 'baz', 'value'], i)
+    !isGeek && immui.next(object)
   }
-  console.timeEnd('Immui reset')
+  console.timeEnd('immui reset')
 
-  console.time('Immui delete')
+  console.time('immui delete')
   for (let i = 0; i < 1000000; i++) {
-    Immui.delete(object, ['foo', 'bar', 'baz', 'value'])
-    !isGeek && Immui.commit(object)
+    immui.delete(object, ['foo', 'bar', 'baz', 'value'])
+    !isGeek && immui.next(object)
   }
-  console.timeEnd('Immui delete')
+  console.timeEnd('immui delete')
 
   if (isGeek) {
-    console.time('Immui commit')
+    console.time('immui commit')
     for (let i = 0; i < 1000000; i++) {
-      Immui.commit(object)
+      immui.next(object)
     }
-    console.timeEnd('Immui commit')
+    console.timeEnd('immui commit')
   }
 }
 
@@ -236,23 +237,22 @@ const testImmutableSetPerformance = () => {
 }
 
 export function immuiPerformanceVs() {
-  console.log('immui-performance-vs')
+  console.log('immui-performance-vs\n')
 
   testImmerPerformance()
-  console.log('------------------------------------------------------------')
+  console.log('-----------------------------------')
 
   testImmutablePerformance()
-  console.log('------------------------------------------------------------')
+  console.log('-----------------------------------')
 
   testNativePerformance()
-  console.log('------------------------------------------------------------')
+  console.log('-----------------------------------')
 
-  testImmuiPerformance(true)
-  console.log('------------------------------------------------------------')
+  testimmuiPerformance(true)
+  console.log('-----------------------------------')
 
-  testImmuiPerformance()
-  console.log('------------------------------------------------------------')
+  testimmuiPerformance()
+  console.log('-----------------------------------')
 
-  testImmutableSetPerformance()
   console.log('immui-performance-vs')
 }

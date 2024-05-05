@@ -11,7 +11,7 @@ import { Schema } from './schema/schema'
 import { IMeta, ISchema } from './schema/type'
 
 @autobind
-export class SchemaFileService {
+class SchemaFileService {
   fileStore = createIDBStore<ISchema>('schema-files')
   isSaved = createSignal(false)
   allFileMeta = createSignal(<IMeta[]>[])

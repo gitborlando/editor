@@ -1,9 +1,12 @@
-import { observer } from 'mobx-react'
-import { FC } from 'react'
+import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import { initEditor } from '~/editor/initialize'
+import { OperateNode } from '~/editor/operate/node'
+import { Schema } from '~/editor/schema/schema'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
+import { EditorSchemaContext, EditorSelectedNodesContext } from './context'
 import { HeaderComp } from './header/header'
 import { LeftPanelComp } from './left-panel/left-panel'
 import { RightPanelComp } from './right-panel/right-panel'
@@ -11,17 +14,23 @@ import { MainStageComp } from './stage/stage'
 
 type IEditorComp = {}
 
-export const EditorComp: FC<IEditorComp> = observer(({}) => {
+export const EditorComp: FC<IEditorComp> = memo(({}) => {
   const { classes } = useStyles({})
   usePromise<[string], any>(initEditor, ['editor-init'])
+  useHookSignal(Schema.schemaChanged, { afterAll: true })
+
   return (
     <Flex layout='v' className={classes.Editor} onContextMenu={(e) => e.preventDefault()}>
-      <HeaderComp />
-      <Flex layout='h' className={classes.main}>
-        <LeftPanelComp />
-        <MainStageComp />
-        <RightPanelComp />
-      </Flex>
+      <EditorSchemaContext.Provider value={Schema.schema}>
+        <EditorSelectedNodesContext.Provider value={OperateNode.selectedNodes.value}>
+          <HeaderComp />
+          <Flex layout='h' className={classes.main}>
+            <LeftPanelComp />
+            <MainStageComp />
+            <RightPanelComp />
+          </Flex>
+        </EditorSelectedNodesContext.Provider>
+      </EditorSchemaContext.Provider>
     </Flex>
   )
 })

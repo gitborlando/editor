@@ -17,7 +17,7 @@ type ISwitchTabOption = {
 }
 
 @autobind
-export class UILeftPanelService {
+class UILeftPanelService {
   currentTabId = createSignal('layer')
   switchTabMap = createSignal(new Map<string, ISwitchTabOption>())
   popupTabIds = createSetting('Editor.LeftPanel.popupTabIds', new Set<string>())

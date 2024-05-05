@@ -11,13 +11,12 @@ import { IFrame } from '~/editor/schema/type'
 import { SchemaUtil } from '~/editor/schema/util'
 import { createCache } from '~/shared/cache'
 import { iife, isNumberEqual } from '~/shared/utils/normal'
-import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageWidgetTransform } from './transform'
 
 @autobind
-export class StageWidgetAdsorptionService {
+class StageWidgetAdsorptionService {
   adsorptionElement = new Graphics()
   hAdsorptionMap = createCache<number, number[]>()
   vAdsorptionMap = createCache<number, number[]>()
@@ -43,13 +42,13 @@ export class StageWidgetAdsorptionService {
     if (OperateNode.datumId.value === '' || SchemaUtil.isPage(OperateNode.datumId.value)) {
       OperateMeta.curPage.value.childIds.forEach((id) => {
         if (OperateNode.selectIds.value.has(id)) return
-        this.collectAdsorption(StageElement.OBBCache.get(id))
+        this.collectAdsorption(OperateNode.getNodeRuntime(id))
       })
     } else {
       const node = Schema.find(OperateNode.datumId.value) as IFrame
       ;[node.id, ...node.childIds].forEach((id) => {
         if (OperateNode.selectIds.value.has(id)) return
-        this.collectAdsorption(StageElement.OBBCache.get(id))
+        this.collectAdsorption(OperateNode.getNodeRuntime(id))
       })
     }
     this.sortedAdsorptionX = [...this.vAdsorptionMap.keys()].sort()

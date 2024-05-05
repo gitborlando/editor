@@ -17,7 +17,7 @@ export type IActionRecord = {
 }
 
 @autobind
-export class RecordService {
+class RecordService {
   stack = <(IUndoRedoRecord | IActionRecord)[]>[]
   index = createSignal(-1)
   isInRedoUndo = false

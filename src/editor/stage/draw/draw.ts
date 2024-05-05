@@ -4,53 +4,51 @@ import { Graphics, Matrix, Text, Texture } from 'pixi.js'
 import { IImage, Img } from '~/editor/img'
 import { radianfy } from '~/editor/math/base'
 import { xy_new } from '~/editor/math/xy'
-import { OperateNode } from '~/editor/operate/node'
-import { Schema } from '~/editor/schema/schema'
-import { IFillLinearGradient, IFrame, IIrregular, INode, IVector } from '~/editor/schema/type'
-import { rgb, rgbToHex, rgbToRgba } from '~/shared/utils/color'
-import { flushList } from '~/shared/utils/list'
+import { ID, IFillLinearGradient, INode, IVector } from '~/editor/schema/type'
+import { createCache } from '~/shared/cache'
+import { rgbToHex, rgbToRgba } from '~/shared/utils/color'
 import { iife } from '~/shared/utils/normal'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
 import { createStarPolygon } from '~/shared/utils/pixi/star'
 import { XY } from '~/shared/xy'
-import { IStageElement, StageElement } from '../element'
-import { PIXI, Pixi } from '../pixi'
+import { PIXI } from '../pixi'
 import { StageViewport } from '../viewport'
-import { StageDrawPath } from './path'
+
+export type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
-export class StageDrawService {
+class StageDrawService {
   private redrawIds = new Set<string>()
   private hasShadowNodes = new Set<INode>()
+  private linearGradientCache = createCache<ID, PIXI.Texture>()
   initHook() {
-    OperateNode.afterFlushDirty.hook({ after: 'reHierarchy' }, () => {
-      flushList(this.redrawIds, (id) => {
-        const node = Schema.find<INode>(id)
-        node && this.drawNode(node)
-      })
-    })
-    StageViewport.zoom.hook((_, args) => {
-      if (args?.pageChangeCause) return
-      this.hasShadowNodes.forEach((node) => {
-        const element = StageElement.findElement(node.id)
-        this.drawShadows(element, node)
-      })
-    })
+    // OperateNode.afterFlushDirty.hook({ after: 'reHierarchy' }, () => {
+    //   flushList(this.redrawIds, (id) => {
+    //     const node = Schema.find<INode>(id)
+    //     node && this.drawNode(node)
+    //   })
+    // })
+    // StageViewport.zoom.hook((_, args) => {
+    //   if (args?.pageChangeCause) return
+    //   this.hasShadowNodes.forEach((node) => {
+    //     const element = StageElement.findElement(node.id)
+    //     this.drawShadows(element, node)
+    //   })
+    // })
   }
   collectRedraw(id: string) {
     this.redrawIds.add(id)
   }
-  private drawNode(node: INode) {
-    const element = StageElement.findElement(node.id)
+  drawNode(element: IStageElement, node: INode) {
     if ('clear' in element) element.clear()
     this.drawFills(element, node)
     this.drawStrokes(element, node)
     this.drawShadows(element, node)
   }
   private drawFills<T extends INode = INode>(element: IStageElement, node: T) {
-    const mask = StageElement.maskCache.get(node.id)
-    mask?.beginFill(rgb(0, 0, 0), 0.001)
+    // const mask = StageElement.maskCache.get(node.id)
+    // mask?.beginFill(rgb(0, 0, 0), 0.001)
     node.fills.forEach((fill) => {
       if (!fill.visible) return
       if (fill.type === 'color') {
@@ -130,6 +128,7 @@ export class StageDrawService {
     element.x = pivotXY.x
     element.y = pivotXY.y
     element.rotation = rotation
+    return { x: pivotXY.x, y: pivotXY.y, rotation }
   }
   drawShape(element: IStageElement, node: INode) {
     this.setGeometry(element, node)
@@ -137,11 +136,7 @@ export class StageDrawService {
     const graphics = element as Graphics
     const text = element as Text
     if (node.type === 'frame') {
-      // this.drawFrameName(node)
-      const mask = StageElement.maskCache.get(node.id)
-      this.setGeometry(mask, node)
       graphics.drawRoundedRect(0, 0, width, height, node.radius)
-      mask.drawRoundedRect(0, 0, width, height, node.radius)
     }
     if (node.type === 'text') {
       text.text = node.content
@@ -168,82 +163,82 @@ export class StageDrawService {
       if (node.vectorType === 'line') {
         graphics.moveTo(0, 0)
         graphics.lineTo(node.width, 0)
-        this.drawHitArea(node, graphics)
+        //     this.drawHitArea(node, graphics)
       }
-      if (node.vectorType === 'irregular') {
-        const path = StageElement.pathCache.getSet(node.id, () =>
-          StageDrawPath.createPath(<IIrregular>node)
-        )
-        StageDrawPath.drawPath(path, graphics)
-      }
+      // if (node.vectorType === 'irregular') {
+      //   const path = StageElement.pathCache.getSet(node.id, () =>
+      //     StageDrawPath.createPath(<IIrregular>node)
+      //   )
+      //   StageDrawPath.drawPath(path, graphics)
+      // }
     }
   }
-  private drawHitArea(node: INode, element: PIXI.Graphics) {
-    const contains = StageElement.hitAreaCache.getSet(
-      node.id,
-      () => {
-        return (x: number, y: number) => {
-          const points = element.geometry.points
-          // const odds: { x: number; y: number; z: number }[] = []
-          // const evens: { x: number; y: number; z: number }[] = []
-          // for (let index = 0; index * 2 < points.length; index++) {
-          //   const x = points[index * 2]
-          //   const y = points[index * 2 + 1]
-          //   const z = points[index * 2 + 2]
-          //   index % 2 === 0 ? odds.push({ x, y, z }) : evens.push({ x, y, z })
-          // }
-          const odds: { x: number; y: number }[] = []
-          const evens: { x: number; y: number }[] = []
-          for (let index = 0; index * 2 < points.length; index++) {
-            const x = points[index * 2]
-            const y = points[index * 2 + 1]
-            index % 2 === 0 ? odds.push({ x, y: y - 5 }) : evens.push({ x, y: y + 5 })
-          }
-          return new PIXI.Polygon([...odds, ...evens.reverse()]).contains(x, y)
-        }
-      },
-      [element.geometry.points.reduce((all, i) => all + i, 0)]
-    )
-    element.hitArea = { contains }
-  }
+  // private drawHitArea(node: INode, element: PIXI.Graphics) {
+  //   const contains = StageElement.hitAreaCache.getSet(
+  //     node.id,
+  //     () => {
+  //       return (x: number, y: number) => {
+  //         const points = element.geometry.points
+  //         // const odds: { x: number; y: number; z: number }[] = []
+  //         // const evens: { x: number; y: number; z: number }[] = []
+  //         // for (let index = 0; index * 2 < points.length; index++) {
+  //         //   const x = points[index * 2]
+  //         //   const y = points[index * 2 + 1]
+  //         //   const z = points[index * 2 + 2]
+  //         //   index % 2 === 0 ? odds.push({ x, y, z }) : evens.push({ x, y, z })
+  //         // }
+  //         const odds: { x: number; y: number }[] = []
+  //         const evens: { x: number; y: number }[] = []
+  //         for (let index = 0; index * 2 < points.length; index++) {
+  //           const x = points[index * 2]
+  //           const y = points[index * 2 + 1]
+  //           index % 2 === 0 ? odds.push({ x, y: y - 5 }) : evens.push({ x, y: y + 5 })
+  //         }
+  //         return new PIXI.Polygon([...odds, ...evens.reverse()]).contains(x, y)
+  //       }
+  //     },
+  //     [element.geometry.points.reduce((all, i) => all + i, 0)]
+  //   )
+  //   element.hitArea = { contains }
+  // }
   private getElementPivotXY(node: INode) {
     const pivotX = node.centerX - node.width / 2
     const pivotY = node.centerY - node.height / 2
     if (node.rotation === 0) return XY.Of(pivotX, pivotY)
     return XY.Of(pivotX, pivotY).rotate(XY.From(node, 'center'), node.rotation)
   }
-  private drawFrameName(frame: IFrame) {
-    const name = StageElement.frameNameCache.getSet(frame.id, () => {
-      const nameText = new Text(frame.name, {
-        fontSize: 12 / StageViewport.zoom.value,
-        fill: '#9F9F9F',
-      })
-      nameText.setParent(Pixi.sceneStage)
-      StageViewport.zoom.hook((zoom) => {
-        nameText.scale.set(1 / zoom, 1 / zoom)
-        this.drawFrameName(frame)
-      })
-      // Schema.afterReName.hook(({ id, name }) => {
-      //   if (id === frame.id) nameText.text = name
-      // })
-      return nameText
-    })
-    const pivotX = frame.centerX - frame.width / 2
-    const pivotY = frame.centerY - frame.height / 2 - 15 / StageViewport.zoom.value
-    const { x, y } = XY.Of(pivotX, pivotY).rotate(XY.From(frame, 'center'), frame.rotation)
-    name.x = x
-    name.y = y
-    name.rotation = radianfy(frame.rotation)
-  }
+  // private drawFrameName(frame: IFrame) {
+  //   const name = StageElement.frameNameCache.getSet(frame.id, () => {
+  //     const nameText = new Text(frame.name, {
+  //       fontSize: 12 / StageViewport.zoom.value,
+  //       fill: '#9F9F9F',
+  //     })
+  //     nameText.setParent(Pixi.sceneStage)
+  //     StageViewport.zoom.hook((zoom) => {
+  //       nameText.scale.set(1 / zoom, 1 / zoom)
+  //       this.drawFrameName(frame)
+  //     })
+  //     // Schema.afterReName.hook(({ id, name }) => {
+  //     //   if (id === frame.id) nameText.text = name
+  //     // })
+  //     return nameText
+  //   })
+  //   const pivotX = frame.centerX - frame.width / 2
+  //   const pivotY = frame.centerY - frame.height / 2 - 15 / StageViewport.zoom.value
+  //   const { x, y } = XY.Of(pivotX, pivotY).rotate(XY.From(frame, 'center'), frame.rotation)
+  //   name.x = x
+  //   name.y = y
+  //   name.rotation = radianfy(frame.rotation)
+  // }
   private getLinearGradientTexture(node: INode, fill: IFillLinearGradient) {
-    return StageElement.linearGradientCache.getSet(
-      fill,
+    return this.linearGradientCache.getSet(
+      node.id,
       () => {
         const start = xy_new(fill.start.x * node.width, fill.start.y * node.height)
         const end = xy_new(fill.end.x * node.width, fill.end.y * node.height)
         return createLinearGradientTexture({ ...fill, start, end })
       },
-      [node.width, node.height, ...fill.stops.map((i) => `${i.color},${i.offset}`)]
+      [node.width, node.height, fill.stops]
     )
   }
   private getImageTextureMatrix(node: INode, image: IImage) {
@@ -264,4 +259,4 @@ export class StageDrawService {
   }
 }
 
-export const StageDraw = new StageDrawService()
+export const StageDraw2 = new StageDrawService()

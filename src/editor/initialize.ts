@@ -14,21 +14,18 @@ import { SchemaHistory } from './schema/history'
 import { Schema } from './schema/schema'
 import { ISchema } from './schema/type'
 import { StageCursor } from './stage/cursor'
-import { StageDraw } from './stage/draw/draw'
-import { StageElement } from './stage/element'
 import { StageCreate } from './stage/interact/create'
 import { StageInteract } from './stage/interact/interact'
 import { StageSelect } from './stage/interact/select'
+import { Pixi } from './stage/pixi'
 import { StageViewport } from './stage/viewport'
 import { StageWidgetAdsorption } from './stage/widget/adsorption'
-import { StageWidgetGradient } from './stage/widget/gradient'
-import { StageWidgetHover } from './stage/widget/hover'
 import { StageWidgetMarquee } from './stage/widget/marquee'
 import { StageWidgetRuler } from './stage/widget/ruler'
 import { StageWidgetTransform } from './stage/widget/transform'
 import { UILeftPanelLayer } from './ui-state/left-panel/layer'
 import { UILeftPanel } from './ui-state/left-panel/left-panel'
-import { UIPicker } from './ui-state/right-panel/operate/picker'
+import { UIPickerCopy } from './ui-state/right-panel/operate/picker copy'
 
 export const editorInited = createSignal(false)
 
@@ -36,6 +33,8 @@ Hotkey.initHook()
 
 SchemaFile.initHook()
 SchemaHistory.initHook()
+
+Pixi.initHook()
 
 OperateMeta.initHook()
 OperateNode.initHook()
@@ -47,22 +46,18 @@ OperateShadow.initHook()
 OperateText.initHook()
 
 StageViewport.initHook()
-StageElement.initHook()
-StageDraw.initHook()
 StageInteract.initHook()
 StageSelect.initHook()
 StageCreate.initHook()
 StageCursor.initHook()
-StageWidgetHover.initHook()
 StageWidgetMarquee.initHook()
 StageWidgetRuler.initHook()
 StageWidgetAdsorption.initHook()
 StageWidgetTransform.initHook()
-StageWidgetGradient.initHook()
 
 UILeftPanelLayer.initHook()
 UILeftPanel.initHook()
-UIPicker.initHook()
+UIPickerCopy.initHook()
 
 export async function initEditor() {
   SchemaFile.init()

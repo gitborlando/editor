@@ -1,8 +1,8 @@
+import { cloneDeep } from 'lodash-es'
 import { FC, memo } from 'react'
 import { IFill, IFillColor } from '~/editor/schema/type'
-import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { hexToRgb, makeLinearGradientCss, rgbToHex, rgbToRgba } from '~/shared/utils/color'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
+import { makeLinearGradientCss, rgbToHex, rgbToRgba } from '~/shared/utils/color'
 import { IXY, iife, useSubComponent } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
 import Asset from '~/view/ui-utility/assets'
@@ -13,7 +13,7 @@ import { Flex } from '~/view/ui-utility/widget/flex'
 type IPickerOpener = {
   fill: IFill
   index: number
-  impact: typeof UIPicker.impact
+  impact: typeof UIPickerCopy.from
 }
 
 export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) => {
@@ -21,22 +21,17 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   const isLinearType = fill.type === 'linearGradient'
   const isImageType = fill.type === 'image'
   const setupUIPicker = () => {
-    currentFill.value = fill
-    UIPicker.type.value = fill.type
-    UIPicker.impact = impact
-    UIPicker.currentIndex = index
+    UIPickerCopy.type.value = fill.type
+    UIPickerCopy.from = impact
+    UIPickerCopy.index = index
+    UIPickerCopy.fill = cloneDeep(fill)
   }
   const showPicker = (xy: IXY) => {
     setupUIPicker()
-    UIPicker.xy.value = XY.Of(window.innerWidth - 480 - 10, xy.y - 10)
-    UIPicker.show.dispatch(true)
+    UIPickerCopy.xy.value = XY.Of(window.innerWidth - 480 - 10, xy.y - 10)
+    UIPickerCopy.show.dispatch(true)
   }
-  const { currentFill, currentImage } = UIPicker
   const { theme, css, classes } = useStyles({})
-
-  useHookSignal(currentFill, { id: 'fill-comp' }, (_, forceUpdate) => {
-    if (UIPicker.impact === impact) forceUpdate()
-  })
 
   const ColorInputComp = useSubComponent<{ fill: IFill }>([fill.type], ({ fill }) => {
     return (
@@ -52,9 +47,9 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
           return ''
         })}
         onNewValueApply={(value) => {
-          currentFill.dispatch((fill) => {
-            ;(fill as IFillColor).color = hexToRgb(value)
-          })
+          // currentFill.dispatch((fill) => {
+          //   ;(fill as IFillColor).color = hexToRgb(value)
+          // })
         }}
         beforeOperate={() => setupUIPicker()}
       />
@@ -70,7 +65,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
             <Flex style={{ backgroundColor: rgbToRgba(fill.color, fill.alpha) }}></Flex>
           )}
           {isLinearType && <Flex style={{ background: makeLinearGradientCss(fill) }}></Flex>}
-          {isImageType && <img src={currentImage.value.objectUrl}></img>}
+          {/* {isImageType && <img src={currentImage.value.objectUrl}></img>} */}
         </Flex>
         <ColorInputComp fill={fill} />
       </Flex>
@@ -82,9 +77,9 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
           value={Number(fill.alpha * 100).toFixed(0)}
           beforeOperate={() => setupUIPicker()}
           onNewValueApply={(value) => {
-            currentFill.dispatch((fill) => {
-              ;(fill as IFillColor).alpha = Number(value) / 100
-            })
+            // currentFill.dispatch((fill) => {
+            //   ;(fill as IFillColor).alpha = Number(value) / 100
+            // })
           }}
         />
         <Flex layout='c' className={css({ ...theme.labelFont })}>

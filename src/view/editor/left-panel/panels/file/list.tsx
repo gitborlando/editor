@@ -23,18 +23,17 @@ export const ListComp: FC<IListComp> = memo(({}) => {
     const isHover = useAutoSignal(false)
     return (
       <Flex
-        key={meta.id}
         layout='h'
         sidePadding={10}
         className={cx(classes.listItem, selected && classes.selectedListItem)}
         onHover={isHover.dispatch}
-        onClick={() => openInNewTab(meta.id)}>
+        onClick={() => openInNewTab(meta.fileId)}>
         {meta.name}
         {isHover.value && (
           <IconButton
             size={12}
             style={{ marginLeft: 'auto' }}
-            onClick={stopPropagation(() => deleteFile(meta.id))}>
+            onClick={stopPropagation(() => deleteFile(meta.fileId))}>
             {Asset.editor.shared.delete}
           </IconButton>
         )}
@@ -45,7 +44,7 @@ export const ListComp: FC<IListComp> = memo(({}) => {
   return (
     <Flex layout='v' className={classes.List}>
       {allFileMeta.value.map((meta) => (
-        <ListItemComp key={meta.id} meta={meta} />
+        <ListItemComp key={meta.fileId} meta={meta} />
       ))}
     </Flex>
   )

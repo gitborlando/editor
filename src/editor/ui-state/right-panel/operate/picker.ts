@@ -9,7 +9,7 @@ import { XY } from '~/shared/xy'
 type IOperateType = 'solid-color'
 
 @autobind
-export class UIPickerService {
+class UIPickerService {
   show = createSignal(false)
   type = createSignal(<'color' | 'linearGradient' | 'image'>'color')
   xy = createSignal(<IXY>XY.Of(0, 0))

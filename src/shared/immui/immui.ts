@@ -1,37 +1,21 @@
-export type IKey = string | number
+type IKey = string | number
+export type IImmuiPatch = {
+  type: 'add' | 'remove' | 'replace'
+  path: string
+  value: any
+  oldValue?: any
+}
+export type IApplyPatchOption = {
+  reverse?: boolean
+  prefix?: string
+}
 
-export type IPatch =
-  | {
-      type: 'add'
-      path: string
-      value: any
-    }
-  | {
-      type: 'replace'
-      path: string
-      value: any
-    }
-  | {
-      type: 'remove'
-      path: string
-    }
+export default class Immui {
+  private keyPathDiffMap = <any>{}
+  private noCommitPatch = false
+  private typePathPatchMap = new Map<string, IImmuiPatch[]>()
 
-let keyPathDiffMap = <any>{}
-let needDiff = true
-
-export const Immui = {
-  get<T>(object: object, keyPath: string | IKey[]): T {
-    const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
-
-    let current: any = object
-    for (const key of keys) {
-      if (!current) console.log('Error at get function')
-      current = current[key]
-    }
-
-    return current as T
-  },
-  add<T>(object: object, keyPath: string | IKey[], value: T) {
+  add = <T>(object: object, keyPath: string | IKey[], value: T) => {
     const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
 
     let current: any = object
@@ -45,9 +29,10 @@ export const Immui = {
     const lastKey = keys[keys.length - 1]
     current[lastKey] = value
 
-    return makeDiff('add', keys, value)
-  },
-  reset<T>(object: object, keyPath: string | IKey[], value: T) {
+    return this.getPatch('add', keys, value)
+  }
+
+  reset = <T>(object: object, keyPath: string | IKey[], value: T) => {
     const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
 
     let current: any = object
@@ -62,11 +47,11 @@ export const Immui = {
     const oldValue = current[lastKey]
     current[lastKey] = value
 
-    return makeDiff('replace', keys, value, oldValue)
-  },
-  delete(object: object, keyPath: string | IKey[]) {
-    const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
+    return this.getPatch('replace', keys, value, oldValue)
+  }
 
+  delete = (object: object, keyPath: string | IKey[]) => {
+    const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
     let current: any = object
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i]
@@ -80,144 +65,99 @@ export const Immui = {
     if (Array.isArray(current)) current.splice(<any>lastKey, 1)
     else delete current[lastKey]
 
-    return makeDiff('remove', keys, undefined, oldValue)
-  },
-  commit<T>(object: T): T {
-    const newObject = traverse(object)
-    keyPathDiffMap = {}
-    return newObject
-  },
-  applyPatch<T>(object: T, patches: IPatch[]): T {
-    return applyPatch(object, patches)
-  },
-}
+    return this.getPatch('remove', keys, undefined, oldValue)
+  }
 
-const makeDiff = (
-  type: 'add' | 'replace' | 'remove',
-  keys: IKey[],
-  newValue: any,
-  oldValue?: any
-) => {
-  let curKeyPathDiffMap = keyPathDiffMap
-  let patch: any
-  let inversePatch: any
-  const path = '/' + keys.join('/')
-  keys.forEach((key, i) => {
-    if (!curKeyPathDiffMap[key]) {
-      if (i != keys.length - 1) {
-        curKeyPathDiffMap[key] = {}
-      } else {
-        curKeyPathDiffMap[key] = undefined
-        if (!needDiff) return
-        if (type === 'add') {
-          patch = { type, path, value: newValue }
-          inversePatch = { type: 'remove', path }
-        } else if (type === 'replace') {
-          patch = { type, path, value: newValue }
-          inversePatch = { type, path, value: oldValue }
+  next = <T>(object: T): T => {
+    const traverse = (oldObj: any, newObj: any = {}) => {
+      for (const key in oldObj) {
+        if (!this.keyPathDiffMap[key]) {
+          newObj[key] = oldObj[key]
+          continue
+        }
+        if (typeof oldObj[key] !== 'object') {
+          newObj[key] = oldObj[key]
         } else {
-          patch = { type, path }
-          inversePatch = { type: 'add', path, value: oldValue }
+          newObj[key] = Array.isArray(oldObj[key]) ? [] : {}
+          traverse(oldObj[key], newObj[key])
         }
       }
+      return newObj
     }
-    curKeyPathDiffMap = curKeyPathDiffMap[key]!
-  })
+    const newObject = traverse(object)
+    this.keyPathDiffMap = {}
+    return newObject
+  }
 
-  return { patch, inversePatch }
-}
+  commitPatches = () => {
+    const patches = []
+    for (const item of this.typePathPatchMap.values()) {
+      const [first, last] = [item[0], item[item.length - 1]]
+      first.value = last.value
+      patches.push(first)
+    }
+    this.typePathPatchMap.clear()
+    return patches
+  }
 
-const traverse = (oldObj: any, newObj: any = {}) => {
-  for (const key in oldObj) {
-    if (!keyPathDiffMap[key]) {
-      newObj[key] = oldObj[key]
-      continue
-    } else {
-      if (typeof oldObj[key] !== 'object') {
-        newObj[key] = oldObj[key]
-      } else {
-        newObj[key] = Array.isArray(oldObj[key]) ? [] : {}
-        traverse(oldObj[key], newObj[key])
+  applyPatches = <T extends object>(
+    object: T,
+    patches: IImmuiPatch[],
+    option: IApplyPatchOption = {}
+  ) => {
+    const { reverse, prefix = '' } = option
+    if (reverse) patches = patches.reverse()
+
+    patches.forEach((patch) => {
+      const path = prefix + patch.path
+      const keys = path.split('/').filter(Boolean)
+      switch (patch.type) {
+        case 'add':
+          if (reverse) this.delete(object, keys)
+          else this.add(object, keys, patch.value)
+          return
+        case 'replace':
+          if (reverse) this.reset(object, keys, patch.oldValue)
+          else this.reset(object, keys, patch.value)
+          return
+        case 'remove':
+          if (reverse) this.add(object, keys, patch.oldValue)
+          else this.delete(object, keys)
+          return
       }
-    }
+    })
+
+    this.noCommitPatch = false
   }
-  return newObj
+
+  private getPatch = (
+    type: 'add' | 'replace' | 'remove',
+    keys: IKey[],
+    value: any,
+    oldValue?: any
+  ) => {
+    let curKeyPathDiffMap = this.keyPathDiffMap
+    keys.forEach((key, i) => {
+      if (!curKeyPathDiffMap[key]) {
+        if (i != keys.length - 1) {
+          curKeyPathDiffMap[key] = {}
+        } else {
+          curKeyPathDiffMap[key] = undefined
+        }
+      } else {
+        curKeyPathDiffMap = curKeyPathDiffMap[key]!
+      }
+    })
+
+    const path = '/' + keys.join('/')
+    const patch = { type, path, value, oldValue }
+
+    if (this.noCommitPatch) return patch
+
+    const patches = this.typePathPatchMap.get(type + path)
+    if (!patches) this.typePathPatchMap.set(type + path, [patch])
+    else patches.push(patch)
+
+    return patch
+  }
 }
-
-function applyPatch(object: any, patches: IPatch[]) {
-  needDiff = false
-  patches.forEach((patch) => {
-    const keys = patch.path.split('/').filter(Boolean)
-    switch (patch.type) {
-      case 'add':
-        return Immui.add(object, keys, patch.value)
-      case 'replace':
-        return Immui.reset(object, keys, patch.value)
-      case 'remove':
-        console.log(object, keys)
-        return Immui.delete(object, keys)
-    }
-  })
-  needDiff = true
-  return Immui.commit(object)
-}
-
-const testImmuiPerformance = (isGeek: boolean = false) => {
-  let object = {
-    foo: {
-      bar: {
-        baz: {
-          value: 0,
-        },
-      },
-    },
-  }
-
-  const patches = <IPatch[]>[]
-
-  isGeek && console.log('Immui Geek')
-  console.time('Immui get')
-  for (let i = 0; i < 1; i++) {
-    Immui.get(object, ['foo', 'bar', 'baz', 'value'])
-  }
-  console.timeEnd('Immui get')
-
-  console.time('Immui add')
-  for (let i = 0; i < 1; i++) {
-    patches.push(Immui.add(object, ['foo', 'bar', 'baz', 'newValue'], 'i').inversePatch)
-    console.log(object)
-    !isGeek && Immui.commit(object)
-  }
-  console.timeEnd('Immui add')
-
-  console.time('Immui reset')
-  for (let i = 0; i < 1; i++) {
-    Immui.reset(object, ['foo', 'bar', 'baz', 'value'], 'i')
-    !isGeek && Immui.commit(object)
-  }
-  console.timeEnd('Immui reset')
-
-  console.time('Immui delete')
-  for (let i = 0; i < 1; i++) {
-    Immui.delete(object, ['foo', 'bar', 'baz', 'value'])
-    !isGeek && Immui.commit(object)
-  }
-  console.timeEnd('Immui delete')
-
-  if (isGeek) {
-    console.time('Immui commit')
-    for (let i = 0; i < 1; i++) {
-      Immui.commit(object)
-    }
-    console.timeEnd('Immui commit')
-  }
-
-  console.time('Immui applyPatch')
-  for (let i = 0; i < 1; i++) {
-    object = Immui.applyPatch(object, patches)
-    console.log(object)
-  }
-  console.timeEnd('Immui applyPatch')
-}
-
-// testImmuiPerformance()

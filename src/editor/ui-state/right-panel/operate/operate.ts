@@ -1,7 +1,9 @@
 import autobind from 'class-autobind-decorator'
+import { createSignal } from '~/shared/signal/signal'
 
 @autobind
-export class UIOperatePanelService {
+class UIOperatePanelService {
+  showPicker = createSignal(false)
   init() {}
 }
 

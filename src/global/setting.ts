@@ -10,7 +10,7 @@ type ISetting = {
 }
 
 @autobind
-export class SettingService {
+class SettingService {
   inited = createSignal(false)
   private settings = createCache<string, ISetting>()
   private key = 'setting'

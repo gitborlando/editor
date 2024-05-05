@@ -1,7 +1,7 @@
 import { FC, memo, useRef } from 'react'
 import { ITextStyleKey, OperateText } from '~/editor/operate/text'
 import { IText } from '~/editor/schema/type'
-import { StageDraw } from '~/editor/stage/draw/draw'
+import { StageDraw2 } from '~/editor/stage/draw/draw'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
@@ -48,7 +48,7 @@ export const TextComp: FC<ITextComp> = memo(({}) => {
     })
     useHookSignal(textContent, (content, forceUpdate) => {
       textNode.content = content
-      StageDraw.collectRedraw(textNode.id)
+      StageDraw2.collectRedraw(textNode.id)
       forceUpdate()
     })
     return (

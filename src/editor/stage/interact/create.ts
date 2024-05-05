@@ -9,7 +9,7 @@ import { Schema } from '~/editor/schema/schema'
 import { INode, INodeParent } from '~/editor/schema/type'
 import { SchemaUtil } from '~/editor/schema/util'
 import { Drag, type IDragData } from '~/global/event/drag'
-import { createSignal, mergeSignal } from '~/shared/signal/signal'
+import { createSignal } from '~/shared/signal/signal'
 import { IXY } from '~/shared/utils/normal'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -20,7 +20,7 @@ const createTypes = ['frame', 'rect', 'ellipse', 'line', 'polygon', 'star', 'tex
 export type IStageCreateType = (typeof createTypes)[number]
 
 @autobind
-export class StageCreateService {
+class StageCreateService {
   createTypes = createTypes
   currentType = createSignal<IStageCreateType>('frame')
   createStarted = createSignal<string>()
@@ -46,7 +46,7 @@ export class StageCreateService {
     StageSelect.onCreateSelect(this.node.id)
     OperateGeometry.beforeOperate.dispatch(['width', 'height'])
   }
-  private onCreateMove({ marquee, current }: IDragData) {
+  private onCreateMove({ marquee }: IDragData) {
     const { x, y } = StageViewport.toSceneStageXY(marquee)
     const width = StageViewport.toSceneStageShift(marquee.width)
     const height = StageViewport.toSceneStageShift(marquee.height)
@@ -66,12 +66,9 @@ export class StageCreateService {
       OperateGeometry.setGeometry('width', 100)
       OperateGeometry.setGeometry('height', 100)
     }
-    const tempSignal = mergeSignal(OperateGeometry.afterOperate, OperateNode.afterFlushDirty)
-    tempSignal.hook({ afterAll: true, once: true }, () => {
-      SchemaHistory.endAction()
-      SchemaHistory.commit('创建节点')
-    })
     OperateGeometry.afterOperate.dispatch()
+    Schema.finalOperation('创建节点 ' + this.node.name)
+    SchemaHistory.endActionWithCommit('创建节点 ' + this.node.name)
     StageInteract.currentType.dispatch('select')
     this.createFinished.dispatch()
   }

@@ -1,6 +1,6 @@
 import { TextStyleAlign, TextStyleFontStyle, TextStyleFontWeight } from 'pixi.js'
-import { IXY } from '~/shared/utils/normal'
-import { IOperateDiff } from './diff'
+import { IImmuiPatch } from '~/shared/immui/immui'
+import { AllKeys, IXY } from '~/shared/utils/normal'
 
 export type ID = string
 
@@ -228,6 +228,8 @@ export type IFillImage = IFillMeta & {
 //   stops: { xy: IXY; color: string }[]
 // }
 
+export type IFillKeys = AllKeys<IFill> | number
+
 export type IStroke = {
   visible: boolean
   fill: IFill
@@ -302,9 +304,7 @@ export const SchemaChangeType = <ISchemaChangeType[]>[
 export type ISchemaOperation = {
   id: ID
   timestamp: number
-  changeType: ISchemaChangeType
-  changeIds: ID[]
-  diff: IOperateDiff
+  patches: IImmuiPatch[]
   description?: string
 }
 

@@ -5,23 +5,20 @@ import { OperateNode } from '~/editor/operate/node'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal, useSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 
-type IGeometryPropComp = {
+type IGeometryItemComp = {
   label: string
   operateKey: keyof IGeometry
 }
 
-export const GeometryPropComp: FC<IGeometryPropComp> = ({ label, operateKey }) => {
-  const { classes } = useStyles({})
-  const { geometry, isChangedGeometry, setGeometry } = OperateGeometry
+export const GeometryItemComp: FC<IGeometryItemComp> = ({ label, operateKey }) => {
+  const { geometry, geometryKeyValue, setGeometry } = OperateGeometry
   const ref = useRef<HTMLDivElement>(null)
   const operateDataCache = useSignal(0)
   const slideRate = 1 / StageViewport.zoom.value
 
   useHookSignal(StageViewport.zoom)
-  useHookSignal(isChangedGeometry)
   useDownUpTracker(
     () => ref.current,
     () => {
@@ -56,18 +53,17 @@ export const GeometryPropComp: FC<IGeometryPropComp> = ({ label, operateKey }) =
       return newValue
     }
 
-    if (operateKey === 'x') {
-      const datum = OperateNode.datumXY.x
-      return geometry[operateKey] - datum
+    if (operateKey === 'x' || operateKey === 'y') {
+      const datum = OperateNode.datumXY[operateKey]
+      const value = geometryKeyValue.get(operateKey)
+      if (value === 'multi') return value
+      return value - datum
     }
-    if (operateKey === 'y') {
-      const datum = OperateNode.datumXY.y
-      return geometry[operateKey] - datum
-    }
-    return geometry[operateKey]
+    return geometryKeyValue.get(operateKey)
   }
 
-  const formatNumber = (value: number): string => {
+  const formatNumber = (value: number | 'multi'): string => {
+    if (value === 'multi') return value
     if (Number.isInteger(value)) {
       return value.toString()
     } else {
@@ -78,20 +74,12 @@ export const GeometryPropComp: FC<IGeometryPropComp> = ({ label, operateKey }) =
   return (
     <CompositeInput
       ref={ref}
-      className={classes.input}
       label={label}
       value={formatNumber(produceValue())}
-      onNewValueApply={(v) => setGeometry(operateKey, produceValue(Number(v)))}
+      onNewValueApply={(v) => setGeometry(operateKey, produceValue(Number(v)) as number)}
       slideRate={slideRate}
     />
   )
 }
 
-type IGeometryPropCompStyle =
-  {} /* & Required<Pick<ISchemaGeometryPropComp>> */ /* & Pick<ISchemaGeometryPropComp> */
-
-const useStyles = makeStyles<IGeometryPropCompStyle>()((t) => ({
-  input: {},
-}))
-
-GeometryPropComp.displayName = 'SchemaGeometryPropComp'
+GeometryItemComp.displayName = 'SchemaGeometryPropComp'

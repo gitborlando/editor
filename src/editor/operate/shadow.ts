@@ -7,7 +7,7 @@ import { Record } from '../record'
 import { SchemaDefault } from '../schema/default'
 import { Schema } from '../schema/schema'
 import { IFillColor, INode, IShadow } from '../schema/type'
-import { StageDraw } from '../stage/draw/draw'
+import { StageDraw2 } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
 import { UIPicker } from '../ui-state/right-panel/operate/picker'
 import { OperateNode } from './node'
@@ -15,7 +15,7 @@ import { OperateNode } from './node'
 type IInitShadows = Map<string, IShadow[]>
 
 @autobind
-export class OperateShadowService {
+class OperateShadowService {
   shadows = createSignal<IShadow[] | IInitShadows>([])
   beforeOperate = createSignal()
   afterOperate = createSignal()
@@ -114,7 +114,7 @@ export class OperateShadowService {
     if (this.isShadowsArray(this.shadows.value)) {
       node.shadows = this.shadows.value
     } else node.shadows = this.shadows.value.get(node.id)!
-    StageDraw.collectRedraw(node.id)
+    StageDraw2.collectRedraw(node.id)
   }
   private recordOperate() {
     if (Record.isInRedoUndo) return

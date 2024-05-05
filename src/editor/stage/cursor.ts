@@ -3,11 +3,11 @@ import { createSignal } from '~/shared/signal/signal'
 import { xy_new } from '../math/xy'
 import { Pixi } from './pixi'
 
-export type IStageCursorType = 'select' | 'h-resize' | 'v-resize'
+export type IStageCursorType = 'auto' | 'h-resize' | 'v-resize' | 'se-resize' | 'sw-resize'
 
 @autobind
-export class StageCursorService {
-  type = createSignal(<IStageCursorType>'select')
+class StageCursorService {
+  type = createSignal(<IStageCursorType>'auto')
   xy = createSignal(xy_new(0, 0))
   rotation = createSignal(0)
   initHook() {
@@ -15,9 +15,11 @@ export class StageCursorService {
   }
   private autoChange() {
     Pixi.htmlContainer.style.cursor = (<const>{
-      select: 'auto',
+      auto: 'auto',
       'h-resize': 'e-resize',
       'v-resize': 's-resize',
+      'se-resize': 'se-resize',
+      'sw-resize': 'sw-resize',
     })[this.type.value]
   }
 }

@@ -3,7 +3,7 @@ import { Photo, createClient } from 'pexels'
 import { FC, useRef } from 'react'
 import { InView } from 'react-intersection-observer'
 import { Img } from '~/editor/img'
-import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { rgba } from '~/shared/utils/color'
 import Asset from '~/view/ui-utility/assets'
@@ -33,26 +33,26 @@ export const GalleryComp: FC<IGalleryComp> = observer(({}) => {
     page.dispatch(page.value + 1)
   }
   const { theme, css, classes } = useStyles({})
+  const { loadingWebImageUrl, type, setFillUrl } = UIPickerCopy
 
   const PhotoComp: FC<{ photo: Photo }> = ({ photo }) => {
     const photoUrl = photo.src.large
     const applyImageFill = async () => {
-      UIPicker.loadingWebImageUrl.dispatch(photoUrl)
+      loadingWebImageUrl.dispatch(photoUrl)
       await Img.getImageAsync(photoUrl)
-      UIPicker.loadingWebImageUrl.dispatch('')
-      if (UIPicker.type.value !== 'image') {
-        UIPicker.type.dispatch('image')
-      }
-      UIPicker.currentImageFill.dispatch((fill) => (fill.url = photoUrl))
+      loadingWebImageUrl.dispatch('')
+      if (type.value !== 'image') type.dispatch('image')
+      setFillUrl(photoUrl)
     }
-    useHookSignal(UIPicker.loadingWebImageUrl)
+    useHookSignal(loadingWebImageUrl)
+
     return (
       <Flex
         layout='c'
         className={classes.photo}
         style={{ width: photo.width, height: photo.height }}>
         <img src={photo.src.small} onClick={applyImageFill}></img>
-        {UIPicker.loadingWebImageUrl.value === photoUrl && (
+        {loadingWebImageUrl.value === photoUrl && (
           <Flex layout='c' className={'mask'}>
             <Icon size={20} className={'loadingIcon'}>
               {Asset.editor.shared.loading}

@@ -1,8 +1,6 @@
-import { observer } from 'mobx-react'
 import { FC } from 'react'
 import { OperateFill } from '~/editor/operate/fill'
 import { IFill } from '~/editor/schema/type'
-import { useHookSignal } from '~/shared/signal/signal-react'
 import { useSubComponent } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
@@ -13,11 +11,10 @@ import { FillItemComp } from './fill-item'
 
 type IFillPropComp = {}
 
-export const FillPropComp: FC<IFillPropComp> = observer(({}) => {
+export const FillPropComp: FC<IFillPropComp> = ({}) => {
   const { classes, css, theme } = useStyles({})
-  const { fills, isFillsArray } = OperateFill
-  const hasFills = isFillsArray(fills.value) && fills.value.length > 0
-  useHookSignal(fills)
+  const { fills, isMultiFills, addFill } = OperateFill
+  const hasFills = fills.length > 0
 
   const HeaderComp = useSubComponent([hasFills], ({}) => {
     return (
@@ -30,7 +27,7 @@ export const FillPropComp: FC<IFillPropComp> = observer(({}) => {
         <Flex layout='c' className={css({ ...theme.labelFont })}>
           <h4>填充</h4>
         </Flex>
-        <IconButton size={16} style={{ marginLeft: 'auto' }} onClick={OperateFill.addFill}>
+        <IconButton size={16} style={{ marginLeft: 'auto' }} onClick={addFill}>
           {Asset.editor.leftPanel.page.add}
         </IconButton>
       </Flex>
@@ -53,16 +50,16 @@ export const FillPropComp: FC<IFillPropComp> = observer(({}) => {
   return (
     <Flex layout='v' sidePadding={6} className={classes.FillProp}>
       <HeaderComp />
-      {isFillsArray(fills.value) ? (
-        <FillListComp fills={fills.value} />
-      ) : (
+      {isMultiFills ? (
         <Flex layout='c' className={classes.isMultiFills}>
           点击 + 重置并修改多个填充
         </Flex>
+      ) : (
+        <FillListComp fills={fills} />
       )}
     </Flex>
   )
-})
+}
 
 type IFillPropCompStyle = {} /* & Required<Pick<IFillPropComp>> */ /* & Pick<IFillPropComp> */
 

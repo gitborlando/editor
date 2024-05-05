@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { IRect, IXY } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
 import { abs, rcos, rsin } from './base'
-import { xy_dot, xy_minus, xy_rotate3 } from './xy'
+import { xy_dot, xy_minus, xy_new, xy_rotate, xy_rotate3 } from './xy'
 
 type IAxis = { widthAxis: XY; heightAxis: XY }
 
@@ -11,7 +11,6 @@ export class OBB {
   xy: IXY
   axis: IAxis
   aabb: IRect
-  vertexes: [IXY, IXY, IXY, IXY]
   constructor(
     public centerX: number,
     public centerY: number,
@@ -22,7 +21,6 @@ export class OBB {
     this.xy = this.calcXY()
     this.axis = this.calcAxis()
     this.aabb = this.calcAABB()
-    this.vertexes = this.calcVertexXY()
   }
   get center() {
     return { x: this.centerX, y: this.centerY }
@@ -31,13 +29,11 @@ export class OBB {
     this.xy.x += x
     this.centerX += x
     this.aabb.x += x
-    this.vertexes.forEach((vertex) => (vertex.x += x))
   }
   shiftY(y: number) {
     this.xy.y += y
     this.centerY += y
     this.aabb.y += y
-    this.vertexes.forEach((vertex) => (vertex.y += y))
   }
   reBound(width?: number, height?: number, centerX?: number, centerY?: number) {
     if (width) this.width = width
@@ -45,14 +41,12 @@ export class OBB {
     if (centerX) this.centerX = centerX
     if (centerY) this.centerY = centerY
     this.calcAABB()
-    this.calcVertexXY()
   }
   reRotation(rotation: number) {
     this.rotation = rotation
     this.calcXY()
     this.calcAxis()
     this.calcAABB()
-    this.calcVertexXY()
   }
   calcXY() {
     return (this.xy = xy_rotate3(
@@ -82,31 +76,15 @@ export class OBB {
   calcVertexXY() {
     const halfWidth = this.width / 2
     const halfHeight = this.height / 2
-    const TL = xy_rotate3(
-      this.centerX - halfWidth,
-      this.centerY - halfHeight,
-      this.center,
-      this.rotation
-    )
-    const TR = xy_rotate3(
-      this.centerX + halfWidth,
-      this.centerY - halfHeight,
-      this.center,
-      this.rotation
-    )
-    const BR = xy_rotate3(
-      this.centerX + halfWidth,
-      this.centerY + halfHeight,
-      this.center,
-      this.rotation
-    )
-    const BL = xy_rotate3(
-      this.centerX - halfWidth,
-      this.centerY + halfHeight,
-      this.center,
-      this.rotation
-    )
-    return (this.vertexes = [TL, TR, BR, BL])
+    let TL = xy_new(this.centerX - halfWidth, this.centerY - halfHeight)
+    let TR = xy_new(this.centerX + halfWidth, this.centerY - halfHeight)
+    let BL = xy_new(this.centerX - halfWidth, this.centerY + halfHeight)
+    let BR = xy_new(this.centerX + halfWidth, this.centerY + halfHeight)
+    TL = xy_rotate(TL, this.center, this.rotation)
+    TR = xy_rotate(TR, this.center, this.rotation)
+    BL = xy_rotate(BL, this.center, this.rotation)
+    BR = xy_rotate(BR, this.center, this.rotation)
+    return [TL, TR, BR, BL]
   }
   aabbHitTest(another: OBB) {
     return (

@@ -12,7 +12,7 @@ export type IDragData = {
 }
 
 @autobind
-export class DragService {
+class DragService {
   @observable canMove = false
   @observable cursor: ICursor = 'auto'
   started = false

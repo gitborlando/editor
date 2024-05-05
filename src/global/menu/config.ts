@@ -1,4 +1,4 @@
-import { Record } from '~/editor/record'
+import { SchemaHistory } from '~/editor/schema/history'
 import { SchemaUtil } from '~/editor/schema/util'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
@@ -22,12 +22,12 @@ export const menuConfig = <const>{
     {
       label: '撤销',
       shortcut: 'ctrl+z',
-      callback: Record.undo,
+      callback: SchemaHistory.undo,
     },
     {
       label: '重做',
       shortcut: 'ctrl+shift+z',
-      callback: Record.redo,
+      callback: SchemaHistory.redo,
     },
   ],
   pageGroup: <IMenuItem[]>[

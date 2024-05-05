@@ -1,49 +1,30 @@
-import { FC, useRef } from 'react'
-import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
-import { useHookSignal, useSignal } from '~/shared/signal/signal-react'
-import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
+import { FC, memo } from 'react'
+import { IFillColor } from '~/editor/schema/type'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
+import { getColorFromFill } from '~/shared/utils/color'
+import { transition } from '~/shared/utils/react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PickerColorComp } from './color'
 
-type IPickerSolidComp = {}
+type IPickerSolidComp = {
+  fill: IFillColor
+}
 
-export const PickerSolidComp: FC<IPickerSolidComp> = ({}) => {
+export const PickerSolidComp: FC<IPickerSolidComp> = memo(({ fill }) => {
   const { classes } = useStyles({})
-  const ref = useRef<HTMLDivElement>(null)
-  const { currentSolidFill, beforeOperate, afterOperate } = UIPicker
-  const onChange = (color: string) => {
-    const [, r, g, b, a] = color.match(/rgba\((\d+), (\d+), (\d+), (\d+(\.\d+)?)\)/)!
-    currentSolidFill.dispatch((fill) => {
-      fill.color = `rgb(${r}, ${g}, ${b})`
-      fill.alpha = Number(a)
-    })
-  }
-  const getColor = () => {
-    const { color, alpha } = currentSolidFill.value
-    return color.replace('rgb', 'rgba').replace(')', `,${alpha})`)
-  }
-  const lastColor = useSignal(getColor())
-  useDownUpTracker(
-    () => ref.current,
-    () => {
-      beforeOperate.dispatch({ type: 'solid-color' })
-    },
-    () => {
-      if (lastColor.value === getColor()) return
-      afterOperate.dispatch({ type: 'solid-color' })
-      lastColor.value = getColor()
-    }
-  )
-  useHookSignal(currentSolidFill)
+  const { setFillSolidColor } = UIPickerCopy
 
   return (
-    <Flex layout='v' ref={ref} className={classes.PickerSolid}>
-      <PickerColorComp color={getColor()} onChange={onChange} />
-      <Flex layout='h'>{getColor()}</Flex>
+    <Flex layout='v' className={classes.PickerSolid}>
+      <PickerColorComp
+        color={getColorFromFill(fill)}
+        onChange={transition(({ color, alpha }) => setFillSolidColor(color, alpha))}
+      />
+      <Flex layout='h'>{getColorFromFill(fill)}</Flex>
     </Flex>
   )
-}
+})
 
 type IPickerSolidCompStyle =
   {} /* & Required<Pick<IPickerSolidComp>> */ /* & Pick<IPickerSolidComp> */

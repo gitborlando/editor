@@ -5,7 +5,7 @@ import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 
 @autobind
-export class StageMoveService {
+class StageMoveService {
   startInteract() {
     Pixi.addListener('mousedown', this.onMoveStage)
   }

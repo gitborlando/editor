@@ -1,8 +1,8 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys, { HotkeysEvent } from 'hotkeys-js'
-import { Record } from '~/editor/record'
 import { createSignal } from '~/shared/signal/signal'
 import { addListener } from '~/shared/utils/event'
+import { SchemaHistory } from './schema/history'
 import { SchemaUtil } from './schema/util'
 
 type IHotKeys = keyof Omit<HotkeyService, 'init' | 'initHook' | 'isKeyDown'>
@@ -13,7 +13,7 @@ type IHotkeyEvent = {
 }
 
 @autobind
-export class HotkeyService {
+class HotkeyService {
   isKeyDown = false
   'ctrl+z' = createSignal<IHotkeyEvent>()
   'ctrl+shift+z' = createSignal<IHotkeyEvent>()
@@ -23,8 +23,8 @@ export class HotkeyService {
   'ctrl+v' = createSignal<IHotkeyEvent>()
   initHook() {
     this.bindHotkeys()
-    this['ctrl+z'].hook(Record.undo)
-    this['ctrl+shift+z'].hook(Record.redo)
+    this['ctrl+z'].hook(SchemaHistory.undo)
+    this['ctrl+shift+z'].hook(SchemaHistory.redo)
     // this['ctrl+s'].hook(SchemaFile.saveJsonFile)
     this['del'].hook(SchemaUtil.deleteSelectNodes)
     // this['ctrl+c'].hook(NewSchema.copyNodes)

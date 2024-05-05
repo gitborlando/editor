@@ -1,6 +1,6 @@
 import rgbToHex from 'rgb-hex'
 import { atan, degreefy } from '~/editor/math/base'
-import { IFillLinearGradient } from '~/editor/schema/type'
+import { IFillColor, IFillLinearGradient } from '~/editor/schema/type'
 
 export { rgbToHex }
 
@@ -21,7 +21,7 @@ export const COLOR = {
 export type IRGB = { r: number; g: number; b: number }
 export type IRGBA = { r: number; g: number; b: number; a: number }
 
-export function rgb(r: number, g: number, b: number) {
+export function rgb(r: number | string, g: number | string, b: number | string) {
   return `rgb(${r},${g},${b})`
 }
 
@@ -59,4 +59,9 @@ export function makeLinearGradientCss({ start, end, stops }: IFillLinearGradient
   return `linear-gradient(${degree}deg, ${stops[0].color} 0%, ${stops
     .map(({ color, offset }) => `${color} ${offset * 100}%`)
     .join(', ')}, ${stops[stops.length - 1].color} 100%)`
+}
+
+export function getColorFromFill(fill: IFillColor) {
+  const { color, alpha } = fill
+  return color.replace('rgb', 'rgba').replace(')', `,${alpha})`)
 }

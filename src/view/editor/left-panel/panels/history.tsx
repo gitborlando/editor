@@ -1,8 +1,7 @@
-import { FC, memo, useEffect, useMemo, useRef } from 'react'
+import { FC, memo, useEffect, useMemo, useRef, useState } from 'react'
 import ReactJson from 'react-json-view'
-import { IOperateDiff } from '~/editor/schema/diff'
 import { SchemaHistory } from '~/editor/schema/history'
-import { ISchemaHistory } from '~/editor/schema/type'
+import { ISchemaHistory, ISchemaOperation } from '~/editor/schema/type'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor, hslColor } from '~/shared/utils/color'
 import { useSubComponent } from '~/shared/utils/normal'
@@ -18,51 +17,18 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
   const { stack, index } = SchemaHistory
   useHookSignal(index)
 
-  const OperateDiffComp = useSubComponent<{ operateDiff: IOperateDiff }>([], ({ operateDiff }) => {
-    const { description, patches, inversePatches } = operateDiff
-    const collapsed = useAutoSignal(true)
-    return (
-      <Flex layout='v' className={classes.diff}>
-        <Flex layout='h' className={css({ ...t.rect('100%', 24) })}>
-          <Flex
-            layout='h'
-            className={css({
-              ...t.default$.description,
-              ...t.default$.font.label,
-              marginRight: 10,
-            })}>
-            {description}
-          </Flex>
-          <IconButton
-            size={16}
-            rotate={collapsed.value ? 0 : 180}
-            style={{ marginLeft: 'auto' }}
-            onClick={() => collapsed.dispatch(!collapsed.value)}>
-            {Asset.editor.leftPanel.page.collapse}
-          </IconButton>
-        </Flex>
-        <Flex layout='h' className='detail'>
-          <ReactJson
-            src={{ patches, inversePatches }}
-            style={{ fontFamily: 'consolas', fontSize: 12 }}
-            indentWidth={2}
-            displayDataTypes={false}
-            quotesOnKeys={false}
-            enableClipboard={false}
-            collapsed={collapsed.value}
-          />
-        </Flex>
-      </Flex>
-    )
-  })
-
   const CardComp = useSubComponent<{ history: ISchemaHistory }>([], ({ history }) => {
     const randomColor = useMemo(() => hslColor(Math.random() * 360, 80, 35), [])
     const ref = useRef<HTMLDivElement>(null)
     const isActive = index.value === stack.indexOf(history)
+    const collapsed = useAutoSignal(true)
+    const { operations, description } = history
+    const needCollapsedItems = operations.length > 6
+    const [itemCollapsed, setItemCollapsed] = useState(needCollapsedItems)
     useEffect(() => {
       if (isActive) ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }, [isActive])
+
     return (
       <Flex
         ref={ref}
@@ -85,15 +51,62 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
             className={css({
               ...t.default$.description,
             })}>
-            {history.description}
+            {description}
           </h6>
+          <IconButton
+            size={16}
+            rotate={collapsed.value ? 0 : 180}
+            style={{ marginLeft: 'auto' }}
+            onClick={() => collapsed.dispatch(!collapsed.value)}>
+            {Asset.editor.leftPanel.page.collapse}
+          </IconButton>
         </Flex>
-        {history.operations.map((operation, i) => (
-          <OperateDiffComp operateDiff={operation.diff} key={(operation.description || '') + i} />
+        {operations.slice(0, itemCollapsed ? 6 : operations.length).map((operation, i) => (
+          <OperateDiffComp
+            key={(operation.description || '') + i}
+            operation={operation}
+            collapsed={collapsed.value}
+          />
         ))}
+        {needCollapsedItems && (
+          <Flex layout='h' className={css({ width: '100%', paddingInline: 10 })}>
+            <Flex
+              className={css({
+                marginLeft: 'auto',
+                ...t.labelFont,
+                cursor: 'pointer',
+                marginBottom: 8,
+              })}
+              onClick={() => setItemCollapsed(!itemCollapsed)}>
+              {itemCollapsed ? '展开' : '折叠'}其余项
+            </Flex>
+          </Flex>
+        )}
       </Flex>
     )
   })
+
+  const OperateDiffComp = useSubComponent<{ operation: ISchemaOperation; collapsed: boolean }>(
+    [],
+    ({ operation, collapsed }) => {
+      const { patches } = operation
+      return (
+        <Flex layout='v' className={classes.diff}>
+          <Flex layout='h' className='detail'>
+            <ReactJson
+              src={patches}
+              style={{ fontFamily: 'consolas', fontSize: 12 }}
+              indentWidth={2}
+              displayDataTypes={false}
+              quotesOnKeys={false}
+              enableClipboard={false}
+              collapsed={collapsed}
+            />
+          </Flex>
+        </Flex>
+      )
+    }
+  )
 
   return (
     <Flex layout='v' className={classes.Diffs}>

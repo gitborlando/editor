@@ -32,7 +32,7 @@ import {
 } from './type'
 
 @autobind
-export class SchemaDefaultService {
+class SchemaDefaultService {
   devFileId?: string
   typeIndexMapCache = createCache<string, Record<string, [string, number]>>()
   meta(): IMeta {

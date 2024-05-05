@@ -1,41 +1,38 @@
-import { FC, memo } from 'react'
+import { FC, Suspense, memo } from 'react'
+import usePromise from 'react-promise-suspense'
 import { IImage, Img } from '~/editor/img'
-import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
+import { IFillImage } from '~/editor/schema/type'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
 import { Uploader } from '~/global/upload'
-import { useAutoSignal, useHookSignal, useSignal } from '~/shared/signal/signal-react'
+import { useAutoSignal } from '~/shared/signal/signal-react'
 import { rgba } from '~/shared/utils/color'
+import { iife, useSubComponent } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
-type IPickerImageComp = {}
+type IPickerImageComp = {
+  fill: IFillImage
+}
 
-export const PickerImageComp: FC<IPickerImageComp> = memo(({}) => {
-  const { currentImageFill } = UIPicker
+export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
+  const { setFillUrl } = UIPickerCopy
   const isHover = useAutoSignal(false)
-  const image = useAutoSignal({ objectUrl: '' } as IImage)
-  const imageBound = useSignal({ width: 0, height: 0 })
   const { classes } = useStyles({})
 
   const uploadImage = async () => {
     const file = await Uploader.open({ accept: 'image/*' })
     const url = await Img.uploadLocal(file!)
-    image.dispatch(await Img.getImageAsync(url))
-    currentImageFill.dispatch((fill) => (fill.url = url))
+    setFillUrl(url)
   }
 
-  image.intercept((image) => {
-    const { width, height } = image
-    const rate = width / height
-    if (rate > 1) {
-      imageBound.value = { width: 240, height: 240 / rate }
-    } else {
-      imageBound.value = { width: 200 * rate, height: 200 }
-    }
-  })
-
-  useHookSignal(currentImageFill, { immediately: true }, (fill) => {
-    if (fill.type !== 'image') return
-    Img.getImageAsync(fill.url).then((img) => image.dispatch(img))
+  const ImgComp = useSubComponent([fill.url], ({}) => {
+    const image = usePromise<[string], IImage>(() => Img.getImageAsync(fill.url), [fill.url])
+    const imageBound = iife(() => {
+      const { width, height } = image
+      const rate = width / height
+      return rate > 1 ? { width: 240, height: 240 / rate } : { width: 200 * rate, height: 200 }
+    })
+    return <img src={image.objectUrl} style={{ ...imageBound }}></img>
   })
 
   return (
@@ -48,7 +45,9 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({}) => {
             </Flex>
           </Flex>
         )}
-        <img src={image.value.objectUrl} style={{ ...imageBound.value }}></img>
+        <Suspense>
+          <ImgComp />
+        </Suspense>
       </Flex>
     </Flex>
   )

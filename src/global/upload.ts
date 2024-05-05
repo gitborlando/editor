@@ -3,7 +3,7 @@ import autobind from 'class-autobind-decorator'
 export type IUploadFileAcceptType = 'image/*' | (string & {})
 
 @autobind
-export class UploaderService {
+class UploaderService {
   private inputRef!: HTMLInputElement
   setInputRef(input: HTMLInputElement) {
     this.inputRef = input

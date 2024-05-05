@@ -1,13 +1,12 @@
 import autobind from 'class-autobind-decorator'
 import { rcos, rsin } from '~/editor/math/base'
-import { createSignal, mergeSignal } from '~/shared/signal/signal'
+import { createCache } from '~/shared/cache'
+import { createSignal } from '~/shared/signal/signal'
+import { rafThrottle } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
 import { Schema } from '../schema/schema'
 import { ID } from '../schema/type'
 import { ITraverseData, SchemaUtil } from '../schema/util'
-import { StageDraw } from '../stage/draw/draw'
-import { StageElement } from '../stage/element'
-import { StageSelect } from '../stage/interact/select'
 import { OperateNode } from './node'
 
 function createInitGeometry() {
@@ -26,29 +25,33 @@ function createInitGeometry() {
 export type IGeometry = ReturnType<typeof createInitGeometry>
 
 @autobind
-export class OperateGeometryService {
+class OperateGeometryService {
   geometry = createInitGeometry()
   isChangedGeometry = createSignal(false)
-  beforeOperate = createSignal<(keyof IGeometry)[]>()
-  afterOperate = createSignal()
   geometryKeys = new Set(<(keyof IGeometry)[]>['x', 'y', 'width', 'height', 'rotation'])
   operateKeys = new Set<keyof IGeometry>()
+  beforeOperate = createSignal<(keyof IGeometry)[]>()
+  afterOperate = createSignal()
+  geometryKeyValue = createCache<keyof IGeometry, number | 'multi'>()
   private lastGeometry = createInitGeometry()
   private changedIds = <ID[]>[]
   initHook() {
-    Schema.registerListener('changeNodeGeometry', ({ changeIds }) => {
-      this.setupGeometry()
-      this.syncLastGeometry()
-      this.isChangedGeometry.dispatch(true)
-      SchemaUtil.traverseIds(changeIds, ({ id }) => {
-        StageElement.setupOBB(id)
-        StageDraw.collectRedraw(id)
-      })
-    })
-    StageSelect.afterSelect.hook({ id: 'setupGeometry' }, () => {
+    OperateNode.selectIds.hook(() => {
       this.setupOperateKeys()
       this.setupGeometry()
       this.syncLastGeometry()
+    })
+    OperateNode.selectedNodes.hook({ id: 'geometryKeyValue' }, (nodes) => {
+      this.geometryKeyValue.clear()
+      this.geometryKeys.forEach((key) => {
+        nodes.forEach((_node) => {
+          const node = _node as any
+          if (!Object.hasOwn(node, key)) return
+          let last = this.geometryKeyValue.getSet(key, () => node[key])
+          if (last === 'multi') return
+          if (node[key] !== last) this.geometryKeyValue.set(key, 'multi')
+        })
+      })
     })
     this.beforeOperate.hook((keys) => {
       this.operateKeys = new Set(keys)
@@ -58,12 +61,13 @@ export class OperateGeometryService {
       SchemaUtil.traverseIds([id], this.applyChangeToNode)
     })
     OperateNode.afterFlushDirty.hook({ id: 'operateGeometryReset' }, () => {
+      if (!this.isChangedGeometry.value) return
+      Schema.nextSchema()
       this.syncLastGeometry()
       this.isChangedGeometry.value = false
     })
-    mergeSignal(this.afterOperate, OperateNode.afterFlushDirty).hook(() => {
-      Schema.commitOperation('changeNodeGeometry', this.changedIds, '操作几何数据')
-      Schema.commitHistory('操作几何数据')
+    this.afterOperate.hook(() => {
+      Schema.finalOperation('操作几何数据')
       this.changedIds = []
       this.operateKeys.clear()
     })
@@ -73,7 +77,12 @@ export class OperateGeometryService {
     if (value === lastValue) return
     this.geometry[key] = value
     this.isChangedGeometry.dispatch(true)
-    OperateNode.makeSelectDirty()
+    // OperateNode.makeSelectDirty()
+    rafThrottle(this.setGeometry, () => {
+      SchemaUtil.traverseIds([...OperateNode.selectIds.value], this.applyChangeToNode)
+      Schema.nextSchema()
+      this.syncLastGeometry()
+    })
   }
   private syncLastGeometry() {
     Object.keys(this.lastGeometry).forEach((key) => {
@@ -141,20 +150,15 @@ export class OperateGeometryService {
   // }
   private applyChangeToNode(traverseData: ITraverseData) {
     const { id, node, depth } = traverseData
-
-    const OBB = StageElement.OBBCache.get(id)
-    //const path = StageElement.pathCache.get(id)
     this.changedIds.push(id)
 
     if (this.operateKeys.has('x')) {
       Schema.itemReset(node, ['x'], node.x + this.delta('x'))
       Schema.itemReset(node, ['centerX'], node.centerX + this.delta('x'))
-      OBB.shiftX(this.delta('x'))
     }
     if (this.operateKeys.has('y')) {
       Schema.itemReset(node, ['y'], node.y + this.delta('y'))
       Schema.itemReset(node, ['centerY'], node.centerY + this.delta('y'))
-      OBB.shiftY(this.delta('y'))
     }
     if (this.operateKeys.has('width') && depth === 0) {
       const newCenterX = node.centerX + (rcos(node.rotation) * this.delta('width')) / 2
@@ -162,7 +166,6 @@ export class OperateGeometryService {
       Schema.itemReset(node, ['width'], node.width + this.delta('width'))
       Schema.itemReset(node, ['centerX'], newCenterX)
       Schema.itemReset(node, ['centerY'], newCenterY)
-      OBB.reBound(node.width, undefined, node.centerX, node.centerY)
     }
     if (this.operateKeys.has('height') && depth === 0) {
       const newCenterX = node.centerX - (rsin(node.rotation) * this.delta('height')) / 2
@@ -170,7 +173,6 @@ export class OperateGeometryService {
       Schema.itemReset(node, ['height'], node.height + this.delta('height'))
       Schema.itemReset(node, ['centerX'], newCenterX)
       Schema.itemReset(node, ['centerY'], newCenterY)
-      OBB.reBound(undefined, node.height, node.centerX, node.centerY)
     }
     if (this.operateKeys.has('radius') && depth === 0) {
       Schema.itemReset(node, ['radius'], this.geometry['radius'])
@@ -187,7 +189,6 @@ export class OperateGeometryService {
         Schema.itemReset(node, ['rotation'], node.rotation + this.delta('rotation'))
         Schema.itemReset(node, ['x'], newXY.x)
         Schema.itemReset(node, ['y'], newXY.y)
-        OBB.reRotation(node.rotation)
       } else {
         let upLevelRef = traverseData.upLevelRef!
         while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
@@ -201,15 +202,8 @@ export class OperateGeometryService {
         Schema.itemReset(node, ['centerY'], newCenterXY.y)
         Schema.itemReset(node, ['x'], newXY.x)
         Schema.itemReset(node, ['y'], newXY.y)
-        const { width, height, rotation, centerX, centerY } = node
-        OBB.reRotation(rotation)
-        OBB.reBound(width, height, centerX, centerY)
       }
     }
-
-    StageDraw.collectRedraw(id)
-    // StageElement.pathCache.set(id, path)
-    StageElement.OBBCache.set(id, OBB)
   }
 }
 

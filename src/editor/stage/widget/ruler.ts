@@ -5,7 +5,7 @@ import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 
 @autobind
-export class StageWidgetRulerService {
+class StageWidgetRulerService {
   private vertical = new PIXI.Graphics()
   private horizontal = new PIXI.Graphics()
   private corner = new PIXI.Graphics()

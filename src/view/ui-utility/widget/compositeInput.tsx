@@ -1,5 +1,5 @@
 import RCInput, { InputProps } from 'rc-input'
-import { ComponentPropsWithRef, forwardRef, memo, useRef } from 'react'
+import { ComponentPropsWithRef, forwardRef, memo, useMemo, useRef } from 'react'
 import { Drag } from '~/global/event/drag'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
@@ -52,6 +52,8 @@ export const CompositeInput = memo(
       const { classes, cx, css, theme } = useStyles({})
       const active = useAutoSignal(false)
       const hover = useAutoSignal(false)
+      //  if (label === '横坐标') console.log('value: 横坐标', value)
+      const numberValue = () => Number(Number.isNaN(Number(value)) ? '0' : value)
 
       const DragLabelComp = useSubComponent([value, disabled], ({}) => {
         if (!label) return
@@ -62,7 +64,7 @@ export const CompositeInput = memo(
             style={{ ...(type === 'number' && { cursor: 'e-resize' }) }}
             onMouseDown={() => {
               if (disabled || needLabelDrag !== true) return
-              let startValue = Number(value)
+              let startValue = numberValue()
               beforeOperate?.()
               Drag.setCursor('e-resize')
                 .onStart(() => active.dispatch(true))
@@ -80,10 +82,20 @@ export const CompositeInput = memo(
 
       const InputComp = useSubComponent([value, disabled], ({}) => {
         const thisValue = useAutoSignal(value)
+        useMemo(() => {
+          if (label === '横坐标') console.log('value: ', value)
+          thisValue.value = value
+        }, [value])
+        const thisType = value === 'multi' ? 'text' : type
+        if (label === '横坐标') {
+          // console.log('value: ', value)
+          console.log('thisValue: ', thisValue.value)
+          // console.log('thisType: ', thisType)
+        }
         return (
           <Flex layout='h'>
             <RCInput
-              type={type}
+              type={thisType}
               disabled={disabled}
               value={thisValue.value}
               className={classes.input}
@@ -115,12 +127,12 @@ export const CompositeInput = memo(
             ref={ref}
             vshow={hover.value}
             className={cx(classes.operate, 'operator')}>
-            <Flex layout='c' onMouseDown={() => emitNewValue((Number(value) + step).toString())}>
+            <Flex layout='c' onMouseDown={() => emitNewValue((numberValue() + step).toString())}>
               <Icon size={7} scale={0.7}>
                 {Asset.editor.widget.numberInput.operateUp}
               </Icon>
             </Flex>
-            <Flex layout='c' onMouseDown={() => emitNewValue((Number(value) - step).toString())}>
+            <Flex layout='c' onMouseDown={() => emitNewValue((numberValue() - step).toString())}>
               <Icon size={7} scale={0.7} rotate={180}>
                 {Asset.editor.widget.numberInput.operateUp}
               </Icon>
@@ -142,7 +154,7 @@ export const CompositeInput = memo(
           onHover={hover.dispatch}>
           <DragLabelComp />
           <InputComp />
-          {needStepHandler === true && !disabled && <OperateComp />}
+          {/* {needStepHandler === true && !disabled && <OperateComp />} */}
         </Flex>
       )
     }

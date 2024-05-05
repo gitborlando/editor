@@ -1,6 +1,5 @@
 import { FC, memo, useCallback } from 'react'
 import { SchemaHistory } from '~/editor/schema/history'
-import { Schema } from '~/editor/schema/schema'
 import { IStageCreateType, StageCreate } from '~/editor/stage/interact/create'
 import { StageInteract } from '~/editor/stage/interact/interact'
 import { StageViewport } from '~/editor/stage/viewport'
@@ -27,7 +26,8 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
         className={css({
           ...theme.labelFont,
         })}>
-        {Schema.client.id}
+        {/* {Schema.client.id} */}
+        <div id='fps'>1</div>
       </Flex>
     )
   })
@@ -85,8 +85,6 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
         <Flex layout='c'>
           <Icon size={28}>{Asset.favIcon.shiyangyang}</Icon>
           <h4 style={{ color: hslBlueColor(60), fontSize: 16 }}>屎羊羊编辑器</h4>
-          {'/'}
-          <ClientComp />
         </Flex>
       </Flex>
       <Flex layout='c' className={classes.centerGroup}>
@@ -101,6 +99,9 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
         ))}
         <Divide length={16} thickness={0.5} />
         <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
+      </Flex>
+      <Flex layout='h' className={classes.rightGroup}>
+        <ClientComp />
       </Flex>
     </Flex>
   )
@@ -123,6 +124,11 @@ const useStyles = makeStyles<IHeaderCompStyle>()((t, { top }) => ({
   centerGroup: {
     ...t.absolute(0, 0, 0, 0),
     margin: 'auto',
+  },
+  rightGroup: {
+    marginRight: 10,
+    marginLeft: 'auto',
+    gap: 8,
   },
   fileSave: {
     ...t.labelFont,

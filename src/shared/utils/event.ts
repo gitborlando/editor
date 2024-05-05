@@ -25,6 +25,12 @@ export function stopPropagation(callback?: (e?: any) => any) {
     e.stopPropagation()
   }
 }
+export function preventDefault(callback?: (e?: any) => any) {
+  return (e: any) => {
+    callback?.(e)
+    e.preventDefault()
+  }
+}
 
 export function clickInside(e: MouseEvent, insideTest: (dom?: Element) => any) {
   let dom = document.elementFromPoint(e.clientX, e.clientY)

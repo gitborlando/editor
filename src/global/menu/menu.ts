@@ -13,7 +13,7 @@ export type IMenuItem = {
 }
 
 @autobind
-export class MenuService {
+class MenuService {
   menuOptions = createSignal<IMenuItem[][]>([])
   xy = createSignal(xy_new(0, 0))
   context = <IAnyObject>{}

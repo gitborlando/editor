@@ -23,7 +23,7 @@ export function useDownUpTracker(
   elCallback: () => HTMLElement | null,
   downCallback: INoopFunc,
   upCallback: INoopFunc,
-  deps?: any[]
+  deps: any[] = []
 ) {
   useEffect(() => downUpTracker(elCallback(), downCallback, upCallback), deps)
 }

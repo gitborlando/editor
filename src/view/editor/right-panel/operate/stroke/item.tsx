@@ -9,7 +9,7 @@ import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 import { Dropdown } from '~/view/ui-utility/widget/dropdown'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { PickerOpener } from '../picker-opener'
+import { PickerOpener } from '../picker/picker-opener'
 
 const alignOptionMap = {
   inner: '内部',

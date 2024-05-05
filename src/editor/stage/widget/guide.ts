@@ -3,7 +3,7 @@ import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 
 @autobind
-export class StageWidgetGuideService {
+class StageWidgetGuideService {
   v = new PIXI.Graphics()
   h = new PIXI.Graphics()
   private draw() {

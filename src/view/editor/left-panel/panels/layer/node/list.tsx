@@ -1,4 +1,4 @@
-import { FC, memo, useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import { OperateNode } from '~/editor/operate/node'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { EventWheel } from '~/global/event/wheel'
@@ -10,14 +10,14 @@ import { NodeItemComp } from './item'
 
 type INodeListComp = {}
 
-export const NodeListComp: FC<INodeListComp> = memo(({}) => {
+export const NodeListComp: FC<INodeListComp> = ({}) => {
   const { classes } = useStyles({})
   const {
     nodeViewHeight,
     nodeListHeight,
     nodeScrollHeight,
     nodeScrollShift,
-    nodeIdsInView,
+    inViewNodeInfo: nodeIdsInView,
     calcNodeListChange,
   } = UILeftPanelLayer
   const { getNodeRuntime } = OperateNode
@@ -33,8 +33,8 @@ export const NodeListComp: FC<INodeListComp> = memo(({}) => {
         className={classes.list}
         style={{ transform: `translateY(-${nodeScrollShift.value}px)` }}
         onWheel={EventWheel.onWheel}>
-        {[...nodeIdsInView.value].map((id) => {
-          return <NodeItemComp key={id} id={id} {...getNodeRuntime(id)!} />
+        {[...nodeIdsInView.value].map(({ id, indent, ancestors }) => {
+          return <NodeItemComp key={id} id={id} indent={indent} ancestors={ancestors} />
         })}
       </Flex>
       {nodeListHeight.value > nodeViewHeight.value && (
@@ -47,7 +47,7 @@ export const NodeListComp: FC<INodeListComp> = memo(({}) => {
       )}
     </Flex>
   )
-})
+}
 type INodeListCompStyle = {} /* & Required<Pick<INodeListComp>> */ /* & Pick<INodeListComp> */
 
 const useStyles = makeStyles<INodeListCompStyle>()((t) => ({

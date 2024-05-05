@@ -1,31 +1,42 @@
 import { Cull } from '@pixi-essentials/cull'
 import autobind from 'class-autobind-decorator'
 import * as PIXI from 'pixi.js'
-import { createSignal } from '~/shared/signal/signal'
-import Asset from '~/view/ui-utility/assets'
+import { createSignal, mergeSignal } from '~/shared/signal/signal'
 
 export * as PIXI from 'pixi.js'
 
 @autobind
-export class PixiService {
+class PixiService {
   inited = createSignal(false)
   htmlContainer!: HTMLDivElement
   app!: PIXI.Application
-  sceneStage = new PIXI.Container()
+  sceneStage!: PIXI.Container
   isForbidEvent = false
   duringTicker = createSignal()
-  setContainer(div: HTMLDivElement) {
-    this.htmlContainer = div
-    this.initPixiApp()
-    this.cull()
-    this.app.ticker.add(this.duringTicker.dispatch)
-    PIXI.Assets.addBundle('fonts', [
-      { alias: 'textFoscscscnt1', src: Asset.editor.font.华光钢铁直黑中黑 },
-    ])
-    // Load the font bundle
-    PIXI.Assets.loadBundle('fonts').then(() => {
+  private appReady = createSignal(false)
+  private sceneStageReady = createSignal(false)
+  initHook() {
+    const allReady = mergeSignal(this.appReady, this.sceneStageReady)
+    allReady.hook(() => {
+      // this.cull()
+      this.app.ticker.add(this.duringTicker.dispatch)
       this.inited.dispatch(true)
     })
+  }
+  setApp(app: PIXI.Application) {
+    if (this.app) return
+    this.app = app
+    app.resizeTo = this.htmlContainer
+    this.appReady.dispatch(true)
+  }
+  setSceneStage(stage: PIXI.Container) {
+    if (this.sceneStage) return
+    this.sceneStage = stage
+    this.sceneStageReady.dispatch(true)
+  }
+  setHtmlContainer(div: HTMLDivElement) {
+    if (this.htmlContainer) return
+    this.htmlContainer = div
   }
   addListener(
     type: string,
@@ -40,25 +51,6 @@ export class PixiService {
     options?: boolean | EventListenerOptions | undefined
   ) {
     this.app.view.removeEventListener?.(type, listener, options)
-  }
-  private initPixiApp() {
-    this.app = new PIXI.Application({
-      backgroundColor: '#F5F5F5' /* '#F7F8FA' */ /* '#F1F2F6' */,
-      resizeTo: this.htmlContainer,
-      antialias: true,
-      resolution: window.devicePixelRatio,
-      eventMode: 'passive',
-      eventFeatures: {
-        move: true,
-        globalMove: false,
-        click: true,
-        wheel: true,
-      },
-    })
-    this.htmlContainer.appendChild(this.app.view as any)
-    this.sceneStage.setParent(this.app.stage)
-    this.app.stage.sortableChildren = true
-    this.sceneStage.sortableChildren = true
   }
   private cull() {
     const cull = new Cull({ recursive: true, toggle: 'renderable' })

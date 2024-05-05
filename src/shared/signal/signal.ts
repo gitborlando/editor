@@ -12,6 +12,7 @@ export type IHookOption = {
   once?: boolean
   before?: string
   after?: string
+  beforeAll?: boolean
   afterAll?: boolean
 }
 
@@ -81,8 +82,13 @@ export class Signal<T extends any> {
   }
   private reHierarchy() {
     this.hooks.forEach((hook) => {
-      const { before, after, afterAll } = this.optionCache.get(hook)
+      const { before, after, beforeAll, afterAll } = this.optionCache.get(hook)
       const selfIndex = this.hooks.findIndex((i) => i === hook)
+      if (beforeAll) {
+        this.hooks.splice(selfIndex, 1)
+        this.hooks.unshift(hook)
+        return
+      }
       if (afterAll) {
         this.hooks.splice(selfIndex, 1)
         this.hooks.push(hook)
@@ -123,13 +129,14 @@ export function mergeSignal(...signals: Signal<any>[]) {
   }, '')
   return mergeSignalCache.getSet(id, () => {
     const mergedSignal = createSignal<void>()
-    let fullFillArray = new Array(signals.length).fill(false)
+    let fullFill = new Array(signals.length).fill(false)
     signals.forEach((signal, index) => {
       signal.hook(() => {
-        if (fullFillArray.every((i) => i === true)) {
+        fullFill[index] = true
+        if (fullFill.every((i) => i === true)) {
           mergedSignal.dispatch()
-          fullFillArray = new Array(signals.length).fill(false)
-        } else fullFillArray[index] = true
+          fullFill = new Array(signals.length).fill(false)
+        }
       })
     })
     return mergedSignal

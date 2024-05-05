@@ -4,10 +4,12 @@ import { Schema } from './schema'
 import { ISchemaHistory, ISchemaOperation } from './type'
 
 @autobind
-export class SchemaHistoryService {
+class SchemaHistoryService {
   stack = <ISchemaHistory[]>[]
   index = createSignal(-1)
+  afterReplay = createSignal<'undo' | 'redo'>()
   private lastOperationsLength = 0
+  private isStart = false
   private isInAction = false
   get canUndo() {
     return this.index.value >= 0
@@ -16,12 +18,15 @@ export class SchemaHistoryService {
     return this.index.value < this.stack.length - 1
   }
   initHook() {
-    Schema.afterSetSchema.hook({ afterAll: true }, () => {
+    Schema.inited.hook({ afterAll: true }, () => {
       this.startRecord()
     })
   }
   commit(description: string) {
     if (this.isInAction) return
+    if (!this.isStart) {
+      return (this.lastOperationsLength = Schema.operationList.length)
+    }
     if (this.index.value !== this.stack.length - 1) {
       this.stack.splice(this.index.value + 1)
     }
@@ -35,28 +40,31 @@ export class SchemaHistoryService {
     const { operations } = this.stack[this.index.value]
     this.replayOperations('undo', operations.slice().reverse())
     this.index.dispatch(this.index.value - 1)
+    this.afterReplay.dispatch('undo')
   }
   redo() {
     if (!this.canRedo) return
     const { operations } = this.stack[this.index.value + 1]
     this.replayOperations('redo', operations)
     this.index.dispatch(this.index.value + 1)
+    this.afterReplay.dispatch('redo')
   }
   startAction() {
     this.isInAction = true
   }
-  endAction() {
+  endActionWithCommit(description: string) {
     this.isInAction = false
+    this.commit(description)
   }
   private startRecord() {
+    this.isStart = true
     this.lastOperationsLength = Schema.operationList.length
   }
   private replayOperations(type: 'undo' | 'redo', operations: ISchemaOperation[]) {
-    operations.forEach((operation) => {
-      const { diff } = operation
-      Schema.applyPatch(type === 'undo' ? diff.inversePatches : diff.patches)
-      Schema.broadcast(operation)
+    operations.forEach(({ patches }) => {
+      Schema.applyPatches(patches, { reverse: type === 'undo' })
     })
+    Schema.nextSchema()
   }
 }
 

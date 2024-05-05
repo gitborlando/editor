@@ -6,13 +6,13 @@ import { xy_plus_mutate } from '~/editor/math/xy'
 import { IIrregular } from '~/editor/schema/type'
 import { cullNegatives } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
-import { StageElement } from '../element'
 import { PIXI } from '../pixi'
 
 @autobind
-export class StageDrawPathService {
+class StageDrawPathService {
+  private pathCache = new Map<string, Path>()
   getCachedPath(id: string) {
-    return StageElement.pathCache.get(id)
+    return this.pathCache.get(id)
   }
   createPath(node: IIrregular) {
     const pathPoints = node.points.map((nodePoint, i) => {

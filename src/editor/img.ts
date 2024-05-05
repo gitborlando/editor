@@ -15,7 +15,7 @@ export type IImage = {
 const prefix = 'local:editor-image/'
 
 @autobind
-export class ImgService {
+class ImgService {
   imageStore = createIDBStore<ArrayBuffer>('editor-image')
   imageCache = createCache<ID, IImage>()
   getImage(url: string) {

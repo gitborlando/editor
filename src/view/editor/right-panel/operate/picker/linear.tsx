@@ -1,27 +1,26 @@
-import { FC, memo } from 'react'
-import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
-import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
+import { FC, memo, useState, useTransition } from 'react'
+import { IFillLinearGradient } from '~/editor/schema/type'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
 import { makeLinearGradientCss } from '~/shared/utils/color'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PickerColorComp } from './color'
 
-type IPickerLinearGradientComp = {}
+type IPickerLinearGradientComp = {
+  fill: IFillLinearGradient
+}
 
-export const PickerLinearGradientComp: FC<IPickerLinearGradientComp> = memo(({}) => {
+export const PickerLinearGradientComp: FC<IPickerLinearGradientComp> = memo(({ fill }) => {
   const { classes } = useStyles({})
-  const { currentLinearFill } = UIPicker
-  const { stops } = currentLinearFill.value
-  const currentStop = useAutoSignal(stops[0])
-  useHookSignal(currentLinearFill)
+  const { setStopColor } = UIPickerCopy
+  const [stopIndex, setStopIndex] = useState(0)
+  const [_, transition] = useTransition()
 
   const StopsBar: FC<{}> = () => {
     return (
       <Flex layout='h' shrink={0} className={classes.stopsBar}>
-        <Flex
-          className='bar'
-          style={{ background: makeLinearGradientCss(currentLinearFill.value) }}></Flex>
-        {stops.map((stop, index) => (
+        <Flex className='bar' style={{ background: makeLinearGradientCss(fill) }}></Flex>
+        {fill.stops.map((stop, index) => (
           <Flex
             key={index}
             className='stop'
@@ -29,11 +28,9 @@ export const PickerLinearGradientComp: FC<IPickerLinearGradientComp> = memo(({})
               backgroundColor: `${stop.color}`,
               border: '2px solid white',
               left: `${stop.offset * 100}%`,
-              ...(currentStop.value === stop && { transform: 'scale(1.4, 1.4)' }),
+              ...(stopIndex === index && { transform: 'scale(1.4, 1.4)' }),
             }}
-            onClick={() => {
-              currentStop.dispatch(stop)
-            }}></Flex>
+            onClick={() => setStopIndex(index)}></Flex>
         ))}
       </Flex>
     )
@@ -43,11 +40,8 @@ export const PickerLinearGradientComp: FC<IPickerLinearGradientComp> = memo(({})
     <Flex layout='v' className={classes.PickerLinearGradient}>
       <StopsBar />
       <PickerColorComp
-        color={currentStop.value.color}
-        onChange={(color) => {
-          currentStop.value.color = color
-          currentLinearFill.dispatch()
-        }}
+        color={fill.stops[stopIndex].color}
+        onChange={({ color, alpha }) => transition(() => setStopColor(stopIndex, color, alpha))}
       />
     </Flex>
   )

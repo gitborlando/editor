@@ -28,7 +28,7 @@ export function mock10000Nested() {
       centerX: 50 + x * (frameSize + 30),
       centerY: 50 + y * (frameSize + 30),
       radius: 10,
-      parentId: 'page:1', //'#CCCCCC',
+      parentId: 'page_1', //'#CCCCCC',
       childIds: [rectId],
     })
 

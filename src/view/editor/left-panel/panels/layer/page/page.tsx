@@ -1,10 +1,10 @@
 import { FC } from 'react'
-import { OperateMeta } from '~/editor/operate/meta'
 import { Schema } from '~/editor/schema/schema'
 import { IPage } from '~/editor/schema/type'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { useHookSignal } from '~/shared/signal/signal-react'
+import { useSchema } from '~/view/editor/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PageHeaderComp } from './header'
@@ -17,7 +17,7 @@ export const PageComp: FC<IPageComp> = ({}) => {
   const { allPageExpanded, pagePanelHeight } = UILeftPanelLayer
   useHookSignal(pagePanelHeight)
   useHookSignal(allPageExpanded)
-  useHookSignal(OperateMeta.afterChangePages)
+  useSchema()
   return (
     <Flex layout='v' shrink={0} className={classes.Page}>
       <PageHeaderComp />

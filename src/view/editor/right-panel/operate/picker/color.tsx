@@ -1,16 +1,36 @@
 import { FC, memo } from 'react'
 import { RgbaStringColorPicker } from 'react-colorful'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
+import { rgb } from '~/shared/utils/color'
+import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import { makeStyles } from '~/view/ui-utility/theme'
 
 type IPickerColorComp = {
   color: string
-  onChange: (color: string) => void
+  onChange: (color: { color: string; alpha: number }) => void
 }
 
 export const PickerColorComp: FC<IPickerColorComp> = memo(({ color, onChange }) => {
-  const { classes, cx } = useStyles({})
+  const { classes } = useStyles({})
+  const { beforeOperate, afterOperate } = UIPickerCopy
+  const transformColor = (color: string) => {
+    const [, r, g, b, a] = color.match(/rgba\((\d+), (\d+), (\d+), (\d+(\.\d+)?)\)/)!
+    return { color: rgb(r, g, b), alpha: Number(a) }
+  }
+  useDownUpTracker(
+    () => document.getElementById('$$RgbaStringColorPicker'),
+    beforeOperate.dispatch,
+    afterOperate.dispatch
+  )
 
-  return <RgbaStringColorPicker className={classes.colorPicker} color={color} onChange={onChange} />
+  return (
+    <RgbaStringColorPicker
+      id='$$RgbaStringColorPicker'
+      className={classes.colorPicker}
+      color={color}
+      onChange={(c) => onChange(transformColor(c))}
+    />
+  )
 })
 
 type IPickerColorCompStyle =

@@ -8,14 +8,13 @@ import { SchemaUtil } from '~/editor/schema/util'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu/menu'
-import { createSignal } from '~/shared/signal/signal'
+import { batchSignal, createSignal } from '~/shared/signal/signal'
 import { rectInAnotherRect } from '~/shared/utils/collision'
 import { isLeftMouse, isRightMouse } from '~/shared/utils/event'
 import { lastOne } from '~/shared/utils/list'
 import { macro_Match } from '~/shared/utils/macro'
 import { createBound, type IRect } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
-import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageWidgetTransform } from '../widget/transform'
@@ -24,7 +23,7 @@ import { StageCreate } from './create'
 type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 
 @autobind
-export class StageSelectService {
+class StageSelectService {
   marquee = createSignal<IRect | undefined>()
   afterSelect = createSignal<ISelectType>()
   duringMarqueeSelect = createSignal()
@@ -81,7 +80,7 @@ export class StageSelectService {
   }
   private onMenu() {
     const { copyPasteGroup, undoRedoGroup, nodeGroup } = Menu.menuConfig
-    if (OperateNode.selectNodes.length) {
+    if (OperateNode.selectedNodes.value.length) {
       const menuOptions = [copyPasteGroup, undoRedoGroup, nodeGroup]
       return Menu.menuOptions.dispatch(menuOptions)
     }
@@ -95,14 +94,14 @@ export class StageSelectService {
     this.clearSelect()
     OperateNode.select(id)
     this.afterSelect.dispatch('panel')
-    OperateNode.afterSelect.dispatch()
+    OperateNode.commitFinalSelect()
   }
   onCreateSelect(id: string) {
     this.clearSelect()
     OperateNode.select(id)
     UILeftPanelLayer.expandAncestor(id)
     this.afterSelect.dispatch('create')
-    OperateNode.afterSelect.dispatch()
+    OperateNode.commitSelect()
   }
   private onMousedownSelect() {
     if (Pixi.isForbidEvent) return
@@ -110,7 +109,7 @@ export class StageSelectService {
     if (SchemaUtil.isPageFrame(this.hoverId)) return
     this.clearSelect()
     OperateNode.select(this.hoverId)
-    OperateNode.afterSelect.dispatch()
+    OperateNode.commitFinalSelect()
     UILeftPanelLayer.expandAncestor(this.hoverId)
     this.afterSelect.dispatch('stage-single')
   }
@@ -125,16 +124,16 @@ export class StageSelectService {
     const traverseTest = () => {
       this.clearSelect()
       SchemaUtil.traverseCurPageChildIds(({ id, node, childIds, depth }) => {
-        const OBB = StageElement.OBBCache.get(node.id)
+        const { obb } = OperateNode.getNodeRuntime(node.id)
         if (childIds?.length && depth === 0) {
-          if (rectInAnotherRect(OBB.aabb, this.marqueeOBB!.aabb)) {
+          if (rectInAnotherRect(obb.aabb, this.marqueeOBB!.aabb)) {
             OperateNode.select(node.id)
             UILeftPanelLayer.needExpandIds.add(node.id)
             return false
           }
           return
         }
-        if (hitTest(this.marqueeOBB, OBB)) {
+        if (hitTest(this.marqueeOBB, obb)) {
           OperateNode.select(id)
           UILeftPanelLayer.needExpandIds.add(node.parentId)
           return
@@ -148,14 +147,16 @@ export class StageSelectService {
       .onMove(({ marquee }) => {
         this.marquee.dispatch(marquee)
         this.marqueeOBB = this.calcMarqueeOBB()
+        const endBatch = batchSignal(OperateNode.selectIds)
         traverseTest()
+        endBatch()
         this.duringMarqueeSelect.dispatch()
       })
       .onDestroy(() => {
         this.marquee.value = undefined
         this.marquee.dispatch()
         this.afterSelect.dispatch('marquee')
-        OperateNode.afterSelect.dispatch()
+        OperateNode.commitFinalSelect()
       })
   }
   private calcMarqueeOBB() {

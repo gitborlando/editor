@@ -1,8 +1,12 @@
-import { FC, memo } from 'react'
+import { cloneDeep } from 'lodash-es'
+import { FC, memo, useEffect } from 'react'
 import { OperateFill } from '~/editor/operate/fill'
-import { UIPicker } from '~/editor/ui-state/right-panel/operate/picker'
+import { SchemaDefault } from '~/editor/schema/default'
+import { IFill, IFillColor, IFillImage, IFillLinearGradient } from '~/editor/schema/type'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { DraggableComp } from '~/view/component/draggable'
+import { useSelectedNodes } from '~/view/editor/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -10,14 +14,40 @@ import { PickerImageComp } from './image'
 import { PickerLinearGradientComp } from './linear'
 import { PickerSolidComp } from './solid'
 
-type IPickerComp = {}
+const createFillCache = () => ({
+  color: SchemaDefault.fillColor(),
+  linearGradient: SchemaDefault.fillLinearGradient(),
+  image: SchemaDefault.fillImage(),
+})
+let fillCache = createFillCache()
 
-export const PickerComp: FC<IPickerComp> = memo(({}) => {
+export const PickerComp: FC<{}> = ({}) => {
+  const fill = OperateFill.fills[UIPickerCopy.index]
+  useSelectedNodes()
+  return fill && <PickerContentComp fill={fill} />
+}
+
+const PickerContentComp: FC<{
+  fill: IFill
+}> = memo(({ fill }) => {
   const { classes } = useStyles({})
-  const { show, type, xy } = UIPicker
+  const { show, type, xy, changeFill } = UIPickerCopy
   useHookSignal(show)
   useHookSignal(type)
-  useHookSignal(OperateFill.fills)
+
+  useEffect(() => {
+    UIPickerCopy.fill = cloneDeep(fill)
+  }, [fill])
+
+  useEffect(() => {
+    //@ts-ignore
+    if (show) fillCache[fill.type] = fill
+    else fillCache = createFillCache()
+  }, [show.value, fill])
+
+  useEffect(() => {
+    changeFill(fillCache[type.value])
+  }, [type.value])
 
   if (!show.value) return null
   return (
@@ -40,9 +70,11 @@ export const PickerComp: FC<IPickerComp> = memo(({}) => {
             图片
           </Button>
         </Flex>
-        {type.value === 'color' && <PickerSolidComp />}
-        {type.value === 'linearGradient' && <PickerLinearGradientComp />}
-        {type.value === 'image' && <PickerImageComp />}
+        {fill.type === 'color' && <PickerSolidComp fill={fill as IFillColor} />}
+        {fill.type === 'linearGradient' && (
+          <PickerLinearGradientComp fill={fill as IFillLinearGradient} />
+        )}
+        {fill.type === 'image' && <PickerImageComp fill={fill as IFillImage} />}
       </Flex>
     </DraggableComp>
   )

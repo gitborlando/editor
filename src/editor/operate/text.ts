@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { createSignal, mergeSignal } from '~/shared/signal/signal'
 import { Schema } from '../schema/schema'
 import { IText } from '../schema/type'
-import { StageDraw } from '../stage/draw/draw'
+import { StageDraw2 } from '../stage/draw/draw'
 import { StageSelect } from '../stage/interact/select'
 import { OperateNode } from './node'
 
@@ -36,7 +36,7 @@ const createBaseStyle = () => ({
 export const textStyleKeys = <ITextStyleKey[]>Object.keys(createBaseStyle())
 
 @autobind
-export class OperateTextService {
+class OperateTextService {
   textStyle = createSignal(<IBaseStyle>createBaseStyle())
   beforeOperate = createSignal<ITextStyleKey | 'content' | null>()
   afterOperate = createSignal()
@@ -45,7 +45,7 @@ export class OperateTextService {
   textStyleOptions = createTextStyleOptions()
   initHook() {
     StageSelect.afterSelect.hook(() => {
-      this.textNodes = OperateNode.selectNodes.filter((node) => {
+      this.textNodes = OperateNode.selectedNodes.value.filter((node) => {
         return node.type === 'text'
       }) as IText[]
       if (!this.textNodes.length) return
@@ -62,18 +62,9 @@ export class OperateTextService {
     })
     mergeSignal(OperateNode.afterFlushDirty, this.afterOperate).hook(() => {
       const operateKey = this.beforeOperate.value!
-      const changeType = operateKey === 'content' ? 'changeTextContent' : 'changeTextStyle'
       const changeDescription = operateKey === 'content' ? '改变 text content' : '改变 text style'
-      Schema.commitOperation(changeType, [...OperateNode.dirtyIds], changeDescription)
-      Schema.commitHistory(changeDescription)
+      Schema.commitOperation(changeDescription)
       this.beforeOperate.value = null
-    })
-    Schema.registerListener('changeTextContent', () => {
-      this.textNodes.forEach((node) => StageDraw.collectRedraw(node.id))
-    })
-    Schema.registerListener('changeTextStyle', () => {
-      this.setupTextStyle()
-      this.textNodes.forEach((node) => StageDraw.collectRedraw(node.id))
     })
   }
   setTextStyle(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
@@ -99,8 +90,8 @@ export class OperateTextService {
   }
   private applyChange(node: IText) {
     const operateKey = this.beforeOperate.value! //@ts-ignore
-    Schema.itemReset(node, `style.${operateKey}`, this.textStyle.value[operateKey])
-    StageDraw.collectRedraw(node.id)
+    Schema.itemReset(node, ['style', operateKey], this.textStyle.value[operateKey])
+    StageDraw2.collectRedraw(node.id)
   }
 }
 

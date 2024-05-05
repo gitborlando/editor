@@ -1,68 +1,61 @@
 import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal/signal'
-import { addListener } from '~/shared/utils/event'
 import { SchemaDefault } from '../schema/default'
 import { Schema } from '../schema/schema'
-import { IClient, ID, IPage } from '../schema/type'
-import { SchemaUtil } from '../schema/util'
-import { StageDraw } from '../stage/draw/draw'
-import { StageElement } from '../stage/element'
+import { IClient, ID, IMeta, IPage } from '../schema/type'
 import { OperateNode } from './node'
 
 @autobind
-export class OperateMetaService {
-  afterChangePages = createSignal()
+class OperateMetaService {
   curPage = createSignal<IPage>()
-  clients!: Record<string, IClient>
+  private clientId!: ID
+  private lastPage!: IPage
   initHook() {
-    Schema.registerListener('selectPage', () => {
-      const page = Schema.find<IPage>(Schema.client.selectPageId)
-      this.curPage.dispatch(page)
+    Schema.inited.hook(() => {
+      const firstPage = Schema.find<IPage>(Schema.meta.pageIds[0])
+      this.addClient({ selectPageId: firstPage.id })
+      this.curPage.value = this.lastPage = firstPage
     })
-    Schema.registerListener('changePagesCount', () => {
-      this.afterChangePages.dispatch()
+    Schema.schemaChanged.hook({ beforeAll: true }, () => {
+      Schema.meta = Schema.find<IMeta>('meta')
+      Schema.client = Schema.meta.clients[this.clientId]
     })
-    Schema.registerListener('syncMouse', (o) => {})
-    Schema.afterSetSchema.hook(() => {
-      const firstPage = Schema.pages[0]
-      Schema.client = this.addClient({ selectPageId: firstPage.id })
-      this.curPage.dispatch(firstPage, { isFirstSelect: true })
+    Schema.schemaChanged.hook(() => {
+      const selectPageId = Schema.client.selectPageId
+      const currentPage = Schema.find<IPage>(selectPageId)
+      if (!this.lastPage) return
+      if (this.lastPage === currentPage) return
+      this.curPage.dispatch((this.lastPage = currentPage))
+      // OperateNode.clearSelect()
     })
-    this.curPage.hook((_, args) => {
-      StageElement.clearAll()
-      StageElement.collectReHierarchy(this.curPage.value.id)
-      SchemaUtil.traverseCurPageChildIds(({ id, childIds, depth, ancestors }) => {
-        OperateNode.setNodeRuntime(id, { ancestors, indent: depth })
-        StageDraw.collectRedraw(id)
-        if (childIds) StageElement.collectReHierarchy(id)
-      })
-      if (!args?.isFirstSelect) OperateNode.clearSelect()
-    })
-    addListener('mousemove', (e) => this.syncMouse(e.clientX, e.clientY))
+    //  addListener('mousemove', (e) => this.syncMouse(e.clientX, e.clientY))
   }
   addClient(option?: Partial<IClient>) {
     const client = SchemaDefault.client(option)
+    this.clientId = client.id
     Schema.itemAdd(Schema.meta, ['clients', client.id], client)
-    Schema.commitOperation('addClient', ['meta'], '添加客户端')
-    return client
+    Schema.finalOperation('添加客户端')
   }
   selectPage(id: ID) {
     Schema.itemReset(Schema.meta, ['clients', Schema.client.id, 'selectPageId'], id)
-    Schema.commitOperation('selectPage', ['meta'], `选择页面 ${id}`)
+    OperateNode.clearSelect()
+    OperateNode.commitSelect()
+    Schema.commitOperation(`选择页面 ${id}`)
   }
-  addPage(page: IPage) {
+  addPage(page = SchemaDefault.page()) {
     Schema.addItem(page)
     Schema.itemAdd(Schema.meta, ['pageIds', Schema.meta.pageIds.length], page.id)
-    Schema.commitOperation('changePagesCount', ['meta', page.id], '添加页面')
+    this.selectPage(page.id)
+    Schema.finalOperation('添加页面')
   }
   removePage(page: IPage) {
     Schema.removeItem(page)
     Schema.itemDelete(Schema.meta, ['pageIds', Schema.meta.pageIds.indexOf(page.id)])
-    Schema.commitOperation('changePagesCount', ['meta', page.id], '移除页面')
+    Schema.finalOperation('移除页面')
   }
   syncMouse(x: number, y: number) {
     Schema.itemReset(Schema.meta, ['clients', Schema.client.id, 'mouse'], { x, y })
-    Schema.commitOperation('syncMouse', ['meta'], '同步鼠标位置')
+    Schema.commitOperation('同步鼠标位置')
   }
 }
 

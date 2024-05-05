@@ -9,7 +9,7 @@ import { OperateMeta } from '../operate/meta'
 import { Pixi } from './pixi'
 
 @autobind
-export class StageViewportService {
+class StageViewportService {
   inited = createSignal(false)
   bound = createSignal({ x: 240, y: 44, width: 0, height: 0, right: 240 })
   zoom = createSignal(1)
@@ -24,6 +24,9 @@ export class StageViewportService {
       window.addEventListener('resize', this.onResizeBound)
       this.onWheelZoom()
       Pixi.addListener('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))
+      const { x, y, zoom } = OperateMeta.curPage.value
+      this.zoom.dispatch(zoom)
+      this.stageOffset.dispatch(XY.Of(x, y))
       this.inited.dispatch()
     })
     OperateMeta.curPage.hook((page) => {

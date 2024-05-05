@@ -4,7 +4,6 @@ import { SchemaUtil } from '~/editor/schema/util'
 import { Drag } from '~/global/event/drag'
 import { batchSignal, createSignal } from '~/shared/signal/signal'
 import { XY } from '~/shared/xy'
-import { StageElement } from '../element'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageCreate } from './create'
@@ -14,7 +13,7 @@ import { StageSelect } from './select'
 export type IStageInteractType = 'select' | 'move' | 'create'
 
 @autobind
-export class StageInteractService {
+class StageInteractService {
   currentType = createSignal(<IStageInteractType>'select')
   canHover = createSignal(true)
   private previousType?: IStageInteractType
@@ -22,7 +21,6 @@ export class StageInteractService {
     IStageInteractType,
     { startInteract: () => void; endInteract: () => void }
   >()
-
   initHook() {
     this.interactHandlerMap.set('create', StageCreate)
     this.interactHandlerMap.set('move', StageMove)
@@ -50,7 +48,7 @@ export class StageInteractService {
       const realXY = StageViewport.toViewportXY(XY.From(e, 'client'))
       const endBatch = batchSignal(OperateNode.hoverIds)
       SchemaUtil.traverseCurPageChildIds(({ id }) => {
-        const element = StageElement.findElement(id)
+        const { element } = OperateNode.getNodeRuntime(id)
         const hovered = element?.containsPoint(realXY)
         hovered ? OperateNode.hover(id) : OperateNode.unHover(id)
         return hovered

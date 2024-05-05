@@ -6,7 +6,7 @@ import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 
 @autobind
-export class StageWidgetMarqueeService {
+class StageWidgetMarqueeService {
   marqueeElement = new PIXI.Graphics()
   initHook() {
     StageSelect.marquee.hook(this.autoDraw)

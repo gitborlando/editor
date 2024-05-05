@@ -1,6 +1,7 @@
 import fastDeepEqual from 'deep-equal'
 import { runInAction } from 'mobx'
 import { FC, memo, useCallback, useEffect } from 'react'
+import { createCache } from '../cache'
 
 export const This = globalThis as any
 export { fastDeepEqual }
@@ -15,6 +16,12 @@ export type IAnyObject = Record<string, any>
 export const AnyObject = <IAnyObject>{}
 
 export type ValueOf<T extends Record<string, any>> = T[keyof T]
+
+export type AllKeys<T extends Record<string, any>> = T extends Record<string, any>
+  ? T extends any[]
+    ? never
+    : keyof T | { [K in keyof T]: AllKeys<T[K]> }[keyof T]
+  : never
 
 export type IXY = { x: number; y: number }
 export type IRect = IXY & { width: number; height: number }
@@ -31,33 +38,15 @@ export type ICursor = 'auto' | 'n-resize' | 'e-resize' | 'grab' | (string & {})
 export function createBound(x: number, y: number, width: number, height: number) {
   return { x, y, width, height }
 }
-
-export function withNewFunction(body: string) {
-  return new Function('target', `with(target){${body}}`)
-}
-
-export function stringPathProxy(target: any) {
-  function get(_: any, key: string) {
-    return withNewFunction(
-      `return ${key}?.constructor.name === 'ObservableSet2' ? ${key}.values() : ${key}`
-    )(target)
-  }
-  return new Proxy({}, { get })
-}
-
 export function Delete<T>(object: Record<string, T>, key: string): void
-export function Delete<T>(target: T[], find: string | ((value: T) => void)): number
-export function Delete<T>(
-  target: Record<string, T> | T[],
-  filter: string | ((value: T) => void | number)
-) {
+export function Delete<T>(target: T[], find: string | ((value: T) => void)): void
+export function Delete<T>(target: Record<string, T> | T[], filter: string | ((value: T) => void)) {
   if (Array.isArray(target)) {
     const index =
       typeof filter === 'function'
         ? target.findIndex(filter)
         : target.findIndex((i) => i === filter)
     index >= 0 && target.splice(index, 1)
-    return index
   } else {
     delete target[filter as string]
   }
@@ -117,13 +106,76 @@ export function useMemoSubComponent<P extends {}>(deps: any[], component: FC<P>)
   return useCallback(memo(component), deps)
 }
 
-export function ObjectGetSet(obj: any, keys: (string | number)[], value?: any) {
-  if (keys.length === 0)
-    keys.forEach((key, i) => {
-      if (value !== undefined && i === keys.length - 1) {
-        obj[key] = value
-      }
-      obj = obj[key]
+export function Log<T>(someThing: T, label: string = '') {
+  console.log(label, someThing)
+  return someThing
+}
+
+const rafThrottleCache = createCache<any, boolean>()
+export function rafThrottle(id: any, callback: () => void) {
+  const ticking = rafThrottleCache.getSet(id, () => false)
+  if (ticking) return
+  rafThrottleCache.set(id, true)
+  requestAnimationFrame(() => {
+    callback()
+    rafThrottleCache.set(id, false)
+  })
+}
+
+//装饰器 rafThrottle
+export function RafThrottle(target: any, key: string, descriptor: PropertyDescriptor) {
+  const original = descriptor.value
+  let ticking = false
+  descriptor.value = function (...args: any[]) {
+    if (ticking) return
+    ticking = true
+    requestAnimationFrame(() => {
+      original.apply(this, args)
+      ticking = false
     })
-  return obj
+  }
+}
+
+//装饰器 rafThrottle
+export function timeoutThrottle(timeout = 30) {
+  return (target: any, key: string, descriptor: PropertyDescriptor) => {
+    const original = descriptor.value
+    let ticking = false
+    descriptor.value = function (...args: any[]) {
+      if (ticking) return
+      ticking = true
+      setTimeout(() => {
+        original.apply(this, args)
+        ticking = false
+      }, timeout)
+    }
+  }
+}
+
+const memorizeMap = createCache<string, { value: any; compare: any[] }>()
+export function memorize<T>(id: string, compare: any[], callback: () => T): T {
+  const cache = memorizeMap.getSet(id, () => ({ value: undefined, compare: [] }))
+  if (!cache.value) {
+    cache.value = callback()
+    cache.compare = compare
+    return cache.value
+  }
+  for (let i = 0; i < compare.length; i++) {
+    if (compare[i] !== cache.compare[i]) {
+      cache.value = callback()
+      cache.compare = compare
+      return cache.value
+    }
+  }
+  return cache.value
+}
+
+export function fps() {
+  //@ts-ignore
+  const meter = new FPSMeter(document.getElementById('fps'), { graph: 3 })
+  const loop = () => {
+    meter.tick()
+    requestAnimationFrame(loop)
+  }
+  requestAnimationFrame(loop)
 }

@@ -10,3 +10,9 @@ favIcon(Asset.favIcon.shiyangyang)
 configure({ enforceActions: 'never' })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(createElement(App))
+
+// import { immuiPerformanceVs } from './shared/immui/immui.benchmark'
+
+// immuiPerformanceVs()
+
+// fps()

@@ -1,12 +1,8 @@
 import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal/signal'
-import { OBB } from '../math/obb'
-import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { INode, INodeParent } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
-import { StageDraw } from '../stage/draw/draw'
-import { StageElement } from '../stage/element'
 import { StageSelect } from '../stage/interact/select'
 import { StageWidgetTransform } from '../stage/widget/transform'
 import { OperateNode } from './node'
@@ -33,13 +29,6 @@ class OperateAlignService {
   initHook() {
     StageSelect.afterSelect.hook(this.setupAlign)
     this.currentAlign.hook(this.autoAlign)
-    Schema.registerListener('changeNodeAlign', ({ changeIds }) => {
-      SchemaUtil.traverseIds(changeIds, ({ id, depth }) => {
-        if (depth > 1) return false
-        StageElement.setupOBB(id)
-        StageDraw.collectRedraw(id)
-      })
-    })
   }
   private setupAlign() {
     const { selectNodes } = OperateNode
@@ -58,78 +47,74 @@ class OperateAlignService {
   private autoAlign() {
     this[this.currentAlign.value]()
     if (this.needAlign) {
-      const changedIds = this.toAlignNodes.map((node) => node.id)
-      Schema.commitOperation('changeNodeAlign', changedIds, '设置对齐')
-      SchemaHistory.commit('设置对齐')
+      Schema.commitOperation('设置对齐')
       this.needAlign = false
     }
   }
   private alignLeft() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeOBB, nodeBound } = this.getOBBAndBound(node)
+      const { nodeBound } = this.getOBBAndBound(node)
       const shift = alignBound.left - nodeBound.left
-      this.horizontalAlign(node, nodeOBB, shift)
+      this.horizontalAlign(node, shift)
     })
   }
   private alignCenter() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeOBB, nodeBound } = this.getOBBAndBound(node)
+      const { nodeBound } = this.getOBBAndBound(node)
       const shift = alignBound.centerX - nodeBound.centerX
-      this.horizontalAlign(node, nodeOBB, shift)
+      this.horizontalAlign(node, shift)
     })
   }
   private alignRight() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeOBB, nodeBound } = this.getOBBAndBound(node)
+      const { nodeBound } = this.getOBBAndBound(node)
       const shift = alignBound.right - nodeBound.right
-      this.horizontalAlign(node, nodeOBB, shift)
+      this.horizontalAlign(node, shift)
     })
   }
   private verticalTop() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeOBB, nodeBound } = this.getOBBAndBound(node)
+      const { nodeBound } = this.getOBBAndBound(node)
       const shift = alignBound.top - nodeBound.top
-      this.verticalAlign(node, nodeOBB, shift)
+      this.verticalAlign(node, shift)
     })
   }
   private verticalCenter() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeOBB, nodeBound } = this.getOBBAndBound(node)
+      const { nodeBound } = this.getOBBAndBound(node)
       const shift = alignBound.centerY - nodeBound.centerY
-      this.verticalAlign(node, nodeOBB, shift)
+      this.verticalAlign(node, shift)
     })
   }
   private verticalBottom() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeOBB, nodeBound } = this.getOBBAndBound(node)
+      const { nodeBound } = this.getOBBAndBound(node)
       const shift = alignBound.bottom - nodeBound.bottom
-      this.verticalAlign(node, nodeOBB, shift)
+      this.verticalAlign(node, shift)
     })
   }
-  private horizontalAlign(node: INode, nodeOBB: OBB, shift: number) {
+  private horizontalAlign(node: INode, shift: number) {
     if (shift === 0) return
     this.needAlign = true
     SchemaUtil.traverseIds([node.id], ({ node }) => {
       Schema.itemReset(node, ['x'], node.x + shift)
       Schema.itemReset(node, ['centerX'], node.centerX + shift)
-      nodeOBB.shiftX(shift)
-      StageDraw.collectRedraw(node.id)
+      return false
     })
   }
-  private verticalAlign(node: INode, nodeOBB: OBB, shift: number) {
+  private verticalAlign(node: INode, shift: number) {
     if (shift === 0) return
     this.needAlign = true
     SchemaUtil.traverseIds([node.id], ({ node }) => {
       Schema.itemReset(node, ['y'], node.y + shift)
       Schema.itemReset(node, ['centerY'], node.centerY + shift)
-      nodeOBB.shiftY(shift)
-      StageDraw.collectRedraw(node.id)
+      return false
     })
   }
   private getAlignBound() {
@@ -137,13 +122,13 @@ class OperateAlignService {
     if (selectNodes.length > 1) {
       return StageWidgetTransform.transformOBB.getAABBBound()
     } else {
-      return StageElement.OBBCache.get(selectNodes[0].id).getAABBBound()
+      return OperateNode.getNodeRuntime(selectNodes[0].id).obb.getAABBBound()
     }
   }
   private getOBBAndBound(node: INode) {
-    const nodeOBB = StageElement.OBBCache.get(node.id)
+    const nodeOBB = OperateNode.getNodeRuntime(node.id).obb
     const nodeBound = nodeOBB.getAABBBound()
-    return { nodeOBB, nodeBound }
+    return { nodeBound }
   }
 }
 
