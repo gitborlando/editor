@@ -1,8 +1,6 @@
-import { FC, memo, useRef } from 'react'
+import { FC, memo } from 'react'
 import { OperateShadow } from '~/editor/operate/shadow'
 import { IShadow } from '~/editor/schema/type'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import { iife } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
@@ -18,10 +16,7 @@ type IShadowItemComp = {
 
 export const ShadowItemComp: FC<IShadowItemComp> = memo(({ shadow, index }) => {
   const { classes, cx } = useStyles({})
-  const { shadows, setAttribute, beforeOperate, afterOperate } = OperateShadow
-  const inputRef = useRef<HTMLInputElement>(null)
-  useHookSignal(shadows)
-  useDownUpTracker(() => inputRef.current, beforeOperate.dispatch, afterOperate.dispatch)
+  const { deleteShadow, setShadow, toggleShadow, afterOperate } = OperateShadow
 
   return (
     <Flex layout='v' className={cx(classes.ShadowItem)}>
@@ -30,10 +25,10 @@ export const ShadowItemComp: FC<IShadowItemComp> = memo(({ shadow, index }) => {
         <IconButton
           size={16}
           style={{ marginLeft: 'auto' }}
-          onClick={() => OperateShadow.toggleVisible(shadow)}>
+          onClick={() => toggleShadow(index, ['visible'], !shadow.visible)}>
           {shadow.visible ? Asset.editor.shared.visible : Asset.editor.shared.unVisible}
         </IconButton>
-        <IconButton size={16} onClick={() => OperateShadow.deleteShadow(shadow)}>
+        <IconButton size={16} onClick={() => deleteShadow(index)}>
           {Asset.editor.shared.minus}
         </IconButton>
       </Flex>
@@ -45,11 +40,11 @@ export const ShadowItemComp: FC<IShadowItemComp> = memo(({ shadow, index }) => {
             <CompositeInput
               key={key}
               className='lineWidth'
-              ref={inputRef}
               label={labels[index]}
               needStepHandler={false}
               value={shadow[key].toString()}
-              onNewValueApply={(value) => setAttribute(shadow, key, Number(value))}
+              onNewValueApply={(value) => setShadow(index, [key], Number(value))}
+              afterOperate={() => afterOperate.dispatch()}
             />
           ))
         })}

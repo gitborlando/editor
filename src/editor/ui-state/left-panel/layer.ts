@@ -165,7 +165,6 @@ class UILeftPanelLayerService {
     let inFrontCount = floor(this.nodeScrollHeight.value / 32)
     let inViewCount = ceil(this.nodeViewHeight.value / 32) + 1
     this.nodeScrollShift.value = this.nodeScrollHeight.value - inFrontCount * 32
-
     SchemaUtil.traverseCurPageChildIds(({ id, abort, ancestors, depth }) => {
       if (inFrontCount > 0) inFrontCount--
       else if (inViewCount !== 0) {

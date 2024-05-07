@@ -12,7 +12,7 @@ export function mock10000Nested() {
   const nodes: Record<string, INode> = {}
   const frameIds = <string[]>[]
 
-  for (let i = 0; i < 5000; i++) {
+  for (let i = 0; i < 20000; i++) {
     const rectId = nanoid()
     const frameId = nanoid()
     frameIds.push(frameId)

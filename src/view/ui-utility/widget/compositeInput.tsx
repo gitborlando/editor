@@ -1,5 +1,5 @@
 import RCInput, { InputProps } from 'rc-input'
-import { ComponentPropsWithRef, forwardRef, memo, useMemo, useRef } from 'react'
+import { ComponentPropsWithRef, forwardRef, memo, useRef } from 'react'
 import { Drag } from '~/global/event/drag'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
@@ -82,16 +82,16 @@ export const CompositeInput = memo(
 
       const InputComp = useSubComponent([value, disabled], ({}) => {
         const thisValue = useAutoSignal(value)
-        useMemo(() => {
-          if (label === '横坐标') console.log('value: ', value)
-          thisValue.value = value
-        }, [value])
+        // useMemo(() => {
+        //   if (label === '横坐标') console.log('value: ', value)
+        //   thisValue.value = value
+        // }, [value])
         const thisType = value === 'multi' ? 'text' : type
-        if (label === '横坐标') {
-          // console.log('value: ', value)
-          console.log('thisValue: ', thisValue.value)
-          // console.log('thisType: ', thisType)
-        }
+        // if (label === '横坐标') {
+        //   // console.log('value: ', value)
+        //   console.log('thisValue: ', thisValue.value)
+        //   // console.log('thisType: ', thisType)
+        // }
         return (
           <Flex layout='h'>
             <RCInput

@@ -1,14 +1,19 @@
 import { cloneDeep } from 'lodash-es'
 import { FC, memo } from 'react'
+import usePromise from 'react-promise-suspense'
+import { IImage, Img } from '~/editor/img'
 import { IFill, IFillColor } from '~/editor/schema/type'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
+import { useAutoSignal } from '~/shared/signal/signal-react'
 import { makeLinearGradientCss, rgbToHex, rgbToRgba } from '~/shared/utils/color'
 import { IXY, iife, useSubComponent } from '~/shared/utils/normal'
+import { withSuspense } from '~/shared/utils/react'
 import { XY } from '~/shared/xy'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 import { Flex } from '~/view/ui-utility/widget/flex'
+import { PickerComp } from './picker'
 
 type IPickerOpener = {
   fill: IFill
@@ -29,8 +34,9 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   const showPicker = (xy: IXY) => {
     setupUIPicker()
     UIPickerCopy.xy.value = XY.Of(window.innerWidth - 480 - 10, xy.y - 10)
-    UIPickerCopy.show.dispatch(true)
+    isShowPicker.dispatch(true)
   }
+  const isShowPicker = useAutoSignal(false)
   const { theme, css, classes } = useStyles({})
 
   const ColorInputComp = useSubComponent<{ fill: IFill }>([fill.type], ({ fill }) => {
@@ -56,6 +62,16 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
     )
   })
 
+  const ImgComp = useSubComponent<{ url: string }>([], ({ url }) => {
+    const image = usePromise<[string], IImage>(() => Img.getImageAsync(url), [url])
+    const imageBound = iife(() => {
+      const { width, height } = image
+      const rate = width / height
+      return rate > 1 ? { width: 18, height: 18 / rate } : { width: 18 * rate, height: 18 }
+    })
+    return <img src={image.objectUrl} style={{ ...imageBound }}></img>
+  })
+
   return (
     <>
       <Flex layout='h' sidePadding={6} className={classes.Fill}>
@@ -65,7 +81,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
             <Flex style={{ backgroundColor: rgbToRgba(fill.color, fill.alpha) }}></Flex>
           )}
           {isLinearType && <Flex style={{ background: makeLinearGradientCss(fill) }}></Flex>}
-          {/* {isImageType && <img src={currentImage.value.objectUrl}></img>} */}
+          {isImageType && withSuspense(<ImgComp url={fill.url} />)}
         </Flex>
         <ColorInputComp fill={fill} />
       </Flex>
@@ -86,6 +102,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
           %
         </Flex>
       </Flex>
+      {isShowPicker.value && <PickerComp fill={fill} show={isShowPicker} />}
     </>
   )
 })

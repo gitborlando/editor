@@ -1,9 +1,9 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal, mergeSignal } from '~/shared/signal/signal'
+import Immui from '~/shared/immui/immui'
+import { createSignal } from '~/shared/signal/signal'
+import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
-import { IText } from '../schema/type'
-import { StageDraw2 } from '../stage/draw/draw'
-import { StageSelect } from '../stage/interact/select'
+import { ID, IText } from '../schema/type'
 import { OperateNode } from './node'
 
 type ITextStyle = IText['style']
@@ -33,65 +33,66 @@ const createBaseStyle = () => ({
 //   lineHeight: <ITextStyle['lineHeight'] | IMulti>16,
 // })
 
-export const textStyleKeys = <ITextStyleKey[]>Object.keys(createBaseStyle())
+export const textStyleKeys = <IBaseStyleKey[]>Object.keys(createBaseStyle())
+
+type IBaseStyleKey = keyof IBaseStyle
 
 @autobind
 class OperateTextService {
-  textStyle = createSignal(<IBaseStyle>createBaseStyle())
-  beforeOperate = createSignal<ITextStyleKey | 'content' | null>()
+  textStyle = createBaseStyle()
   afterOperate = createSignal()
-  intoEditing = createSignal<IText | null>(null)
+  intoEditing = createSignal<ID>()
   textNodes = <IText[]>[]
   textStyleOptions = createTextStyleOptions()
+  private immui = new Immui()
   initHook() {
-    StageSelect.afterSelect.hook(() => {
+    OperateNode.selectedNodes.hook(() => {
       this.textNodes = OperateNode.selectedNodes.value.filter((node) => {
         return node.type === 'text'
       }) as IText[]
       if (!this.textNodes.length) return
       this.setupTextStyle()
     })
-    this.textStyle.hook((_, args) => {
-      if (args?.isSetupCause) return
-      this.textNodes.forEach((node) => OperateNode.collectDirty(node.id))
-    })
-    OperateNode.duringFlushDirty.hook((id) => {
-      const node = Schema.find(id)
-      if (node.type !== 'text') return
-      this.applyChange(node)
-    })
-    mergeSignal(OperateNode.afterFlushDirty, this.afterOperate).hook(() => {
-      const operateKey = this.beforeOperate.value!
-      const changeDescription = operateKey === 'content' ? '改变 text content' : '改变 text style'
-      Schema.commitOperation(changeDescription)
-      this.beforeOperate.value = null
+    this.afterOperate.hook(() => {
+      SchemaHistory.commit('改变 text')
     })
   }
   setTextStyle(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
-    this.textStyle.dispatch((style) => {
-      //@ts-ignore
-      style[key] = value //@ts-ignore
-    })
+    this.immui.reset(this.textStyle, [key], value)
+    this.applyChangeToSchema()
   }
   toggleTextStyle(key: ITextStyleKey, value: ITextStyle[ITextStyleKey]) {
-    this.beforeOperate.dispatch(key) //@ts-ignore
-    this.textStyle.dispatch((style) => (style[key] = value))
-    this.afterOperate.dispatch()
+    this.immui.reset(this.textStyle, [key], value)
+    this.applyChangeToSchema()
+    SchemaHistory.commit('改变 text style')
+  }
+  setTextContent(textNode: IText, content: string) {
+    Schema.itemReset(textNode, ['content'], content)
+    Schema.commitOperation('改变 text content')
+    Schema.nextSchema()
   }
   private setupTextStyle() {
+    const newTextStyle = <IBaseStyle>{}
     textStyleKeys.forEach((key) => {
       let firstNodeStyleValue = this.textNodes[0].style[key] //@ts-ignore
-      this.textStyle.value[key] = firstNodeStyleValue
       this.textNodes.forEach(({ style }) => {
-        // if (style[key] !== firstNodeStyleValue) this.textStyle.value[key] = 0
+        if (style[key] === firstNodeStyleValue) {
+          //@ts-ignore
+          newTextStyle[key] = firstNodeStyleValue
+        } else {
+          //@ts-ignore
+          newTextStyle[key] = typeof style[key] === 'number' ? -1 : 'multi'
+        }
       })
     })
-    this.textStyle.dispatch(undefined, { isSetupCause: true })
+    this.textStyle = newTextStyle
   }
-  private applyChange(node: IText) {
-    const operateKey = this.beforeOperate.value! //@ts-ignore
-    Schema.itemReset(node, ['style', operateKey], this.textStyle.value[operateKey])
-    StageDraw2.collectRedraw(node.id)
+  private applyChangeToSchema() {
+    const nodes = OperateNode.selectedNodes.value
+    const patches = this.immui.commitPatches()
+    nodes.forEach((node) => Schema.applyPatches(patches, { prefix: `/${node.id}/style` }))
+    Schema.commitOperation('改变 text styles')
+    Schema.nextSchema()
   }
 }
 

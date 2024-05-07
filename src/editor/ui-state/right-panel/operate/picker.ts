@@ -1,62 +1,56 @@
 import autobind from 'class-autobind-decorator'
-import { IImage, Img } from '~/editor/img'
-import { SchemaDefault } from '~/editor/schema/default'
-import { IFill, IFillColor, IFillImage, IFillLinearGradient } from '~/editor/schema/type'
-import { Signal, createSignal } from '~/shared/signal/signal'
-import { IXY, iife } from '~/shared/utils/normal'
+import { IFill, IFillKeys } from '~/editor/schema/type'
+import Immui, { IImmuiPatch } from '~/shared/immui/immui'
+import { createSignal } from '~/shared/signal/signal'
+import { IXY } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
 
 type IOperateType = 'solid-color'
 
 @autobind
 class UIPickerService {
+  fill!: IFill
   show = createSignal(false)
   type = createSignal(<'color' | 'linearGradient' | 'image'>'color')
   xy = createSignal(<IXY>XY.Of(0, 0))
-  currentFill = createSignal(<IFill>{})
   beforeOperate = createSignal(<{ type: IOperateType }>{})
   afterOperate = createSignal(<{ type: IOperateType; value?: any }>{})
   loadingWebImageUrl = createSignal('')
-  currentImage = createSignal(<IImage>{ objectUrl: '' })
-  currentIndex = 0
-  impact = <'fill' | 'stroke' | 'shadow'>''
-  private fillCache = this.createFillCache()
-  get currentSolidFill() {
-    return this.currentFill as Signal<IFillColor>
-  }
-  get currentLinearFill() {
-    return this.currentFill as Signal<IFillLinearGradient>
-  }
-  get currentImageFill() {
-    return this.currentFill as Signal<IFillImage>
-  }
+  from = <'fill' | 'stroke' | 'shadow'>''
+  index = 0
+  onChange = createSignal<IImmuiPatch[]>()
+  private immui = new Immui()
   initHook() {
-    this.show.hook((show) => {
-      if (show) this.fillCache = this.createFillCache()
-    })
-    this.type.hook((type) => {
-      this.currentFill.dispatch(this.fillCache[type])
-    })
-    this.currentFill.hook((fill) => {
-      //@ts-ignore
-      this.fillCache[fill.type] = fill
-    })
-    this.currentFill.hook({ before: 'fill-comp' }, (fill) => {
-      if (fill.type !== 'image') return
-      iife(async () => {
-        const image = Img.getImage(fill.url)
-        if (image) this.currentImage.dispatch(image)
-        else this.currentImage.dispatch(await Img.getImageAsync(fill.url))
-      })
+    this.onChange.intercept((patches) => {
+      return patches.map((patch) => ({ ...patch, path: patch.path.slice(2) }))
     })
   }
-  private createFillCache() {
-    return {
-      color: SchemaDefault.fillColor(),
-      linearGradient: SchemaDefault.fillLinearGradient(),
-      image: SchemaDefault.fillImage(),
-    }
+  setFill(keys: IFillKeys[], value: any) {
+    this.immui.reset([this.fill], [0, ...keys], value)
+  }
+  changeFill(newFill: IFill) {
+    this.immui.reset([this.fill], [0], newFill)
+    this.emitChange()
+    this.afterOperate.dispatch()
+  }
+  setFillSolidColor(color: string, alpha: number) {
+    this.setFill(['color'], color)
+    this.setFill(['alpha'], alpha)
+    this.emitChange()
+  }
+  setStopColor(index: number, color: string, alpha: number) {
+    this.setFill(['stops', index, 'color'], color)
+    this.setFill(['stops', index, 'alpha'], alpha)
+    this.emitChange()
+  }
+  setFillUrl(url: string) {
+    this.setFill(['url'], url)
+    this.emitChange()
+    this.afterOperate.dispatch()
+  }
+  emitChange() {
+    this.onChange.dispatch(this.immui.commitPatches())
   }
 }
 
-export const UIPicker = new UIPickerService()
+export const UIPickerCopy = new UIPickerService()

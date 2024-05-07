@@ -122,36 +122,6 @@ export function rafThrottle(id: any, callback: () => void) {
   })
 }
 
-//装饰器 rafThrottle
-export function RafThrottle(target: any, key: string, descriptor: PropertyDescriptor) {
-  const original = descriptor.value
-  let ticking = false
-  descriptor.value = function (...args: any[]) {
-    if (ticking) return
-    ticking = true
-    requestAnimationFrame(() => {
-      original.apply(this, args)
-      ticking = false
-    })
-  }
-}
-
-//装饰器 rafThrottle
-export function timeoutThrottle(timeout = 30) {
-  return (target: any, key: string, descriptor: PropertyDescriptor) => {
-    const original = descriptor.value
-    let ticking = false
-    descriptor.value = function (...args: any[]) {
-      if (ticking) return
-      ticking = true
-      setTimeout(() => {
-        original.apply(this, args)
-        ticking = false
-      }, timeout)
-    }
-  }
-}
-
 const memorizeMap = createCache<string, { value: any; compare: any[] }>()
 export function memorize<T>(id: string, compare: any[], callback: () => T): T {
   const cache = memorizeMap.getSet(id, () => ({ value: undefined, compare: [] }))

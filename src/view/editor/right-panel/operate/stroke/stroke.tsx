@@ -1,7 +1,6 @@
-import { FC, memo } from 'react'
+import { FC } from 'react'
 import { OperateStroke } from '~/editor/operate/stroke'
 import { IStroke } from '~/editor/schema/type'
-import { useHookSignal } from '~/shared/signal/signal-react'
 import { useSubComponent } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
@@ -12,11 +11,10 @@ import { StrokeItemComp } from './item'
 
 type IStrokeComp = {}
 
-export const StrokeComp: FC<IStrokeComp> = memo(({}) => {
-  const { strokes, isStrokesArray, addStroke } = OperateStroke
+export const StrokeComp: FC<IStrokeComp> = ({}) => {
+  const { strokes, addStroke, isMultiStrokes } = OperateStroke
   const { classes, css, cx } = useStyles({})
-  const hasStrokes = isStrokesArray(strokes.value) && strokes.value.length > 0
-  useHookSignal(strokes)
+  const hasStrokes = strokes.length > 0
 
   const HeaderComp = useSubComponent([hasStrokes], ({}) => {
     const hasStrokesStyle = hasStrokes && css({ marginBottom: 8 })
@@ -48,8 +46,8 @@ export const StrokeComp: FC<IStrokeComp> = memo(({}) => {
   return (
     <Flex layout='v' sidePadding={6} className={classes.Stroke}>
       <HeaderComp />
-      {isStrokesArray(strokes.value) ? (
-        <StrokeListComp strokes={strokes.value} />
+      {!isMultiStrokes ? (
+        <StrokeListComp strokes={strokes} />
       ) : (
         <Flex layout='c' className={classes.isMultiStrokes}>
           点击 + 重置并修改多个描边
@@ -57,7 +55,7 @@ export const StrokeComp: FC<IStrokeComp> = memo(({}) => {
       )}
     </Flex>
   )
-})
+}
 
 type IStrokeCompStyle = {} /* & Required<Pick<IStrokeComp>> */ /* & Pick<IStrokeComp> */
 

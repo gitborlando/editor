@@ -1,7 +1,6 @@
-import { FC, memo } from 'react'
+import { FC } from 'react'
 import { OperateShadow } from '~/editor/operate/shadow'
 import { IShadow } from '~/editor/schema/type'
-import { useHookSignal } from '~/shared/signal/signal-react'
 import { useSubComponent } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
@@ -12,11 +11,10 @@ import { ShadowItemComp } from './shadow-item'
 
 type IShadowComp = {}
 
-export const ShadowComp: FC<IShadowComp> = memo(({}) => {
-  const { shadows, isShadowsArray, addShadow } = OperateShadow
+export const ShadowComp: FC<IShadowComp> = ({}) => {
+  const { shadows, addShadow, isMultiShadows } = OperateShadow
   const { classes, css, cx } = useStyles({})
-  const hasShadows = isShadowsArray(shadows.value) && shadows.value.length > 0
-  useHookSignal(shadows)
+  const hasShadows = shadows.length > 0
 
   const HeaderComp = useSubComponent([hasShadows], ({}) => {
     const hasShadowsStyle = hasShadows && css({ marginBottom: 8 })
@@ -48,8 +46,8 @@ export const ShadowComp: FC<IShadowComp> = memo(({}) => {
   return (
     <Flex layout='v' sidePadding={6} className={classes.Shadow}>
       <HeaderComp />
-      {isShadowsArray(shadows.value) ? (
-        <ShadowListComp shadows={shadows.value} />
+      {!isMultiShadows ? (
+        <ShadowListComp shadows={shadows} />
       ) : (
         <Flex layout='c' className={classes.isMultiShadows}>
           点击 + 重置并修改多个描边
@@ -57,7 +55,7 @@ export const ShadowComp: FC<IShadowComp> = memo(({}) => {
       )}
     </Flex>
   )
-})
+}
 
 type IShadowCompStyle = {} /* & Required<Pick<IShadowComp>> */ /* & Pick<IShadowComp> */
 

@@ -1,6 +1,6 @@
 import { FC, memo } from 'react'
 import { IFillColor } from '~/editor/schema/type'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { getColorFromFill } from '~/shared/utils/color'
 import { transition } from '~/shared/utils/react'
 import { makeStyles } from '~/view/ui-utility/theme'

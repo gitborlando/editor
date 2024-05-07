@@ -1,12 +1,13 @@
-import { FC, Suspense, memo } from 'react'
+import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import { IImage, Img } from '~/editor/img'
 import { IFillImage } from '~/editor/schema/type'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { Uploader } from '~/global/upload'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { rgba } from '~/shared/utils/color'
 import { iife, useSubComponent } from '~/shared/utils/normal'
+import { withSuspense } from '~/shared/utils/react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -45,9 +46,7 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
             </Flex>
           </Flex>
         )}
-        <Suspense>
-          <ImgComp />
-        </Suspense>
+        {withSuspense(<ImgComp />)}
       </Flex>
     </Flex>
   )

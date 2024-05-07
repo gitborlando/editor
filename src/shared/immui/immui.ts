@@ -38,7 +38,10 @@ export default class Immui {
     let current: any = object
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i]
-      if (!current) console.log('Error at reset function')
+      if (!current) {
+        console.log('Error at reset function')
+        console.log(object, keys, i)
+      }
       current = current[key]
     }
 

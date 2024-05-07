@@ -7,7 +7,7 @@ import { SchemaDefault } from '../schema/default'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { IFill, IFillKeys, INode } from '../schema/type'
-import { UIPickerCopy } from '../ui-state/right-panel/operate/picker copy'
+import { UIPickerCopy } from '../ui-state/right-panel/operate/picker'
 import { OperateNode } from './node'
 
 @autobind

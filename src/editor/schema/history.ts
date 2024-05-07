@@ -64,6 +64,7 @@ class SchemaHistoryService {
     operations.forEach(({ patches }) => {
       Schema.applyPatches(patches, { reverse: type === 'undo' })
     })
+    Schema.commitOperation('replay')
     Schema.nextSchema()
   }
 }

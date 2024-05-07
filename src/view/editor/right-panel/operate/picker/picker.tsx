@@ -1,12 +1,12 @@
 import { cloneDeep } from 'lodash-es'
 import { FC, memo, useEffect } from 'react'
-import { OperateFill } from '~/editor/operate/fill'
 import { SchemaDefault } from '~/editor/schema/default'
 import { IFill, IFillColor, IFillImage, IFillLinearGradient } from '~/editor/schema/type'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
+import { StageWidgetTransform } from '~/editor/stage/widget/transform'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
+import { Signal } from '~/shared/signal/signal'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { DraggableComp } from '~/view/component/draggable'
-import { useSelectedNodes } from '~/view/editor/context'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -21,19 +21,14 @@ const createFillCache = () => ({
 })
 let fillCache = createFillCache()
 
-export const PickerComp: FC<{}> = ({}) => {
-  const fill = OperateFill.fills[UIPickerCopy.index]
-  useSelectedNodes()
-  return fill && <PickerContentComp fill={fill} />
+type IPickerComp = {
+  fill: IFill
+  show: Signal<boolean>
 }
 
-const PickerContentComp: FC<{
-  fill: IFill
-}> = memo(({ fill }) => {
+export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
   const { classes } = useStyles({})
-  const { show, type, xy, changeFill } = UIPickerCopy
-  useHookSignal(show)
-  useHookSignal(type)
+  const { type, xy, changeFill } = UIPickerCopy
 
   useEffect(() => {
     UIPickerCopy.fill = cloneDeep(fill)
@@ -41,42 +36,50 @@ const PickerContentComp: FC<{
 
   useEffect(() => {
     //@ts-ignore
-    if (show) fillCache[fill.type] = fill
-    else fillCache = createFillCache()
+    fillCache[fill.type] = fill
+    return () => void (fillCache = createFillCache())
   }, [show.value, fill])
 
-  useEffect(() => {
+  useHookSignal(type, () => {
     changeFill(fillCache[type.value])
-  }, [type.value])
+  })
 
-  if (!show.value) return null
+  useEffect(() => {
+    StageWidgetTransform.needDraw.dispatch(false)
+    return () => void StageWidgetTransform.needDraw.dispatch(true)
+  })
+
+  const ButtonComp: FC<{ fillType: IFill['type']; label: string }> = ({ fillType, label }) => {
+    return (
+      <Button active={type.value === fillType} onClick={() => type.dispatch(fillType)}>
+        {label}
+      </Button>
+    )
+  }
+
   return (
-    <DraggableComp
-      headerSlot={<h6>颜色</h6>}
-      closeFunc={() => show.dispatch(false)}
-      clickAwayClose={() => show.value}
-      xy={xy.value}>
-      <Flex layout='v' className={classes.Picker} style={{}}>
-        <Flex layout='h' className={classes.typeSwitcher} justify={'space-around'}>
-          <Button active={type.value === 'color'} onClick={() => type.dispatch('color')}>
-            颜色
-          </Button>
-          <Button
-            active={type.value === 'linearGradient'}
-            onClick={() => type.dispatch('linearGradient')}>
-            线性
-          </Button>
-          <Button active={type.value === 'image'} onClick={() => type.dispatch('image')}>
-            图片
-          </Button>
-        </Flex>
-        {fill.type === 'color' && <PickerSolidComp fill={fill as IFillColor} />}
-        {fill.type === 'linearGradient' && (
-          <PickerLinearGradientComp fill={fill as IFillLinearGradient} />
-        )}
-        {fill.type === 'image' && <PickerImageComp fill={fill as IFillImage} />}
-      </Flex>
-    </DraggableComp>
+    <>
+      {show.value && (
+        <DraggableComp
+          headerSlot={<h6>颜色</h6>}
+          closeFunc={() => show.dispatch(false)}
+          clickAwayClose={() => show.value}
+          xy={xy.value}>
+          <Flex layout='v' className={classes.Picker} style={{}}>
+            <Flex layout='h' className={classes.typeSwitcher} justify={'space-around'}>
+              <ButtonComp fillType='color' label='颜色' />
+              <ButtonComp fillType='linearGradient' label='线性' />
+              <ButtonComp fillType='image' label='图片' />
+            </Flex>
+            {fill.type === 'color' && <PickerSolidComp fill={fill as IFillColor} />}
+            {fill.type === 'linearGradient' && (
+              <PickerLinearGradientComp fill={fill as IFillLinearGradient} />
+            )}
+            {fill.type === 'image' && <PickerImageComp fill={fill as IFillImage} />}
+          </Flex>
+        </DraggableComp>
+      )}
+    </>
   )
 })
 

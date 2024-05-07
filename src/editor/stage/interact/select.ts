@@ -56,7 +56,7 @@ class StageSelectService {
   private onEditText() {
     const hoverNode = Schema.find(this.hoverId)
     if (hoverNode?.type !== 'text') return
-    OperateText.intoEditing.dispatch(hoverNode)
+    OperateText.intoEditing.dispatch(hoverNode.id)
   }
   private onLeftMouseDown(e: MouseEvent) {
     if (StageWidgetTransform.mouseOnEdge) return

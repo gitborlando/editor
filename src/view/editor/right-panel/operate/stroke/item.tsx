@@ -1,8 +1,6 @@
-import { FC, memo, useRef } from 'react'
+import { FC, memo } from 'react'
 import { OperateStroke } from '~/editor/operate/stroke'
 import { IStroke } from '~/editor/schema/type'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
@@ -24,10 +22,7 @@ type IStrokeItemComp = {
 
 export const StrokeItemComp: FC<IStrokeItemComp> = memo(({ stroke, index }) => {
   const { classes, cx } = useStyles({})
-  const { strokes, setWidth, setAlign, beforeOperate, afterOperate } = OperateStroke
-  const inputRef = useRef<HTMLInputElement>(null)
-  useHookSignal(strokes)
-  useDownUpTracker(() => inputRef.current, beforeOperate.dispatch, afterOperate.dispatch)
+  const { afterOperate, setStroke, toggleStroke, deleteStroke } = OperateStroke
 
   return (
     <Flex layout='v' className={cx(classes.StrokeItem)}>
@@ -36,27 +31,27 @@ export const StrokeItemComp: FC<IStrokeItemComp> = memo(({ stroke, index }) => {
         <IconButton
           size={16}
           style={{ marginLeft: 'auto' }}
-          onClick={() => OperateStroke.toggleVisible(stroke)}>
+          onClick={() => toggleStroke(index, ['visible'], !stroke.visible)}>
           {stroke.visible ? Asset.editor.shared.visible : Asset.editor.shared.unVisible}
         </IconButton>
-        <IconButton size={16} onClick={() => OperateStroke.deleteStroke(stroke)}>
+        <IconButton size={16} onClick={() => deleteStroke(index)}>
           {Asset.editor.shared.minus}
         </IconButton>
       </Flex>
       <Flex className={classes.second}>
         <CompositeInput
           className='lineWidth'
-          ref={inputRef}
           label='粗细'
           needStepHandler={false}
           value={stroke.width.toString()}
-          onNewValueApply={(width) => setWidth(stroke, Number(width))}
+          onNewValueApply={(width) => setStroke(index, ['width'], Number(width))}
+          afterOperate={() => afterOperate.dispatch()}
         />
         <Dropdown
           className='dropdown'
           selected={stroke.align}
           options={['inner', 'center', 'outer'] as const}
-          onSelected={(selected) => setAlign(stroke, selected as IStroke['align'])}
+          onSelected={(selected) => toggleStroke(index, ['align'], selected as IStroke['align'])}
           translateArray={['内部', '居中', '外部']}
         />
       </Flex>

@@ -1,15 +1,20 @@
-import { Stage, useApp } from '@pixi/react'
+import { Container, Stage, useApp } from '@pixi/react'
 import { Application } from 'pixi.js'
 import { FC } from 'react'
 import { Schema } from '~/editor/schema/schema'
+import { SchemaUtil } from '~/editor/schema/util'
 import { Pixi } from '~/editor/stage/pixi'
-import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal/signal-react'
-import { useMemoSubComponent } from '~/shared/utils/normal'
+import { useMemoSubComponent, useSubComponent } from '~/shared/utils/normal'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { EditorSchemaContext } from '../context'
-import { SceneStageComp } from './scene-stage'
+import { useRenderChildren } from './hooks'
+import { CooperationComp } from './widget/cooperation'
+import { HoverComp } from './widget/hover'
+import { MarqueeComp } from './widget/marquee'
+import { RulerComp } from './widget/ruler'
+import { TransformComp } from './widget/transform'
 
 const staticOption: ConstructorParameters<typeof Application>[0] = {
   backgroundColor: 0xf5f5f5 /* '#F7F8FA' */ /* '#F1F2F6' */,
@@ -28,13 +33,24 @@ type IStageComp = {}
 
 export const MainStageComp: FC<IStageComp> = ({}) => {
   const { classes } = useStyles({})
-  const { bound } = StageViewport
   useHookSignal(Schema.inited)
-  useHookSignal(bound)
 
   const AppRefComp = useMemoSubComponent([], ({}) => {
     Pixi.setApp(useApp())
     return null
+  })
+
+  const SceneStageComp = useSubComponent([], ({}) => {
+    const children = SchemaUtil.getChildren(Schema.client.selectPageId)
+    return (
+      <Container ref={Pixi.setSceneStage}>
+        {useRenderChildren(children)}
+        <HoverComp />
+        <TransformComp />
+        <MarqueeComp />
+        <CooperationComp />
+      </Container>
+    )
   })
 
   return (
@@ -49,6 +65,7 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
             <EditorSchemaContext.Provider value={schema}>
               <AppRefComp />
               <SceneStageComp />
+              <RulerComp />
             </EditorSchemaContext.Provider>
           </Stage>
         )}

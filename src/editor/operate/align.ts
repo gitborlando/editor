@@ -47,7 +47,7 @@ class OperateAlignService {
   private autoAlign() {
     this[this.currentAlign.value]()
     if (this.needAlign) {
-      Schema.commitOperation('设置对齐')
+      Schema.finalOperation('设置对齐')
       this.needAlign = false
     }
   }

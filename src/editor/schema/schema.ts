@@ -2,6 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { createSignal } from '~/shared/signal/signal'
 import Immui, { IApplyPatchOption, IImmuiPatch } from '../../shared/immui/immui'
+import { socket } from './cooperation'
 import { SchemaHistory } from './history'
 import {
   IClient,
@@ -63,8 +64,10 @@ class SchemaService {
     const id = nanoid()
     const patches = this.immui.commitPatches()
     const timestamp = performance.now()
-    const operation = { id, patches, description, timestamp, ...option }
+    const clientId = this.client.id
+    const operation = { id, patches, description, timestamp, clientId, ...option }
     this.operationList.push(operation)
+    socket.send(operation)
   }
   finalOperation(description: string, option?: ICommitOperationOption) {
     this.commitOperation(description, option)

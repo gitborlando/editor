@@ -5,7 +5,6 @@ import { OperateGeometry } from '~/editor/operate/geometry'
 import { OperateMeta } from '~/editor/operate/meta'
 import { OperateNode } from '~/editor/operate/node'
 import { SchemaHistory } from '~/editor/schema/history'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
 import { Drag } from '~/global/event/drag'
 import { createSignal } from '~/shared/signal/signal'
 import { IXY } from '~/shared/utils/normal'
@@ -43,9 +42,9 @@ class StageWidgetTransformService {
     StageViewport.afterZoom.hook(() => {
       this.needDraw.dispatch(true)
     })
-    UIPickerCopy.show.hook((show) => {
-      this.needDraw.dispatch(!show)
-    })
+    // UIPickerCopy.show.hook((show) => {
+    //   this.needDraw.dispatch(!show)
+    // })
     OperateGeometry.afterOperate.hook(() => {
       // const operateKeys = OperateGeometry.beforeOperate.value
       this.needDraw.dispatch(true)

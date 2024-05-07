@@ -24,12 +24,7 @@ type INodeItemComp = {
 }
 
 export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
-  const {
-    nodeIdsInSearch,
-    singleNodeExpanded,
-    inViewNodeInfo: nodeIdsInView,
-    setNodeExpanded,
-  } = UILeftPanelLayer
+  const { nodeIdsInSearch, singleNodeExpanded, setNodeExpanded } = UILeftPanelLayer
   const { nodeMoveDropDetail, nodeMoveStarted, nodeMoveEnded, enterReName } = UILeftPanelLayer
   const node = Schema.find<INode>(id)
   const { expand } = OperateNode.getNodeRuntime(id)
@@ -44,7 +39,6 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     subSelected,
     nodeMoving: !!nodeMoveStarted.value.moveId,
   })
-  useHookSignal(nodeIdsInView)
   useHookSignal(hovered, (isHover) => {
     isHover ? OperateNode.hover(id) : OperateNode.unHover(id)
   })

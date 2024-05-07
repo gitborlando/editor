@@ -19,6 +19,12 @@ class StageViewportService {
   afterZoom = createSignal()
   private wheeler = new EventWheelService()
   initHook() {
+    const { x, y, right } = this.bound.value
+    this.bound.value = {
+      ...this.bound.value,
+      width: window.innerWidth - x - right,
+      height: window.innerHeight - y + 1,
+    }
     Pixi.inited.hook(() => {
       this.bound.hook({ immediately: true }, this.onResizeBound)
       window.addEventListener('resize', this.onResizeBound)

@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal/signal'
+import { addListener } from '~/shared/utils/event'
 import { SchemaDefault } from '../schema/default'
 import { Schema } from '../schema/schema'
 import { IClient, ID, IMeta, IPage } from '../schema/type'
@@ -8,7 +9,6 @@ import { OperateNode } from './node'
 @autobind
 class OperateMetaService {
   curPage = createSignal<IPage>()
-  private clientId!: ID
   private lastPage!: IPage
   initHook() {
     Schema.inited.hook(() => {
@@ -18,7 +18,7 @@ class OperateMetaService {
     })
     Schema.schemaChanged.hook({ beforeAll: true }, () => {
       Schema.meta = Schema.find<IMeta>('meta')
-      Schema.client = Schema.meta.clients[this.clientId]
+      Schema.client = Schema.meta.clients[Schema.client.id]
     })
     Schema.schemaChanged.hook(() => {
       const selectPageId = Schema.client.selectPageId
@@ -26,13 +26,11 @@ class OperateMetaService {
       if (!this.lastPage) return
       if (this.lastPage === currentPage) return
       this.curPage.dispatch((this.lastPage = currentPage))
-      // OperateNode.clearSelect()
     })
-    //  addListener('mousemove', (e) => this.syncMouse(e.clientX, e.clientY))
+    addListener('mousemove', (e) => this.syncMouse(e.clientX, e.clientY))
   }
   addClient(option?: Partial<IClient>) {
-    const client = SchemaDefault.client(option)
-    this.clientId = client.id
+    const client = (Schema.client = SchemaDefault.client(option))
     Schema.itemAdd(Schema.meta, ['clients', client.id], client)
     Schema.finalOperation('添加客户端')
   }

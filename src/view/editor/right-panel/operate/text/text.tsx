@@ -1,9 +1,9 @@
-import { FC, memo, useRef } from 'react'
+import { FC, useRef } from 'react'
 import { ITextStyleKey, OperateText } from '~/editor/operate/text'
+import { Schema } from '~/editor/schema/schema'
 import { IText } from '~/editor/schema/type'
-import { StageDraw2 } from '~/editor/stage/draw/draw'
 import { StageViewport } from '~/editor/stage/viewport'
-import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
 import { iife, useSubComponent } from '~/shared/utils/normal'
 import { DraggableComp } from '~/view/component/draggable'
@@ -14,20 +14,15 @@ import { Flex } from '~/view/ui-utility/widget/flex'
 
 type ITextComp = {}
 
-export const TextComp: FC<ITextComp> = memo(({}) => {
+export const TextComp: FC<ITextComp> = ({}) => {
   const { classes, theme: t, css, cx } = useStyles({})
-  const { intoEditing, textStyle, textStyleOptions } = OperateText
-  const { setTextStyle, toggleTextStyle, beforeOperate, afterOperate } = OperateText
-  useHookSignal(intoEditing)
-  useHookSignal(textStyle)
-  useHookSignal(intoEditing, (editNode) => {
-    if (editNode) beforeOperate.dispatch('content')
-    else afterOperate.dispatch()
-  })
-
+  const { intoEditing, textStyle, textStyleOptions, setTextStyle, toggleTextStyle, afterOperate } =
+    OperateText
   const createDownUpTracker = (elFunc: () => HTMLElement | null, key: ITextStyleKey) => {
-    useDownUpTracker(elFunc, () => beforeOperate.dispatch(key), afterOperate.dispatch)
+    useDownUpTracker(elFunc, () => {}, afterOperate.dispatch)
   }
+
+  useHookSignal(intoEditing)
 
   const HeaderComp = useSubComponent([], ({}) => {
     return (
@@ -40,34 +35,33 @@ export const TextComp: FC<ITextComp> = memo(({}) => {
   })
 
   const TextEditComp = useSubComponent([], ({}) => {
-    const textNode = intoEditing.value as IText
-    const textContent = useAutoSignal(textNode.content)
+    const { setTextContent } = OperateText
+    const textNode = Schema.find<IText>(intoEditing.value)
     const xy = iife(() => {
       const { x, y, width } = textNode
       return StageViewport.sceneStageToClientXY({ x: x + width, y })
     })
-    useHookSignal(textContent, (content, forceUpdate) => {
-      textNode.content = content
-      StageDraw2.collectRedraw(textNode.id)
-      forceUpdate()
-    })
+
     return (
       <DraggableComp
         xy={xy}
         headerSlot={<h6>编辑文本</h6>}
         clickAwayClose={() => !!intoEditing.value}
-        closeFunc={() => intoEditing.dispatch(null)}>
+        closeFunc={() => {
+          intoEditing.dispatch('')
+          afterOperate.dispatch()
+        }}>
         <Flex layout='v' className={classes.textArea}>
           <textarea
             className={'input'}
             value={textNode.content}
-            onChange={(e) => textContent.dispatch(e.target.value)}></textarea>
+            onChange={(e) => setTextContent(textNode, e.target.value)}></textarea>
         </Flex>
       </DraggableComp>
     )
   })
 
-  const { fontSize, fontWeight } = textStyle.value
+  const { fontSize, fontWeight } = textStyle
   const FontSizeWeightComp = useSubComponent([fontSize, fontWeight], ({}) => {
     const inputRef = useRef<HTMLDivElement>(null)
     createDownUpTracker(() => inputRef.current, 'fontSize')
@@ -79,7 +73,6 @@ export const TextComp: FC<ITextComp> = memo(({}) => {
           label='大小'
           value={fontSize.toString()}
           onNewValueApply={(value) => setTextStyle('fontSize', Number(value))}
-          beforeOperate={() => beforeOperate.dispatch('fontSize')}
           afterOperate={() => afterOperate.dispatch()}
         />
         <Dropdown
@@ -92,14 +85,15 @@ export const TextComp: FC<ITextComp> = memo(({}) => {
     )
   })
 
-  const { align, lineHeight } = textStyle.value
+  const { align, lineHeight } = textStyle
   const FontAlignComp = useSubComponent([align, lineHeight], ({}) => {
     return (
       <Flex layout='h' className={css({ width: '100%' })}>
         <Dropdown
           className={css({ width: 80 })}
           selected={align}
-          options={textStyleOptions.align}
+          options={textStyleOptions.align} //@ts-ignore
+          isMulti={align === 'multi'}
           translateArray={['左对齐', '居中对齐', '右对齐']}
           onSelected={(value) => toggleTextStyle('align', value)}
         />
@@ -108,7 +102,6 @@ export const TextComp: FC<ITextComp> = memo(({}) => {
           label='行高'
           value={lineHeight.toString()}
           onNewValueApply={(value) => setTextStyle('lineHeight', Number(value))}
-          beforeOperate={() => beforeOperate.dispatch('lineHeight')}
           afterOperate={() => afterOperate.dispatch()}
         />
       </Flex>
@@ -123,7 +116,7 @@ export const TextComp: FC<ITextComp> = memo(({}) => {
       <FontAlignComp />
     </Flex>
   )
-})
+}
 
 type ITextCompStyle = {} /* & Required<Pick<ITextComp>> */ /* & Pick<ITextComp> */
 

@@ -1,144 +1,97 @@
 import autobind from 'class-autobind-decorator'
+import equal from 'fast-deep-equal'
 import { cloneDeep } from 'lodash-es'
-import { createMomentChange } from '~/shared/intercept-data/moment-change'
+import Immui from '~/shared/immui/immui'
 import { createSignal } from '~/shared/signal/signal'
 import { rgb } from '~/shared/utils/color'
-import { Delete } from '~/shared/utils/normal'
-import { Record } from '../record'
 import { SchemaDefault } from '../schema/default'
+import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { INode, IStroke } from '../schema/type'
-import { StageDraw2 } from '../stage/draw/draw'
-import { StageSelect } from '../stage/interact/select'
-import { UIPicker } from '../ui-state/right-panel/operate/picker'
+import { UIPickerCopy } from '../ui-state/right-panel/operate/picker'
 import { OperateNode } from './node'
-
-type IInitStrokes = Map<string, IStroke[]>
 
 @autobind
 class OperateStrokeService {
-  strokes = createSignal<IStroke[] | IInitStrokes>([])
-  beforeOperate = createSignal()
+  strokes = <IStroke[]>[]
+  isMultiStrokes = false
   afterOperate = createSignal()
-  private isStrokesChanged = false
-  private initStrokes = new Map<string, IStroke[]>()
-  private oneOperateChange = createMomentChange<{ strokes: IStroke[] | IInitStrokes }>({
-    strokes: [],
-  })
+  private immui = new Immui()
   initHook() {
-    StageSelect.afterSelect.hook(() => {
-      this.setupStrokes()
-    })
-    this.beforeOperate.hook(() => {
-      this.oneOperateChange.endCurrent()
-    })
-    UIPicker.beforeOperate.hook(({ type }) => {
-      if (UIPicker.impact !== 'stroke') return
-      if (type !== 'solid-color') return
-      this.beforeOperate.dispatch()
-    })
-    UIPicker.currentFill.hook(() => {
-      if (UIPicker.impact !== 'stroke') return
-      if (!this.isStrokesArray(this.strokes.value)) return
-      this.strokes.value[UIPicker.currentIndex].fill = UIPicker.currentFill.value
-      this.strokes.dispatch()
-    })
-    UIPicker.afterOperate.hook(({ type }) => {
-      if (UIPicker.impact !== 'stroke') return
-      if (type !== 'solid-color') return
-      this.afterOperate.dispatch()
-    })
-    this.strokes.hook(() => {
-      // if (this.strokesSignalArgs()?.isSetup) return
-      this.isStrokesChanged = true
-      OperateNode.makeSelectDirty()
-    })
-    OperateNode.duringFlushDirty.hook((id) => {
-      if (!this.isStrokesChanged) return
-      this.applyChange(Schema.find(id))
-    })
-    OperateNode.afterFlushDirty.hook(() => {
-      this.isStrokesChanged = false
-    })
+    OperateNode.selectedNodes.hook({ id: 'setupStrokes' }, this.setupStrokes)
+    this.onUiPickerSetStroke()
     this.afterOperate.hook(() => {
-      this.oneOperateChange.update('strokes', cloneDeep(this.strokes.value as IStroke[]))
-      this.recordOperate()
+      SchemaHistory.commit('改变 strokes')
     })
   }
+  setupStrokes() {
+    this.strokes = []
+    this.isMultiStrokes = false
+    const nodes = OperateNode.selectedNodes.value
+    if (nodes.length === 1) return (this.strokes = cloneDeep(nodes[0].strokes))
+    if (nodes.length > 1) {
+      if (this.isSameStrokes(nodes)) return (this.strokes = cloneDeep(nodes[0].strokes))
+      return (this.isMultiStrokes = true)
+    }
+  }
   addStroke() {
-    this.beforeOperate.dispatch()
-    const strokesLength = this.isStrokesArray(this.strokes.value) ? this.strokes.value.length : 0
+    const strokesLength = this.strokes.length
     const stroke = SchemaDefault.stroke({
       fill: SchemaDefault.fillColor(rgb(0, 0, 0), strokesLength ? 0.25 : 1),
     })
-    if (!this.isStrokesArray(this.strokes.value)) this.strokes.value = []
-    this.strokes.value.push(stroke)
-    this.strokes.dispatch()
-    this.afterOperate.dispatch()
+    this.immui.add(this.strokes, [strokesLength], stroke)
+    this.applyChangeToSchema()
+    SchemaHistory.commit('添加 stroke')
   }
-  deleteStroke(stroke: IStroke) {
-    this.beforeOperate.dispatch()
-    Delete(this.strokes.value as IStroke[], (f) => f === stroke)
-    this.strokes.dispatch()
-    this.afterOperate.dispatch()
+  deleteStroke(index: number) {
+    this.immui.delete(this.strokes, [index])
+    this.applyChangeToSchema()
+    SchemaHistory.commit('删除 stroke')
   }
-  toggleVisible(stroke: IStroke) {
-    this.beforeOperate.dispatch()
-    stroke.visible = !stroke.visible
-    this.strokes.dispatch()
-    this.afterOperate.dispatch()
+  setStroke(index: number, keys: string[], value: any) {
+    this.immui.reset(this.strokes, [index, ...keys], value)
+    this.applyChangeToSchema()
   }
-  setWidth(stroke: IStroke, width: number) {
-    stroke.width = width
-    this.strokes.dispatch()
+  toggleStroke(index: number, keys: string[], value: any) {
+    this.immui.reset(this.strokes, [index, ...keys], value)
+    this.applyChangeToSchema()
+    SchemaHistory.commit('改变 stroke')
   }
-  setAlign(stroke: IStroke, align: IStroke['align']) {
-    this.beforeOperate.dispatch()
-    stroke.align = align
-    this.strokes.dispatch()
-    this.afterOperate.dispatch()
+  changeStroke(index: number, newStroke: IStroke) {
+    this.immui.reset(this.strokes, [index], newStroke)
+    this.applyChangeToSchema()
+    SchemaHistory.commit('改变 strokes')
   }
-  isStrokesArray(strokes: IStroke[] | IInitStrokes): strokes is IStroke[] {
-    return Array.isArray(strokes)
+  applyChangeToSchema() {
+    const nodes = OperateNode.selectedNodes.value
+    const patches = this.immui.commitPatches()
+    nodes.forEach((node) => Schema.applyPatches(patches, { prefix: `/${node.id}/strokes` }))
+    Schema.commitOperation('改变 strokes')
+    Schema.nextSchema()
   }
-  private setupStrokes() {
-    this.initStrokes.clear()
-    this.oneOperateChange.endCurrent()
-    // this.strokesSignalArgs({ isSetup: true })
-    if (OperateNode.selectIds.value.size === 0) {
-      this.strokes.dispatch([])
-    }
-    if (OperateNode.selectNodes.length === 1) {
-      const node = OperateNode.selectNodes[0]
-      this.oneOperateChange.reset({ strokes: cloneDeep(node.strokes) })
-      this.strokes.dispatch(node.strokes)
-    }
-    if (OperateNode.selectNodes.length > 1) {
-      const nodes = OperateNode.selectNodes
-      nodes.forEach(({ id, strokes }) => this.initStrokes.set(id, strokes))
-      this.oneOperateChange.reset({ strokes: this.initStrokes })
-      this.strokes.dispatch(this.initStrokes)
-    }
-  }
-  private applyChange(node: INode) {
-    if (this.isStrokesArray(this.strokes.value)) {
-      node.strokes = this.strokes.value
-    } else node.strokes = this.strokes.value.get(node.id)!
-    StageDraw2.collectRedraw(node.id)
-  }
-  private recordOperate() {
-    if (Record.isInRedoUndo) return
-    const { last, current } = cloneDeep(this.oneOperateChange.record.strokes)
-    const travel = (strokes: IStroke[] | IInitStrokes) => {
-      this.strokes.dispatch(strokes)
-      UIPicker.show.dispatch(false)
-    }
-    Record.push({
-      description: '改变strokes属性',
-      detail: { last, current },
-      undo: () => travel(last),
-      redo: () => travel(current),
+  private onUiPickerSetStroke() {
+    UIPickerCopy.onChange.hook((patches) => {
+      if (UIPickerCopy.from !== 'stroke') return
+      this.immui.applyPatches(this.strokes, patches, { prefix: `/${UIPickerCopy.index}/fill` })
+      this.applyChangeToSchema()
     })
+    UIPickerCopy.afterOperate.hook(() => {
+      if (UIPickerCopy.from !== 'stroke') return
+      SchemaHistory.commit('改变 strokes')
+    })
+  }
+  private isSameStrokes(nodes: INode[]) {
+    let isSame = true
+    const firstNode = nodes[0]
+    nodes.forEach(({ strokes }) => {
+      if (!isSame) return
+      if (strokes.length !== firstNode.strokes.length) return (isSame = false)
+      firstNode.strokes.forEach((stroke, index) => {
+        const otherStroke = strokes[index]
+        if (!equal(stroke, otherStroke)) return (isSame = false)
+      })
+    })
+    return isSame
   }
 }
 

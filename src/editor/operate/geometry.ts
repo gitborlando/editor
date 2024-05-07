@@ -2,10 +2,8 @@ import autobind from 'class-autobind-decorator'
 import { rcos, rsin } from '~/editor/math/base'
 import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal/signal'
-import { rafThrottle } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
 import { Schema } from '../schema/schema'
-import { ID } from '../schema/type'
 import { ITraverseData, SchemaUtil } from '../schema/util'
 import { OperateNode } from './node'
 
@@ -34,7 +32,6 @@ class OperateGeometryService {
   afterOperate = createSignal()
   geometryKeyValue = createCache<keyof IGeometry, number | 'multi'>()
   private lastGeometry = createInitGeometry()
-  private changedIds = <ID[]>[]
   initHook() {
     OperateNode.selectIds.hook(() => {
       this.setupOperateKeys()
@@ -56,19 +53,8 @@ class OperateGeometryService {
     this.beforeOperate.hook((keys) => {
       this.operateKeys = new Set(keys)
     })
-    OperateNode.duringFlushDirty.hook((id) => {
-      if (!this.isChangedGeometry.value) return
-      SchemaUtil.traverseIds([id], this.applyChangeToNode)
-    })
-    OperateNode.afterFlushDirty.hook({ id: 'operateGeometryReset' }, () => {
-      if (!this.isChangedGeometry.value) return
-      Schema.nextSchema()
-      this.syncLastGeometry()
-      this.isChangedGeometry.value = false
-    })
     this.afterOperate.hook(() => {
       Schema.finalOperation('操作几何数据')
-      this.changedIds = []
       this.operateKeys.clear()
     })
   }
@@ -77,12 +63,10 @@ class OperateGeometryService {
     if (value === lastValue) return
     this.geometry[key] = value
     this.isChangedGeometry.dispatch(true)
-    // OperateNode.makeSelectDirty()
-    rafThrottle(this.setGeometry, () => {
-      SchemaUtil.traverseIds([...OperateNode.selectIds.value], this.applyChangeToNode)
-      Schema.nextSchema()
-      this.syncLastGeometry()
-    })
+    SchemaUtil.traverseIds([...OperateNode.selectIds.value], this.applyChangeToNode)
+    Schema.commitOperation('设置几何数据')
+    Schema.nextSchema()
+    this.syncLastGeometry()
   }
   private syncLastGeometry() {
     Object.keys(this.lastGeometry).forEach((key) => {
@@ -149,8 +133,7 @@ class OperateGeometryService {
   // })
   // }
   private applyChangeToNode(traverseData: ITraverseData) {
-    const { id, node, depth } = traverseData
-    this.changedIds.push(id)
+    const { node, depth } = traverseData
 
     if (this.operateKeys.has('x')) {
       Schema.itemReset(node, ['x'], node.x + this.delta('x'))

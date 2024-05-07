@@ -1,6 +1,6 @@
 import { FC, memo, useState, useTransition } from 'react'
 import { IFillLinearGradient } from '~/editor/schema/type'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker copy'
+import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { makeLinearGradientCss } from '~/shared/utils/color'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'

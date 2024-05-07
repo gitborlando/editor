@@ -213,23 +213,14 @@ class SchemaDefaultService {
       alpha: 1,
     }
   }
-  // fillRadialGradient(center: IXY, radiusA: IXY, radiusB: IXY): IFillRadialGradient {
-  //   return {
-  //     type: 'radialGradient',
-  //     center,
-  //     radiusA,
-  //     radiusB,
-  //     stops: [
-  //       { xy: center, color: 'skyBlue' },
-  //       { xy: radiusA, color: 'pink' },
-  //     ],
-  //   }
-  // }
-  // fillGonicGradient(startAngle: number, center: IXY): IFillGonicGradient {
-  //   return { type: 'gonicGradient', startAngle, center, stops: [{ xy: center, color: 'skyBlue' }] }
-  // }
   fillImage(url: string = Asset.editor.rightPanel.operate.picker.defaultImage): IFillImage {
-    return { type: 'image', visible: true, url, matrix: [0, 0, 0, 0, 0, 0], alpha: 1 }
+    return {
+      type: 'image',
+      visible: true,
+      url,
+      matrix: [0, 0, 0, 0, 0, 0],
+      alpha: 1,
+    }
   }
   stroke(option?: Partial<IStroke>) {
     return <IStroke>{

@@ -12,11 +12,12 @@ export type IDropdown = ComponentPropsWithRef<'div'> & {
   options: string[]
   selected: string
   translateArray?: string[]
+  isMulti?: boolean
   onSelected: (selected: string) => void
 }
 
 export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
-  const { options, selected, translateArray, onSelected, className, ...rest } = props
+  const { options, selected, translateArray, isMulti, onSelected, className, ...rest } = props
   const { classes, cx } = useStyles({})
   const innerRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLInputElement>(null)
@@ -41,8 +42,9 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
       {...rest}
       ref={innerRef}>
       {iife(() => {
+        if (isMulti) return '多值'
         if (!translateArray) return selected
-        const index = options.findIndex((i) => i === selected)!
+        const index = options.indexOf(selected)!
         return translateArray[index]
       })}
       <Icon size={16} rotate={show.value ? 180 : 0}>

@@ -1,12 +1,12 @@
 import { FC, memo } from 'react'
+import { OperateNode } from '~/editor/operate/node'
 import { OperateText } from '~/editor/operate/text'
+import { useHookSignal } from '~/shared/signal/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { useSelectedNodes } from '../../context'
 import { AlignComp } from './align/align'
-import { FillPropComp } from './fill copy/fill'
+import { FillPropComp } from './fill/fill'
 import { GeometryComp } from './geometry/geometry'
-import { PickerComp } from './picker/picker'
 import { ShadowComp } from './shadow/shadows'
 import { StrokeComp } from './stroke/stroke'
 import { TextComp } from './text/text'
@@ -15,9 +15,7 @@ type IOperatePanelComp = {}
 
 export const OperatePanelComp: FC<IOperatePanelComp> = memo(({}) => {
   const { classes } = useStyles({})
-  // useHookSignal(StageSelect.afterSelect, { afterAll: true })
-  useSelectedNodes()
-  // useHookSignal(OperateNode.selectedNodes, { afterAll: true })
+  useHookSignal(OperateNode.selectedNodes, { afterAll: true })
 
   return (
     <Flex layout='v' className={classes.OperatePanel}>
@@ -27,7 +25,6 @@ export const OperatePanelComp: FC<IOperatePanelComp> = memo(({}) => {
       <StrokeComp />
       <ShadowComp />
       {OperateText.textNodes.length > 0 && <TextComp />}
-      <PickerComp />
     </Flex>
   )
 })

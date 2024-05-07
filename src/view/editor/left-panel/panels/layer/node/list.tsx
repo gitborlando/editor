@@ -1,5 +1,4 @@
 import { FC, useEffect } from 'react'
-import { OperateNode } from '~/editor/operate/node'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { EventWheel } from '~/global/event/wheel'
 import { useHookSignal } from '~/shared/signal/signal-react'
@@ -17,11 +16,10 @@ export const NodeListComp: FC<INodeListComp> = ({}) => {
     nodeListHeight,
     nodeScrollHeight,
     nodeScrollShift,
-    inViewNodeInfo: nodeIdsInView,
+    inViewNodeInfo,
     calcNodeListChange,
   } = UILeftPanelLayer
-  const { getNodeRuntime } = OperateNode
-  useHookSignal(nodeIdsInView)
+  useHookSignal(inViewNodeInfo)
   useHookSignal(EventWheel.duringWheel, ({ direction }) => {
     nodeScrollHeight.dispatch(nodeScrollHeight.value + direction * 24)
   })
@@ -33,7 +31,7 @@ export const NodeListComp: FC<INodeListComp> = ({}) => {
         className={classes.list}
         style={{ transform: `translateY(-${nodeScrollShift.value}px)` }}
         onWheel={EventWheel.onWheel}>
-        {[...nodeIdsInView.value].map(({ id, indent, ancestors }) => {
+        {[...inViewNodeInfo.value].map(({ id, indent, ancestors }) => {
           return <NodeItemComp key={id} id={id} indent={indent} ancestors={ancestors} />
         })}
       </Flex>

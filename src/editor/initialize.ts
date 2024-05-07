@@ -20,12 +20,10 @@ import { StageSelect } from './stage/interact/select'
 import { Pixi } from './stage/pixi'
 import { StageViewport } from './stage/viewport'
 import { StageWidgetAdsorption } from './stage/widget/adsorption'
-import { StageWidgetMarquee } from './stage/widget/marquee'
-import { StageWidgetRuler } from './stage/widget/ruler'
 import { StageWidgetTransform } from './stage/widget/transform'
 import { UILeftPanelLayer } from './ui-state/left-panel/layer'
 import { UILeftPanel } from './ui-state/left-panel/left-panel'
-import { UIPickerCopy } from './ui-state/right-panel/operate/picker copy'
+import { UIPickerCopy } from './ui-state/right-panel/operate/picker'
 
 export const editorInited = createSignal(false)
 
@@ -44,14 +42,13 @@ OperateFill.initHook()
 OperateStroke.initHook()
 OperateShadow.initHook()
 OperateText.initHook()
+OperateText.initHook()
 
 StageViewport.initHook()
 StageInteract.initHook()
 StageSelect.initHook()
 StageCreate.initHook()
 StageCursor.initHook()
-StageWidgetMarquee.initHook()
-StageWidgetRuler.initHook()
 StageWidgetAdsorption.initHook()
 StageWidgetTransform.initHook()
 
