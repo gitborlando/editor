@@ -1,7 +1,9 @@
 import autobind from 'class-autobind-decorator'
+import { cloneDeep } from 'lodash-es'
+import { nanoid } from 'nanoid'
 import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal/signal'
-import { firstOne, flushList } from '~/shared/utils/list'
+import { firstOne, stableIndex } from '~/shared/utils/list'
 import { XY } from '~/shared/xy'
 import { OBB } from '../math/obb'
 import { SchemaHistory } from '../schema/history'
@@ -9,7 +11,6 @@ import { Schema } from '../schema/schema'
 import { ID, INode, INodeParent } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
 import { IStageElement } from '../stage/draw/draw'
-import { Pixi } from '../stage/pixi'
 
 export type INodeRuntime = {
   expand: boolean
@@ -23,29 +24,15 @@ class OperateNodeService {
   datumXY = XY.Of(0, 0)
   hoverIds = createSignal(new Set<ID>())
   selectIds = createSignal(new Set<ID>())
-  dirtyIds = new Set<string>()
-  beforeFlushDirty = createSignal()
-  duringFlushDirty = createSignal('')
-  afterFlushDirty = createSignal()
   afterRemoveNodes = createSignal<ID[]>()
-  afterCommitSelect = createSignal()
   selectedNodes = createSignal(<INode[]>[])
   private lastSelectedNodeSet = new Set<INode>()
   private nodeRuntimeCache = createCache<ID, INodeRuntime>()
-  nodeRuntimeMap = createSignal<Record<ID, INodeRuntime>>({})
+  private copyIds = <ID[]>[]
   initHook() {
-    Pixi.inited.hook(() => {
-      Pixi.duringTicker.hook({ id: 'flushDirty' }, this.flushDirty)
-    })
-    this.datumId.hook((id) => {
-      const { obb } = OperateNode.getNodeRuntime(id)
-      if (!obb) return (this.datumXY = XY.Of(0, 0))
-      this.datumXY = XY.Of(obb.aabb.x, obb.aabb.y)
-    })
     this.afterRemoveNodes.hook((ids) => {
-      ids.forEach((id) => OperateNode.dirtyIds.delete(id))
-      OperateNode.selectIds.dispatch((ids) => ids.clear())
-      OperateNode.hoverIds.dispatch((hoverIds) => ids.forEach((id) => hoverIds.delete(id)))
+      this.selectIds.dispatch((ids) => ids.clear())
+      this.hoverIds.dispatch((hoverIds) => ids.forEach((id) => hoverIds.delete(id)))
     })
     Schema.schemaChanged.hook(() => {
       const selectedNodes = Schema.client.selectIds.map(Schema.find<INode>)
@@ -100,17 +87,6 @@ class OperateNodeService {
     Schema.nextSchema()
     SchemaHistory.commit('选择节点')
   }
-  collectDirty(id: ID) {
-    this.dirtyIds.add(id)
-  }
-  flushDirty() {
-    this.beforeFlushDirty.dispatch()
-    flushList(this.dirtyIds, this.duringFlushDirty.dispatch)
-    this.afterFlushDirty.dispatch()
-  }
-  makeSelectDirty() {
-    this.selectIds.value.forEach(this.collectDirty)
-  }
   addNodes(nodes: INode[]) {
     nodes.forEach(Schema.addItem)
     Schema.commitOperation('添加节点')
@@ -118,6 +94,7 @@ class OperateNodeService {
   removeNodes(nodes: INode[]) {
     nodes.forEach(Schema.removeItem)
     Schema.commitOperation('移除节点')
+    this.afterRemoveNodes.dispatch(nodes.map((node) => node.id))
   }
   insertAt(parent: INodeParent, node: INode, index?: number) {
     index ??= parent.childIds.length
@@ -132,12 +109,57 @@ class OperateNodeService {
     Schema.itemReset(node, ['parentId'], '')
     Schema.commitOperation('移除子节点')
   }
-  traverseDelete(ids: ID[]) {
+  reHierarchy(parent: INodeParent, node: INode, index: number) {
+    index = stableIndex(parent.childIds, index)
+    const oldIndex = parent.childIds.indexOf(node.id)
+    Schema.itemDelete(parent, ['childIds', oldIndex])
+    Schema.itemAdd(parent, ['childIds', index], node.id)
+    Schema.commitOperation('重新排序')
+  }
+  deleteSelectNodes() {
+    const ids = [...this.selectIds.value]
+    const nodes = <INode[]>[]
+    this.clearSelect()
+    this.commitSelect()
     SchemaUtil.traverseIds(ids, ({ node, parent }) => {
-      this.removeNodes([node])
+      nodes.push(node)
       this.splice(parent, node)
     })
+    this.removeNodes(nodes)
     Schema.finalOperation('删除节点')
+  }
+  copySelectNodes() {
+    this.copyIds = [...this.selectIds.value]
+  }
+  pasteNodes() {
+    if (!this.copyIds.length) return
+    const newSelectIds = <ID[]>[]
+    const clone = (oldNode: INode) => {
+      const newNode = cloneDeep(oldNode)
+      newNode.id = nanoid()
+      newNode.name = `${oldNode.name} - 复制`
+      if ('childIds' in newNode) newNode.childIds = []
+      return newNode
+    }
+    SchemaUtil.traverseIds(this.copyIds, (props) => {
+      const { node, parent, depth, upLevelRef } = props
+      const newNode = clone(node)
+      const newParent = upLevelRef?.newNode || parent
+      const index = newParent.childIds.indexOf(node.id)
+      this.addNodes([newNode])
+      this.insertAt(newParent, newNode, index + 1)
+      props.newNode = newNode
+      if (depth === 0) newSelectIds.push(newNode.id)
+    })
+    this.selectIds.dispatch(new Set(newSelectIds))
+    this.commitSelect()
+    Schema.commitOperation('粘贴节点')
+  }
+  paste() {
+    this.pasteNodes()
+    this.copyIds = []
+    Schema.nextSchema()
+    Schema.commitHistory('粘贴节点')
   }
   setNodeRuntime(id: ID, runtime: Partial<INodeRuntime>) {
     const prevRuntime = this.getNodeRuntime(id)
@@ -163,6 +185,9 @@ class OperateNodeService {
       if (parentIds.size === 1) this.datumId.dispatch(firstOne(parentIds))
       if (parentIds.size > 1) this.datumId.dispatch('')
     }
+    const { obb } = this.getNodeRuntime(this.datumId.value)
+    if (!obb) return (this.datumXY = XY.Of(0, 0))
+    this.datumXY = XY.Of(obb.aabb.x, obb.aabb.y)
   }
 }
 

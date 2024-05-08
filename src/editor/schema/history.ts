@@ -30,7 +30,8 @@ class SchemaHistoryService {
     if (this.index.value !== this.stack.length - 1) {
       this.stack.splice(this.index.value + 1)
     }
-    const operations = Schema.operationList.slice(this.lastOperationsLength)
+    let operations = Schema.operationList.slice(this.lastOperationsLength)
+    operations = operations.filter((i) => !i.noHistory)
     this.stack.push({ operations, description })
     this.index.dispatch(this.stack.length - 1)
     this.lastOperationsLength = Schema.operationList.length

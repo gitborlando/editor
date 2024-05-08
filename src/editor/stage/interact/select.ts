@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
+import { Editor } from '~/editor/editor/editor'
 import { OBB } from '~/editor/math/obb'
 import { OperateNode } from '~/editor/operate/node'
 import { OperateText } from '~/editor/operate/text'
@@ -7,7 +8,7 @@ import { Schema } from '~/editor/schema/schema'
 import { SchemaUtil } from '~/editor/schema/util'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
-import { Menu } from '~/global/menu/menu'
+import { Menu } from '~/global/menu'
 import { batchSignal, createSignal } from '~/shared/signal/signal'
 import { rectInAnotherRect } from '~/shared/utils/collision'
 import { isLeftMouse, isRightMouse } from '~/shared/utils/event'
@@ -79,9 +80,9 @@ class StageSelectService {
     this.onMenu()
   }
   private onMenu() {
-    const { copyPasteGroup, undoRedoGroup, nodeGroup } = Menu.menuConfig
+    const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } = Editor.commands
     if (OperateNode.selectedNodes.value.length) {
-      const menuOptions = [copyPasteGroup, undoRedoGroup, nodeGroup]
+      const menuOptions = [nodeReHierarchyGroup, copyPasteGroup, undoRedoGroup, nodeGroup]
       return Menu.menuOptions.dispatch(menuOptions)
     }
     Menu.menuOptions.dispatch([undoRedoGroup])

@@ -1,4 +1,4 @@
-import { Menu } from './menu/menu'
+import { Menu } from './menu'
 import { Setting } from './setting'
 
 Menu.initHook()

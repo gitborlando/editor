@@ -115,7 +115,6 @@ class StageCreateService {
     return { x, y, width, height, centerX, centerY }
   }
   private findParent() {
-    console.log(OperateNode.hoverIds.value)
     const frameId = [...OperateNode.hoverIds.value]
       .reverse()
       .find((id) => SchemaUtil.isById(id, 'frame'))

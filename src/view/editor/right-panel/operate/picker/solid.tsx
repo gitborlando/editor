@@ -21,7 +21,7 @@ export const PickerSolidComp: FC<IPickerSolidComp> = memo(({ fill }) => {
         color={getColorFromFill(fill)}
         onChange={transition(({ color, alpha }) => setFillSolidColor(color, alpha))}
       />
-      <Flex layout='h'>{getColorFromFill(fill)}</Flex>
+      {/* <Flex layout='h'>{getColorFromFill(fill)}</Flex> */}
     </Flex>
   )
 })

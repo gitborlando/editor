@@ -1,5 +1,5 @@
 import { FC, memo } from 'react'
-import { SchemaFile } from '~/editor/file'
+import { SchemaFile } from '~/editor/editor/file'
 import { Schema } from '~/editor/schema/schema'
 import { IMeta } from '~/editor/schema/type'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'

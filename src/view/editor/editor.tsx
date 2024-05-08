@@ -1,6 +1,6 @@
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
-import { initEditor } from '~/editor/initialize'
+import { initEditor } from '~/editor/editor/initialize'
 import { OperateNode } from '~/editor/operate/node'
 import { Schema } from '~/editor/schema/schema'
 import { useHookSignal } from '~/shared/signal/signal-react'

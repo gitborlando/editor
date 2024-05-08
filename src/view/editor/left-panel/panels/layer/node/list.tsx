@@ -1,7 +1,8 @@
-import { FC, useEffect } from 'react'
+import { FC, memo } from 'react'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { EventWheel } from '~/global/event/wheel'
 import { useHookSignal } from '~/shared/signal/signal-react'
+import { useAnimationFrame } from '~/shared/utils/react'
 import { ScrollComp } from '~/view/editor/left-panel/panels/layer/node/scroll'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -9,7 +10,7 @@ import { NodeItemComp } from './item'
 
 type INodeListComp = {}
 
-export const NodeListComp: FC<INodeListComp> = ({}) => {
+export const NodeListComp: FC<INodeListComp> = memo(({}) => {
   const { classes } = useStyles({})
   const {
     nodeViewHeight,
@@ -17,13 +18,14 @@ export const NodeListComp: FC<INodeListComp> = ({}) => {
     nodeScrollHeight,
     nodeScrollShift,
     inViewNodeInfo,
-    calcNodeListChange,
+    calcNodeListChange2,
   } = UILeftPanelLayer
   useHookSignal(inViewNodeInfo)
   useHookSignal(EventWheel.duringWheel, ({ direction }) => {
     nodeScrollHeight.dispatch(nodeScrollHeight.value + direction * 24)
   })
-  useEffect(() => calcNodeListChange(), [])
+  useAnimationFrame(calcNodeListChange2)
+
   return (
     <Flex layout='v' className={classes.NodeList} style={{ height: nodeViewHeight.value }}>
       <Flex
@@ -45,7 +47,8 @@ export const NodeListComp: FC<INodeListComp> = ({}) => {
       )}
     </Flex>
   )
-}
+})
+
 type INodeListCompStyle = {} /* & Required<Pick<INodeListComp>> */ /* & Pick<INodeListComp> */
 
 const useStyles = makeStyles<INodeListCompStyle>()((t) => ({

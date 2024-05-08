@@ -272,45 +272,12 @@ export type ISchemaPropKey =
   | keyof IPoint
   | keyof INodeBase
 
-export type ISchemaChangeType =
-  | 'addClient'
-  | 'selectPage'
-  | 'syncMouse'
-  | 'selectIds'
-  | 'clientsChange'
-  | 'changePagesCount'
-  | 'changeNodesCount'
-  | 'changeNodeHierarchy'
-  | 'changeNodeAlign'
-  | 'changeNodeGeometry'
-  | 'changeTextContent'
-  | 'changeTextStyle'
-
-export const SchemaChangeType = <ISchemaChangeType[]>[
-  'addClient',
-  'selectPage',
-  'syncMouse',
-  'selectIds',
-  'clientsChange',
-  'changePagesCount',
-  'changeNodesCount',
-  'changeNodeHierarchy',
-  'changeNodeAlign',
-  'changeNodeGeometry',
-  'changeTextContent',
-  'changeTextStyle',
-]
-
 export type ISchemaOperation = {
   id: ID
   timestamp: number
   patches: IImmuiPatch[]
   description?: string
-}
-
-export type ISchemaListener = {
-  listenType: ISchemaChangeType
-  callback: (operation: ISchemaOperation) => void
+  noHistory?: boolean
 }
 
 export type ISchemaHistory = {

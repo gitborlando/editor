@@ -189,7 +189,7 @@ class SchemaDefaultService {
         fontFamily: '',
         fontStyle: 'normal',
         letterSpacing: 0,
-        lineHeight: 1,
+        lineHeight: 16,
         wordWrap: true,
       },
       ...nodeBase,
@@ -283,37 +283,22 @@ class SchemaDefaultService {
       shadows: [],
     }
   }
-  createNodeName(
-    type:
-      | 'page'
-      | 'frame'
-      | 'rect'
-      | 'group'
-      | 'ellipse'
-      | 'polygon'
-      | 'star'
-      | 'irregular'
-      | 'text'
-      | 'line'
-      | 'image'
-  ) {
+  createNodeName(type: string) {
     const typeIndexMap = this.typeIndexMapCache.getSet(
       'this.devFileId' || OperateMeta.curPage.value.id,
-      () => {
-        return {
-          page: ['页面', 1],
-          frame: ['画板', 1],
-          group: ['分组', 1],
-          rect: ['矩形', 1],
-          ellipse: ['椭圆', 1],
-          polygon: ['多边形', 1],
-          star: ['星形', 1],
-          irregular: ['矢量图形', 1],
-          line: ['线段', 1],
-          text: ['文本', 1],
-          image: ['图片', 1],
-        }
-      }
+      () => ({
+        page: ['页面', 1],
+        frame: ['画板', 1],
+        group: ['分组', 1],
+        rect: ['矩形', 1],
+        ellipse: ['椭圆', 1],
+        polygon: ['多边形', 1],
+        star: ['星形', 1],
+        irregular: ['矢量图形', 1],
+        line: ['线段', 1],
+        text: ['文本', 1],
+        image: ['图片', 1],
+      })
     )
     let nameIndex = typeIndexMap[type]!
     return { name: nameIndex[0] + ' ' + (nameIndex[1] as number)++ }

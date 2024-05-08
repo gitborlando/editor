@@ -40,6 +40,7 @@ import EditorSharedMinus from './editor/shared/minus.tsx'
 import EditorSharedUnLock from './editor/shared/un-lock.tsx'
 import EditorSharedUnVisible from './editor/shared/un-visible.tsx'
 import EditorSharedVisible from './editor/shared/visible.tsx'
+import EditorWidgetCursor from './editor/widget/cursor.tsx'
 import EditorWidgetNumberInputOperateUp from './editor/widget/number-input/operate-up.tsx'
 import FavIconShiyangyang from './fav-icon/shiyangyang.png'
 
@@ -120,6 +121,7 @@ const Asset = {
       visible: EditorSharedVisible,
     },
     widget: {
+      cursor: EditorWidgetCursor,
       numberInput: {
         operateUp: EditorWidgetNumberInputOperateUp,
       },

@@ -11,6 +11,7 @@ import { Flex } from '~/view/ui-utility/widget/flex'
 import { EditorSchemaContext } from '../context'
 import { useRenderChildren } from './hooks'
 import { CooperationComp } from './widget/cooperation'
+import { CursorsComp } from './widget/cursors'
 import { HoverComp } from './widget/hover'
 import { MarqueeComp } from './widget/marquee'
 import { RulerComp } from './widget/ruler'
@@ -70,6 +71,7 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
           </Stage>
         )}
       </EditorSchemaContext.Consumer>
+      <CursorsComp />
     </Flex>
   )
 }

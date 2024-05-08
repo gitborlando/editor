@@ -1,7 +1,8 @@
 import { FC } from 'react'
+import { commands } from '~/editor/editor/command'
 import { OperateMeta } from '~/editor/operate/meta'
 import { Schema } from '~/editor/schema/schema'
-import { Menu } from '~/global/menu/menu'
+import { Menu } from '~/global/menu'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import Asset from '~/view/ui-utility/assets'
@@ -20,7 +21,7 @@ export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
   const isHover = useAutoSignal(false)
   const openMenu = () => {
     Menu.context = { id }
-    Menu.menuOptions.dispatch([Menu.menuConfig.pageGroup])
+    Menu.menuOptions.dispatch([commands.pageGroup])
   }
   const selectPage = () => {
     OperateMeta.selectPage(id)

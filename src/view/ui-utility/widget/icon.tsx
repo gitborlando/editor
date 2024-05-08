@@ -8,6 +8,7 @@ export type IIconProps = {
   rotate?: number
   scale?: number
   fill?: CSSProperties['color'] | (string & {})
+  style?: CSSProperties
 }
 
 export const Icon: FC<IIconProps> = ({

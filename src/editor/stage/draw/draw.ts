@@ -1,7 +1,7 @@
 import { DropShadowFilter } from '@pixi/filter-drop-shadow'
 import autobind from 'class-autobind-decorator'
 import { Graphics, Matrix, Text, Texture } from 'pixi.js'
-import { IImage, Img } from '~/editor/img'
+import { IImage, Img } from '~/editor/editor/img'
 import { radianfy } from '~/editor/math/base'
 import { xy_new } from '~/editor/math/xy'
 import { ID, IFillLinearGradient, INode, IVector } from '~/editor/schema/type'
@@ -134,16 +134,8 @@ class StageDrawService {
     this.setGeometry(element, node)
     const { width, height, rotation } = node
     const graphics = element as Graphics
-    const text = element as Text
     if (node.type === 'frame') {
       graphics.drawRoundedRect(0, 0, width, height, node.radius)
-    }
-    if (node.type === 'text') {
-      text.text = node.content
-      const wordWrapWidth = node.width
-      // const lineHeight = node.style.fontSize
-      text.style = { ...text.style, ...node.style, wordWrapWidth }
-      text.style.wordWrap = true
     }
     if (node.type === 'vector') {
       if (node.vectorType === 'rect') {

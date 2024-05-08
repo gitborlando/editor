@@ -1,4 +1,5 @@
-import { ReactNode, Suspense, createElement, useTransition } from 'react'
+import { ReactNode, Suspense, createElement, useEffect, useTransition } from 'react'
+import { IAnyFunc } from './normal'
 
 export function transition<T extends any[]>(func: (...args: T) => any) {
   const [_, startTransition] = useTransition()
@@ -7,4 +8,14 @@ export function transition<T extends any[]>(func: (...args: T) => any) {
 
 export function withSuspense(node: ReactNode) {
   return createElement(Suspense, {}, node)
+}
+
+export function useAnimationFrame(callback: IAnyFunc) {
+  useEffect(() => {
+    const loop = () => {
+      callback()
+      requestAnimationFrame(loop)
+    }
+    requestAnimationFrame(loop)
+  }, [])
 }

@@ -6,22 +6,9 @@ export function lastOne<T extends any = any>(input: T[] | Set<T>) {
   return arr[arr.length - 1]
 }
 
-export function insertAt<T>(array: T[], index: number, item: T) {
-  if (index < 0) return array.unshift(item)
-  if (index > array.length - 1) return array.push(item)
-  return array.splice(index, 0, item)
-}
-
-export function flushList<T extends any = any>(
-  input: T[] | Set<T>,
-  callback: (item: T, index: number) => void
-) {
-  if (Array.isArray(input)) {
-    input.forEach(callback)
-    input.length = 0
-  } else {
-    let i = 0
-    input.forEach((item) => callback(item, i++))
-    input.clear()
-  }
+export function stableIndex<T extends any = any>(arr: T[], index?: number) {
+  if (index === undefined) return arr.length
+  if (index < 0) return 0
+  if (index > arr.length) return arr.length
+  return index
 }

@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
+import { forEach } from 'lodash-es'
 import { OperateMeta } from '../operate/meta'
-import { OperateNode } from '../operate/node'
 import { Schema } from './schema'
 import { ID, INode, INodeParent, ISchemaItem } from './type'
 
@@ -14,7 +14,7 @@ export type ITraverseData = {
   ancestors: string[]
   abort: AbortController
   upLevelRef: ITraverseData | undefined
-  custom?: any
+  [key: string & {}]: any
 }
 type ITraverseCallback = (arg: ITraverseData) => any
 
@@ -38,25 +38,16 @@ class SchemaUtilService {
     const childIds = (typeof id !== 'string' ? id : Schema.find<INodeParent>(id))?.childIds || []
     return childIds.map((id) => Schema.find<INode>(id))
   }
-  deleteSelectNodes() {
-    if (OperateNode.selectIds.value.size) {
-      this.traverseDelete(OperateNode.selectIds.value)
-    }
-  }
-  traverseDelete(ids: Set<string>) {
-    const deleteNodes: INode[] = []
-    this.traverseIds([...ids], ({ node }) => deleteNodes.push(node))
-    OperateNode.removeNodes(deleteNodes)
-  }
   traverseCurPageChildIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
     this.traverseIds(OperateMeta.curPage.value.childIds, callback, bubbleCallback)
   }
   traverseIds(ids: string[], callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
     const abort = new AbortController()
     const traverse = (ids: string[], depth: number, upLevelRef?: ITraverseData) => {
-      ids.forEach((id, index) => {
+      forEach(ids, (id, index) => {
         if (abort.signal.aborted) return
         const node = Schema.find<INode>(id)
+        if (!node) console.log(id, ids)
         const childIds = 'childIds' in node ? node.childIds : undefined
         const parent = <INodeParent>(upLevelRef?.node || Schema.find(node.parentId))
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []

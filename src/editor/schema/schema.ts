@@ -64,8 +64,7 @@ class SchemaService {
     const id = nanoid()
     const patches = this.immui.commitPatches()
     const timestamp = performance.now()
-    const clientId = this.client.id
-    const operation = { id, patches, description, timestamp, clientId, ...option }
+    const operation = { id, patches, description, timestamp, ...option }
     this.operationList.push(operation)
     socket.send(operation)
   }

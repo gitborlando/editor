@@ -1,7 +1,8 @@
 import { observer } from 'mobx-react'
 import { FC } from 'react'
+import { commands } from '~/editor/editor/command'
 import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
-import { Menu } from '~/global/menu/menu'
+import { Menu } from '~/global/menu'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -31,7 +32,7 @@ export const SwitchBarComp: FC<ISwitchBarComp> = observer(({}) => {
                 onClick={() => currentTabId.dispatch(id)}
                 onDoubleClick={() => showLeftPanel.dispatch(!showLeftPanel.value)}
                 onContextMenu={() => {
-                  const { UIleftPanelSwitchBarGroup } = Menu.menuConfig
+                  const { UIleftPanelSwitchBarGroup } = commands
                   Menu.context = { id }
                   Menu.menuOptions.dispatch([UIleftPanelSwitchBarGroup])
                 }}>

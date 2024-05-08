@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import equal from 'fast-deep-equal'
 import { OperateMeta } from '~/editor/operate/meta'
 import { OperateNode } from '~/editor/operate/node'
 import { SchemaHistory } from '~/editor/schema/history'
@@ -38,6 +39,7 @@ class UILeftPanelLayerService {
   nodeMoveEnded = createSignal()
   enterReName = createSignal<string>()
   needExpandIds = new Set<string>()
+  private lastInViewIds = <ID[]>[]
   initHook() {
     this.singleNodeExpanded.hook((expanded) => {
       if (expanded === false) return
@@ -105,15 +107,14 @@ class UILeftPanelLayerService {
     this.nodeScrollHeight.intercept((value) => {
       return max(0, min(this.nodeListHeight.value - this.nodeViewHeight.value, value))
     })
-    this.nodeScrollHeight.hook(() => {
-      this.findNodeInView()
-      this.inViewNodeInfo.dispatch()
-    })
+    // this.nodeScrollHeight.hook(() => {
+    //   this.findNodeInView()
+    //   this.inViewNodeInfo.dispatch()
+    // })
     this.nodeListHeight.hook(() => {
       this.nodeScrollHeight.value = this.nodeScrollHeight.value
     })
     this.nodeViewHeight.hook(() => {
-      // if (this.nodeViewHeight.arguments.isInitCause) return
       this.nodeScrollHeight.value = this.nodeScrollHeight.value
       this.findNodeInView()
       this.inViewNodeInfo.dispatch()
@@ -141,6 +142,7 @@ class UILeftPanelLayerService {
   }
   setNodeExpanded(id: string, expand: boolean) {
     OperateNode.setNodeRuntime(id, { expand: expand })
+    //this.calcNodeListChange2()
   }
   private setAllNodeStatusExpanded(expanded: boolean) {
     SchemaUtil.traverseCurPageChildIds(({ id }) => {
@@ -148,9 +150,32 @@ class UILeftPanelLayerService {
     })
   }
   calcNodeListChange() {
-    this.calcNodeListHeight()
-    this.findNodeInView()
-    this.inViewNodeInfo.dispatch()
+    // this.calcNodeListHeight()
+    // this.findNodeInView()
+    // this.inViewNodeInfo.dispatch()
+  }
+  calcNodeListChange2() {
+    this.nodeListHeight.value = 0
+    let inViewNodeInfo = <INodeInfo[]>[]
+    let inFrontCount = floor(this.nodeScrollHeight.value / 32)
+    let inViewCount = ceil(this.nodeViewHeight.value / 32) + 1
+    this.nodeScrollShift.value = this.nodeScrollHeight.value - inFrontCount * 32
+    SchemaUtil.traverseCurPageChildIds(({ id, ancestors, depth }) => {
+      this.nodeListHeight.value += 32
+      if (inFrontCount > 0) {
+        inFrontCount--
+      } else if (inViewCount !== 0) {
+        inViewCount--
+        inViewNodeInfo.push({ id, indent: depth, ancestors })
+      }
+      if (this.getNodeExpanded(id) === false) return false
+    })
+    const thisInViewIds = inViewNodeInfo.map((info) => info.id)
+    if (!equal(this.lastInViewIds, thisInViewIds)) {
+      this.lastInViewIds = thisInViewIds
+      this.inViewNodeInfo.dispatch(new Set(inViewNodeInfo))
+    }
+    this.nodeListHeight.dispatch()
   }
   calcNodeListHeight() {
     this.nodeListHeight.value = 0

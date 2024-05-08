@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { Texture } from 'pixi.js'
 import { createCache } from '~/shared/cache'
 import { createIDBStore } from '~/shared/idb-store'
-import { ID } from './schema/type'
+import { ID } from '../schema/type'
 
 export type IImage = {
   objectUrl: string

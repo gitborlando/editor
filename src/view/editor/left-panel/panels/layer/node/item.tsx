@@ -1,4 +1,5 @@
 import { FC, useCallback } from 'react'
+import { Editor } from '~/editor/editor/editor'
 import { OperateNode } from '~/editor/operate/node'
 import { Schema } from '~/editor/schema/schema'
 import { INode } from '~/editor/schema/type'
@@ -6,7 +7,7 @@ import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
-import { Menu } from '~/global/menu/menu'
+import { Menu } from '~/global/menu'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { stopPropagation } from '~/shared/utils/event'
@@ -39,6 +40,8 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     subSelected,
     nodeMoving: !!nodeMoveStarted.value.moveId,
   })
+  useHookSignal(OperateNode.selectIds)
+  useHookSignal(nodeIdsInSearch)
   useHookSignal(hovered, (isHover) => {
     isHover ? OperateNode.hover(id) : OperateNode.unHover(id)
   })
@@ -51,9 +54,8 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     }
   }
   const makeMenu = () => {
-    const { nodeGroup } = Menu.menuConfig
-    Menu.context = { id }
-    Menu.menuOptions.dispatch([nodeGroup])
+    const { nodeReHierarchyGroup, nodeGroup } = Editor.commands
+    Menu.menuOptions.dispatch([nodeReHierarchyGroup, nodeGroup])
   }
 
   const ExpandComp = useSubComponent([expand], ({}) => {

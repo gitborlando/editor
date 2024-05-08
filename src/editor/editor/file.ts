@@ -5,10 +5,10 @@ import { Uploader } from '~/global/upload'
 import { createIDBStore } from '~/shared/idb-store'
 import { createSignal } from '~/shared/signal/signal'
 import { Delete } from '~/shared/utils/normal'
-import { OperateNode } from './operate/node'
-import { SchemaDefault } from './schema/default'
-import { Schema } from './schema/schema'
-import { IMeta, ISchema } from './schema/type'
+import { OperateNode } from '../operate/node'
+import { SchemaDefault } from '../schema/default'
+import { Schema } from '../schema/schema'
+import { IMeta, ISchema } from '../schema/type'
 
 @autobind
 class SchemaFileService {

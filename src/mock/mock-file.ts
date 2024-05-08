@@ -1,4 +1,4 @@
-import { SchemaFile } from '~/editor/file'
+import { SchemaFile } from '~/editor/editor/file'
 import { IMeta, ISchema } from '~/editor/schema/type'
 // import { mock10000Nested } from './10000nested'
 // import { mockAll } from './all'

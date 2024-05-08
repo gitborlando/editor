@@ -1,10 +1,12 @@
 import autobind from 'class-autobind-decorator'
+import hotkeys from 'hotkeys-js'
 import { max, min } from '~/editor/math/base'
 import { OBB } from '~/editor/math/obb'
 import { OperateGeometry } from '~/editor/operate/geometry'
 import { OperateMeta } from '~/editor/operate/meta'
 import { OperateNode } from '~/editor/operate/node'
 import { SchemaHistory } from '~/editor/schema/history'
+import { Schema } from '~/editor/schema/schema'
 import { Drag } from '~/global/event/drag'
 import { createSignal } from '~/shared/signal/signal'
 import { IXY } from '~/shared/utils/normal'
@@ -63,6 +65,11 @@ class StageWidgetTransformService {
     if (!OperateNode.selectIds.value.size) {
       return (this.transformOBB = new OBB(0, 0, 0, 0, 0))
     }
+    if (OperateNode.selectIds.value.size === 1) {
+      const node = OperateNode.selectNodes[0]
+      const { centerX, centerY, width, height, rotation } = node
+      return (this.transformOBB = new OBB(centerX, centerY, width, height, rotation))
+    }
     let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
     OperateNode.selectNodes.forEach((node) => {
       const obb = OperateNode.getNodeRuntime(node.id).obb
@@ -81,6 +88,10 @@ class StageWidgetTransformService {
       const { x, y } = OperateGeometry.geometry
       Drag.onStart(() => {
         this.needDraw.dispatch(false)
+        if (hotkeys.alt) {
+          OperateNode.copySelectNodes()
+          OperateNode.pasteNodes()
+        }
         OperateGeometry.beforeOperate.dispatch(['x', 'y'])
       })
         .onMove(({ shift }) => {
@@ -90,7 +101,12 @@ class StageWidgetTransformService {
         })
         .onDestroy(({ dragService }) => {
           if (dragService.started) {
-            OperateGeometry.afterOperate.dispatch()
+            if (hotkeys.alt) {
+              OperateGeometry.operateKeys.clear()
+              Schema.finalOperation('alt 复制节点')
+            } else {
+              OperateGeometry.afterOperate.dispatch()
+            }
           }
         })
     }

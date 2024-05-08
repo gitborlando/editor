@@ -16,9 +16,10 @@ import { createMultiLineHitArea } from '~/shared/utils/pixi/line-hit-area'
 type ITransformComp = {}
 
 export const TransformComp: FC<ITransformComp> = ({}) => {
-  const zoom = StageViewport.zoom.value
   const { needDraw, calcTransformOBB } = StageWidgetTransform
-  const vertexes = calcTransformOBB().calcVertexXY()
+  const zoom = StageViewport.zoom.value
+  const transformOBB = calcTransformOBB()
+  const vertexes = transformOBB.calcVertexXY()
   useHookSignal(needDraw)
 
   if (OperateNode.selectIds.value.size === 0) {
@@ -116,7 +117,7 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
   const VertexComp = useSubComponent<{
     xy: IXY
     type: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
-  }>([zoom], ({ xy, type }) => {
+  }>([zoom, transformOBB.rotation], ({ xy, type }) => {
     const spread = 8 / zoom
 
     const mouseenter = () => {
@@ -180,17 +181,14 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
           g.clear()
           if (!needDraw.value) return
           const size = 6 / zoom
+          g.x = xy.x
+          g.y = xy.y
+          g.angle = transformOBB.rotation
           g.lineStyle(1 / zoom, hslBlueColor(65))
           g.beginFill('white')
-          g.drawRoundedRect(xy.x - size / 2, xy.y - size / 2, size, size, 1 / zoom)
+          g.drawRoundedRect(-size / 2, -size / 2, size, size, 1 / zoom)
           g.hitArea = {
-            contains: (x, y) =>
-              new PIXI.Rectangle(
-                xy.x - size / 2 - spread,
-                xy.y - size / 2 - spread,
-                size + spread,
-                size + spread
-              ).contains(x, y),
+            contains: (x, y) => new PIXI.Circle(0, 0, size / 2 + spread).contains(x, y),
           }
         }}
       />

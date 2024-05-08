@@ -1,30 +1,22 @@
 import autobind from 'class-autobind-decorator'
+import { ICommand } from '~/editor/editor/command'
 import { xy_new } from '~/editor/math/xy'
 import { createSignal } from '~/shared/signal/signal'
 import { addListenerCapture, clickAway } from '~/shared/utils/event'
-import { IAnyFunc, IAnyObject, INoopFunc } from '~/shared/utils/normal'
-import { menuConfig } from './config'
-
-export type IMenuItem = {
-  label: string
-  callback: IAnyFunc
-  shortcut?: string
-  children?: IMenuItem[][]
-}
+import { IAnyObject } from '~/shared/utils/normal'
 
 @autobind
 class MenuService {
-  menuOptions = createSignal<IMenuItem[][]>([])
+  menuOptions = createSignal<ICommand[][]>([])
   xy = createSignal(xy_new(0, 0))
   context = <IAnyObject>{}
-  readonly menuConfig = menuConfig
   private ref?: HTMLDivElement
-  private disposers = <INoopFunc[]>[]
   initHook() {}
   setRef(div: HTMLDivElement) {
+    if (this.ref) return
     this.ref = div
-    this.disposers.forEach((dispose) => dispose())
-    this.disposers.push(this.autoHideMenu(div), addListenerCapture('mousedown', this.autoPosition))
+    this.autoHideMenu(div)
+    addListenerCapture('mousedown', this.autoPosition)
   }
   closeMenu() {
     this.menuOptions.dispatch([])

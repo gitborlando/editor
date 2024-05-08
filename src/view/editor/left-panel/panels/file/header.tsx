@@ -1,5 +1,5 @@
 import { FC, memo } from 'react'
-import { SchemaFile } from '~/editor/file'
+import { SchemaFile } from '~/editor/editor/file'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'

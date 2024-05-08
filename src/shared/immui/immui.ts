@@ -27,7 +27,8 @@ export default class Immui {
 
     if (!current) console.log('Error at add function')
     const lastKey = keys[keys.length - 1]
-    current[lastKey] = value
+    if (Array.isArray(current)) current.splice(<any>lastKey, 0, value)
+    else current[lastKey] = value
 
     return this.getPatch('add', keys, value)
   }
