@@ -58,24 +58,22 @@ UIPickerCopy.initHook()
 
 export async function initEditor() {
   SchemaFile.init()
-  const allFileMeta = await SchemaFile.allFileMetaStore.get('allFileMeta')
-  // if (!allFileMeta || allFileMeta.length === 0) {
-  //   mockFile()
-  // }
+
   mockFile()
+
   if (location.hash === '') {
-    location.hash = 'testFile1'
+    location.hash = 'test-file-1'
   }
 
   const fileId = location.hash.slice(1)
   let file: ISchema
-  if (import.meta.env.DEV && fileId.match('testFile')) {
+  if (import.meta.env.DEV && fileId.match(/test-file/)) {
     file = getMockFile(fileId)
   } else {
     file = await SchemaFile.fileStore.get(fileId)
   }
-  console.log(fileId)
   Schema.initSchema(file)
+
   UILeftPanelLayer.init()
 
   editorInited.dispatch(true)

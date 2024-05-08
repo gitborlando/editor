@@ -20,7 +20,7 @@ export function mockNested2() {
     meta: {
       type: 'meta',
       id: 'meta',
-      fileId: 'testFile1',
+      fileId: 'test-file-1',
       name: '测试文件1',
       version: 0,
       pageIds: ['page_1'],

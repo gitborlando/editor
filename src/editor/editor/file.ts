@@ -34,7 +34,7 @@ class SchemaFileService {
   // }
   autoSave() {
     setInterval(() => {
-      if (import.meta.env.DEV && Schema.schema.meta.id.match('testFile')) return
+      if (import.meta.env.DEV && Schema.schema.meta.id.match('test-file')) return
       this.saveJsonFile(Schema.schema)
       this.isSaved.dispatch(true)
     }, 1000)
@@ -56,7 +56,7 @@ class SchemaFileService {
     this.fileStore.delete(id)
   }
   saveJsonFile(json: ISchema) {
-    this.fileStore.set(json.meta.id, json)
+    this.fileStore.set(json.meta.fileId, json)
   }
   downloadJsonFile(data: object): void {
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })

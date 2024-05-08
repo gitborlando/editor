@@ -53,7 +53,7 @@ export function mock10000Nested() {
     meta: {
       type: 'meta',
       id: 'meta',
-      fileId: 'testFile10000Nested',
+      fileId: 'test-file-10000Nested',
       name: '测试文件10000Nested',
       version: 0,
       pageIds: ['page_1'],
