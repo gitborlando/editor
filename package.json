@@ -18,6 +18,7 @@
     "@pixi-essentials/svg": "^2.0.1",
     "@pixi/filter-drop-shadow": "^5.2.0",
     "@pixi/react": "^7.1.2",
+    "@types/svg-path-parser": "^1.1.6",
     "class-autobind-decorator": "^3.0.1",
     "deep-equal": "^2.2.3",
     "fast-deep-equal": "^3.1.3",
@@ -47,6 +48,8 @@
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "svg-parser": "^2.0.4",
+    "svg-path-parse": "^1.1.3",
+    "svg-path-parser": "^1.1.0",
     "tss-react": "^4.9.3",
     "vault-storage": "^1.2.3",
     "ws": "^8.17.0"

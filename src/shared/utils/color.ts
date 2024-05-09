@@ -65,3 +65,10 @@ export function getColorFromFill(fill: IFillColor) {
   const { color, alpha } = fill
   return color.replace('rgb', 'rgba').replace(')', `,${alpha})`)
 }
+
+export function normalizeColor(fill?: string) {
+  if (fill === 'currentColor') return { color: rgb(0, 0, 0), alpha: 1 }
+  if (fill?.startsWith('rgb')) return { color: fill, alpha: 1 }
+  if (fill?.startsWith('#')) return { color: hexToRgb(fill), alpha: 1 }
+  return { color: COLOR[fill as keyof typeof COLOR], alpha: 1 }
+}

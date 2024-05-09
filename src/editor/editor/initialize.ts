@@ -12,6 +12,7 @@ import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { ISchema } from '../schema/type'
 import { StageCursor } from '../stage/cursor'
+import { StageDrop } from '../stage/drop'
 import { StageCreate } from '../stage/interact/create'
 import { StageInteract } from '../stage/interact/interact'
 import { StageSelect } from '../stage/interact/select'
@@ -48,6 +49,7 @@ StageViewport.initHook()
 StageInteract.initHook()
 StageSelect.initHook()
 StageCreate.initHook()
+StageDrop.initHook()
 StageCursor.initHook()
 StageWidgetAdsorption.initHook()
 StageWidgetTransform.initHook()
