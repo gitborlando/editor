@@ -1,5 +1,6 @@
 import { Container, Graphics } from '@pixi/react'
 import { FC, useRef } from 'react'
+import { rcos, rsin } from '~/editor/math/base'
 import { IGeometry, OperateGeometry } from '~/editor/operate/geometry'
 import { OperateNode } from '~/editor/operate/node'
 import { StageCursor } from '~/editor/stage/cursor'
@@ -49,6 +50,7 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
   }>([zoom], ({ p1, p2, type }) => {
     const spread = 5
     const ref = useRef<PIXI.Graphics>(null)
+    const { geometry, beforeOperate, afterOperate, setGeometry } = OperateGeometry
 
     const mouseenter = () => {
       switch (type) {
@@ -64,34 +66,37 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
     const mousedown = () => {
       Pixi.isForbidEvent = true
       StageWidgetTransform.mouseOnEdge = true
-      const { x, y, width, height } = OperateGeometry.geometry
+      const { x, y, width, height } = geometry
       Drag.onStart(() => {
         const operateKeys = iife(() => {
-          if (type === 'top') return ['y', 'height']
+          if (type === 'top') return ['x', 'y', 'height']
           if (type === 'right') return ['width']
           if (type === 'bottom') return ['height']
-          if (type === 'left') return ['x', 'width']
+          if (type === 'left') return ['x', 'y', 'width']
         })
-        OperateGeometry.beforeOperate.dispatch(operateKeys as (keyof IGeometry)[])
+        beforeOperate.dispatch(operateKeys as (keyof IGeometry)[])
       })
         .onMove(({ shift }) => {
+          const rotation = geometry.rotation
           switch (type) {
             case 'top':
-              OperateGeometry.setGeometry('y', y + shift.y)
-              return OperateGeometry.setGeometry('height', height - shift.y)
+              setGeometry('x', x - shift.y * rsin(rotation))
+              setGeometry('y', y + shift.y * rcos(rotation))
+              return setGeometry('height', height - shift.y)
             case 'right':
-              return OperateGeometry.setGeometry('width', width + shift.x)
+              return setGeometry('width', width + shift.x)
             case 'bottom':
-              return OperateGeometry.setGeometry('height', height + shift.y)
+              return setGeometry('height', height + shift.y)
             case 'left':
-              OperateGeometry.setGeometry('x', x + shift.x)
-              return OperateGeometry.setGeometry('width', width - shift.x)
+              setGeometry('x', x + shift.x * rcos(rotation))
+              setGeometry('y', y + shift.x * rsin(rotation))
+              return setGeometry('width', width - shift.x)
           }
         })
         .onDestroy(() => {
           Pixi.isForbidEvent = false
           StageWidgetTransform.mouseOnEdge = false
-          OperateGeometry.afterOperate.dispatch()
+          afterOperate.dispatch()
         })
     }
 

@@ -4,6 +4,7 @@ import { OperateNode } from '~/editor/operate/node'
 import { Schema } from '~/editor/schema/schema'
 import { INode, INodeParent } from '~/editor/schema/type'
 import { IStageElement, StageDraw2 } from '~/editor/stage/draw/draw'
+import { getNodeCenterXY } from '~/shared/utils/normal'
 import { FrameComp } from './elements/frame'
 import { TextComp } from './elements/text'
 import { VectorComp } from './elements/vector'
@@ -29,7 +30,8 @@ export function useMemoChildren(node: INodeParent) {
 }
 
 export function useResetOBB(node: INode) {
-  const { centerX, centerY, width, height, rotation } = node
+  const { width, height, rotation } = node
+  const [centerX, centerY] = getNodeCenterXY(node).toArray()
   useMemo(() => {
     const obb = new OBB(centerX, centerY, width, height, rotation)
     OperateNode.setNodeRuntime(node.id, { obb })

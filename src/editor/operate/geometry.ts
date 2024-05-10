@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
-import { rcos, rsin } from '~/editor/math/base'
 import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal/signal'
+import { getNodeCenterXY } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
 import { Schema } from '../schema/schema'
 import { ITraverseData, SchemaUtil } from '../schema/util'
@@ -137,25 +137,15 @@ class OperateGeometryService {
 
     if (this.operateKeys.has('x')) {
       Schema.itemReset(node, ['x'], node.x + this.delta('x'))
-      Schema.itemReset(node, ['centerX'], node.centerX + this.delta('x'))
     }
     if (this.operateKeys.has('y')) {
       Schema.itemReset(node, ['y'], node.y + this.delta('y'))
-      Schema.itemReset(node, ['centerY'], node.centerY + this.delta('y'))
     }
     if (this.operateKeys.has('width') && depth === 0) {
-      const newCenterX = node.centerX + (rcos(node.rotation) * this.delta('width')) / 2
-      const newCenterY = node.centerY + (rsin(node.rotation) * this.delta('width')) / 2
       Schema.itemReset(node, ['width'], node.width + this.delta('width'))
-      Schema.itemReset(node, ['centerX'], newCenterX)
-      Schema.itemReset(node, ['centerY'], newCenterY)
     }
     if (this.operateKeys.has('height') && depth === 0) {
-      const newCenterX = node.centerX - (rsin(node.rotation) * this.delta('height')) / 2
-      const newCenterY = node.centerY + (rcos(node.rotation) * this.delta('height')) / 2
       Schema.itemReset(node, ['height'], node.height + this.delta('height'))
-      Schema.itemReset(node, ['centerX'], newCenterX)
-      Schema.itemReset(node, ['centerY'], newCenterY)
     }
     if (this.operateKeys.has('radius') && depth === 0) {
       Schema.itemReset(node, ['radius'], this.geometry['radius'])
@@ -167,24 +157,20 @@ class OperateGeometryService {
       Schema.itemReset(node, ['points'], this.geometry['points'])
     }
     if (this.operateKeys.has('rotation')) {
+      const centerXY = getNodeCenterXY(node)
+      const newXY = XY.From(node).rotate(centerXY, this.delta('rotation'))
+      Schema.itemReset(node, ['rotation'], node.rotation + this.delta('rotation'))
       if (depth === 0) {
-        const newXY = XY.From(node).rotate(XY.From(node, 'center'), this.delta('rotation'))
-        Schema.itemReset(node, ['rotation'], node.rotation + this.delta('rotation'))
         Schema.itemReset(node, ['x'], newXY.x)
         Schema.itemReset(node, ['y'], newXY.y)
       } else {
         let upLevelRef = traverseData.upLevelRef!
         while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
-        const newCenterXY = XY.From(node, 'center').rotate(
-          XY.From(upLevelRef.node, 'center'),
-          this.delta('rotation')
-        )
-        const newXY = XY.From(node).rotate(newCenterXY, this.delta('rotation'))
-        Schema.itemReset(node, ['rotation'], node.rotation + this.delta('rotation'))
-        Schema.itemReset(node, ['centerX'], newCenterXY.x)
-        Schema.itemReset(node, ['centerY'], newCenterXY.y)
-        Schema.itemReset(node, ['x'], newXY.x)
-        Schema.itemReset(node, ['y'], newXY.y)
+        const centerShift = centerXY
+          .rotate(getNodeCenterXY(upLevelRef.node), this.delta('rotation'))
+          .minus(centerXY)
+        Schema.itemReset(node, ['x'], newXY.x + centerShift.x)
+        Schema.itemReset(node, ['y'], newXY.y + centerShift.y)
       }
     }
   }

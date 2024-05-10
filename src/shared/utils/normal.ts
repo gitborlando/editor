@@ -1,7 +1,9 @@
 import fastDeepEqual from 'deep-equal'
 import { runInAction } from 'mobx'
 import { FC, memo, useCallback, useEffect } from 'react'
+import { INode } from '~/editor/schema/type'
 import { createCache } from '../cache'
+import { XY } from '../xy'
 
 export const This = globalThis as any
 export { fastDeepEqual }
@@ -148,4 +150,9 @@ export function fps() {
     requestAnimationFrame(loop)
   }
   requestAnimationFrame(loop)
+}
+
+export function getNodeCenterXY(node: INode) {
+  const { x, y, width, height } = node
+  return XY.Of(x + width / 2, y + height / 2).rotate(XY.Of(x, y), node.rotation)
 }

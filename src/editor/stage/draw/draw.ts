@@ -2,7 +2,6 @@ import { DropShadowFilter } from '@pixi/filter-drop-shadow'
 import autobind from 'class-autobind-decorator'
 import { Graphics, Matrix, Text, Texture } from 'pixi.js'
 import { IImage, Img } from '~/editor/editor/img'
-import { radianfy } from '~/editor/math/base'
 import { xy_new } from '~/editor/math/xy'
 import { ID, IFillLinearGradient, INode, IVector } from '~/editor/schema/type'
 import { createCache } from '~/shared/cache'
@@ -11,7 +10,6 @@ import { iife } from '~/shared/utils/normal'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
 import { createStarPolygon } from '~/shared/utils/pixi/star'
-import { XY } from '~/shared/xy'
 import { PIXI } from '../pixi'
 import { StageViewport } from '../viewport'
 
@@ -123,12 +121,9 @@ class StageDrawService {
     })
   }
   setGeometry(element: IStageElement, node: INode) {
-    const rotation = radianfy(node.rotation)
-    const pivotXY = this.getElementPivotXY(node)
-    element.x = pivotXY.x
-    element.y = pivotXY.y
-    element.rotation = rotation
-    return { x: pivotXY.x, y: pivotXY.y, rotation }
+    element.x = node.x
+    element.y = node.y
+    element.angle = node.rotation
   }
   drawShape(element: IStageElement, node: INode) {
     this.setGeometry(element, node)
@@ -193,12 +188,6 @@ class StageDrawService {
   //   )
   //   element.hitArea = { contains }
   // }
-  private getElementPivotXY(node: INode) {
-    const pivotX = node.centerX - node.width / 2
-    const pivotY = node.centerY - node.height / 2
-    if (node.rotation === 0) return XY.Of(pivotX, pivotY)
-    return XY.Of(pivotX, pivotY).rotate(XY.From(node, 'center'), node.rotation)
-  }
   // private drawFrameName(frame: IFrame) {
   //   const name = StageElement.frameNameCache.getSet(frame.id, () => {
   //     const nameText = new Text(frame.name, {

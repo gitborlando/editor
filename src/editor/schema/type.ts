@@ -67,8 +67,6 @@ export type INodeMeta = {
 export type IGeometryDetail = {
   x: number
   y: number
-  centerX: number
-  centerY: number
   width: number
   height: number
   rotation: number
