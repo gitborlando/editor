@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { IRect, IXY } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
 import { abs, rcos, rsin } from './base'
-import { xy_dot, xy_minus, xy_new, xy_rotate, xy_rotate3 } from './xy'
+import { xy_, xy_dot, xy_minus, xy_rotate, xy_rotate3 } from './xy'
 
 type IAxis = { widthAxis: XY; heightAxis: XY }
 
@@ -76,10 +76,10 @@ export class OBB {
   calcVertexXY() {
     const halfWidth = this.width / 2
     const halfHeight = this.height / 2
-    let TL = xy_new(this.centerX - halfWidth, this.centerY - halfHeight)
-    let TR = xy_new(this.centerX + halfWidth, this.centerY - halfHeight)
-    let BL = xy_new(this.centerX - halfWidth, this.centerY + halfHeight)
-    let BR = xy_new(this.centerX + halfWidth, this.centerY + halfHeight)
+    let TL = xy_(this.centerX - halfWidth, this.centerY - halfHeight)
+    let TR = xy_(this.centerX + halfWidth, this.centerY - halfHeight)
+    let BL = xy_(this.centerX - halfWidth, this.centerY + halfHeight)
+    let BR = xy_(this.centerX + halfWidth, this.centerY + halfHeight)
     TL = xy_rotate(TL, this.center, this.rotation)
     TR = xy_rotate(TR, this.center, this.rotation)
     BL = xy_rotate(BL, this.center, this.rotation)

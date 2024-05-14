@@ -44,6 +44,7 @@ class StageInteractService {
   }
   private bindHover() {
     const handler = (e: Event) => {
+      if (Pixi.isForbidEvent) return OperateNode.clearHover()
       OperateNode.clearHover()
       const realXY = StageViewport.toViewportXY(XY.From(e, 'client'))
       const endBatch = batchSignal(OperateNode.hoverIds)

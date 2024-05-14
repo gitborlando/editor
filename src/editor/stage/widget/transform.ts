@@ -3,7 +3,6 @@ import hotkeys from 'hotkeys-js'
 import { max, min } from '~/editor/math/base'
 import { OBB } from '~/editor/math/obb'
 import { OperateGeometry } from '~/editor/operate/geometry'
-import { OperateMeta } from '~/editor/operate/meta'
 import { OperateNode } from '~/editor/operate/node'
 import { SchemaHistory } from '~/editor/schema/history'
 import { Schema } from '~/editor/schema/schema'
@@ -31,13 +30,10 @@ class StageWidgetTransformService {
     OperateNode.selectIds.hook(() => {
       this.needDraw.dispatch(true)
     })
-    OperateMeta.curPage.hook(() => {
-      this.needDraw.dispatch(false)
-    })
-    OperateGeometry.beforeOperate.hook((operateKeys) => {
-      //  /*       operateKeys.some((k) => k !== 'width' && k !== 'height') &&  */
-      this.needDraw.dispatch(false)
-    })
+    // OperateGeometry.beforeOperate.hook((operateKeys) => {
+    //   //  /*       operateKeys.some((k) => k !== 'width' && k !== 'height') &&  */
+    //   this.needDraw.dispatch(false)
+    // })
     StageViewport.beforeZoom.hook(() => {
       this.needDraw.dispatch(false)
     })
@@ -54,10 +50,13 @@ class StageWidgetTransformService {
 
       // }
     })
+    OperateNode.intoEditNodeId.hook(() => {
+      this.needDraw.dispatch(false)
+    })
   }
   mouseIn(e: MouseEvent) {
     if (this.needDraw.value === false) return false
-    const { x, y } = StageViewport.toSceneStageXY(XY.From(e, 'client'))
+    const { x, y } = StageViewport.toSceneXY(XY.From(e, 'client'))
     const pointOBB = new OBB(x, y, 1, 1, 0)
     return this.transformOBB.obbHitTest(pointOBB)
   }
@@ -95,7 +94,7 @@ class StageWidgetTransformService {
         OperateGeometry.beforeOperate.dispatch(['x', 'y'])
       })
         .onMove(({ shift }) => {
-          const sceneShiftXY = StageViewport.toSceneStageShiftXY(shift)
+          const sceneShiftXY = StageViewport.toSceneShift(shift)
           OperateGeometry.setGeometry('x', x + sceneShiftXY.x)
           OperateGeometry.setGeometry('y', y + sceneShiftXY.y)
         })

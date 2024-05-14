@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { min, tan } from '~/editor/math/base'
-import { IBezierType } from '~/editor/schema/type'
 import { IXY } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
 import { PathCurve } from './curve'
@@ -11,7 +10,7 @@ import { PathNull } from './null'
 export class PathPoint {
   x = 0
   y = 0
-  bezierType: IBezierType = 'no-bezier'
+  bezierType = 'no-bezier'
   radius = 0
   left?: PathPoint
   right?: PathPoint
@@ -31,7 +30,7 @@ export class PathPoint {
   constructor(option: {
     x?: number
     y?: number
-    bezierType?: IBezierType
+    bezierType?: ''
     radius?: number
     handleLeft?: IXY
     handleRight?: IXY

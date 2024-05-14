@@ -1,4 +1,10 @@
-import { TextStyleAlign, TextStyleFontStyle, TextStyleFontWeight } from 'pixi.js'
+import {
+  LINE_CAP,
+  LINE_JOIN,
+  TextStyleAlign,
+  TextStyleFontStyle,
+  TextStyleFontWeight,
+} from 'pixi.js'
 import { IImmuiPatch } from '~/shared/immui/immui'
 import { AllKeys, IXY } from '~/shared/utils/normal'
 
@@ -94,17 +100,16 @@ export type IGroup = INodeBase &
     type: 'group'
   }
 
-export type IBezierType = 'no-bezier' | 'symmetric' | 'angle-symmetric' | 'no-symmetric'
-
 export type IPoint = {
   type: 'point'
-  bezierType: IBezierType
+  symmetric: 'angle' | 'complete' | 'none'
   x: number
   y: number
   radius: number
   handleLeft?: IXY
   handleRight?: IXY
-  jumpToRight?: boolean
+  endPath?: boolean
+  startPath?: boolean
 }
 
 export type IVector = IRectangle | IEllipse | IPolygon | IStar | ILine | IIrregular
@@ -114,7 +119,6 @@ export type IVectorType = { type: 'vector' }
 export type IIrregular = INodeBase &
   IVectorType & {
     vectorType: 'irregular'
-    closed: boolean
     points: IPoint[]
   }
 
@@ -211,31 +215,15 @@ export type IFillImage = IFillMeta & {
   matrix: number[]
 }
 
-// export type IFillRadialGradient = {
-//   type: 'radialGradient'
-//   center: IXY
-//   radiusA: IXY
-//   radiusB: IXY
-//   stops: { xy: IXY; color: string }[]
-// }
-
-// export type IFillGonicGradient = {
-//   type: 'gonicGradient'
-//   startAngle: number
-//   center: IXY
-//   stops: { xy: IXY; color: string }[]
-// }
-
 export type IFillKeys = AllKeys<IFill> | number
 
 export type IStroke = {
   visible: boolean
+  width: number
   fill: IFill
   align: 'inner' | 'center' | 'outer'
-  width: number
-  vertex: ''
-  cap: number
-  join: number
+  cap: LINE_CAP
+  join: LINE_JOIN
 }
 
 export type IShadow = {
@@ -269,6 +257,8 @@ export type ISchemaPropKey =
   | keyof IText['style']
   | keyof IPoint
   | keyof INodeBase
+  | (string & {})
+  | number
 
 export type ISchemaOperation = {
   id: ID

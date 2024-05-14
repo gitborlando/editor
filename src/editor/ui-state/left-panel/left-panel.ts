@@ -6,6 +6,7 @@ import { createSignal } from '~/shared/signal/signal'
 import { FileComp } from '~/view/editor/left-panel/panels/file/file'
 import { GalleryComp } from '~/view/editor/left-panel/panels/gallery'
 import { HistoryComp } from '~/view/editor/left-panel/panels/history'
+import { IconsComp } from '~/view/editor/left-panel/panels/icons'
 import { LayerComp } from '~/view/editor/left-panel/panels/layer/layer'
 import Asset from '~/view/ui-utility/assets'
 
@@ -64,27 +65,21 @@ UILeftPanel.registerSwitchTab({
   icon: Asset.editor.leftPanel.switchBar.layer,
   panel: LayerComp,
 })
-// UILeftPanel.registerSwitchTab({
-//   id: 'component',
-//   name: '组件',
-//   icon: Asset.editor.leftPanel.switchBar.component,
-//   panel: () => '',
-// })
+UILeftPanel.registerSwitchTab({
+  id: 'history',
+  name: '历史',
+  icon: Asset.editor.leftPanel.switchBar.record,
+  panel: HistoryComp,
+})
 UILeftPanel.registerSwitchTab({
   id: 'source',
   name: '图片',
   icon: Asset.editor.leftPanel.switchBar.image,
   panel: GalleryComp,
 })
-// UILeftPanel.registerSwitchTab({
-//   id: 'record',
-//   name: '记录',
-//   icon: Asset.editor.leftPanel.switchBar.record,
-//   panel: RecordComp,
-// })
 UILeftPanel.registerSwitchTab({
-  id: 'history',
-  name: '历史',
+  id: 'icon',
+  name: '图标',
   icon: Asset.editor.leftPanel.switchBar.record,
-  panel: HistoryComp,
+  panel: IconsComp,
 })

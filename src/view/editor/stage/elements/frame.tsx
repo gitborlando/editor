@@ -21,6 +21,7 @@ export const FrameComp: FC<IFrameComp> = ({ frame }) => {
     const maskRef = useRef<PIXI.Graphics>(null)
     const draw = useDraw(frame)
     useResetOBB(frame)
+
     return (
       <Container mask={maskRef.current}>
         <Graphics ref={ref} draw={draw} />

@@ -15,7 +15,7 @@ class OperateMetaService {
       const firstPage = Schema.find<IPage>(Schema.meta.pageIds[0])
       this.addClient({ selectPageId: firstPage.id })
       this.curPage.value = this.lastPage = firstPage
-      this.syncMouse()
+      //  this.syncMouse()
     })
     Schema.schemaChanged.hook({ beforeAll: true }, () => {
       Schema.meta = Schema.find<IMeta>('meta')
@@ -24,7 +24,7 @@ class OperateMetaService {
     Schema.schemaChanged.hook(() => {
       const selectPageId = Schema.client.selectPageId
       const currentPage = Schema.find<IPage>(selectPageId)
-      if (!this.lastPage) return
+      if (!this.lastPage) return (this.lastPage = currentPage)
       if (this.lastPage === currentPage) return
       this.curPage.dispatch((this.lastPage = currentPage))
     })

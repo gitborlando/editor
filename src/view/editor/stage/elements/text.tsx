@@ -3,7 +3,7 @@ import { TextStyle } from 'pixi.js'
 import { FC, memo, useEffect } from 'react'
 import { max } from '~/editor/math/base'
 import { IFillColor, IText } from '~/editor/schema/type'
-import { StageDraw2 } from '~/editor/stage/draw/draw'
+import { StageDraw } from '~/editor/stage/draw/draw'
 import { PIXI } from '~/editor/stage/pixi'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal/signal-react'
@@ -25,7 +25,7 @@ export const TextComp: FC<ITextComp> = memo(({ text }) => {
   })
   useResetOBB(text)
   useHookSignal(StageViewport.zoom)
-  useEffect(() => void StageDraw2.setGeometry(ref.current!, text), [text])
+  useEffect(() => void StageDraw.setGeometry(ref.current!, text), [text])
 
   return <Text ref={ref} text={text.content} style={style} resolution={resolution} />
 })

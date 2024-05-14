@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react'
+import { nanoid } from 'nanoid'
 import { Photo, createClient } from 'pexels'
 import { FC, useRef } from 'react'
 import { InView } from 'react-intersection-observer'
@@ -44,12 +45,20 @@ export const GalleryComp: FC<IGalleryComp> = observer(({}) => {
       if (type.value !== 'image') type.dispatch('image')
       setFillUrl(photoUrl)
     }
+    const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+      e.dataTransfer.setData(
+        'text/plain',
+        JSON.stringify({ event: 'dropImage', data: { url: photoUrl } })
+      )
+    }
     useHookSignal(loadingWebImageUrl)
 
     return (
       <Flex
+        draggable
         layout='c'
         className={classes.photo}
+        onDragStart={onDragStart}
         style={{ width: photo.width, height: photo.height }}>
         <img src={photo.src.small} onClick={applyImageFill}></img>
         {loadingWebImageUrl.value === photoUrl && (
@@ -69,12 +78,12 @@ export const GalleryComp: FC<IGalleryComp> = observer(({}) => {
         <Flex className={classes.list}>
           <Flex layout='v'>
             {leftList.current.list.map((photo, i) => (
-              <PhotoComp key={photo.id + i} photo={photo} />
+              <PhotoComp key={nanoid()} photo={photo} />
             ))}
           </Flex>
           <Flex layout='v'>
             {rightList.current.list.map((photo, i) => (
-              <PhotoComp key={photo.id + i} photo={photo} />
+              <PhotoComp key={nanoid()} photo={photo} />
             ))}
           </Flex>
         </Flex>

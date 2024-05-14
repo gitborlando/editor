@@ -14,7 +14,8 @@ export type ILoopArrayCallbackData<T> = {
 export class LoopArray<T> {
   constructor(public array: T[]) {}
   forEach(callback: (data: ILoopArrayCallbackData<T>) => void) {
-    this.array.forEach((current, index) => {
+    for (let index = 0; index < this.array.length; index++) {
+      const current = this.array[index]
       const left = index === 0 ? this.array.length - 1 : index - 1
       const right = index === this.array.length - 1 ? 0 : index + 1
       callback({
@@ -25,7 +26,7 @@ export class LoopArray<T> {
         array: this.array,
         at: this.getPosition(index),
       })
-    })
+    }
     return this
   }
   reduce<I>(callback: (data: ILoopArrayCallbackData<T> & { init: I }) => I, init: I) {

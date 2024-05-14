@@ -65,7 +65,7 @@ export const GeometryItemComp: FC<IGeometryItemComp> = ({ label, operateKey }) =
   const formatNumber = (value: number | 'multi'): string => {
     if (value === undefined) console.log(operateKey)
     if (value === 'multi') return value
-    return value.toFixed(Number.isInteger(value) ? 0 : 2)
+    return value?.toFixed(Number.isInteger(value) ? 0 : 2)
   }
 
   return (

@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { makeObservable, observable } from 'mobx'
+import { xy_, xy_minus } from '~/editor/math/xy'
 import { createSignal } from '~/shared/signal/signal'
 import { IRect, IXY, makeAction, noopFunc, type ICursor } from '~/shared/utils/normal'
 
@@ -96,7 +97,9 @@ class DragService {
           start: this.start,
           shift: this.shift,
           marquee: this.marquee,
+          delta: xy_minus(this.current, this.last),
         })
+        this.last = xy_(clientX, clientY)
       })
     )
     return this
@@ -165,26 +168,25 @@ class DragService {
   }
   private calculateMarquee() {
     this.marquee = { x: this.start.x, y: this.start.y, width: 0, height: 0 }
-    if (this.shift.x >= 0) {
-      if (this.shift.y >= 0) {
-        this.marquee.width = this.shift.x
-        this.marquee.height = this.shift.y
-      } else {
-        this.marquee.y = this.start.y + this.shift.y
-        this.marquee.width = this.shift.x
-        this.marquee.height = -this.shift.y
-      }
-    } else {
-      if (this.shift.y >= 0) {
-        this.marquee.x = this.start.x + this.shift.x
-        this.marquee.width = -this.shift.x
-        this.marquee.height = this.shift.y
-      } else {
-        this.marquee.x = this.start.x + this.shift.x
-        this.marquee.y = this.start.y + this.shift.y
-        this.marquee.width = -this.shift.x
-        this.marquee.height = -this.shift.y
-      }
+    if (this.shift.x >= 0 && this.shift.y >= 0) {
+      this.marquee.width = this.shift.x
+      this.marquee.height = this.shift.y
+    }
+    if (this.shift.x >= 0 && this.shift.y < 0) {
+      this.marquee.y = this.start.y + this.shift.y
+      this.marquee.width = this.shift.x
+      this.marquee.height = -this.shift.y
+    }
+    if (this.shift.x < 0 && this.shift.y >= 0) {
+      this.marquee.x = this.start.x + this.shift.x
+      this.marquee.width = -this.shift.x
+      this.marquee.height = this.shift.y
+    }
+    if (this.shift.x < 0 && this.shift.y < 0) {
+      this.marquee.x = this.start.x + this.shift.x
+      this.marquee.y = this.start.y + this.shift.y
+      this.marquee.width = -this.shift.x
+      this.marquee.height = -this.shift.y
     }
     return this.marquee
   }

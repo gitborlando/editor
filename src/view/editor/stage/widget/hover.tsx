@@ -5,7 +5,7 @@ import { SchemaDefault } from '~/editor/schema/default'
 import { Schema } from '~/editor/schema/schema'
 import { INode } from '~/editor/schema/type'
 import { SchemaUtil } from '~/editor/schema/util'
-import { StageDraw2 } from '~/editor/stage/draw/draw'
+import { StageDraw } from '~/editor/stage/draw/draw'
 import { StageInteract } from '~/editor/stage/interact/interact'
 import { PIXI } from '~/editor/stage/pixi'
 import { StageViewport } from '~/editor/stage/viewport'
@@ -31,9 +31,9 @@ export const HoverComp: FC<IHoverComp> = memo(({}) => {
     graphic.lineStyle(1.5 / StageViewport.zoom.value, hslBlueColor(65))
     if (hoverNode.type === 'text') {
       const rect = SchemaDefault.rect({ ...hoverNode, type: 'vector' })
-      StageDraw2.drawShape(graphic, rect)
+      StageDraw.drawShape(graphic, rect)
     } else {
-      StageDraw2.drawShape(graphic, hoverNode)
+      StageDraw.drawShape(graphic, hoverNode)
     }
   }
 

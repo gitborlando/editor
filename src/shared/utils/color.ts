@@ -1,13 +1,10 @@
+import hexRgb from 'hex-rgb'
 import rgbToHex from 'rgb-hex'
 import { atan, degreefy } from '~/editor/math/base'
 import { IFillColor, IFillLinearGradient } from '~/editor/schema/type'
 
 export { rgbToHex }
 
-export function hexToRgb(hex: string) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)!
-  return rgb(parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16))
-}
 export function isHexColor(hex: string) {
   return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex)
 }
@@ -66,9 +63,14 @@ export function getColorFromFill(fill: IFillColor) {
   return color.replace('rgb', 'rgba').replace(')', `,${alpha})`)
 }
 
-export function normalizeColor(fill?: string) {
-  if (fill === 'currentColor') return { color: rgb(0, 0, 0), alpha: 1 }
-  if (fill?.startsWith('rgb')) return { color: fill, alpha: 1 }
-  if (fill?.startsWith('#')) return { color: hexToRgb(fill), alpha: 1 }
-  return { color: COLOR[fill as keyof typeof COLOR], alpha: 1 }
+export function normalizeColor(input?: string) {
+  if (input?.startsWith('rgb')) return { color: input, alpha: 1 }
+  if (input?.startsWith('#')) {
+    const [r, g, b] = hexRgb(input, { format: 'array' })
+    return { color: rgb(r, g, b), alpha: 1 }
+  }
+  if (COLOR[input as keyof typeof COLOR]) {
+    return { color: COLOR[input as keyof typeof COLOR], alpha: 1 }
+  }
+  return { color: rgb(166, 166, 166), alpha: 1 }
 }

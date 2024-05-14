@@ -104,7 +104,6 @@ class OperateAlignService {
     this.needAlign = true
     SchemaUtil.traverseIds([node.id], ({ node }) => {
       Schema.itemReset(node, ['x'], node.x + shift)
-      Schema.itemReset(node, ['centerX'], node.centerX + shift)
       return false
     })
   }
@@ -113,7 +112,6 @@ class OperateAlignService {
     this.needAlign = true
     SchemaUtil.traverseIds([node.id], ({ node }) => {
       Schema.itemReset(node, ['y'], node.y + shift)
-      Schema.itemReset(node, ['centerY'], node.centerY + shift)
       return false
     })
   }

@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { ICommand } from '~/editor/editor/command'
-import { xy_new } from '~/editor/math/xy'
+import { xy_ } from '~/editor/math/xy'
 import { createSignal } from '~/shared/signal/signal'
 import { addListenerCapture, clickAway } from '~/shared/utils/event'
 import { IAnyObject } from '~/shared/utils/normal'
@@ -8,7 +8,7 @@ import { IAnyObject } from '~/shared/utils/normal'
 @autobind
 class MenuService {
   menuOptions = createSignal<ICommand[][]>([])
-  xy = createSignal(xy_new(0, 0))
+  xy = createSignal(xy_(0, 0))
   context = <IAnyObject>{}
   private ref?: HTMLDivElement
   initHook() {}
@@ -24,7 +24,7 @@ class MenuService {
   }
   private autoPosition(e: MouseEvent) {
     if (!this.ref) return
-    this.xy.value = xy_new(e.clientX, e.clientY)
+    this.xy.value = xy_(e.clientX, e.clientY)
     const { width, height } = this.ref.getBoundingClientRect()
     if (this.xy.value.y + height > window.innerHeight) {
       this.xy.value.y -= height

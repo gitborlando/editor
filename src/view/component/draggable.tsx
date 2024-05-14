@@ -1,7 +1,7 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC, ReactNode, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { xy_new } from '~/editor/math/xy'
+import { xy_ } from '~/editor/math/xy'
 import { Drag } from '~/global/event/drag'
 import { createSignal } from '~/shared/signal/signal'
 import { useAutoSignal } from '~/shared/signal/signal-react'
@@ -33,7 +33,7 @@ export const DraggableComp: FC<IDraggableComp> = observer(
     const ref = useRef<HTMLDivElement>(null)
     const { classes } = useStyles({})
     const state = useLocalObservable(() => ({
-      xy: xy || xy_new(480, 240),
+      xy: xy || xy_(480, 240),
     }))
     const zIndex = useAutoSignal(0)
     useEffect(() => {

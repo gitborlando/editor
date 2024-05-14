@@ -73,8 +73,38 @@ export default class Immui {
   }
 
   next = <T>(object: T): T => {
-    const traverse = (oldObj: any, newObj: any = {}) => {
+    const traverse = (oldObj: any, newObj: any, keyPathMap: any) => {
       for (const key in oldObj) {
+        if (!keyPathMap[key]) {
+          newObj[key] = oldObj[key]
+          continue
+        }
+        if (typeof oldObj[key] !== 'object') {
+          newObj[key] = oldObj[key]
+        } else {
+          newObj[key] = Array.isArray(oldObj[key]) ? [] : {}
+          traverse(oldObj[key], newObj[key], keyPathMap[key])
+        }
+      }
+      return newObj
+    }
+    const newObject = traverse(object, {}, this.keyPathDiffMap)
+    this.keyPathDiffMap = {}
+    return newObject
+  }
+
+  next2 = <T>(object: T): T => {
+    const traverse = (oldObj: any, newObj: any = {}, depth = 0) => {
+      for (const key in oldObj) {
+        if (depth === 0) {
+          if (!this.keyPathDiffMap[key]) continue
+          if (typeof oldObj[key] !== 'object') {
+            newObj[key] = oldObj[key]
+          } else {
+            newObj[key] = traverse(oldObj[key], Array.isArray(oldObj[key]) ? [] : {}, depth + 1)
+          }
+          continue
+        }
         if (!this.keyPathDiffMap[key]) {
           newObj[key] = oldObj[key]
           continue
@@ -83,12 +113,12 @@ export default class Immui {
           newObj[key] = oldObj[key]
         } else {
           newObj[key] = Array.isArray(oldObj[key]) ? [] : {}
-          traverse(oldObj[key], newObj[key])
+          traverse(oldObj[key], newObj[key], depth + 1)
         }
       }
       return newObj
     }
-    const newObject = traverse(object)
+    const newObject = traverse(object, object)
     this.keyPathDiffMap = {}
     return newObject
   }
@@ -144,7 +174,7 @@ export default class Immui {
     keys.forEach((key, i) => {
       if (!curKeyPathDiffMap[key]) {
         if (i != keys.length - 1) {
-          curKeyPathDiffMap[key] = {}
+          curKeyPathDiffMap = curKeyPathDiffMap[key] = {}
         } else {
           curKeyPathDiffMap[key] = undefined
         }
@@ -163,5 +193,15 @@ export default class Immui {
     else patches.push(patch)
 
     return patch
+  }
+
+  static pathMatcher = (path: string, pattern: string) => {
+    const pathArr = path.split('/')
+    const patternArr = pattern.split('/')
+    for (let i = 0; i < patternArr.length; i++) {
+      if (patternArr[i] === '*' || patternArr[i] === '') continue
+      if (patternArr[i] !== pathArr[i]) return false
+    }
+    return true
   }
 }

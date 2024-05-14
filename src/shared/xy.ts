@@ -37,6 +37,9 @@ export class XY {
   shift = (distance: number, rotation: number) => {
     return new XY(this.x + distance * rcos(rotation), this.y + distance * rsin(rotation))
   }
+  symmetric = (origin: IXY) => {
+    return new XY(2 * origin.x - this.x, 2 * origin.y - this.y)
+  }
   mutate = (obj: Record<string, any>, prefix?: 'client' | 'center' | (string & {})) => {
     if (prefix) {
       obj[prefix + 'X'] = this.x

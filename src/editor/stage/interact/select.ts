@@ -15,11 +15,9 @@ import { isLeftMouse, isRightMouse } from '~/shared/utils/event'
 import { lastOne } from '~/shared/utils/list'
 import { macro_Match } from '~/shared/utils/macro'
 import { createBound, type IRect } from '~/shared/utils/normal'
-import { XY } from '~/shared/xy'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageWidgetTransform } from '../widget/transform'
-import { StageCreate } from './create'
 
 type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 
@@ -30,9 +28,6 @@ class StageSelectService {
   duringMarqueeSelect = createSignal()
   private marqueeOBB?: OBB
   private doubleClickTimeStamp?: number
-  initHook() {
-    StageCreate.createStarted.hook(this.onCreateSelect)
-  }
   startInteract() {
     Pixi.addListener('mousedown', this.onMouseDown)
     Pixi.addListener('click', this.onClick)
@@ -53,11 +48,18 @@ class StageSelectService {
   }
   private onDoubleClick(e: Event) {
     this.onEditText()
+    this.onEditVector()
   }
   private onEditText() {
     const hoverNode = Schema.find(this.hoverId)
     if (hoverNode?.type !== 'text') return
     OperateText.intoEditing.dispatch(hoverNode.id)
+  }
+  private onEditVector() {
+    if (OperateNode.intoEditNodeId.value) OperateNode.intoEditNodeId.dispatch('')
+    const hoverNode = Schema.find(this.hoverId)
+    if (hoverNode?.type !== 'vector') return
+    OperateNode.intoEditNodeId.dispatch(hoverNode.id)
   }
   private onLeftMouseDown(e: MouseEvent) {
     if (StageWidgetTransform.mouseOnEdge) return
@@ -162,10 +164,7 @@ class StageSelectService {
   }
   private calcMarqueeOBB() {
     if (!this.marquee.value) return
-    const marquee = this.marquee.value!
-    const { x, y } = StageViewport.toSceneStageXY(XY.Of(marquee.x, marquee.y))
-    const width = StageViewport.toSceneStageShift(marquee.width)
-    const height = StageViewport.toSceneStageShift(marquee.height)
+    const { x, y, width, height } = StageViewport.toSceneMarquee(this.marquee.value!)
     return new OBB(x + width / 2, y + height / 2, width, height, 0)
   }
   private hasDoubleClick(e: Event) {

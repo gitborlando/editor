@@ -2,11 +2,15 @@ import { DropShadowFilter } from '@pixi/filter-drop-shadow'
 import autobind from 'class-autobind-decorator'
 import { Graphics, Matrix, Text, Texture } from 'pixi.js'
 import { IImage, Img } from '~/editor/editor/img'
-import { xy_new } from '~/editor/math/xy'
-import { ID, IFillLinearGradient, INode, IVector } from '~/editor/schema/type'
+import { pointsOnBezierCurves } from '~/editor/math/bezier/points-of-bezier'
+import { LoopArray } from '~/editor/math/path/loop-array'
+import { xy_ } from '~/editor/math/xy'
+import { ID, IFillLinearGradient, IIrregular, INode, IVector } from '~/editor/schema/type'
 import { createCache } from '~/shared/cache'
-import { rgbToHex, rgbToRgba } from '~/shared/utils/color'
-import { iife } from '~/shared/utils/normal'
+import { rgb, rgbToHex, rgbToRgba } from '~/shared/utils/color'
+import { loopFor } from '~/shared/utils/list'
+import { IXY, iife } from '~/shared/utils/normal'
+import { pixiPolylineContainsPoint } from '~/shared/utils/pixi/line-hit-area'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
 import { createStarPolygon } from '~/shared/utils/pixi/star'
@@ -17,36 +21,21 @@ export type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 class StageDrawService {
-  private redrawIds = new Set<string>()
-  private hasShadowNodes = new Set<INode>()
   private linearGradientCache = createCache<ID, PIXI.Texture>()
-  initHook() {
-    // OperateNode.afterFlushDirty.hook({ after: 'reHierarchy' }, () => {
-    //   flushList(this.redrawIds, (id) => {
-    //     const node = Schema.find<INode>(id)
-    //     node && this.drawNode(node)
-    //   })
-    // })
-    // StageViewport.zoom.hook((_, args) => {
-    //   if (args?.pageChangeCause) return
-    //   this.hasShadowNodes.forEach((node) => {
-    //     const element = StageElement.findElement(node.id)
-    //     this.drawShadows(element, node)
-    //   })
-    // })
-  }
-  collectRedraw(id: string) {
-    this.redrawIds.add(id)
-  }
+
   drawNode(element: IStageElement, node: INode) {
     if ('clear' in element) element.clear()
     this.drawFills(element, node)
     this.drawStrokes(element, node)
     this.drawShadows(element, node)
   }
+
   private drawFills<T extends INode = INode>(element: IStageElement, node: T) {
-    // const mask = StageElement.maskCache.get(node.id)
-    // mask?.beginFill(rgb(0, 0, 0), 0.001)
+    const graphic = element as PIXI.Graphics
+    if (node.fills.length === 0) {
+      graphic.beginFill?.(rgb(0, 0, 0), 0.0001)
+      this.drawShape(element, node)
+    }
     node.fills.forEach((fill) => {
       if (!fill.visible) return
       if (fill.type === 'color') {
@@ -72,14 +61,15 @@ class StageDrawService {
       }
     })
   }
+
   drawStrokes(element: IStageElement, node: INode) {
     node.strokes.forEach((stroke) => {
       if (!stroke.visible) return
-      const { fill, width, align } = stroke
+      const { fill, width, align, join, cap } = stroke
       const alignment = { inner: 0, center: 0.5, outer: 1 }[align]
       if (fill.type === 'color') {
         if (this.isText(element)) return
-        element.lineStyle({ width, color: fill.color, alignment, alpha: fill.alpha })
+        element.lineStyle({ width, color: fill.color, alignment, alpha: fill.alpha, join, cap })
         this.drawShape(element, <IVector>node)
       }
       if (fill.type === 'image') {
@@ -87,7 +77,8 @@ class StageDrawService {
         const image = Img.getImage(fill.url)
         const draw = (image: IImage) => {
           const { texture, matrix } = this.getImageTextureMatrix(node, image)
-          element.lineTextureStyle({ width, alignment, texture, matrix, alpha: fill.alpha })
+          const option = { width, alignment, texture, matrix, alpha: fill.alpha, join, cap }
+          element.lineTextureStyle(option)
           this.drawShape(element, <IVector>node)
         }
         image ? draw(image) : Img.getImageAsync(fill.url).then(draw)
@@ -95,13 +86,13 @@ class StageDrawService {
       if (fill.type === 'linearGradient') {
         if (this.isText(element)) return
         const texture = this.getLinearGradientTexture(node, fill)
-        element.lineTextureStyle({ width, texture, alignment, alpha: fill.alpha })
+        element.lineTextureStyle({ width, texture, alignment, alpha: fill.alpha, join, cap })
         this.drawShape(element, <IVector>node)
       }
     })
   }
+
   drawShadows(element: IStageElement, node: INode) {
-    node.shadows.length ? this.hasShadowNodes.add(node) : this.hasShadowNodes.delete(node)
     element.filters = []
     node.shadows.forEach((shadow) => {
       if (!shadow.visible) return
@@ -120,11 +111,13 @@ class StageDrawService {
       element.filterArea = new PIXI.Rectangle(0, 0, 9999, 9999)
     })
   }
+
   setGeometry(element: IStageElement, node: INode) {
     element.x = node.x
     element.y = node.y
     element.angle = node.rotation
   }
+
   drawShape(element: IStageElement, node: INode) {
     this.setGeometry(element, node)
     const { width, height, rotation } = node
@@ -150,78 +143,47 @@ class StageDrawService {
       if (node.vectorType === 'line') {
         graphics.moveTo(0, 0)
         graphics.lineTo(node.width, 0)
-        //     this.drawHitArea(node, graphics)
+        graphics.containsPoint = pixiPolylineContainsPoint([
+          xy_(node.x, node.y),
+          xy_(node.x + node.width, node.y),
+        ])
       }
-      // if (node.vectorType === 'irregular') {
-      //   const path = StageElement.pathCache.getSet(node.id, () =>
-      //     StageDrawPath.createPath(<IIrregular>node)
-      //   )
-      //   StageDrawPath.drawPath(path, graphics)
-      // }
+      if (node.vectorType === 'irregular') {
+        this.drawPath(node, graphics)
+        this.drawIrregularHitArea(node, graphics)
+      }
     }
   }
-  // private drawHitArea(node: INode, element: PIXI.Graphics) {
-  //   const contains = StageElement.hitAreaCache.getSet(
-  //     node.id,
-  //     () => {
-  //       return (x: number, y: number) => {
-  //         const points = element.geometry.points
-  //         // const odds: { x: number; y: number; z: number }[] = []
-  //         // const evens: { x: number; y: number; z: number }[] = []
-  //         // for (let index = 0; index * 2 < points.length; index++) {
-  //         //   const x = points[index * 2]
-  //         //   const y = points[index * 2 + 1]
-  //         //   const z = points[index * 2 + 2]
-  //         //   index % 2 === 0 ? odds.push({ x, y, z }) : evens.push({ x, y, z })
-  //         // }
-  //         const odds: { x: number; y: number }[] = []
-  //         const evens: { x: number; y: number }[] = []
-  //         for (let index = 0; index * 2 < points.length; index++) {
-  //           const x = points[index * 2]
-  //           const y = points[index * 2 + 1]
-  //           index % 2 === 0 ? odds.push({ x, y: y - 5 }) : evens.push({ x, y: y + 5 })
-  //         }
-  //         return new PIXI.Polygon([...odds, ...evens.reverse()]).contains(x, y)
-  //       }
-  //     },
-  //     [element.geometry.points.reduce((all, i) => all + i, 0)]
-  //   )
-  //   element.hitArea = { contains }
-  // }
-  // private drawFrameName(frame: IFrame) {
-  //   const name = StageElement.frameNameCache.getSet(frame.id, () => {
-  //     const nameText = new Text(frame.name, {
-  //       fontSize: 12 / StageViewport.zoom.value,
-  //       fill: '#9F9F9F',
-  //     })
-  //     nameText.setParent(Pixi.sceneStage)
-  //     StageViewport.zoom.hook((zoom) => {
-  //       nameText.scale.set(1 / zoom, 1 / zoom)
-  //       this.drawFrameName(frame)
-  //     })
-  //     // Schema.afterReName.hook(({ id, name }) => {
-  //     //   if (id === frame.id) nameText.text = name
-  //     // })
-  //     return nameText
-  //   })
-  //   const pivotX = frame.centerX - frame.width / 2
-  //   const pivotY = frame.centerY - frame.height / 2 - 15 / StageViewport.zoom.value
-  //   const { x, y } = XY.Of(pivotX, pivotY).rotate(XY.From(frame, 'center'), frame.rotation)
-  //   name.x = x
-  //   name.y = y
-  //   name.rotation = radianfy(frame.rotation)
-  // }
+
+  private drawPath(node: IIrregular, element: PIXI.Graphics) {
+    LoopArray.From(node.points).forEach(({ cur, next, at }) => {
+      if (at.end && cur.endPath) return element.closePath()
+      if (cur.startPath) element.moveTo(cur.x, cur.y)
+      if (cur.handleRight && next.handleLeft) {
+        const [cp2, cp1] = [next.handleLeft, cur.handleRight]
+        element.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, next.x, next.y)
+      } else if (cur.handleRight) {
+        element.quadraticCurveTo(cur.handleRight.x, cur.handleRight.y, next.x, next.y)
+      } else if (next.handleLeft) {
+        element.quadraticCurveTo(next.handleLeft.x, next.handleLeft.y, cur.x, cur.y)
+      } else if (!next.startPath) {
+        element.lineTo(next.x, next.y)
+      }
+    })
+  }
+
   private getLinearGradientTexture(node: INode, fill: IFillLinearGradient) {
     return this.linearGradientCache.getSet(
       node.id,
       () => {
-        const start = xy_new(fill.start.x * node.width, fill.start.y * node.height)
-        const end = xy_new(fill.end.x * node.width, fill.end.y * node.height)
+        const start = xy_(fill.start.x * node.width, fill.start.y * node.height)
+        const end = xy_(fill.end.x * node.width, fill.end.y * node.height)
         return createLinearGradientTexture({ ...fill, start, end })
       },
       [node.width, node.height, fill.stops]
     )
   }
+
   private getImageTextureMatrix(node: INode, image: IImage) {
     const nodeRate = node.width / node.height
     const imageRate = image.width / image.height
@@ -235,9 +197,33 @@ class StageDrawService {
     }
     return { texture, matrix }
   }
+
+  private drawIrregularHitArea(node: IIrregular, element: PIXI.Graphics) {
+    const originPoints = node.points
+    const newPoints = <IXY[]>[originPoints[0]]
+    loopFor(originPoints, (cur, next) => {
+      if (next.startPath) return
+      if (cur.handleRight && next.handleLeft) {
+        const points = pointsOnBezierCurves([cur, cur.handleRight, next.handleLeft, next], 0.3, 0.3)
+        newPoints.push(...points.slice(1))
+      } else if (cur.handleRight) {
+        const points = pointsOnBezierCurves([cur, cur.handleRight, next, next], 0.3, 0.3)
+        newPoints.push(...points.slice(1))
+      } else if (next.handleLeft) {
+        const points = pointsOnBezierCurves([cur, cur, next.handleLeft, next], 0.3, 0.3)
+        newPoints.push(...points.slice(1))
+      } else {
+        newPoints.push(next)
+      }
+    })
+    element.containsPoint = pixiPolylineContainsPoint(
+      newPoints.map(({ x, y }) => xy_(node.x + x, node.y + y))
+    )
+  }
+
   private isText(element: IStageElement): element is Text {
     return element instanceof Text
   }
 }
 
-export const StageDraw2 = new StageDrawService()
+export const StageDraw = new StageDrawService()

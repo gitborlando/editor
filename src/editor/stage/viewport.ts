@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
 import { EventWheelService } from '~/global/event/wheel'
 import { createSignal } from '~/shared/signal/signal'
-import { IXY } from '~/shared/utils/normal'
+import { IRect, IXY } from '~/shared/utils/normal'
 import { XY } from '~/shared/xy'
 import { max } from '../math/base'
 import { OperateMeta } from '../operate/meta'
@@ -56,22 +56,21 @@ class StageViewportService {
   toStageXY(xy: IXY) {
     return this.toViewportXY(xy).minus(this.stageOffset.value)
   }
-  toSceneStageXY(xy: IXY) {
+  toSceneXY(xy: IXY) {
     return this.toViewportXY(xy).minus(this.stageOffset.value).divide(this.zoom.value)
   }
-  toSceneStage(key: 'x' | 'y', num: number) {
-    const viewportXY = num - this.bound.value[key]
-    const stageXY = viewportXY - this.stageOffset.value[key]
-    return stageXY / this.zoom.value
+  toSceneShift(xy: IXY) {
+    return XY.From(xy).divide(this.zoom.value)
+  }
+  toSceneMarquee(marquee: IRect) {
+    return {
+      ...this.toSceneXY(marquee),
+      width: marquee.width / this.zoom.value,
+      height: marquee.height / this.zoom.value,
+    }
   }
   sceneStageToClientXY(xy: IXY) {
     return XY.From(xy).multiply(this.zoom.value).plus(this.stageOffset.value).plus(this.bound.value)
-  }
-  toSceneStageShiftXY(xy: IXY) {
-    return XY.From(xy).divide(this.zoom.value)
-  }
-  toSceneStageShift(shift: number) {
-    return shift / this.zoom.value
   }
   inViewport(xy: IXY) {
     const { x, y, width } = this.bound.value
@@ -94,7 +93,7 @@ class StageViewportService {
       const stepByZoom = getStepByZoom()
       const step = stepByZoom.find(([_zoom, _step]) => _zoom <= this.zoom.value)![1] * sign
       const newZoom = max(0.02, this.zoom.value + step)
-      const sceneStageXY = this.toSceneStageXY(new XY(clientX, clientY))
+      const sceneStageXY = this.toSceneXY(new XY(clientX, clientY))
       const newOffset = XY.From(this.stageOffset.value).plus(sceneStageXY.multiply(-step))
       this.zoom.dispatch(newZoom)
       this.stageOffset.dispatch(newOffset)

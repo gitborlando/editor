@@ -156,3 +156,11 @@ export function getNodeCenterXY(node: INode) {
   const { x, y, width, height } = node
   return XY.Of(x + width / 2, y + height / 2).rotate(XY.Of(x, y), node.rotation)
 }
+
+export function favIcon(href: string) {
+  const head = document.querySelector<HTMLHeadElement>('head')!
+  const link = document.createElement('link')
+  link.setAttribute('rel', 'shortcut icon')
+  link.setAttribute('href', href)
+  head.appendChild(link)
+}

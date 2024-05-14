@@ -4,8 +4,8 @@ import { createCache } from '~/shared/cache'
 import { COLOR, rgb } from '~/shared/utils/color'
 import { IRect, IXY } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'
-import { xy_new } from '../math/xy'
-import { OperateMeta } from '../operate/meta'
+import { xy_ } from '../math/xy'
+import { Schema } from './schema'
 import {
   IClient,
   IEllipse,
@@ -16,6 +16,7 @@ import {
   // IFillRadialGradient,
   IFrame,
   IGroup,
+  IIrregular,
   ILine,
   IMeta,
   INodeBase,
@@ -51,7 +52,7 @@ class SchemaDefaultService {
       id: nanoid(),
       selectIds: [],
       selectPageId: '',
-      mouse: xy_new(0, 0),
+      mouse: xy_(0, 0),
       ...option,
     }
   }
@@ -78,11 +79,9 @@ class SchemaDefaultService {
   point(option?: Partial<IPoint>): IPoint {
     return {
       type: 'point',
-      bezierType: 'no-bezier',
+      symmetric: 'angle',
       x: 0,
       y: 0,
-      handleLeft: { x: 0, y: 0 },
-      handleRight: { x: 0, y: 0 },
       radius: 0,
       ...option,
     }
@@ -167,7 +166,20 @@ class SchemaDefaultService {
       ...name,
       ...option,
       fills: [],
+      strokes: [this.stroke()],
       height: 0,
+    }
+  }
+  irregular(option?: Partial<IIrregular>): IIrregular {
+    const name = this.createNodeName('irregular')
+    const nodeBase = this.createNodeBase()
+    return {
+      type: 'vector',
+      vectorType: 'irregular',
+      points: [],
+      ...nodeBase,
+      ...name,
+      ...option,
     }
   }
   image(option?: Partial<IRect>): IRect {
@@ -200,7 +212,7 @@ class SchemaDefaultService {
   fillColor(color = rgb(204, 204, 204), alpha = 1): IFillColor {
     return { type: 'color', visible: true, color, alpha }
   }
-  fillLinearGradient(start: IXY = xy_new(0, 0), end: IXY = xy_new(1, 1)): IFillLinearGradient {
+  fillLinearGradient(start: IXY = xy_(0, 0), end: IXY = xy_(1, 1)): IFillLinearGradient {
     return {
       type: 'linearGradient',
       visible: true,
@@ -228,8 +240,8 @@ class SchemaDefaultService {
       fill: this.fillColor(rgb(0, 0, 0)),
       align: 'center',
       width: 1,
-      cap: 0,
-      join: 0,
+      cap: 'round',
+      join: 'round',
       ...option,
     }
   }
@@ -283,7 +295,7 @@ class SchemaDefaultService {
   }
   createNodeName(type: string) {
     const typeIndexMap = this.typeIndexMapCache.getSet(
-      'this.devFileId' || OperateMeta.curPage.value.id,
+      Schema.client?.selectPageId || 'abc',
       () => ({
         page: ['页面', 1],
         frame: ['画板', 1],

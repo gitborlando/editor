@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal/signal'
-import { xy_new } from '../math/xy'
+import { xy_ } from '../math/xy'
 import { Pixi } from './pixi'
 
 export type IStageCursorType = 'auto' | 'h-resize' | 'v-resize' | 'se-resize' | 'sw-resize'
@@ -8,7 +8,7 @@ export type IStageCursorType = 'auto' | 'h-resize' | 'v-resize' | 'se-resize' | 
 @autobind
 class StageCursorService {
   type = createSignal(<IStageCursorType>'auto')
-  xy = createSignal(xy_new(0, 0))
+  xy = createSignal(xy_(0, 0))
   rotation = createSignal(0)
   initHook() {
     this.type.hook(this.autoChange)

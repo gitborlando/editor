@@ -2,7 +2,7 @@ import { Container, Graphics } from '@pixi/react'
 import { FC } from 'react'
 import { Schema } from '~/editor/schema/schema'
 import { IClient } from '~/editor/schema/type'
-import { StageDraw2 } from '~/editor/stage/draw/draw'
+import { StageDraw } from '~/editor/stage/draw/draw'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useMemoSubComponent } from '~/shared/utils/normal'
 
@@ -26,7 +26,7 @@ export const CooperationComp: FC<ICooperationComp> = ({}) => {
             g.clear()
             //  if (!needDraw.value) return
             g.lineStyle(1 / zoom, 'red')
-            StageDraw2.drawShape(g, node)
+            StageDraw.drawShape(g, node)
           }
         }}
       />

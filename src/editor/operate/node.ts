@@ -6,11 +6,13 @@ import { createSignal } from '~/shared/signal/signal'
 import { firstOne, stableIndex } from '~/shared/utils/list'
 import { XY } from '~/shared/xy'
 import { OBB } from '../math/obb'
+import { SchemaDefault } from '../schema/default'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { ID, INode, INodeParent } from '../schema/type'
 import { SchemaUtil } from '../schema/util'
 import { IStageElement } from '../stage/draw/draw'
+import { Pixi } from '../stage/pixi'
 
 export type INodeRuntime = {
   expand: boolean
@@ -25,7 +27,9 @@ class OperateNodeService {
   hoverIds = createSignal(new Set<ID>())
   selectIds = createSignal(new Set<ID>())
   afterRemoveNodes = createSignal<ID[]>()
+  // selectNodes = createSignal(<INode[]>[])
   selectedNodes = createSignal(<INode[]>[])
+  intoEditNodeId = createSignal('')
   private lastSelectedNodeSet = new Set<INode>()
   private nodeRuntimeCache = createCache<ID, INodeRuntime>()
   private copyIds = <ID[]>[]
@@ -47,6 +51,15 @@ class OperateNodeService {
       for (const node of selectedNodes) {
         if (!this.lastSelectedNodeSet.has(node)) return selectionChange()
       }
+    })
+    this.intoEditNodeId.intercept((id) => {
+      if (!id) return ''
+      const node = Schema.find(id)
+      if (node.type === 'vector' && node.vectorType === 'irregular') return id
+      return ''
+    })
+    this.intoEditNodeId.hook((id) => {
+      Pixi.isForbidEvent = !!id
     })
   }
   get selectNodes() {
@@ -137,7 +150,8 @@ class OperateNodeService {
     const clone = (oldNode: INode) => {
       const newNode = cloneDeep(oldNode)
       newNode.id = nanoid()
-      newNode.name = `${oldNode.name} - 复制`
+      const type = oldNode.type === 'vector' ? oldNode.vectorType : oldNode.type
+      newNode.name = SchemaDefault.createNodeName(type).name
       if ('childIds' in newNode) newNode.childIds = []
       return newNode
     }

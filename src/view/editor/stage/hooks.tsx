@@ -3,7 +3,7 @@ import { OBB } from '~/editor/math/obb'
 import { OperateNode } from '~/editor/operate/node'
 import { Schema } from '~/editor/schema/schema'
 import { INode, INodeParent } from '~/editor/schema/type'
-import { IStageElement, StageDraw2 } from '~/editor/stage/draw/draw'
+import { IStageElement, StageDraw } from '~/editor/stage/draw/draw'
 import { getNodeCenterXY } from '~/shared/utils/normal'
 import { FrameComp } from './elements/frame'
 import { TextComp } from './elements/text'
@@ -47,5 +47,5 @@ export function useCollectRef<T extends IStageElement>(node: INode) {
 }
 
 export function useDraw(node: INode) {
-  return useCallback((element: IStageElement) => StageDraw2.drawNode(element, node), [node])
+  return useCallback((element: IStageElement) => StageDraw.drawNode(element, node), [node])
 }

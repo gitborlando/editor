@@ -20,8 +20,8 @@ export const MarqueeComp: FC<IMarqueeComp> = memo(({}) => {
         g.clear()
         if (!StageSelect.marquee.value) return
         const { x, y, width, height } = StageSelect.marquee.value
-        const sceneStartXY = StageViewport.toSceneStageXY(XY.Of(x, y))
-        const sceneShiftXY = StageViewport.toSceneStageShiftXY(XY.Of(width, height))
+        const sceneStartXY = StageViewport.toSceneXY(XY.Of(x, y))
+        const sceneShiftXY = StageViewport.toSceneShift(XY.Of(width, height))
         g.beginFill(hslBlueColor(65), 0.1)
         g.lineStyle(1 / StageViewport.zoom.value, hslBlueColor(65))
         g.drawRect(sceneStartXY.x, sceneStartXY.y, sceneShiftXY.x, sceneShiftXY.y)

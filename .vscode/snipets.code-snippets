@@ -36,7 +36,7 @@
   "Sub Component": {
     "prefix": "subcomp",
     "body": [
-      "const $1Comp = useSubComponent([], ({}) => {",
+      "const $1Comp = useMemoComp([], ({}) => {",
       "  return (<Flex className={''}></Flex>)",
       "})"
     ],

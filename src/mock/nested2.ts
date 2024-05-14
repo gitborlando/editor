@@ -1,4 +1,4 @@
-import { xy_new } from '~/editor/math/xy'
+import { xy_ } from '~/editor/math/xy'
 import { SchemaDefault } from '~/editor/schema/default'
 import { IFillLinearGradient, ISchema } from '~/editor/schema/type'
 import { COLOR } from '~/shared/utils/color'
@@ -7,8 +7,8 @@ export function mockNested2() {
   const [x, y, width, height] = [100, 0, 100, 100]
   const LinearGradient = <IFillLinearGradient>{
     type: 'linearGradient',
-    start: xy_new(0, 0),
-    end: xy_new(1, 1),
+    start: xy_(0, 0),
+    end: xy_(1, 1),
     stops: [
       { offset: 0, color: COLOR.blue },
       { offset: 1, color: COLOR.pinkRed },
@@ -78,8 +78,8 @@ export function mockNested2() {
       id: 'line1',
       width: 100,
       height: 0,
-      x: 400,
-      y: 400,
+      x: 100,
+      y: 350,
       strokes: [SchemaDefault.stroke()],
       parentId: 'frame:1',
     }),

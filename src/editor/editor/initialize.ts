@@ -13,9 +13,7 @@ import { Schema } from '../schema/schema'
 import { ISchema } from '../schema/type'
 import { StageCursor } from '../stage/cursor'
 import { StageDrop } from '../stage/drop'
-import { StageCreate } from '../stage/interact/create'
 import { StageInteract } from '../stage/interact/interact'
-import { StageSelect } from '../stage/interact/select'
 import { Pixi } from '../stage/pixi'
 import { StageViewport } from '../stage/viewport'
 import { StageWidgetAdsorption } from '../stage/widget/adsorption'
@@ -43,12 +41,9 @@ OperateFill.initHook()
 OperateStroke.initHook()
 OperateShadow.initHook()
 OperateText.initHook()
-OperateText.initHook()
 
 StageViewport.initHook()
 StageInteract.initHook()
-StageSelect.initHook()
-StageCreate.initHook()
 StageDrop.initHook()
 StageCursor.initHook()
 StageWidgetAdsorption.initHook()

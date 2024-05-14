@@ -16,6 +16,7 @@ import { HoverComp } from './widget/hover'
 import { MarqueeComp } from './widget/marquee'
 import { RulerComp } from './widget/ruler'
 import { TransformComp } from './widget/transform'
+import { VectorEditComp } from './widget/vector-edit'
 
 const staticOption: ConstructorParameters<typeof Application>[0] = {
   backgroundColor: 0xf5f5f5 /* '#F7F8FA' */ /* '#F1F2F6' */,
@@ -50,6 +51,7 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
         <TransformComp />
         <MarqueeComp />
         <CooperationComp />
+        <VectorEditComp />
       </Container>
     )
   })
