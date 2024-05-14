@@ -2,13 +2,13 @@ import { cloneDeep } from 'lodash-es'
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import { IImage, Img } from '~/editor/editor/img'
+import { xy_, xy_client } from '~/editor/math/xy'
 import { IFill, IFillColor } from '~/editor/schema/type'
 import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { makeLinearGradientCss, rgbToHex, rgbToRgba } from '~/shared/utils/color'
 import { IXY, iife, useSubComponent } from '~/shared/utils/normal'
 import { withSuspense } from '~/shared/utils/react'
-import { XY } from '~/shared/xy'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
@@ -33,7 +33,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   }
   const showPicker = (xy: IXY) => {
     setupUIPicker()
-    UIPickerCopy.xy.value = XY.Of(window.innerWidth - 480 - 10, xy.y - 10)
+    UIPickerCopy.xy.value = xy_(window.innerWidth - 480 - 10, xy.y - 10)
     isShowPicker.dispatch(true)
   }
   const isShowPicker = useAutoSignal(false)
@@ -75,7 +75,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   return (
     <>
       <Flex layout='h' sidePadding={6} className={classes.Fill}>
-        <Flex layout='h' className='miniShower' onClick={(e) => showPicker(XY.From(e, 'client'))}>
+        <Flex layout='h' className='miniShower' onClick={(e) => showPicker(xy_client(e))}>
           <img src={Asset.editor.rightPanel.operate.fill.none}></img>
           {isColorType && (
             <Flex style={{ backgroundColor: rgbToRgba(fill.color, fill.alpha) }}></Flex>

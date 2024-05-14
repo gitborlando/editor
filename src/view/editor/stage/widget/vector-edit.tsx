@@ -27,7 +27,6 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
     const curHandleIndex = useAutoSignal()
 
     curIndex.intercept(() => (curHandleIndex.value = undefined))
-    console.log('curIndex: ', curIndex.value)
 
     const points = iife(() => {
       if (!node) return []

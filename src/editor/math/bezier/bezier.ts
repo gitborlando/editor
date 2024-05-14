@@ -1,5 +1,5 @@
-import { XY } from '~/shared/xy'
-import { abs, pow2, pow3 } from './base'
+import { abs, pow2, pow3 } from '../base'
+import { xy_, xy_distance, xy_minus, xy_multiply, xy_plus_all } from '../xy'
 
 /* 贝塞尔参数方程 */
 export function bezierParametricEquation(
@@ -13,17 +13,13 @@ export function bezierParametricEquation(
   a2y: number,
   t: number //参数t
 ) {
-  const A = new XY(p1x, p1y)
-  const B = new XY(p2x, p2y)
-  const C = new XY(a1x, a1y)
-  const D = new XY(a2x, a2y)
-  const newXY = XY.Plus(
-    A.multiply(pow3(1 - t)),
-    C.multiply(3, t, pow2(1 - t)),
-    D.multiply(3, pow2(t), 1 - t),
-    B.multiply(pow3(t))
+  const newXY = xy_plus_all(
+    xy_multiply(xy_(p1x, p1y), pow3(1 - t)),
+    xy_multiply(xy_(a1x, a1y), 3, t, pow2(1 - t)),
+    xy_multiply(xy_(a2x, a2y), 3, pow2(t), 1 - t),
+    xy_multiply(xy_(p2x, p2y), pow3(t))
   )
-  return newXY.toArray()
+  return [newXY.x, newXY.y]
 }
 
 /* 求贝塞尔曲线的中点, 即到两个端点的距离相同 */
@@ -44,17 +40,17 @@ export function bezierMidpoint(
     subLength: number
     shift: number
   }[] = []
-  let lastX = new XY(p1x, p1y)
+  let lastX = xy_(p1x, p1y)
   let iteration = 30 //粒度, 越大拟合越精细
   let length = 0
   for (let i = 0; i <= iteration; i++) {
     let t = i / iteration
     let [x, y] = bezierParametricEquation(p1x, p1x, p2x, p2y, a1x, a1y, a2x, a2y, t)
-    let subLength = new XY(x, y).distance(lastX)
+    let subLength = xy_distance(xy_(x, y), lastX)
 
     arr.push({ t, x, y, subLength, shift: 0 })
     length += subLength
-    lastX = new XY(x, y)
+    lastX = xy_(x, y)
   }
   arr = arr.map((i) => ({ ...i, shift: abs(length / 2 - i.subLength) }))
   arr.sort((a, b) => a.shift - b.shift)
@@ -65,7 +61,7 @@ export function bezierMidpoint(
 /**
  * 从某个参数t开始分割贝塞尔曲线
  * 返回被分割后的两个贝塞尔曲线的四个控制点坐标
- * 即 [a1x,a1y,a2x,a2y,b1x,b1y,b2x,b2y]
+ * 即 [a1,a2,b1,b2]
  */
 export function bezierDivide(
   p1x: number,
@@ -78,14 +74,14 @@ export function bezierDivide(
   a2y: number,
   t: number
 ) {
-  const A = new XY(p1x, p1y)
-  const B = new XY(p2x, p2y)
-  const C = new XY(a1x, a1y)
-  const D = new XY(a2x, a2y)
-  const AC = C.minus(A).multiply(t)
-  const BD = D.minus(B).multiply(t)
-  const CD = D.minus(C).multiply(t)
-  const CD_AC = CD.minus(AC).multiply(t)
-  const CD_BD = CD.minus(BD).multiply(t)
-  return [...AC.toArray(), ...CD_AC.toArray(), ...CD_BD.toArray(), ...BD.toArray()]
+  const A = xy_(p1x, p1y)
+  const B = xy_(p2x, p2y)
+  const C = xy_(a1x, a1y)
+  const D = xy_(a2x, a2y)
+  const AC = xy_multiply(xy_minus(C, A), t)
+  const BD = xy_multiply(xy_minus(D, B), t)
+  const CD = xy_multiply(xy_minus(D, C), t)
+  const CD_AC = xy_multiply(xy_minus(CD, AC), t)
+  const CD_BD = xy_multiply(xy_minus(CD, BD), t)
+  return [AC, CD_AC, CD_BD, BD]
 }

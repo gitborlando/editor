@@ -1,10 +1,10 @@
 import { FC, useMemo } from 'react'
 import { createPortal } from 'react-dom'
+import { xy_toArray } from '~/editor/math/xy'
 import { Schema } from '~/editor/schema/schema'
 import { IClient } from '~/editor/schema/type'
 import { hslColor } from '~/shared/utils/color'
 import { useMemoSubComponent } from '~/shared/utils/normal'
-import { XY } from '~/shared/xy'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -18,7 +18,7 @@ export const CursorsComp: FC<ICursorsComp> = ({}) => {
 
   const CursorComp = useMemoSubComponent<{ client: IClient }>([], ({ client }) => {
     const randomColor = useMemo(() => hslColor(Math.random() * 360, 80, 35), [])
-    const [left, top] = XY.From(client.mouse).toArray()
+    const [left, top] = xy_toArray(client.mouse)
     return (
       <Icon className={classes.cursor} size={24} fill={randomColor} style={{ left, top }}>
         {Asset.editor.widget.cursor}

@@ -3,8 +3,8 @@ import hotkeys from 'hotkeys-js'
 import { EventWheelService } from '~/global/event/wheel'
 import { createSignal } from '~/shared/signal/signal'
 import { IRect, IXY } from '~/shared/utils/normal'
-import { XY } from '~/shared/xy'
 import { max } from '../math/base'
+import { xy_, xy_client, xy_divide, xy_minus, xy_multiply, xy_plus, xy_plus_all } from '../math/xy'
 import { OperateMeta } from '../operate/meta'
 import { Pixi } from './pixi'
 
@@ -32,12 +32,12 @@ class StageViewportService {
       Pixi.addListener('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))
       const { x, y, zoom } = OperateMeta.curPage.value
       this.zoom.dispatch(zoom)
-      this.stageOffset.dispatch(XY.Of(x, y))
+      this.stageOffset.dispatch(xy_(x, y))
       this.inited.dispatch()
     })
     OperateMeta.curPage.hook((page) => {
       this.zoom.dispatch(page.zoom, { pageChangeCause: true })
-      this.stageOffset.dispatch(XY.Of(page.x, page.y))
+      this.stageOffset.dispatch(xy_(page.x, page.y))
     })
     this.zoom.hook(() => {
       Pixi.sceneStage.scale.set(this.zoom.value, this.zoom.value)
@@ -51,16 +51,16 @@ class StageViewportService {
     })
   }
   toViewportXY(xy: IXY) {
-    return XY.From(xy).minus(this.bound.value)
+    return xy_minus(xy, this.bound.value)
   }
   toStageXY(xy: IXY) {
-    return this.toViewportXY(xy).minus(this.stageOffset.value)
+    return xy_minus(this.toViewportXY(xy), this.stageOffset.value)
   }
   toSceneXY(xy: IXY) {
-    return this.toViewportXY(xy).minus(this.stageOffset.value).divide(this.zoom.value)
+    return xy_divide(this.toStageXY(xy), this.zoom.value)
   }
   toSceneShift(xy: IXY) {
-    return XY.From(xy).divide(this.zoom.value)
+    return xy_divide(xy, this.zoom.value)
   }
   toSceneMarquee(marquee: IRect) {
     return {
@@ -70,7 +70,7 @@ class StageViewportService {
     }
   }
   sceneStageToClientXY(xy: IXY) {
-    return XY.From(xy).multiply(this.zoom.value).plus(this.stageOffset.value).plus(this.bound.value)
+    return xy_plus_all(xy_multiply(xy, this.zoom.value), this.stageOffset.value, this.bound.value)
   }
   inViewport(xy: IXY) {
     const { x, y, width } = this.bound.value
@@ -93,8 +93,8 @@ class StageViewportService {
       const stepByZoom = getStepByZoom()
       const step = stepByZoom.find(([_zoom, _step]) => _zoom <= this.zoom.value)![1] * sign
       const newZoom = max(0.02, this.zoom.value + step)
-      const sceneStageXY = this.toSceneXY(new XY(clientX, clientY))
-      const newOffset = XY.From(this.stageOffset.value).plus(sceneStageXY.multiply(-step))
+      const sceneStageXY = this.toSceneXY(xy_client(e))
+      const newOffset = xy_plus(this.stageOffset.value, xy_multiply(sceneStageXY, -step))
       this.zoom.dispatch(newZoom)
       this.stageOffset.dispatch(newOffset)
       this.duringZoom.dispatch()

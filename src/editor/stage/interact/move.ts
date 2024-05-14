@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
+import { xy_from, xy_plus } from '~/editor/math/xy'
 import { Drag } from '~/global/event/drag'
-import { XY } from '~/shared/xy'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 
@@ -13,9 +13,9 @@ class StageMoveService {
     Pixi.removeListener('mousedown', this.onMoveStage)
   }
   private onMoveStage() {
-    const start = XY.From(Pixi.sceneStage.position)
+    const start = xy_from(Pixi.sceneStage.position)
     Drag.onSlide(({ shift }) => {
-      StageViewport.stageOffset.dispatch(start.plus(shift))
+      StageViewport.stageOffset.dispatch(xy_plus(start, shift))
     })
   }
 }

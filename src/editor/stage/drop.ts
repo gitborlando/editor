@@ -1,9 +1,8 @@
 import autobind from 'class-autobind-decorator'
 import { Uploader } from '~/global/upload'
 import { preventDefault } from '~/shared/utils/event'
-import { XY } from '~/shared/xy'
 import { Img } from '../editor/img'
-import { xy_ } from '../math/xy'
+import { xy_, xy_client } from '../math/xy'
 import { OperateMeta } from '../operate/meta'
 import { OperateNode } from '../operate/node'
 import { SvgParser } from '../parse/svg'
@@ -25,7 +24,7 @@ export class StageDropService {
     })
   }
   private async onDrop(e: DragEvent) {
-    this.sceneXY = StageViewport.toSceneXY(XY.From(e, 'client')).toObject()
+    this.sceneXY = StageViewport.toSceneXY(xy_client(e))
     this.getContainerNode()
     await this.onDropData(e)
     await this.onDropFile(e)

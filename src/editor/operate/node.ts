@@ -4,8 +4,8 @@ import { nanoid } from 'nanoid'
 import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal/signal'
 import { firstOne, stableIndex } from '~/shared/utils/list'
-import { XY } from '~/shared/xy'
 import { OBB } from '../math/obb'
+import { xy_ } from '../math/xy'
 import { SchemaDefault } from '../schema/default'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
@@ -23,7 +23,7 @@ export type INodeRuntime = {
 @autobind
 class OperateNodeService {
   datumId = createSignal('')
-  datumXY = XY.Of(0, 0)
+  datumXY = xy_(0, 0)
   hoverIds = createSignal(new Set<ID>())
   selectIds = createSignal(new Set<ID>())
   afterRemoveNodes = createSignal<ID[]>()
@@ -200,8 +200,8 @@ class OperateNodeService {
       if (parentIds.size > 1) this.datumId.dispatch('')
     }
     const { obb } = this.getNodeRuntime(this.datumId.value)
-    if (!obb) return (this.datumXY = XY.Of(0, 0))
-    this.datumXY = XY.Of(obb.aabb.x, obb.aabb.y)
+    if (!obb) return (this.datumXY = xy_(0, 0))
+    this.datumXY = xy_(obb.aabb.x, obb.aabb.y)
   }
 }
 

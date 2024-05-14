@@ -31,7 +31,9 @@ export function useMemoChildren(node: INodeParent) {
 
 export function useResetOBB(node: INode) {
   const { width, height, rotation } = node
-  const [centerX, centerY] = getNodeCenterXY(node).toArray()
+  const centerXY = getNodeCenterXY(node)
+  const centerX = centerXY.x
+  const centerY = centerXY.y
   useMemo(() => {
     const obb = new OBB(centerX, centerY, width, height, rotation)
     OperateNode.setNodeRuntime(node.id, { obb })

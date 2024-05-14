@@ -40,3 +40,17 @@ console.log(new Date().getTime() - s + 'ms')
 // }
 
 // console.log(new Date().getTime() - s + 'ms')
+
+// -------------------------------------------------------------------------------------
+
+// console.time('XY')
+// for (let i = 0; i < 100000; i++) {
+//   XY.From({ x: 1, y: 2 }).rotate(XY.From({ x: 0, y: 0 }), 90)
+// }
+// console.timeEnd('XY')
+
+// console.time('xy')
+// for (let i = 0; i < 100000; i++) {
+//   xy_rotate({ x: 1, y: 2 }, { x: 0, y: 0 }, 90)
+// }
+// console.timeEnd('xy')

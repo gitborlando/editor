@@ -3,7 +3,6 @@ import autobind from 'class-autobind-decorator'
 import { Graphics, Matrix, Text, Texture } from 'pixi.js'
 import { IImage, Img } from '~/editor/editor/img'
 import { pointsOnBezierCurves } from '~/editor/math/bezier/points-of-bezier'
-import { LoopArray } from '~/editor/math/path/loop-array'
 import { xy_ } from '~/editor/math/xy'
 import { ID, IFillLinearGradient, IIrregular, INode, IVector } from '~/editor/schema/type'
 import { createCache } from '~/shared/cache'
@@ -156,8 +155,8 @@ class StageDrawService {
   }
 
   private drawPath(node: IIrregular, element: PIXI.Graphics) {
-    LoopArray.From(node.points).forEach(({ cur, next, at }) => {
-      if (at.end && cur.endPath) return element.closePath()
+    loopFor(node.points, (cur, next, last, i) => {
+      if (i === node.points.length - 1 && cur.endPath) return element.closePath()
       if (cur.startPath) element.moveTo(cur.x, cur.y)
       if (cur.handleRight && next.handleLeft) {
         const [cp2, cp1] = [next.handleLeft, cur.handleRight]

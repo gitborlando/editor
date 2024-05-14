@@ -1,10 +1,9 @@
 import autobind from 'class-autobind-decorator'
 import { IRect, IXY } from '~/shared/utils/normal'
-import { XY } from '~/shared/xy'
 import { abs, rcos, rsin } from './base'
-import { xy_, xy_dot, xy_minus, xy_rotate, xy_rotate3 } from './xy'
+import { xy_, xy_dot, xy_minus, xy_rotate } from './xy'
 
-type IAxis = { widthAxis: XY; heightAxis: XY }
+type IAxis = { widthAxis: IXY; heightAxis: IXY }
 
 @autobind
 export class OBB {
@@ -49,9 +48,8 @@ export class OBB {
     this.calcAABB()
   }
   calcXY() {
-    return (this.xy = xy_rotate3(
-      this.centerX - this.width / 2,
-      this.centerY - this.height / 2,
+    return (this.xy = xy_rotate(
+      xy_(this.centerX - this.width / 2, this.centerY - this.height / 2),
       this.center,
       this.rotation
     ))
@@ -59,13 +57,13 @@ export class OBB {
   calcAxis() {
     const cos = rcos(this.rotation)
     const sin = rsin(this.rotation)
-    const widthAxis = XY.Of(cos, -sin)
-    const heightAxis = XY.Of(sin, cos)
+    const widthAxis = xy_(cos, -sin)
+    const heightAxis = xy_(sin, cos)
     return (this.axis = { widthAxis, heightAxis })
   }
   calcAABB() {
-    const width = this.projectionLengthAt(XY.Of(1, 0))
-    const height = this.projectionLengthAt(XY.Of(0, 1))
+    const width = this.projectionLengthAt(xy_(1, 0))
+    const height = this.projectionLengthAt(xy_(0, 1))
     return (this.aabb = {
       x: this.center.x - width / 2,
       y: this.center.y - height / 2,
@@ -118,7 +116,7 @@ export class OBB {
       return false
     return true
   }
-  projectionLengthAt(anotherAxis: XY) {
+  projectionLengthAt(anotherAxis: IXY) {
     const { widthAxis, heightAxis } = this.axis
     return (
       abs(xy_dot(widthAxis, anotherAxis)) * this.width +

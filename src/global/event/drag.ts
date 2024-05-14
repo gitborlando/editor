@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { makeObservable, observable } from 'mobx'
-import { xy_, xy_minus } from '~/editor/math/xy'
 import { createSignal } from '~/shared/signal/signal'
 import { IRect, IXY, makeAction, noopFunc, type ICursor } from '~/shared/utils/normal'
 
@@ -97,9 +96,7 @@ class DragService {
           start: this.start,
           shift: this.shift,
           marquee: this.marquee,
-          delta: xy_minus(this.current, this.last),
         })
-        this.last = xy_(clientX, clientY)
       })
     )
     return this

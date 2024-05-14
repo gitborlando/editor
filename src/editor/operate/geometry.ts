@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal/signal'
 import { getNodeCenterXY } from '~/shared/utils/normal'
-import { XY } from '~/shared/xy'
+import { xy_rotate } from '../math/xy'
 import { Schema } from '../schema/schema'
 import { ITraverseData, SchemaUtil } from '../schema/util'
 import { OperateNode } from './node'
@@ -158,7 +158,7 @@ class OperateGeometryService {
     }
     if (this.operateKeys.has('rotation')) {
       const centerXY = getNodeCenterXY(node)
-      const newXY = XY.From(node).rotate(centerXY, this.delta('rotation'))
+      const newXY = xy_rotate(node, centerXY, this.delta('rotation'))
       Schema.itemReset(node, ['rotation'], node.rotation + this.delta('rotation'))
       if (depth === 0) {
         Schema.itemReset(node, ['x'], newXY.x)

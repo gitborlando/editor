@@ -1,5 +1,5 @@
-import { LoopArray } from '~/editor/math/path/loop-array'
 import { IIrregular, IPoint } from '~/editor/schema/type'
+import { loopFor } from './list'
 import { IXY } from './normal'
 
 export class IrregularUtils {
@@ -35,8 +35,8 @@ export class IrregularUtils {
 
   static getNodeSvgPath(node: IIrregular) {
     let path = ''
-    LoopArray.From(node.points).forEach(({ cur, next, at }) => {
-      if (at.end && cur.endPath) return (path += 'Z ')
+    loopFor(node.points, (cur, next, last, i) => {
+      if (i === node.points.length - 1 && cur.endPath) return (path += 'Z ')
       if (cur.startPath) path += `M${cur.x},${cur.y} `
       if (next.startPath) return
       if (cur.handleRight && next.handleLeft) {

@@ -1,6 +1,6 @@
+import { xy_divide, xy_minus } from '~/editor/math/xy'
 import { PIXI } from '~/editor/stage/pixi'
 import { StageViewport } from '~/editor/stage/viewport'
-import { XY } from '~/shared/xy'
 import { polylineCollide, twoPointsSpreadRect } from '../collision'
 import { IXY } from '../normal'
 
@@ -20,7 +20,7 @@ export function pixiPolylineContainsPoint(points: IXY[]) {
   return (xy: IXY) => {
     const { zoom, stageOffset } = StageViewport
     const spread = 10 / zoom.value
-    xy = XY.From(xy).minus(stageOffset.value).divide(zoom.value)
+    xy = xy_divide(xy_minus(xy, stageOffset.value), zoom.value)
     return polylineCollide(points, xy, spread)
   }
 }

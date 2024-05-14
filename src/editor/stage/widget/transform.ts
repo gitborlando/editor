@@ -2,6 +2,7 @@ import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
 import { max, min } from '~/editor/math/base'
 import { OBB } from '~/editor/math/obb'
+import { xy_client } from '~/editor/math/xy'
 import { OperateGeometry } from '~/editor/operate/geometry'
 import { OperateNode } from '~/editor/operate/node'
 import { SchemaHistory } from '~/editor/schema/history'
@@ -9,7 +10,6 @@ import { Schema } from '~/editor/schema/schema'
 import { Drag } from '~/global/event/drag'
 import { createSignal } from '~/shared/signal/signal'
 import { IXY } from '~/shared/utils/normal'
-import { XY } from '~/shared/xy'
 import { StageInteract } from '../interact/interact'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
@@ -56,7 +56,7 @@ class StageWidgetTransformService {
   }
   mouseIn(e: MouseEvent) {
     if (this.needDraw.value === false) return false
-    const { x, y } = StageViewport.toSceneXY(XY.From(e, 'client'))
+    const { x, y } = StageViewport.toSceneXY(xy_client(e))
     const pointOBB = new OBB(x, y, 1, 1, 0)
     return this.transformOBB.obbHitTest(pointOBB)
   }

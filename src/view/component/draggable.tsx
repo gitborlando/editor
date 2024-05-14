@@ -1,13 +1,12 @@
 import { observer, useLocalObservable } from 'mobx-react'
 import { FC, ReactNode, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { xy_ } from '~/editor/math/xy'
+import { xy_, xy_plus } from '~/editor/math/xy'
 import { Drag } from '~/global/event/drag'
 import { createSignal } from '~/shared/signal/signal'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { useClickAway } from '~/shared/utils/event'
 import { IXY } from '~/shared/utils/normal'
-import { XY } from '~/shared/xy'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import Asset from '../ui-utility/assets'
@@ -71,7 +70,7 @@ export const DraggableComp: FC<IDraggableComp> = observer(
             const { innerWidth, innerHeight } = window
             Drag.onSlide(({ shift, current }) => {
               if (current.x > innerWidth || current.y > innerHeight) return
-              state.xy = XY.From(start).plus(shift)
+              state.xy = xy_plus(start, shift)
               onXYChange?.(state.xy)
             })
           }}>

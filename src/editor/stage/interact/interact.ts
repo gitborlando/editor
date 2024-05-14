@@ -1,9 +1,9 @@
 import autobind from 'class-autobind-decorator'
+import { xy_client } from '~/editor/math/xy'
 import { OperateNode } from '~/editor/operate/node'
 import { SchemaUtil } from '~/editor/schema/util'
 import { Drag } from '~/global/event/drag'
 import { batchSignal, createSignal } from '~/shared/signal/signal'
-import { XY } from '~/shared/xy'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageCreate } from './create'
@@ -46,7 +46,7 @@ class StageInteractService {
     const handler = (e: Event) => {
       if (Pixi.isForbidEvent) return OperateNode.clearHover()
       OperateNode.clearHover()
-      const realXY = StageViewport.toViewportXY(XY.From(e, 'client'))
+      const realXY = StageViewport.toViewportXY(xy_client(e))
       const endBatch = batchSignal(OperateNode.hoverIds)
       SchemaUtil.traverseCurPageChildIds(({ id }) => {
         const { element } = OperateNode.getNodeRuntime(id)
