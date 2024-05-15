@@ -77,9 +77,6 @@ class OperateGeometryService {
   private delta(key: keyof IGeometry) {
     return this.geometry[key] - this.lastGeometry[key]
   }
-  private deltaDivide(key: keyof IGeometry) {
-    return this.geometry[key] / this.lastGeometry[key]
-  }
   private setupGeometry() {
     if (OperateNode.selectIds.value.size === 1) {
       const node = OperateNode.selectNodes[0]
@@ -117,25 +114,10 @@ class OperateGeometryService {
       }
     })
   }
-  private patchChangeToVectorPoints(id: string) {
-    const node = Schema.find<IIrregular>(id)
-    if (node.type !== 'vector') return
-    if (node.vectorType !== 'irregular') return
-    node.points.forEach((point, i) => {
-      if (this.operateKeys.has('width')) {
-        point.x *= 1 + this.delta('width') / node.width
-        point.handleLeft && (point.handleLeft.x *= 1 + this.delta('width') / node.width)
-        point.handleRight && (point.handleRight.x *= 1 + this.delta('width') / node.width)
-      }
-      if (this.operateKeys.has('height')) {
-        point.y *= 1 + this.delta('height') / node.height
-        point.handleLeft && (point.handleLeft.y *= 1 + this.delta('height') / node.height)
-        point.handleRight && (point.handleRight.y *= 1 + this.delta('height') / node.height)
-      }
-    })
-  }
   private applyChangeToNode(traverseData: ITraverseData) {
     const { node, depth } = traverseData
+
+    if (depth === 0) this.patchChangeToVectorPoints(node.id)
 
     if (this.operateKeys.has('x')) {
       Schema.itemReset(node, ['x'], node.x + this.delta('x'))
@@ -176,8 +158,23 @@ class OperateGeometryService {
         Schema.itemReset(node, ['y'], newXY.y + centerShift.y)
       }
     }
-
-    this.patchChangeToVectorPoints(node.id)
+  }
+  private patchChangeToVectorPoints(id: string) {
+    const node = Schema.find<IIrregular>(id)
+    if (node.type !== 'vector') return
+    if (node.vectorType !== 'irregular') return
+    node.points.forEach((point, i) => {
+      if (this.operateKeys.has('width')) {
+        point.x *= 1 + this.delta('width') / node.width
+        point.handleLeft && (point.handleLeft.x *= 1 + this.delta('width') / node.width)
+        point.handleRight && (point.handleRight.x *= 1 + this.delta('width') / node.width)
+      }
+      if (this.operateKeys.has('height')) {
+        point.y *= 1 + this.delta('height') / node.height
+        point.handleLeft && (point.handleLeft.y *= 1 + this.delta('height') / node.height)
+        point.handleRight && (point.handleRight.y *= 1 + this.delta('height') / node.height)
+      }
+    })
   }
 }
 
