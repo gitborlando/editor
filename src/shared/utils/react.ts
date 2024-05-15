@@ -9,7 +9,9 @@ import {
   useMemo,
   useRef,
 } from 'react'
+import { Editor } from '~/editor/editor/editor'
 import { StageViewport } from '~/editor/stage/viewport'
+import Immui from '../immui/immui'
 import { useHookSignal } from '../signal/signal-react'
 import { IAnyFunc } from './normal'
 
@@ -53,4 +55,10 @@ export function useZoom() {
 
 export function useAsyncEffect(callback: Function, deps = []) {
   useEffect(() => void (async () => callback())(), deps)
+}
+
+export function useMatchPatch(...pattens: string[]) {
+  useHookSignal(Editor.onReviewSchema, ({ path }, update) => {
+    pattens.forEach((patten) => Immui.matchPath(path, patten) && update())
+  })
 }

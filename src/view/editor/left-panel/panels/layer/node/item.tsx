@@ -7,13 +7,12 @@ import { StageSelect } from '~/editor/stage/interact/select'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu'
-import Immui from '~/shared/immui/immui'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { stopPropagation } from '~/shared/utils/event'
 import { IrregularUtils } from '~/shared/utils/irregular'
 import { iife, noopFunc } from '~/shared/utils/normal'
-import { useMemoComp } from '~/shared/utils/react'
+import { useMatchPatch, useMemoComp } from '~/shared/utils/react'
 import { SchemaUtil } from '~/shared/utils/schema'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
@@ -84,9 +83,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     const PathSvgComp = useMemoComp<SVGProps<SVGSVGElement>>([], (props) => {
       const instantNode = Schema.find<IIrregular>(node.id)
       const d = IrregularUtils.getNodeSvgPath(instantNode)
-      useHookSignal(Editor.onReviewSchema, ({ path }, update) => {
-        if (Immui.matchPath(path, `/${node.id}/points`)) update()
-      })
+      useMatchPatch(`/${node.id}/points`)
       return (
         <svg width='20' height='20' viewBox='0 0 20 20' {...props}>
           <path d={d} stroke='currentColor' strokeWidth={1} style={{ fill: 'none' }} />

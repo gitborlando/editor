@@ -20,6 +20,14 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageViewport.zoom)
   const { classes, theme, css } = useStyles({ top: StageViewport.bound.value.y })
 
+  const AutoSaveComp = useMemoComp([], ({}) => {
+    return (
+      <Flex layout='h' className={''}>
+        <Flex className={''}></Flex>
+      </Flex>
+    )
+  })
+
   const ClientComp = useMemoComp([], ({}) => {
     return (
       <Flex
@@ -86,6 +94,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
           <Icon size={28}>{Asset.favIcon.shiyangyang}</Icon>
           <h4 style={{ color: hslBlueColor(60), fontSize: 16 }}>屎羊羊编辑器</h4>
         </Flex>
+        <AutoSaveComp />
       </Flex>
       <Flex layout='c' className={classes.centerGroup}>
         <RecordIcons />

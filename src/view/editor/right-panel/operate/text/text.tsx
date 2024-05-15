@@ -6,7 +6,7 @@ import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/event'
 import { iife } from '~/shared/utils/normal'
-import { useMemoComp } from '~/shared/utils/react'
+import { useMatchPatch, useMemoComp } from '~/shared/utils/react'
 import { DraggableComp } from '~/view/component/draggable'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
@@ -35,13 +35,14 @@ export const TextComp: FC<ITextComp> = ({}) => {
     )
   })
 
-  const TextEditComp = useMemoComp([{}], ({}) => {
+  const TextEditComp = useMemoComp([], ({}) => {
     const { setTextContent } = OperateText
     const textNode = Schema.find<IText>(intoEditing.value)
     const xy = iife(() => {
       const { x, y, width } = textNode
       return StageViewport.sceneStageToClientXY({ x: x + width, y })
     })
+    useMatchPatch(`/${textNode.id}/content`)
 
     return (
       <DraggableComp

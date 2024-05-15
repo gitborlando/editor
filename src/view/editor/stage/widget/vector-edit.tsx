@@ -1,17 +1,15 @@
 import { Container, Graphics } from '@pixi/react'
 import { FC, Fragment, memo } from 'react'
-import { Editor } from '~/editor/editor/editor'
 import { xy_angle, xy_minus, xy_opposite, xy_plus, xy_rotate } from '~/editor/math/xy'
 import { OperateNode } from '~/editor/operate/node'
 import { Schema } from '~/editor/schema/schema'
 import { INode, IPoint, ISchemaPropKey } from '~/editor/schema/type'
 import { StageDraw } from '~/editor/stage/draw/draw'
 import { PIXI } from '~/editor/stage/pixi'
-import Immui from '~/shared/immui/immui'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { COLOR, hslBlueColor } from '~/shared/utils/color'
 import { IXY, iife } from '~/shared/utils/normal'
-import { useMemoComp, useZoom } from '~/shared/utils/react'
+import { useMatchPatch, useMemoComp, useZoom } from '~/shared/utils/react'
 import { PointComp } from './point'
 
 type IVectorEditComp = {}
@@ -36,9 +34,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
       return []
     })
 
-    useHookSignal(Editor.onReviewSchema, ({ path }, update) => {
-      if (Immui.matchPath(path, '/*/points')) update()
-    })
+    useMatchPatch('/?/points')
 
     const EditorPointComp = useMemoComp<{ index: number; point: IPoint }>(
       [zoom, curIndex.value, curHandleIndex.value],

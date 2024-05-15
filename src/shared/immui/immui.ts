@@ -174,6 +174,10 @@ export default class Immui {
   static matchPath = (path: string, pattern: string) => {
     const pathArr = path.split('/')
     const patternArr = pattern.split('/')
+    if (pattern.endsWith('$')) {
+      if (pathArr.length !== patternArr.length - 1) return false
+      patternArr.splice(-1, 1)
+    }
     for (let i = 0; i < patternArr.length; i++) {
       if (patternArr[i] === '*' || patternArr[i] === '?' || patternArr[i] === '') continue
       if (patternArr[i] !== pathArr[i]) return false
