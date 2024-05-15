@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { xy_ } from '~/editor/math/xy'
 import { IFill, IFillKeys } from '~/editor/schema/type'
-import Immui, { IImmuiPatch } from '~/shared/immui/immui'
+import Immui, { ImmuiPatch } from '~/shared/immui/immui'
 import { createSignal } from '~/shared/signal/signal'
 import { IXY } from '~/shared/utils/normal'
 
@@ -18,7 +18,7 @@ class UIPickerService {
   loadingWebImageUrl = createSignal('')
   from = <'fill' | 'stroke' | 'shadow'>''
   index = 0
-  onChange = createSignal<IImmuiPatch[]>()
+  onChange = createSignal<ImmuiPatch[]>()
   private immui = new Immui()
   initHook() {
     this.onChange.intercept((patches) => {

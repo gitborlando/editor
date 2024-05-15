@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { createSignal } from '~/shared/signal/signal'
-import Immui, { IApplyPatchOption, IImmuiPatch } from '../../shared/immui/immui'
+import Immui, { ImmuiApplyPatchOption, ImmuiPatch } from '../../shared/immui/immui'
 import { SchemaHistory } from './history'
 import {
   IClient,
@@ -50,7 +50,7 @@ class SchemaService {
   itemDelete(item: ISchemaItem, keypath: ISchemaPropKey[]) {
     this.immui.delete(this.schema, [item.id, ...keypath])
   }
-  applyPatches(patches: IImmuiPatch[], option?: IApplyPatchOption) {
+  applyPatches(patches: ImmuiPatch[], option?: ImmuiApplyPatchOption) {
     this.immui.applyPatches(this.schema, patches, option)
   }
   nextSchema() {

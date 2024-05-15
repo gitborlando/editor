@@ -1,6 +1,3 @@
-import autobind from 'class-autobind-decorator'
-
-@autobind
 export class Cache<K, V> {
   cache = new Map<K, V>()
   private compareCache = new Map<K, any[]>()

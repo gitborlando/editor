@@ -17,17 +17,19 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
   const { stack, index } = SchemaHistory
   useHookSignal(index)
 
-  const CardComp = useMemoComp<{ history: ISchemaHistory }>([index.value], ({ history }) => {
+  const CardComp = useMemoComp<{
+    history: ISchemaHistory
+    active: boolean
+  }>([], ({ active, history }) => {
     const randomColor = useMemo(() => hslColor(Math.random() * 360, 80, 35), [])
     const ref = useRef<HTMLDivElement>(null)
-    const isActive = index.value === stack.indexOf(history)
     const collapsed = useAutoSignal(true)
     const { operations, description } = history
     const needCollapsedItems = operations.length > 6
     const [itemCollapsed, setItemCollapsed] = useState(needCollapsedItems)
     useEffect(() => {
-      if (isActive) ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-    }, [isActive])
+      if (active) ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }, [active])
 
     return (
       <Flex
@@ -36,7 +38,7 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
         className={css({
           ...t.rect('100%', 'fit-content'),
           ...t.default$.borderBottom,
-          ...(isActive && { backgroundColor: hslBlueColor(98) }),
+          ...(active && { backgroundColor: hslBlueColor(98) }),
         })}>
         <Flex
           layout='h'
@@ -111,7 +113,7 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
   return (
     <Flex layout='v' className={classes.Diffs}>
       {stack.map((history, i) => (
-        <CardComp history={history} key={i} />
+        <CardComp active={i === index.value} history={history} key={i} />
       ))}
     </Flex>
   )

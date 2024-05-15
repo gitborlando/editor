@@ -5,7 +5,7 @@ import {
   TextStyleFontStyle,
   TextStyleFontWeight,
 } from 'pixi.js'
-import { IImmuiPatch } from '~/shared/immui/immui'
+import { ImmuiPatch } from '~/shared/immui/immui'
 import { AllKeys, IXY } from '~/shared/utils/normal'
 
 export type ID = string
@@ -263,7 +263,7 @@ export type ISchemaPropKey =
 export type ISchemaOperation = {
   id: ID
   timestamp: number
-  patches: IImmuiPatch[]
+  patches: ImmuiPatch[]
   description?: string
   noHistory?: boolean
 }

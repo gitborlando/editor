@@ -37,7 +37,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
     })
 
     useHookSignal(Editor.onReviewSchema, ({ path }, update) => {
-      if (Immui.pathMatcher(path, '/*/points')) update()
+      if (Immui.matchPath(path, '/*/points')) update()
     })
 
     const EditorPointComp = useMemoComp<{ index: number; point: IPoint }>(

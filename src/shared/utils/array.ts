@@ -14,7 +14,6 @@ export function stableIndex<T extends any = any>(arr: T[], index?: number) {
 }
 
 export const BREAK = 'break'
-
 export function loopFor<T>(arr: T[], callback: (cur: T, next: T, last: T, index: number) => any) {
   for (let index = 0; index < arr.length; index++) {
     const left = index === 0 ? arr.length - 1 : index - 1
@@ -22,4 +21,8 @@ export function loopFor<T>(arr: T[], callback: (cur: T, next: T, last: T, index:
     const res = callback(arr[index], arr[right], arr[left], index)
     if (res === BREAK) break
   }
+}
+
+export function reverse<T extends any>(arr: T[]) {
+  return arr.slice().reverse()
 }

@@ -1,9 +1,7 @@
-import fastDeepEqual from 'deep-equal'
 import { runInAction } from 'mobx'
 import { createCache } from '../cache'
 
 export const This = globalThis as any
-export { fastDeepEqual }
 
 export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
@@ -87,4 +85,17 @@ export function macro_match(_input: TemplateStringsArray) {
     )
   })
   return (left: any) => test(left)
+}
+
+export function clone<T extends any>(object: T): T {
+  if (typeof object !== 'object') return object
+  const newObj: any = Array.isArray(object) ? [] : {}
+  for (const key in object) newObj[key] = clone(object[key])
+  return newObj
+}
+
+export function timeFor(count: number, func: any, name?: string) {
+  console.time(name || `${count}`)
+  for (let i = 0; i < count; i++) func()
+  console.timeEnd(name || `${count}`)
 }

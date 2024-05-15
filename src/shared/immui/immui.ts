@@ -1,11 +1,11 @@
 type IKey = string | number
-export type IImmuiPatch = {
+export type ImmuiPatch = {
   type: 'add' | 'remove' | 'replace'
   path: string
   value: any
   oldValue?: any
 }
-export type IApplyPatchOption = {
+export type ImmuiApplyPatchOption = {
   reverse?: boolean
   prefix?: string
 }
@@ -13,7 +13,7 @@ export type IApplyPatchOption = {
 export default class Immui {
   private keyPathDiffMap = <any>{}
   private noCommitPatch = false
-  private typePathPatchMap = new Map<string, IImmuiPatch[]>()
+  private typePathPatchMap = new Map<string, ImmuiPatch[]>()
 
   add = <T>(object: object, keyPath: string | IKey[], value: T) => {
     const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
@@ -21,14 +21,16 @@ export default class Immui {
     let current: any = object
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i]
-      if (!current) console.log('Error at add function')
       current = current[key]
+      if (!current) console.log('Error at add function')
     }
 
-    if (!current) console.log('Error at add function')
     const lastKey = keys[keys.length - 1]
-    if (Array.isArray(current)) current.splice(<any>lastKey, 0, value)
-    else current[lastKey] = value
+    if (Array.isArray(current)) {
+      current.splice(<any>lastKey, 0, value)
+    } else {
+      current[lastKey] = value
+    }
 
     return this.getPatch('add', keys, value)
   }
@@ -39,16 +41,12 @@ export default class Immui {
     let current: any = object
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i]
-      if (!current) {
-        console.log('Error at reset function')
-        console.log(object, keys, i)
-      }
       current = current[key]
+      if (!current) console.log('Error at reset function')
     }
 
-    if (!current) console.log('Error at reset function')
     const lastKey = keys[keys.length - 1]
-    const oldValue = current[lastKey]
+    let oldValue = current[lastKey]
     current[lastKey] = value
 
     return this.getPatch('replace', keys, value, oldValue)
@@ -56,18 +54,22 @@ export default class Immui {
 
   delete = (object: object, keyPath: string | IKey[]) => {
     const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
+
     let current: any = object
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i]
-      if (!current) console.log('Error at delete function')
       current = current[key]
+      if (!current) console.log('Error at delete function')
     }
 
-    if (!current) console.log('Error at delete function')
     const lastKey = keys[keys.length - 1]
     const oldValue = current[lastKey]
-    if (Array.isArray(current)) current.splice(<any>lastKey, 1)
-    else delete current[lastKey]
+
+    if (Array.isArray(current)) {
+      current.splice(<any>lastKey, 1)
+    } else {
+      delete current[lastKey]
+    }
 
     return this.getPatch('remove', keys, undefined, oldValue)
   }
@@ -106,11 +108,15 @@ export default class Immui {
 
   applyPatches = <T extends object>(
     object: T,
-    patches: IImmuiPatch[],
-    option: IApplyPatchOption = {}
+    patches: ImmuiPatch[],
+    option: ImmuiApplyPatchOption = {}
   ) => {
     const { reverse, prefix = '' } = option
-    if (reverse) patches = patches.reverse()
+
+    if (reverse) {
+      patches = patches.slice().reverse()
+      this.noCommitPatch = true
+    }
 
     patches.forEach((patch) => {
       const path = prefix + patch.path
@@ -118,14 +124,14 @@ export default class Immui {
       switch (patch.type) {
         case 'add':
           if (reverse) this.delete(object, keys)
-          else this.add(object, keys, patch.value)
+          else this.add(object, keys, clone(patch.value))
           return
         case 'replace':
-          if (reverse) this.reset(object, keys, patch.oldValue)
-          else this.reset(object, keys, patch.value)
+          if (reverse) this.reset(object, keys, clone(patch.oldValue))
+          else this.reset(object, keys, clone(patch.value))
           return
         case 'remove':
-          if (reverse) this.add(object, keys, patch.oldValue)
+          if (reverse) this.add(object, keys, clone(patch.oldValue))
           else this.delete(object, keys)
           return
       }
@@ -154,7 +160,7 @@ export default class Immui {
     })
 
     const path = '/' + keys.join('/')
-    const patch = { type, path, value, oldValue }
+    const patch = { type, path, value: clone(value), oldValue: clone(oldValue) }
 
     if (this.noCommitPatch) return patch
 
@@ -165,13 +171,20 @@ export default class Immui {
     return patch
   }
 
-  static pathMatcher = (path: string, pattern: string) => {
+  static matchPath = (path: string, pattern: string) => {
     const pathArr = path.split('/')
     const patternArr = pattern.split('/')
     for (let i = 0; i < patternArr.length; i++) {
-      if (patternArr[i] === '*' || patternArr[i] === '') continue
+      if (patternArr[i] === '*' || patternArr[i] === '?' || patternArr[i] === '') continue
       if (patternArr[i] !== pathArr[i]) return false
     }
     return true
   }
+}
+
+function clone(object: any) {
+  if (typeof object !== 'object') return object
+  const newObj: any = Array.isArray(object) ? [] : {}
+  for (const key in object) newObj[key] = clone(object[key])
+  return newObj
 }

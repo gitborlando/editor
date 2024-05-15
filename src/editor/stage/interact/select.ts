@@ -1,10 +1,12 @@
 import autobind from 'class-autobind-decorator'
+import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { Editor } from '~/editor/editor/editor'
 import { OBB } from '~/editor/math/obb'
 import { OperateNode } from '~/editor/operate/node'
 import { OperateText } from '~/editor/operate/text'
 import { Schema } from '~/editor/schema/schema'
+import { ID } from '~/editor/schema/type'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu'
@@ -27,6 +29,7 @@ class StageSelectService {
   duringMarqueeSelect = createSignal()
   private marqueeOBB?: OBB
   private doubleClickTimeStamp?: number
+  private lastSelectIds = <ID[]>[]
   startInteract() {
     Pixi.addListener('mousedown', this.onMouseDown)
     Pixi.addListener('click', this.onClick)
@@ -63,6 +66,7 @@ class StageSelectService {
   private onLeftMouseDown(e: MouseEvent) {
     if (StageWidgetTransform.mouseOnEdge) return
     if (StageWidgetTransform.mouseIn(e)) return
+    this.lastSelectIds = [...OperateNode.selectIds.value]
     if (!this.hoverId) {
       this.clearSelect()
       this.onMarqueeSelect()
@@ -111,6 +115,7 @@ class StageSelectService {
     if (SchemaUtil.isPageFrame(this.hoverId)) return
     this.clearSelect()
     OperateNode.select(this.hoverId)
+    if (equal([...OperateNode.selectIds.value], this.lastSelectIds)) return
     OperateNode.commitFinalSelect()
     UILeftPanelLayer.expandAncestor(this.hoverId)
     this.afterSelect.dispatch('stage-single')
@@ -158,6 +163,7 @@ class StageSelectService {
         this.marquee.value = undefined
         this.marquee.dispatch()
         this.afterSelect.dispatch('marquee')
+        if (equal([...OperateNode.selectIds.value], this.lastSelectIds)) return
         OperateNode.commitFinalSelect()
       })
   }

@@ -23,16 +23,15 @@ class SchemaHistoryService {
   commit(description: string) {
     if (this.isInAction) return
     if (!this.isStart) {
-      return (this.lastOperationsLength = Schema.operationList.length)
+      return (Schema.operationList = [])
     }
     if (this.index.value !== this.stack.length - 1) {
       this.stack.splice(this.index.value + 1)
     }
-    let operations = Schema.operationList.slice(this.lastOperationsLength)
-    operations = operations.filter((i) => !i.noHistory)
+    const operations = Schema.operationList.filter((i) => !i.noHistory)
     this.stack.push({ operations, description })
     this.index.dispatch(this.stack.length - 1)
-    this.lastOperationsLength = Schema.operationList.length
+    Schema.operationList = []
   }
   undo() {
     if (!this.canUndo) return

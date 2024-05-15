@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
-import { IImmuiPatch } from '~/shared/immui/immui'
+import { ImmuiPatch } from '~/shared/immui/immui'
 import { createSignal } from '~/shared/signal/signal'
 import { addListener } from '~/shared/utils/event'
 import { Schema } from '../schema/schema'
@@ -9,7 +9,7 @@ import { ICommand, commands } from './command'
 @autobind
 export class EditorService {
   commands = commands
-  onReviewSchema = createSignal<IImmuiPatch>()
+  onReviewSchema = createSignal<ImmuiPatch>()
   private lastOperationLength = 0
   initHook() {
     this.bindHotkeys()

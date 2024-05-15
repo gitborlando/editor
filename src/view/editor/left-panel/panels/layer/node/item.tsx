@@ -85,7 +85,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
       const instantNode = Schema.find<IIrregular>(node.id)
       const d = IrregularUtils.getNodeSvgPath(instantNode)
       useHookSignal(Editor.onReviewSchema, ({ path }, update) => {
-        if (Immui.pathMatcher(path, `/${node.id}/points`)) update()
+        if (Immui.matchPath(path, `/${node.id}/points`)) update()
       })
       return (
         <svg width='20' height='20' viewBox='0 0 20 20' {...props}>
