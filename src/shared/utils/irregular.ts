@@ -1,5 +1,5 @@
 import { IIrregular, IPoint } from '~/editor/schema/type'
-import { loopFor } from './list'
+import { loopFor } from './array'
 import { IXY } from './normal'
 
 export class IrregularUtils {
@@ -28,7 +28,7 @@ export class IrregularUtils {
     if (point.handleLeft) point.handleLeft.y *= y
     if (point.handleRight) point.handleRight.y *= y
   }
-  static multiPointXY(point: IPoint, xy: IXY) {
+  static multiplyPointXY(point: IPoint, xy: IXY) {
     this.multiPointX(point, xy.x)
     this.multiPointY(point, xy.y)
   }

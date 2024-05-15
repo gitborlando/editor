@@ -1,12 +1,11 @@
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import { initEditor } from '~/editor/editor/initialize'
-import { OperateNode } from '~/editor/operate/node'
 import { Schema } from '~/editor/schema/schema'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { EditorSchemaContext, EditorSelectedNodesContext } from './context'
+import { EditorSchemaContext } from './context'
 import { HeaderComp } from './header/header'
 import { LeftPanelComp } from './left-panel/left-panel'
 import { RightPanelComp } from './right-panel/right-panel'
@@ -22,14 +21,12 @@ export const EditorComp: FC<IEditorComp> = memo(({}) => {
   return (
     <Flex layout='v' className={classes.Editor} onContextMenu={(e) => e.preventDefault()}>
       <EditorSchemaContext.Provider value={Schema.schema}>
-        <EditorSelectedNodesContext.Provider value={OperateNode.selectedNodes.value}>
-          <HeaderComp />
-          <Flex layout='h' className={classes.main}>
-            <LeftPanelComp />
-            <MainStageComp />
-            <RightPanelComp />
-          </Flex>
-        </EditorSelectedNodesContext.Provider>
+        <HeaderComp />
+        <Flex layout='h' className={classes.main}>
+          <LeftPanelComp />
+          <MainStageComp />
+          <RightPanelComp />
+        </Flex>
       </EditorSchemaContext.Provider>
     </Flex>
   )

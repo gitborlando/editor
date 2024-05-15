@@ -1,8 +1,7 @@
-import autobind from 'class-autobind-decorator'
 import { forEach } from 'lodash-es'
-import { OperateMeta } from '../operate/meta'
-import { Schema } from './schema'
-import { ID, INode, INodeParent, ISchemaItem } from './type'
+import { OperateMeta } from '~/editor/operate/meta'
+import { Schema } from '~/editor/schema/schema'
+import { ID, INode, INodeParent, ISchemaItem } from '~/editor/schema/type'
 
 export type ITraverseData = {
   id: ID
@@ -18,30 +17,33 @@ export type ITraverseData = {
 }
 type ITraverseCallback = (arg: ITraverseData) => any
 
-@autobind
-class SchemaUtilService {
-  isPage(id: ID) {
+export class SchemaUtil {
+  static isPage(id: ID) {
     return id.startsWith('page_')
   }
-  is<T extends ISchemaItem>(item: ISchemaItem, type: ISchemaItem['type']): item is T {
+  static is<T extends ISchemaItem>(item: ISchemaItem, type: ISchemaItem['type']): item is T {
     return item.type === type
   }
-  isById(id: ID, type: ISchemaItem['type'] | 'nodeParent'): boolean {
+  static isById(id: ID, type: ISchemaItem['type'] | 'nodeParent'): boolean {
     if (type === 'nodeParent') return ['page', 'frame', 'group'].includes(Schema.find(id).type)
     return Schema.find(id).type === type
   }
-  isPageFrame(id: ID) {
+  static isPageFrame(id: ID) {
     const node = Schema.find(id)
     return node.type === 'frame' && this.isPage(node.parentId)
   }
-  getChildren(id: ID | INodeParent) {
+  static getChildren(id: ID | INodeParent) {
     const childIds = (typeof id !== 'string' ? id : Schema.find<INodeParent>(id))?.childIds || []
     return childIds.map((id) => Schema.find<INode>(id))
   }
-  traverseCurPageChildIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
+  static traverseCurPageChildIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
     this.traverseIds(OperateMeta.curPage.value.childIds, callback, bubbleCallback)
   }
-  traverseIds(ids: string[], callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
+  static traverseIds(
+    ids: string[],
+    callback: ITraverseCallback,
+    bubbleCallback?: ITraverseCallback
+  ) {
     const abort = new AbortController()
     const traverse = (ids: string[], depth: number, upLevelRef?: ITraverseData) => {
       forEach(ids, (id, index) => {
@@ -60,5 +62,3 @@ class SchemaUtilService {
     traverse(ids, 0)
   }
 }
-
-export const SchemaUtil = new SchemaUtilService()

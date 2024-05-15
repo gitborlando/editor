@@ -1,10 +1,10 @@
 import autobind from 'class-autobind-decorator'
 import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal/signal'
-import { getNodeCenterXY } from '~/shared/utils/normal'
-import { xy_rotate } from '../math/xy'
+import { ITraverseData, SchemaUtil } from '~/shared/utils/schema'
+import { xy_minus, xy_rotate } from '../math/xy'
 import { Schema } from '../schema/schema'
-import { ITraverseData, SchemaUtil } from '../schema/util'
+import { IIrregular } from '../schema/type'
 import { OperateNode } from './node'
 
 function createInitGeometry() {
@@ -77,6 +77,9 @@ class OperateGeometryService {
   private delta(key: keyof IGeometry) {
     return this.geometry[key] - this.lastGeometry[key]
   }
+  private deltaDivide(key: keyof IGeometry) {
+    return this.geometry[key] / this.lastGeometry[key]
+  }
   private setupGeometry() {
     if (OperateNode.selectIds.value.size === 1) {
       const node = OperateNode.selectNodes[0]
@@ -114,24 +117,23 @@ class OperateGeometryService {
       }
     })
   }
-  // private patchChangeToVectorPoints(id: string) {
-  //   const node = Schema.find(id)
-  // if (node.type !== 'vector') return
-  // const { record, changedKeys } = this.oneTickChange
-  // const { width, height } = record
-  // node.points.forEach((point) => {
-  //   if (this.operateKeys.has('width') && width) {
-  //     point.x *= 1 + (width.new - width.old) / node.width
-  //     point.handleLeft && (point.handleLeft.x *= width.new / width.old)
-  //     point.handleRight && (point.handleRight.x *= width.new / width.old)
-  //   }
-  //   if (this.operateKeys.has('height') && height) {
-  //     point.y *= 1 + (height.new - height.old) / node.height
-  //     point.handleLeft && (point.handleLeft.y *= height.new / height.old)
-  //     point.handleRight && (point.handleRight.y *= height.new / height.old)
-  //   }
-  // })
-  // }
+  private patchChangeToVectorPoints(id: string) {
+    const node = Schema.find<IIrregular>(id)
+    if (node.type !== 'vector') return
+    if (node.vectorType !== 'irregular') return
+    node.points.forEach((point, i) => {
+      if (this.operateKeys.has('width')) {
+        point.x *= 1 + this.delta('width') / node.width
+        point.handleLeft && (point.handleLeft.x *= 1 + this.delta('width') / node.width)
+        point.handleRight && (point.handleRight.x *= 1 + this.delta('width') / node.width)
+      }
+      if (this.operateKeys.has('height')) {
+        point.y *= 1 + this.delta('height') / node.height
+        point.handleLeft && (point.handleLeft.y *= 1 + this.delta('height') / node.height)
+        point.handleRight && (point.handleRight.y *= 1 + this.delta('height') / node.height)
+      }
+    })
+  }
   private applyChangeToNode(traverseData: ITraverseData) {
     const { node, depth } = traverseData
 
@@ -157,6 +159,7 @@ class OperateGeometryService {
       Schema.itemReset(node, ['points'], this.geometry['points'])
     }
     if (this.operateKeys.has('rotation')) {
+      const { getNodeCenterXY } = OperateNode
       const centerXY = getNodeCenterXY(node)
       const newXY = xy_rotate(node, centerXY, this.delta('rotation'))
       Schema.itemReset(node, ['rotation'], node.rotation + this.delta('rotation'))
@@ -166,13 +169,15 @@ class OperateGeometryService {
       } else {
         let upLevelRef = traverseData.upLevelRef!
         while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
-        const centerShift = centerXY
-          .rotate(getNodeCenterXY(upLevelRef.node), this.delta('rotation'))
-          .minus(centerXY)
+        const ancestorCenter = getNodeCenterXY(upLevelRef.node)
+        const newCenter = xy_rotate(centerXY, ancestorCenter, this.delta('rotation'))
+        const centerShift = xy_minus(newCenter, centerXY)
         Schema.itemReset(node, ['x'], newXY.x + centerShift.x)
         Schema.itemReset(node, ['y'], newXY.y + centerShift.y)
       }
     }
+
+    this.patchChangeToVectorPoints(node.id)
   }
 }
 

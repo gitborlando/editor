@@ -4,7 +4,7 @@ import { IGeometry, OperateGeometry } from '~/editor/operate/geometry'
 import { OperateNode } from '~/editor/operate/node'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal, useSignal } from '~/shared/signal/signal-react'
-import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
+import { useDownUpTracker } from '~/shared/utils/event'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 
 type IGeometryItemComp = {

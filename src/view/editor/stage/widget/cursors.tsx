@@ -4,7 +4,7 @@ import { xy_toArray } from '~/editor/math/xy'
 import { Schema } from '~/editor/schema/schema'
 import { IClient } from '~/editor/schema/type'
 import { hslColor } from '~/shared/utils/color'
-import { useMemoSubComponent } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -16,7 +16,7 @@ export const CursorsComp: FC<ICursorsComp> = ({}) => {
   const { classes, theme } = useStyles({})
   const clients = Object.values(Schema.meta.clients)
 
-  const CursorComp = useMemoSubComponent<{ client: IClient }>([], ({ client }) => {
+  const CursorComp = useMemoComp<{ client: IClient }>([], ({ client }) => {
     const randomColor = useMemo(() => hslColor(Math.random() * 360, 80, 35), [])
     const [left, top] = xy_toArray(client.mouse)
     return (

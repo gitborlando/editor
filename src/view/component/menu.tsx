@@ -2,7 +2,7 @@ import { FC, memo } from 'react'
 import { ICommand } from '~/editor/editor/command'
 import { Menu } from '~/global/menu'
 import { useHookSignal } from '~/shared/signal/signal-react'
-import { useSubComponent } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Divide } from '~/view/ui-utility/widget/divide'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -16,7 +16,7 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
   const { setRef, xy, menuOptions, closeMenu } = Menu
   useHookSignal(menuOptions)
 
-  const MenuItemComp = useSubComponent<{ item: ICommand }>([], ({ item }) => {
+  const MenuItemComp = useMemoComp<{ item: ICommand }>([], ({ item }) => {
     return (
       <Flex
         layout='h'
@@ -28,11 +28,11 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
     )
   })
 
-  const DivideComp = useSubComponent([], ({}) => {
+  const DivideComp = useMemoComp([], ({}) => {
     return <Divide direction='h' length='100%' margin={4} bgColor='rgba(0,0,0,0.05)' />
   })
 
-  const MenuOptionsComp = useSubComponent<{ menuOptions: ICommand[][] }>([], ({ menuOptions }) => {
+  const MenuOptionsComp = useMemoComp<{ menuOptions: ICommand[][] }>([], ({ menuOptions }) => {
     return menuOptions.map((group, groupIndex) => {
       const menuGroup = group.map((item, index) => <MenuItemComp key={index} item={item} />)
       if (groupIndex !== menuOptions.length - 1) menuGroup.push(<DivideComp key={Math.random()} />)

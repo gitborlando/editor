@@ -6,8 +6,8 @@ import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { Uploader } from '~/global/upload'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { rgba } from '~/shared/utils/color'
-import { iife, useSubComponent } from '~/shared/utils/normal'
-import { withSuspense } from '~/shared/utils/react'
+import { iife } from '~/shared/utils/normal'
+import { useMemoComp, withSuspense } from '~/shared/utils/react'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -26,7 +26,7 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
     setFillUrl(url)
   }
 
-  const ImgComp = useSubComponent([fill.url], ({}) => {
+  const ImgComp = useMemoComp([fill.url], ({}) => {
     const image = usePromise<[string], IImage>(() => Img.getImageAsync(fill.url), [fill.url])
     const imageBound = iife(() => {
       const { width, height } = image

@@ -1,7 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { makeObservable, observable } from 'mobx'
 import { createSignal } from '~/shared/signal/signal'
-import { IRect, IXY, makeAction, noopFunc, type ICursor } from '~/shared/utils/normal'
+import { IRect, IXY, makeAction, noopFunc } from '~/shared/utils/normal'
 
 export type IDragData = {
   dragService: DragService
@@ -13,8 +12,7 @@ export type IDragData = {
 
 @autobind
 class DragService {
-  @observable canMove = false
-  @observable cursor: ICursor = 'auto'
+  canMove = false
   started = false
   afterDown = createSignal()
   beforeDrag = createSignal()
@@ -28,9 +26,6 @@ class DragService {
   private startHandler?: (event: MouseEvent) => any
   private moveHandler?: (event: MouseEvent) => any
   private endHandler?: (event: MouseEvent) => any
-  constructor() {
-    makeObservable(this)
-  }
   onDown(callback?: (data: IDragData) => void) {
     if (this.downHandler) return this
     this.downHandler = ({ clientX, clientY }) => {
@@ -158,10 +153,6 @@ class DragService {
     this.moveHandler = undefined
     this.endHandler = undefined
     this.setDataToDefault()
-  }
-  setCursor(cursor: ICursor) {
-    this.cursor = cursor
-    return this
   }
   private calculateMarquee() {
     this.marquee = { x: this.start.x, y: this.start.y, width: 0, height: 0 }

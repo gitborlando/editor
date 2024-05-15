@@ -1,7 +1,7 @@
-import { FC } from 'react'
+import { FC, Fragment } from 'react'
 import { OperateFill } from '~/editor/operate/fill'
 import { IFill } from '~/editor/schema/type'
-import { useSubComponent } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
@@ -16,7 +16,7 @@ export const FillPropComp: FC<IFillPropComp> = ({}) => {
   const { fills, isMultiFills, addFill } = OperateFill
   const hasFills = fills.length > 0
 
-  const HeaderComp = useSubComponent([hasFills], ({}) => {
+  const HeaderComp = useMemoComp([hasFills], ({}) => {
     return (
       <Flex
         layout='h'
@@ -34,13 +34,13 @@ export const FillPropComp: FC<IFillPropComp> = ({}) => {
     )
   })
 
-  const FillListComp = useSubComponent<{ fills: IFill[] }>([], ({ fills }) => {
+  const FillListComp = useMemoComp<{ fills: IFill[] }>([], ({ fills }) => {
     return fills.map((fill, index) =>
       index !== fills.length - 1 ? (
-        <>
+        <Fragment key={index}>
           <FillItemComp key={index} fill={fill} index={index} />
           <Divide direction='h' margin={4} length={'95%'} thickness={0} bgColor='#E3E3E3' />
-        </>
+        </Fragment>
       ) : (
         <FillItemComp key={index} fill={fill} index={index} />
       )

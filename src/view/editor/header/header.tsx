@@ -5,7 +5,7 @@ import { StageInteract } from '~/editor/stage/interact/interact'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
-import { useSubComponent } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -20,7 +20,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageViewport.zoom)
   const { classes, theme, css } = useStyles({ top: StageViewport.bound.value.y })
 
-  const ClientComp = useSubComponent([], ({}) => {
+  const ClientComp = useMemoComp([], ({}) => {
     return (
       <Flex
         className={css({

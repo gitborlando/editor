@@ -3,14 +3,14 @@ import { cloneDeep } from 'lodash-es'
 import { nanoid } from 'nanoid'
 import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal/signal'
-import { firstOne, stableIndex } from '~/shared/utils/list'
+import { firstOne, stableIndex } from '~/shared/utils/array'
+import { SchemaUtil } from '~/shared/utils/schema'
 import { OBB } from '../math/obb'
-import { xy_ } from '../math/xy'
+import { xy_, xy_rotate } from '../math/xy'
 import { SchemaDefault } from '../schema/default'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { ID, INode, INodeParent } from '../schema/type'
-import { SchemaUtil } from '../schema/util'
 import { IStageElement } from '../stage/draw/draw'
 import { Pixi } from '../stage/pixi'
 
@@ -27,7 +27,6 @@ class OperateNodeService {
   hoverIds = createSignal(new Set<ID>())
   selectIds = createSignal(new Set<ID>())
   afterRemoveNodes = createSignal<ID[]>()
-  // selectNodes = createSignal(<INode[]>[])
   selectedNodes = createSignal(<INode[]>[])
   intoEditNodeId = createSignal('')
   private lastSelectedNodeSet = new Set<INode>()
@@ -185,6 +184,11 @@ class OperateNodeService {
       obb: new OBB(0, 0, 0, 0, 0),
       element: null!,
     }))
+  }
+  getNodeCenterXY(node: INode) {
+    const { x, y, width, height } = node
+    const center = xy_(x + width / 2, y + height / 2)
+    return xy_rotate(center, xy_(x, y), node.rotation)
   }
   private autoGetDatumId(selectIds: Set<string>) {
     if (selectIds.size === 0) {

@@ -4,7 +4,7 @@ import { Schema } from '~/editor/schema/schema'
 import { IClient } from '~/editor/schema/type'
 import { StageDraw } from '~/editor/stage/draw/draw'
 import { StageViewport } from '~/editor/stage/viewport'
-import { useMemoSubComponent } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 
 type ICooperationComp = {}
 
@@ -16,7 +16,7 @@ export const CooperationComp: FC<ICooperationComp> = ({}) => {
 
   const clients = Object.values(Schema.meta.clients).filter(({ id }) => Schema.client.id !== id)
 
-  const OutlinesComp = useMemoSubComponent<{ client: IClient }>([zoom], ({ client }) => {
+  const OutlinesComp = useMemoComp<{ client: IClient }>([zoom], ({ client }) => {
     const nodes = client.selectIds.map(Schema.find)
     return nodes.map((node) => (
       <Graphics
@@ -33,7 +33,7 @@ export const CooperationComp: FC<ICooperationComp> = ({}) => {
     ))
   })
 
-  // const LineComp = useSubComponent<{
+  // const LineComp = useMemoComp<{
   //   p1: IXY
   //   p2: IXY
   //   type: 'top' | 'right' | 'bottom' | 'left'

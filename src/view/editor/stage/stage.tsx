@@ -2,13 +2,12 @@ import { Container, Stage, useApp } from '@pixi/react'
 import { Application } from 'pixi.js'
 import { FC } from 'react'
 import { Schema } from '~/editor/schema/schema'
-import { SchemaUtil } from '~/editor/schema/util'
 import { Pixi } from '~/editor/stage/pixi'
 import { useHookSignal } from '~/shared/signal/signal-react'
-import { useMemoSubComponent, useSubComponent } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
+import { SchemaUtil } from '~/shared/utils/schema'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { EditorSchemaContext } from '../context'
 import { useRenderChildren } from './hooks'
 import { CooperationComp } from './widget/cooperation'
 import { CursorsComp } from './widget/cursors'
@@ -37,13 +36,14 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
   const { classes } = useStyles({})
   useHookSignal(Schema.inited)
 
-  const AppRefComp = useMemoSubComponent([], ({}) => {
+  const AppRefComp = useMemoComp([], ({}) => {
     Pixi.setApp(useApp())
     return null
   })
 
-  const SceneStageComp = useSubComponent([], ({}) => {
+  const SceneStageComp = useMemoComp([Schema.inited.value], ({}) => {
     const children = SchemaUtil.getChildren(Schema.client.selectPageId)
+    useHookSignal(Schema.schemaChanged)
     return (
       <Container ref={Pixi.setSceneStage}>
         {useRenderChildren(children)}
@@ -62,17 +62,11 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
       ref={Pixi.setHtmlContainer}
       className={classes.Stage}
       onContextMenu={(e) => e.preventDefault()}>
-      <EditorSchemaContext.Consumer>
-        {(schema) => (
-          <Stage options={staticOption} raf={false} renderOnComponentChange={true}>
-            <EditorSchemaContext.Provider value={schema}>
-              <AppRefComp />
-              <SceneStageComp />
-              <RulerComp />
-            </EditorSchemaContext.Provider>
-          </Stage>
-        )}
-      </EditorSchemaContext.Consumer>
+      <Stage options={staticOption} raf={false} renderOnComponentChange={true}>
+        <AppRefComp />
+        <SceneStageComp />
+        <RulerComp />
+      </Stage>
       <CursorsComp />
     </Flex>
   )

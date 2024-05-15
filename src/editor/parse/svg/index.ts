@@ -8,9 +8,9 @@ import { xy_, xy_symmetric } from '~/editor/math/xy'
 import { OperateNode } from '~/editor/operate/node'
 import { SchemaDefault } from '~/editor/schema/default'
 import { IFrame, INode, INodeParent, IPoint } from '~/editor/schema/type'
+import { loopFor } from '~/shared/utils/array'
 import { normalizeColor } from '~/shared/utils/color'
 import { IrregularUtils } from '~/shared/utils/irregular'
-import { loopFor } from '~/shared/utils/list'
 import { IXY } from '~/shared/utils/normal'
 
 type ISvgProps = {
@@ -230,7 +230,7 @@ export class SvgParser {
 
     loopFor(points, (cur, next) => {
       if (cur.endPath) next.startPath = true
-      IrregularUtils.multiPointXY(cur, this.ratio)
+      IrregularUtils.multiplyPointXY(cur, this.ratio)
     })
     return points
   }

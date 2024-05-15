@@ -39,7 +39,7 @@ export const PageComp: FC<IPageComp> = ({}) => {
         vshow={allPageExpanded.value}
         onMouseDown={() => {
           let lastHeight = pagePanelHeight.value
-          Drag.setCursor('n-resize').onSlide(({ shift }) => {
+          Drag.onSlide(({ shift }) => {
             let newHeight = lastHeight + shift.y
             if (newHeight <= 69 || newHeight >= 800) return
             pagePanelHeight.dispatch(newHeight)

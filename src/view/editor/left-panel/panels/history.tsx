@@ -4,7 +4,7 @@ import { SchemaHistory } from '~/editor/schema/history'
 import { ISchemaHistory, ISchemaOperation } from '~/editor/schema/type'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor, hslColor } from '~/shared/utils/color'
-import { useSubComponent } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
@@ -17,7 +17,7 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
   const { stack, index } = SchemaHistory
   useHookSignal(index)
 
-  const CardComp = useSubComponent<{ history: ISchemaHistory }>([], ({ history }) => {
+  const CardComp = useMemoComp<{ history: ISchemaHistory }>([index.value], ({ history }) => {
     const randomColor = useMemo(() => hslColor(Math.random() * 360, 80, 35), [])
     const ref = useRef<HTMLDivElement>(null)
     const isActive = index.value === stack.indexOf(history)
@@ -86,7 +86,7 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
     )
   })
 
-  const OperateDiffComp = useSubComponent<{ operation: ISchemaOperation; collapsed: boolean }>(
+  const OperateDiffComp = useMemoComp<{ operation: ISchemaOperation; collapsed: boolean }>(
     [],
     ({ operation, collapsed }) => {
       const { patches } = operation

@@ -35,13 +35,9 @@ export const Input = observer(
             className={cx(classes.label, 'label')}
             onMouseDown={() => {
               let startValue = value
-              Drag.setCursor('e-resize')
-                .onStart(() => (state.active = true))
+              Drag.onStart(() => (state.active = true))
                 .onMove(({ shift }) => emitNewValue(startValue + shift.x * slideRate))
-                .onDestroy(({ dragService }) => {
-                  dragService.setCursor('auto')
-                  state.active = false
-                })
+                .onDestroy(() => (state.active = false))
             }}>
             {label}
           </Flex>

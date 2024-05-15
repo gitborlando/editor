@@ -11,8 +11,9 @@ import { StageWidgetTransform } from '~/editor/stage/widget/transform'
 import { Drag } from '~/global/event/drag'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
-import { IXY, iife, useSubComponent } from '~/shared/utils/normal'
+import { IXY, iife } from '~/shared/utils/normal'
 import { createMultiLineHitArea } from '~/shared/utils/pixi/line-hit-area'
+import { useMemoComp } from '~/shared/utils/react'
 
 type ITransformComp = {}
 
@@ -21,18 +22,18 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
   if (OperateNode.selectIds.value.size === 0) {
     needDraw.value = false
   }
-  if (Pixi.isForbidEvent) {
+  if (OperateNode.intoEditNodeId.value) {
     needDraw.value = false
   }
   useHookSignal(needDraw)
 
-  const TransformContentComp = useSubComponent([], ({}) => {
+  const TransformContentComp = useMemoComp([{}], ({}) => {
     const { needDraw, calcTransformOBB } = StageWidgetTransform
     const zoom = StageViewport.zoom.value
     const transformOBB = calcTransformOBB()
     const vertexes = transformOBB.calcVertexXY()
 
-    const OutlinesComp = useSubComponent([zoom], ({}) => {
+    const OutlinesComp = useMemoComp([zoom], ({}) => {
       return OperateNode.selectNodes.map((node) => (
         <Graphics
           key={node.id}
@@ -48,7 +49,7 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
       ))
     })
 
-    const LineComp = useSubComponent<{
+    const LineComp = useMemoComp<{
       p1: IXY
       p2: IXY
       type: 'top' | 'right' | 'bottom' | 'left'
@@ -82,6 +83,7 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
           beforeOperate.dispatch(operateKeys as (keyof IGeometry)[])
         })
           .onMove(({ shift }) => {
+            shift = StageViewport.toSceneShift(shift)
             const rotation = geometry.rotation
             switch (type) {
               case 'top':
@@ -124,7 +126,7 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
       )
     })
 
-    const VertexComp = useSubComponent<{
+    const VertexComp = useMemoComp<{
       xy: IXY
       type: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
     }>([zoom, transformOBB.rotation], ({ xy, type }) => {
@@ -155,6 +157,7 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
           OperateGeometry.beforeOperate.dispatch(operateKeys as (keyof IGeometry)[])
         })
           .onMove(({ shift }) => {
+            shift = StageViewport.toSceneShift(shift)
             switch (type) {
               case 'topLeft':
                 OperateGeometry.setGeometry('x', x + shift.x)

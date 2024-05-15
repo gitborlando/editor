@@ -1,7 +1,7 @@
-import { FC } from 'react'
+import { FC, Fragment } from 'react'
 import { OperateShadow } from '~/editor/operate/shadow'
 import { IShadow } from '~/editor/schema/type'
-import { useSubComponent } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
@@ -16,7 +16,7 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
   const { classes, css, cx } = useStyles({})
   const hasShadows = shadows.length > 0
 
-  const HeaderComp = useSubComponent([hasShadows], ({}) => {
+  const HeaderComp = useMemoComp([hasShadows], ({}) => {
     const hasShadowsStyle = hasShadows && css({ marginBottom: 8 })
     return (
       <Flex layout='h' className={cx(classes.header, hasShadowsStyle)}>
@@ -30,13 +30,13 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
     )
   })
 
-  const ShadowListComp = useSubComponent<{ shadows: IShadow[] }>([], ({ shadows }) => {
+  const ShadowListComp = useMemoComp<{ shadows: IShadow[] }>([], ({ shadows }) => {
     return shadows.map((shadow, index) =>
       index !== shadows.length - 1 ? (
-        <>
+        <Fragment key={index}>
           <ShadowItemComp key={index} shadow={shadow} index={index} />
           <Divide direction='h' margin={6} length={'95%'} thickness={0.2} bgColor='#E3E3E3' />
-        </>
+        </Fragment>
       ) : (
         <ShadowItemComp key={index} shadow={shadow} index={index} />
       )

@@ -5,16 +5,15 @@ import { OBB } from '~/editor/math/obb'
 import { OperateNode } from '~/editor/operate/node'
 import { OperateText } from '~/editor/operate/text'
 import { Schema } from '~/editor/schema/schema'
-import { SchemaUtil } from '~/editor/schema/util'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { Menu } from '~/global/menu'
 import { batchSignal, createSignal } from '~/shared/signal/signal'
+import { lastOne } from '~/shared/utils/array'
 import { rectInAnotherRect } from '~/shared/utils/collision'
 import { isLeftMouse, isRightMouse } from '~/shared/utils/event'
-import { lastOne } from '~/shared/utils/list'
-import { macro_Match } from '~/shared/utils/macro'
-import { createBound, type IRect } from '~/shared/utils/normal'
+import { macro_match, type IRect } from '~/shared/utils/normal'
+import { SchemaUtil } from '~/shared/utils/schema'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageWidgetTransform } from '../widget/transform'
@@ -121,7 +120,7 @@ class StageSelectService {
     const hitTest = (marqueeOBB: OBB | undefined, obb: OBB) => {
       if (!marqueeOBB) return false
       const aabbResult = marqueeOBB.aabbHitTest(obb)
-      if (macro_Match`-180|-90|0|90|180`(obb.rotation)) return aabbResult
+      if (macro_match`-180|-90|0|90|180`(obb.rotation)) return aabbResult
       return aabbResult && marqueeOBB.obbHitTest(obb)
     }
     const traverseTest = () => {
@@ -145,7 +144,7 @@ class StageSelectService {
       })
     }
     Drag.onStart(() => {
-      this.marquee.value = createBound(0, 0, 0, 0)
+      this.marquee.value = { x: 0, y: 0, width: 0, height: 0 }
     })
       .onMove(({ marquee }) => {
         this.marquee.dispatch(marquee)

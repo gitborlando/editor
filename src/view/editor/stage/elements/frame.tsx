@@ -2,7 +2,7 @@ import { Container, Graphics } from '@pixi/react'
 import { FC, useRef } from 'react'
 import { IFrame, INode } from '~/editor/schema/type'
 import { PIXI } from '~/editor/stage/pixi'
-import { useMemoSubComponent } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 import { useCollectRef, useDraw, useMemoChildren, useRenderChildren, useResetOBB } from '../hooks'
 
 type IFrameComp = {
@@ -16,7 +16,7 @@ type IFrameContentComp = {
 export const FrameComp: FC<IFrameComp> = ({ frame }) => {
   const children = useMemoChildren(frame)
 
-  const FrameContentComp = useMemoSubComponent<IFrameContentComp>([], ({ frame, children }) => {
+  const FrameContentComp = useMemoComp<IFrameContentComp>([], ({ frame, children }) => {
     const ref = useCollectRef<PIXI.Graphics>(frame)
     const maskRef = useRef<PIXI.Graphics>(null)
     const draw = useDraw(frame)

@@ -4,8 +4,9 @@ import { Schema } from '~/editor/schema/schema'
 import { IText } from '~/editor/schema/type'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal/signal-react'
-import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
-import { iife, useSubComponent } from '~/shared/utils/normal'
+import { useDownUpTracker } from '~/shared/utils/event'
+import { iife } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 import { DraggableComp } from '~/view/component/draggable'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
@@ -24,7 +25,7 @@ export const TextComp: FC<ITextComp> = ({}) => {
 
   useHookSignal(intoEditing)
 
-  const HeaderComp = useSubComponent([], ({}) => {
+  const HeaderComp = useMemoComp([], ({}) => {
     return (
       <Flex layout='h' className={classes.header}>
         <Flex layout='c' className={classes.title}>
@@ -34,7 +35,7 @@ export const TextComp: FC<ITextComp> = ({}) => {
     )
   })
 
-  const TextEditComp = useSubComponent([], ({}) => {
+  const TextEditComp = useMemoComp([{}], ({}) => {
     const { setTextContent } = OperateText
     const textNode = Schema.find<IText>(intoEditing.value)
     const xy = iife(() => {
@@ -62,7 +63,7 @@ export const TextComp: FC<ITextComp> = ({}) => {
   })
 
   const { fontSize, fontWeight } = textStyle
-  const FontSizeWeightComp = useSubComponent([fontSize, fontWeight], ({}) => {
+  const FontSizeWeightComp = useMemoComp([fontSize, fontWeight], ({}) => {
     const inputRef = useRef<HTMLDivElement>(null)
     createDownUpTracker(() => inputRef.current, 'fontSize')
     return (
@@ -86,7 +87,7 @@ export const TextComp: FC<ITextComp> = ({}) => {
   })
 
   const { align, lineHeight } = textStyle
-  const FontAlignComp = useSubComponent([align, lineHeight], ({}) => {
+  const FontAlignComp = useMemoComp([align, lineHeight], ({}) => {
     return (
       <Flex layout='h' className={css({ width: '100%' })}>
         <Dropdown

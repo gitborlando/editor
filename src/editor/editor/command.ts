@@ -1,6 +1,6 @@
 import { SchemaHistory } from '~/editor/schema/history'
 import { Menu } from '~/global/menu'
-import { lastOne } from '~/shared/utils/list'
+import { lastOne } from '~/shared/utils/array'
 import { IAnyFunc, iife } from '~/shared/utils/normal'
 import { OperateMeta } from '../operate/meta'
 import { OperateNode } from '../operate/node'

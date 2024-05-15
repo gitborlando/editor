@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { OBB } from '~/editor/math/obb'
+import { xy_toArray } from '~/editor/math/xy'
 import { OperateNode } from '~/editor/operate/node'
 import { Schema } from '~/editor/schema/schema'
 import { INode, INodeParent } from '~/editor/schema/type'
 import { IStageElement, StageDraw } from '~/editor/stage/draw/draw'
-import { getNodeCenterXY } from '~/shared/utils/normal'
 import { FrameComp } from './elements/frame'
 import { TextComp } from './elements/text'
 import { VectorComp } from './elements/vector'
@@ -31,9 +31,7 @@ export function useMemoChildren(node: INodeParent) {
 
 export function useResetOBB(node: INode) {
   const { width, height, rotation } = node
-  const centerXY = getNodeCenterXY(node)
-  const centerX = centerXY.x
-  const centerY = centerXY.y
+  const [centerX, centerY] = xy_toArray(OperateNode.getNodeCenterXY(node))
   useMemo(() => {
     const obb = new OBB(centerX, centerY, width, height, rotation)
     OperateNode.setNodeRuntime(node.id, { obb })
@@ -49,5 +47,10 @@ export function useCollectRef<T extends IStageElement>(node: INode) {
 }
 
 export function useDraw(node: INode) {
-  return useCallback((element: IStageElement) => StageDraw.drawNode(element, node), [node])
+  return useCallback(
+    (element: IStageElement) => {
+      StageDraw.drawNode(element, node)
+    },
+    [node]
+  )
 }

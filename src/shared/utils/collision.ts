@@ -1,5 +1,5 @@
 import { xy_ } from '~/editor/math/xy'
-import { BREAK, loopFor } from './list'
+import { BREAK, loopFor } from './array'
 import { IRect, IXY } from './normal'
 
 export function rectInAnotherRect(rectA: IRect, rectB: IRect) {

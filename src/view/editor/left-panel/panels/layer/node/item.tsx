@@ -3,7 +3,6 @@ import { Editor } from '~/editor/editor/editor'
 import { OperateNode } from '~/editor/operate/node'
 import { Schema } from '~/editor/schema/schema'
 import { IIrregular, INode } from '~/editor/schema/type'
-import { SchemaUtil } from '~/editor/schema/util'
 import { StageSelect } from '~/editor/stage/interact/select'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
@@ -13,8 +12,9 @@ import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { stopPropagation } from '~/shared/utils/event'
 import { IrregularUtils } from '~/shared/utils/irregular'
-import { iife, noopFunc, useSubComponent } from '~/shared/utils/normal'
+import { iife, noopFunc } from '~/shared/utils/normal'
 import { useMemoComp } from '~/shared/utils/react'
+import { SchemaUtil } from '~/shared/utils/schema'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
@@ -61,7 +61,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     Menu.menuOptions.dispatch([nodeReHierarchyGroup, nodeGroup])
   }
 
-  const ExpandComp = useSubComponent([expand], ({}) => {
+  const ExpandComp = useMemoComp([expand], ({}) => {
     return (
       <Flex
         layout='c'
@@ -109,7 +109,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     )
   }, [])
 
-  const LabelComp = useSubComponent([searched, id], ({}) => {
+  const LabelComp = useMemoComp([searched, id], ({}) => {
     return (
       <Flex
         layout='h'
@@ -137,7 +137,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     )
   })
 
-  const DropAreaComp = useSubComponent([subSelected, expand, selected], ({}) => {
+  const DropAreaComp = useMemoComp([subSelected, expand, selected], ({}) => {
     const dropInFront = useAutoSignal(false)
     const dropInSide = useAutoSignal(false)
     const dropBehind = useAutoSignal(false)

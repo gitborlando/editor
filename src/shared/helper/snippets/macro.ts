@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid'
-import { macro_StringMatch } from '~/shared/utils/macro'
-import { This } from '~/shared/utils/normal'
+import { This, macro_match } from '~/shared/utils/normal'
 This.ids = <string[]>[]
 
 if (!This.ids.length) {
@@ -10,7 +9,7 @@ if (!This.ids.length) {
 }
 
 const set = new Set(['transform', 'marquee'])
-const tt = macro_StringMatch`id === transform | marquee`
+const tt = macro_match`id === 'transform' | 'marquee'`
 
 ;(<string[]>This.ids).forEach((id) => {
   // if (['transform', 'marquee'].some((i) => i === id)) {

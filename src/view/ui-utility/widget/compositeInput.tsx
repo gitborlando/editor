@@ -2,8 +2,9 @@ import RCInput, { InputProps } from 'rc-input'
 import { ComponentPropsWithRef, forwardRef, memo, useRef } from 'react'
 import { Drag } from '~/global/event/drag'
 import { useAutoSignal } from '~/shared/signal/signal-react'
-import { useDownUpTracker } from '~/shared/utils/down-up-tracker'
-import { iife, noopFunc, useSubComponent } from '~/shared/utils/normal'
+import { useDownUpTracker } from '~/shared/utils/event'
+import { iife, noopFunc } from '~/shared/utils/normal'
+import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -55,7 +56,7 @@ export const CompositeInput = memo(
       //  if (label === '横坐标') console.log('value: 横坐标', value)
       const numberValue = () => Number(Number.isNaN(Number(value)) ? '0' : value)
 
-      const DragLabelComp = useSubComponent([value, disabled], ({}) => {
+      const DragLabelComp = useMemoComp([value, disabled], ({}) => {
         if (!label) return
         return (
           <Flex
@@ -66,11 +67,9 @@ export const CompositeInput = memo(
               if (disabled || needLabelDrag !== true) return
               let startValue = numberValue()
               beforeOperate?.()
-              Drag.setCursor('e-resize')
-                .onStart(() => active.dispatch(true))
+              Drag.onStart(() => active.dispatch(true))
                 .onMove(({ shift }) => emitNewValue((startValue + shift.x * slideRate).toString()))
                 .onDestroy(({ dragService }) => {
-                  dragService.setCursor('auto')
                   active.dispatch(false)
                   afterOperate?.()
                 })
@@ -80,7 +79,7 @@ export const CompositeInput = memo(
         )
       })
 
-      const InputComp = useSubComponent([value, disabled], ({}) => {
+      const InputComp = useMemoComp([value, disabled], ({}) => {
         const thisValue = useAutoSignal(value)
         // useMemo(() => {
         //   if (label === '横坐标') console.log('value: ', value)
@@ -118,7 +117,7 @@ export const CompositeInput = memo(
         )
       })
 
-      const OperateComp = useSubComponent([value, step], ({}) => {
+      const OperateComp = useMemoComp([value, step], ({}) => {
         const ref = useRef<HTMLDivElement>(null)
         useDownUpTracker(() => ref.current, beforeOperate, afterOperate)
         return (

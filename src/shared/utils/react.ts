@@ -8,7 +8,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useTransition,
 } from 'react'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '../signal/signal-react'
@@ -17,7 +16,7 @@ import { IAnyFunc } from './normal'
 export function useMemoComp<P extends {}>(deps: any[], component: FC<P>) {
   const comp = useRef(component)
   const depsChanged = useRef(false)
-  comp.current = component
+  comp.current = useCallback(component, deps)
   depsChanged.current = false
   useMemo(() => (depsChanged.current = true), deps)
   return useCallback(
@@ -30,11 +29,6 @@ export function useMemoComp<P extends {}>(deps: any[], component: FC<P>) {
     ),
     [deps.length]
   )
-}
-
-export function transition<T extends any[]>(func: (...args: T) => any) {
-  const [_, startTransition] = useTransition()
-  return (...args: T) => startTransition(() => func(...args))
 }
 
 export function withSuspense(node: ReactNode, fallback?: ReactNode) {
@@ -55,4 +49,8 @@ export function useZoom() {
   const zoom = StageViewport.zoom.value
   useHookSignal(StageViewport.zoom)
   return zoom
+}
+
+export function useAsyncEffect(callback: Function, deps = []) {
+  useEffect(() => void (async () => callback())(), deps)
 }

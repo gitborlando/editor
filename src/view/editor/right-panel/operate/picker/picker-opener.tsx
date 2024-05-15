@@ -7,8 +7,8 @@ import { IFill, IFillColor } from '~/editor/schema/type'
 import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { makeLinearGradientCss, rgbToHex, rgbToRgba } from '~/shared/utils/color'
-import { IXY, iife, useSubComponent } from '~/shared/utils/normal'
-import { withSuspense } from '~/shared/utils/react'
+import { IXY, iife } from '~/shared/utils/normal'
+import { useMemoComp, withSuspense } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
@@ -39,7 +39,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   const isShowPicker = useAutoSignal(false)
   const { theme, css, classes } = useStyles({})
 
-  const ColorInputComp = useSubComponent<{ fill: IFill }>([fill.type], ({ fill }) => {
+  const ColorInputComp = useMemoComp<{ fill: IFill }>([fill], ({ fill }) => {
     return (
       <CompositeInput
         type='text'
@@ -62,7 +62,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
     )
   })
 
-  const ImgComp = useSubComponent<{ url: string }>([], ({ url }) => {
+  const ImgComp = useMemoComp<{ url: string }>([], ({ url }) => {
     const image = usePromise<[string], IImage>(() => Img.getImageAsync(url), [url])
     const imageBound = iife(() => {
       const { width, height } = image

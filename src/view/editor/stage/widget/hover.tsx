@@ -4,14 +4,14 @@ import { OperateNode } from '~/editor/operate/node'
 import { SchemaDefault } from '~/editor/schema/default'
 import { Schema } from '~/editor/schema/schema'
 import { INode } from '~/editor/schema/type'
-import { SchemaUtil } from '~/editor/schema/util'
 import { StageDraw } from '~/editor/stage/draw/draw'
 import { StageInteract } from '~/editor/stage/interact/interact'
 import { PIXI } from '~/editor/stage/pixi'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal/signal-react'
+import { lastOne } from '~/shared/utils/array'
 import { hslBlueColor } from '~/shared/utils/color'
-import { lastOne } from '~/shared/utils/list'
+import { SchemaUtil } from '~/shared/utils/schema'
 
 type IHoverComp = {}
 

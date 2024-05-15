@@ -1,9 +1,8 @@
 import autobind from 'class-autobind-decorator'
 import { xy_client } from '~/editor/math/xy'
 import { OperateNode } from '~/editor/operate/node'
-import { SchemaUtil } from '~/editor/schema/util'
-import { Drag } from '~/global/event/drag'
 import { batchSignal, createSignal } from '~/shared/signal/signal'
+import { SchemaUtil } from '~/shared/utils/schema'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageCreate } from './create'
@@ -39,7 +38,6 @@ class StageInteractService {
   }
   private autoCursor() {
     const cursor = interactCursorMap[this.currentType.value]
-    Drag.setCursor(cursor)
     Pixi.htmlContainer.style.cursor = cursor
   }
   private bindHover() {
