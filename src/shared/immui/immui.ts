@@ -93,36 +93,6 @@ export default class Immui {
     return newObject
   }
 
-  next2 = <T>(object: T): T => {
-    const traverse = (oldObj: any, newObj: any = {}, depth = 0) => {
-      for (const key in oldObj) {
-        if (depth === 0) {
-          if (!this.keyPathDiffMap[key]) continue
-          if (typeof oldObj[key] !== 'object') {
-            newObj[key] = oldObj[key]
-          } else {
-            newObj[key] = traverse(oldObj[key], Array.isArray(oldObj[key]) ? [] : {}, depth + 1)
-          }
-          continue
-        }
-        if (!this.keyPathDiffMap[key]) {
-          newObj[key] = oldObj[key]
-          continue
-        }
-        if (typeof oldObj[key] !== 'object') {
-          newObj[key] = oldObj[key]
-        } else {
-          newObj[key] = Array.isArray(oldObj[key]) ? [] : {}
-          traverse(oldObj[key], newObj[key], depth + 1)
-        }
-      }
-      return newObj
-    }
-    const newObject = traverse(object, object)
-    this.keyPathDiffMap = {}
-    return newObject
-  }
-
   commitPatches = () => {
     const patches = []
     for (const item of this.typePathPatchMap.values()) {

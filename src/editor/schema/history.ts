@@ -18,9 +18,7 @@ class SchemaHistoryService {
     return this.index.value < this.stack.length - 1
   }
   initHook() {
-    Schema.inited.hook({ afterAll: true }, () => {
-      this.startRecord()
-    })
+    Schema.inited.hook({ afterAll: true }, this.startRecord)
   }
   commit(description: string) {
     if (this.isInAction) return

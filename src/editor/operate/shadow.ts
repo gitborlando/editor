@@ -65,7 +65,10 @@ class OperateShadowService {
   applyChangeToSchema() {
     const nodes = OperateNode.selectedNodes.value
     const patches = this.immui.commitPatches()
-    nodes.forEach((node) => Schema.applyPatches(patches, { prefix: `/${node.id}/shadows` }))
+    nodes.forEach((node) => {
+      if (this.isMultiShadows) Schema.itemReset(node, ['shadows'], [])
+      Schema.applyPatches(patches, { prefix: `/${node.id}/shadows` })
+    })
     Schema.commitOperation('改变 shadows')
     Schema.nextSchema()
   }

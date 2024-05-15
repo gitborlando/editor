@@ -54,7 +54,10 @@ class OperateFillService {
   applyChangeToSchema() {
     const nodes = OperateNode.selectedNodes.value
     const patches = this.immui.commitPatches()
-    nodes.forEach((node) => Schema.applyPatches(patches, { prefix: `/${node.id}/fills` }))
+    nodes.forEach((node) => {
+      if (this.isMultiFills) Schema.itemReset(node, ['fills'], [])
+      Schema.applyPatches(patches, { prefix: `/${node.id}/fills` })
+    })
     Schema.commitOperation('改变 fills')
     Schema.nextSchema()
   }

@@ -65,7 +65,10 @@ class OperateStrokeService {
   applyChangeToSchema() {
     const nodes = OperateNode.selectedNodes.value
     const patches = this.immui.commitPatches()
-    nodes.forEach((node) => Schema.applyPatches(patches, { prefix: `/${node.id}/strokes` }))
+    nodes.forEach((node) => {
+      if (this.isMultiStrokes) Schema.itemReset(node, ['strokes'], [])
+      Schema.applyPatches(patches, { prefix: `/${node.id}/strokes` })
+    })
     Schema.commitOperation('改变 strokes')
     Schema.nextSchema()
   }
