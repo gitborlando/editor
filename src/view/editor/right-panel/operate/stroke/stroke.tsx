@@ -44,7 +44,7 @@ export const StrokeComp: FC<IStrokeComp> = ({}) => {
   })
 
   return (
-    <Flex layout='v' sidePadding={6} className={classes.Stroke}>
+    <Flex layout='v' className={cx(classes.Stroke, 'px-6')}>
       <HeaderComp />
       {!isMultiStrokes ? (
         <StrokeListComp strokes={strokes} />

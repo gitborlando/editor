@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal/signal'
+import { createCache } from '~/shared/utils/cache'
 import { ITraverseData, SchemaUtil } from '~/shared/utils/schema'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { Schema } from '../schema/schema'

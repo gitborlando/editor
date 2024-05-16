@@ -1,4 +1,4 @@
-import { Rule, defineConfig, presetUno } from 'unocss'
+import { Rule, defineConfig, presetUno, transformerCompileClass } from 'unocss'
 
 const widthHeightRadius: Rule<object> = [
   /wh-([^-]+)-([^-]+)-?([^-]+)?/,
@@ -24,12 +24,21 @@ const border: Rule<object> = [
   ([_, width, color]) => ({ border: `${width}px solid ${normalColor(color)}` }),
 ]
 
+const boxShadow: Rule<object> = [
+  /shadow-(\d+)-(\d+)-(.+)/,
+  ([_, x, y, color]) => ({ 'box-shadow': `0px 0px ${x}px ${y}px ${normal(color)}` }),
+]
+
 const cursorPointer: Rule<object> = [/pointer/, () => ({ cursor: 'pointer' })]
+
 const labelFont: Rule<object> = [/labelFont/, () => ({ 'font-size': '11px', color: '#626262' })]
 const normalFont: Rule<object> = [/normalFont/, () => ({ 'font-size': '12px' })]
 
+const borderBottom: Rule<object> = [/borderBottom/, () => ({ border: '1px solid #E3E3E3' })]
+
 export default defineConfig({
   presets: [presetUno()],
+  transformers: [transformerCompileClass()],
   rules: [
     widthHeightRadius,
     marginAuto,
@@ -38,6 +47,8 @@ export default defineConfig({
     cursorPointer,
     labelFont,
     normalFont,
+    borderBottom,
+    boxShadow,
   ],
   postprocess: [
     (obj) => {

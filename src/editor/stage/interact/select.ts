@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
-import { Editor } from '~/editor/editor/editor'
+import { editorCommands } from '~/editor/editor/command'
 import { OBB } from '~/editor/math/obb'
 import { OperateNode } from '~/editor/operate/node'
 import { OperateText } from '~/editor/operate/text'
@@ -85,7 +85,7 @@ class StageSelectService {
     this.onMenu()
   }
   private onMenu() {
-    const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } = Editor.commands
+    const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } = editorCommands
     if (OperateNode.selectedNodes.value.length) {
       const menuOptions = [nodeReHierarchyGroup, copyPasteGroup, undoRedoGroup, nodeGroup]
       return Menu.menuOptions.dispatch(menuOptions)

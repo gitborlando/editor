@@ -9,14 +9,14 @@ import { INode, INodeParent, IPage } from '../schema/type'
 import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
 import { UILeftPanel } from '../ui-state/left-panel/left-panel'
 
-export type ICommand = {
+export type IEditorCommand = {
   name: string
   callback: IAnyFunc
   shortcut?: string
-  children?: ICommand[][]
+  children?: IEditorCommand[][]
 }
 
-export const commands = {
+export const editorCommands = {
   copyPasteGroup: [
     {
       name: '复制',

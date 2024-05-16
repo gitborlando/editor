@@ -4,12 +4,11 @@ import { ImmuiPatch } from '~/shared/immui/immui'
 import { createSignal } from '~/shared/signal/signal'
 import { addListener } from '~/shared/utils/event'
 import { Schema } from '../schema/schema'
-import { ICommand, commands } from './command'
+import { IEditorCommand, editorCommands } from './command'
 
 @autobind
 export class EditorService {
-  commands = commands
-  onReviewSchema = createSignal<ImmuiPatch>()
+  onCheckOperation = createSignal<ImmuiPatch>()
   private lastOperationLength = 0
   initHook() {
     this.bindHotkeys()
@@ -21,14 +20,14 @@ export class EditorService {
         .slice(this.lastOperationLength)
         .map((operation) => operation.patches)
       patches.flat().forEach((patch) => {
-        this.onReviewSchema.dispatch(patch)
+        this.onCheckOperation.dispatch(patch)
       })
       this.lastOperationLength = Schema.operationList.length
     })
   }
   private bindHotkeys() {
     let isKeyDown = false
-    const commands = Object.values(this.commands).flat() as ICommand[]
+    const commands = Object.values(editorCommands).flat() as IEditorCommand[]
     commands.forEach(({ shortcut, callback }) => {
       if (!shortcut) return
       hotkeys(shortcut!, (keyboardEvent) => {

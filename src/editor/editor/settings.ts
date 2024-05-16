@@ -1,17 +1,19 @@
 import { createSignal } from '~/shared/signal/signal'
 
+export type IEditorSettings = typeof defaultSettings
+
 const defaultSettings = {
   autosave: true,
 }
 
-const storageSettings = localStorage.getItem('editorSettings')
+const settingStr = localStorage.getItem('editorSettings')
 
-export type IEditorSettings = typeof defaultSettings
+export const editorSettings: IEditorSettings = settingStr ? JSON.parse(settingStr) : defaultSettings
 
-export const editorSettings = createSignal<IEditorSettings>(
-  storageSettings ? JSON.parse(storageSettings) : defaultSettings
-)
+export function setSettings(setFunc: (settings: IEditorSettings) => void) {
+  setFunc(editorSettings)
+  onSettingsChanged.dispatch()
+  localStorage.setItem('editorSettings', JSON.stringify(editorSettings))
+}
 
-editorSettings.hook({ afterAll: true }, () => {
-  localStorage.setItem('editorSettings', JSON.stringify(editorSettings.value))
-})
+export const onSettingsChanged = createSignal()

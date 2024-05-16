@@ -1,5 +1,5 @@
 import { FC, SVGProps, useCallback } from 'react'
-import { Editor } from '~/editor/editor/editor'
+import { editorCommands } from '~/editor/editor/command'
 import { OperateNode } from '~/editor/operate/node'
 import { Schema } from '~/editor/schema/schema'
 import { IIrregular, INode } from '~/editor/schema/type'
@@ -56,7 +56,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     }
   }
   const makeMenu = () => {
-    const { nodeReHierarchyGroup, nodeGroup } = Editor.commands
+    const { nodeReHierarchyGroup, nodeGroup } = editorCommands
     Menu.menuOptions.dispatch([nodeReHierarchyGroup, nodeGroup])
   }
 
@@ -91,7 +91,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
       )
     })
     return (
-      <Flex layout='c' sidePadding={6}>
+      <Flex layout='c' className='px-6'>
         <Icon size={12} scale={12 / 10}>
           {iife(() => {
             if (node.type === 'frame') return Asset.editor.node.frame

@@ -11,7 +11,7 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 type IPageHeaderComp = {}
 
 export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
-  const { classes } = useStyles({})
+  const { classes, cx } = useStyles({})
   const { allPageExpanded } = UILeftPanelLayer
   useHookSignal(allPageExpanded)
   useHookSignal(OperateMeta.curPage)
@@ -23,7 +23,7 @@ export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
     OperateMeta.addPage()
   }
   return (
-    <Flex layout='h' shrink={0} sidePadding={4} className={classes.PageHeader}>
+    <Flex layout='h' shrink={0} className={cx(classes.PageHeader, 'px-4')}>
       <Flex layout='c' className={classes.selectPageName}>
         {OperateMeta.curPage.value.name}
       </Flex>

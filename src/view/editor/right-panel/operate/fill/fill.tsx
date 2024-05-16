@@ -12,7 +12,7 @@ import { FillItemComp } from './fill-item'
 type IFillPropComp = {}
 
 export const FillPropComp: FC<IFillPropComp> = ({}) => {
-  const { classes, css, theme } = useStyles({})
+  const { classes, css, theme, cx } = useStyles({})
   const { fills, isMultiFills, addFill } = OperateFill
   const hasFills = fills.length > 0
 
@@ -48,7 +48,7 @@ export const FillPropComp: FC<IFillPropComp> = ({}) => {
   })
 
   return (
-    <Flex layout='v' sidePadding={6} className={classes.FillProp}>
+    <Flex layout='v' className={cx(classes.FillProp, 'px-6')}>
       <HeaderComp />
       {isMultiFills ? (
         <Flex layout='c' className={classes.isMultiFills}>

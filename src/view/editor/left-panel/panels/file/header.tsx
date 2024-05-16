@@ -1,5 +1,5 @@
 import { FC, memo } from 'react'
-import { SchemaFile } from '~/editor/editor/file'
+import { FileManager } from '~/editor/editor/file-manager'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
@@ -9,15 +9,15 @@ import { InputComp } from '~/view/ui-utility/widget/input'
 type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
-  const { classes, theme, css } = useStyles({})
+  const { classes, theme, css, cx } = useStyles({})
   return (
-    <Flex layout='h' sidePadding={10} className={classes.Header}>
+    <Flex layout='h' className={cx(classes.Header, 'px-10')}>
       <InputComp placeholder='搜索' />
       <Flex layout='h' className={classes.iconGroup}>
         <IconButton size={14} onClick={() => {}}>
           {Asset.editor.leftPanel.file.newFolder}
         </IconButton>
-        <IconButton size={13} onClick={() => SchemaFile.newFile()}>
+        <IconButton size={13} onClick={() => FileManager.newFile()}>
           {Asset.editor.leftPanel.file.newFile}
         </IconButton>
       </Flex>

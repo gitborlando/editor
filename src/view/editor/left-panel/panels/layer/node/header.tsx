@@ -10,13 +10,13 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 type INodeHeaderComp = {}
 
 export const NodeHeaderComp: FC<INodeHeaderComp> = ({}) => {
-  const { classes } = useStyles({})
+  const { classes, cx } = useStyles({})
   const { allNodeExpanded, searchSlice } = UILeftPanelLayer
   const isCollapsed = allNodeExpanded.value === 'collapsed'
   useHookSignal(allNodeExpanded)
   useHookSignal(searchSlice)
   return (
-    <Flex layout='h' shrink={0} sidePadding={6} className={classes.NodeHeader}>
+    <Flex layout='h' shrink={0} className={cx(classes.NodeHeader, 'px-6')}>
       <input
         className={classes.input}
         placeholder='搜索'

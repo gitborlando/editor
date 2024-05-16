@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { commands } from '~/editor/editor/command'
+import { editorCommands } from '~/editor/editor/command'
 import { OperateMeta } from '~/editor/operate/meta'
 import { Schema } from '~/editor/schema/schema'
 import { Menu } from '~/global/menu'
@@ -17,11 +17,11 @@ type IPageItemComp = {
 
 export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
   const selected = Schema.client.selectPageId === id
-  const { classes, css } = useStyles({ selected })
+  const { classes, css, cx } = useStyles({ selected })
   const isHover = useAutoSignal(false)
   const openMenu = () => {
     Menu.context = { id }
-    Menu.menuOptions.dispatch([commands.pageGroup])
+    Menu.menuOptions.dispatch([editorCommands.pageGroup])
   }
   const selectPage = () => {
     OperateMeta.selectPage(id)
@@ -35,7 +35,7 @@ export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
       onHover={isHover.dispatch}
       onClick={selectPage}
       onContextMenu={openMenu}>
-      <Flex layout='h' sidePadding={10} className={classes.name}>
+      <Flex layout='h' className={cx(classes.name, 'px-10')}>
         {name}
       </Flex>
       {selected && (

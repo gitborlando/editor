@@ -14,7 +14,7 @@ class StageMoveService {
   }
   private onMoveStage() {
     const start = xy_from(Pixi.sceneStage.position)
-    Drag.onSlide(({ shift }) => {
+    Drag.needInfinity().onSlide(({ shift }) => {
       StageViewport.stageOffset.dispatch(xy_plus(start, shift))
     })
   }

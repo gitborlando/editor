@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { toJS } from 'mobx'
-import { createCache } from '~/shared/cache'
 import { createSignal } from '~/shared/signal/signal'
+import { createCache } from '~/shared/utils/cache'
 import { iife } from '~/shared/utils/normal'
 
 type IStorageItem = {

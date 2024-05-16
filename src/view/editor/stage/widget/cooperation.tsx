@@ -135,7 +135,7 @@ export const CooperationComp: FC<ICooperationComp> = ({}) => {
   return (
     <Container>
       {clients.map((client) => (
-        <OutlinesComp client={client} />
+        <OutlinesComp key={client.id} client={client} />
       ))}
       {/* <LineComp type='top' p1={vertexes[0]} p2={vertexes[1]} />
       <LineComp type='right' p1={vertexes[1]} p2={vertexes[2]} />

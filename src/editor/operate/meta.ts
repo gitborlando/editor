@@ -28,11 +28,16 @@ class OperateMetaService {
       if (this.lastPage === currentPage) return
       this.curPage.dispatch((this.lastPage = currentPage))
     })
+    window.addEventListener('beforeunload', this.removeClient)
   }
   addClient(option?: Partial<IClient>) {
     const client = (Schema.client = SchemaDefault.client(option))
     Schema.itemAdd(Schema.meta, ['clients', client.id], client)
     Schema.finalOperation('添加客户端', { noHistory: true })
+  }
+  removeClient() {
+    Schema.itemDelete(Schema.meta, ['clients', Schema.client.id])
+    Schema.finalOperation('移除客户端', { noHistory: true })
   }
   selectPage(id: ID) {
     Schema.itemReset(Schema.meta, ['clients', Schema.client.id, 'selectPageId'], id)

@@ -1,5 +1,5 @@
 import { runInAction } from 'mobx'
-import { createCache } from '../cache'
+import { createCache } from './cache'
 
 export const This = globalThis as any
 

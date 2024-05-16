@@ -1,7 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { Texture } from 'pixi.js'
-import { createCache } from '~/shared/cache'
-import { createIDBStore } from '~/shared/idb-store'
+import { createCache } from '~/shared/utils/cache'
 import { ID } from '../schema/type'
 
 export type IImage = {
@@ -16,7 +15,6 @@ const prefix = 'local:editor-image/'
 
 @autobind
 class ImgService {
-  imageStore = createIDBStore<ArrayBuffer>('editor-image')
   imageCache = createCache<ID, IImage>()
   getImage(url: string) {
     return this.imageCache.get(url)

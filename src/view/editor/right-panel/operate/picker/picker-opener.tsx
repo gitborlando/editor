@@ -38,7 +38,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
     isShowPicker.dispatch(true)
   }
   const isShowPicker = useAutoSignal(false)
-  const { theme, css, classes } = useStyles({})
+  const { theme, css, classes, cx } = useStyles({})
 
   const ColorInputComp = useMemoComp<{ fill: IFill }>([fill], ({ fill }) => {
     return (
@@ -75,7 +75,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
 
   return (
     <>
-      <Flex layout='h' sidePadding={6} className={classes.Fill}>
+      <Flex layout='h' className={cx(classes.Fill, 'px-6')}>
         <Flex layout='h' className='miniShower' onClick={(e) => showPicker(xy_client(e))}>
           <img src={Asset.editor.rightPanel.operate.fill.none}></img>
           {isColorType && (
@@ -86,7 +86,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
         </Flex>
         <ColorInputComp fill={fill} />
       </Flex>
-      <Flex layout='h' justify='space-between' sidePadding={6} className={classes.opacity}>
+      <Flex layout='h' justify='space-between' className={cx(classes.opacity, 'px-6')}>
         <CompositeInput
           type='number'
           needStepHandler={false}

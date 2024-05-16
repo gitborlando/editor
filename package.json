@@ -22,6 +22,7 @@
     "hex-rgb": "^5.0.0",
     "hotkeys-js": "^3.13.7",
     "idb-kv-store": "^4.5.0",
+    "localforage": "^1.10.0",
     "lodash-es": "^4.17.21",
     "mobx": "^6.12.3",
     "mobx-react": "^9.1.1",
@@ -41,8 +42,7 @@
     "svg-parser": "^2.0.4",
     "svg-path-bounding-box": "^1.0.4",
     "svg-path-parser": "^1.1.0",
-    "tss-react": "^4.9.10",
-    "vault-storage": "^1.2.3"
+    "tss-react": "^4.9.10"
   },
   "devDependencies": {
     "@svgr/core": "^8.1.0",

@@ -10,6 +10,23 @@
     "prefix": "comp",
     "body": [
       "import { FC, memo } from 'react'",
+      "import { Flex } from '~/view/ui-utility/widget/flex'",
+      "",
+      "type I$1${TM_FILENAME_BASE}Comp = {}",
+      "",
+      "export const $1${TM_FILENAME_BASE}Comp: FC<I$1${TM_FILENAME_BASE}Comp> = memo(({}) => {",
+      "  return <Flex layount='c' className={classes.$1${TM_FILENAME_BASE}}></Flex>",
+      "})",
+      "",
+      "",
+      "$1${TM_FILENAME_BASE}Comp.displayName = '$1${TM_FILENAME_BASE}Comp'"
+    ],
+    "description": "Component"
+  },
+  "Component2": {
+    "prefix": "comp",
+    "body": [
+      "import { FC, memo } from 'react'",
       "import { makeStyles } from '~/view/ui-utility/theme'",
       "import { Flex } from '~/view/ui-utility/widget/flex'",
       "",

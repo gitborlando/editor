@@ -8,9 +8,3 @@ import Asset from './view/ui-utility/assets'
 favIcon(Asset.favIcon.shiyangyang)
 
 ReactDOM.createRoot(document.getElementById('root')!).render(createElement(App))
-
-// import { immuiPerformanceVs } from './shared/immui/immui.benchmark'
-
-// immuiPerformanceVs()
-
-// fps()

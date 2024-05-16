@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
-import { createCache } from '~/shared/cache'
+import { createCache } from '~/shared/utils/cache'
 import { COLOR, rgb } from '~/shared/utils/color'
 import { IRect, IXY } from '~/shared/utils/normal'
 import Asset from '~/view/ui-utility/assets'

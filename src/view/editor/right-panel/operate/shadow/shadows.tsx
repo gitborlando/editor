@@ -44,7 +44,7 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
   })
 
   return (
-    <Flex layout='v' sidePadding={6} className={classes.Shadow}>
+    <Flex layout='v' className={cx(classes.Shadow, 'px-6')}>
       <HeaderComp />
       {!isMultiShadows ? (
         <ShadowListComp shadows={shadows} />

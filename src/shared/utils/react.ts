@@ -58,7 +58,7 @@ export function useAsyncEffect(callback: Function, deps = []) {
 }
 
 export function useMatchPatch(...pattens: string[]) {
-  useHookSignal(Editor.onReviewSchema, ({ path }, update) => {
+  useHookSignal(Editor.onCheckOperation, ({ path }, update) => {
     pattens.forEach((patten) => Immui.matchPath(path, patten) && update())
   })
 }

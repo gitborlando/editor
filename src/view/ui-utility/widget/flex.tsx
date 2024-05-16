@@ -3,7 +3,6 @@ import { makeStyles } from '../theme'
 
 export interface IFlexProps extends ComponentPropsWithRef<'div'> {
   layout?: 'c' | 'h' | 'v'
-  sidePadding?: number
   vshow?: boolean
   justify?: 'space-around' | 'space-between'
   shrink?: number
@@ -14,7 +13,6 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
   (
     {
       layout,
-      sidePadding = 0,
       vshow = true,
       shrink = 1,
       justify,
@@ -26,16 +24,23 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
     },
     ref
   ) => {
-    const { classes, cx } = useStyles({ sidePadding, vshow, justify, shrink })
+    const { classes, cx } = useStyles({ vshow, justify, shrink })
+
     return (
       <div
         ref={ref}
-        className={cx(
-          layout &&
-            classes[({ c: 'center', h: 'horizontalCenter', v: 'verticalCenter' } as const)[layout]],
-          classes.Flex,
-          className
-        )}
+        className={
+          ':uno: relative' +
+          ' ' +
+          cx(
+            layout &&
+              classes[
+                ({ c: 'center', h: 'horizontalCenter', v: 'verticalCenter' } as const)[layout]
+              ],
+            classes.Flex,
+            className
+          )
+        }
         onMouseEnter={(e) => {
           onHover?.(true)
           onMouseEnter?.(e)
@@ -49,12 +54,11 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
   }
 )
 
-type IFlexStyleProps = {} & Required<Pick<IFlexProps, 'sidePadding' | 'vshow'>> &
+type IFlexStyleProps = {} & Required<Pick<IFlexProps, 'vshow'>> &
   Pick<IFlexProps, 'justify' | 'shrink'>
 
-const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, vshow, justify, shrink }) => ({
+const useStyles = makeStyles<IFlexStyleProps>()((t, { vshow, justify, shrink }) => ({
   Flex: {
-    position: 'relative',
     display: vshow ? 'flex' : 'none',
     justifyContent: justify,
     flexShrink: shrink,

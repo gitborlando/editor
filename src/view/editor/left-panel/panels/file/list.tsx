@@ -1,10 +1,10 @@
 import { FC, memo } from 'react'
-import { SchemaFile } from '~/editor/editor/file'
+import usePromise from 'react-promise-suspense'
+import { FileManager } from '~/editor/editor/file-manager'
 import { Schema } from '~/editor/schema/schema'
 import { IMeta } from '~/editor/schema/type'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { stopPropagation } from '~/shared/utils/event'
-import { useAsyncEffect } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
@@ -14,9 +14,10 @@ type IListComp = {}
 
 export const ListComp: FC<IListComp> = memo(({}) => {
   const { classes, cx } = useStyles({})
-  const { allFileMeta, getAllFileMeta, openInNewTab, deleteFile } = SchemaFile
-  useHookSignal(allFileMeta)
-  useAsyncEffect(getAllFileMeta)
+  const { openInNewTab, deleteFile, fileMetaList$, getFileMetaList } = FileManager
+  useHookSignal(fileMetaList$)
+
+  usePromise<[string], void>(getFileMetaList, ['getFileMetaList'])
 
   const ListItemComp: FC<{ meta: IMeta }> = memo(({ meta }) => {
     const selected = meta.fileId === Schema.meta.fileId
@@ -24,8 +25,7 @@ export const ListComp: FC<IListComp> = memo(({}) => {
     return (
       <Flex
         layout='h'
-        sidePadding={10}
-        className={cx(classes.listItem, selected && classes.selectedListItem)}
+        className={cx(classes.listItem, selected && classes.selectedListItem, 'px-10')}
         onHover={isHover.dispatch}
         onClick={() => openInNewTab(meta.fileId)}>
         {meta.name}
@@ -43,7 +43,7 @@ export const ListComp: FC<IListComp> = memo(({}) => {
 
   return (
     <Flex layout='v' className={classes.List}>
-      {allFileMeta.value.map((meta) => (
+      {fileMetaList$.value.map((meta) => (
         <ListItemComp key={meta.fileId} meta={meta} />
       ))}
     </Flex>

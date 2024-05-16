@@ -90,9 +90,9 @@ export const TextComp: FC<ITextComp> = ({}) => {
   const { align, lineHeight } = textStyle
   const FontAlignComp = useMemoComp([align, lineHeight], ({}) => {
     return (
-      <Flex layout='h' className={css({ width: '100%' })}>
+      <Flex layout='h' className={'w-100%'}>
         <Dropdown
-          className={css({ width: 80 })}
+          className={'w-80'}
           selected={align}
           options={textStyleOptions.align} //@ts-ignore
           isMulti={align === 'multi'}
@@ -111,7 +111,7 @@ export const TextComp: FC<ITextComp> = ({}) => {
   })
 
   return (
-    <Flex layout='v' sidePadding={6} className={classes.Text}>
+    <Flex layout='v' className={cx(classes.Text, 'px-6')}>
       <HeaderComp />
       {intoEditing.value && <TextEditComp />}
       <FontSizeWeightComp />

@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { ICommand } from '~/editor/editor/command'
+import { IEditorCommand } from '~/editor/editor/command'
 import { xy_ } from '~/editor/math/xy'
 import { createSignal } from '~/shared/signal/signal'
 import { addListenerCapture, clickAway } from '~/shared/utils/event'
@@ -7,7 +7,7 @@ import { IAnyObject } from '~/shared/utils/normal'
 
 @autobind
 class MenuService {
-  menuOptions = createSignal<ICommand[][]>([])
+  menuOptions = createSignal<IEditorCommand[][]>([])
   xy = createSignal(xy_(0, 0))
   context = <IAnyObject>{}
   private ref?: HTMLDivElement

@@ -1,7 +1,7 @@
 import autoBindMethods from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { ID } from '~/editor/schema/type'
-import { createCache } from '../cache'
+import { createCache } from '../utils/cache'
 import { iife } from '../utils/normal'
 
 type IHook<T> = (value: T, args?: any) => void
