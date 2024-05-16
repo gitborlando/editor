@@ -1,7 +1,7 @@
 import { Menu } from './menu'
-import { Setting } from './setting'
+import { Storage } from './storage'
 
 Menu.initHook()
-Setting.init()
+Storage.init()
 
 export function initApp() {}

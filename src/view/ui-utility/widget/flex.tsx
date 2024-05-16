@@ -62,16 +62,13 @@ const useStyles = makeStyles<IFlexStyleProps>()((t, { sidePadding, vshow, justif
   center: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: sidePadding,
   },
   horizontalCenter: {
     alignItems: 'center',
-    paddingInline: sidePadding,
   },
   verticalCenter: {
     flexDirection: 'column',
     alignItems: 'center',
-    paddingBlock: sidePadding,
   },
 }))
 

@@ -1,13 +1,14 @@
 import autobind from 'class-autobind-decorator'
 import { FC } from 'react'
 import { StageViewport } from '~/editor/stage/viewport'
-import { createSetting } from '~/global/setting'
+import { createStorageItem } from '~/global/storage'
 import { createSignal } from '~/shared/signal/signal'
 import { FileComp } from '~/view/editor/left-panel/panels/file/file'
 import { GalleryComp } from '~/view/editor/left-panel/panels/gallery'
 import { HistoryComp } from '~/view/editor/left-panel/panels/history'
 import { IconsComp } from '~/view/editor/left-panel/panels/icons'
 import { LayerComp } from '~/view/editor/left-panel/panels/layer/layer'
+import { SettingComp } from '~/view/editor/left-panel/panels/setting'
 import Asset from '~/view/ui-utility/assets'
 
 type ISwitchTabOption = {
@@ -21,8 +22,8 @@ type ISwitchTabOption = {
 class UILeftPanelService {
   currentTabId = createSignal('layer')
   switchTabMap = createSignal(new Map<string, ISwitchTabOption>())
-  popupTabIds = createSetting('Editor.LeftPanel.popupTabIds', new Set<string>())
-  showLeftPanel = createSetting('Editor.LeftPanel.showLeftPanel', true)
+  popupTabIds = createStorageItem('Editor.LeftPanel.popupTabIds', new Set<string>())
+  showLeftPanel = createStorageItem('Editor.LeftPanel.showLeftPanel', true)
   panelHeight = window.innerHeight - 48
   switchTabIds = <string[]>[]
   initHook() {
@@ -82,4 +83,10 @@ UILeftPanel.registerSwitchTab({
   name: '图标',
   icon: Asset.editor.leftPanel.switchBar.record,
   panel: IconsComp,
+})
+UILeftPanel.registerSwitchTab({
+  id: 'setting',
+  name: '设置',
+  icon: Asset.editor.leftPanel.switchBar.record,
+  panel: SettingComp,
 })

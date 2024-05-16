@@ -5,7 +5,7 @@ import { OperateNode } from '~/editor/operate/node'
 import { SchemaHistory } from '~/editor/schema/history'
 import { Schema } from '~/editor/schema/schema'
 import { StageSelect } from '~/editor/stage/interact/select'
-import { createSetting } from '~/global/setting'
+import { createStorageItem } from '~/global/storage'
 import { createSignal } from '~/shared/signal/signal'
 import { SchemaUtil } from '~/shared/utils/schema'
 import { ceil, floor, max, min } from '../../math/base'
@@ -22,7 +22,7 @@ type IAllNodeExpanded = 'expanded' | 'collapsed' | 'partial-expanded'
 
 @autobind
 class UILeftPanelLayerService {
-  allPageExpanded = createSetting('LeftPanel.LayerPanel.pagePanelExpanded', true)
+  allPageExpanded = createStorageItem('LeftPanel.LayerPanel.pagePanelExpanded', true)
   pagePanelHeight = createSignal(200)
   nodeViewHeight = createSignal(0)
   nodeListHeight = createSignal(0)

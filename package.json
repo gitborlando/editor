@@ -56,12 +56,15 @@
     "@types/svg-parser": "^2.0.6",
     "@types/svg-path-bounding-box": "^1.0.2",
     "@types/svg-path-parser": "^1.1.6",
+    "@unocss/preset-rem-to-px": "^0.60.2",
+    "@unocss/transformer-variant-group": "^0.60.2",
     "@vitejs/plugin-react": "^4.2.1",
     "camelcase": "^8.0.0",
     "depcheck": "^1.4.7",
     "husky": "^9.0.11",
     "pretty-quick": "^4.0.0",
     "typescript": "^5.4.5",
+    "unocss": "^0.60.2",
     "vite": "^5.2.11"
   }
 }

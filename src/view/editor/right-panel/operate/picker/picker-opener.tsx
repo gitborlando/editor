@@ -1,12 +1,13 @@
 import { cloneDeep } from 'lodash-es'
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
+import rgbHex from 'rgb-hex'
 import { IImage, Img } from '~/editor/editor/img'
 import { xy_, xy_client } from '~/editor/math/xy'
 import { IFill, IFillColor } from '~/editor/schema/type'
 import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { useAutoSignal } from '~/shared/signal/signal-react'
-import { makeLinearGradientCss, rgbToHex, rgbToRgba } from '~/shared/utils/color'
+import { makeLinearGradientCss, rgbToRgba } from '~/shared/utils/color'
 import { IXY, iife } from '~/shared/utils/normal'
 import { useMemoComp, withSuspense } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
@@ -47,7 +48,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
         disabled={!isColorType}
         needStepHandler={false}
         value={iife(() => {
-          if (isColorType) return rgbToHex((fill as IFillColor).color)
+          if (isColorType) return rgbHex((fill as IFillColor).color)
           if (isLinearType) return '线性渐变'
           if (isImageType) return '图片填充'
           return ''

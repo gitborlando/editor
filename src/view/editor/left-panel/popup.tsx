@@ -1,6 +1,6 @@
 import { FC, createElement, memo, useRef } from 'react'
 import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
-import { createSetting } from '~/global/setting'
+import { createStorageItem } from '~/global/storage'
 import { DraggableComp } from '~/view/component/draggable'
 import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -14,7 +14,7 @@ export const PopupPanelComp: FC<IPopupPanelComp> = memo(({ id }) => {
   const { popDownPanel, findSwitchTab } = UILeftPanel
   const { name, panel, icon } = findSwitchTab(id)
   const settingXY = useRef(
-    createSetting(`Draggable.PopupPanel.${id}.XY`, { x: window.innerWidth - 480, y: 100 })
+    createStorageItem(`Draggable.PopupPanel.${id}.XY`, { x: window.innerWidth - 480, y: 100 })
   )
   return (
     <DraggableComp

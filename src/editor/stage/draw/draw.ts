@@ -1,13 +1,14 @@
 import { DropShadowFilter } from '@pixi/filter-drop-shadow'
 import autobind from 'class-autobind-decorator'
 import { Graphics, Matrix, Text, Texture } from 'pixi.js'
+import rgbHex from 'rgb-hex'
 import { IImage, Img } from '~/editor/editor/img'
 import { pointsOnBezierCurves } from '~/editor/math/bezier/points-of-bezier'
 import { xy_ } from '~/editor/math/xy'
 import { ID, IFillLinearGradient, IIrregular, INode, IVector } from '~/editor/schema/type'
 import { createCache } from '~/shared/cache'
 import { loopFor } from '~/shared/utils/array'
-import { rgb, rgbToHex, rgbToRgba } from '~/shared/utils/color'
+import { rgb, rgbToRgba } from '~/shared/utils/color'
 import { IXY, iife } from '~/shared/utils/normal'
 import { pixiPolylineContainsPoint } from '~/shared/utils/pixi/line-hit-area'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
@@ -101,7 +102,7 @@ class StageDrawService {
       const zoom = StageViewport.zoom.value
       const filter = new DropShadowFilter({
         offset: { x: offsetX * zoom, y: offsetY * zoom },
-        color: Number(`0x${rgbToHex(fill.color)}`),
+        color: Number(`0x${rgbHex(fill.color)}`),
         alpha: fill.alpha,
         blur: blur * zoom,
         quality: 60,
