@@ -101,6 +101,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
                 <Fragment key={i}>
                   <Graphics
                     draw={(g) => {
+                      g.clear()
                       g.x = node.x
                       g.y = node.y
                       g.lineStyle(1 / zoom, handelSelected ? hslBlueColor(60) : '#9F9F9F')
