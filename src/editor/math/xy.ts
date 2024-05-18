@@ -1,7 +1,7 @@
 import { IXY } from '~/shared/utils/normal'
 import { degreefy, rotatePoint } from './base'
 
-export function xy_(x: number, y: number) {
+export function xy_(x: number = 0, y: number = 0) {
   return { x, y }
 }
 

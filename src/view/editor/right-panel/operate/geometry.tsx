@@ -77,8 +77,8 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
 
     return (
       <CompositeInput
-        className='d-hover-bg'
         ref={ref}
+        className='d-hover-bg px-6'
         label={label}
         value={formatNumber(produceValue())}
         onNewValueApply={(v) => setGeometry(operateKey, produceValue(Number(v)) as number)}

@@ -24,6 +24,7 @@ export const EditorComp: FC<IEditorComp> = memo(({}) => {
         <LeftPanelComp />
         <MainStageComp />
         <RightPanelComp />
+        {/* <CursorComp /> */}
       </Flex>
     </Flex>
   )

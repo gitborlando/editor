@@ -62,7 +62,7 @@ export const StrokeComp: FC<{}> = ({}) => {
         </Flex>
         <Flex className='wh-100%-28'>
           <CompositeInput
-            className='wh-92-28-2 mr-4 px-6 [&_.label]:w-28'
+            className='wh-92-28-2 mr-4 px-6 d-hover-bg [&_.label]:w-28'
             label='粗细'
             needStepHandler={false}
             value={stroke.width.toString()}

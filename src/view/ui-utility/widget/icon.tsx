@@ -2,8 +2,6 @@ import { CSSProperties, FC, createElement } from 'react'
 import { useCssInJs } from '~/shared/utils/css-in-js'
 import { cx } from '~/shared/utils/normal'
 
-let count = 0
-
 export type IIconProps = {
   children: any
   className?: string

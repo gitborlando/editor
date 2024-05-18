@@ -60,8 +60,7 @@ export const CompositeInput = memo(
               if (disabled || needLabelDrag !== true) return
               let startValue = numberValue()
               beforeOperate?.()
-              Drag.needInfinity()
-                .onStart(() => active.dispatch(true))
+              Drag.onStart(() => active.dispatch(true))
                 .onMove(({ shift }) => emitNewValue((startValue + shift.x * slideRate).toString()))
                 .onDestroy(() => {
                   active.dispatch(false)
@@ -136,7 +135,7 @@ export const CompositeInput = memo(
 
       return (
         <Flex
-          className={cx(':uno: lay-h wh-92-28-2 box-border select-none', className)}
+          className={cx(':uno: lay-h wh-92-28-2 box-border select-none pl-4', className)}
           ref={ref}
           onHover={hover.dispatch}>
           <DragLabelComp />

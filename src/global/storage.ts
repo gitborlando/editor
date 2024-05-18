@@ -1,5 +1,4 @@
 import autobind from 'class-autobind-decorator'
-import { toJS } from 'mobx'
 import { createSignal } from '~/shared/signal/signal'
 import { createCache } from '~/shared/utils/cache'
 import { iife } from '~/shared/utils/normal'
@@ -21,7 +20,7 @@ class StorageService {
   set<T>(key: string, value: T) {
     const item = iife(() => {
       if (value instanceof Set) return <IStorageItem>{ type: 'set', value: [...value] }
-      if (value instanceof Map) return <IStorageItem>{ type: 'map', value: toJS(value) }
+      if (value instanceof Map) return <IStorageItem>{ type: 'map', value: value }
       return <IStorageItem>{ type: 'normal', value: value }
     })
     this.storage.set(key, item)

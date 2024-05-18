@@ -1,9 +1,9 @@
 import { Container, Graphics } from '@pixi/react'
 import { FC, useRef } from 'react'
+import { EditorCursor } from '~/editor/editor/cursor'
 import { rcos, rsin } from '~/editor/math/base'
 import { IGeometry, OperateGeometry } from '~/editor/operate/geometry'
 import { OperateNode } from '~/editor/operate/node'
-import { StageCursor } from '~/editor/stage/cursor'
 import { StageDraw } from '~/editor/stage/draw/draw'
 import { PIXI, Pixi } from '~/editor/stage/pixi'
 import { StageViewport } from '~/editor/stage/viewport'
@@ -62,10 +62,10 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
         switch (type) {
           case 'top':
           case 'bottom':
-            return StageCursor.type.dispatch('v-resize')
+            return EditorCursor.setCursor({ type: 'n-resize' })
           case 'right':
           case 'left':
-            return StageCursor.type.dispatch('h-resize')
+            return EditorCursor.setCursor({ type: 'e-resize' })
         }
       }
 
@@ -112,7 +112,7 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
           ref={ref}
           eventMode='dynamic'
           onmouseenter={mouseenter}
-          onmouseleave={() => StageCursor.type.dispatch('auto')}
+          onmouseleave={() => EditorCursor.setCursor({ type: 'auto' })}
           onmousedown={mousedown}
           draw={(g) => {
             g.clear()
@@ -136,10 +136,10 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
         switch (type) {
           case 'topLeft':
           case 'bottomRight':
-            return StageCursor.type.dispatch('se-resize')
+            return EditorCursor.setCursor({ type: 'se-resize' })
           case 'topRight':
           case 'bottomLeft':
-            return StageCursor.type.dispatch('sw-resize')
+            return EditorCursor.setCursor({ type: 'sw-resize' })
         }
       }
 
@@ -188,7 +188,7 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
         <Graphics
           eventMode='dynamic'
           onmouseenter={mouseenter}
-          onmouseleave={() => StageCursor.type.dispatch('auto')}
+          onmouseleave={() => EditorCursor.setCursor({ type: 'auto' })}
           onmousedown={mousedown}
           draw={(g) => {
             g.clear()

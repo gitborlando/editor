@@ -40,6 +40,7 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
   const SceneStageComp = useMemoComp([Schema.inited.value], ({}) => {
     const children = SchemaUtil.getChildren(Schema.client.selectPageId)
     useHookSignal(Schema.schemaChanged)
+
     return (
       <Container ref={Pixi.setSceneStage}>
         {useRenderChildren(children)}

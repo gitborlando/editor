@@ -1,4 +1,3 @@
-import { runInAction } from 'mobx'
 import { createCache } from './cache'
 
 export const This = globalThis as any
@@ -43,10 +42,6 @@ export function Delete<T>(target: Record<string, T> | T[], filter: string | ((va
   } else {
     delete target[filter as string]
   }
-}
-
-export function makeAction<T extends any>(callback?: (...args: T[]) => void) {
-  return (...args: T[]) => runInAction(() => callback?.(...args))
 }
 
 export function iife<T extends any = any>(callback: () => T): T {
@@ -103,4 +98,8 @@ export function timeFor(count: number, func: any, name?: string) {
   console.time(name || `${count}`)
   for (let i = 0; i < count; i++) func()
   console.timeEnd(name || `${count}`)
+}
+
+export function notUndefine<T extends any>(val: T | undefined): val is T {
+  return val !== undefined
 }
