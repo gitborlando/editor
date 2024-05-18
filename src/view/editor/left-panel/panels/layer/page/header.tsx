@@ -3,7 +3,6 @@ import { OperateMeta } from '~/editor/operate/meta'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import Asset from '~/view/ui-utility/assets'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from '~/view/ui-utility/widget/icon'
@@ -11,7 +10,6 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 type IPageHeaderComp = {}
 
 export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
-  const { classes, cx } = useStyles({})
   const { allPageExpanded } = UILeftPanelLayer
   useHookSignal(allPageExpanded)
   useHookSignal(OperateMeta.curPage)
@@ -22,11 +20,10 @@ export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
     }
     OperateMeta.addPage()
   }
+
   return (
-    <Flex layout='h' shrink={0} className={cx(classes.PageHeader, 'px-4')}>
-      <Flex layout='c' className={classes.selectPageName}>
-        {OperateMeta.curPage.value.name}
-      </Flex>
+    <Flex className='lay-h shrink-0 wh-100%-32 bg-white px-6'>
+      <Flex className='lay-c labelFont pl-6'>{OperateMeta.curPage.value.name}</Flex>
       <Button type='icon' style={{ marginLeft: 'auto' }} onClick={newPage}>
         <Icon size={16}>{Asset.editor.leftPanel.page.add}</Icon>
       </Button>
@@ -38,17 +35,3 @@ export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
     </Flex>
   )
 }
-
-type IPageHeaderCompStyle = {} /* & Required<Pick<IPageHeaderComp>> */ /* & Pick<IPageHeaderComp> */
-
-const useStyles = makeStyles<IPageHeaderCompStyle>()((t) => ({
-  PageHeader: {
-    ...t.rect('100%', t.default$.normalHeight, 'no-radius', 'white'),
-  },
-  selectPageName: {
-    ...t.labelFont,
-    paddingLeft: 6,
-  },
-}))
-
-PageHeaderComp.displayName = 'PageHeaderComp'

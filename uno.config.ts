@@ -1,67 +1,123 @@
-import { Rule, defineConfig, presetUno, transformerCompileClass } from 'unocss'
+import presetRemToPx from '@unocss/preset-rem-to-px'
+import {
+  Rule,
+  defineConfig,
+  presetUno,
+  toEscapedSelector,
+  transformerCompileClass,
+  transformerVariantGroup,
+} from 'unocss'
+
+const theme = (() => {
+  const hslB = Object.fromEntries(
+    new Array(100).fill(0).map((_, i) => [`hslb${i}`, `hsl(217, 100, ${i})`])
+  )
+  return {
+    colors: { ...hslB },
+  }
+})()
 
 const widthHeightRadius: Rule<object> = [
-  /wh-([^-]+)-([^-]+)-?([^-]+)?/,
+  /wh-([^-]+)-?([^-]+)?-?([^-]+)?/,
   ([_, w, h, r]) => ({
     width: normal(w),
-    height: normal(h),
+    height: normal(h ?? w),
     ...(r && { 'border-radius': normal(r) }),
   }),
 ]
 
-const marginAuto: Rule<object> = [
-  /mAuto-(r|t|b|l)/,
-  ([_, direct]) => ({ [`margin-${normal(direct)}`]: 'auto' }),
-]
-
-const backgroundColor: Rule<object> = [
-  /bg-([^-]+)/,
-  ([_, color]) => ({ 'background-color': normalColor(color) }),
+const layout: Rule<object> = [
+  /lay-(h|v|c)/,
+  ([_, d]) => {
+    if (d === 'h') return { 'align-items': 'center' }
+    if (d === 'v') return { 'align-items': 'center', 'flex-direction': 'column' }
+    if (d === 'c') return { 'align-items': 'center', 'justify-content': 'center' }
+  },
 ]
 
 const border: Rule<object> = [
-  /b-(\d+)-([^-]+)/,
-  ([_, width, color]) => ({ border: `${width}px solid ${normalColor(color)}` }),
+  /b-(\d+)-([^-]+)-?(t|r|b|l)?/,
+  ([_, width, color, direction]) => ({
+    [`border${direction ? `-${normal(direction)}` : ''}`]: `${width}px solid ${normalColor(color)}`,
+  }),
 ]
 
 const boxShadow: Rule<object> = [
-  /shadow-(\d+)-(\d+)-(.+)/,
-  ([_, x, y, color]) => ({ 'box-shadow': `0px 0px ${x}px ${y}px ${normal(color)}` }),
+  /shadow-(\d+)-(\d+)-([^-]+)-?(inset)?/,
+  ([_, x, y, color, inset]) => ({
+    'box-shadow': `${inset || ''} 0px 0px ${x}px ${y}px ${normal(color)}`,
+  }),
 ]
+
+const defaultHover: Rule<object> = [
+  /d-hover-(bg|border)/,
+  ([_, type], { rawSelector }) => {
+    if (type === 'bg')
+      return `${toEscapedSelector(rawSelector)}:hover { background-color: rgba(138,138,138,0.13) }`
+    if (type === 'border') {
+      return (
+        `@layer widget { ${toEscapedSelector(rawSelector)} { border: 1px solid transparent; } }\n` +
+        `${toEscapedSelector(rawSelector)}:hover { border: 1px solid hsl(217 100 50) }`
+      )
+    }
+  },
+]
+
+const defaultFont: Rule<object> = [
+  /d-font-(label)/,
+  ([_, type], { rawSelector }) => {
+    const css = (() => {
+      if (type === 'label') return `font-size: 11px; color: #626262`
+    })()
+    return `${toEscapedSelector(rawSelector)} { ${css} }`
+  },
+]
+
+const defaultScrollBar: Rule<object> = [
+  /d-scroll-?(.+)?/,
+  ([_, type], { rawSelector }) => {
+    const selector = toEscapedSelector(rawSelector)
+    return `
+      ${selector}::-webkit-scrollbar { width: 4px; height: 4px }
+      ${selector}::-webkit-scrollbar-thumb { background: rgba(204, 204, 204, 0.5) }`
+  },
+]
+
+const gap: Rule<object> = [/gap-(\d+)-(\d+)/, ([_, x, y]) => ({ gap: `${x}px ${y}px` })]
 
 const cursorPointer: Rule<object> = [/pointer/, () => ({ cursor: 'pointer' })]
 
 const labelFont: Rule<object> = [/labelFont/, () => ({ 'font-size': '11px', color: '#626262' })]
 const normalFont: Rule<object> = [/normalFont/, () => ({ 'font-size': '12px' })]
 
-const borderBottom: Rule<object> = [/borderBottom/, () => ({ border: '1px solid #E3E3E3' })]
+const borderBottom: Rule<object> = [
+  /borderBottom/,
+  () => ({ 'border-bottom': '1px solid #E3E3E3' }),
+]
+
+const defaultInput: Rule<object> = [
+  /d-input/,
+  () => ({ border: 'none', outline: 'none', 'background-color': 'transparent' }),
+]
 
 export default defineConfig({
-  presets: [presetUno()],
-  transformers: [transformerCompileClass()],
+  theme,
+  presets: [presetUno(), presetRemToPx({ baseFontSize: 4 })],
+  transformers: [transformerCompileClass(), transformerVariantGroup()],
   rules: [
     widthHeightRadius,
-    marginAuto,
-    backgroundColor,
+    layout,
     border,
     cursorPointer,
     labelFont,
     normalFont,
     borderBottom,
     boxShadow,
-  ],
-  postprocess: [
-    (obj) => {
-      if (/-[\d]+\W?$/g.test(obj.selector) === false) {
-        return obj
-      }
-      obj.entries.forEach((i) => {
-        const value = i[1]
-        if (typeof value === 'string' && /(-?[\.\d]+)rem/g.test(value)) {
-          i[1] = value.replace(/(-?[\.\d]+)rem/g, (_, p1) => `${p1 / 4}rem`)
-        }
-      })
-    },
+    gap,
+    defaultHover,
+    defaultScrollBar,
+    defaultInput,
+    defaultFont,
   ],
 })
 
@@ -76,7 +132,14 @@ function normal(val: string) {
 }
 
 function normalColor(val: string) {
-  if (!/\D/.test(val)) return `hsl(217 100 ${val})`
+  if (val.startsWith('rgb')) {
+    console.log('val: ', val)
+    const [_, r, g, b, a] = val.match(
+      /rgba?,?(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),?(\d+(?:\.\d+)?)?/
+    )
+    return `rgba(${r},${g},${b},${a || 1})`
+  }
+  if (val.match(/hslB.\d{1,3}/)) return `hsl(217, 100, ${val.slice(5)})`
   return val
 }
 

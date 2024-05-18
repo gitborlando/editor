@@ -1,9 +1,8 @@
-import { FC, memo } from 'react'
+import { FC, memo, useEffect } from 'react'
 import { RgbaStringColorPicker } from 'react-colorful'
 import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { rgb } from '~/shared/utils/color'
 import { useDownUpTracker } from '~/shared/utils/event'
-import { makeStyles } from '~/view/ui-utility/theme'
 
 type IPickerColorComp = {
   color: string
@@ -11,7 +10,6 @@ type IPickerColorComp = {
 }
 
 export const PickerColorComp: FC<IPickerColorComp> = memo(({ color, onChange }) => {
-  const { classes } = useStyles({})
   const { beforeOperate, afterOperate } = UIPickerCopy
   const transformColor = (color: string) => {
     const [, r, g, b, a] = color.match(/rgba\((\d+), (\d+), (\d+), (\d+(\.\d+)?)\)/)!
@@ -22,40 +20,26 @@ export const PickerColorComp: FC<IPickerColorComp> = memo(({ color, onChange }) 
     beforeOperate.dispatch,
     afterOperate.dispatch
   )
+  useEffect(() => injectCss(), [])
 
   return (
     <RgbaStringColorPicker
       id='$$RgbaStringColorPicker'
-      className={classes.colorPicker}
+      className='wh-240-240! bg-white!'
       color={color}
       onChange={(c) => onChange(transformColor(c))}
     />
   )
 })
 
-type IPickerColorCompStyle =
-  {} /* & Required<Pick<IPickerColorComp>> */ /* & Pick<IPickerColorComp> */
-
-const useStyles = makeStyles<IPickerColorCompStyle>()((t) => ({
-  PickerColor: {
-    ...t.rect(240, 'fit-content', 'no-radius', 'white'),
-  },
-  colorPicker: {
-    '&.react-colorful': {
-      width: 240,
-      height: 240,
-    },
-    '& .react-colorful__pointer': {
-      width: 12,
-      height: 12,
-    },
-    '& .react-colorful__alpha, .react-colorful__hue': {
-      height: 12,
-    },
-    '& .react-colorful__last-control, .react-colorful__saturation': {
-      borderRadius: 0,
-    },
-  },
-}))
-
-PickerColorComp.displayName = 'PickerColorComp'
+function injectCss() {
+  if (document.getElementById('$$react-colorful')) return
+  const style = document.createElement('style')
+  style.id = '$$react-colorful'
+  style.innerHTML = `
+    .react-colorful__pointer{width:14px;height:14px}
+    .react-colorful__alpha,.react-colorful__hue{height:12px}
+    .react-colorful__last-control,.react-colorful__saturation{border-radius:0}
+  `
+  document.head.appendChild(style)
+}

@@ -1,5 +1,4 @@
 import { FC } from 'react'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { NodeHeaderComp } from './header'
 import { NodeListComp } from './list'
@@ -7,21 +6,10 @@ import { NodeListComp } from './list'
 type INodeComp = {}
 
 export const NodeComp: FC<INodeComp> = ({}) => {
-  const { classes } = useStyles({})
   return (
-    <Flex layout='v' className={classes.Node}>
+    <Flex className='lay-v wh-100%-fit bg-white'>
       <NodeHeaderComp />
       <NodeListComp />
     </Flex>
   )
 }
-
-type INodeCompStyle = {} /* & Required<Pick<INodeComp>> */ /* & Pick<INodeComp> */
-
-const useStyles = makeStyles<INodeCompStyle>()((t) => ({
-  Node: {
-    ...t.rect('100%', 'fit-content', 'no-radius', 'white'),
-  },
-}))
-
-NodeComp.displayName = 'NodeComp'

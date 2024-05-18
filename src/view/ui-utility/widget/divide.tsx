@@ -1,5 +1,5 @@
 import { ComponentPropsWithRef, forwardRef } from 'react'
-import { makeStyles } from '../theme'
+import { cx, iife } from '~/shared/utils/normal'
 import { Flex } from './flex'
 
 interface IDivide extends ComponentPropsWithRef<'div'> {
@@ -23,39 +23,29 @@ export const Divide = forwardRef<HTMLDivElement, IDivide>(
     },
     ref
   ) => {
-    const { classes, cx } = useStyles({ length, bgColor, margin, thickness })
+    const baseStyle = { boxShadow: `0 0 0 ${thickness}px ${bgColor}` }
+
+    const dynamicStyle = iife(() => {
+      if (direction === 'h')
+        return {
+          width: length,
+          height: 0,
+          marginBlock: margin,
+        }
+      else
+        return {
+          width: 0,
+          height: length,
+          marginInline: margin,
+        }
+    })
+
     return (
       <Flex
-        layout='c'
-        shrink={0}
-        className={cx(
-          classes.Divide,
-          className,
-          direction === 'h' && classes.h,
-          direction === 'v' && classes.v
-        )}
+        style={{ ...baseStyle, ...dynamicStyle }}
+        className={cx('layer-widget(lay-c shrink-0)', className)}
         {...rest}
         ref={ref}></Flex>
     )
   }
 )
-
-type IDivideStyle = {} & Required<
-  Pick<IDivide, 'length' | 'bgColor' | 'margin' | 'thickness'>
-> /* & Pick<IDivide> */
-
-const useStyles = makeStyles<IDivideStyle>()((t, { length, bgColor, thickness, margin }) => ({
-  Divide: {
-    boxShadow: `0 0 0 ${thickness}px ${bgColor}`,
-  },
-  h: {
-    ...t.rect(length, 0),
-    marginBlock: margin,
-  },
-  v: {
-    ...t.rect(0, length),
-    marginInline: margin,
-  },
-}))
-
-Divide.displayName = 'Divide'

@@ -6,7 +6,6 @@ import { createCache } from '~/shared/utils/cache'
 import { hslBlueColor } from '~/shared/utils/color'
 import { IAnyObject } from '~/shared/utils/normal'
 import { useMemoComp, withSuspense } from '~/shared/utils/react'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IIconsComp = {}
@@ -17,7 +16,6 @@ const categoryLengthCache = createCache<string, number>()
 
 export const IconsComp: FC<IIconsComp> = memo(({}) => {
   const IconsContentComp = ({}) => {
-    const { classes } = useStyles({})
     const svgSource = usePromise<[string], IAnyObject>(
       (url) => fetch(url).then((res) => res.json()),
       [staticHost + '/svg-source/list.json']
@@ -31,14 +29,13 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
 
     const CategoryComp = useMemoComp([curCategory], () => {
       return (
-        <Flex layout='h' className={classes.categories}>
+        <Flex className={'lay-h wh-100%-fit px-10 gap-6-6 pointer'}>
           {categories.map((category) => {
             const selectCss = curCategory === category && { color: hslBlueColor(60) }
             return (
               <Flex
                 key={category}
-                layout='h'
-                className='category'
+                className='lay-h wh-fit-fit-5 bg-[#F5F5F5] p-6 my-10 normalFont'
                 style={{ ...selectCss }}
                 onClick={() => setCurCategory(category)}>
                 {category}
@@ -53,13 +50,14 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
       const length = useAutoSignal(categoryLengthCache.get(curCategory))
       const icons = Object.entries<string>(svgSource[curCategory]).slice(0, length.value)
       useHookSignal(length, (len) => categoryLengthCache.set(curCategory, len))
+
       return (
-        <Flex layout='h' className={classes.list}>
+        <Flex className={'wh-100%-fit lay-h flex-wrap of-y-auto px-6 gap-10-10 d-scroll'}>
           {icons.map(([name, path]) => (
             <SvgComp key={path} name={name} path={path} />
           ))}
           <InView
-            style={{ width: '100%', height: 30 }}
+            className='wh-100%-30 '
             onChange={(inView) => inView && length.dispatch(length.value + 40)}></InView>
         </Flex>
       )
@@ -78,8 +76,11 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
           )
         }
         return (
-          <Flex draggable layout='c' className={classes.svg} onDragStart={onDragStart}>
-            <Flex layout='c' dangerouslySetInnerHTML={{ __html: svgStr }} />
+          <Flex
+            draggable
+            className={'lay-c wh-48-48-5 d-hover-bg pointer'}
+            onDragStart={onDragStart}>
+            <Flex className='lay-c' dangerouslySetInnerHTML={{ __html: svgStr }} />
           </Flex>
         )
       })
@@ -87,7 +88,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
     })
 
     return (
-      <Flex layout='v' className={classes.Icons}>
+      <Flex className={'lay-v wh-100%-100% bg-white'}>
         <CategoryComp />
         <SvgListComp />
       </Flex>
@@ -96,38 +97,3 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
 
   return withSuspense(<IconsContentComp />)
 })
-
-type IIconsCompStyle = {} /* & Required<Pick<IIconsComp>> */ /* & Pick<IIconsComp> */
-
-const useStyles = makeStyles<IIconsCompStyle>()((t) => ({
-  Icons: {
-    ...t.rect('100%', '100%', 'no-radius', 'white'),
-  },
-  categories: {
-    ...t.rect('100%', 'fit-content', 'no-radius'),
-    paddingInline: 6,
-    gap: '6px 6px',
-    cursor: 'pointer',
-    '& .category': {
-      ...t.rect('fit-content', 'fit-content', 5, '#F5F5F5'),
-      padding: 6,
-      marginBlock: 10,
-      ...t.default$.font.normal,
-    },
-  },
-  list: {
-    ...t.rect('100%', 'fit-content', 'no-radius'),
-    flexWrap: 'wrap',
-    overflowY: 'auto',
-    ...t.default$.scrollBar,
-    paddingInline: 6,
-    gap: '10px 10px',
-  },
-  svg: {
-    ...t.rect(48, 48, 5),
-    ...t.default$.hover.background,
-    cursor: 'pointer',
-  },
-}))
-
-IconsComp.displayName = 'IconsComp'

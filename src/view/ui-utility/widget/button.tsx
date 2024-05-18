@@ -1,6 +1,5 @@
 import { ComponentPropsWithRef, forwardRef } from 'react'
-import { hslBlueColor } from '~/shared/utils/color'
-import { makeStyles } from '~/view/ui-utility/theme'
+import { cx } from '~/shared/utils/normal'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
 export type IButtonProps = ComponentPropsWithRef<'div'> & {
@@ -11,51 +10,41 @@ export type IButtonProps = ComponentPropsWithRef<'div'> & {
 
 export const Button = forwardRef<HTMLDivElement, IButtonProps>(
   ({ type = 'normal', active = false, disabled = false, className, children, ...rest }, ref) => {
-    const { classes, cx } = useStyles({ active, disabled })
+    const baseCss = cx([':uno: lay-c'], [!disabled, ':uno: pointer'])
+
+    const normalCss = cx(
+      [':uno: wh-fit-fit-4 p-6 mx-2 text-11 text-[#626262]'],
+      [disabled, ''],
+      [active, ':uno: text-[hsl(217,100,65)] bg-[hsl(217,100,95)]'],
+      [':uno: d-hover-bg']
+    )
+
+    const textCss = cx(
+      [':uno: text-[hsl(217,100,50)]'],
+      [disabled, ''],
+      [active, ':uno: text-[hsl(217,100,50)]'],
+      [':uno: text-[hsl(217,100,50)]']
+    )
+
+    const iconCss = cx(
+      [':uno: wh-fit-fit-4 p-4 mx-2'],
+      [disabled, ''],
+      [active, ':uno: bg-hslb95'],
+      [':uno: d-hover-bg']
+    )
+
+    const finalCss = cx(
+      [baseCss],
+      [type === 'text', textCss],
+      [type === 'icon', iconCss],
+      [type === 'normal', normalCss],
+      [normalCss]
+    )
+
     return (
-      <Flex
-        layout='c'
-        className={cx(
-          classes.Button,
-          className,
-          type === 'normal' && classes.normal,
-          type === 'text' && classes.text,
-          type === 'icon' && classes.icon
-        )}
-        {...(!disabled && rest)}
-        ref={ref}>
+      <Flex className={cx(finalCss, className)} {...(!disabled && rest)} ref={ref}>
         {children}
       </Flex>
     )
   }
 )
-
-type IButtonStyle = {} /* & Required<Pick<IButton>> */ & Pick<IButtonProps, 'active' | 'disabled'>
-
-const useStyles = makeStyles<IButtonStyle>()((t, { active, disabled }) => ({
-  Button: {
-    ...t.labelFont,
-    ...(disabled && { ...t.default$.disabled.font }),
-    ...(!disabled && { cursor: 'pointer' }),
-  },
-  normal: {
-    ...t.rect('fit-content', 'fit-content', 4),
-    padding: 6,
-    marginInline: 2,
-    ...(!disabled && active && { color: hslBlueColor(65), ...t.default$.active.background }),
-    ...(!active && !disabled && { ...t.default$.hover.background }),
-  },
-  text: {
-    ...(!disabled && active && { ...t.default$.active.font }),
-    ...(!active && !disabled && { ...t.default$.hover.font }),
-  },
-  icon: {
-    ...t.rect('fit-content', 'fit-content', 4),
-    padding: 4,
-    marginInline: 2,
-    ...(!disabled && active && { color: hslBlueColor(65), ...t.default$.active.background }),
-    ...(!active && !disabled && { ...t.default$.hover.background }),
-  },
-}))
-
-Button.displayName = 'Button'

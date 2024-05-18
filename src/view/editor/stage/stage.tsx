@@ -6,7 +6,6 @@ import { Pixi } from '~/editor/stage/pixi'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { useMemoComp } from '~/shared/utils/react'
 import { SchemaUtil } from '~/shared/utils/schema'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { useRenderChildren } from './hooks'
 import { HoverComp } from './widget/hover'
@@ -31,7 +30,6 @@ const staticOption: ConstructorParameters<typeof Application>[0] = {
 type IStageComp = {}
 
 export const MainStageComp: FC<IStageComp> = ({}) => {
-  const { classes } = useStyles({})
   useHookSignal(Schema.inited)
 
   const AppRefComp = useMemoComp([], ({}) => {
@@ -56,9 +54,8 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
 
   return (
     <Flex
-      shrink={0}
       ref={Pixi.setHtmlContainer}
-      className={classes.Stage}
+      className='wh-100% bg-white shrink-0 relative left-0 -top-0.5'
       onContextMenu={(e) => e.preventDefault()}>
       <Stage options={staticOption} raf={false} renderOnComponentChange={true}>
         <AppRefComp />
@@ -69,14 +66,3 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
     </Flex>
   )
 }
-
-type IStageCompStyle = {} /* & Required<Pick<IStageComp>> */ /* & Pick<IStageComp> */
-
-const useStyles = makeStyles<IStageCompStyle>()((t) => ({
-  Stage: {
-    ...t.rect('100%', '100%', 'no-radius', 'white'),
-    ...t.relative(0, -0.5),
-  },
-}))
-
-MainStageComp.displayName = 'StageComp'

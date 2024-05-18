@@ -3,17 +3,15 @@ import ReactJson from 'react-json-view'
 import { SchemaHistory } from '~/editor/schema/history'
 import { ISchemaHistory, ISchemaOperation } from '~/editor/schema/type'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
-import { hslBlueColor, hslColor } from '~/shared/utils/color'
+import { hslColor } from '~/shared/utils/color'
 import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IHistoryComp = {}
 
 export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
-  const { classes, css, theme: t, cx } = useStyles({})
   const { stack, index } = SchemaHistory
   useHookSignal(index)
 
@@ -32,29 +30,9 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
     }, [active])
 
     return (
-      <Flex
-        ref={ref}
-        layout='v'
-        className={css({
-          ...t.rect('100%', 'fit-content'),
-          ...t.default$.borderBottom,
-          ...(active && { backgroundColor: hslBlueColor(98) }),
-        })}>
-        <Flex
-          layout='h'
-          className={css({
-            ...t.rect('100%', 24),
-            ...t.font(randomColor),
-            paddingInline: 10,
-            fontSize: 17,
-            marginTop: 8,
-          })}>
-          <h6
-            className={css({
-              ...t.default$.description,
-            })}>
-            {description}
-          </h6>
+      <Flex ref={ref} className={`lay-v wh-100%-fit borderBottom ${active && 'bg-hslb98'}`}>
+        <Flex style={{ color: randomColor }} className={`lay-h wh-100%-24 font-size-17 px-10 mt-8`}>
+          <h6 className={`w-100% nowrap of-hidden text-ellipsis`}>{description}</h6>
           <IconButton
             size={16}
             rotate={collapsed.value ? 0 : 180}
@@ -71,14 +49,9 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
           />
         ))}
         {needCollapsedItems && (
-          <Flex layout='h' className={css({ width: '100%', paddingInline: 10 })}>
+          <Flex className={'lay-h w-100% px-10'}>
             <Flex
-              className={css({
-                marginLeft: 'auto',
-                ...t.labelFont,
-                cursor: 'pointer',
-                marginBottom: 8,
-              })}
+              className='ml-auto labelFont pointer mb-8'
               onClick={() => setItemCollapsed(!itemCollapsed)}>
               {itemCollapsed ? '展开' : '折叠'}其余项
             </Flex>
@@ -93,8 +66,8 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
     ({ operation, collapsed }) => {
       const { patches } = operation
       return (
-        <Flex layout='v' className={classes.diff}>
-          <Flex layout='h' className='detail'>
+        <Flex className='lay-v wh-100%-fit px-10 py-4'>
+          <Flex className='lay-h wh-100%-fit my-6'>
             <ReactJson
               src={patches}
               style={{ fontFamily: 'consolas', fontSize: 12 }}
@@ -111,36 +84,10 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
   )
 
   return (
-    <Flex layout='v' className={classes.Diffs}>
+    <Flex className='lay-v wh-100%-100% d-scroll of-y-auto'>
       {stack.map((history, i) => (
         <CardComp active={i === index.value} history={history} key={i} />
       ))}
     </Flex>
   )
 })
-
-type IHistoryCompStyle = {} /* & Required<Pick<IHistoryComp>> */ /* & Pick<IHistoryComp> */
-
-const useStyles = makeStyles<IHistoryCompStyle>()((t) => ({
-  Diffs: {
-    ...t.rect('100%', '100%'),
-    ...t.default$.scrollBar,
-    overflowY: 'auto',
-  },
-  diff: {
-    ...t.rect('100%', 'fit-content'),
-    // ...t.default$.borderBottom,
-    paddingInline: 10,
-    paddingBlock: 4,
-    '& .description': {
-      ...t.rect('100%', 24),
-      ...t.font(hslBlueColor(50), 12),
-    },
-    '& .detail': {
-      ...t.rect('100%', 'fit-content'),
-      marginBlock: 6,
-    },
-  },
-}))
-
-HistoryComp.displayName = 'HistoryComp'

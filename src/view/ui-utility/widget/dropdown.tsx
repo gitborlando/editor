@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 import { useAutoSignal, useSignal } from '~/shared/signal/signal-react'
 import { stopPropagation, useClickAway } from '~/shared/utils/event'
 import { iife } from '~/shared/utils/normal'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import Asset from '../assets'
 import { Icon } from './icon'
@@ -18,7 +17,6 @@ export type IDropdown = ComponentPropsWithRef<'div'> & {
 
 export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
   const { options, selected, translateArray, isMulti, onSelected, className, ...rest } = props
-  const { classes, cx } = useStyles({})
   const innerRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLInputElement>(null)
   const show = useAutoSignal(false)
@@ -35,9 +33,7 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
   })
   return (
     <Flex
-      layout='h'
-      justify='space-between'
-      className={cx(classes.Dropdown, className)}
+      className='lay-h justify-around wh-fit-28-2 pointer normalFont d-hover-bg px-6'
       onMouseDown={() => show.dispatch(!show.value)}
       {...rest}
       ref={innerRef}>
@@ -54,8 +50,7 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
         createPortal(
           <Flex
             ref={listRef}
-            layout='v'
-            className={classes.list}
+            className='lay-v bg-white rounded-2 fixed normalFont shadow-3-0-rgba(0,0,0,0.5)'
             style={{
               left: bound.value.x,
               top: bound.value.y,
@@ -65,8 +60,7 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
             {options.map((option, index) => (
               <Flex
                 key={option}
-                layout='h'
-                className='listItem'
+                className='lay-h h-100% px-6 d-hover-bg'
                 style={{ width: bound.value.width, height: bound.value.height }}
                 onMouseDown={stopPropagation(() => {
                   onSelected(option)
@@ -81,31 +75,3 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
     </Flex>
   )
 })
-
-type IDropdownStyle = {} /* & Required<Pick<IDropdown>> */ /* & Pick<IDropdown> */
-
-const paddingInline = 6
-
-const useStyles = makeStyles<IDropdownStyle>()((t) => ({
-  Dropdown: {
-    ...t.rect('fit-content', 28, 2),
-    ...t.cursor('pointer'),
-    ...t.default$.font.normal,
-    ...t.default$.hover.background,
-    paddingInline,
-  },
-  list: {
-    borderRadius: 2,
-    backgroundColor: 'white',
-    ...t.fixed(),
-    ...t.default$.font.normal,
-    boxShadow: '0 0 3px -1px rgba(0,0,0,0.5)',
-    '& .listItem': {
-      height: '100%',
-      paddingInline,
-      ...t.default$.hover.background,
-    },
-  },
-}))
-
-Dropdown.displayName = 'Dropdown'

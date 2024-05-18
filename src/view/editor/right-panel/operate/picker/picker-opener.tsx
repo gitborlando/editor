@@ -11,7 +11,6 @@ import { makeLinearGradientCss, rgbToRgba } from '~/shared/utils/color'
 import { IXY, iife } from '~/shared/utils/normal'
 import { useMemoComp, withSuspense } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PickerComp } from './picker'
@@ -38,13 +37,12 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
     isShowPicker.dispatch(true)
   }
   const isShowPicker = useAutoSignal(false)
-  const { theme, css, classes, cx } = useStyles({})
 
   const ColorInputComp = useMemoComp<{ fill: IFill }>([fill], ({ fill }) => {
     return (
       <CompositeInput
         type='text'
-        className='input'
+        className='d-input w-56 text-align-center'
         disabled={!isColorType}
         needStepHandler={false}
         value={iife(() => {
@@ -75,8 +73,10 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
 
   return (
     <>
-      <Flex layout='h' className={cx(classes.Fill, 'px-6')}>
-        <Flex layout='h' className='miniShower' onClick={(e) => showPicker(xy_client(e))}>
+      <Flex className='lay-h wh-92-28-2 d-hover-bg normalFont px-6'>
+        <Flex
+          className='lay-h wh-18-18-2 relative mr-4 pointer [&_div]:(wh-100%-100%-2 absolute) [&_img]:(wh-100%-100%-2 absolute)'
+          onClick={(e) => showPicker(xy_client(e))}>
           <img src={Asset.editor.rightPanel.operate.fill.none}></img>
           {isColorType && (
             <Flex style={{ backgroundColor: rgbToRgba(fill.color, fill.alpha) }}></Flex>
@@ -86,11 +86,11 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
         </Flex>
         <ColorInputComp fill={fill} />
       </Flex>
-      <Flex layout='h' justify='space-between' className={cx(classes.opacity, 'px-6')}>
+      <Flex className='lay-h space-between px-6 wh-54-28-2 d-hover-bg'>
         <CompositeInput
           type='number'
           needStepHandler={false}
-          className='opacity'
+          className='width-34 d-input'
           value={Number(fill.alpha * 100).toFixed(0)}
           beforeOperate={() => setupUIPicker()}
           onNewValueApply={(value) => {
@@ -99,52 +99,9 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
             // })
           }}
         />
-        <Flex layout='c' className={css({ ...theme.labelFont })}>
-          %
-        </Flex>
+        <Flex className='lay-c labelFont'>%</Flex>
       </Flex>
       {isShowPicker.value && <PickerComp fill={fill} show={isShowPicker} />}
     </>
   )
 })
-
-type IPickerOpenerStyle = {} /* & Required<Pick<IPickerOpener>> */ /* & Pick<IPickerOpener> */
-
-const useStyles = makeStyles<IPickerOpenerStyle>()((t) => ({
-  Fill: {
-    ...t.rect(92, 28, 2),
-    ...t.default$.hover.background,
-    // ...t.default$.background,
-    ...t.default$.font.normal,
-    marginRight: 4,
-    '& .miniShower': {
-      ...t.rect(18, 18, 2),
-      ...t.relative(),
-      marginRight: 6,
-      cursor: 'pointer',
-      '& div, img': {
-        ...t.rect('100%', '100%', 2),
-        ...t.absolute(),
-      },
-    },
-    '& .input': {
-      ...t.default$.input,
-      width: 54,
-      textAlign: 'center',
-      '&:hover': {
-        backgroundColor: 'transparent',
-      },
-    },
-  },
-  opacity: {
-    ...t.rect(54, 28, 2),
-    // ...t.default$.hover.border,
-    ...t.default$.hover.background,
-    '& .opacity': {
-      width: 34,
-      ...t.default$.input,
-    },
-  },
-}))
-
-PickerOpener.displayName = 'PickerOpener'

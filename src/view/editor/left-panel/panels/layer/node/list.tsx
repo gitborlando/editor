@@ -4,14 +4,12 @@ import { EventWheel } from '~/global/event/wheel'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { useAnimationFrame } from '~/shared/utils/react'
 import { ScrollComp } from '~/view/editor/left-panel/panels/layer/node/scroll'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { NodeItemComp } from './item'
 
 type INodeListComp = {}
 
 export const NodeListComp: FC<INodeListComp> = memo(({}) => {
-  const { classes } = useStyles({})
   const {
     nodeViewHeight,
     nodeListHeight,
@@ -27,10 +25,9 @@ export const NodeListComp: FC<INodeListComp> = memo(({}) => {
   useAnimationFrame(calcNodeListChange2)
 
   return (
-    <Flex layout='v' className={classes.NodeList} style={{ height: nodeViewHeight.value }}>
+    <Flex className='lay-v wh-100% of-hidden relative' style={{ height: nodeViewHeight.value }}>
       <Flex
-        layout='v'
-        className={classes.list}
+        className='lay-v wh-100%'
         style={{ transform: `translateY(-${nodeScrollShift.value}px)` }}
         onWheel={EventWheel.onWheel}>
         {[...inViewNodeInfo.value].map(({ id, indent, ancestors }) => {
@@ -48,17 +45,3 @@ export const NodeListComp: FC<INodeListComp> = memo(({}) => {
     </Flex>
   )
 })
-
-type INodeListCompStyle = {} /* & Required<Pick<INodeListComp>> */ /* & Pick<INodeListComp> */
-
-const useStyles = makeStyles<INodeListCompStyle>()((t) => ({
-  NodeList: {
-    ...t.rect('100%', '100%'),
-    overflow: 'hidden',
-  },
-  list: {
-    ...t.rect('100%', '100%'),
-  },
-}))
-
-NodeListComp.displayName = 'NodeListComp'

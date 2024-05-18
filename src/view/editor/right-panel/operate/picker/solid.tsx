@@ -2,7 +2,6 @@ import { FC, memo, useTransition } from 'react'
 import { IFillColor } from '~/editor/schema/type'
 import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { getColorFromFill } from '~/shared/utils/color'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PickerColorComp } from './color'
 
@@ -11,12 +10,11 @@ type IPickerSolidComp = {
 }
 
 export const PickerSolidComp: FC<IPickerSolidComp> = memo(({ fill }) => {
-  const { classes } = useStyles({})
   const { setFillSolidColor } = UIPickerCopy
   const transition = useTransition()[1]
 
   return (
-    <Flex layout='v' className={classes.PickerSolid}>
+    <Flex className='lay-v wh-240-fit bg-white'>
       <PickerColorComp
         color={getColorFromFill(fill)}
         onChange={({ color, alpha }) => transition(() => setFillSolidColor(color, alpha))}
@@ -24,14 +22,3 @@ export const PickerSolidComp: FC<IPickerSolidComp> = memo(({ fill }) => {
     </Flex>
   )
 })
-
-type IPickerSolidCompStyle =
-  {} /* & Required<Pick<IPickerSolidComp>> */ /* & Pick<IPickerSolidComp> */
-
-const useStyles = makeStyles<IPickerSolidCompStyle>()((t) => ({
-  PickerSolid: {
-    ...t.rect(240, 'fit-content', 'no-radius', 'white'),
-  },
-}))
-
-PickerSolidComp.displayName = 'PickerSolidComp'

@@ -5,10 +5,8 @@ import { IFillImage } from '~/editor/schema/type'
 import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { Uploader } from '~/global/upload'
 import { useAutoSignal } from '~/shared/signal/signal-react'
-import { rgba } from '~/shared/utils/color'
 import { iife } from '~/shared/utils/normal'
 import { useMemoComp, withSuspense } from '~/shared/utils/react'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IPickerImageComp = {
@@ -18,7 +16,6 @@ type IPickerImageComp = {
 export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
   const { setFillUrl } = UIPickerCopy
   const isHover = useAutoSignal(false)
-  const { classes } = useStyles({})
 
   const uploadImage = async () => {
     const file = await Uploader.open({ accept: 'image/*' })
@@ -37,11 +34,13 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
   })
 
   return (
-    <Flex layout='v' className={classes.PickerImage}>
-      <Flex layout='c' className={classes.image} onHover={isHover.dispatch}>
+    <Flex className='lay-v wh-100%-fit bg-white relative'>
+      <Flex className='lay-c wh-100%-200 relative of-hidden bg-black' onHover={isHover.dispatch}>
         {isHover.value && (
-          <Flex layout='c' className={classes.upload}>
-            <Flex layout='c' className='button' onClick={uploadImage}>
+          <Flex className='lay-c wh-100% bg-[rgba(0,0,0,0.2)] absolute '>
+            <Flex
+              className='lay-c wh-80-32-5 b-1-white text-white text-14 pointer'
+              onClick={uploadImage}>
               更换图片
             </Flex>
           </Flex>
@@ -51,31 +50,3 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
     </Flex>
   )
 })
-
-type IPickerImageCompStyle =
-  {} /* & Required<Pick<IPickerImageComp>> */ /* & Pick<IPickerImageComp> */
-
-const useStyles = makeStyles<IPickerImageCompStyle>()((t) => ({
-  PickerImage: {
-    ...t.rect('100%', 'fit-content', 'no-radius', 'white'),
-    ...t.relative(),
-  },
-  image: {
-    ...t.rect('100%', 200),
-    ...t.relative(),
-    overflow: 'hidden',
-    backgroundColor: 'black',
-  },
-  upload: {
-    ...t.rect('100%', '100%', 'no-radius', rgba(0, 0, 0, 0.2)),
-    ...t.absolute(),
-    '& .button': {
-      ...t.rect(80, 32, 5, 'transparent'),
-      ...t.border(1, 'white'),
-      ...t.font('white', 14),
-      cursor: 'pointer',
-    },
-  },
-}))
-
-PickerImageComp.displayName = 'PickerImageComp'

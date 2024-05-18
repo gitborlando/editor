@@ -2,7 +2,6 @@ import { FC, createElement, memo, useRef } from 'react'
 import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
 import { createStorageItem } from '~/global/storage'
 import { DraggableComp } from '~/view/component/draggable'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from '~/view/ui-utility/widget/icon'
 
@@ -20,7 +19,7 @@ export const PopupPanelComp: FC<IPopupPanelComp> = memo(({ id }) => {
     <DraggableComp
       key={id}
       headerSlot={
-        <Flex layout='h' style={{ gap: 4 }}>
+        <Flex className='lay-h gap-4-4'>
           <Icon size={18}>{icon}</Icon>
           <h4>{name}</h4>
         </Flex>
@@ -34,9 +33,3 @@ export const PopupPanelComp: FC<IPopupPanelComp> = memo(({ id }) => {
     </DraggableComp>
   )
 })
-
-type IPopupPanelCompStyle = {} /* & Required<Pick<IPopupPanelComp>> */ /* & Pick<IPopupPanelComp> */
-
-const useStyles = makeStyles<IPopupPanelCompStyle>()((t) => ({}))
-
-PopupPanelComp.displayName = 'PopupPanelComp'

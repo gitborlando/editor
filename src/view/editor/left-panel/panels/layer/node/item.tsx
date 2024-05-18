@@ -11,11 +11,10 @@ import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { stopPropagation } from '~/shared/utils/event'
 import { IrregularUtils } from '~/shared/utils/irregular'
-import { iife, noopFunc } from '~/shared/utils/normal'
+import { cx, iife, noopFunc } from '~/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from '~/shared/utils/react'
 import { SchemaUtil } from '~/shared/utils/schema'
 import Asset from '~/view/ui-utility/assets'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from '~/view/ui-utility/widget/icon'
@@ -37,11 +36,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
   const isContainerNode = SchemaUtil.isById(id, 'nodeParent')
   const children = SchemaUtil.getChildren(id)
   const hovered = useAutoSignal(false)
-  const { classes, css, cx, theme } = useStyles({
-    selected,
-    subSelected,
-    nodeMoving: !!nodeMoveStarted.value.moveId,
-  })
+
   useHookSignal(OperateNode.selectIds)
   useHookSignal(nodeIdsInSearch)
   useHookSignal(hovered, (isHover) => {
@@ -63,7 +58,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
   const ExpandComp = useMemoComp([expand], ({}) => {
     return (
       <Flex
-        layout='c'
+        className='lay-c'
         onMouseDown={stopPropagation()}
         onClick={() => {
           setNodeExpanded(id, !expand)
@@ -91,7 +86,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
       )
     })
     return (
-      <Flex layout='c' className='px-6'>
+      <Flex className='lay-c px-6'>
         <Icon size={12} scale={12 / 10}>
           {iife(() => {
             if (node.type === 'frame') return Asset.editor.node.frame
@@ -109,23 +104,21 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
   const LabelComp = useMemoComp([searched, id], ({}) => {
     return (
       <Flex
-        layout='h'
         style={{ width: '100%' }}
-        className={cx(searched && classes.searched)}
+        className={cx([searched, 'lay-h text-[hsl(217,100,50)]'])}
         onDoubleClick={() => enterReName.dispatch(id)}>
         {enterReName.value === id ? (
           <CompositeInput
             type='text'
             needLabelDrag={false}
             needStepHandler={false}
-            className={cx(classes.input, css({ padding: 0 }))}
+            className='p-0 wh-100%-fit bg-transparent outline-none border-none text-12'
             value={node.name}
             onNewValueApply={(value) => {
               node.name = value
               // Schema.afterReName.dispatch({ id: node.id, name: value })
             }}
             afterOperate={() => enterReName.dispatch('')}
-            styles={{ needHover: false }}
           />
         ) : (
           <div>{node.name}</div>
@@ -159,31 +152,41 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
 
     return (
       <Flex
-        layout='v'
-        className={classes.dropArea}
+        className='lay-v wh-100%-32 absolute'
         style={{
           ...(!nodeMoveStarted.value.moveId && { pointerEvents: 'none' }),
-          ...(dropInSide.value && { ...theme.default$.active.boxShadow }),
+          ...(dropInSide.value && { boxShadow: 'inset 0 0 0px 0.7px ' + hslBlueColor(50) }),
         }}>
-        <Flex className='dropLayer' onHover={dropInFront.dispatch}>
+        <Flex className='wh-100%' onHover={dropInFront.dispatch}>
           {dropInFront.value && (
-            <Flex className='dropLine' style={{ paddingLeft: indent * 16 + 16 }}></Flex>
+            <Flex
+              className='wh-100%-2 bg-hslb50 absolute pointer-events-none'
+              style={{ paddingLeft: indent * 16 + 16 }}></Flex>
           )}
         </Flex>
-        {isContainerNode && <Flex className='dropLayer' onHover={dropInSide.dispatch}></Flex>}
-        <Flex layout='v' className='dropLayer' onHover={dropBehind.dispatch}>
+        {isContainerNode && <Flex className='wh-100%' onHover={dropInSide.dispatch}></Flex>}
+        <Flex className='lay-v wh-100%' onHover={dropBehind.dispatch}>
           {dropBehind.value && (
-            <Flex className='dropLine' style={{ bottom: 0, paddingLeft: indent * 16 + 16 }}></Flex>
+            <Flex
+              className='wh-100%-2 bg-hslb50 absolute pointer-events-none'
+              style={{ bottom: 0, paddingLeft: indent * 16 + 16 }}></Flex>
           )}
         </Flex>
       </Flex>
     )
   })
 
+  const nodeItemCss = cx(
+    ['lay-h wh-100%-32 layer-floor:bg-white min-w-100% text-12 px-6 d-hover-border'],
+    [!!nodeMoveStarted.value.moveId, ''],
+    [subSelected, 'bg-hslb97'],
+    [selected, 'bg-hslb94']
+  )
+
   return (
-    <Flex layout='v' style={{ width: '100%' }} onHover={hovered.dispatch} onContextMenu={makeMenu}>
-      <Flex layout='h' className={classes.NodeItem} onMouseDown={handleMouseDown}>
-        <Flex className={css({ width: indent * 16 })}></Flex>
+    <Flex className='lay-v w-100% pointer' onHover={hovered.dispatch} onContextMenu={makeMenu}>
+      <Flex className={nodeItemCss} onMouseDown={handleMouseDown}>
+        <Flex style={{ width: indent * 16 }}></Flex>
         <ExpandComp />
         <IconComp />
         <LabelComp />
@@ -192,44 +195,3 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     </Flex>
   )
 }
-
-type INodeItemCompStyle = {
-  selected: boolean
-  subSelected: boolean
-  nodeMoving: boolean
-} /* & Required<Pick<INodeItemComp>> */ /* & Pick<INodeItemComp> */
-
-const useStyles = makeStyles<INodeItemCompStyle>()((t, { selected, subSelected, nodeMoving }) => ({
-  NodeItem: {
-    ...t.rect('100%', 32, 'no-radius', 'white'),
-    minWidth: '100%',
-    fontSize: 12,
-    paddingInline: 6,
-    ...(selected && { ...t.default$.select.background }),
-    ...(subSelected && { backgroundColor: hslBlueColor(97) }),
-    ...(!nodeMoving && t.default$.hover.border),
-  },
-  input: {
-    ...t.rect('100%', 'fit-content', 'no-radius', 'transparent'),
-    fontSize: 12,
-    outline: 'none',
-    border: 'none',
-  },
-  searched: {
-    ...t.default$.active.font,
-  },
-  dropArea: {
-    ...t.rect('100%', 32),
-    ...t.absolute(),
-    '& .dropLayer': {
-      ...t.rect('100%', '100%'),
-    },
-    '& .dropLine': {
-      ...t.rect('100%', 2, 'no-radius', hslBlueColor(50)),
-      ...t.absolute(),
-      pointerEvents: 'none',
-    },
-  },
-}))
-
-NodeItemComp.displayName = 'NodeItemComp'

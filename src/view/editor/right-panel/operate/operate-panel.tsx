@@ -2,23 +2,19 @@ import { FC, memo } from 'react'
 import { OperateNode } from '~/editor/operate/node'
 import { OperateText } from '~/editor/operate/text'
 import { useHookSignal } from '~/shared/signal/signal-react'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { AlignComp } from './align/align'
-import { FillPropComp } from './fill/fill'
-import { GeometryComp } from './geometry/geometry'
-import { ShadowComp } from './shadow/shadows'
-import { StrokeComp } from './stroke/stroke'
-import { TextComp } from './text/text'
+import { AlignComp } from './align'
+import { FillPropComp } from './fill'
+import { GeometryComp } from './geometry'
+import { ShadowComp } from './shadows'
+import { StrokeComp } from './stroke'
+import { TextComp } from './text'
 
-type IOperatePanelComp = {}
-
-export const OperatePanelComp: FC<IOperatePanelComp> = memo(({}) => {
-  const { classes } = useStyles({})
+export const OperatePanelComp: FC<{}> = memo(({}) => {
   useHookSignal(OperateNode.selectedNodes, { afterAll: true })
 
   return (
-    <Flex layout='v' className={classes.OperatePanel}>
+    <Flex className='lay-v wh-100% of-y-auto d-scroll'>
       <AlignComp />
       <GeometryComp />
       <FillPropComp />
@@ -28,16 +24,3 @@ export const OperatePanelComp: FC<IOperatePanelComp> = memo(({}) => {
     </Flex>
   )
 })
-
-type IOperatePanelCompStyle =
-  {} /* & Required<Pick<IOperatePanelComp>> */ /* & Pick<IOperatePanelComp> */
-
-const useStyles = makeStyles<IOperatePanelCompStyle>()((t) => ({
-  OperatePanel: {
-    ...t.rect('100%', '100%'),
-    overflowY: 'auto',
-    ...t.default$.scrollBar,
-  },
-}))
-
-OperatePanelComp.displayName = 'OperatePanelComp'

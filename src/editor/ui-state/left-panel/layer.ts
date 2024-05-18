@@ -1,5 +1,4 @@
 import autobind from 'class-autobind-decorator'
-import equal from 'fast-deep-equal'
 import { OperateMeta } from '~/editor/operate/meta'
 import { OperateNode } from '~/editor/operate/node'
 import { SchemaHistory } from '~/editor/schema/history'
@@ -171,10 +170,19 @@ class UILeftPanelLayerService {
       if (this.getNodeExpanded(id) === false) return false
     })
     const thisInViewIds = inViewNodeInfo.map((info) => info.id)
-    if (!equal(this.lastInViewIds, thisInViewIds)) {
-      this.lastInViewIds = thisInViewIds
-      this.inViewNodeInfo.dispatch(new Set(inViewNodeInfo))
-    }
+    // if (!equal(this.lastInViewIds, thisInViewIds)) {
+    this.lastInViewIds = thisInViewIds
+    this.inViewNodeInfo.dispatch(new Set(inViewNodeInfo))
+
+    // } else {
+    //   const lastSelected = this.lastInViewIds.map((id) => OperateNode.selectIds.value.has(id))
+    //   const thisSelected = thisInViewIds.map((id) => OperateNode.selectIds.value.has(id))
+    //   console.log(equal(lastSelected, thisSelected))
+    //   if (!equal(lastSelected, thisSelected)) {
+    //     this.lastInViewIds = thisInViewIds
+    //     this.inViewNodeInfo.dispatch(new Set(inViewNodeInfo))
+    //   }
+    // }
     this.nodeListHeight.dispatch()
   }
   calcNodeListHeight() {

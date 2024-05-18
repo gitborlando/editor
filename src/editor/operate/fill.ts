@@ -30,6 +30,7 @@ class OperateFillService {
     }
   }
   addFill() {
+    if (!OperateNode.selectedNodes.value.length) return
     const fillsLength = this.fills.length
     const fill = SchemaDefault.fillColor(rgb(204, 204, 204), fillsLength ? 0.25 : 1)
     this.immui.add(this.fills, [fillsLength], fill)
@@ -37,16 +38,19 @@ class OperateFillService {
     SchemaHistory.commit('添加 fill')
   }
   deleteFill(index: number) {
+    if (!this.fills.length) return
     this.immui.delete(this.fills, [index])
     this.applyChangeToSchema()
     SchemaHistory.commit('删除 fill')
   }
   setFill(index: number, keys: IFillKeys[], value: any) {
+    if (!this.fills.length) return
     this.immui.reset(this.fills, [index, ...keys], value)
     this.applyChangeToSchema()
     SchemaHistory.commit('改变 fill')
   }
   changeFill(index: number, newFill: IFill) {
+    if (!this.fills.length) return
     this.immui.reset(this.fills, [index], newFill)
     this.applyChangeToSchema()
     SchemaHistory.commit('改变 fills')

@@ -12,41 +12,9 @@
       "import { FC, memo } from 'react'",
       "import { Flex } from '~/view/ui-utility/widget/flex'",
       "",
-      "type I$1${TM_FILENAME_BASE}Comp = {}",
-      "",
-      "export const $1${TM_FILENAME_BASE}Comp: FC<I$1${TM_FILENAME_BASE}Comp> = memo(({}) => {",
-      "  return <Flex layount='c' className={classes.$1${TM_FILENAME_BASE}}></Flex>",
-      "})",
-      "",
-      "",
-      "$1${TM_FILENAME_BASE}Comp.displayName = '$1${TM_FILENAME_BASE}Comp'"
-    ],
-    "description": "Component"
-  },
-  "Component2": {
-    "prefix": "comp",
-    "body": [
-      "import { FC, memo } from 'react'",
-      "import { makeStyles } from '~/view/ui-utility/theme'",
-      "import { Flex } from '~/view/ui-utility/widget/flex'",
-      "",
-      "type I$1${TM_FILENAME_BASE}Comp = {}",
-      "",
-      "export const $1${TM_FILENAME_BASE}Comp: FC<I$1${TM_FILENAME_BASE}Comp> = memo(({}) => {",
-      "  const { classes } = useStyles({})",
-      "  return <Flex className={classes.$1${TM_FILENAME_BASE}}></Flex>",
-      "})",
-      "",
-      "",
-      "type I$1${TM_FILENAME_BASE}CompStyle = {} /* & Required<Pick<I$1${TM_FILENAME_BASE}Comp>> */ /* & Pick<I$1${TM_FILENAME_BASE}Comp> */",
-      "",
-      "const useStyles = makeStyles<I$1${TM_FILENAME_BASE}CompStyle>()((t) => ({",
-      "  $1${TM_FILENAME_BASE}: {",
-      "    ...t.rect('100%', 30, 'no-radius', 'white'),",
-      "  },",
-      "}))",
-      "",
-      "$1${TM_FILENAME_BASE}Comp.displayName = '$1${TM_FILENAME_BASE}Comp'"
+      "export const $1${TM_FILENAME_BASE}Comp: FC<{}> = memo(({}) => {",
+      "  return <Flex className='lay'></Flex>",
+      "})"
     ],
     "description": "Component"
   },
@@ -54,7 +22,7 @@
     "prefix": "subcomp",
     "body": [
       "const $1Comp = useMemoComp([], ({}) => {",
-      "  return (<Flex className={''}></Flex>)",
+      "  return (<Flex className='lay'></Flex>)",
       "})"
     ],
     "description": "Sub Component"
@@ -64,24 +32,13 @@
     "scope": ["typescriptreact"],
     "body": [
       "import { ComponentPropsWithRef, forwardRef } from 'react'",
-      "import { makeStyles } from '~/view/ui-utility/theme'",
       "import { Flex } from '~/view/ui-utility/widget/flex'",
       "",
       "export type I$1${TM_FILENAME_BASE} = ComponentPropsWithRef<'div'> & {}",
       "",
       "export const $1${TM_FILENAME_BASE} = forwardRef<HTMLDivElement, I$1${TM_FILENAME_BASE}>(({ className, ...rest }, ref) => {",
-      "  const { classes, cx } = useStyles({})",
-      "  return <Flex className={cx(classes.$1${TM_FILENAME_BASE}, className)} {...rest} ref={ref}></Flex>",
-      "})",
-      "",
-      "type I$1${TM_FILENAME_BASE}Style = {} /* & Required<Pick<I$1${TM_FILENAME_BASE}>> */ /* & Pick<I$1${TM_FILENAME_BASE}> */",
-      "",
-      "const useStyles = makeStyles<I$1${TM_FILENAME_BASE}Style>()((t) => ({",
-      "  $1${TM_FILENAME_BASE}: {},",
-      "}))",
-      "",
-      "$1${TM_FILENAME_BASE}.displayName = '$1${TM_FILENAME_BASE}'",
-      ""
+      "  return <Flex className='' {...rest} ref={ref}></Flex>",
+      "})"
     ],
     "description": "Widget"
   },
@@ -103,7 +60,7 @@
   },
   "Flex": {
     "prefix": "flex",
-    "body": ["<Flex layout='$1' className={}></Flex>"],
+    "body": ["<Flex className='lay'></Flex>"],
     "description": "flex"
   }
 }

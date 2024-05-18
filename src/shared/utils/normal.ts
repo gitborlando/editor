@@ -62,14 +62,19 @@ export function Log<T>(someThing: T, label: string = '') {
   return someThing
 }
 
-export function fps() {
-  //@ts-ignore
-  const meter = new FPSMeter(document.getElementById('fps'), { graph: 3 })
-  const loop = () => {
-    meter.tick()
-    requestAnimationFrame(loop)
+export function cx(...args: (string | undefined)[]): string
+export function cx(...args: ([boolean, string] | [string])[]): string
+export function cx(...args: ((string | undefined) | [boolean, string] | [string])[]) {
+  const array = args.filter(Boolean) as (string | [boolean, string] | [string])[]
+
+  if (typeof array[0] === 'string') return array.join(' ')
+
+  let res = ''
+  for (const [condition, className] of array) {
+    if (className === undefined) res += condition + ' '
+    if (condition === true) return (res += className !== '' ? `${className} ` : '')
   }
-  requestAnimationFrame(loop)
+  return res.trim()
 }
 
 const cache = createCache()

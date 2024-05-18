@@ -8,15 +8,11 @@ import { useDownUpTracker } from '~/shared/utils/event'
 import { iife } from '~/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from '~/shared/utils/react'
 import { DraggableComp } from '~/view/component/draggable'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 import { Dropdown } from '~/view/ui-utility/widget/dropdown'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
-type ITextComp = {}
-
-export const TextComp: FC<ITextComp> = ({}) => {
-  const { classes, theme: t, css, cx } = useStyles({})
+export const TextComp: FC<{}> = ({}) => {
   const { intoEditing, textStyle, textStyleOptions, setTextStyle, toggleTextStyle, afterOperate } =
     OperateText
   const createDownUpTracker = (elFunc: () => HTMLElement | null, key: ITextStyleKey) => {
@@ -27,8 +23,8 @@ export const TextComp: FC<ITextComp> = ({}) => {
 
   const HeaderComp = useMemoComp([], ({}) => {
     return (
-      <Flex layout='h' className={classes.header}>
-        <Flex layout='c' className={classes.title}>
+      <Flex className='lay-h wh-100%-24 mb-8'>
+        <Flex className='lay-c labelFont'>
           <h4>文本</h4>
         </Flex>
       </Flex>
@@ -53,9 +49,9 @@ export const TextComp: FC<ITextComp> = ({}) => {
           intoEditing.dispatch('')
           afterOperate.dispatch()
         }}>
-        <Flex layout='v' className={classes.textArea}>
+        <Flex className='lay-v wh-100%-200'>
           <textarea
-            className={'input'}
+            className='wh-100%-200 font-size-14 p-4 resize-none outline-none border-none'
             value={textNode.content}
             onChange={(e) => setTextContent(textNode, e.target.value)}></textarea>
         </Flex>
@@ -68,9 +64,9 @@ export const TextComp: FC<ITextComp> = ({}) => {
     const inputRef = useRef<HTMLDivElement>(null)
     createDownUpTracker(() => inputRef.current, 'fontSize')
     return (
-      <Flex layout='h' className={classes.fontSizeWeight}>
+      <Flex className='lay-h w-100% mb-4'>
         <CompositeInput
-          className='size'
+          className='mr-4'
           ref={inputRef}
           label='大小'
           value={fontSize.toString()}
@@ -78,7 +74,7 @@ export const TextComp: FC<ITextComp> = ({}) => {
           afterOperate={() => afterOperate.dispatch()}
         />
         <Dropdown
-          className='weight'
+          className='w-69'
           selected={fontWeight}
           options={textStyleOptions.fontWeight}
           onSelected={(value) => toggleTextStyle('fontWeight', value)}
@@ -90,9 +86,9 @@ export const TextComp: FC<ITextComp> = ({}) => {
   const { align, lineHeight } = textStyle
   const FontAlignComp = useMemoComp([align, lineHeight], ({}) => {
     return (
-      <Flex layout='h' className={'w-100%'}>
+      <Flex className='lay-h w-100%'>
         <Dropdown
-          className={'w-80'}
+          className='w-80'
           selected={align}
           options={textStyleOptions.align} //@ts-ignore
           isMulti={align === 'multi'}
@@ -111,7 +107,7 @@ export const TextComp: FC<ITextComp> = ({}) => {
   })
 
   return (
-    <Flex layout='v' className={cx(classes.Text, 'px-6')}>
+    <Flex className='lay-v wh-100%-fit bg-white borderBottom p-8'>
       <HeaderComp />
       {intoEditing.value && <TextEditComp />}
       <FontSizeWeightComp />
@@ -119,43 +115,3 @@ export const TextComp: FC<ITextComp> = ({}) => {
     </Flex>
   )
 }
-
-type ITextCompStyle = {} /* & Required<Pick<ITextComp>> */ /* & Pick<ITextComp> */
-
-const useStyles = makeStyles<ITextCompStyle>()((t) => ({
-  Text: {
-    ...t.rect('100%', 'fit-content', 'no-radius', 'white'),
-    ...t.default$.borderBottom,
-    padding: 8,
-  },
-  header: {
-    ...t.rect('100%', 24),
-    marginBottom: 8,
-  },
-  title: {
-    ...t.labelFont,
-  },
-  textArea: {
-    ...t.rect('100%', 200),
-    '& .input': {
-      ...t.rect('100%', 200),
-      fontSize: 14,
-      padding: 4,
-      resize: 'none',
-      outline: 'none',
-      border: 'none',
-    },
-  },
-  fontSizeWeight: {
-    width: '100%',
-    marginBottom: 4,
-    '& .size': {
-      marginRight: 4,
-    },
-    '& .weight': {
-      width: 69,
-    },
-  },
-}))
-
-TextComp.displayName = 'TextComp'

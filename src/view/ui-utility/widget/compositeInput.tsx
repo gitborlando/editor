@@ -3,10 +3,9 @@ import { ComponentPropsWithRef, forwardRef, memo, useRef } from 'react'
 import { Drag } from '~/global/event/drag'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { useDownUpTracker } from '~/shared/utils/event'
-import { iife, noopFunc } from '~/shared/utils/normal'
+import { cx, noopFunc } from '~/shared/utils/normal'
 import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from './icon'
 
@@ -23,9 +22,6 @@ export type ICompositeInput = ComponentPropsWithRef<'div'> &
     disabled?: boolean
     beforeOperate?: () => void
     afterOperate?: () => void
-    styles?: {
-      needHover?: boolean
-    }
   }
 
 export const CompositeInput = memo(
@@ -46,11 +42,9 @@ export const CompositeInput = memo(
         afterOperate = noopFunc,
         onFocus,
         onBlur,
-        styles = {},
       },
       ref
     ) => {
-      const { classes, cx, css, theme } = useStyles({})
       const active = useAutoSignal(false)
       const hover = useAutoSignal(false)
       //  if (label === '横坐标') console.log('value: 横坐标', value)
@@ -60,16 +54,16 @@ export const CompositeInput = memo(
         if (!label) return
         return (
           <Flex
-            layout='h'
-            className={cx(classes.label, 'label')}
-            style={{ ...(type === 'number' && { cursor: 'e-resize' }) }}
+            className={cx('label', ':uno: lay-h w-36 shrink-0 text-11 text-gray mr-6')}
+            style={{ ...(type === 'number' && { cursor: 'e-resize' }), flexShrink: 0 }}
             onMouseDown={() => {
               if (disabled || needLabelDrag !== true) return
               let startValue = numberValue()
               beforeOperate?.()
-              Drag.onStart(() => active.dispatch(true))
+              Drag.needInfinity()
+                .onStart(() => active.dispatch(true))
                 .onMove(({ shift }) => emitNewValue((startValue + shift.x * slideRate).toString()))
-                .onDestroy(({ dragService }) => {
+                .onDestroy(() => {
                   active.dispatch(false)
                   afterOperate?.()
                 })
@@ -92,12 +86,12 @@ export const CompositeInput = memo(
         //   // console.log('thisType: ', thisType)
         // }
         return (
-          <Flex layout='h'>
+          <Flex className=':uno: lay-h translate-y-0.5'>
             <RCInput
               type={thisType}
               disabled={disabled}
               value={thisValue.value}
-              className={classes.input}
+              className=':uno: wh-100%-14 px-4 outline-none border-none text-12 text-align-center bg-transparent'
               onFocus={(e) => {
                 active.dispatch(true)
                 onFocus?.(e)
@@ -121,17 +115,17 @@ export const CompositeInput = memo(
         const ref = useRef<HTMLDivElement>(null)
         useDownUpTracker(() => ref.current, beforeOperate, afterOperate)
         return (
-          <Flex
-            layout='v'
-            ref={ref}
-            vshow={hover.value}
-            className={cx(classes.operate, 'operator')}>
-            <Flex layout='c' onMouseDown={() => emitNewValue((numberValue() + step).toString())}>
+          <Flex className=':uno: lay-v wh-16-100% shrink-0' ref={ref} vshow={hover.value}>
+            <Flex
+              className='lay-c'
+              onMouseDown={() => emitNewValue((numberValue() + step).toString())}>
               <Icon size={7} scale={0.7}>
                 {Asset.editor.widget.numberInput.operateUp}
               </Icon>
             </Flex>
-            <Flex layout='c' onMouseDown={() => emitNewValue((numberValue() - step).toString())}>
+            <Flex
+              className='lay-c'
+              onMouseDown={() => emitNewValue((numberValue() - step).toString())}>
               <Icon size={7} scale={0.7} rotate={180}>
                 {Asset.editor.widget.numberInput.operateUp}
               </Icon>
@@ -140,15 +134,9 @@ export const CompositeInput = memo(
         )
       })
 
-      const mainStyle = iife(() => {
-        const needHoverCss = css({ ...theme.default$.hover.background })
-        return cx(styles.needHover && needHoverCss)
-      })
-
       return (
         <Flex
-          layout='h'
-          className={cx(classes.CompositeInput, mainStyle, className)}
+          className={cx(':uno: lay-h wh-92-28-2 box-border select-none', className)}
           ref={ref}
           onHover={hover.dispatch}>
           <DragLabelComp />
@@ -159,44 +147,3 @@ export const CompositeInput = memo(
     }
   )
 )
-
-type ICompositeInputStyle = {} /* & Required<Pick<ICompositeInput>> */ /* & Pick<ICompositeInput> */
-
-const useStyles = makeStyles<ICompositeInputStyle>()((t) => ({
-  CompositeInput: {
-    ...t.rect(92, 28, 2),
-    // ...t.rect('100%', t.default$.normalHeight),
-    // ...t.default$.background,
-    paddingLeft: 6,
-    boxSizing: 'border-box',
-    userSelect: 'none',
-  },
-  active: {
-    ...t.default$.active.boxShadow,
-  },
-  label: {
-    width: 36,
-    flexShrink: 0,
-    fontSize: 11,
-    color: 'gray',
-    marginRight: 6,
-  },
-  input: {
-    ...t.rect('100%', 16, 'no-radius', 'transparent'),
-    outline: 'none',
-    border: 'none',
-    fontSize: 12,
-    transform: 'translateY(0.5px)',
-  },
-  operate: {
-    ...t.rect(16, '100%'),
-    flexShrink: 0,
-    '& div': {
-      ...t.rect('100%', '50%'),
-      ...t.labelFont,
-      cursor: 'pointer',
-    },
-  },
-}))
-
-CompositeInput.displayName = 'CompositeInput'

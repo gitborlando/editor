@@ -4,8 +4,6 @@ import { IPage } from '~/editor/schema/type'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { useHookSignal } from '~/shared/signal/signal-react'
-import { useSchema } from '~/view/editor/context'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PageHeaderComp } from './header'
 import { PageItemComp } from './item'
@@ -13,19 +11,16 @@ import { PageItemComp } from './item'
 type IPageComp = {}
 
 export const PageComp: FC<IPageComp> = ({}) => {
-  const { classes } = useStyles({})
   const { allPageExpanded, pagePanelHeight } = UILeftPanelLayer
   useHookSignal(pagePanelHeight)
   useHookSignal(allPageExpanded)
-  useSchema()
+
   return (
-    <Flex layout='v' shrink={0} className={classes.Page}>
+    <Flex className='lay-v shrink-0 wh-100%-fit borderBottom'>
       <PageHeaderComp />
       <Flex
-        layout='v'
-        className={classes.pageList}
+        className='lay-v wh-100% of-overlay d-scroll'
         vshow={allPageExpanded.value}
-        shrink={1}
         style={{ height: pagePanelHeight.value - 37 }}>
         {Schema.meta.pageIds.map((id) => {
           const page = Schema.find<IPage>(id)
@@ -33,9 +28,7 @@ export const PageComp: FC<IPageComp> = ({}) => {
         })}
       </Flex>
       <Flex
-        layout='c'
-        shrink={0}
-        className={classes.move}
+        className='lay-c shrink-0 wh-100%-5 n-resize'
         vshow={allPageExpanded.value}
         onMouseDown={() => {
           let lastHeight = pagePanelHeight.value
@@ -48,23 +41,3 @@ export const PageComp: FC<IPageComp> = ({}) => {
     </Flex>
   )
 }
-
-type IPageCompStyle = {} /* & Required<Pick<IPageComp>> */ /* & Pick<IPageComp> */
-
-const useStyles = makeStyles<IPageCompStyle>()((t) => ({
-  Page: {
-    ...t.rect('100%', 'fit-content'),
-    ...t.default$.borderBottom,
-  },
-  pageList: {
-    ...t.rect('100%', '100%'),
-    overflow: 'overlay',
-    ...t.default$.scrollBar,
-  },
-  move: {
-    ...t.rect('100%', 5, 'no-radius'),
-    cursor: 'n-resize',
-  },
-}))
-
-PageComp.displayName = 'PageComp'

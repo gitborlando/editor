@@ -3,7 +3,6 @@ import { IEditorCommand } from '~/editor/editor/command'
 import { Menu } from '~/global/menu'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { useMemoComp } from '~/shared/utils/react'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Divide } from '~/view/ui-utility/widget/divide'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
@@ -12,18 +11,17 @@ const offset = 5
 type IMenuComp = {}
 
 export const MenuComp: FC<IMenuComp> = memo(({}) => {
-  const { classes } = useStyles({})
   const { setRef, xy, menuOptions, closeMenu } = Menu
   useHookSignal(menuOptions)
 
   const MenuItemComp = useMemoComp<{ item: IEditorCommand }>([], ({ item }) => {
     return (
       <Flex
-        layout='h'
-        className={classes.menuItem}
+        id='menu'
+        className='lay-h wh-100%-30-2 pointer normalFont px-8 hover:(bg-hslb93)'
         onClick={() => void item.callback() || closeMenu()}>
         <Flex>{item.name}</Flex>
-        <Flex style={{ marginLeft: 'auto' }}>{item.shortcut}</Flex>
+        <Flex className='ml-auto'>{item.shortcut}</Flex>
       </Flex>
     )
   })
@@ -46,34 +44,11 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
 
   return (
     <Flex
-      layout='v'
       ref={setRef}
       vshow={menuOptions.value.length > 0}
-      className={classes.Menu}
+      className='lay-v wh-200-fit-2 bg-white p-6 fixed z-999 shadow-4-0-rgba(0,0,0,0.15)'
       style={{ left: xy.value.x + offset, top: xy.value.y + offset }}>
       <MenuOptionsComp menuOptions={menuOptions.value} />
     </Flex>
   )
 })
-
-type IMenuCompStyle = {} /* & Required<Pick<IMenuComp>> */ /* & Pick<IMenuComp> */
-
-const useStyles = makeStyles<IMenuCompStyle>()((t) => ({
-  Menu: {
-    ...t.rect(200, 'fit-content', 2, 'white'),
-    borderBottom: '1px solid gray',
-    padding: 6,
-    position: 'fixed',
-    zIndex: 999,
-    boxShadow: '0px 0px 4px  rgba(0, 0, 0, 0.15)',
-  },
-  menuItem: {
-    ...t.rect('100%', 30, 2),
-    ...t.default$.hover.background,
-    ...t.cursor('pointer'),
-    ...t.default$.font.normal,
-    paddingInline: 8,
-  },
-}))
-
-MenuComp.displayName = 'MenuComp'

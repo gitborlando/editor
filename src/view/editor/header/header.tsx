@@ -5,9 +5,7 @@ import { StageInteract } from '~/editor/stage/interact/interact'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
-import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Divide } from '~/view/ui-utility/widget/divide'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -18,27 +16,6 @@ type IHeaderComp = {}
 export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageInteract.currentType)
   useHookSignal(StageViewport.zoom)
-  const { classes, theme, css } = useStyles({ top: StageViewport.bound.value.y })
-
-  const AutoSaveComp = useMemoComp([], ({}) => {
-    return (
-      <Flex layout='h' className={''}>
-        <Flex className={''}></Flex>
-      </Flex>
-    )
-  })
-
-  const ClientComp = useMemoComp([], ({}) => {
-    return (
-      <Flex
-        className={css({
-          ...theme.labelFont,
-        })}>
-        {/* {Schema.client.id} */}
-        <div id='fps'>1</div>
-      </Flex>
-    )
-  })
 
   const RecordIcons: FC<{}> = useCallback(() => {
     useHookSignal(SchemaHistory.index)
@@ -88,15 +65,16 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   }
 
   return (
-    <Flex layout='h' className={classes.Header}>
-      <Flex layout='h' className={classes.leftGroup}>
-        <Flex layout='c'>
+    <Flex
+      className='lay-h w-100% borderBottom relative'
+      style={{ height: StageViewport.bound.value.y }}>
+      <Flex className='lay-h ml-10 gap-8-8'>
+        <Flex className='lay-h'>
           <Icon size={28}>{Asset.favIcon.shiyangyang}</Icon>
-          <h4 style={{ color: hslBlueColor(60), fontSize: 16 }}>屎羊羊编辑器</h4>
+          <h4 className='text-hslb60 text-16'>屎羊羊编辑器</h4>
         </Flex>
-        <AutoSaveComp />
       </Flex>
-      <Flex layout='c' className={classes.centerGroup}>
+      <Flex className='lay-c absolute left-0 right-0 top-0 bottom-0 m-auto'>
         <RecordIcons />
         <Divide length={16} thickness={0.5} />
         {(['select', 'move'] as const).map((type) => (
@@ -109,39 +87,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
         <Divide length={16} thickness={0.5} />
         <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
       </Flex>
-      <Flex layout='h' className={classes.rightGroup}>
-        <ClientComp />
-      </Flex>
+      <Flex className='lay-h mr-10 ml-auto gap-8-8'></Flex>
     </Flex>
   )
 })
-
-type IHeaderCompStyle = {
-  top: number
-} /* & Required<Pick<IHeaderComp>> */ /* & Pick<IHeaderComp> */
-
-const useStyles = makeStyles<IHeaderCompStyle>()((t, { top }) => ({
-  Header: {
-    ...t.rect('100%', top),
-    ...t.default$.borderBottom,
-    ...t.relative(),
-  },
-  leftGroup: {
-    marginLeft: 10,
-    gap: 8,
-  },
-  centerGroup: {
-    ...t.absolute(0, 0, 0, 0),
-    margin: 'auto',
-  },
-  rightGroup: {
-    marginRight: 10,
-    marginLeft: 'auto',
-    gap: 8,
-  },
-  fileSave: {
-    ...t.labelFont,
-  },
-}))
-
-HeaderComp.displayName = 'HeaderComp'

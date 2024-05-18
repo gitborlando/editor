@@ -8,7 +8,6 @@ import { Signal } from '~/shared/signal/signal'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { useMemoComp } from '~/shared/utils/react'
 import { DraggableComp } from '~/view/component/draggable'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PickerImageComp } from './image'
@@ -28,7 +27,6 @@ type IPickerComp = {
 }
 
 export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
-  const { classes } = useStyles({})
   const { type, xy, changeFill } = UIPickerCopy
 
   useEffect(() => {
@@ -67,8 +65,8 @@ export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
       closeFunc={() => show.dispatch(false)}
       clickAwayClose={() => show.value}
       xy={xy.value}>
-      <Flex layout='v' className={classes.Picker} style={{}}>
-        <Flex layout='h' className={classes.typeSwitcher} justify={'space-around'}>
+      <Flex className='lay-v wh-240-fit bg-white'>
+        <Flex className='lay-h justify-around wh-100%-fit py-4'>
           <ButtonComp fillType='color' label='颜色' />
           <ButtonComp fillType='linearGradient' label='线性' />
           <ButtonComp fillType='image' label='图片' />
@@ -82,21 +80,3 @@ export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
     </DraggableComp>
   )
 })
-
-type IPickerCompStyle = {} /* & Required<Pick<IPickerComp>> */ /* & Pick<IPickerComp> */
-
-const useStyles = makeStyles<IPickerCompStyle>()((t) => ({
-  Picker: {
-    ...t.rect(240, 'fit-content', 5, 'white'),
-  },
-  header: {
-    ...t.rect('100%', 'fit-content'),
-    ...t.default$.borderBottom,
-  },
-  typeSwitcher: {
-    ...t.rect('100%', 'fit-content'),
-    paddingBlock: 4,
-  },
-}))
-
-PickerComp.displayName = 'PickerComp'

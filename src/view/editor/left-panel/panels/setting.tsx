@@ -7,7 +7,7 @@ import { Flex } from '~/view/ui-utility/widget/flex'
 type ISettingComp = {}
 
 export const SettingComp: FC<ISettingComp> = memo(({}) => {
-  const commonItemCss = 'wh-100%-40 px-10'
+  const commonItemCss = 'lay-h wh-100%-40 px-10'
   useHookSignal(onSettingsChanged)
 
   const ToggleItemComp = useMemoComp<{
@@ -16,10 +16,8 @@ export const SettingComp: FC<ISettingComp> = memo(({}) => {
     toggle: (a: boolean) => void
   }>([], ({ label, active, toggle }) => {
     return (
-      <Flex layout='h' className={commonItemCss}>
-        <Flex layout='c' className={'normalFont'}>
-          {label}
-        </Flex>
+      <Flex className={commonItemCss}>
+        <Flex className={'lay-c normalFont'}>{label}</Flex>
         <SwitchComp active={active} toggle={toggle} classes={['ml-auto']} />
       </Flex>
     )
@@ -31,14 +29,13 @@ export const SettingComp: FC<ISettingComp> = memo(({}) => {
     classes?: string[]
   }>([], ({ active, toggle, classes }) => {
     const activeCss = active
-      ? ['b-1-#d7d7d7', 'ml-auto bg-70']
-      : ['b-1-#d7d7d7', 'mr-auto bg-#d7d7d7']
+      ? ['b-1-#d7d7d7', 'ml-auto bg-hslb70']
+      : ['b-1-#d7d7d7', 'mr-auto bg-[#d7d7d7]']
     return (
       <Flex
-        layout='h'
-        className={`wh-40-20-99 px-4 pointer ${activeCss[0]} ${classes?.[0]}`}
+        className={`lay-h wh-40-20-99 px-4 pointer ${activeCss[0]} ${classes?.[0]}`}
         onClick={() => toggle(!active)}>
-        <Flex layout='c' className={`wh-12-12-99 ${activeCss[1]} ${classes?.[1]}`}></Flex>
+        <Flex className={`lay-c wh-12-12-99 ${activeCss[1]} ${classes?.[1]}`}></Flex>
       </Flex>
     )
   })
@@ -53,5 +50,3 @@ export const SettingComp: FC<ISettingComp> = memo(({}) => {
     </Flex>
   )
 })
-
-SettingComp.displayName = 'SettingComp'

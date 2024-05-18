@@ -6,7 +6,6 @@ import { Menu } from '~/global/menu'
 import { useAutoSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import Asset from '~/view/ui-utility/assets'
-import { makeStyles } from '~/view/ui-utility/theme'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { Icon } from '~/view/ui-utility/widget/icon'
 
@@ -17,7 +16,6 @@ type IPageItemComp = {
 
 export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
   const selected = Schema.client.selectPageId === id
-  const { classes, css, cx } = useStyles({ selected })
   const isHover = useAutoSignal(false)
   const openMenu = () => {
     Menu.context = { id }
@@ -29,43 +27,16 @@ export const PageItemComp: FC<IPageItemComp> = ({ name, id }) => {
   }
   return (
     <Flex
-      layout='h'
-      justify='space-between'
-      className={classes.PageItem}
+      className='lay-h justify-between wh-100%-32 bg-white pointer shrink-0 d-hover-border'
       onHover={isHover.dispatch}
       onClick={selectPage}
       onContextMenu={openMenu}>
-      <Flex layout='h' className={cx(classes.name, 'px-10')}>
-        {name}
-      </Flex>
+      <Flex className='lay-h text-12 px-10'>{name}</Flex>
       {selected && (
-        <Icon
-          size={18}
-          fill={selected ? hslBlueColor(60) : ''}
-          className={css({ marginRight: 10 })}>
+        <Icon size={18} fill={selected ? hslBlueColor(60) : ''} className='mr-10'>
           {Asset.editor.leftPanel.page.pageSelect}
         </Icon>
       )}
     </Flex>
   )
 }
-
-type IPageItemCompStyle = {
-  selected: boolean
-} /* & Required<Pick<IPageItemComp>> */ /* & Pick<IPageItemComp> */
-
-const useStyles = makeStyles<IPageItemCompStyle>()((t, { selected }) => ({
-  PageItem: {
-    ...t.rect('100%', t.default$.normalHeight, 'no-radius', 'white'),
-    cursor: 'pointer',
-    flexShrink: 0,
-    ...t.default$.hover.border,
-    // ...(selected ? t.default$.select.background : t.default$.hover.background),
-  },
-  name: {
-    fontSize: 12,
-    //...(selected && t.default$.color.active),
-  },
-}))
-
-PageItemComp.displayName = 'PageItemComp'
