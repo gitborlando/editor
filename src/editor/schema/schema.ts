@@ -1,5 +1,4 @@
 import autobind from 'class-autobind-decorator'
-import { nanoid } from 'nanoid'
 import { createSignal } from '~/shared/signal/signal'
 import Immui, { ImmuiApplyPatchOption, ImmuiPatch } from '../../shared/immui/immui'
 import { SchemaHistory } from './history'
@@ -25,7 +24,9 @@ class SchemaService {
   client!: IClient
   inited = createSignal()
   schemaChanged = createSignal()
+  onReviewSchema = createSignal<ImmuiPatch>()
   operationList = <ISchemaOperation[]>[]
+  changePatches = <ImmuiPatch[]>[]
   private immui = new Immui()
   initSchema(schema: ISchema) {
     this.schema = schema
@@ -53,25 +54,25 @@ class SchemaService {
   applyPatches(patches: ImmuiPatch[], option?: ImmuiApplyPatchOption) {
     this.immui.applyPatches(this.schema, patches, option)
   }
-  nextSchema() {
-    this.schema = this.immui.next(this.schema)
-    this.schemaChanged.dispatch()
-  }
   commitOperation(description: string, option?: ICommitOperationOption) {
-    const id = nanoid()
     const patches = this.immui.commitPatches()
-    const timestamp = performance.now()
-    const operation = { id, patches, description, timestamp, ...option }
+    const operation = { id: '', patches, description, timestamp: 0, ...option }
+    this.changePatches.push(...patches)
     this.operationList.push(operation)
-    // socket.send(operation)
   }
   finalOperation(description: string, option?: ICommitOperationOption) {
     this.commitOperation(description, option)
     this.commitHistory(description)
   }
+  nextSchema() {
+    this.schema = this.immui.next(this.schema)
+    this.changePatches.forEach(this.onReviewSchema.dispatch)
+    this.schemaChanged.dispatch()
+    this.changePatches = []
+  }
   commitHistory(description: string) {
-    SchemaHistory.commit(description)
     this.nextSchema()
+    SchemaHistory.commit(description)
   }
 }
 

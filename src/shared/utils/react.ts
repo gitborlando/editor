@@ -9,7 +9,7 @@ import {
   useMemo,
   useRef,
 } from 'react'
-import { Editor } from '~/editor/editor/editor'
+import { Schema } from '~/editor/schema/schema'
 import { StageViewport } from '~/editor/stage/viewport'
 import Immui from '../immui/immui'
 import { useHookSignal } from '../signal/signal-react'
@@ -58,7 +58,12 @@ export function useAsyncEffect(callback: Function, deps = []) {
 }
 
 export function useMatchPatch(...pattens: string[]) {
-  useHookSignal(Editor.onCheckOperation, ({ path }, update) => {
-    pattens.forEach((patten) => Immui.matchPath(path, patten) && update())
+  useHookSignal(Schema.onReviewSchema, ({ path }, update) => {
+    pattens.forEach((patten) => {
+      if (Immui.matchPath(path, patten)) {
+        console.log('path: ', path)
+        update()
+      }
+    })
   })
 }

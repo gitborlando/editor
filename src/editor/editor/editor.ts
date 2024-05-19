@@ -1,29 +1,12 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
-import { ImmuiPatch } from '~/shared/immui/immui'
-import { createSignal } from '~/shared/signal/signal'
 import { addListener } from '~/shared/utils/event'
-import { Schema } from '../schema/schema'
 import { IEditorCommand, editorCommands } from './command'
 
 @autobind
 export class EditorService {
-  onCheckOperation = createSignal<ImmuiPatch>()
-  private lastOperationLength = 0
   initHook() {
     this.bindHotkeys()
-    this.reviewSchema()
-  }
-  private reviewSchema() {
-    Schema.schemaChanged.hook({ beforeAll: true }, () => {
-      const patches = Schema.operationList
-        .slice(this.lastOperationLength)
-        .map((operation) => operation.patches)
-      patches.flat().forEach((patch) => {
-        this.onCheckOperation.dispatch(patch)
-      })
-      this.lastOperationLength = Schema.operationList.length
-    })
   }
   private bindHotkeys() {
     let isKeyDown = false

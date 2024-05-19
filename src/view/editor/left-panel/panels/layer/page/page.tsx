@@ -1,19 +1,21 @@
-import { FC } from 'react'
+import { FC, memo } from 'react'
 import { Schema } from '~/editor/schema/schema'
 import { IPage } from '~/editor/schema/type'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { Drag } from '~/global/event/drag'
 import { useHookSignal } from '~/shared/signal/signal-react'
+import { useMatchPatch } from '~/shared/utils/react'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { PageHeaderComp } from './header'
 import { PageItemComp } from './item'
 
 type IPageComp = {}
 
-export const PageComp: FC<IPageComp> = ({}) => {
+export const PageComp: FC<IPageComp> = memo(({}) => {
   const { allPageExpanded, pagePanelHeight } = UILeftPanelLayer
   useHookSignal(pagePanelHeight)
   useHookSignal(allPageExpanded)
+  useMatchPatch(`/meta/pageIds`)
 
   return (
     <Flex className='lay-v shrink-0 wh-100%-fit borderBottom'>
@@ -40,4 +42,4 @@ export const PageComp: FC<IPageComp> = ({}) => {
         }}></Flex>
     </Flex>
   )
-}
+})

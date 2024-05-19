@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, memo } from 'react'
 import { OperateMeta } from '~/editor/operate/meta'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { useHookSignal } from '~/shared/signal/signal-react'
@@ -9,7 +9,7 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 
 type IPageHeaderComp = {}
 
-export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
+export const PageHeaderComp: FC<IPageHeaderComp> = memo(({}) => {
   const { allPageExpanded } = UILeftPanelLayer
   useHookSignal(allPageExpanded)
   useHookSignal(OperateMeta.curPage)
@@ -34,4 +34,4 @@ export const PageHeaderComp: FC<IPageHeaderComp> = ({}) => {
       </Button>
     </Flex>
   )
-}
+})

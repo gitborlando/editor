@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, memo } from 'react'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import Asset from '~/view/ui-utility/assets'
@@ -8,7 +8,7 @@ import { Icon } from '~/view/ui-utility/widget/icon'
 
 type INodeHeaderComp = {}
 
-export const NodeHeaderComp: FC<INodeHeaderComp> = ({}) => {
+export const NodeHeaderComp: FC<INodeHeaderComp> = memo(({}) => {
   const { allNodeExpanded, searchSlice } = UILeftPanelLayer
   const isCollapsed = allNodeExpanded.value === 'collapsed'
   useHookSignal(allNodeExpanded)
@@ -33,4 +33,4 @@ export const NodeHeaderComp: FC<INodeHeaderComp> = ({}) => {
       </Button>
     </Flex>
   )
-}
+})

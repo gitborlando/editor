@@ -4,8 +4,8 @@ import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import { iife } from '~/shared/utils/normal'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { PopupPanelComp } from './popup'
-import { SwitchBarComp } from './switch-bar'
+import { PopupPanelComp } from './switch-bar/popup'
+import { SwitchBarComp } from './switch-bar/switch-bar'
 
 type ILeftPanelComp = {}
 

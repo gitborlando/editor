@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, memo } from 'react'
 import { editorCommands } from '~/editor/editor/command'
 import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
 import { Menu } from '~/global/menu'
@@ -8,7 +8,7 @@ import { Flex } from '~/view/ui-utility/widget/flex'
 
 type ISwitchBarComp = {}
 
-export const SwitchBarComp: FC<ISwitchBarComp> = ({}) => {
+export const SwitchBarComp: FC<ISwitchBarComp> = memo(({}) => {
   const { showLeftPanel, currentTabId, switchTabMap, popupTabIds } = UILeftPanel
   const { switchTabIds, findSwitchTab } = UILeftPanel
   useHookSignal(currentTabId)
@@ -40,6 +40,4 @@ export const SwitchBarComp: FC<ISwitchBarComp> = ({}) => {
       </Flex>
     </Flex>
   )
-}
-
-type ISwitchBarCompStyle = {} /* & Required<Pick<ISwitchBarComp>> */ /* & Pick<ISwitchBarComp> */
+})

@@ -94,9 +94,9 @@ export function clone<T extends any>(object: T): T {
   return newObj
 }
 
-export function timeFor(count: number, func: any, name?: string) {
+export function timeFor(count: number, func: (i: number) => any, name?: string) {
   console.time(name || `${count}`)
-  for (let i = 0; i < count; i++) func()
+  for (let i = 0; i < count; i++) func(i)
   console.timeEnd(name || `${count}`)
 }
 
