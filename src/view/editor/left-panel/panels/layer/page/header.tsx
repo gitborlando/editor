@@ -1,5 +1,5 @@
 import { FC, memo } from 'react'
-import { OperateMeta } from '~/editor/operate/meta'
+import { OperatePage } from '~/editor/operate/page'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { useHookSignal } from '~/shared/signal/signal-react'
 import Asset from '~/view/ui-utility/assets'
@@ -12,18 +12,18 @@ type IPageHeaderComp = {}
 export const PageHeaderComp: FC<IPageHeaderComp> = memo(({}) => {
   const { allPageExpanded } = UILeftPanelLayer
   useHookSignal(allPageExpanded)
-  useHookSignal(OperateMeta.curPage)
+  useHookSignal(OperatePage.curPage)
 
   const newPage = () => {
     if (allPageExpanded.value === false) {
       allPageExpanded.dispatch(true)
     }
-    OperateMeta.addPage()
+    OperatePage.addPage()
   }
 
   return (
     <Flex className='lay-h shrink-0 wh-100%-32 bg-white px-6'>
-      <Flex className='lay-c labelFont pl-6'>{OperateMeta.curPage.value.name}</Flex>
+      <Flex className='lay-c labelFont pl-6'>{OperatePage.curPage.value.name}</Flex>
       <Button type='icon' style={{ marginLeft: 'auto' }} onClick={newPage}>
         <Icon size={16}>{Asset.editor.leftPanel.page.add}</Icon>
       </Button>

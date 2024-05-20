@@ -1,5 +1,5 @@
 import { forEach } from 'lodash-es'
-import { OperateMeta } from '~/editor/operate/meta'
+import { OperatePage } from '~/editor/operate/page'
 import { Schema } from '~/editor/schema/schema'
 import { ID, INode, INodeParent, ISchemaItem } from '~/editor/schema/type'
 
@@ -37,7 +37,7 @@ export class SchemaUtil {
     return childIds.map((id) => Schema.find<INode>(id))
   }
   static traverseCurPageChildIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
-    this.traverseIds(OperateMeta.curPage.value.childIds, callback, bubbleCallback)
+    this.traverseIds(OperatePage.curPage.value.childIds, callback, bubbleCallback)
   }
   static traverseIds(
     ids: string[],

@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { OperateMeta } from '~/editor/operate/meta'
 import { OperateNode } from '~/editor/operate/node'
+import { OperatePage } from '~/editor/operate/page'
 import { SchemaHistory } from '~/editor/schema/history'
 import { Schema } from '~/editor/schema/schema'
 import { StageSelect } from '~/editor/stage/interact/select'
@@ -121,7 +121,7 @@ class UILeftPanelLayerService {
     this.pagePanelHeight.hook((height) => {
       this.nodeViewHeight.dispatch(UILeftPanel.panelHeight - height - 32)
     })
-    OperateMeta.curPage.hook(() => {
+    OperatePage.curPage.hook(() => {
       this.findNodeInView()
       this.inViewNodeInfo.dispatch()
     })

@@ -179,8 +179,10 @@ export default class Immui {
       patternArr.splice(-1, 1)
     }
     for (let i = 0; i < patternArr.length; i++) {
-      if (patternArr[i] === '*' || patternArr[i] === '?' || patternArr[i] === '') continue
-      if (patternArr[i] !== pathArr[i]) return false
+      const curPattern = patternArr[i]
+      if (curPattern === pathArr[i]) continue
+      if (curPattern === '*' || curPattern === '?' || curPattern === '') continue
+      return false
     }
     return true
   }

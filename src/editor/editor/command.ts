@@ -2,8 +2,8 @@ import { SchemaHistory } from '~/editor/schema/history'
 import { Menu } from '~/global/menu'
 import { lastOne } from '~/shared/utils/array'
 import { IAnyFunc, iife } from '~/shared/utils/normal'
-import { OperateMeta } from '../operate/meta'
 import { OperateNode } from '../operate/node'
+import { OperatePage } from '../operate/page'
 import { Schema } from '../schema/schema'
 import { INode, INodeParent, IPage } from '../schema/type'
 import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
@@ -46,7 +46,7 @@ export const editorCommands = {
       name: '删除页面',
       callback: () => {
         const { id } = Menu.context
-        OperateMeta.removePage(Schema.find<IPage>(id))
+        OperatePage.removePage(Schema.find<IPage>(id))
       },
     },
   ],

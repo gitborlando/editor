@@ -58,12 +58,9 @@ export function useAsyncEffect(callback: Function, deps = []) {
 }
 
 export function useMatchPatch(...pattens: string[]) {
-  useHookSignal(Schema.onReviewSchema, ({ path }, update) => {
+  useHookSignal(Schema.onFlushPatches, ({ path }, update) => {
     pattens.forEach((patten) => {
-      if (Immui.matchPath(path, patten)) {
-        console.log('path: ', path)
-        update()
-      }
+      if (Immui.matchPath(path, patten)) update()
     })
   })
 }

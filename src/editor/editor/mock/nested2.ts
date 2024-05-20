@@ -24,7 +24,13 @@ export function mockNested2() {
       name: '测试文件1',
       version: 0,
       pageIds: ['page_1'],
-      clients: {},
+    },
+    client: {
+      id: 'client',
+      type: 'client',
+      selectIds: [],
+      selectPageId: 'page_1',
+      viewport: { page_1: { zoom: 0.05, x: 100, y: 100 } },
     },
     page_1: {
       type: 'page',

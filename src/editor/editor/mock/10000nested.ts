@@ -53,7 +53,13 @@ export function mock10000Nested() {
       name: '测试文件10000Nested',
       version: 0,
       pageIds: ['page_1'],
-      clients: {},
+    },
+    client: {
+      id: 'client',
+      type: 'client',
+      selectIds: [],
+      selectPageId: 'page_1',
+      viewport: { page_1: { zoom: 0.05, x: 100, y: 100 } },
     },
     page_1: {
       id: 'page_1',

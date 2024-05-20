@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal/signal'
+import { IAnyFunc } from '~/shared/utils/normal'
 import Immui, { ImmuiApplyPatchOption, ImmuiPatch } from '../../shared/immui/immui'
 import { SchemaHistory } from './history'
 import {
@@ -24,13 +25,14 @@ class SchemaService {
   client!: IClient
   inited = createSignal()
   schemaChanged = createSignal()
-  onReviewSchema = createSignal<ImmuiPatch>()
+  onFlushPatches = createSignal<ImmuiPatch>()
   operationList = <ISchemaOperation[]>[]
   changePatches = <ImmuiPatch[]>[]
   private immui = new Immui()
   initSchema(schema: ISchema) {
     this.schema = schema
     this.meta = this.find<IMeta>('meta')
+    this.client = this.find<IClient>('client')
     this.inited.dispatch()
   }
   find<T extends ISchemaItem>(id: ID): T {
@@ -66,9 +68,17 @@ class SchemaService {
   }
   nextSchema() {
     this.schema = this.immui.next(this.schema)
-    this.changePatches.forEach(this.onReviewSchema.dispatch)
+    this.meta = this.find<IMeta>('meta')
+    this.client = this.find<IClient>('client')
+    this.changePatches.forEach(this.onFlushPatches.dispatch)
     this.schemaChanged.dispatch()
     this.changePatches = []
+  }
+  onReviewSchema(patten: string | (() => string), callback: IAnyFunc) {
+    this.onFlushPatches.hook((patch) => {
+      patten = typeof patten === 'function' ? patten() : patten
+      if (Immui.matchPath(patch.path, patten)) callback()
+    })
   }
   commitHistory(description: string) {
     this.nextSchema()

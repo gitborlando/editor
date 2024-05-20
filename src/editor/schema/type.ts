@@ -12,10 +12,11 @@ export type ID = string
 
 export type ISchema = {
   meta: IMeta
-  [id: string]: IPage | INode | IMeta
+  client: IClient
+  [id: string & {}]: IPage | INode | IMeta | IClient
 }
 
-export type ISchemaItem = INode | IPage | IMeta
+export type ISchemaItem = INode | IPage | IMeta | IClient
 
 export type INodeOrPage = INode | IPage
 
@@ -26,14 +27,14 @@ export type IMeta = {
   name: string
   version: number
   pageIds: string[]
-  clients: Record<ID, IClient>
 }
 
 export type IClient = {
-  id: ID
+  id: 'client'
+  type: 'client'
   selectIds: ID[]
   selectPageId: ID
-  mouse: IXY
+  viewport: Record<ID, { x: number; y: number; zoom: number }>
 }
 
 export type INodeParentBase = {

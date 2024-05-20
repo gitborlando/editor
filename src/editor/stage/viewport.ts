@@ -5,7 +5,8 @@ import { createSignal } from '~/shared/signal/signal'
 import { IRect, IXY } from '~/shared/utils/normal'
 import { max } from '../math/base'
 import { xy_, xy_client, xy_divide, xy_minus, xy_multiply, xy_plus, xy_plus_all } from '../math/xy'
-import { OperateMeta } from '../operate/meta'
+import { OperatePage } from '../operate/page'
+import { Schema } from '../schema/schema'
 import { Pixi } from './pixi'
 
 @autobind
@@ -30,24 +31,36 @@ class StageViewportService {
       window.addEventListener('resize', this.onResizeBound)
       this.onWheelZoom()
       Pixi.addListener('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))
-      const { x, y, zoom } = OperateMeta.curPage.value
+      const { x, y, zoom } = OperatePage.curPage.value
       this.zoom.dispatch(zoom)
       this.stageOffset.dispatch(xy_(x, y))
       this.inited.dispatch()
     })
-    OperateMeta.curPage.hook((page) => {
-      this.zoom.dispatch(page.zoom, { pageChangeCause: true })
-      this.stageOffset.dispatch(xy_(page.x, page.y))
-    })
+    // OperatePage.curPage.hook((page) => {
+    //   this.zoom.dispatch(page.zoom, { pageChangeCause: true })
+    //   this.stageOffset.dispatch(xy_(page.x, page.y))
+    // })
+    Schema.onReviewSchema(
+      () => `/${Schema.client.selectPageId}/zoom`,
+      () => this.zoom.dispatch(OperatePage.currentPage.zoom)
+    )
+    Schema.onReviewSchema(
+      () => `/${Schema.client.selectPageId}/x`,
+      () => this.stageOffset.dispatch(xy_(OperatePage.currentPage.x, this.stageOffset.value.y))
+    )
+    Schema.onReviewSchema(
+      () => `/${Schema.client.selectPageId}/y`,
+      () => this.stageOffset.dispatch(xy_(this.stageOffset.value.x, OperatePage.currentPage.y))
+    )
     this.zoom.hook(() => {
       Pixi.sceneStage.scale.set(this.zoom.value, this.zoom.value)
-      OperateMeta.curPage.value.zoom = this.zoom.value
+      //OperatePage.curPage.value.zoom = this.zoom.value
     })
     this.stageOffset.hook(() => {
       const { x, y } = this.stageOffset.value
       Pixi.sceneStage.position.set(x, y)
-      OperateMeta.curPage.value.x = x
-      OperateMeta.curPage.value.y = y
+      // OperatePage.curPage.value.x = x
+      // OperatePage.curPage.value.y = y
     })
   }
   toViewportXY(xy: IXY) {

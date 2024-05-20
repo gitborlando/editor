@@ -1,6 +1,5 @@
 import { createElement } from 'react'
 import ReactDOM from 'react-dom/client'
-import 'uno:layer-widget.css'
 import 'virtual:uno.css'
 import { favIcon } from './shared/utils/normal'
 import { App } from './view/app'

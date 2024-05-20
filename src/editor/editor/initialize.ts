@@ -2,8 +2,8 @@ import { OperateGeometry } from '~/editor/operate/geometry'
 import { createSignal } from '~/shared/signal/signal'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
-import { OperateMeta } from '../operate/meta'
 import { OperateNode } from '../operate/node'
+import { OperatePage } from '../operate/page'
 import { OperateShadow } from '../operate/shadow'
 import { OperateStroke } from '../operate/stroke'
 import { OperateText } from '../operate/text'
@@ -13,7 +13,6 @@ import { StageDrop } from '../stage/drop'
 import { StageInteract } from '../stage/interact/interact'
 import { Pixi } from '../stage/pixi'
 import { StageViewport } from '../stage/viewport'
-import { StageWidgetAdsorption } from '../stage/widget/adsorption'
 import { StageWidgetTransform } from '../stage/widget/transform'
 import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
 import { UILeftPanel } from '../ui-state/left-panel/left-panel'
@@ -33,7 +32,7 @@ SchemaHistory.initHook()
 
 Pixi.initHook()
 
-OperateMeta.initHook()
+OperatePage.initHook()
 OperateNode.initHook()
 OperateAlign.initHook()
 OperateGeometry.initHook()
@@ -46,7 +45,7 @@ StageViewport.initHook()
 StageInteract.initHook()
 StageDrop.initHook()
 EditorCursor.initHook()
-StageWidgetAdsorption.initHook()
+// StageWidgetAdsorption.initHook()
 StageWidgetTransform.initHook()
 
 UILeftPanelLayer.initHook()

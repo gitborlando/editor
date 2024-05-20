@@ -3,8 +3,8 @@ import { Uploader } from '~/global/upload'
 import { preventDefault } from '~/shared/utils/event'
 import { Img } from '../editor/img'
 import { xy_, xy_client } from '../math/xy'
-import { OperateMeta } from '../operate/meta'
 import { OperateNode } from '../operate/node'
+import { OperatePage } from '../operate/page'
 import { SvgParser } from '../parse/svg'
 import { SchemaDefault } from '../schema/default'
 import { Schema } from '../schema/schema'
@@ -74,7 +74,7 @@ export class StageDropService {
         .map(Schema.find<INodeParent>)
         .find((node) => {
           return node?.type === 'frame'
-        }) || OperateMeta.curPage.value
+        }) || OperatePage.curPage.value
   }
 }
 

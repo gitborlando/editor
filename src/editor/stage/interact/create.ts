@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { OperateMeta } from '~/editor/operate/meta'
 import { OperateNode } from '~/editor/operate/node'
+import { OperatePage } from '~/editor/operate/page'
 import { SchemaDefault } from '~/editor/schema/default'
 import { Schema } from '~/editor/schema/schema'
 import { INode, INodeParent } from '~/editor/schema/type'
@@ -66,7 +66,7 @@ class StageCreateService {
       .reverse()
       .find((id) => SchemaUtil.isById(id, 'frame'))
     if (frameId) return Schema.find<INodeParent>(frameId)
-    return OperateMeta.curPage.value
+    return OperatePage.curPage.value
   }
 }
 

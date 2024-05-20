@@ -44,24 +44,27 @@ class SchemaDefaultService {
       name: '无标题',
       version: 0,
       pageIds: [],
-      clients: {},
     }
   }
-  client(option?: Partial<IClient>): IClient {
+  client(): IClient {
     return {
-      id: nanoid(),
+      id: 'client',
+      type: 'client',
       selectIds: [],
       selectPageId: '',
-      mouse: xy_(0, 0),
-      ...option,
+      viewport: {},
     }
   }
   schema(): ISchema {
     const page = this.page()
     const meta = this.meta()
+    const client = this.client()
     meta.pageIds = [page.id]
+    client.selectPageId = page.id
+    client.viewport[page.id] = { x: 0, y: 0, zoom: 1 }
     return {
-      meta: meta,
+      meta,
+      client,
       [page.id]: page,
     }
   }

@@ -1,6 +1,6 @@
 import { FC, memo } from 'react'
 import { editorCommands } from '~/editor/editor/command'
-import { OperateMeta } from '~/editor/operate/meta'
+import { OperatePage } from '~/editor/operate/page'
 import { Schema } from '~/editor/schema/schema'
 import { Menu } from '~/global/menu'
 import { hslBlueColor } from '~/shared/utils/color'
@@ -21,10 +21,10 @@ export const PageItemComp: FC<IPageItemComp> = memo(({ name, id }) => {
     Menu.menuOptions.dispatch([editorCommands.pageGroup])
   }
   const selectPage = () => {
-    OperateMeta.selectPage(id)
+    OperatePage.selectPage(id)
     Schema.commitHistory('选择页面 ' + id)
   }
-  useMatchPatch(`/meta/clients/${Schema.client.id}/selectPageId`)
+  useMatchPatch(`/client/selectPageId`)
 
   return (
     <Flex
