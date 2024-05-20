@@ -115,7 +115,7 @@ export default class Immui {
 
     if (reverse) {
       patches = patches.slice().reverse()
-      this.noCommitPatch = true
+      // this.noCommitPatch = true
     }
 
     patches.forEach((patch) => {

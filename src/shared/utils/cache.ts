@@ -38,6 +38,9 @@ export class Cache<K, V> {
   values() {
     return this.cache.values()
   }
+  entries() {
+    return this.cache.entries()
+  }
   fromObject(obj: Record<string | number | symbol, V>) {
     this.cache = new Map(Object.entries(obj)) as Map<K, V>
   }

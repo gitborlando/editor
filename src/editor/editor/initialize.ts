@@ -1,5 +1,4 @@
 import { OperateGeometry } from '~/editor/operate/geometry'
-import { createSignal } from '~/shared/signal/signal'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
 import { OperateNode } from '../operate/node'
@@ -22,37 +21,39 @@ import { Editor } from './editor'
 import { FileManager } from './file-manager'
 import { mockFile } from './mock/mock'
 
-export const editorInited = createSignal(false)
+function initHooks() {
+  Editor.initHook()
+  EditorCursor.initHook()
 
-Editor.initHook()
-EditorCursor.initHook()
+  FileManager.initHook()
+  SchemaHistory.initHook()
 
-FileManager.initHook()
-SchemaHistory.initHook()
+  Pixi.initHook()
 
-Pixi.initHook()
+  OperatePage.initHook()
+  OperateNode.initHook()
+  OperateAlign.initHook()
+  OperateGeometry.initHook()
+  OperateFill.initHook()
+  OperateStroke.initHook()
+  OperateShadow.initHook()
+  OperateText.initHook()
 
-OperatePage.initHook()
-OperateNode.initHook()
-OperateAlign.initHook()
-OperateGeometry.initHook()
-OperateFill.initHook()
-OperateStroke.initHook()
-OperateShadow.initHook()
-OperateText.initHook()
+  StageViewport.initHook()
+  StageInteract.initHook()
+  StageDrop.initHook()
+  EditorCursor.initHook()
+  // StageWidgetAdsorption.initHook()
+  StageWidgetTransform.initHook()
 
-StageViewport.initHook()
-StageInteract.initHook()
-StageDrop.initHook()
-EditorCursor.initHook()
-// StageWidgetAdsorption.initHook()
-StageWidgetTransform.initHook()
-
-UILeftPanelLayer.initHook()
-UILeftPanel.initHook()
-UIPickerCopy.initHook()
+  UILeftPanelLayer.initHook()
+  UILeftPanel.initHook()
+  UIPickerCopy.initHook()
+}
 
 export async function initEditor() {
+  initHooks()
+
   FileManager.init()
 
   await mockFile()
@@ -65,6 +66,4 @@ export async function initEditor() {
   Schema.initSchema((await FileManager.fileForage.getItem(fileId))!)
 
   UILeftPanelLayer.init()
-
-  editorInited.dispatch(true)
 }

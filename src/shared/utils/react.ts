@@ -8,10 +8,10 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react'
 import { Schema } from '~/editor/schema/schema'
 import { StageViewport } from '~/editor/stage/viewport'
-import Immui from '../immui/immui'
 import { useHookSignal } from '../signal/signal-react'
 import { IAnyFunc } from './normal'
 
@@ -58,9 +58,12 @@ export function useAsyncEffect(callback: Function, deps = []) {
 }
 
 export function useMatchPatch(...pattens: string[]) {
-  useHookSignal(Schema.onFlushPatches, ({ path }, update) => {
+  const disposers = useRef<Function[]>([])
+  const update = useState({})[1]
+  useEffect(() => {
     pattens.forEach((patten) => {
-      if (Immui.matchPath(path, patten)) update()
+      disposers.current.push(Schema.reviewSchema(patten, () => update({})))
     })
-  })
+    return () => disposers.current.forEach((disposer) => disposer())
+  }, [])
 }

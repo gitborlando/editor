@@ -6,8 +6,8 @@ import { mockNested2 } from './nested2'
 
 const mockFiles = [mockNested2(), mockNested(), mock10000Nested()]
 
-export async function mockFile() {
-  if (Storage.get('mockFile')) return
+export async function mockFile(force?: boolean) {
+  if (!force && Storage.get('mockFile')) return
   for (const file of mockFiles) {
     await FileManager.fileForage.setItem(file.meta.fileId, file)
   }

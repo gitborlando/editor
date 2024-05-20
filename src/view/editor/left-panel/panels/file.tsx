@@ -1,23 +1,30 @@
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import { FileManager } from '~/editor/editor/file-manager'
+import { mockFile } from '~/editor/editor/mock/mock'
 import { Schema } from '~/editor/schema/schema'
 import { IMeta } from '~/editor/schema/type'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
 import { hslBlueColor } from '~/shared/utils/color'
 import { useMemoComp, withSuspense } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
+import { Button } from '~/view/ui-utility/widget/button'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
-import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
 import { Flex } from '~/view/ui-utility/widget/flex'
 
 type IFileComp = {}
 
 export const FileComp: FC<IFileComp> = memo(({}) => {
   const HeaderComp = useMemoComp([], ({}) => {
+    const reMockFile = async () => {
+      await mockFile(true)
+      alert('已重新mock文件')
+    }
     return (
       <Flex className='lay-h wh-100%-32 px-10 borderBottom'>
-        <CompositeInput placeholder='搜索' value={''} onNewValueApply={() => {}} />
+        <Button className='-ml-4' onClick={reMockFile}>
+          重新mock文件
+        </Button>
         <Flex className='lay-h ml-auto'>
           <IconButton size={14} onClick={() => {}}>
             {Asset.editor.leftPanel.file.newFolder}

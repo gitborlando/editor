@@ -34,7 +34,7 @@ export type IClient = {
   type: 'client'
   selectIds: ID[]
   selectPageId: ID
-  viewport: Record<ID, { x: number; y: number; zoom: number }>
+  viewport: Record<ID, { xy: IXY; zoom: number }>
 }
 
 export type INodeParentBase = {

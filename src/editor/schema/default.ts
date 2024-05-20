@@ -61,7 +61,7 @@ class SchemaDefaultService {
     const client = this.client()
     meta.pageIds = [page.id]
     client.selectPageId = page.id
-    client.viewport[page.id] = { x: 0, y: 0, zoom: 1 }
+    client.viewport[page.id] = { xy: { x: 0, y: 0 }, zoom: 1 }
     return {
       meta,
       client,

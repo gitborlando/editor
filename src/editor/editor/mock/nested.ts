@@ -30,7 +30,7 @@ export function mockNested() {
       type: 'client',
       selectIds: [],
       selectPageId: 'page_1',
-      viewport: { page_1: { zoom: 0.05, x: 100, y: 100 } },
+      viewport: { page_1: { zoom: 1, xy: { x: 100, y: 100 } } },
     },
     page_1: {
       type: 'page',

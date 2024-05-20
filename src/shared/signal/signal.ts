@@ -43,13 +43,13 @@ export class Signal<T extends any> {
       if (hookCallback) return [hookCallback, hookOrOption as IHookOption]
       return [hookOrOption as IHook<T>, {} as IHookOption]
     })
-    const { immediately, once } = this.optionCache.set(hook, option)
-    if (immediately && once) {
+    this.optionCache.set(hook, option)
+    if (option.immediately && option.once) {
       hook(this.value)
-    } else if (immediately) {
+    } else if (option.immediately) {
       hook(this.value)
       this.hooks.push(hook)
-    } else if (once) {
+    } else if (option.once) {
       const onceFunc = () => void hook(this.value) || this.unHook(onceFunc)
       this.optionCache.set(onceFunc, option)
       this.hooks.push(onceFunc)
@@ -82,30 +82,30 @@ export class Signal<T extends any> {
   }
   private reHierarchy() {
     this.hooks.forEach((hook) => {
-      const { before, after, beforeAll, afterAll } = this.optionCache.get(hook)
+      const option = this.optionCache.get(hook)
       const selfIndex = this.hooks.findIndex((i) => i === hook)
-      if (beforeAll) {
+      if (option.beforeAll) {
         this.hooks.splice(selfIndex, 1)
         this.hooks.unshift(hook)
         return
       }
-      if (afterAll) {
+      if (option.afterAll) {
         this.hooks.splice(selfIndex, 1)
         this.hooks.push(hook)
         return
       }
-      if (before) {
+      if (option.before) {
         const anotherIndex = this.hooks.findIndex((i) => {
-          return this.optionCache.get(i).id === before
+          return this.optionCache.get(i).id === option.before
         })
         if (selfIndex > anotherIndex) {
           this.hooks.splice(selfIndex, 1)
           this.hooks.splice(anotherIndex, 0, hook)
         }
       }
-      if (after) {
+      if (option.after) {
         const anotherIndex = this.hooks.findIndex((i) => {
-          return this.optionCache.get(i).id === after
+          return this.optionCache.get(i).id === option.after
         })
         if (selfIndex < anotherIndex) {
           this.hooks.splice(selfIndex, 1)

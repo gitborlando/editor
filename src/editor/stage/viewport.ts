@@ -2,65 +2,58 @@ import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
 import { EventWheelService } from '~/global/event/wheel'
 import { createSignal } from '~/shared/signal/signal'
-import { IRect, IXY } from '~/shared/utils/normal'
+import { INoopFunc, IRect, IXY } from '~/shared/utils/normal'
 import { max } from '../math/base'
 import { xy_, xy_client, xy_divide, xy_minus, xy_multiply, xy_plus, xy_plus_all } from '../math/xy'
-import { OperatePage } from '../operate/page'
 import { Schema } from '../schema/schema'
 import { Pixi } from './pixi'
+
+const initBound = {
+  x: 240,
+  y: 44,
+  right: 240,
+  width: window.innerWidth - 480,
+  height: window.innerHeight - 44 + 1,
+}
 
 @autobind
 class StageViewportService {
   inited = createSignal(false)
-  bound = createSignal({ x: 240, y: 44, width: 0, height: 0, right: 240 })
+  bound = createSignal(initBound)
   zoom = createSignal(1)
-  stageOffset = createSignal({ x: 0, y: 0 })
+  stageOffset = createSignal({ x: 100, y: 100 })
   beforeZoom = createSignal()
   duringZoom = createSignal()
   afterZoom = createSignal()
   private wheeler = new EventWheelService()
   initHook() {
-    const { x, y, right } = this.bound.value
-    this.bound.value = {
-      ...this.bound.value,
-      width: window.innerWidth - x - right,
-      height: window.innerHeight - y + 1,
-    }
     Pixi.inited.hook(() => {
       this.bound.hook({ immediately: true }, this.onResizeBound)
       window.addEventListener('resize', this.onResizeBound)
       this.onWheelZoom()
-      Pixi.addListener('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))
-      const { x, y, zoom } = OperatePage.curPage.value
-      this.zoom.dispatch(zoom)
-      this.stageOffset.dispatch(xy_(x, y))
+      this.zoom.dispatch(1)
+      this.stageOffset.dispatch(xy_(100, 100))
       this.inited.dispatch()
     })
-    // OperatePage.curPage.hook((page) => {
-    //   this.zoom.dispatch(page.zoom, { pageChangeCause: true })
-    //   this.stageOffset.dispatch(xy_(page.x, page.y))
-    // })
-    Schema.onReviewSchema(
-      () => `/${Schema.client.selectPageId}/zoom`,
-      () => this.zoom.dispatch(OperatePage.currentPage.zoom)
-    )
-    Schema.onReviewSchema(
-      () => `/${Schema.client.selectPageId}/x`,
-      () => this.stageOffset.dispatch(xy_(OperatePage.currentPage.x, this.stageOffset.value.y))
-    )
-    Schema.onReviewSchema(
-      () => `/${Schema.client.selectPageId}/y`,
-      () => this.stageOffset.dispatch(xy_(this.stageOffset.value.x, OperatePage.currentPage.y))
-    )
+
+    const disposers = <INoopFunc[]>[]
+    Schema.reviewSchema('/client/selectPageId', () => {
+      disposers.forEach((disposer) => disposer())
+      const disposeZoom = Schema.reviewSchema(`/*/*/${Schema.client.selectPageId}/zoom`, () =>
+        this.zoom.dispatch(Schema.client.viewport[Schema.client.selectPageId].zoom)
+      )
+      const disposeOffset = Schema.reviewSchema(`/*/*/${Schema.client.selectPageId}/xy`, () =>
+        this.stageOffset.dispatch(Schema.client.viewport[Schema.client.selectPageId].xy)
+      )
+      disposers.push(disposeZoom, disposeOffset)
+    })
+
     this.zoom.hook(() => {
       Pixi.sceneStage.scale.set(this.zoom.value, this.zoom.value)
-      //OperatePage.curPage.value.zoom = this.zoom.value
     })
     this.stageOffset.hook(() => {
       const { x, y } = this.stageOffset.value
       Pixi.sceneStage.position.set(x, y)
-      // OperatePage.curPage.value.x = x
-      // OperatePage.curPage.value.y = y
     })
   }
   toViewportXY(xy: IXY) {
@@ -95,26 +88,34 @@ class StageViewportService {
       this.beforeZoom.dispatch()
     })
     this.wheeler.duringWheel.hook(({ e }) => {
-      const { deltaY, clientX, clientY } = e
       if (!hotkeys.ctrl) {
-        return this.stageOffset.dispatch((offset) => {
-          offset[hotkeys.shift ? 'x' : 'y'] -= deltaY
-        })
+        const oldXY = Schema.client.viewport[Schema.client.selectPageId].xy
+        oldXY[hotkeys.shift ? 'x' : 'y'] -= e.deltaY
+        Schema.itemReset(Schema.client, ['viewport', Schema.client.selectPageId, 'xy'], oldXY)
+        Schema.commitOperation('移动画布')
+        Schema.nextSchema()
+        return
       }
       e.preventDefault()
-      const sign = deltaY > 0 ? -1 : 1
+      const sign = e.deltaY > 0 ? -1 : 1
       const stepByZoom = getStepByZoom()
       const step = stepByZoom.find(([_zoom, _step]) => _zoom <= this.zoom.value)![1] * sign
       const newZoom = max(0.02, this.zoom.value + step)
       const sceneStageXY = this.toSceneXY(xy_client(e))
       const newOffset = xy_plus(this.stageOffset.value, xy_multiply(sceneStageXY, -step))
-      this.zoom.dispatch(newZoom)
-      this.stageOffset.dispatch(newOffset)
+      Schema.itemReset(Schema.client, ['viewport', Schema.client.selectPageId, 'zoom'], newZoom)
+      Schema.itemReset(Schema.client, ['viewport', Schema.client.selectPageId, 'xy'], newOffset)
+      Schema.commitOperation('缩放画布')
+      Schema.nextSchema()
       this.duringZoom.dispatch()
     })
     this.wheeler.afterWheel.hook(({ e }) => {
       if (hotkeys.ctrl) e.preventDefault()
       this.afterZoom.dispatch()
+      // Schema.commitHistory('缩放画布')
+    })
+    Pixi.addListener('wheel', (e) => {
+      this.wheeler.onWheel(e as WheelEvent)
     })
   }
   private onResizeBound() {

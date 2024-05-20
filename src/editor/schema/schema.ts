@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal/signal'
-import { IAnyFunc } from '~/shared/utils/normal'
 import Immui, { ImmuiApplyPatchOption, ImmuiPatch } from '../../shared/immui/immui'
 import { SchemaHistory } from './history'
 import {
@@ -74,15 +73,15 @@ class SchemaService {
     this.schemaChanged.dispatch()
     this.changePatches = []
   }
-  onReviewSchema(patten: string | (() => string), callback: IAnyFunc) {
-    this.onFlushPatches.hook((patch) => {
-      patten = typeof patten === 'function' ? patten() : patten
-      if (Immui.matchPath(patch.path, patten)) callback()
-    })
-  }
   commitHistory(description: string) {
     this.nextSchema()
     SchemaHistory.commit(description)
+  }
+  reviewSchema(patten: string, callback: () => void) {
+    return this.onFlushPatches.hook((patch) => {
+      if (!Immui.matchPath(patch.path, patten)) return
+      callback()
+    })
   }
 }
 

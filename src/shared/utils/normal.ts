@@ -103,3 +103,7 @@ export function timeFor(count: number, func: (i: number) => any, name?: string) 
 export function notUndefine<T extends any>(val: T | undefined): val is T {
   return val !== undefined
 }
+
+export function jsonFy(obj: any) {
+  return JSON.stringify(obj, null, 2)
+}
