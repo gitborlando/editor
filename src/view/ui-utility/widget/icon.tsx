@@ -1,5 +1,4 @@
 import { CSSProperties, FC, createElement } from 'react'
-import { useCssInJs } from '~/shared/utils/css-in-js'
 import { cx } from '~/shared/utils/normal'
 
 export type IIconProps = {
@@ -30,25 +29,18 @@ export const Icon: FC<IIconProps> = ({
     ...inputStyle,
   }
 
-  const innerCss = useCssInJs(
-    [fill, scale],
-    () => {
-      return `path { fill: ${fill /* '#7a7a7a' */ || /* '#545454' */ '#393939'}; }`
-    },
-    { classNamePrefix: 'icon' }
-  )
+  if (typeof children === 'string')
+    return (
+      <img
+        className={cx(':uno: lay-c wh-fit-fit', className)}
+        src={children}
+        style={style}
+        {...rest}></img>
+    )
 
-  return typeof children === 'string' ? (
-    <img
-      className={cx(':uno: lay-c wh-fit-fit', innerCss, className)}
-      src={children}
-      style={style}
-      {...rest}></img>
-  ) : (
-    createElement(children as unknown as FC<any>, {
-      className: cx(':uno: lay-c wh-fit-fit', innerCss, className),
-      style,
-      ...rest,
-    })
-  )
+  return createElement(children as unknown as FC<any>, {
+    className: cx(':uno: lay-c wh-fit-fit', className),
+    style,
+    ...rest,
+  })
 }

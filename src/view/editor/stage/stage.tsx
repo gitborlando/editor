@@ -47,7 +47,6 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
         <HoverComp />
         <TransformComp />
         <MarqueeComp />
-        {/* <CooperationComp /> */}
         <VectorEditComp />
       </Container>
     )

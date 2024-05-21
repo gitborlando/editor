@@ -1,20 +1,21 @@
 import { forEach } from 'lodash-es'
 import { timeFor } from '~/shared/utils/normal'
 
-const arr = new Array(10).fill(0)
+const arr = new Array(10000).fill(0)
+const count = 10
 
-timeFor(10000, () => {
+timeFor(() => {
   for (let i = 0; i < arr.length; i++) arr[i]
-}) //0.966ms
+}, count) //0.966ms
 
-timeFor(10000, () => {
+timeFor(() => {
   arr.forEach((item) => item)
-}) //1.136ms
+}, count) //1.136ms
 
-timeFor(10000, () => {
+timeFor(() => {
   forEach(arr, (item) => item)
-}) //2.044ms
+}, count) //2.044ms
 
-timeFor(10000, () => {
+timeFor(() => {
   for (const a of arr) a
-}) //1.326ms
+}, count) //1.326ms

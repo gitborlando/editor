@@ -4,6 +4,7 @@ export type ImmuiPatch = {
   path: string
   value: any
   oldValue?: any
+  keys: IKey[]
 }
 export type ImmuiApplyPatchOption = {
   reverse?: boolean
@@ -75,24 +76,17 @@ export default class Immui {
   }
 
   next = <T>(object: T): T => {
-    const traverse = (oldObj: any, newObj: any, keyPathMap: any) => {
-      for (const key in oldObj) {
-        if (!keyPathMap[key]) {
-          newObj[key] = oldObj[key]
-          continue
-        }
-        if (typeof oldObj[key] !== 'object') {
-          newObj[key] = oldObj[key]
-        } else {
-          newObj[key] = Array.isArray(oldObj[key]) ? [] : {}
-          traverse(oldObj[key], newObj[key], keyPathMap[key])
-        }
+    const traverse = (object: any, keyPathMap: any) => {
+      for (const key in keyPathMap) {
+        if (typeof object[key] !== 'object') continue
+        const oldValue = object[key]
+        object[key] = Array.isArray(oldValue) ? [...oldValue] : { ...oldValue }
+        traverse(object[key], keyPathMap[key])
       }
-      return newObj
     }
-    const newObject = traverse(object, {}, this.keyPathDiffMap)
+    traverse(object, this.keyPathDiffMap)
     this.keyPathDiffMap = {}
-    return newObject
+    return object
   }
 
   commitPatches = () => {
@@ -149,7 +143,7 @@ export default class Immui {
     let curKeyPathDiffMap = this.keyPathDiffMap
     keys.forEach((key, i) => {
       if (!curKeyPathDiffMap[key]) {
-        if (i != keys.length - 1) {
+        if (i !== keys.length - 1) {
           curKeyPathDiffMap = curKeyPathDiffMap[key] = {}
         } else {
           curKeyPathDiffMap[key] = undefined
@@ -160,7 +154,7 @@ export default class Immui {
     })
 
     const path = '/' + keys.join('/')
-    const patch = { type, path, value: clone(value), oldValue: clone(oldValue) }
+    const patch = { type, path, value: clone(value), oldValue: clone(oldValue), keys }
 
     if (this.noCommitPatch) return patch
 
@@ -171,17 +165,13 @@ export default class Immui {
     return patch
   }
 
-  static matchPath = (path: string, pattern: string) => {
-    const pathArr = path.split('/')
-    const patternArr = pattern.split('/')
-    if (pattern.endsWith('$')) {
-      if (pathArr.length !== patternArr.length - 1) return false
-      patternArr.splice(-1, 1)
-    }
-    for (let i = 0; i < patternArr.length; i++) {
-      const curPattern = patternArr[i]
-      if (curPattern === pathArr[i]) continue
-      if (curPattern === '*' || curPattern === '?' || curPattern === '') continue
+  static matchPath = (path: IKey[], pattern: string[]) => {
+    if (path.length !== pattern.length) return false
+    if (path[path.length - 1] !== pattern[pattern.length - 1]) return false
+    for (let i = 0; i < pattern.length - 1; i++) {
+      const curPattern = pattern[i]
+      if (curPattern === '?' || curPattern === '') continue
+      if (curPattern == path[i]) continue
       return false
     }
     return true

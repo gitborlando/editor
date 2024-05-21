@@ -3,7 +3,6 @@ import { editorCommands } from '~/editor/editor/command'
 import { OperatePage } from '~/editor/operate/page'
 import { Schema } from '~/editor/schema/schema'
 import { Menu } from '~/global/menu'
-import { hslBlueColor } from '~/shared/utils/color'
 import { useMatchPatch } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { Flex } from '~/view/ui-utility/widget/flex'
@@ -33,7 +32,7 @@ export const PageItemComp: FC<IPageItemComp> = memo(({ name, id }) => {
       onContextMenu={openMenu}>
       <Flex className='lay-h text-12 px-10'>{name}</Flex>
       {selected && (
-        <Icon size={18} fill={selected ? hslBlueColor(60) : ''} className='mr-10'>
+        <Icon size={18} className={'mr-10 path-fill-hslb60'}>
           {Asset.editor.leftPanel.page.pageSelect}
         </Icon>
       )}

@@ -18,7 +18,7 @@ class OperatePageService {
       Schema.itemReset(Schema.client, ['selectPageId'], firstPage.id)
       Schema.nextSchema()
     })
-    Schema.reviewSchema('/client/selectPageId', () => {
+    Schema.onMatchPatch('/client/selectPageId', () => {
       this.selectedPage = Schema.find<IPage>(Schema.client.selectPageId)
       this.selectedPageId = Schema.client.selectPageId
     })

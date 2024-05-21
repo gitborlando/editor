@@ -5,7 +5,6 @@ import { mockFile } from '~/editor/editor/mock/mock'
 import { Schema } from '~/editor/schema/schema'
 import { IMeta } from '~/editor/schema/type'
 import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
-import { hslBlueColor } from '~/shared/utils/color'
 import { useMemoComp, withSuspense } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { Button } from '~/view/ui-utility/widget/button'
@@ -54,7 +53,7 @@ export const FileComp: FC<IFileComp> = memo(({}) => {
           onClick={() => openInNewTab(meta.fileId)}>
           {meta.name}
           {selected && (
-            <IconButton size={16} fill={hslBlueColor(60)} className='ml-auto'>
+            <IconButton size={16} className='ml-auto path-fill-hslb60'>
               {Asset.editor.leftPanel.page.pageSelect}
             </IconButton>
           )}

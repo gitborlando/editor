@@ -26,18 +26,17 @@ type INodeItemComp = {
 }
 
 export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
-  const { nodeIdsInSearch, singleNodeExpanded, setNodeExpanded } = UILeftPanelLayer
+  const { nodeIdsInSearch, singleNodeExpanded, setSingleNodeExpanded } = UILeftPanelLayer
   const { nodeMoveDropDetail, nodeMoveStarted, nodeMoveEnded, enterReName } = UILeftPanelLayer
   const node = Schema.find<INode>(id)
   const { expand } = OperateNode.getNodeRuntime(id)
-  const selected = OperateNode.selectIds.value.has(id)
-  const subSelected = ancestors.some((i) => OperateNode.selectIds.value.has(i)) && !selected
+  const selected = Schema.client.selectIds.includes(id)
+  const subSelected = ancestors.some((i) => Schema.client.selectIds.includes(i)) && !selected
   const searched = nodeIdsInSearch.value.has(id)
   const isContainerNode = SchemaUtil.isById(id, 'nodeParent')
   const children = SchemaUtil.getChildren(id)
   const hovered = useAutoSignal(false)
 
-  useHookSignal(OperateNode.selectIds)
   useHookSignal(nodeIdsInSearch)
   useHookSignal(hovered, (isHover) => {
     isHover ? OperateNode.hover(id) : OperateNode.unHover(id)
@@ -55,13 +54,15 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     Menu.menuOptions.dispatch([nodeReHierarchyGroup, nodeGroup])
   }
 
+  useMatchPatch(`/client/selectIds`)
+
   const ExpandComp = useMemoComp([expand], ({}) => {
     return (
       <Flex
         className='lay-c'
         onMouseDown={stopPropagation()}
         onClick={() => {
-          setNodeExpanded(id, !expand)
+          setSingleNodeExpanded(id, !expand)
           singleNodeExpanded.dispatch(!expand)
         }}
         style={{ width: 8, cursor: 'pointer' }}>

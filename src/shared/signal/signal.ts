@@ -56,6 +56,7 @@ export class Signal<T extends any> {
     } else {
       this.hooks.push(hook)
     }
+    this.reHierarchy()
     return () => this.unHook(hook)
   }
   dispatch(value?: T | ((value: T) => void), args?: any) {
@@ -76,7 +77,6 @@ export class Signal<T extends any> {
   }
   private runHooks() {
     if (signalBatchMap.get(this)) return
-    this.reHierarchy()
     this.hooks.forEach((hook) => hook(this.value, this.args))
     this.args = undefined
   }

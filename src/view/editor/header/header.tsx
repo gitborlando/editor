@@ -4,7 +4,7 @@ import { IStageCreateType, StageCreate } from '~/editor/stage/interact/create'
 import { StageInteract } from '~/editor/stage/interact/interact'
 import { StageViewport } from '~/editor/stage/viewport'
 import { useHookSignal } from '~/shared/signal/signal-react'
-import { hslBlueColor } from '~/shared/utils/color'
+import { useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { Button } from '~/view/ui-utility/widget/button'
 import { Divide } from '~/view/ui-utility/widget/divide'
@@ -15,19 +15,18 @@ type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageInteract.currentType)
-  useHookSignal(StageViewport.zoom)
 
   const RecordIcons: FC<{}> = useCallback(() => {
     useHookSignal(SchemaHistory.index)
     return (
       <>
         <Button disabled={!SchemaHistory.canUndo} onClick={SchemaHistory.undo}>
-          <Icon size={20} fill={SchemaHistory.canUndo ? '' : '#E6E6E6'}>
+          <Icon size={20} className={SchemaHistory.canUndo ? '' : 'path-fill-#E6E6E6'}>
             {Asset.editor.header.record.undo}
           </Icon>
         </Button>
         <Button disabled={!SchemaHistory.canRedo} onClick={SchemaHistory.redo}>
-          <Icon size={20} fill={SchemaHistory.canRedo ? '' : '#E6E6E6'}>
+          <Icon size={20} className={SchemaHistory.canRedo ? '' : 'path-fill-#E6E6E6'}>
             {Asset.editor.header.record.redo}
           </Icon>
         </Button>
@@ -39,7 +38,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     const isActive = StageInteract.currentType.value === type
     return (
       <Button active={isActive} onClick={() => StageInteract.currentType.dispatch(type)}>
-        <Icon size={20} fill={isActive ? hslBlueColor(65) : ''}>
+        <Icon size={20} className={isActive ? 'path-fill-hslb60' : ''}>
           {Asset.editor.header.stageOperate[type]}
         </Icon>
       </Button>
@@ -57,12 +56,17 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
           StageCreate.currentType.dispatch(type)
           // e.stopPropagation()
         }}>
-        <Icon size={20} fill={isActive ? hslBlueColor(65) : ''}>
+        <Icon size={20} className={isActive ? 'path-fill-hslb60' : ''}>
           {Asset.editor.node[type as keyof typeof Asset.editor.node]}
         </Icon>
       </Button>
     )
   }
+
+  const ZoomComp = useMemoComp([], ({}) => {
+    useHookSignal(StageViewport.zoom)
+    return <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
+  })
 
   return (
     <Flex
@@ -85,7 +89,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
           <CreateShapeIcon key={type} type={type} />
         ))}
         <Divide length={16} thickness={0.5} />
-        <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
+        <ZoomComp />
       </Flex>
       <Flex className='lay-h mr-10 ml-auto gap-8-8'></Flex>
     </Flex>

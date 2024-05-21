@@ -94,10 +94,11 @@ export function clone<T extends any>(object: T): T {
   return newObj
 }
 
-export function timeFor(count: number, func: (i: number) => any, name?: string) {
-  console.time(name || `${count}`)
+export function timeFor(func: (i: number) => any, count = 1) {
+  const start = performance.now()
   for (let i = 0; i < count; i++) func(i)
-  console.timeEnd(name || `${count}`)
+  const end = performance.now()
+  console.log(`${count}`, `all: ${end - start}ms`, `aver: ${(end - start) / count}ms`)
 }
 
 export function notUndefine<T extends any>(val: T | undefined): val is T {

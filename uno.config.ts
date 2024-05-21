@@ -10,7 +10,7 @@ import {
 
 const theme = (() => {
   const hslB = Object.fromEntries(
-    new Array(100).fill(0).map((_, i) => [`hslb${i}`, `hsl(217, 100, ${i})`])
+    new Array(100).fill(0).map((_, i) => [`hslb${i}`, `hsl(217 100 ${i})`])
   )
   return {
     colors: { ...hslB },
@@ -100,6 +100,13 @@ const defaultInput: Rule<object> = [
   () => ({ border: 'none', outline: 'none', 'background-color': 'transparent' }),
 ]
 
+const pathFill: Rule<object> = [
+  /path-fill-(.+)/,
+  ([_, color], { rawSelector }) => {
+    return `${toEscapedSelector(rawSelector)} path { fill: ${normalColor(color)} }`
+  },
+]
+
 export default defineConfig({
   theme,
   presets: [presetUno(), presetRemToPx({ baseFontSize: 4 })],
@@ -118,6 +125,7 @@ export default defineConfig({
     defaultScrollBar,
     defaultInput,
     defaultFont,
+    pathFill,
   ],
 })
 
@@ -132,14 +140,7 @@ function normal(val: string) {
 }
 
 function normalColor(val: string) {
-  if (val.startsWith('rgb')) {
-    console.log('val: ', val)
-    const [_, r, g, b, a] = val.match(
-      /rgba?,?(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),?(\d+(?:\.\d+)?)?/
-    )
-    return `rgba(${r},${g},${b},${a || 1})`
-  }
-  if (val.match(/hslB.\d{1,3}/)) return `hsl(217, 100, ${val.slice(5)})`
+  if (theme.colors[val]) return theme.colors[val]
   return val
 }
 

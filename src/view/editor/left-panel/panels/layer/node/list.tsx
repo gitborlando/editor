@@ -2,7 +2,6 @@ import { FC, memo } from 'react'
 import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
 import { EventWheel } from '~/global/event/wheel'
 import { useHookSignal } from '~/shared/signal/signal-react'
-import { useAnimationFrame } from '~/shared/utils/react'
 import { ScrollComp } from '~/view/editor/left-panel/panels/layer/node/scroll'
 import { Flex } from '~/view/ui-utility/widget/flex'
 import { NodeItemComp } from './item'
@@ -10,19 +9,12 @@ import { NodeItemComp } from './item'
 type INodeListComp = {}
 
 export const NodeListComp: FC<INodeListComp> = memo(({}) => {
-  const {
-    nodeViewHeight,
-    nodeListHeight,
-    nodeScrollHeight,
-    nodeScrollShift,
-    inViewNodeInfo,
-    calcNodeListChange2,
-  } = UILeftPanelLayer
+  const { nodeViewHeight, nodeListHeight, nodeScrollHeight, nodeScrollShift, inViewNodeInfo } =
+    UILeftPanelLayer
   useHookSignal(inViewNodeInfo)
   useHookSignal(EventWheel.duringWheel, ({ direction }) => {
-    nodeScrollHeight.dispatch(nodeScrollHeight.value + direction * 24)
+    nodeScrollHeight.dispatch(nodeScrollHeight.value + direction * 96)
   })
-  useAnimationFrame(calcNodeListChange2)
 
   return (
     <Flex className='lay-v wh-100% of-hidden relative' style={{ height: nodeViewHeight.value }}>

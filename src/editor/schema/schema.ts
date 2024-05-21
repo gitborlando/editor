@@ -77,10 +77,10 @@ class SchemaService {
     this.nextSchema()
     SchemaHistory.commit(description)
   }
-  reviewSchema(patten: string, callback: () => void) {
+  onMatchPatch(patten: string, callback: () => void) {
+    const pattenArr = patten.split('/').filter(Boolean)
     return this.onFlushPatches.hook((patch) => {
-      if (!Immui.matchPath(patch.path, patten)) return
-      callback()
+      if (Immui.matchPath(patch.keys, pattenArr)) callback()
     })
   }
 }

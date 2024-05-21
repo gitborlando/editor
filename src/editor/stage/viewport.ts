@@ -37,12 +37,12 @@ class StageViewportService {
     })
 
     const disposers = <INoopFunc[]>[]
-    Schema.reviewSchema('/client/selectPageId', () => {
+    Schema.onMatchPatch('/client/selectPageId', () => {
       disposers.forEach((disposer) => disposer())
-      const disposeZoom = Schema.reviewSchema(`/*/*/${Schema.client.selectPageId}/zoom`, () =>
+      const disposeZoom = Schema.onMatchPatch(`/?/?/${Schema.client.selectPageId}/zoom`, () =>
         this.zoom.dispatch(Schema.client.viewport[Schema.client.selectPageId].zoom)
       )
-      const disposeOffset = Schema.reviewSchema(`/*/*/${Schema.client.selectPageId}/xy`, () =>
+      const disposeOffset = Schema.onMatchPatch(`/?/?/${Schema.client.selectPageId}/xy`, () =>
         this.stageOffset.dispatch(Schema.client.viewport[Schema.client.selectPageId].xy)
       )
       disposers.push(disposeZoom, disposeOffset)
