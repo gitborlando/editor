@@ -1,7 +1,7 @@
 import { FC, Fragment } from 'react'
 import { OperateFill } from '~/editor/operate/fill'
 import { IFill } from '~/editor/schema/type'
-import { useMemoComp } from '~/shared/utils/react'
+import { useMatchPatch, useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
 import { Divide } from '~/view/ui-utility/widget/divide'
@@ -11,6 +11,7 @@ import { PickerOpener } from './picker/picker-opener'
 export const FillPropComp: FC<{}> = ({}) => {
   const { fills, isMultiFills, addFill } = OperateFill
   const hasFills = fills.length > 0
+  useMatchPatch('/?/fills/...')
 
   const HeaderComp = useMemoComp([hasFills], ({}) => {
     return (

@@ -1,11 +1,9 @@
-import autobind from 'class-autobind-decorator'
 import { IRect, IXY } from '~/shared/utils/normal'
 import { abs, rcos, rsin } from './base'
 import { xy_, xy_dot, xy_minus, xy_rotate } from './xy'
 
 type IAxis = { widthAxis: IXY; heightAxis: IXY }
 
-@autobind
 export class OBB {
   xy: IXY
   axis: IAxis

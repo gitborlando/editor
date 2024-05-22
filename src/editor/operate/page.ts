@@ -1,5 +1,4 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal/signal'
 import { SchemaDefault } from '../schema/default'
 import { Schema } from '../schema/schema'
 import { ID, IPage } from '../schema/type'
@@ -7,29 +6,10 @@ import { OperateNode } from './node'
 
 @autobind
 class OperatePageService {
-  curPage = createSignal<IPage>()
-  selectedPage!: IPage
-  selectedPageId!: ID
-  private lastPage!: IPage
-  initHook() {
-    Schema.inited.hook(() => {
-      const firstPage = Schema.find<IPage>(Schema.meta.pageIds[0])
-      this.curPage.value = this.lastPage = firstPage
-      Schema.itemReset(Schema.client, ['selectPageId'], firstPage.id)
-      Schema.nextSchema()
-    })
-    Schema.onMatchPatch('/client/selectPageId', () => {
-      this.selectedPage = Schema.find<IPage>(Schema.client.selectPageId)
-      this.selectedPageId = Schema.client.selectPageId
-    })
-    Schema.schemaChanged.hook(() => {
-      const selectPageId = Schema.client.selectPageId
-      const currentPage = Schema.find<IPage>(selectPageId)
-      if (!this.lastPage) return (this.lastPage = currentPage)
-      if (this.lastPage === currentPage) return
-      this.curPage.dispatch((this.lastPage = currentPage))
-    })
+  get currentPage() {
+    return Schema.find<IPage>(Schema.client.selectPageId)
   }
+  initHook() {}
   selectPage(id: ID) {
     Schema.itemReset(Schema.client, ['selectPageId'], id)
     OperateNode.clearSelect()

@@ -1,5 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { createSignal } from '~/shared/signal/signal'
+import { flushFuncs } from '~/shared/utils/array'
+import { INoopFunc } from '~/shared/utils/normal'
 import Immui, { ImmuiApplyPatchOption, ImmuiPatch } from '../../shared/immui/immui'
 import { SchemaHistory } from './history'
 import {
@@ -28,6 +30,7 @@ class SchemaService {
   operationList = <ISchemaOperation[]>[]
   changePatches = <ImmuiPatch[]>[]
   private immui = new Immui()
+  private matchPatchFuncs = new Set<INoopFunc>()
   initSchema(schema: ISchema) {
     this.schema = schema
     this.meta = this.find<IMeta>('meta')
@@ -56,31 +59,34 @@ class SchemaService {
     this.immui.applyPatches(this.schema, patches, option)
   }
   commitOperation(description: string, option?: ICommitOperationOption) {
-    const patches = this.immui.commitPatches()
-    const operation = { id: '', patches, description, timestamp: 0, ...option }
-    this.changePatches.push(...patches)
-    this.operationList.push(operation)
+    return
+    // const patches = this.immui.commitPatches()
+    // const operation = { id: '', patches, description, timestamp: 0, ...option }
+    // this.changePatches.push(...patches)
+    // this.operationList.push(operation)
   }
   finalOperation(description: string, option?: ICommitOperationOption) {
     this.commitOperation(description, option)
     this.commitHistory(description)
   }
   nextSchema() {
-    this.schema = this.immui.next(this.schema)
+    const [schema, patches] = this.immui.next(this.schema)
+    this.schema = schema
     this.meta = this.find<IMeta>('meta')
     this.client = this.find<IClient>('client')
-    this.changePatches.forEach(this.onFlushPatches.dispatch)
+    patches.forEach(this.onFlushPatches.dispatch)
+    flushFuncs(this.matchPatchFuncs)
     this.schemaChanged.dispatch()
-    this.changePatches = []
   }
   commitHistory(description: string) {
     this.nextSchema()
     SchemaHistory.commit(description)
   }
-  onMatchPatch(patten: string, callback: () => void) {
+  onMatchPatch(patten: string, callback: INoopFunc) {
     const pattenArr = patten.split('/').filter(Boolean)
     return this.onFlushPatches.hook((patch) => {
-      if (Immui.matchPath(patch.keys, pattenArr)) callback()
+      if (!Immui.matchPath(patch.keys, pattenArr)) return
+      this.matchPatchFuncs.add(callback)
     })
   }
 }

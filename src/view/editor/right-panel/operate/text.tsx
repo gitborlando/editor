@@ -20,6 +20,8 @@ export const TextComp: FC<{}> = ({}) => {
   }
 
   useHookSignal(intoEditing)
+  useMatchPatch('/?/content')
+  useMatchPatch('/?/style/...')
 
   const HeaderComp = useMemoComp([], ({}) => {
     return (

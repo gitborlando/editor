@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { mergeSignal } from '~/shared/signal/signal'
-import { createCache } from '~/shared/utils/cache'
+import { createObjCache } from '~/shared/utils/cache'
 import { iife, macro_match } from '~/shared/utils/normal'
 import { SchemaUtil } from '~/shared/utils/schema'
 import { OBB } from '../math/obb'
@@ -14,9 +14,9 @@ export type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 export class StageElementService {
-  elements = createCache<ID, IStageElement>()
-  containers = createCache<ID, PIXI.Container>()
-  prevNodes = createCache<ID, INode>()
+  elements = createObjCache<IStageElement>()
+  containers = createObjCache<PIXI.Container>()
+  prevNodes = createObjCache<INode>()
 
   initHook() {
     mergeSignal(Schema.inited, Pixi.inited).hook(() => {
@@ -68,14 +68,14 @@ export class StageElementService {
   }
 
   updateNode(prevNode: INode, curNode: INode) {
-    if (prevNode.id !== curNode.id || prevNode === curNode) return
+    //if (prevNode.id !== curNode.id || prevNode === curNode) return
 
     StageDraw.collectRedraw(curNode.id)
     this.updateOBB(prevNode, curNode)
 
-    if (SchemaUtil.isNodeParent(prevNode)) {
-      this.diffChildren(prevNode, curNode as INodeParent)
-    }
+    // if (SchemaUtil.isNodeParent(prevNode)) {
+    //   this.diffChildren(prevNode, curNode as INodeParent)
+    // }
   }
 
   updateOBB(prevNode: INode | null, curNode: INode) {

@@ -27,7 +27,7 @@ export const HoverComp: FC<IHoverComp> = memo(({}) => {
     if (!StageInteract.canHover.value) return
     if (OperateNode.selectIds.value.has(hoverId)) return
     const hoverNode = Schema.find<INode>(hoverId)
-    if (hoverNode.type === 'frame' && SchemaUtil.isPage(hoverNode.parentId)) return
+    if (hoverNode.type === 'frame' && SchemaUtil.isPageById(hoverNode.parentId)) return
     graphic.lineStyle(1.5 / StageViewport.zoom.value, hslBlueColor(65))
     if (hoverNode.type === 'text') {
       const rect = SchemaDefault.rect({ ...hoverNode, type: 'vector' })

@@ -1,4 +1,4 @@
-import { createCache } from './cache'
+import { createObjCache } from './cache'
 
 export const This = globalThis as any
 
@@ -72,7 +72,7 @@ export function cx(...args: ((string | undefined) | [boolean, string] | [string]
   return res.trim()
 }
 
-const cache = createCache()
+const cache = createObjCache()
 export function macro_match(_input: TemplateStringsArray) {
   const input = _input[0]
   const test: any = cache.getSet(input, () => {
@@ -99,6 +99,17 @@ export function timeFor(func: (i: number) => any, count = 1) {
   for (let i = 0; i < count; i++) func(i)
   const end = performance.now()
   console.log(`${count}`, `all: ${end - start}ms`, `aver: ${(end - start) / count}ms`)
+}
+
+export function timeOf(count: number, func: (i: number) => any, count2 = 1, skip = 0) {
+  let all = 0
+  for (let i = 0; i < count2; i++) {
+    const start = performance.now()
+    for (let i = 0; i < count; i++) func(i)
+    const end = performance.now()
+    if (i >= skip) all += end - start
+  }
+  console.log(`${count}`, `all: ${all}ms`, `aver: ${all / count / (count2 - skip)}ms`)
 }
 
 export function notUndefine<T extends any>(val: T | undefined): val is T {

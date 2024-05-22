@@ -3,7 +3,6 @@ import { createSignal } from '~/shared/signal/signal'
 import { SchemaUtil } from '~/shared/utils/schema'
 import { Schema } from '../schema/schema'
 import { INode, INodeParent } from '../schema/type'
-import { StageSelect } from '../stage/interact/select'
 import { StageWidgetTransform } from '../stage/widget/transform'
 import { OperateNode } from './node'
 
@@ -27,11 +26,11 @@ class OperateAlignService {
   private needAlign = false
   private toAlignNodes = <INode[]>[]
   initHook() {
-    StageSelect.afterSelect.hook(this.setupAlign)
+    OperateNode.selectedNodes$.hook(this.setupAlign)
     this.currentAlign.hook(this.autoAlign)
   }
   private setupAlign() {
-    const { selectNodes } = OperateNode
+    const selectNodes = OperateNode.selectingNodes
     if (selectNodes.length === 0) {
       this.canAlign.dispatch(false)
     }
@@ -116,7 +115,7 @@ class OperateAlignService {
     })
   }
   private getAlignBound() {
-    const { selectNodes } = OperateNode
+    const selectNodes = OperateNode.selectingNodes
     if (selectNodes.length > 1) {
       return StageWidgetTransform.transformOBB.getAABBBound()
     } else {

@@ -25,6 +25,9 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
     const operateDataCache = useSignal(0)
     const slideRate = 1 / StageViewport.zoom.value
 
+    const { selectedNodes } = OperateNode
+    useHookSignal(selectedNodes, { after: 'geometryKeyValue' })
+
     useHookSignal(StageViewport.zoom)
     useDownUpTracker(
       () => ref.current,

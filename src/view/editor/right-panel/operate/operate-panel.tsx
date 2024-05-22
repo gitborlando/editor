@@ -11,7 +11,7 @@ import { StrokeComp } from './stroke'
 import { TextComp } from './text'
 
 export const OperatePanelComp: FC<{}> = memo(({}) => {
-  useHookSignal(OperateNode.selectedNodes, { afterAll: true })
+  useHookSignal(OperateNode.selectedNodes$)
 
   return (
     <Flex className='lay-v wh-100% of-y-auto d-scroll'>

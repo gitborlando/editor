@@ -6,8 +6,8 @@ export type IIconButton = ComponentPropsWithRef<'div'> & IButtonProps & IIconPro
 
 export const IconButton = forwardRef<HTMLDivElement, IIconButton>(
   ({ className, children, ...rest }, ref) => {
-    const { size, rotate, fill, scale } = rest
-    const iconProps = { size, rotate, fill, scale }
+    const { size, rotate, scale } = rest
+    const iconProps = { size, rotate, scale }
     return (
       <Button type='icon' className={className} {...rest} ref={ref}>
         <Icon {...iconProps}>{children}</Icon>

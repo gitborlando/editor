@@ -1,4 +1,4 @@
-import { FC, memo, useState, useTransition } from 'react'
+import { FC, memo, useState } from 'react'
 import { IFillLinearGradient } from '~/editor/schema/type'
 import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
 import { makeLinearGradientCss } from '~/shared/utils/color'
@@ -12,7 +12,6 @@ type IPickerLinearGradientComp = {
 export const PickerLinearGradientComp: FC<IPickerLinearGradientComp> = memo(({ fill }) => {
   const { setStopColor } = UIPickerCopy
   const [stopIndex, setStopIndex] = useState(0)
-  const [_, transition] = useTransition()
 
   const StopsBar: FC<{}> = () => {
     return (
@@ -39,7 +38,7 @@ export const PickerLinearGradientComp: FC<IPickerLinearGradientComp> = memo(({ f
       <StopsBar />
       <PickerColorComp
         color={fill.stops[stopIndex].color}
-        onChange={({ color, alpha }) => transition(() => setStopColor(stopIndex, color, alpha))}
+        onChange={({ color, alpha }) => setStopColor(stopIndex, color, alpha)}
       />
     </Flex>
   )

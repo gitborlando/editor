@@ -1,4 +1,3 @@
-import { forEach } from 'lodash-es'
 import { Schema } from '~/editor/schema/schema'
 import { ID, INode, INodeParent, IPage, ISchemaItem } from '~/editor/schema/type'
 
@@ -17,7 +16,7 @@ export type ITraverseData = {
 type ITraverseCallback = (arg: ITraverseData) => any
 
 export class SchemaUtil {
-  static isPage(id: ID) {
+  static isPageById(id: ID) {
     return id.startsWith('page_')
   }
   static is<T extends ISchemaItem>(item: ISchemaItem, type: ISchemaItem['type']): item is T {
@@ -32,11 +31,18 @@ export class SchemaUtil {
   }
   static isPageFrame(id: ID) {
     const node = Schema.find(id)
-    return node.type === 'frame' && this.isPage(node.parentId)
+    return node.type === 'frame' && this.isPageById(node.parentId)
   }
   static getChildren(id: ID | INodeParent) {
     const childIds = (typeof id !== 'string' ? id : Schema.find<INodeParent>(id))?.childIds || []
     return childIds.map((id) => Schema.find<INode>(id))
+  }
+  static findAncestor(node: INode) {
+    while (node.parentId) {
+      if (SchemaUtil.isPageById(node.parentId)) return node
+      node = Schema.find<INode>(node.parentId)
+    }
+    return node
   }
   static traverseCurPageChildIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
     const curPage = Schema.find<IPage>(Schema.client.selectPageId)
@@ -49,10 +55,10 @@ export class SchemaUtil {
   ) {
     const abort = new AbortController()
     const traverse = (ids: string[], depth: number, upLevelRef?: ITraverseData) => {
-      forEach(ids, (id, index) => {
+      ids.forEach((id, index) => {
         if (abort.signal.aborted) return
         const node = Schema.find<INode>(id)
-        if (!node) console.log(id, ids)
+        if (node === undefined) console.log(id, ids)
         const childIds = 'childIds' in node ? node.childIds : undefined
         const parent = <INodeParent>(upLevelRef?.node || Schema.find(node.parentId))
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []

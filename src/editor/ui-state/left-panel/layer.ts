@@ -112,6 +112,9 @@ class UILeftPanelLayerService {
     this.pagePanelHeight.hook((height) => {
       this.nodeViewHeight.dispatch(UILeftPanel.panelHeight - height - 32)
     })
+    Schema.inited.hook(() => {
+      this.calcNodeListChange()
+    })
     Schema.onMatchPatch('/client/selectPageId', () => {
       this.calcNodeListChange()
     })

@@ -7,7 +7,6 @@ export type IIconProps = {
   size?: number
   rotate?: number
   scale?: number
-  fill?: CSSProperties['color'] | (string & {})
   style?: CSSProperties
 }
 
@@ -17,7 +16,6 @@ export const Icon: FC<IIconProps> = ({
   size = 8,
   rotate = 0,
   scale = 1,
-  fill,
   style: inputStyle,
   ...rest
 }) => {
@@ -32,14 +30,14 @@ export const Icon: FC<IIconProps> = ({
   if (typeof children === 'string')
     return (
       <img
-        className={cx(':uno: lay-c wh-fit-fit', className)}
+        className={cx('layer-widget:(lay-c wh-fit-fit)', className)}
         src={children}
         style={style}
         {...rest}></img>
     )
 
   return createElement(children as unknown as FC<any>, {
-    className: cx(':uno: lay-c wh-fit-fit', className),
+    className: cx('layer-widget:(lay-c wh-fit-fit path-fill-#393939)', className),
     style,
     ...rest,
   })

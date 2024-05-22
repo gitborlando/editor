@@ -258,6 +258,7 @@ export type ISchemaPropKey =
   | keyof IText['style']
   | keyof IPoint
   | keyof INodeBase
+  | keyof ISchema
   | (string & {})
   | number
 

@@ -79,7 +79,7 @@ class OperateGeometryService {
   }
   private setupGeometry() {
     if (OperateNode.selectIds.value.size === 1) {
-      const node = OperateNode.selectNodes[0]
+      const node = OperateNode.selectingNodes[0]
       this.geometryKeys.forEach((key) => {
         //@ts-ignore
         this.geometry[key] = node[key]
@@ -89,7 +89,7 @@ class OperateGeometryService {
       const propKeys = [...this.geometryKeys]
       const tempObj = <any>{}
       const multiValueArr = <string[]>[]
-      OperateNode.selectNodes.forEach((node, i) => {
+      OperateNode.selectingNodes.forEach((node, i) => {
         propKeys.forEach((key) => {
           //@ts-ignore
           if (i === 0) tempObj[key] = node[key]
@@ -105,7 +105,7 @@ class OperateGeometryService {
   }
   private setupOperateKeys() {
     this.geometryKeys = new Set(['x', 'y', 'width', 'height', 'rotation'])
-    OperateNode.selectNodes.forEach((node) => {
+    OperateNode.selectingNodes.forEach((node) => {
       if (node.type === 'frame') return this.geometryKeys.add('radius')
       if (node.type === 'vector') {
         if (node.vectorType === 'rect') return this.geometryKeys.add('radius')

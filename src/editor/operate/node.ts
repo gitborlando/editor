@@ -3,7 +3,7 @@ import { cloneDeep } from 'lodash-es'
 import { nanoid } from 'nanoid'
 import { createSignal } from '~/shared/signal/signal'
 import { firstOne, stableIndex } from '~/shared/utils/array'
-import { createCache } from '~/shared/utils/cache'
+import { createObjCache } from '~/shared/utils/cache'
 import { SchemaUtil } from '~/shared/utils/schema'
 import { OBB } from '../math/obb'
 import { xy_, xy_rotate } from '../math/xy'
@@ -29,13 +29,18 @@ class OperateNodeService {
   afterRemoveNodes = createSignal<ID[]>()
   selectedNodes = createSignal(<INode[]>[])
   intoEditNodeId = createSignal('')
+  selectedNodes$ = createSignal(<INode[]>[])
   private lastSelectedNodeSet = new Set<INode>()
-  private nodeRuntimeCache = createCache<ID, INodeRuntime>()
+  private nodeRuntimeCache = createObjCache<INodeRuntime>()
   private copyIds = <ID[]>[]
   initHook() {
     this.afterRemoveNodes.hook((ids) => {
       this.selectIds.dispatch((ids) => ids.clear())
       this.hoverIds.dispatch((hoverIds) => ids.forEach((id) => hoverIds.delete(id)))
+    })
+    Schema.onMatchPatch('/client/selectIds', () => {
+      this.selectIds.value = new Set(Schema.client.selectIds)
+      this.selectedNodes$.dispatch(Schema.client.selectIds.map(Schema.find<INode>))
     })
     Schema.schemaChanged.hook(() => {
       const selectedNodes = Schema.client.selectIds.map(Schema.find<INode>)
@@ -61,7 +66,7 @@ class OperateNodeService {
       Pixi.isForbidEvent = !!id
     })
   }
-  get selectNodes() {
+  get selectingNodes() {
     const nodes = <INode[]>[]
     this.selectIds.value.forEach((id) => nodes.push(Schema.find(id)))
     return nodes
@@ -186,9 +191,8 @@ class OperateNodeService {
     }))
   }
   getNodeCenterXY(node: INode) {
-    const { x, y, width, height } = node
-    const center = xy_(x + width / 2, y + height / 2)
-    return xy_rotate(center, xy_(x, y), node.rotation)
+    const center = xy_(node.x + node.width / 2, node.y + node.height / 2)
+    return xy_rotate(center, xy_(node.x, node.y), node.rotation)
   }
   private autoGetDatumId(selectIds: Set<string>) {
     if (selectIds.size === 0) {

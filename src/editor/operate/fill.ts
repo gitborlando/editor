@@ -1,8 +1,8 @@
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
-import { cloneDeep } from 'lodash-es'
 import Immui from '~/shared/immui/immui'
 import { rgb } from '~/shared/utils/color'
+import { clone } from '~/shared/utils/normal'
 import { SchemaDefault } from '../schema/default'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
@@ -16,16 +16,17 @@ class OperateFillService {
   isMultiFills = false
   private immui = new Immui()
   initHook() {
-    Schema.onMatchPatch('/?/fills', this.setupFills)
+    OperateNode.selectedNodes$.hook(this.setupFills)
+    Schema.onMatchPatch('/?/fills/...', this.setupFills)
     this.onUiPickerSetFill()
   }
   setupFills() {
     this.fills = []
     this.isMultiFills = false
-    const nodes = OperateNode.selectedNodes.value
-    if (nodes.length === 1) return (this.fills = cloneDeep(nodes[0].fills))
+    const nodes = OperateNode.selectingNodes
+    if (nodes.length === 1) return (this.fills = clone(nodes[0].fills))
     if (nodes.length > 1) {
-      if (this.isSameFills(nodes)) return (this.fills = cloneDeep(nodes[0].fills))
+      if (this.isSameFills(nodes)) return (this.fills = clone(nodes[0].fills))
       return (this.isMultiFills = true)
     }
   }
@@ -57,7 +58,7 @@ class OperateFillService {
   }
   applyChangeToSchema() {
     const nodes = OperateNode.selectedNodes.value
-    const patches = this.immui.commitPatches()
+    const patches = this.immui.next(this.fills)[1]
     nodes.forEach((node) => {
       if (this.isMultiFills) Schema.itemReset(node, ['fills'], [])
       Schema.applyPatches(patches, { prefix: `/${node.id}/fills` })
@@ -79,11 +80,12 @@ class OperateFillService {
   private isSameFills(nodes: INode[]) {
     let isSame = true
     const firstNode = nodes[0]
-    nodes.forEach(({ id, fills }) => {
+
+    nodes.forEach((node) => {
       if (!isSame) return
-      if (fills.length !== firstNode.fills.length) return (isSame = false)
+      if (node.fills.length !== firstNode.fills.length) return (isSame = false)
       firstNode.fills.forEach((fill, index) => {
-        const otherFill = fills[index]
+        const otherFill = node.fills[index]
         if (fill.type !== otherFill.type) return (isSame = false)
         if (!equal(fill, otherFill)) return (isSame = false)
       })

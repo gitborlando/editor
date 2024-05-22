@@ -1,7 +1,7 @@
 import { FC, Fragment } from 'react'
 import { OperateStroke } from '~/editor/operate/stroke'
 import { IStroke } from '~/editor/schema/type'
-import { useMemoComp } from '~/shared/utils/react'
+import { useMatchPatch, useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
@@ -13,6 +13,7 @@ import { PickerOpener } from './picker/picker-opener'
 export const StrokeComp: FC<{}> = ({}) => {
   const { strokes, addStroke, isMultiStrokes } = OperateStroke
   const hasStrokes = strokes.length > 0
+  useMatchPatch('/?/strokes/...')
 
   const HeaderComp = useMemoComp([hasStrokes], ({}) => {
     return (

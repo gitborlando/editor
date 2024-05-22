@@ -36,17 +36,7 @@ class StageViewportService {
       this.inited.dispatch()
     })
 
-    const disposers = <INoopFunc[]>[]
-    Schema.onMatchPatch('/client/selectPageId', () => {
-      disposers.forEach((disposer) => disposer())
-      const disposeZoom = Schema.onMatchPatch(`/?/?/${Schema.client.selectPageId}/zoom`, () =>
-        this.zoom.dispatch(Schema.client.viewport[Schema.client.selectPageId].zoom)
-      )
-      const disposeOffset = Schema.onMatchPatch(`/?/?/${Schema.client.selectPageId}/xy`, () =>
-        this.stageOffset.dispatch(Schema.client.viewport[Schema.client.selectPageId].xy)
-      )
-      disposers.push(disposeZoom, disposeOffset)
-    })
+    this.onListenViewportChange()
 
     this.zoom.hook(() => {
       Pixi.sceneStage.scale.set(this.zoom.value, this.zoom.value)
@@ -128,6 +118,22 @@ class StageViewportService {
     Pixi.htmlContainer.style.width = this.bound.value.width + 'px'
     Pixi.htmlContainer.style.height = this.bound.value.height + 'px'
     Pixi.app.resize()
+  }
+  private onListenViewportChange() {
+    const disposers = <INoopFunc[]>[]
+    const onChangeZoomOffset = () => {
+      disposers.forEach((disposer) => disposer())
+      const selectPageId = Schema.client.selectPageId
+      const disposeZoom = Schema.onMatchPatch(`/?/?/${selectPageId}/zoom`, () => {
+        this.zoom.dispatch(Schema.client.viewport[selectPageId].zoom)
+      })
+      const disposeOffset = Schema.onMatchPatch(`/?/?/${selectPageId}/xy`, () =>
+        this.stageOffset.dispatch(Schema.client.viewport[selectPageId].xy)
+      )
+      disposers.push(disposeZoom, disposeOffset)
+    }
+    Schema.inited.hook(() => onChangeZoomOffset())
+    Schema.onMatchPatch('/client/selectPageId', () => onChangeZoomOffset())
   }
 }
 

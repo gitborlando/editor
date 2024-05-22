@@ -1,4 +1,3 @@
-import { forEach } from 'lodash-es'
 import { timeFor } from '~/shared/utils/normal'
 
 const arr = new Array(10000).fill(0)
@@ -13,7 +12,7 @@ timeFor(() => {
 }, count) //1.136ms
 
 timeFor(() => {
-  forEach(arr, (item) => item)
+  arr.forEach((item) => item)
 }, count) //2.044ms
 
 timeFor(() => {

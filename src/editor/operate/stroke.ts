@@ -1,9 +1,9 @@
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
-import { cloneDeep } from 'lodash-es'
 import Immui from '~/shared/immui/immui'
 import { createSignal } from '~/shared/signal/signal'
 import { rgb } from '~/shared/utils/color'
+import { clone } from '~/shared/utils/normal'
 import { SchemaDefault } from '../schema/default'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
@@ -18,7 +18,8 @@ class OperateStrokeService {
   afterOperate = createSignal()
   private immui = new Immui()
   initHook() {
-    Schema.onMatchPatch('/?/strokes', this.setupStrokes)
+    OperateNode.selectedNodes$.hook(this.setupStrokes)
+    Schema.onMatchPatch('/?/strokes/...', this.setupStrokes)
     this.onUiPickerSetStroke()
     this.afterOperate.hook(() => {
       SchemaHistory.commit('改变 strokes')
@@ -27,10 +28,10 @@ class OperateStrokeService {
   setupStrokes() {
     this.strokes = []
     this.isMultiStrokes = false
-    const nodes = OperateNode.selectedNodes.value
-    if (nodes.length === 1) return (this.strokes = cloneDeep(nodes[0].strokes))
+    const nodes = OperateNode.selectingNodes
+    if (nodes.length === 1) return (this.strokes = clone(nodes[0].strokes))
     if (nodes.length > 1) {
-      if (this.isSameStrokes(nodes)) return (this.strokes = cloneDeep(nodes[0].strokes))
+      if (this.isSameStrokes(nodes)) return (this.strokes = clone(nodes[0].strokes))
       return (this.isMultiStrokes = true)
     }
   }
@@ -64,7 +65,7 @@ class OperateStrokeService {
   }
   applyChangeToSchema() {
     const nodes = OperateNode.selectedNodes.value
-    const patches = this.immui.commitPatches()
+    const patches = this.immui.next(this.strokes)[1]
     nodes.forEach((node) => {
       if (this.isMultiStrokes) Schema.itemReset(node, ['strokes'], [])
       Schema.applyPatches(patches, { prefix: `/${node.id}/strokes` })

@@ -59,10 +59,11 @@ export function useAsyncEffect(callback: Function, deps = []) {
 
 export function useMatchPatch(...pattens: string[]) {
   const disposers = useRef<Function[]>([])
-  const update = useState({})[1]
+  const setState = useState({})[1]
+  const update = useRef(() => setState({})).current
   useEffect(() => {
     pattens.forEach((patten) => {
-      disposers.current.push(Schema.onMatchPatch(patten, () => update({})))
+      disposers.current.push(Schema.onMatchPatch(patten, update))
     })
     return () => disposers.current.forEach((disposer) => disposer())
   }, [])

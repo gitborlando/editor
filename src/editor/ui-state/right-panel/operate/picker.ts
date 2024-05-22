@@ -49,7 +49,8 @@ class UIPickerService {
     this.afterOperate.dispatch()
   }
   emitChange() {
-    this.onChange.dispatch(this.immui.commitPatches())
+    const patches = this.immui.next([this.fill])[1]
+    this.onChange.dispatch(patches)
   }
 }
 

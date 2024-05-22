@@ -65,12 +65,12 @@ class StageWidgetTransformService {
       return (this.transformOBB = new OBB(0, 0, 0, 0, 0))
     }
     if (OperateNode.selectIds.value.size === 1) {
-      const { obb } = OperateNode.getNodeRuntime(OperateNode.selectNodes[0].id)
+      const { obb } = OperateNode.getNodeRuntime(OperateNode.selectingNodes[0].id)
       const { centerX, centerY, width, height, rotation } = obb
       return (this.transformOBB = new OBB(centerX, centerY, width, height, rotation))
     }
     let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
-    OperateNode.selectNodes.forEach((node) => {
+    OperateNode.selectingNodes.forEach((node) => {
       const obb = OperateNode.getNodeRuntime(node.id).obb
       obb.calcVertexXY().forEach((xy) => {
         xMin = min(xMin, xy.x)

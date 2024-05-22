@@ -74,7 +74,7 @@ export class StageDropService {
         .map(Schema.find<INodeParent>)
         .find((node) => {
           return node?.type === 'frame'
-        }) || OperatePage.curPage.value
+        }) || OperatePage.currentPage
   }
 }
 

@@ -13,8 +13,6 @@ export type ImmuiApplyPatchOption = {
 
 export default class Immui {
   private keyPathDiffMap = <any>{}
-  private noCommitPatch = false
-  private typePathPatchMap = new Map<string, ImmuiPatch[]>()
 
   add = <T>(object: object, keyPath: string | IKey[], value: T) => {
     const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
@@ -33,7 +31,7 @@ export default class Immui {
       current[lastKey] = value
     }
 
-    return this.getPatch('add', keys, value)
+    this.recordChange(keys, value)
   }
 
   reset = <T>(object: object, keyPath: string | IKey[], value: T) => {
@@ -50,7 +48,7 @@ export default class Immui {
     let oldValue = current[lastKey]
     current[lastKey] = value
 
-    return this.getPatch('replace', keys, value, oldValue)
+    this.recordChange(keys, value, oldValue)
   }
 
   delete = (object: object, keyPath: string | IKey[]) => {
@@ -72,32 +70,36 @@ export default class Immui {
       delete current[lastKey]
     }
 
-    return this.getPatch('remove', keys, undefined, oldValue)
+    this.recordChange(keys, undefined, oldValue)
   }
 
-  next = <T>(object: T): T => {
-    const traverse = (object: any, keyPathMap: any) => {
+  next = <T>(object: T): [T, ImmuiPatch[]] => {
+    const patches = <ImmuiPatch[]>[]
+    const traverse = (object: any, keyPathMap: any, keys: string[]) => {
       for (const key in keyPathMap) {
-        if (typeof object[key] !== 'object') continue
-        const oldValue = object[key]
-        object[key] = Array.isArray(oldValue) ? [...oldValue] : { ...oldValue }
-        traverse(object[key], keyPathMap[key])
+        const _keys = [...keys, key]
+        if (Array.isArray(keyPathMap[key])) {
+          const [value, oldValue] = keyPathMap[key]
+          if (value === oldValue) continue
+
+          const path = '/' + _keys.join('/')
+          const patch = <any>{ keys: _keys, path, value, oldValue }
+
+          if (value === undefined) patch.type = 'remove'
+          else if (oldValue === undefined) patch.type = 'add'
+          else patch.type = 'replace'
+
+          patches.push(patch)
+        } else {
+          const content = object[key]
+          object[key] = Array.isArray(content) ? [...content] : { ...content }
+          traverse(object[key], keyPathMap[key], _keys)
+        }
       }
     }
-    traverse(object, this.keyPathDiffMap)
+    traverse(object, this.keyPathDiffMap, [])
     this.keyPathDiffMap = {}
-    return object
-  }
-
-  commitPatches = () => {
-    const patches = []
-    for (const item of this.typePathPatchMap.values()) {
-      const [first, last] = [item[0], item[item.length - 1]]
-      first.value = last.value
-      patches.push(first)
-    }
-    this.typePathPatchMap.clear()
-    return patches
+    return [object, patches]
   }
 
   applyPatches = <T extends object>(
@@ -109,7 +111,6 @@ export default class Immui {
 
     if (reverse) {
       patches = patches.slice().reverse()
-      // this.noCommitPatch = true
     }
 
     patches.forEach((patch) => {
@@ -130,46 +131,34 @@ export default class Immui {
           return
       }
     })
-
-    this.noCommitPatch = false
   }
 
-  private getPatch = (
-    type: 'add' | 'replace' | 'remove',
-    keys: IKey[],
-    value: any,
-    oldValue?: any
-  ) => {
+  private recordChange = (keys: IKey[], value: any, oldValue?: any) => {
     let curKeyPathDiffMap = this.keyPathDiffMap
     keys.forEach((key, i) => {
       if (!curKeyPathDiffMap[key]) {
         if (i !== keys.length - 1) {
           curKeyPathDiffMap = curKeyPathDiffMap[key] = {}
         } else {
-          curKeyPathDiffMap[key] = undefined
+          curKeyPathDiffMap[key] = [value, oldValue]
         }
       } else {
-        curKeyPathDiffMap = curKeyPathDiffMap[key]!
+        if (i !== keys.length - 1) {
+          curKeyPathDiffMap = curKeyPathDiffMap[key]!
+        } else {
+          curKeyPathDiffMap[key][0] = value
+        }
       }
     })
-
-    const path = '/' + keys.join('/')
-    const patch = { type, path, value: clone(value), oldValue: clone(oldValue), keys }
-
-    if (this.noCommitPatch) return patch
-
-    const patches = this.typePathPatchMap.get(type + path)
-    if (!patches) this.typePathPatchMap.set(type + path, [patch])
-    else patches.push(patch)
-
-    return patch
   }
 
   static matchPath = (path: IKey[], pattern: string[]) => {
-    if (path[path.length - 1] !== pattern[pattern.length - 1]) return false
-    if (path.length !== pattern.length) return false
+    if (pattern[pattern.length - 1] !== '...') {
+      if (path[path.length - 1] !== pattern[pattern.length - 1]) return false
+      if (path.length !== pattern.length) return false
+    }
     for (let i = 0; i < pattern.length - 1; i++) {
-      if (pattern[i] === '?' || pattern[i] === '') continue
+      if (pattern[i] === '?' || pattern[i] === '' || pattern[i] === '...') continue
       if (pattern[i] == path[i]) continue
       return false
     }

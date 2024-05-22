@@ -2,7 +2,7 @@ import { FC, Fragment } from 'react'
 import { OperateShadow } from '~/editor/operate/shadow'
 import { IShadow } from '~/editor/schema/type'
 import { iife } from '~/shared/utils/normal'
-import { useMemoComp } from '~/shared/utils/react'
+import { useMatchPatch, useMemoComp } from '~/shared/utils/react'
 import Asset from '~/view/ui-utility/assets'
 import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
 import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
@@ -15,6 +15,7 @@ type IShadowComp = {}
 export const ShadowComp: FC<IShadowComp> = ({}) => {
   const { shadows, addShadow, isMultiShadows } = OperateShadow
   const hasShadows = shadows.length > 0
+  useMatchPatch('/?/shadows/...')
 
   const HeaderComp = useMemoComp([hasShadows], ({}) => {
     return (

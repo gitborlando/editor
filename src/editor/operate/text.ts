@@ -89,7 +89,7 @@ class OperateTextService {
   }
   private applyChangeToSchema() {
     const nodes = OperateNode.selectedNodes.value
-    const patches = this.immui.commitPatches()
+    const patches = this.immui.next(this.textStyle)[1]
     nodes.forEach((node) => Schema.applyPatches(patches, { prefix: `/${node.id}/style` }))
     Schema.commitOperation('改变 text styles')
     Schema.nextSchema()

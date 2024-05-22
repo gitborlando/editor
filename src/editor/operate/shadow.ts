@@ -18,7 +18,8 @@ class OperateShadowService {
   afterOperate = createSignal()
   private immui = new Immui()
   initHook() {
-    Schema.onMatchPatch('/?/shadows', this.setupShadows)
+    OperateNode.selectedNodes$.hook(this.setupShadows)
+    Schema.onMatchPatch('/?/shadows/...', this.setupShadows)
     this.onUiPickerSetShadow()
     this.afterOperate.hook(() => {
       SchemaHistory.commit('改变 shadows')
@@ -27,7 +28,7 @@ class OperateShadowService {
   setupShadows() {
     this.shadows = []
     this.isMultiShadows = false
-    const nodes = OperateNode.selectedNodes.value
+    const nodes = OperateNode.selectingNodes
     if (nodes.length === 1) return (this.shadows = cloneDeep(nodes[0].shadows))
     if (nodes.length > 1) {
       if (this.isSameShadows(nodes)) return (this.shadows = cloneDeep(nodes[0].shadows))
@@ -64,7 +65,7 @@ class OperateShadowService {
   }
   applyChangeToSchema() {
     const nodes = OperateNode.selectedNodes.value
-    const patches = this.immui.commitPatches()
+    const patches = this.immui.next(this.shadows)[1]
     nodes.forEach((node) => {
       if (this.isMultiShadows) Schema.itemReset(node, ['shadows'], [])
       Schema.applyPatches(patches, { prefix: `/${node.id}/shadows` })

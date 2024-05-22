@@ -39,7 +39,7 @@ class StageWidgetAdsorptionService {
   }
   private setupAdsorption() {
     this.updateCloneTransformOBB()
-    if (OperateNode.datumId.value === '' || SchemaUtil.isPage(OperateNode.datumId.value)) {
+    if (OperateNode.datumId.value === '' || SchemaUtil.isPageById(OperateNode.datumId.value)) {
       OperateMeta.curPage.value.childIds.forEach((id) => {
         if (OperateNode.selectIds.value.has(id)) return
         this.collectAdsorption(OperateNode.getNodeRuntime(id))

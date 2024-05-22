@@ -34,7 +34,7 @@ export const TransformComp: FC<ITransformComp> = ({}) => {
     const vertexes = transformOBB.calcVertexXY()
 
     const OutlinesComp = useMemoComp([zoom], ({}) => {
-      return OperateNode.selectNodes.map((node) => (
+      return OperateNode.selectingNodes.map((node) => (
         <Graphics
           key={node.id}
           draw={(g) => {

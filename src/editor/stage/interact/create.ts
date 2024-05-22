@@ -66,7 +66,7 @@ class StageCreateService {
       .reverse()
       .find((id) => SchemaUtil.isById(id, 'frame'))
     if (frameId) return Schema.find<INodeParent>(frameId)
-    return OperatePage.curPage.value
+    return OperatePage.currentPage
   }
 }
 

@@ -1,9 +1,16 @@
+import { INoopFunc } from './normal'
+
 export function firstOne<T extends any = any>(input: T[] | Set<T>) {
   return [...input][0]
 }
 export function lastOne<T extends any = any>(input: T[] | Set<T>) {
   const arr = [...input]
   return arr[arr.length - 1]
+}
+
+export function flushFuncs<T extends INoopFunc>(input: T[] | Set<T>) {
+  input.forEach((callback) => callback())
+  Array.isArray(input) ? (input.length = 0) : input.clear()
 }
 
 export function stableIndex<T extends any = any>(arr: T[], index?: number) {
@@ -21,6 +28,10 @@ export function loopFor<T>(arr: T[], callback: (cur: T, next: T, last: T, index:
     const res = callback(arr[index], arr[right], arr[left], index)
     if (res === BREAK) break
   }
+}
+
+export function forEach<T>(items: T[], callback: (item: T, index: number) => void) {
+  for (let i = 0; i < items.length; i++) callback(items[i], i)
 }
 
 export function reverse<T extends any>(arr: T[]) {
