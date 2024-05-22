@@ -27,6 +27,9 @@ export class SchemaUtil {
     if (type === 'nodeParent') return ['page', 'frame', 'group'].includes(Schema.find(id).type)
     return Schema.find(id).type === type
   }
+  static isNodeParent<T extends { childIds: string[] }>(node: any): node is T {
+    return 'childIds' in node
+  }
   static isPageFrame(id: ID) {
     const node = Schema.find(id)
     return node.type === 'frame' && this.isPage(node.parentId)

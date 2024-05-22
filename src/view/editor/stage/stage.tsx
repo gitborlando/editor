@@ -7,7 +7,6 @@ import { useHookSignal } from '~/shared/signal/signal-react'
 import { useMemoComp } from '~/shared/utils/react'
 import { SchemaUtil } from '~/shared/utils/schema'
 import { Flex } from '~/view/ui-utility/widget/flex'
-import { useRenderChildren } from './hooks'
 import { HoverComp } from './widget/hover'
 import { MarqueeComp } from './widget/marquee'
 import { RulerComp } from './widget/ruler'
@@ -43,7 +42,7 @@ export const MainStageComp: FC<IStageComp> = ({}) => {
 
     return (
       <Container ref={Pixi.setSceneStage}>
-        {useRenderChildren(children)}
+        {/* {useRenderChildren(children)} */}
         <HoverComp />
         <TransformComp />
         <MarqueeComp />

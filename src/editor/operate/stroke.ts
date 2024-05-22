@@ -18,7 +18,7 @@ class OperateStrokeService {
   afterOperate = createSignal()
   private immui = new Immui()
   initHook() {
-    OperateNode.selectedNodes.hook({ id: 'setupStrokes' }, this.setupStrokes)
+    Schema.onMatchPatch('/?/strokes', this.setupStrokes)
     this.onUiPickerSetStroke()
     this.afterOperate.hook(() => {
       SchemaHistory.commit('改变 strokes')

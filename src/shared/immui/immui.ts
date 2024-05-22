@@ -166,12 +166,11 @@ export default class Immui {
   }
 
   static matchPath = (path: IKey[], pattern: string[]) => {
-    if (path.length !== pattern.length) return false
     if (path[path.length - 1] !== pattern[pattern.length - 1]) return false
+    if (path.length !== pattern.length) return false
     for (let i = 0; i < pattern.length - 1; i++) {
-      const curPattern = pattern[i]
-      if (curPattern === '?' || curPattern === '') continue
-      if (curPattern == path[i]) continue
+      if (pattern[i] === '?' || pattern[i] === '') continue
+      if (pattern[i] == path[i]) continue
       return false
     }
     return true

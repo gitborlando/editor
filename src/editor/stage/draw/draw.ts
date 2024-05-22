@@ -5,6 +5,7 @@ import rgbHex from 'rgb-hex'
 import { IImage, Img } from '~/editor/editor/img'
 import { pointsOnBezierCurves } from '~/editor/math/bezier/points-of-bezier'
 import { xy_ } from '~/editor/math/xy'
+import { Schema } from '~/editor/schema/schema'
 import { ID, IFillLinearGradient, IIrregular, INode, IVector } from '~/editor/schema/type'
 import { loopFor } from '~/shared/utils/array'
 import { createCache } from '~/shared/utils/cache'
@@ -14,14 +15,36 @@ import { pixiPolylineContainsPoint } from '~/shared/utils/pixi/line-hit-area'
 import { createLinearGradientTexture } from '~/shared/utils/pixi/linear-gradient'
 import { createRegularPolygon } from '~/shared/utils/pixi/regular-polygon'
 import { createStarPolygon } from '~/shared/utils/pixi/star'
-import { PIXI } from '../pixi'
+import { StageElement } from '../element'
+import { PIXI, Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 
 export type IStageElement = PIXI.Graphics | PIXI.Text
 
 @autobind
 class StageDrawService {
+  private redrawIds = new Set<ID>()
   private linearGradientCache = createCache<ID, PIXI.Texture>()
+  private requested = false
+
+  collectRedraw(id: string) {
+    this.redrawIds.add(id)
+
+    if (this.requested) return
+    this.requested = true
+
+    queueMicrotask(() => {
+      this.redrawIds.forEach((id) => {
+        const node = Schema.find<INode>(id)
+        const element = StageElement.elements.get(id)
+        this.drawNode(element, node)
+      })
+      Pixi.app.renderer.render(Pixi.app.stage)
+
+      this.redrawIds.clear()
+      this.requested = false
+    })
+  }
 
   drawNode(element: IStageElement, node: INode) {
     if ('clear' in element) element.clear()
@@ -38,11 +61,16 @@ class StageDrawService {
     }
     node.fills.forEach((fill) => {
       if (!fill.visible) return
+
       if (fill.type === 'color') {
-        if (this.isText(element)) element.style.fill = rgbToRgba(fill.color, fill.alpha)
-        else element.beginFill(fill.color, fill.alpha)
+        if (this.isText(element)) {
+          element.style.fill = rgbToRgba(fill.color, fill.alpha)
+        } else {
+          element.beginFill(fill.color, fill.alpha)
+        }
         this.drawShape(element, <IVector>node)
       }
+
       if (fill.type === 'image') {
         if (this.isText(element)) return
         const image = Img.getImage(fill.url)
@@ -53,6 +81,7 @@ class StageDrawService {
         }
         image ? draw(image) : Img.getImageAsync(fill.url).then(draw)
       }
+
       if (fill.type === 'linearGradient') {
         if (this.isText(element)) return
         const texture = this.getLinearGradientTexture(node, fill)

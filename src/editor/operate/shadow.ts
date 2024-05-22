@@ -18,7 +18,7 @@ class OperateShadowService {
   afterOperate = createSignal()
   private immui = new Immui()
   initHook() {
-    OperateNode.selectedNodes.hook({ id: 'setupShadows' }, this.setupShadows)
+    Schema.onMatchPatch('/?/shadows', this.setupShadows)
     this.onUiPickerSetShadow()
     this.afterOperate.hook(() => {
       SchemaHistory.commit('改变 shadows')

@@ -16,7 +16,7 @@ class OperateFillService {
   isMultiFills = false
   private immui = new Immui()
   initHook() {
-    OperateNode.selectedNodes.hook({ id: 'setupFills' }, this.setupFills)
+    Schema.onMatchPatch('/?/fills', this.setupFills)
     this.onUiPickerSetFill()
   }
   setupFills() {

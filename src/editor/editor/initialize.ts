@@ -8,7 +8,6 @@ import { OperateStroke } from '../operate/stroke'
 import { OperateText } from '../operate/text'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
-import { StageDraw } from '../stage/draw/draw'
 import { StageDrop } from '../stage/drop'
 import { StageElement } from '../stage/element'
 import { StageInteract } from '../stage/interact/interact'
@@ -43,7 +42,6 @@ function initHooks() {
   StageElement.initHook()
   StageViewport.initHook()
   StageInteract.initHook()
-  StageDraw.initHook()
   StageDrop.initHook()
   // StageWidgetAdsorption.initHook()
   StageWidgetTransform.initHook()
