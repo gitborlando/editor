@@ -1,7 +1,7 @@
 import { Graphics } from '@pixi/react'
 import { FC, memo } from 'react'
-import { IVector } from '~/editor/schema/type'
-import { PIXI } from '~/editor/stage/pixi'
+import { IVector } from 'src/editor/schema/type'
+import { PIXI } from 'src/editor/stage/pixi'
 import { useCollectRef, useDraw, useResetOBB } from '../hooks'
 
 type IVectorComp = {

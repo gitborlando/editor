@@ -1,10 +1,10 @@
 import autobind from 'class-autobind-decorator'
 import { cloneDeep } from 'lodash-es'
 import { nanoid } from 'nanoid'
-import { createSignal } from '~/shared/signal/signal'
-import { firstOne, stableIndex } from '~/shared/utils/array'
-import { createObjCache } from '~/shared/utils/cache'
-import { SchemaUtil } from '~/shared/utils/schema'
+import { createSignal } from 'src/shared/signal/signal'
+import { firstOne, stableIndex } from 'src/shared/utils/array'
+import { createObjCache } from 'src/shared/utils/cache'
+import { SchemaUtil } from 'src/shared/utils/schema'
 import { OBB } from '../math/obb'
 import { xy_, xy_rotate } from '../math/xy'
 import { SchemaDefault } from '../schema/default'
@@ -59,7 +59,7 @@ class OperateNodeService {
     this.intoEditNodeId.intercept((id) => {
       if (!id) return ''
       const node = Schema.find(id)
-      if (node.type === 'vector' && node.vectorType === 'irregular') return id
+      if (node.type === 'irregular') return id
       return ''
     })
     this.intoEditNodeId.hook((id) => {
@@ -154,8 +154,7 @@ class OperateNodeService {
     const clone = (oldNode: INode) => {
       const newNode = cloneDeep(oldNode)
       newNode.id = nanoid()
-      const type = oldNode.type === 'vector' ? oldNode.vectorType : oldNode.type
-      newNode.name = SchemaDefault.createNodeName(type).name
+      newNode.name = SchemaDefault.createNodeName(oldNode.type).name
       if ('childIds' in newNode) newNode.childIds = []
       return newNode
     }

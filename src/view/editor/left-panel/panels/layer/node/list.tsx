@@ -1,9 +1,9 @@
 import { FC, memo } from 'react'
-import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
-import { EventWheel } from '~/global/event/wheel'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { ScrollComp } from '~/view/editor/left-panel/panels/layer/node/scroll'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
+import { EventWheel } from 'src/global/event/wheel'
+import { useHookSignal } from 'src/shared/signal/signal-react'
+import { ScrollComp } from 'src/view/editor/left-panel/panels/layer/node/scroll'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 import { NodeItemComp } from './item'
 
 type INodeListComp = {}

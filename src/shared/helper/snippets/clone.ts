@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash-es'
-import { clone, timeFor } from '~/shared/utils/normal'
+import { clone, timeFor } from 'src/shared/utils/normal'
 
 const obj = { a: 123, b: { b: 456 } }
 const count = 10000

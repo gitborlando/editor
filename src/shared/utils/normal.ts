@@ -23,11 +23,10 @@ export type IXY = { x: number; y: number }
 export type IRect = IXY & { width: number; height: number }
 
 export function favIcon(href: string) {
-  const head = document.querySelector<HTMLHeadElement>('head')!
   const link = document.createElement('link')
   link.setAttribute('rel', 'shortcut icon')
   link.setAttribute('href', href)
-  head.appendChild(link)
+  document.head.appendChild(link)
 }
 
 export function Delete<T>(object: Record<string, T>, key: string): void
@@ -109,7 +108,11 @@ export function timeOf(count: number, func: (i: number) => any, count2 = 1, skip
     const end = performance.now()
     if (i >= skip) all += end - start
   }
-  console.log(`${count}`, `all: ${all}ms`, `aver: ${all / count / (count2 - skip)}ms`)
+  console.log(
+    `${count}`,
+    `all: ${all}ms`,
+    `aver: ${(all / count / (count2 - skip)).toExponential()}ms`
+  )
 }
 
 export function notUndefine<T extends any>(val: T | undefined): val is T {

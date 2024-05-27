@@ -1,5 +1,5 @@
 import { CSSProperties, FC, createElement } from 'react'
-import { cx } from '~/shared/utils/normal'
+import { cx } from 'src/shared/utils/normal'
 
 export type IIconProps = {
   children: any

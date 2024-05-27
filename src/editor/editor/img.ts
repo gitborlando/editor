@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { Texture } from 'pixi.js'
-import { createCache } from '~/shared/utils/cache'
+import { createCache } from 'src/shared/utils/cache'
 import { ID } from '../schema/type'
 
 export type IImage = {

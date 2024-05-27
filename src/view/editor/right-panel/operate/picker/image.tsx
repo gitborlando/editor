@@ -1,13 +1,13 @@
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
-import { IImage, Img } from '~/editor/editor/img'
-import { IFillImage } from '~/editor/schema/type'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
-import { Uploader } from '~/global/upload'
-import { useAutoSignal } from '~/shared/signal/signal-react'
-import { iife } from '~/shared/utils/normal'
-import { useMemoComp, withSuspense } from '~/shared/utils/react'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { IImage, Img } from 'src/editor/editor/img'
+import { IFillImage } from 'src/editor/schema/type'
+import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
+import { Uploader } from 'src/global/upload'
+import { useAutoSignal } from 'src/shared/signal/signal-react'
+import { iife } from 'src/shared/utils/normal'
+import { useMemoComp, withSuspense } from 'src/shared/utils/react'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IPickerImageComp = {
   fill: IFillImage

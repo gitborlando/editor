@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal/signal'
-import { IXY } from '~/shared/utils/normal'
+import { createSignal } from 'src/shared/signal/signal'
+import { IXY } from 'src/shared/utils/normal'
 import { xy_ } from '../math/xy'
 import { Pixi } from '../stage/pixi'
 

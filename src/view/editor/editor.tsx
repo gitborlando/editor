@@ -1,13 +1,13 @@
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
-import { initEditor } from '~/editor/editor/initialize'
-import { Schema } from '~/editor/schema/schema'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { initEditor } from 'src/editor/editor/initialize'
+import { Schema } from 'src/editor/schema/schema'
+import { useHookSignal } from 'src/shared/signal/signal-react'
+import { CanvasStageComp } from 'src/view/editor/canvas/stage'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 import { HeaderComp } from './header/header'
 import { LeftPanelComp } from './left-panel/left-panel'
 import { RightPanelComp } from './right-panel/right-panel'
-import { MainStageComp } from './stage/stage'
 
 type IEditorComp = {}
 
@@ -22,7 +22,8 @@ export const EditorComp: FC<IEditorComp> = memo(({}) => {
       <HeaderComp />
       <Flex className='lay-h wh-100% of-hidden'>
         <LeftPanelComp />
-        <MainStageComp />
+        <CanvasStageComp />
+        {/* <MainStageComp /> */}
         <RightPanelComp />
       </Flex>
     </Flex>

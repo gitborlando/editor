@@ -1,23 +1,23 @@
 import { FC, SVGProps, useCallback } from 'react'
-import { editorCommands } from '~/editor/editor/command'
-import { OperateNode } from '~/editor/operate/node'
-import { Schema } from '~/editor/schema/schema'
-import { IIrregular, INode } from '~/editor/schema/type'
-import { StageSelect } from '~/editor/stage/interact/select'
-import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
-import { Drag } from '~/global/event/drag'
-import { Menu } from '~/global/menu'
-import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
-import { hslBlueColor } from '~/shared/utils/color'
-import { stopPropagation } from '~/shared/utils/event'
-import { IrregularUtils } from '~/shared/utils/irregular'
-import { cx, iife, noopFunc } from '~/shared/utils/normal'
-import { useMatchPatch, useMemoComp } from '~/shared/utils/react'
-import { SchemaUtil } from '~/shared/utils/schema'
-import Asset from '~/view/ui-utility/assets'
-import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
-import { Flex } from '~/view/ui-utility/widget/flex'
-import { Icon } from '~/view/ui-utility/widget/icon'
+import { editorCommands } from 'src/editor/editor/command'
+import { OperateNode } from 'src/editor/operate/node'
+import { Schema } from 'src/editor/schema/schema'
+import { IIrregular, INode } from 'src/editor/schema/type'
+import { StageSelect } from 'src/editor/stage/interact/select'
+import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
+import { Drag } from 'src/global/event/drag'
+import { Menu } from 'src/global/menu'
+import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
+import { hslBlueColor } from 'src/shared/utils/color'
+import { stopPropagation } from 'src/shared/utils/event'
+import { IrregularUtils } from 'src/shared/utils/irregular'
+import { cx, iife, noopFunc } from 'src/shared/utils/normal'
+import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
+import { SchemaUtil } from 'src/shared/utils/schema'
+import Asset from 'src/view/ui-utility/assets'
+import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
+import { Flex } from 'src/view/ui-utility/widget/flex'
+import { Icon } from 'src/view/ui-utility/widget/icon'
 
 type INodeItemComp = {
   id: string
@@ -92,10 +92,9 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
           {iife(() => {
             if (node.type === 'frame') return Asset.editor.node.frame
             if (node.type === 'text') return Asset.editor.node.text
-            if (node.type === 'vector') {
-              if (node.vectorType === 'irregular') return PathSvgComp
-              return Asset.editor.node[node.vectorType as keyof typeof Asset.editor.node]
-            }
+            if (node.type === 'irregular') return PathSvgComp
+            if (node.type === 'group') return () => null
+            return Asset.editor.node[node.type as keyof typeof Asset.editor.node]
           })}
         </Icon>
       </Flex>

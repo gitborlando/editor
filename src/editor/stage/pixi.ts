@@ -1,7 +1,7 @@
 import { Cull } from '@pixi-essentials/cull'
 import autobind from 'class-autobind-decorator'
 import * as PIXI from 'pixi.js'
-import { createSignal, mergeSignal } from '~/shared/signal/signal'
+import { createSignal, mergeSignal } from 'src/shared/signal/signal'
 
 export * as PIXI from 'pixi.js'
 

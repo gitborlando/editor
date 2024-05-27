@@ -1,8 +1,8 @@
 import { FC, memo } from 'react'
-import { editorSettings, onSettingsChanged, setSettings } from '~/editor/editor/settings'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { useMemoComp } from '~/shared/utils/react'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { editorSettings, onSettingsChanged, setSettings } from 'src/editor/editor/settings'
+import { useHookSignal } from 'src/shared/signal/signal-react'
+import { useMemoComp } from 'src/shared/utils/react'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type ISettingComp = {}
 

@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal/signal'
-import { flushFuncs } from '~/shared/utils/array'
-import { INoopFunc } from '~/shared/utils/normal'
+import { createSignal } from 'src/shared/signal/signal'
+import { flushFuncs } from 'src/shared/utils/array'
+import { INoopFunc } from 'src/shared/utils/normal'
 import Immui, { ImmuiApplyPatchOption, ImmuiPatch } from '../../shared/immui/immui'
 import { SchemaHistory } from './history'
 import {

@@ -1,6 +1,6 @@
-import { abs } from '~/editor/math/base'
-import { IFillLinearGradient } from '~/editor/schema/type'
-import { PIXI } from '~/editor/stage/pixi'
+import { abs } from 'src/editor/math/base'
+import { IFillLinearGradient } from 'src/editor/schema/type'
+import { PIXI } from 'src/editor/stage/pixi'
 
 export function createLinearGradientTexture({
   start,

@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal/signal'
-import { SchemaUtil } from '~/shared/utils/schema'
+import { createSignal } from 'src/shared/signal/signal'
+import { SchemaUtil } from 'src/shared/utils/schema'
 import { Schema } from '../schema/schema'
 import { INode, INodeParent } from '../schema/type'
 import { StageWidgetTransform } from '../stage/widget/transform'

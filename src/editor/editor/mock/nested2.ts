@@ -1,7 +1,7 @@
-import { xy_ } from '~/editor/math/xy'
-import { SchemaDefault } from '~/editor/schema/default'
-import { IFillLinearGradient, ISchema } from '~/editor/schema/type'
-import { COLOR } from '~/shared/utils/color'
+import { xy_ } from 'src/editor/math/xy'
+import { SchemaDefault } from 'src/editor/schema/default'
+import { IFillLinearGradient, ISchema } from 'src/editor/schema/type'
+import { COLOR } from 'src/shared/utils/color'
 
 export function mockNested2() {
   const [x, y, width, height] = [100, 0, 100, 100]

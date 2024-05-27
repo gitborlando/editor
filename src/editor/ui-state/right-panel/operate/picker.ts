@@ -1,9 +1,9 @@
 import autobind from 'class-autobind-decorator'
-import { xy_ } from '~/editor/math/xy'
-import { IFill, IFillKeys } from '~/editor/schema/type'
-import Immui, { ImmuiPatch } from '~/shared/immui/immui'
-import { createSignal } from '~/shared/signal/signal'
-import { IXY } from '~/shared/utils/normal'
+import { xy_ } from 'src/editor/math/xy'
+import { IFill, IFillKeys } from 'src/editor/schema/type'
+import Immui, { ImmuiPatch } from 'src/shared/immui/immui'
+import { createSignal } from 'src/shared/signal/signal'
+import { IXY } from 'src/shared/utils/normal'
 
 type IOperateType = 'solid-color'
 

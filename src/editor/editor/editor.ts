@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
-import { addListener } from '~/shared/utils/event'
+import { addListener } from 'src/shared/utils/event'
 import { IEditorCommand, editorCommands } from './command'
 
 @autobind

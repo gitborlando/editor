@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { Uploader } from '~/global/upload'
-import { preventDefault } from '~/shared/utils/event'
+import { Uploader } from 'src/global/upload'
+import { preventDefault } from 'src/shared/utils/event'
 import { Img } from '../editor/img'
 import { xy_, xy_client } from '../math/xy'
 import { OperateNode } from '../operate/node'

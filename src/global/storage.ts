@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal/signal'
-import { createCache } from '~/shared/utils/cache'
-import { iife } from '~/shared/utils/normal'
+import { createSignal } from 'src/shared/signal/signal'
+import { createCache } from 'src/shared/utils/cache'
+import { iife } from 'src/shared/utils/normal'
 
 type IStorageItem = {
   type: 'normal' | 'map' | 'set'

@@ -1,7 +1,7 @@
 import { FC, memo } from 'react'
-import { max } from '~/editor/math/base'
-import { Drag } from '~/global/event/drag'
-import { useAutoSignal, useHookSignal, useSignal } from '~/shared/signal/signal-react'
+import { max } from 'src/editor/math/base'
+import { Drag } from 'src/global/event/drag'
+import { useAutoSignal, useHookSignal, useSignal } from 'src/shared/signal/signal-react'
 import { Flex } from '../../../../../ui-utility/widget/flex'
 
 type IScrollComp = {

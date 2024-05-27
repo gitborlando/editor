@@ -1,12 +1,12 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
-import { EventWheelService } from '~/global/event/wheel'
-import { createSignal } from '~/shared/signal/signal'
-import { INoopFunc, IRect, IXY } from '~/shared/utils/normal'
+import { Surface } from 'src/editor/stage/render/surface'
+import { EventWheelService } from 'src/global/event/wheel'
+import { createSignal } from 'src/shared/signal/signal'
+import { INoopFunc, IRect, IXY } from 'src/shared/utils/normal'
 import { max } from '../math/base'
 import { xy_, xy_client, xy_divide, xy_minus, xy_multiply, xy_plus, xy_plus_all } from '../math/xy'
 import { Schema } from '../schema/schema'
-import { Pixi } from './pixi'
 
 const initBound = {
   x: 240,
@@ -26,25 +26,21 @@ class StageViewportService {
   duringZoom = createSignal()
   afterZoom = createSignal()
   private wheeler = new EventWheelService()
+
   initHook() {
-    Pixi.inited.hook(() => {
-      this.bound.hook({ immediately: true }, this.onResizeBound)
+    Surface.inited.hook(() => {
+      this.onResizeBound()
       window.addEventListener('resize', this.onResizeBound)
       this.onWheelZoom()
       this.zoom.dispatch(1)
       this.stageOffset.dispatch(xy_(100, 100))
       this.inited.dispatch()
     })
-
     this.onListenViewportChange()
+  }
 
-    this.zoom.hook(() => {
-      Pixi.sceneStage.scale.set(this.zoom.value, this.zoom.value)
-    })
-    this.stageOffset.hook(() => {
-      const { x, y } = this.stageOffset.value
-      Pixi.sceneStage.position.set(x, y)
-    })
+  getViewport() {
+    return { zoom: this.zoom.value, x: this.stageOffset.value.x, y: this.stageOffset.value.y }
   }
   toViewportXY(xy: IXY) {
     return xy_minus(xy, this.bound.value)
@@ -72,6 +68,7 @@ class StageViewportService {
     const { x, y, width } = this.bound.value
     return xy.x > x && xy.x < x + width && xy.y > y
   }
+
   private onWheelZoom() {
     this.wheeler.beforeWheel.hook(({ e }) => {
       if (hotkeys.ctrl) e.preventDefault()
@@ -104,10 +101,11 @@ class StageViewportService {
       this.afterZoom.dispatch()
       // Schema.commitHistory('缩放画布')
     })
-    Pixi.addListener('wheel', (e) => {
+    Surface.addEvent('wheel', (e) => {
       this.wheeler.onWheel(e as WheelEvent)
     })
   }
+
   private onResizeBound() {
     const { x, y, right } = this.bound.value
     this.bound.value = {
@@ -115,10 +113,9 @@ class StageViewportService {
       width: window.innerWidth - x - right,
       height: window.innerHeight - y + 1,
     }
-    Pixi.htmlContainer.style.width = this.bound.value.width + 'px'
-    Pixi.htmlContainer.style.height = this.bound.value.height + 'px'
-    Pixi.app.resize()
+    this.bound.dispatch(this.bound.value)
   }
+
   private onListenViewportChange() {
     const disposers = <INoopFunc[]>[]
     const onChangeZoomOffset = () => {

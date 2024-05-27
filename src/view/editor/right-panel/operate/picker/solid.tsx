@@ -1,8 +1,8 @@
 import { FC, memo } from 'react'
-import { IFillColor } from '~/editor/schema/type'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
-import { getColorFromFill } from '~/shared/utils/color'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { IFillColor } from 'src/editor/schema/type'
+import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
+import { getColorFromFill } from 'src/shared/utils/color'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 import { PickerColorComp } from './color'
 
 type IPickerSolidComp = {

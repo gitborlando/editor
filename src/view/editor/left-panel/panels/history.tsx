@@ -1,13 +1,13 @@
 import { FC, memo, useEffect, useMemo, useRef, useState } from 'react'
 import ReactJson from 'react-json-view'
-import { SchemaHistory } from '~/editor/schema/history'
-import { ISchemaHistory, ISchemaOperation } from '~/editor/schema/type'
-import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
-import { hslColor } from '~/shared/utils/color'
-import { useMemoComp } from '~/shared/utils/react'
-import Asset from '~/view/ui-utility/assets'
-import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { SchemaHistory } from 'src/editor/schema/history'
+import { ISchemaHistory, ISchemaOperation } from 'src/editor/schema/type'
+import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
+import { hslColor } from 'src/shared/utils/color'
+import { useMemoComp } from 'src/shared/utils/react'
+import Asset from 'src/view/ui-utility/assets'
+import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IHistoryComp = {}
 

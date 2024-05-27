@@ -1,6 +1,6 @@
 import { ComponentPropsWithRef, forwardRef } from 'react'
-import { cx } from '~/shared/utils/normal'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { cx } from 'src/shared/utils/normal'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 
 export type IButtonProps = ComponentPropsWithRef<'div'> & {
   type?: 'text' | 'normal' | 'icon'

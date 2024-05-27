@@ -1,6 +1,6 @@
 import autoBindMethods from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
-import { ID } from '~/editor/schema/type'
+import { ID } from 'src/editor/schema/type'
 import { createCache } from '../utils/cache'
 import { iife } from '../utils/normal'
 
@@ -151,4 +151,12 @@ export function batchSignal(...signals: Signal<any>[]) {
     signals.forEach((signal) => signalBatchMap.set(signal, false))
     signals.forEach((signal) => signal.dispatch())
   }
+}
+
+export function multiSignal(...signals: Signal<any>[]) {
+  const newSignal = createSignal<void>()
+  signals.forEach((signal) => {
+    signal.hook(() => newSignal.dispatch())
+  })
+  return newSignal
 }

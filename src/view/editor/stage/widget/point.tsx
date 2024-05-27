@@ -1,9 +1,9 @@
 import { Graphics } from '@pixi/react'
 import { FC, memo, useState } from 'react'
-import { PIXI } from '~/editor/stage/pixi'
-import { StageViewport } from '~/editor/stage/viewport'
-import { Drag } from '~/global/event/drag'
-import { IXY } from '~/shared/utils/normal'
+import { PIXI } from 'src/editor/stage/pixi'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { Drag } from 'src/global/event/drag'
+import { IXY } from 'src/shared/utils/normal'
 
 type IPointComp = {
   select: () => any

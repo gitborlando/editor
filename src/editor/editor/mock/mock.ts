@@ -1,4 +1,4 @@
-import { Storage } from '~/global/storage'
+import { Storage } from 'src/global/storage'
 import { FileManager } from '../file-manager'
 import { mock10000Nested } from './10000nested'
 import { mock10000Rect } from './10000rect'

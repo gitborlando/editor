@@ -1,4 +1,4 @@
-import { timeFor } from '~/shared/utils/normal'
+import { timeFor } from 'src/shared/utils/normal'
 
 const arr = new Array(10000).fill(0)
 const count = 10

@@ -1,13 +1,13 @@
 import { FC, memo, useRef } from 'react'
-import { max } from '~/editor/math/base'
-import { IGeometry, OperateGeometry } from '~/editor/operate/geometry'
-import { OperateNode } from '~/editor/operate/node'
-import { StageViewport } from '~/editor/stage/viewport'
-import { useHookSignal, useSignal } from '~/shared/signal/signal-react'
-import { useDownUpTracker } from '~/shared/utils/event'
-import { useMemoComp } from '~/shared/utils/react'
-import { CompositeInput } from '~/view/ui-utility/widget/compositeInput'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { max } from 'src/editor/math/base'
+import { IGeometry, OperateGeometry } from 'src/editor/operate/geometry'
+import { OperateNode } from 'src/editor/operate/node'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { useHookSignal, useSignal } from 'src/shared/signal/signal-react'
+import { useDownUpTracker } from 'src/shared/utils/event'
+import { useMemoComp } from 'src/shared/utils/react'
+import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IGeometryPropsComp = {}
 

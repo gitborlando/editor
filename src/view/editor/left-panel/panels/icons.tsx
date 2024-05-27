@@ -1,12 +1,12 @@
 import { FC, memo, useMemo, useState } from 'react'
 import { InView } from 'react-intersection-observer'
 import usePromise from 'react-promise-suspense'
-import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
-import { createCache } from '~/shared/utils/cache'
-import { hslBlueColor } from '~/shared/utils/color'
-import { IAnyObject } from '~/shared/utils/normal'
-import { useMemoComp, withSuspense } from '~/shared/utils/react'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
+import { createCache } from 'src/shared/utils/cache'
+import { hslBlueColor } from 'src/shared/utils/color'
+import { IAnyObject } from 'src/shared/utils/normal'
+import { useMemoComp, withSuspense } from 'src/shared/utils/react'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IIconsComp = {}
 

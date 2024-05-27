@@ -1,8 +1,8 @@
 import { FC, memo, useState } from 'react'
-import { IFillLinearGradient } from '~/editor/schema/type'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
-import { makeLinearGradientCss } from '~/shared/utils/color'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { IFillLinearGradient } from 'src/editor/schema/type'
+import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
+import { makeLinearGradientCss } from 'src/shared/utils/color'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 import { PickerColorComp } from './color'
 
 type IPickerLinearGradientComp = {

@@ -1,4 +1,4 @@
-import { IRect, IXY } from '~/shared/utils/normal'
+import { IRect, IXY } from 'src/shared/utils/normal'
 import { abs, rcos, rsin } from './base'
 import { xy_, xy_dot, xy_minus, xy_rotate } from './xy'
 

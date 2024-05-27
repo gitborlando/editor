@@ -1,8 +1,9 @@
 import autobind from 'class-autobind-decorator'
-import { xy_client } from '~/editor/math/xy'
-import { OperateNode } from '~/editor/operate/node'
-import { batchSignal, createSignal } from '~/shared/signal/signal'
-import { SchemaUtil } from '~/shared/utils/schema'
+import { xy_client } from 'src/editor/math/xy'
+import { OperateNode } from 'src/editor/operate/node'
+import { Surface } from 'src/editor/stage/render/surface'
+import { batchSignal, createSignal } from 'src/shared/signal/signal'
+import { SchemaUtil } from 'src/shared/utils/schema'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageCreate } from './create'
@@ -26,8 +27,8 @@ class StageInteractService {
     this.interactHandlerMap.set('select', StageSelect)
     this.currentType.hook(this.autoInteract)
     this.currentType.hook(this.autoCursor)
-    Pixi.inited.hook(() => {
-      this.bindHover()
+    Surface.inited.hook(() => {
+      //  this.bindHover()
       this.currentType.dispatch('select')
     })
   }
@@ -38,7 +39,7 @@ class StageInteractService {
   }
   private autoCursor() {
     const cursor = interactCursorMap[this.currentType.value]
-    Pixi.htmlContainer.style.cursor = cursor
+    Surface.canvas.style.cursor = cursor
   }
   private bindHover() {
     const handler = (e: Event) => {

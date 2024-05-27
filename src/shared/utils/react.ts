@@ -10,8 +10,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Schema } from '~/editor/schema/schema'
-import { StageViewport } from '~/editor/stage/viewport'
+import { Schema } from 'src/editor/schema/schema'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { useHookSignal } from '../signal/signal-react'
 import { IAnyFunc } from './normal'
 

@@ -1,9 +1,9 @@
 import { FC, createElement, memo, useRef } from 'react'
-import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
-import { createStorageItem } from '~/global/storage'
-import { DraggableComp } from '~/view/component/draggable'
-import { Flex } from '~/view/ui-utility/widget/flex'
-import { Icon } from '~/view/ui-utility/widget/icon'
+import { UILeftPanel } from 'src/editor/ui-state/left-panel/left-panel'
+import { createStorageItem } from 'src/global/storage'
+import { DraggableComp } from 'src/view/component/draggable'
+import { Flex } from 'src/view/ui-utility/widget/flex'
+import { Icon } from 'src/view/ui-utility/widget/icon'
 
 type IPopupPanelComp = {
   id: string

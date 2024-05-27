@@ -1,5 +1,5 @@
-import { Schema } from '~/editor/schema/schema'
-import { ID, INode, INodeParent, IPage, ISchemaItem } from '~/editor/schema/type'
+import { Schema } from 'src/editor/schema/schema'
+import { ID, INode, INodeParent, IPage, ISchemaItem } from 'src/editor/schema/type'
 
 export type ITraverseData = {
   id: ID

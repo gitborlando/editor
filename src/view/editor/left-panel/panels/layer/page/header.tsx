@@ -1,12 +1,12 @@
 import { FC, memo } from 'react'
-import { OperatePage } from '~/editor/operate/page'
-import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { useMatchPatch } from '~/shared/utils/react'
-import Asset from '~/view/ui-utility/assets'
-import { Button } from '~/view/ui-utility/widget/button'
-import { Flex } from '~/view/ui-utility/widget/flex'
-import { Icon } from '~/view/ui-utility/widget/icon'
+import { OperatePage } from 'src/editor/operate/page'
+import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
+import { useHookSignal } from 'src/shared/signal/signal-react'
+import { useMatchPatch } from 'src/shared/utils/react'
+import Asset from 'src/view/ui-utility/assets'
+import { Button } from 'src/view/ui-utility/widget/button'
+import { Flex } from 'src/view/ui-utility/widget/flex'
+import { Icon } from 'src/view/ui-utility/widget/icon'
 
 type IPageHeaderComp = {}
 

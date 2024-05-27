@@ -1,6 +1,6 @@
 import hexRgb from 'hex-rgb'
-import { atan, degreefy } from '~/editor/math/base'
-import { IFillColor, IFillLinearGradient } from '~/editor/schema/type'
+import { atan, degreefy } from 'src/editor/math/base'
+import { IFillColor, IFillLinearGradient } from 'src/editor/schema/type'
 
 export function isHexColor(hex: string) {
   return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex)

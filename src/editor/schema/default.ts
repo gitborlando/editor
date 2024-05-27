@@ -1,9 +1,9 @@
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
-import { createCache } from '~/shared/utils/cache'
-import { COLOR, rgb } from '~/shared/utils/color'
-import { IRect, IXY } from '~/shared/utils/normal'
-import Asset from '~/view/ui-utility/assets'
+import { createCache } from 'src/shared/utils/cache'
+import { COLOR, rgb } from 'src/shared/utils/color'
+import { IRect, IXY } from 'src/shared/utils/normal'
+import Asset from 'src/view/ui-utility/assets'
 import { xy_ } from '../math/xy'
 import { Schema } from './schema'
 import {
@@ -116,14 +116,14 @@ class SchemaDefaultService {
   rect(option?: Partial<IRectangle>): IRectangle {
     const name = this.createNodeName('rect')
     const nodeBase = this.createNodeBase()
-    return { type: 'vector', vectorType: 'rect', radius: 0, ...nodeBase, ...name, ...option }
+    return { type: 'rect', points: [], radius: 0, ...nodeBase, ...name, ...option }
   }
   ellipse(option?: Partial<IEllipse>): IEllipse {
     const name = this.createNodeName('ellipse')
     const nodeBase = this.createNodeBase()
     return {
-      type: 'vector',
-      vectorType: 'ellipse',
+      type: 'ellipse',
+      points: [],
       innerRate: 0,
       startAngle: 0,
       endAngle: 360,
@@ -136,8 +136,8 @@ class SchemaDefaultService {
     const name = this.createNodeName('polygon')
     const nodeBase = this.createNodeBase()
     return {
-      type: 'vector',
-      vectorType: 'polygon',
+      type: 'polygon',
+      points: [],
       sides: 3,
       radius: 0,
       ...nodeBase,
@@ -149,9 +149,9 @@ class SchemaDefaultService {
     const name = this.createNodeName('star')
     const nodeBase = this.createNodeBase()
     return {
-      type: 'vector',
-      vectorType: 'star',
-      points: 5,
+      type: 'star',
+      points: [],
+      sides: 5,
       radius: 0,
       innerRate: 0.382,
       ...nodeBase,
@@ -163,8 +163,8 @@ class SchemaDefaultService {
     const name = this.createNodeName('line')
     const nodeBase = this.createNodeBase()
     return {
-      type: 'vector',
-      vectorType: 'line',
+      type: 'line',
+      points: [],
       ...nodeBase,
       ...name,
       ...option,
@@ -177,8 +177,7 @@ class SchemaDefaultService {
     const name = this.createNodeName('irregular')
     const nodeBase = this.createNodeBase()
     return {
-      type: 'vector',
-      vectorType: 'irregular',
+      type: 'irregular',
       points: [],
       ...nodeBase,
       ...name,

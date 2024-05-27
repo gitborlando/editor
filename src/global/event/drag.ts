@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { xy_, xy_minus, xy_plus } from '~/editor/math/xy'
-import { IRect, IXY, noopFunc } from '~/shared/utils/normal'
+import { xy_, xy_minus, xy_plus } from 'src/editor/math/xy'
+import { IRect, IXY, noopFunc } from 'src/shared/utils/normal'
 
 export type IDragData = {
   dragService: DragService

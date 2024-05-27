@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import { This, macro_match } from '~/shared/utils/normal'
+import { This, macro_match } from 'src/shared/utils/normal'
 This.ids = <string[]>[]
 
 if (!This.ids.length) {

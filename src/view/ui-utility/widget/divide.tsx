@@ -1,5 +1,5 @@
 import { ComponentPropsWithRef, forwardRef, memo } from 'react'
-import { cx, iife } from '~/shared/utils/normal'
+import { cx, iife } from 'src/shared/utils/normal'
 import { Flex } from './flex'
 
 interface IDivide extends ComponentPropsWithRef<'div'> {

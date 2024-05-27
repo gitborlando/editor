@@ -1,9 +1,9 @@
 import autobind from 'class-autobind-decorator'
-import { IEditorCommand } from '~/editor/editor/command'
-import { xy_ } from '~/editor/math/xy'
-import { createSignal } from '~/shared/signal/signal'
-import { addListenerCapture, clickAway } from '~/shared/utils/event'
-import { IAnyObject } from '~/shared/utils/normal'
+import { IEditorCommand } from 'src/editor/editor/command'
+import { xy_ } from 'src/editor/math/xy'
+import { createSignal } from 'src/shared/signal/signal'
+import { addListenerCapture, clickAway } from 'src/shared/utils/event'
+import { IAnyObject } from 'src/shared/utils/normal'
 
 @autobind
 class MenuService {

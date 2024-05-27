@@ -5,8 +5,8 @@ import {
   TextStyleFontStyle,
   TextStyleFontWeight,
 } from 'pixi.js'
-import { ImmuiPatch } from '~/shared/immui/immui'
-import { AllKeys, IXY } from '~/shared/utils/normal'
+import { ImmuiPatch } from 'src/shared/immui/immui'
+import { AllKeys, IXY } from 'src/shared/utils/normal'
 
 export type ID = string
 
@@ -115,46 +115,47 @@ export type IPoint = {
 
 export type IVector = IRectangle | IEllipse | IPolygon | IStar | ILine | IIrregular
 
-export type IVectorType = { type: 'vector' }
+export type IVectorBase = {
+  points: IPoint[]
+}
 
 export type IIrregular = INodeBase &
-  IVectorType & {
-    vectorType: 'irregular'
-    points: IPoint[]
+  IVectorBase & {
+    type: 'irregular'
   }
 
 export type IRectangle = INodeBase &
-  IVectorType & {
-    vectorType: 'rect'
+  IVectorBase & {
+    type: 'rect'
     radius: number
   }
 
 export type IEllipse = INodeBase &
-  IVectorType & {
-    vectorType: 'ellipse'
+  IVectorBase & {
+    type: 'ellipse'
     innerRate: number
     startAngle: number
     endAngle: number
   }
 
 export type IPolygon = INodeBase &
-  IVectorType & {
-    vectorType: 'polygon'
+  IVectorBase & {
+    type: 'polygon'
     sides: number
     radius: number
   }
 
 export type IStar = INodeBase &
-  IVectorType & {
-    vectorType: 'star'
-    points: number
+  IVectorBase & {
+    type: 'star'
+    sides: number
     radius: number
     innerRate: number
   }
 
 export type ILine = INodeBase &
-  IVectorType & {
-    vectorType: 'line'
+  IVectorBase & {
+    type: 'line'
   }
 
 export type ISvg = INodeBase & {

@@ -1,10 +1,10 @@
 import { FC, memo } from 'react'
-import { IEditorCommand } from '~/editor/editor/command'
-import { Menu } from '~/global/menu'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { useMemoComp } from '~/shared/utils/react'
-import { Divide } from '~/view/ui-utility/widget/divide'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { IEditorCommand } from 'src/editor/editor/command'
+import { Menu } from 'src/global/menu'
+import { useHookSignal } from 'src/shared/signal/signal-react'
+import { useMemoComp } from 'src/shared/utils/react'
+import { Divide } from 'src/view/ui-utility/widget/divide'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 
 const offset = 5
 

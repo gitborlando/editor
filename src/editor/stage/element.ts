@@ -1,8 +1,7 @@
 import autobind from 'class-autobind-decorator'
-import { mergeSignal } from '~/shared/signal/signal'
-import { createObjCache } from '~/shared/utils/cache'
-import { iife, macro_match } from '~/shared/utils/normal'
-import { SchemaUtil } from '~/shared/utils/schema'
+import { createObjCache } from 'src/shared/utils/cache'
+import { iife, macro_match } from 'src/shared/utils/normal'
+import { SchemaUtil } from 'src/shared/utils/schema'
 import { OBB } from '../math/obb'
 import { OperateNode } from '../operate/node'
 import { Schema } from '../schema/schema'
@@ -19,12 +18,13 @@ export class StageElementService {
   prevNodes = createObjCache<INode>()
 
   initHook() {
-    mergeSignal(Schema.inited, Pixi.inited).hook(() => {
-      for (const id in Schema.schema) this.renderNode(id)
-    })
-    Schema.onFlushPatches.hook(({ keys }) => {
-      this.renderNode(keys[0] as string)
-    })
+    return
+    // mergeSignal(Schema.inited, Pixi.inited).hook(() => {
+    //   for (const id in Schema.schema) this.renderNode(id)
+    // })
+    // Schema.onFlushPatches.hook(({ keys }) => {
+    //   this.renderNode(keys[0] as string)
+    // })
   }
 
   renderNode(id: ID) {

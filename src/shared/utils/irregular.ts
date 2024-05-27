@@ -1,4 +1,4 @@
-import { IIrregular, IPoint } from '~/editor/schema/type'
+import { IIrregular, IPoint } from 'src/editor/schema/type'
 import { loopFor } from './array'
 import { IXY } from './normal'
 

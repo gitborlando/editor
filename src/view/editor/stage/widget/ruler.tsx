@@ -1,10 +1,10 @@
 import { Container, Graphics } from '@pixi/react'
 import * as PIXI from 'pixi.js'
 import { FC, memo, useRef } from 'react'
-import { radianfy } from '~/editor/math/base'
-import { OperateNode } from '~/editor/operate/node'
-import { StageViewport } from '~/editor/stage/viewport'
-import { useHookSignal } from '~/shared/signal/signal-react'
+import { radianfy } from 'src/editor/math/base'
+import { OperateNode } from 'src/editor/operate/node'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { useHookSignal } from 'src/shared/signal/signal-react'
 
 type IRulerComp = {}
 

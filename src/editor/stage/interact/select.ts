@@ -1,21 +1,22 @@
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
-import { editorCommands } from '~/editor/editor/command'
-import { OBB } from '~/editor/math/obb'
-import { OperateNode } from '~/editor/operate/node'
-import { OperateText } from '~/editor/operate/text'
-import { Schema } from '~/editor/schema/schema'
-import { ID } from '~/editor/schema/type'
-import { UILeftPanelLayer } from '~/editor/ui-state/left-panel/layer'
-import { Drag } from '~/global/event/drag'
-import { Menu } from '~/global/menu'
-import { batchSignal, createSignal } from '~/shared/signal/signal'
-import { lastOne } from '~/shared/utils/array'
-import { rectInAnotherRect } from '~/shared/utils/collision'
-import { isLeftMouse, isRightMouse } from '~/shared/utils/event'
-import { macro_match, type IRect } from '~/shared/utils/normal'
-import { SchemaUtil } from '~/shared/utils/schema'
+import { editorCommands } from 'src/editor/editor/command'
+import { OBB } from 'src/editor/math/obb'
+import { OperateNode } from 'src/editor/operate/node'
+import { OperateText } from 'src/editor/operate/text'
+import { Schema } from 'src/editor/schema/schema'
+import { ID } from 'src/editor/schema/type'
+import { Surface } from 'src/editor/stage/render/surface'
+import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
+import { Drag } from 'src/global/event/drag'
+import { Menu } from 'src/global/menu'
+import { batchSignal, createSignal } from 'src/shared/signal/signal'
+import { lastOne } from 'src/shared/utils/array'
+import { rectInAnotherRect } from 'src/shared/utils/collision'
+import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
+import { macro_match, type IRect } from 'src/shared/utils/normal'
+import { SchemaUtil } from 'src/shared/utils/schema'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageWidgetTransform } from '../widget/transform'
@@ -31,12 +32,12 @@ class StageSelectService {
   private doubleClickTimeStamp?: number
   private lastSelectIds = <ID[]>[]
   startInteract() {
-    Pixi.addListener('mousedown', this.onMouseDown)
-    Pixi.addListener('click', this.onClick)
+    Surface.canvas.addEventListener('mousedown', this.onMouseDown)
+    // Pixi.addListener('click', this.onClick)
   }
   endInteract() {
-    Pixi.removeListener('mousedown', this.onMouseDown)
-    Pixi.removeListener('click', this.onClick)
+    Surface.canvas.removeEventListener('mousedown', this.onMouseDown)
+    // Pixi.removeListener('click', this.onClick)
   }
   private get hoverId() {
     return lastOne(OperateNode.hoverIds.value)
@@ -60,7 +61,7 @@ class StageSelectService {
   private onEditVector() {
     if (OperateNode.intoEditNodeId.value) OperateNode.intoEditNodeId.dispatch('')
     const hoverNode = Schema.find(this.hoverId)
-    if (hoverNode?.type !== 'vector') return
+    //  if (hoverNode?.type !== 'vector') return
     OperateNode.intoEditNodeId.dispatch(hoverNode.id)
   }
   private onLeftMouseDown(e: MouseEvent) {
@@ -152,7 +153,7 @@ class StageSelectService {
       this.marquee.value = { x: 0, y: 0, width: 0, height: 0 }
     })
       .onMove(({ marquee }) => {
-        this.marquee.dispatch(marquee)
+        this.marquee.dispatch(StageViewport.toSceneMarquee(marquee))
         this.marqueeOBB = this.calcMarqueeOBB()
         const endBatch = batchSignal(OperateNode.selectIds)
         traverseTest()

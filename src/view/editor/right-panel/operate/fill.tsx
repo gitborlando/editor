@@ -1,11 +1,11 @@
 import { FC, Fragment } from 'react'
-import { OperateFill } from '~/editor/operate/fill'
-import { IFill } from '~/editor/schema/type'
-import { useMatchPatch, useMemoComp } from '~/shared/utils/react'
-import Asset from '~/view/ui-utility/assets'
-import { IconButton } from '~/view/ui-utility/widget/button/icon-button'
-import { Divide } from '~/view/ui-utility/widget/divide'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { OperateFill } from 'src/editor/operate/fill'
+import { IFill } from 'src/editor/schema/type'
+import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
+import Asset from 'src/view/ui-utility/assets'
+import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
+import { Divide } from 'src/view/ui-utility/widget/divide'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 import { PickerOpener } from './picker/picker-opener'
 
 export const FillPropComp: FC<{}> = ({}) => {

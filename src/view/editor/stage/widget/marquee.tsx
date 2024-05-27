@@ -1,10 +1,10 @@
 import { Graphics } from '@pixi/react'
 import { FC, memo, useTransition } from 'react'
-import { xy_ } from '~/editor/math/xy'
-import { StageSelect } from '~/editor/stage/interact/select'
-import { StageViewport } from '~/editor/stage/viewport'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { hslBlueColor } from '~/shared/utils/color'
+import { xy_ } from 'src/editor/math/xy'
+import { StageSelect } from 'src/editor/stage/interact/select'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { useHookSignal } from 'src/shared/signal/signal-react'
+import { hslBlueColor } from 'src/shared/utils/color'
 
 type IMarqueeComp = {}
 

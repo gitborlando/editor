@@ -10,7 +10,7 @@ export default defineConfig(() => {
     plugins: [react(), unocss(), reactClickToComponent()],
     resolve: {
       alias: {
-        '~': path.resolve(__dirname, 'src'),
+        src: path.resolve(__dirname, 'src'),
       },
     },
     build: {

@@ -1,8 +1,8 @@
 import { Container, Graphics } from '@pixi/react'
 import { FC, useRef } from 'react'
-import { IFrame, INode } from '~/editor/schema/type'
-import { PIXI } from '~/editor/stage/pixi'
-import { useMemoComp } from '~/shared/utils/react'
+import { IFrame, INode } from 'src/editor/schema/type'
+import { PIXI } from 'src/editor/stage/pixi'
+import { useMemoComp } from 'src/shared/utils/react'
 import { useCollectRef, useDraw, useMemoChildren, useRenderChildren, useResetOBB } from '../hooks'
 
 type IFrameComp = {

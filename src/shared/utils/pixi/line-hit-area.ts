@@ -1,6 +1,6 @@
-import { xy_divide, xy_minus } from '~/editor/math/xy'
-import { PIXI } from '~/editor/stage/pixi'
-import { StageViewport } from '~/editor/stage/viewport'
+import { xy_divide, xy_minus } from 'src/editor/math/xy'
+import { PIXI } from 'src/editor/stage/pixi'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { polylineCollide, twoPointsSpreadRect } from '../collision'
 import { IXY } from '../normal'
 

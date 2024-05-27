@@ -1,4 +1,4 @@
-import { createSignal } from '~/shared/signal/signal'
+import { createSignal } from 'src/shared/signal/signal'
 
 export type IEditorSettings = typeof defaultSettings
 

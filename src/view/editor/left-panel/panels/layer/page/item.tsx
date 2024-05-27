@@ -1,12 +1,12 @@
 import { FC, memo } from 'react'
-import { editorCommands } from '~/editor/editor/command'
-import { OperatePage } from '~/editor/operate/page'
-import { Schema } from '~/editor/schema/schema'
-import { Menu } from '~/global/menu'
-import { useMatchPatch } from '~/shared/utils/react'
-import Asset from '~/view/ui-utility/assets'
-import { Flex } from '~/view/ui-utility/widget/flex'
-import { Icon } from '~/view/ui-utility/widget/icon'
+import { editorCommands } from 'src/editor/editor/command'
+import { OperatePage } from 'src/editor/operate/page'
+import { Schema } from 'src/editor/schema/schema'
+import { Menu } from 'src/global/menu'
+import { useMatchPatch } from 'src/shared/utils/react'
+import Asset from 'src/view/ui-utility/assets'
+import { Flex } from 'src/view/ui-utility/widget/flex'
+import { Icon } from 'src/view/ui-utility/widget/icon'
 
 type IPageItemComp = {
   name: string

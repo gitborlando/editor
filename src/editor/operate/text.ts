@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import Immui from '~/shared/immui/immui'
-import { createSignal } from '~/shared/signal/signal'
+import Immui from 'src/shared/immui/immui'
+import { createSignal } from 'src/shared/signal/signal'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { ID, IText } from '../schema/type'

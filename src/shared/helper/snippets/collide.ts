@@ -1,4 +1,4 @@
-import { xy_ } from '~/editor/math/xy'
+import { xy_ } from 'src/editor/math/xy'
 
 const polygonCount = 10000
 const polygonEdgeCount = 4

@@ -1,4 +1,4 @@
-import { xy_, xy_minus } from '~/editor/math/xy'
+import { xy_, xy_minus } from 'src/editor/math/xy'
 import { BREAK, loopFor } from './array'
 import { IRect, IXY } from './normal'
 

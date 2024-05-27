@@ -1,4 +1,4 @@
-import { max, rcos, rsin } from '~/editor/math/base'
+import { max, rcos, rsin } from 'src/editor/math/base'
 
 export function createStarPolygon(
   width: number,

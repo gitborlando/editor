@@ -2,12 +2,12 @@ import { nanoid } from 'nanoid'
 import { Photo, createClient } from 'pexels'
 import { FC, useRef } from 'react'
 import { InView } from 'react-intersection-observer'
-import { Img } from '~/editor/editor/img'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
-import { useAutoSignal, useHookSignal } from '~/shared/signal/signal-react'
-import Asset from '~/view/ui-utility/assets'
-import { Flex } from '~/view/ui-utility/widget/flex'
-import { Icon } from '~/view/ui-utility/widget/icon'
+import { Img } from 'src/editor/editor/img'
+import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
+import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
+import Asset from 'src/view/ui-utility/assets'
+import { Flex } from 'src/view/ui-utility/widget/flex'
+import { Icon } from 'src/view/ui-utility/widget/icon'
 
 const pexels = createClient('1vbcKedpSbDaktXlI6jmDczCNUBMqDkXL3Gndwp7HMblwGoENO4xlDnm')
 

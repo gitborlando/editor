@@ -1,4 +1,4 @@
-import { max, rcos, rsin } from '~/editor/math/base'
+import { max, rcos, rsin } from 'src/editor/math/base'
 
 export function createRegularPolygon(width: number, height: number, sides: number, rotation = 0) {
   sides = Math.max(sides | 0, 3)

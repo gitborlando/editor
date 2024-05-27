@@ -1,10 +1,10 @@
 import { FC, memo } from 'react'
-import { editorCommands } from '~/editor/editor/command'
-import { UILeftPanel } from '~/editor/ui-state/left-panel/left-panel'
-import { Menu } from '~/global/menu'
-import { useHookSignal } from '~/shared/signal/signal-react'
-import { Button } from '~/view/ui-utility/widget/button'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { editorCommands } from 'src/editor/editor/command'
+import { UILeftPanel } from 'src/editor/ui-state/left-panel/left-panel'
+import { Menu } from 'src/global/menu'
+import { useHookSignal } from 'src/shared/signal/signal-react'
+import { Button } from 'src/view/ui-utility/widget/button'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type ISwitchBarComp = {}
 

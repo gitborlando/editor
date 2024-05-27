@@ -1,5 +1,5 @@
 import { FC, memo } from 'react'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 import { NodeHeaderComp } from './header'
 import { NodeListComp } from './list'
 

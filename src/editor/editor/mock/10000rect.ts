@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid'
-import { SchemaDefault } from '~/editor/schema/default'
-import { INode, ISchema } from '~/editor/schema/type'
-import { COLOR } from '~/shared/utils/color'
+import { SchemaDefault } from 'src/editor/schema/default'
+import { INode, ISchema } from 'src/editor/schema/type'
+import { COLOR } from 'src/shared/utils/color'
 
 export function mock10000Rect() {
   let s = new Date().getTime()
@@ -11,7 +11,7 @@ export function mock10000Rect() {
   const nodes: Record<string, INode> = {}
   const rectIds = <string[]>[]
 
-  for (let i = 0; i < 5000; i++) {
+  for (let i = 0; i < 10000; i++) {
     const rectId = nanoid()
     let x = i % 100
     let y = ~~(i / 100)

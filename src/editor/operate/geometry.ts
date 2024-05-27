@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal/signal'
-import { createCache } from '~/shared/utils/cache'
-import { ITraverseData, SchemaUtil } from '~/shared/utils/schema'
+import { createSignal } from 'src/shared/signal/signal'
+import { createCache } from 'src/shared/utils/cache'
+import { ITraverseData, SchemaUtil } from 'src/shared/utils/schema'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { Schema } from '../schema/schema'
 import { IIrregular } from '../schema/type'
@@ -107,11 +107,9 @@ class OperateGeometryService {
     this.geometryKeys = new Set(['x', 'y', 'width', 'height', 'rotation'])
     OperateNode.selectingNodes.forEach((node) => {
       if (node.type === 'frame') return this.geometryKeys.add('radius')
-      if (node.type === 'vector') {
-        if (node.vectorType === 'rect') return this.geometryKeys.add('radius')
-        if (node.vectorType === 'polygon') return this.geometryKeys.add('sides')
-        if (node.vectorType === 'star') return this.geometryKeys.add('points')
-      }
+      if (node.type === 'rect') return this.geometryKeys.add('radius')
+      if (node.type === 'polygon') return this.geometryKeys.add('sides')
+      if (node.type === 'star') return this.geometryKeys.add('points')
     })
   }
   private applyChangeToNode(traverseData: ITraverseData) {
@@ -161,8 +159,7 @@ class OperateGeometryService {
   }
   private patchChangeToVectorPoints(id: string) {
     const node = Schema.find<IIrregular>(id)
-    if (node.type !== 'vector') return
-    if (node.vectorType !== 'irregular') return
+    if (node.type !== 'irregular') return
     node.points.forEach((point, i) => {
       if (this.operateKeys.has('width')) {
         point.x *= 1 + this.delta('width') / node.width

@@ -1,8 +1,8 @@
 import { FC, memo, useEffect } from 'react'
 import { RgbaStringColorPicker } from 'react-colorful'
-import { UIPickerCopy } from '~/editor/ui-state/right-panel/operate/picker'
-import { rgb } from '~/shared/utils/color'
-import { useDownUpTracker } from '~/shared/utils/event'
+import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
+import { rgb } from 'src/shared/utils/color'
+import { useDownUpTracker } from 'src/shared/utils/event'
 
 type IPickerColorComp = {
   color: string

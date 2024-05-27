@@ -10,7 +10,7 @@
     "prefix": "comp",
     "body": [
       "import { FC, memo } from 'react'",
-      "import { Flex } from '~/view/ui-utility/widget/flex'",
+      "import { Flex } from 'src/view/ui-utility/widget/flex'",
       "",
       "export const $1${TM_FILENAME_BASE}Comp: FC<{}> = memo(({}) => {",
       "  return <Flex className='lay'></Flex>",
@@ -32,7 +32,7 @@
     "scope": ["typescriptreact"],
     "body": [
       "import { ComponentPropsWithRef, forwardRef } from 'react'",
-      "import { Flex } from '~/view/ui-utility/widget/flex'",
+      "import { Flex } from 'src/view/ui-utility/widget/flex'",
       "",
       "export type I$1${TM_FILENAME_BASE} = ComponentPropsWithRef<'div'> & {}",
       "",
@@ -48,7 +48,7 @@
       "import autobind from 'class-autobind-decorator'",
       "",
       "@autobind",
-      "export class $1${TM_FILENAME_BASE}Service {",
+      "class $1${TM_FILENAME_BASE}Service {",
       "  initHook() {",
       "  }",
       "}",

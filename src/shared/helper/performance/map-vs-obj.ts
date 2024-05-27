@@ -1,4 +1,4 @@
-import { timeOf } from '~/shared/utils/normal'
+import { timeOf } from 'src/shared/utils/normal'
 
 const obj: any = {}
 timeOf(

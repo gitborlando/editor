@@ -1,4 +1,4 @@
-import { IXY } from '~/shared/utils/normal'
+import { IXY } from 'src/shared/utils/normal'
 import { degreefy, rotatePoint } from './base'
 
 export function xy_(x: number = 0, y: number = 0) {

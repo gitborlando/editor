@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid'
-import { SchemaDefault } from '~/editor/schema/default'
-import { INode, ISchema } from '~/editor/schema/type'
-import { COLOR } from '~/shared/utils/color'
+import { SchemaDefault } from 'src/editor/schema/default'
+import { INode, ISchema } from 'src/editor/schema/type'
+import { COLOR } from 'src/shared/utils/color'
 
 export function mock10000Nested() {
   let s = new Date().getTime()

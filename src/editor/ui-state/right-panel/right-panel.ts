@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from '~/shared/signal/signal'
+import { createSignal } from 'src/shared/signal/signal'
 
 @autobind
 class UIRightPanelService {

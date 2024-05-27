@@ -1,9 +1,9 @@
 import { ComponentPropsWithRef, forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { useAutoSignal, useSignal } from '~/shared/signal/signal-react'
-import { stopPropagation, useClickAway } from '~/shared/utils/event'
-import { iife } from '~/shared/utils/normal'
-import { Flex } from '~/view/ui-utility/widget/flex'
+import { useAutoSignal, useSignal } from 'src/shared/signal/signal-react'
+import { stopPropagation, useClickAway } from 'src/shared/utils/event'
+import { iife } from 'src/shared/utils/normal'
+import { Flex } from 'src/view/ui-utility/widget/flex'
 import Asset from '../assets'
 import { Icon } from './icon'
 
