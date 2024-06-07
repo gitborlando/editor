@@ -1,6 +1,7 @@
 import hexRgb from 'hex-rgb'
 import { atan, degreefy } from 'src/editor/math/base'
 import { IFillColor, IFillLinearGradient } from 'src/editor/schema/type'
+import { memoize } from 'src/shared/utils/normal'
 
 export function isHexColor(hex: string) {
   return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex)
@@ -44,9 +45,9 @@ export function hslColor(h: number, s: number, l: number) {
   return rgbaString(hslToRgba(h, s, l))
 }
 
-export function hslBlueColor(l: number) {
+export const hslBlueColor = memoize((l: number) => {
   return hslColor(217, 100, l)
-}
+})
 
 export function makeLinearGradientCss({ start, end, stops }: IFillLinearGradient) {
   const degree = degreefy(atan((end.x - start.x) / (end.y - start.y))) + 90

@@ -6,6 +6,7 @@ import { Schema } from 'src/editor/schema/schema'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { createStorageItem } from 'src/global/storage'
 import { createSignal } from 'src/shared/signal/signal'
+import { createObjCache } from 'src/shared/utils/cache'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { ceil, floor, max, min } from '../../math/base'
 import { ID, INode, INodeParent } from '../../schema/type'
@@ -39,6 +40,7 @@ class UILeftPanelLayerService {
   enterReName = createSignal<string>()
   needExpandIds = new Set<string>()
   private lastInViewIds = <ID[]>[]
+  private nodeExpandCache = createObjCache<boolean>()
   initHook() {
     this.singleNodeExpanded.hook((expanded) => {
       if (expanded === false) return
@@ -58,7 +60,7 @@ class UILeftPanelLayerService {
       }
     })
     StageSelect.afterSelect.hook((type) => {
-      this.needExpandIds.forEach((id) => OperateNode.setNodeRuntime(id, { expand: true }))
+      this.needExpandIds.forEach((id) => this.nodeExpandCache.set(id, true))
       if (type !== 'panel') this.autoScroll(OperateNode.selectIds.value)
       this.singleNodeExpanded.dispatch(true)
     })
@@ -118,6 +120,9 @@ class UILeftPanelLayerService {
     Schema.onMatchPatch('/client/selectPageId', () => {
       this.calcNodeListChange()
     })
+    Schema.onMatchPatch('/?/childIds/...', () => {
+      this.calcNodeListChange()
+    })
   }
   init() {
     this.nodeViewHeight.dispatch(UILeftPanel.panelHeight - this.pagePanelHeight.value - 32)
@@ -129,16 +134,16 @@ class UILeftPanelLayerService {
       node = Schema.find(node.parentId)
     }
   }
-  private getNodeExpanded(id: string) {
-    return OperateNode.getNodeRuntime(id)?.expand
+  getNodeExpanded(id: string) {
+    return this.nodeExpandCache.getSet(id, () => true)
   }
   setSingleNodeExpanded(id: string, expand: boolean) {
-    OperateNode.setNodeRuntime(id, { expand: expand })
+    this.nodeExpandCache.set(id, expand)
     this.calcNodeListChange()
   }
   private setAllNodeStatusExpanded(expand: boolean) {
     SchemaUtil.traverseCurPageChildIds(({ id }) => {
-      OperateNode.setNodeRuntime(id, { expand })
+      this.nodeExpandCache.set(id, expand)
     })
     this.calcNodeListChange()
   }

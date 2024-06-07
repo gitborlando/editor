@@ -60,7 +60,8 @@ export const CompositeInput = memo(
               if (disabled || needLabelDrag !== true) return
               let startValue = numberValue()
               beforeOperate?.()
-              Drag.onStart(() => active.dispatch(true))
+              Drag.needInfinity()
+                .onStart(() => active.dispatch(true))
                 .onMove(({ shift }) => emitNewValue((startValue + shift.x * slideRate).toString()))
                 .onDestroy(() => {
                   active.dispatch(false)

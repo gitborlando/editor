@@ -56,7 +56,12 @@ export function xy_distance(self: IXY, another: IXY) {
   return Math.sqrt((self.x - another.x) ** 2 + (self.y - another.y) ** 2)
 }
 
+export function xy_distance_noSqrt(self: IXY, another: IXY) {
+  return (self.x - another.x) ** 2 + (self.y - another.y) ** 2
+}
+
 export function xy_rotate(self: IXY, origin: IXY, rotation: number) {
+  if (rotation === 0) return self
   return rotatePoint(self.x, self.y, origin.x, origin.y, rotation)
 }
 

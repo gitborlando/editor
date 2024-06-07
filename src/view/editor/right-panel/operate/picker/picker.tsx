@@ -2,7 +2,8 @@ import { cloneDeep } from 'lodash-es'
 import { FC, memo, useEffect } from 'react'
 import { SchemaDefault } from 'src/editor/schema/default'
 import { IFill, IFillColor, IFillImage, IFillLinearGradient } from 'src/editor/schema/type'
-import { StageWidgetTransform } from 'src/editor/stage/widget/transform'
+
+import { StageWidgetTransform } from 'src/editor/stage/render/widget/transform'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { Signal } from 'src/shared/signal/signal'
 import { useHookSignal } from 'src/shared/signal/signal-react'
@@ -44,8 +45,8 @@ export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
   })
 
   useEffect(() => {
-    StageWidgetTransform.needDraw.dispatch(false)
-    return () => void StageWidgetTransform.needDraw.dispatch(true)
+    StageWidgetTransform.show.dispatch(false)
+    return () => void StageWidgetTransform.show.dispatch(true)
   })
 
   const ButtonComp = useMemoComp<{ fillType: IFill['type']; label: string }>(

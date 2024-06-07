@@ -4,11 +4,12 @@ import { OperatePage } from 'src/editor/operate/page'
 import { SchemaDefault } from 'src/editor/schema/default'
 import { Schema } from 'src/editor/schema/schema'
 import { INode, INodeParent } from 'src/editor/schema/type'
+import { StageScene } from 'src/editor/stage/render/scene'
 import { Drag, type IDragData } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
+import { createDisposer } from 'src/shared/utils/disposer'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
 import { StageSelect } from './select'
@@ -21,21 +22,27 @@ class StageCreateService {
   createTypes = createTypes
   currentType = createSignal<IStageCreateType>('frame')
   private createNodeId = ''
+  private disposer = createDisposer()
+
   startInteract() {
-    Pixi.addListener('mousedown', this.create)
+    this.disposer.push(StageScene.sceneRoot.on('mousedown', this.create, { capture: true }))
   }
+
   endInteract() {
-    Pixi.removeListener('mousedown', this.create)
+    this.disposer.dispose()
   }
+
   private create() {
     Drag.onDown(this.onCreateStart).onMove(this.onCreateMove).onDestroy(this.onCreateEnd)
   }
+
   private onCreateStart({ start }: IDragData) {
     const node = this.createNode(start)
     OperateNode.addNodes([node])
     OperateNode.insertAt(this.findParent(), node)
     StageSelect.onCreateSelect(this.createNodeId)
   }
+
   private onCreateMove({ marquee }: IDragData) {
     const node = Schema.find(this.createNodeId)
     const { x, y, width, height } = StageViewport.toSceneMarquee(marquee)
@@ -46,6 +53,7 @@ class StageCreateService {
     Schema.commitOperation('创建 node 中...')
     Schema.nextSchema()
   }
+
   private onCreateEnd() {
     const node = Schema.find<INode>(this.createNodeId)
     if (node.width === 0) {
@@ -55,12 +63,14 @@ class StageCreateService {
     Schema.finalOperation('创建节点 ' + node.name)
     StageInteract.currentType.dispatch('select')
   }
+
   private createNode(start: IXY) {
     const { x, y } = StageViewport.toSceneXY(start)
     const node = SchemaDefault[this.currentType.value]({ x, y, width: 0, height: 0 })
     this.createNodeId = node.id
     return node
   }
+
   private findParent() {
     const frameId = [...OperateNode.hoverIds.value]
       .reverse()

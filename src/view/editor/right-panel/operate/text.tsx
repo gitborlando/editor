@@ -76,7 +76,7 @@ export const TextComp: FC<{}> = ({}) => {
           afterOperate={() => afterOperate.dispatch()}
         />
         <Dropdown
-          className='w-69'
+          className='w-69' //@ts-ignore
           selected={fontWeight}
           options={textStyleOptions.fontWeight}
           onSelected={(value) => toggleTextStyle('fontWeight', value)}
@@ -85,35 +85,45 @@ export const TextComp: FC<{}> = ({}) => {
     )
   })
 
-  const { align, lineHeight } = textStyle
-  const FontAlignComp = useMemoComp([align, lineHeight], ({}) => {
-    return (
-      <Flex className='lay-h w-100%'>
-        <Dropdown
-          className='w-80'
-          selected={align}
-          options={textStyleOptions.align} //@ts-ignore
-          isMulti={align === 'multi'}
-          translateArray={['左对齐', '居中对齐', '右对齐']}
-          onSelected={(value) => toggleTextStyle('align', value)}
-        />
-        <CompositeInput
-          className='size'
-          label='行高'
-          value={lineHeight.toString()}
-          onNewValueApply={(value) => setTextStyle('lineHeight', Number(value))}
-          afterOperate={() => afterOperate.dispatch()}
-        />
-      </Flex>
-    )
-  })
+  const { align, lineHeight, letterSpacing } = textStyle
+  const FontAlignLineHeightLetterSpacingComp = useMemoComp(
+    [align, lineHeight, letterSpacing],
+    ({}) => {
+      return (
+        <Flex className='lay-h w-100%'>
+          <Dropdown
+            className='w-80'
+            selected={align}
+            options={textStyleOptions.align} //@ts-ignore
+            isMulti={align === 'multi'}
+            translateArray={['左对齐', '居中对齐', '右对齐']}
+            onSelected={(value) => toggleTextStyle('align', value)}
+          />
+          <CompositeInput
+            className='w-80'
+            label='行高'
+            value={lineHeight.toString()}
+            onNewValueApply={(value) => setTextStyle('lineHeight', Number(value))}
+            afterOperate={() => afterOperate.dispatch()}
+          />
+          <CompositeInput
+            className='w-80'
+            label='字间距'
+            value={letterSpacing.toString()}
+            onNewValueApply={(value) => setTextStyle('letterSpacing', Number(value))}
+            afterOperate={() => afterOperate.dispatch()}
+          />
+        </Flex>
+      )
+    }
+  )
 
   return (
     <Flex className='lay-v wh-100%-fit bg-white borderBottom p-8'>
       <HeaderComp />
       {intoEditing.value && <TextEditComp />}
       <FontSizeWeightComp />
-      <FontAlignComp />
+      <FontAlignLineHeightLetterSpacingComp />
     </Flex>
   )
 }

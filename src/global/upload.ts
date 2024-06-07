@@ -5,9 +5,11 @@ export type IUploadFileAcceptType = 'image/*' | (string & {})
 @autobind
 class UploaderService {
   private inputRef!: HTMLInputElement
+
   setInputRef(input: HTMLInputElement) {
     this.inputRef = input
   }
+
   async open({ accept }: { accept: IUploadFileAcceptType }) {
     this.inputRef.accept = accept
     this.inputRef.click()
@@ -16,6 +18,7 @@ class UploaderService {
     })
     return file
   }
+
   download(blob: Blob): void {
     const downloadLink = document.createElement('a')
     downloadLink.href = URL.createObjectURL(blob)
@@ -24,6 +27,7 @@ class UploaderService {
     downloadLink.click()
     document.body.removeChild(downloadLink)
   }
+
   readAsText(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()

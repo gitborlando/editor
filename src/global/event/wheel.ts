@@ -9,7 +9,9 @@ export class EventWheelService {
   beforeWheel = createSignal<IWheelData>()
   duringWheel = createSignal<IWheelData>()
   afterWheel = createSignal<IWheelData>()
+
   private wheelTimeOut?: NodeJS.Timeout
+
   onWheel(e: WheelEvent | ReactWheelEvent) {
     const direction = e.deltaY > 0 ? 1 : -1
 

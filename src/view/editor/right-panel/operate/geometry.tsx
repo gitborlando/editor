@@ -1,5 +1,5 @@
 import { FC, memo, useRef } from 'react'
-import { max } from 'src/editor/math/base'
+import { max, min } from 'src/editor/math/base'
 import { IGeometry, OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -19,11 +19,12 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
   const GeometryItemComp = useMemoComp<{
     label: string
     operateKey: keyof IGeometry
-  }>([], ({ label, operateKey }) => {
+    slideRate?: number
+  }>([], ({ label, operateKey, slideRate }) => {
     const { geometry, geometryKeyValue, setGeometry } = OperateGeometry
     const ref = useRef<HTMLDivElement>(null)
     const operateDataCache = useSignal(0)
-    const slideRate = 1 / StageViewport.zoom.value
+    slideRate = (slideRate ?? 1) / StageViewport.zoom.value
 
     const { selectedNodes } = OperateNode
     useHookSignal(selectedNodes, { after: 'geometryKeyValue' })
@@ -54,11 +55,14 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
         if (['width', 'height', 'radius'].includes(operateKey)) {
           return max(0, newValue)
         }
-        if (operateKey === 'rotation') {
-          return newValue > 180 ? 180 : newValue < -180 ? -180 : newValue
+        if (['rotation', 'startAngle', 'endAngle'].includes(operateKey)) {
+          return newValue % 360
         }
         if (['sides', 'points'].includes(operateKey)) {
           return max(3, newValue)
+        }
+        if (['innerRate'].includes(operateKey)) {
+          return min(1, max(0, newValue))
         }
         return newValue
       }
@@ -100,7 +104,16 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
         <GeometryItemComp label='旋转' operateKey='rotation' />
         {geometryKeys.has('radius') && <GeometryItemComp label='圆角' operateKey='radius' />}
         {geometryKeys.has('sides') && <GeometryItemComp label='边数' operateKey='sides' />}
-        {geometryKeys.has('points') && <GeometryItemComp label='角数' operateKey='points' />}
+        {geometryKeys.has('pointCount') && (
+          <GeometryItemComp label='角数' operateKey='pointCount' />
+        )}
+        {geometryKeys.has('startAngle') && (
+          <GeometryItemComp label='起始角' operateKey='startAngle' />
+        )}
+        {geometryKeys.has('endAngle') && <GeometryItemComp label='结束角' operateKey='endAngle' />}
+        {geometryKeys.has('innerRate') && (
+          <GeometryItemComp label='内径比' operateKey='innerRate' slideRate={0.01} />
+        )}
       </Flex>
     )
   )

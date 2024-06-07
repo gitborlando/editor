@@ -2,7 +2,7 @@ import { cloneDeep } from 'lodash-es'
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import rgbHex from 'rgb-hex'
-import { IImage, Img } from 'src/editor/editor/img'
+import { IImage, ImgManager } from 'src/editor/editor/img'
 import { xy_, xy_client } from 'src/editor/math/xy'
 import { IFill, IFillColor } from 'src/editor/schema/type'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
@@ -62,7 +62,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   })
 
   const ImgComp = useMemoComp<{ url: string }>([], ({ url }) => {
-    const image = usePromise<[string], IImage>(() => Img.getImageAsync(url), [url])
+    const image = usePromise<[string], IImage>(() => ImgManager.getImageAsync(url), [url])
     const imageBound = iife(() => {
       const { width, height } = image
       const rate = width / height

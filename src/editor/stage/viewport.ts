@@ -5,16 +5,38 @@ import { EventWheelService } from 'src/global/event/wheel'
 import { createSignal } from 'src/shared/signal/signal'
 import { INoopFunc, IRect, IXY } from 'src/shared/utils/normal'
 import { max } from '../math/base'
-import { xy_, xy_client, xy_divide, xy_minus, xy_multiply, xy_plus, xy_plus_all } from '../math/xy'
+import {
+  xy_,
+  xy_client,
+  xy_divide,
+  xy_from,
+  xy_minus,
+  xy_multiply,
+  xy_plus,
+  xy_plus_all,
+} from '../math/xy'
 import { Schema } from '../schema/schema'
 
 const initBound = {
-  x: 240,
+  x: 280,
   y: 44,
   right: 240,
-  width: window.innerWidth - 480,
+  width: window.innerWidth - 520,
   height: window.innerHeight - 44 + 1,
 }
+
+const stepByZoom = [
+  [0, 0.02],
+  [0.1, 0.03],
+  [0.2, 0.05],
+  [0.3, 0.1],
+  [0.5, 0.2],
+  [1.2, 0.3],
+  [1.5, 0.5],
+  [2, 1],
+  [3, 2],
+  [5, 3],
+].reverse()
 
 @autobind
 class StageViewportService {
@@ -78,14 +100,17 @@ class StageViewportService {
       if (!hotkeys.ctrl) {
         const oldXY = Schema.client.viewport[Schema.client.selectPageId].xy
         oldXY[hotkeys.shift ? 'x' : 'y'] -= e.deltaY
-        Schema.itemReset(Schema.client, ['viewport', Schema.client.selectPageId, 'xy'], oldXY)
+        Schema.itemReset(
+          Schema.client,
+          ['viewport', Schema.client.selectPageId, 'xy'],
+          xy_from(oldXY)
+        )
         Schema.commitOperation('移动画布')
         Schema.nextSchema()
         return
       }
       e.preventDefault()
       const sign = e.deltaY > 0 ? -1 : 1
-      const stepByZoom = getStepByZoom()
       const step = stepByZoom.find(([_zoom, _step]) => _zoom <= this.zoom.value)![1] * sign
       const newZoom = max(0.02, this.zoom.value + step)
       const sceneStageXY = this.toSceneXY(xy_client(e))
@@ -127,7 +152,7 @@ class StageViewportService {
       const disposeOffset = Schema.onMatchPatch(`/?/?/${selectPageId}/xy`, () =>
         this.stageOffset.dispatch(Schema.client.viewport[selectPageId].xy)
       )
-      disposers.push(disposeZoom, disposeOffset)
+      disposers.push(...disposeZoom, ...disposeOffset)
     }
     Schema.inited.hook(() => onChangeZoomOffset())
     Schema.onMatchPatch('/client/selectPageId', () => onChangeZoomOffset())
@@ -136,17 +161,6 @@ class StageViewportService {
 
 export const StageViewport = new StageViewportService()
 
-function getStepByZoom() {
-  return [
-    [0, 0.02],
-    [0.1, 0.03],
-    [0.2, 0.05],
-    [0.3, 0.1],
-    [0.5, 0.2],
-    [1.2, 0.3],
-    [1.5, 0.5],
-    [2, 1],
-    [3, 2],
-    [5, 3],
-  ].reverse()
+export function getZoom() {
+  return StageViewport.zoom.value
 }

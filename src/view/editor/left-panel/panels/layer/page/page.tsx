@@ -15,7 +15,7 @@ export const PageComp: FC<IPageComp> = memo(({}) => {
   const { allPageExpanded, pagePanelHeight } = UILeftPanelLayer
   useHookSignal(pagePanelHeight)
   useHookSignal(allPageExpanded)
-  useMatchPatch(`/meta/pageIds`)
+  useMatchPatch(`/meta/pageIds/...`)
 
   return (
     <Flex className='lay-v shrink-0 wh-100%-fit borderBottom'>

@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid'
 import { Photo, createClient } from 'pexels'
 import { FC, useRef } from 'react'
 import { InView } from 'react-intersection-observer'
-import { Img } from 'src/editor/editor/img'
+import { ImgManager } from 'src/editor/editor/img'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import Asset from 'src/view/ui-utility/assets'
@@ -36,7 +36,7 @@ export const GalleryComp: FC<IGalleryComp> = ({}) => {
     const photoUrl = photo.src.large
     const applyImageFill = async () => {
       loadingWebImageUrl.dispatch(photoUrl)
-      await Img.getImageAsync(photoUrl)
+      await ImgManager.getImageAsync(photoUrl)
       loadingWebImageUrl.dispatch('')
       if (type.value !== 'image') type.dispatch('image')
       setFillUrl(photoUrl)

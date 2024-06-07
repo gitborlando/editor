@@ -10,17 +10,11 @@ import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IIconsComp = {}
 
-const staticHost = 'http://103.103.201.42:17937'
-
 const categoryLengthCache = createCache<string, number>()
 
 export const IconsComp: FC<IIconsComp> = memo(({}) => {
   const IconsContentComp = ({}) => {
-    const svgSource = usePromise<[string], IAnyObject>(
-      (url) => fetch(url).then((res) => res.json()),
-      [staticHost + '/svg-source/list.json']
-    )
-    const categories = Object.keys(svgSource)
+    const categories = ['arco-design', 'iconpark']
     const [curCategory, setCurCategory] = useState(categories[0])
 
     useMemo(() => {
@@ -47,14 +41,19 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
     })
 
     const SvgListComp = useMemoComp([curCategory], ({}) => {
+      const svgSource = usePromise<[string], IAnyObject>(
+        (url) => fetch(url).then((res) => res.json()),
+        [`https://nvvxaxp63w.bja.sealos.run/get/icons/list?category=${curCategory}`]
+      ).Contents
+
       const length = useAutoSignal(categoryLengthCache.get(curCategory))
-      const icons = Object.entries<string>(svgSource[curCategory]).slice(0, length.value)
+      const icons = Object.entries<any>(svgSource).slice(0, length.value)
       useHookSignal(length, (len) => categoryLengthCache.set(curCategory, len))
 
       return (
         <Flex className={'wh-100%-fit lay-h flex-wrap of-y-auto px-6 gap-10-10 d-scroll'}>
           {icons.map(([name, path]) => (
-            <SvgComp key={path} name={name} path={path} />
+            <SvgComp key={path.Key} name={name} path={path.Key} />
           ))}
           <InView
             className='wh-100%-30 '
@@ -65,16 +64,22 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
 
     const SvgComp = useMemoComp<{ name: string; path: string }>([], ({ name, path }) => {
       const SvgContentComp = useMemoComp([], ({}) => {
+        const svgUrl = usePromise<[string], string>(
+          (url) => fetch(url).then((res) => res.text()),
+          [`https://nvvxaxp63w.bja.sealos.run/get/icons/url?path=${path}`]
+        )
         const svgStr = usePromise<[string], string>(
           (url) => fetch(url).then((res) => res.text()),
-          [`${staticHost}/svg-source${path}`]
+          [svgUrl]
         )
+
         const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
           e.dataTransfer.setData(
             'text/plain',
             JSON.stringify({ event: 'dropSvg', data: { svgStr, name } })
           )
         }
+
         return (
           <Flex
             draggable

@@ -1,29 +1,30 @@
 import autobind from 'class-autobind-decorator'
-import { Texture } from 'pixi.js'
-import { createCache } from 'src/shared/utils/cache'
-import { ID } from '../schema/type'
+import { createObjCache } from 'src/shared/utils/cache'
 
 export type IImage = {
   objectUrl: string
   arrayBuffer: ArrayBuffer
   width: number
   height: number
-  pixiTexture?: Texture
+  image: HTMLImageElement
 }
 
 const prefix = 'local:editor-image/'
 
 @autobind
 class ImgService {
-  imageCache = createCache<ID, IImage>()
+  private imageCache = createObjCache<IImage>()
+
   getImage(url: string) {
     return this.imageCache.get(url)
   }
+
   async getImageAsync(url: string) {
     const image = this.getImage(url)
     if (image) return await image
     return this.imageCache.set(url, await this.loadImage(url))
   }
+
   async uploadLocal(file: File) {
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader()
@@ -37,6 +38,7 @@ class ImgService {
     // this.imageStore.set(url, await file.arrayBuffer())
     // return url
   }
+
   private async loadImage(url: string) {
     const image = <IImage>{}
     const htmlImage = new Image()
@@ -48,6 +50,7 @@ class ImgService {
     // image.objectUrl = URL.createObjectURL(new Blob([image.arrayBuffer]))
     image.objectUrl = url
     await new Promise<void>((resolve) => {
+      image.image = htmlImage
       htmlImage.src = image.objectUrl
       htmlImage.onload = () => {
         image.width = htmlImage.width
@@ -59,4 +62,4 @@ class ImgService {
   }
 }
 
-export const Img = new ImgService()
+export const ImgManager = new ImgService()

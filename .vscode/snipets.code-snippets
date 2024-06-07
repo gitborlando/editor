@@ -29,7 +29,7 @@
   },
   "Widget": {
     "prefix": "widget",
-    "scope": ["typescriptreact"],
+    "scope": "typescriptreact",
     "body": [
       "import { ComponentPropsWithRef, forwardRef } from 'react'",
       "import { Flex } from 'src/view/ui-utility/widget/flex'",

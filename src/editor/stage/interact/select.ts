@@ -1,25 +1,27 @@
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
-import { editorCommands } from 'src/editor/editor/command'
-import { OBB } from 'src/editor/math/obb'
+import { AABB, OBB } from 'src/editor/math/obb'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { Schema } from 'src/editor/schema/schema'
 import { ID } from 'src/editor/schema/type'
+import { ElemMouseEvent } from 'src/editor/stage/render/elem'
+import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
+import { StageWidgetTransform } from 'src/editor/stage/render/widget/transform'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
-import { Menu } from 'src/global/menu'
 import { batchSignal, createSignal } from 'src/shared/signal/signal'
 import { lastOne } from 'src/shared/utils/array'
-import { rectInAnotherRect } from 'src/shared/utils/collision'
 import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
-import { macro_match, type IRect } from 'src/shared/utils/normal'
+import { macroMatch, noopFunc, type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { Pixi } from '../pixi'
+
+import { editorCommands } from 'src/editor/editor/command'
+import { StageWidgetMarquee } from 'src/editor/stage/render/widget/marquee'
+import { Menu } from 'src/global/menu'
 import { StageViewport } from '../viewport'
-import { StageWidgetTransform } from '../widget/transform'
 
 type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 
@@ -31,20 +33,21 @@ class StageSelectService {
   private marqueeOBB?: OBB
   private doubleClickTimeStamp?: number
   private lastSelectIds = <ID[]>[]
+  private disposer = noopFunc
   startInteract() {
-    Surface.canvas.addEventListener('mousedown', this.onMouseDown)
-    // Pixi.addListener('click', this.onClick)
+    this.disposer = StageScene.sceneRoot.on('mousedown', this.onMouseDown)
+    Surface.addEvent('click', this.onClick)
   }
   endInteract() {
-    Surface.canvas.removeEventListener('mousedown', this.onMouseDown)
-    // Pixi.removeListener('click', this.onClick)
+    this.disposer()
+    Surface.removeEvent('click', this.onClick)
   }
   private get hoverId() {
     return lastOne(OperateNode.hoverIds.value)
   }
-  private onMouseDown(e: Event) {
-    if (isLeftMouse(e)) this.onLeftMouseDown(e as MouseEvent)
-    if (isRightMouse(e)) this.onRightMouseDown(e as MouseEvent)
+  private onMouseDown(e: ElemMouseEvent) {
+    if (isLeftMouse(e.hostEvent)) this.onLeftMouseDown(e.hostEvent)
+    if (isRightMouse(e.hostEvent)) this.onRightMouseDown(e.hostEvent)
   }
   private onClick(e: Event) {
     if (this.hasDoubleClick(e)) this.onDoubleClick(e)
@@ -65,8 +68,8 @@ class StageSelectService {
     OperateNode.intoEditNodeId.dispatch(hoverNode.id)
   }
   private onLeftMouseDown(e: MouseEvent) {
-    if (StageWidgetTransform.mouseOnEdge) return
-    if (StageWidgetTransform.mouseIn(e)) return
+    // if (StageWidgetTransform.mouseOnEdge) return
+    // if (StageWidgetTransform.mouseIn(e)) return
     this.lastSelectIds = [...OperateNode.selectIds.value]
     if (!this.hoverId) {
       this.clearSelect()
@@ -78,6 +81,7 @@ class StageSelectService {
         this.onMarqueeSelect()
       } else {
         this.onMousedownSelect()
+        StageWidgetTransform.move()
       }
     }
   }
@@ -111,7 +115,6 @@ class StageSelectService {
     OperateNode.commitSelect()
   }
   private onMousedownSelect() {
-    if (Pixi.isForbidEvent) return
     if (OperateNode.selectIds.value.has(this.hoverId)) return
     if (SchemaUtil.isPageFrame(this.hoverId)) return
     this.clearSelect()
@@ -122,19 +125,18 @@ class StageSelectService {
     this.afterSelect.dispatch('stage-single')
   }
   private onMarqueeSelect() {
-    if (Pixi.isForbidEvent) return
     const hitTest = (marqueeOBB: OBB | undefined, obb: OBB) => {
       if (!marqueeOBB) return false
-      const aabbResult = marqueeOBB.aabbHitTest(obb)
-      if (macro_match`-180|-90|0|90|180`(obb.rotation)) return aabbResult
-      return aabbResult && marqueeOBB.obbHitTest(obb)
+      const aabbResult = AABB.Collide(marqueeOBB.aabb, obb.aabb)
+      if (macroMatch`-180|-90|0|90|180`(obb.rotation)) return aabbResult
+      return aabbResult && marqueeOBB.collide(obb)
     }
     const traverseTest = () => {
       this.clearSelect()
       SchemaUtil.traverseCurPageChildIds(({ id, node, childIds, depth }) => {
-        const { obb } = OperateNode.getNodeRuntime(node.id)
+        const { obb } = StageScene.findElem(node.id)
         if (childIds?.length && depth === 0) {
-          if (rectInAnotherRect(obb.aabb, this.marqueeOBB!.aabb)) {
+          if (AABB.Include(this.marqueeOBB!.aabb, obb.aabb) === 1) {
             OperateNode.select(node.id)
             UILeftPanelLayer.needExpandIds.add(node.id)
             return false
@@ -154,7 +156,7 @@ class StageSelectService {
     })
       .onMove(({ marquee }) => {
         this.marquee.dispatch(StageViewport.toSceneMarquee(marquee))
-        this.marqueeOBB = this.calcMarqueeOBB()
+        this.marqueeOBB = StageWidgetMarquee.marqueeElem.obb
         const endBatch = batchSignal(OperateNode.selectIds)
         traverseTest()
         endBatch()
@@ -168,11 +170,7 @@ class StageSelectService {
         OperateNode.commitFinalSelect()
       })
   }
-  private calcMarqueeOBB() {
-    if (!this.marquee.value) return
-    const { x, y, width, height } = StageViewport.toSceneMarquee(this.marquee.value!)
-    return new OBB(x + width / 2, y + height / 2, width, height, 0)
-  }
+
   private hasDoubleClick(e: Event) {
     if (this.doubleClickTimeStamp && e.timeStamp - this.doubleClickTimeStamp <= 300) {
       this.doubleClickTimeStamp = undefined

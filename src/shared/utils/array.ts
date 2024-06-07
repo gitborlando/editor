@@ -20,18 +20,18 @@ export function stableIndex<T extends any = any>(arr: T[], index?: number) {
   return index
 }
 
-export const BREAK = 'break'
 export function loopFor<T>(arr: T[], callback: (cur: T, next: T, last: T, index: number) => any) {
   for (let index = 0; index < arr.length; index++) {
     const left = index === 0 ? arr.length - 1 : index - 1
     const right = index === arr.length - 1 ? 0 : index + 1
     const res = callback(arr[index], arr[right], arr[left], index)
-    if (res === BREAK) break
+    if (res === true) break
+    if (res === false) continue
   }
 }
 
-export function forEach<T>(items: T[], callback: (item: T, index: number) => void) {
-  for (let i = 0; i < items.length; i++) callback(items[i], i)
+export function reverseFor<T>(items: T[], callback: (item: T, index: number) => any) {
+  for (let i = items.length - 1; i >= 0; i--) callback(items[i], i)
 }
 
 export function reverse<T extends any>(arr: T[]) {

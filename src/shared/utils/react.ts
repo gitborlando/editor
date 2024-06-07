@@ -63,7 +63,7 @@ export function useMatchPatch(...pattens: string[]) {
   const update = useRef(() => setState({})).current
   useEffect(() => {
     pattens.forEach((patten) => {
-      disposers.current.push(Schema.onMatchPatch(patten, update))
+      disposers.current.push(...Schema.onMatchPatch(patten, update))
     })
     return () => disposers.current.forEach((disposer) => disposer())
   }, [])

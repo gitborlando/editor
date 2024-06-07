@@ -17,7 +17,6 @@ export const FileComp: FC<IFileComp> = memo(({}) => {
   const HeaderComp = useMemoComp([], ({}) => {
     const reMockFile = async () => {
       await mockFile(true)
-      alert('已重新mock文件')
     }
     return (
       <Flex className='lay-h wh-100%-32 px-10 borderBottom'>

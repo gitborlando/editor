@@ -15,12 +15,10 @@ const createBaseStyle = () => ({
   fontSize: <ITextStyle['fontSize']>16,
   fontWeight: <ITextStyle['fontWeight']>'500',
   align: <ITextStyle['align']>'left',
-  breakWords: <ITextStyle['breakWords']>true,
   fontFamily: <ITextStyle['fontFamily']>'Arial',
   fontStyle: <ITextStyle['fontStyle']>'normal',
   letterSpacing: <ITextStyle['letterSpacing']>30,
   lineHeight: <ITextStyle['lineHeight']>16,
-  wordWrap: <ITextStyle['wordWrap']>true,
 })
 // const createBaseStyle = () => ({
 //   fontSize: <ITextStyle['fontSize'] | IMulti>16,

@@ -1,4 +1,3 @@
-import autoBindMethods from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { ID } from 'src/editor/schema/type'
 import { createCache } from '../utils/cache'
@@ -16,18 +15,19 @@ export type IHookOption = {
   afterAll?: boolean
 }
 
-@autoBindMethods
 export class Signal<T extends any> {
   newValue!: T
   oldValue!: T
+
   private _intercept?: (value: T) => T | void
   private hooks = <IHook<T>[]>[]
   private optionCache = createCache<IHook<T>, IHookOption>()
-  private args: any
+
   constructor(value?: T) {
     this.newValue = value ?? this.newValue
     this.oldValue = value ?? this.oldValue
   }
+
   get value(): T {
     return this.newValue
   }
@@ -36,6 +36,7 @@ export class Signal<T extends any> {
     const interceptRes = this._intercept?.(value)
     this.newValue = interceptRes ?? value
   }
+
   hook(hook: IHook<T>): () => void
   hook(option: IHookOption, hook: IHook<T>): () => void
   hook(hookOrOption: IHook<T> | IHookOption, hookCallback?: IHook<T>) {
@@ -59,27 +60,27 @@ export class Signal<T extends any> {
     this.reHierarchy()
     return () => this.unHook(hook)
   }
-  dispatch(value?: T | ((value: T) => void), args?: any) {
+
+  dispatch = (value?: T | ((value: T) => void), args?: any) => {
     if (typeof value === 'function') {
       ;(value as Function)(this.value)
     } else if (value !== undefined) {
       this.value = value
     }
-    this.args = args
-    this.runHooks()
+
+    if (signalBatchMap.get(this)) return
+    this.hooks.forEach((hook) => hook(this.value, args))
   }
+
   intercept(handle: (value: T) => T | void) {
     this._intercept = handle
   }
+
   private unHook(hook: IHook<T>) {
     const index = this.hooks.findIndex((i) => i === hook)
     index !== -1 && this.hooks.splice(index, 1)
   }
-  private runHooks() {
-    if (signalBatchMap.get(this)) return
-    this.hooks.forEach((hook) => hook(this.value, this.args))
-    this.args = undefined
-  }
+
   private reHierarchy() {
     this.hooks.forEach((hook) => {
       const option = this.optionCache.get(hook)

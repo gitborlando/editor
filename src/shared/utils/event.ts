@@ -4,7 +4,7 @@ import { INoopFunc } from './normal'
 export const isLeftMouse = (e: any): e is MouseEvent => e.button === 0
 export const isRightMouse = (e: any): e is MouseEvent => e.button === 2
 
-export function addListener<K extends keyof WindowEventMap>(
+export function listen<K extends keyof WindowEventMap>(
   type: K,
   listener: (this: Window, ev: WindowEventMap[K]) => any
 ) {
@@ -12,7 +12,7 @@ export function addListener<K extends keyof WindowEventMap>(
   return () => window.removeEventListener(type, listener)
 }
 
-export function addListenerCapture<K extends keyof WindowEventMap>(
+export function listenCapture<K extends keyof WindowEventMap>(
   type: K,
   listener: (this: Window, ev: WindowEventMap[K]) => any
 ) {
@@ -47,7 +47,7 @@ type IClickAwayProps = {
   callback: () => void
 }
 export function clickAway({ when, insideTest, callback }: IClickAwayProps) {
-  return addListenerCapture('mousedown', (e) => {
+  return listenCapture('mousedown', (e) => {
     if (!when()) return
     if (!clickInside(e, insideTest)) callback()
   })

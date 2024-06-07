@@ -29,7 +29,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
   const { nodeIdsInSearch, singleNodeExpanded, setSingleNodeExpanded } = UILeftPanelLayer
   const { nodeMoveDropDetail, nodeMoveStarted, nodeMoveEnded, enterReName } = UILeftPanelLayer
   const node = Schema.find<INode>(id)
-  const { expand } = OperateNode.getNodeRuntime(id)
+  const expand = UILeftPanelLayer.getNodeExpanded(id)
   const selected = Schema.client.selectIds.includes(id)
   const subSelected = ancestors.some((i) => Schema.client.selectIds.includes(i)) && !selected
   const searched = nodeIdsInSearch.value.has(id)

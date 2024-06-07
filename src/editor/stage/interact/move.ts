@@ -7,10 +7,10 @@ import { StageViewport } from '../viewport'
 @autobind
 class StageMoveService {
   startInteract() {
-    Surface.canvas.addEventListener('mousedown', this.onMoveStage)
+    Surface.addEvent('mousedown', this.onMoveStage)
   }
   endInteract() {
-    Surface.canvas.removeEventListener('mousedown', this.onMoveStage)
+    Surface.removeEvent('mousedown', this.onMoveStage)
   }
   private onMoveStage() {
     const start = xy_from(StageViewport.stageOffset.value)

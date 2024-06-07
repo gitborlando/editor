@@ -75,15 +75,16 @@ export default class Immui {
 
   next = <T>(object: T): [T, ImmuiPatch[]] => {
     const patches = <ImmuiPatch[]>[]
+
     const traverse = (object: any, keyPathMap: any, keys: string[]) => {
       for (const key in keyPathMap) {
         const _keys = [...keys, key]
-        if (Array.isArray(keyPathMap[key])) {
-          const [value, oldValue] = keyPathMap[key]
+        if (keyPathMap[key][this.symbolKey]) {
+          const [value, oldValue] = keyPathMap[key][this.symbolKey]
           if (value === oldValue) continue
 
           const path = '/' + _keys.join('/')
-          const patch = <any>{ keys: _keys, path, value, oldValue }
+          const patch = <any>{ keys: _keys, path, value: clone(value), oldValue: clone(oldValue) }
 
           if (value === undefined) patch.type = 'remove'
           else if (oldValue === undefined) patch.type = 'add'
@@ -91,14 +92,17 @@ export default class Immui {
 
           patches.push(patch)
         } else {
+          if (!object[key]) continue
           const content = object[key]
           object[key] = Array.isArray(content) ? [...content] : { ...content }
           traverse(object[key], keyPathMap[key], _keys)
         }
       }
     }
+
     traverse(object, this.keyPathDiffMap, [])
     this.keyPathDiffMap = {}
+
     return [object, patches]
   }
 
@@ -133,20 +137,30 @@ export default class Immui {
     })
   }
 
-  private recordChange = (keys: IKey[], value: any, oldValue?: any) => {
+  private symbolKey = Symbol('value')
+
+  private recordChange = (keys: IKey[], value?: any, oldValue?: any) => {
     let curKeyPathDiffMap = this.keyPathDiffMap
+
     keys.forEach((key, i) => {
       if (!curKeyPathDiffMap[key]) {
         if (i !== keys.length - 1) {
           curKeyPathDiffMap = curKeyPathDiffMap[key] = {}
         } else {
-          curKeyPathDiffMap[key] = [value, oldValue]
+          curKeyPathDiffMap[key] = { [this.symbolKey]: [value, oldValue] }
         }
       } else {
         if (i !== keys.length - 1) {
           curKeyPathDiffMap = curKeyPathDiffMap[key]!
         } else {
-          curKeyPathDiffMap[key][0] = value
+          if (!curKeyPathDiffMap[key][this.symbolKey]) {
+            curKeyPathDiffMap[key][this.symbolKey] = []
+          }
+          if (value) {
+            curKeyPathDiffMap[key][this.symbolKey][0] = value
+          } else {
+            curKeyPathDiffMap[key][this.symbolKey] = [value, oldValue]
+          }
         }
       }
     })

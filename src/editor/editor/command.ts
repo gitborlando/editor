@@ -21,24 +21,24 @@ export const editorCommands = {
     {
       name: '复制',
       shortcut: 'ctrl+c',
-      callback: OperateNode.copySelectNodes,
+      callback: () => OperateNode.copySelectNodes(),
     },
     {
       name: '黏贴',
       shortcut: 'ctrl+v',
-      callback: OperateNode.paste,
+      callback: () => OperateNode.paste(),
     },
   ],
   undoRedoGroup: [
     {
       name: '撤销',
       shortcut: 'ctrl+z',
-      callback: SchemaHistory.undo,
+      callback: () => SchemaHistory.undo(),
     },
     {
       name: '重做',
       shortcut: 'ctrl+shift+z',
-      callback: SchemaHistory.redo,
+      callback: () => SchemaHistory.redo(),
     },
   ],
   pageGroup: [
@@ -61,7 +61,7 @@ export const editorCommands = {
     {
       name: '删除',
       shortcut: 'del',
-      callback: OperateNode.deleteSelectNodes,
+      callback: () => OperateNode.deleteSelectNodes(),
     },
   ],
   nodeReHierarchyGroup: [

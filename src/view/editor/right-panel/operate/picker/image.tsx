@@ -1,6 +1,6 @@
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
-import { IImage, Img } from 'src/editor/editor/img'
+import { IImage, ImgManager } from 'src/editor/editor/img'
 import { IFillImage } from 'src/editor/schema/type'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { Uploader } from 'src/global/upload'
@@ -19,12 +19,12 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
 
   const uploadImage = async () => {
     const file = await Uploader.open({ accept: 'image/*' })
-    const url = await Img.uploadLocal(file!)
+    const url = await ImgManager.uploadLocal(file!)
     setFillUrl(url)
   }
 
   const ImgComp = useMemoComp([fill.url], ({}) => {
-    const image = usePromise<[string], IImage>(() => Img.getImageAsync(fill.url), [fill.url])
+    const image = usePromise<[string], IImage>(() => ImgManager.getImageAsync(fill.url), [fill.url])
     const imageBound = iife(() => {
       const { width, height } = image
       const rate = width / height

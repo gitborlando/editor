@@ -34,7 +34,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
       return []
     })
 
-    useMatchPatch('/?/points')
+    useMatchPatch('/?/points/...')
 
     const EditorPointComp = useMemoComp<{ index: number; point: IPoint }>(
       [zoom, curIndex.value, curHandleIndex.value],

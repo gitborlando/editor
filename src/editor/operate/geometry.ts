@@ -16,7 +16,10 @@ function createInitGeometry() {
     rotation: 0,
     radius: 0,
     sides: 3,
-    points: 5,
+    pointCount: 5,
+    startAngle: 0,
+    endAngle: 360,
+    innerRate: 0,
   }
 }
 
@@ -106,10 +109,18 @@ class OperateGeometryService {
   private setupOperateKeys() {
     this.geometryKeys = new Set(['x', 'y', 'width', 'height', 'rotation'])
     OperateNode.selectingNodes.forEach((node) => {
-      if (node.type === 'frame') return this.geometryKeys.add('radius')
-      if (node.type === 'rect') return this.geometryKeys.add('radius')
-      if (node.type === 'polygon') return this.geometryKeys.add('sides')
-      if (node.type === 'star') return this.geometryKeys.add('points')
+      if (node.type === 'frame') this.geometryKeys.add('radius')
+      if (node.type === 'rect') this.geometryKeys.add('radius')
+      if (node.type === 'polygon') this.geometryKeys.add('sides')
+      if (node.type === 'star') {
+        this.geometryKeys.add('innerRate')
+        this.geometryKeys.add('pointCount')
+      }
+      if (node.type === 'ellipse') {
+        this.geometryKeys.add('startAngle')
+        this.geometryKeys.add('endAngle')
+        this.geometryKeys.add('innerRate')
+      }
     })
   }
   private applyChangeToNode(traverseData: ITraverseData) {
@@ -135,8 +146,17 @@ class OperateGeometryService {
     if (this.operateKeys.has('sides')) {
       Schema.itemReset(node, ['sides'], this.geometry['sides'])
     }
-    if (this.operateKeys.has('points')) {
-      Schema.itemReset(node, ['points'], this.geometry['points'])
+    if (this.operateKeys.has('pointCount')) {
+      Schema.itemReset(node, ['pointCount'], this.geometry['pointCount'])
+    }
+    if (this.operateKeys.has('startAngle')) {
+      Schema.itemReset(node, ['startAngle'], this.geometry['startAngle'])
+    }
+    if (this.operateKeys.has('endAngle')) {
+      Schema.itemReset(node, ['endAngle'], this.geometry['endAngle'])
+    }
+    if (this.operateKeys.has('innerRate')) {
+      Schema.itemReset(node, ['innerRate'], this.geometry['innerRate'])
     }
     if (this.operateKeys.has('rotation')) {
       const { getNodeCenterXY } = OperateNode

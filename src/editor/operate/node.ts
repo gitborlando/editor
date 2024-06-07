@@ -1,24 +1,15 @@
 import autobind from 'class-autobind-decorator'
 import { cloneDeep } from 'lodash-es'
 import { nanoid } from 'nanoid'
+import { StageScene } from 'src/editor/stage/render/scene'
 import { createSignal } from 'src/shared/signal/signal'
 import { firstOne, stableIndex } from 'src/shared/utils/array'
-import { createObjCache } from 'src/shared/utils/cache'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { OBB } from '../math/obb'
 import { xy_, xy_rotate } from '../math/xy'
 import { SchemaDefault } from '../schema/default'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { ID, INode, INodeParent } from '../schema/type'
-import { IStageElement } from '../stage/draw/draw'
-import { Pixi } from '../stage/pixi'
-
-export type INodeRuntime = {
-  expand: boolean
-  element: IStageElement
-  obb: OBB
-}
 
 @autobind
 class OperateNodeService {
@@ -31,7 +22,6 @@ class OperateNodeService {
   intoEditNodeId = createSignal('')
   selectedNodes$ = createSignal(<INode[]>[])
   private lastSelectedNodeSet = new Set<INode>()
-  private nodeRuntimeCache = createObjCache<INodeRuntime>()
   private copyIds = <ID[]>[]
   initHook() {
     this.afterRemoveNodes.hook((ids) => {
@@ -61,9 +51,6 @@ class OperateNodeService {
       const node = Schema.find(id)
       if (node.type === 'irregular') return id
       return ''
-    })
-    this.intoEditNodeId.hook((id) => {
-      Pixi.isForbidEvent = !!id
     })
   }
   get selectingNodes() {
@@ -118,7 +105,6 @@ class OperateNodeService {
     Schema.itemAdd(parent, ['childIds', index], node.id)
     Schema.itemReset(node, ['parentId'], parent.id)
     Schema.commitOperation('插入子节点')
-    this.setNodeRuntime(parent.id, { expand: true })
   }
   splice(parent: INodeParent, node: INode) {
     const index = parent.childIds.indexOf(node.id)
@@ -178,17 +164,6 @@ class OperateNodeService {
     Schema.nextSchema()
     Schema.commitHistory('粘贴节点')
   }
-  setNodeRuntime(id: ID, runtime: Partial<INodeRuntime>) {
-    const prevRuntime = this.getNodeRuntime(id)
-    this.nodeRuntimeCache.set(id, { ...prevRuntime, ...runtime })
-  }
-  getNodeRuntime(id: ID) {
-    return this.nodeRuntimeCache.getSet(id, () => ({
-      expand: false,
-      obb: new OBB(0, 0, 0, 0, 0),
-      element: null!,
-    }))
-  }
   getNodeCenterXY(node: INode) {
     const center = xy_(node.x + node.width / 2, node.y + node.height / 2)
     return xy_rotate(center, xy_(node.x, node.y), node.rotation)
@@ -206,9 +181,9 @@ class OperateNodeService {
       if (parentIds.size === 1) this.datumId.dispatch(firstOne(parentIds))
       if (parentIds.size > 1) this.datumId.dispatch('')
     }
-    const { obb } = this.getNodeRuntime(this.datumId.value)
-    if (!obb) return (this.datumXY = xy_(0, 0))
-    this.datumXY = xy_(obb.aabb.x, obb.aabb.y)
+    const elem = StageScene.findElem(this.datumId.value)
+    if (!elem) return (this.datumXY = xy_(0, 0))
+    this.datumXY = xy_(elem.obb.aabb.minX, elem.obb.aabb.minY)
   }
 }
 

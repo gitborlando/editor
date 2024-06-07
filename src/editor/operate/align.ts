@@ -1,9 +1,10 @@
 import autobind from 'class-autobind-decorator'
+import { StageScene } from 'src/editor/stage/render/scene'
+import { StageWidgetTransform } from 'src/editor/stage/render/widget/transform'
 import { createSignal } from 'src/shared/signal/signal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { Schema } from '../schema/schema'
 import { INode, INodeParent } from '../schema/type'
-import { StageWidgetTransform } from '../stage/widget/transform'
 import { OperateNode } from './node'
 
 const alignTypes = <const>[
@@ -119,11 +120,11 @@ class OperateAlignService {
     if (selectNodes.length > 1) {
       return StageWidgetTransform.transformOBB.getAABBBound()
     } else {
-      return OperateNode.getNodeRuntime(selectNodes[0].id).obb.getAABBBound()
+      return StageScene.findElem(selectNodes[0].id).obb.getAABBBound()
     }
   }
   private getOBBAndBound(node: INode) {
-    const nodeOBB = OperateNode.getNodeRuntime(node.id).obb
+    const nodeOBB = StageScene.findElem(node.id).obb
     const nodeBound = nodeOBB.getAABBBound()
     return { nodeBound }
   }

@@ -151,7 +151,7 @@ class SchemaDefaultService {
     return {
       type: 'star',
       points: [],
-      sides: 5,
+      pointCount: 5,
       radius: 0,
       innerRate: 0.382,
       ...nodeBase,
@@ -165,12 +165,12 @@ class SchemaDefaultService {
     return {
       type: 'line',
       points: [],
+      length: 100,
       ...nodeBase,
       ...name,
       ...option,
       fills: [],
       strokes: [this.stroke()],
-      height: 0,
     }
   }
   irregular(option?: Partial<IIrregular>): IIrregular {
@@ -197,14 +197,12 @@ class SchemaDefaultService {
       content: '文本1',
       style: {
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: 500,
         align: 'center',
-        breakWords: true,
-        fontFamily: '',
+        fontFamily: 'Arial',
         fontStyle: 'normal',
         letterSpacing: 0,
         lineHeight: 16,
-        wordWrap: true,
       },
       ...nodeBase,
       ...name,

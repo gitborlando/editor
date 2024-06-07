@@ -1,9 +1,9 @@
 import { FC, memo } from 'react'
 import { initApp } from 'src/global/initialize'
 import { withSuspense } from 'src/shared/utils/react'
+import { MenuComp } from 'src/view/component/menu'
+import { UploaderComp } from 'src/view/component/uploader'
 import { Flex } from 'src/view/ui-utility/widget/flex'
-import { MenuComp } from './component/menu'
-import { UploaderComp } from './component/uploader'
 import { EditorComp } from './editor/editor'
 
 initApp()

@@ -1,0 +1,25 @@
+export const CR = 0,
+  LF = 1,
+  Control = 2,
+  Extend = 3,
+  RegionalIndicator = 4,
+  SpacingMark = 5,
+  L = 6,
+  V = 7,
+  T = 8,
+  LV = 9,
+  LVT = 10,
+  Other = 11,
+  Prepend = 12,
+  EBase = 13,
+  EModifier = 14,
+  ZWJ = 15,
+  GlueAfterZwj = 16,
+  EBaseGAZ = 17
+
+// BreakTypes
+export const NotBreak = 0,
+  BreakStart = 1,
+  Break = 2,
+  BreakLastRegional = 3,
+  BreakPenultimateRegional = 4

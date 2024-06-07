@@ -1,10 +1,4 @@
-import {
-  LINE_CAP,
-  LINE_JOIN,
-  TextStyleAlign,
-  TextStyleFontStyle,
-  TextStyleFontWeight,
-} from 'pixi.js'
+import { LINE_CAP, LINE_JOIN } from 'pixi.js'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { AllKeys, IXY } from 'src/shared/utils/normal'
 
@@ -81,6 +75,8 @@ export type IGeometryDetail = {
 
 export type INodeBase = INodeMeta &
   IGeometryDetail & {
+    width: number
+    height: number
     opacity: number
     hFlip: boolean
     vFlip: boolean
@@ -148,7 +144,7 @@ export type IPolygon = INodeBase &
 export type IStar = INodeBase &
   IVectorBase & {
     type: 'star'
-    sides: number
+    pointCount: number
     radius: number
     innerRate: number
   }
@@ -156,39 +152,20 @@ export type IStar = INodeBase &
 export type ILine = INodeBase &
   IVectorBase & {
     type: 'line'
+    length: number
   }
-
-export type ISvg = INodeBase & {
-  type: 'svg'
-  svg: string
-}
 
 export type IText = INodeBase & {
   type: 'text'
   content: string
   style: {
-    align: TextStyleAlign
-    breakWords: boolean
-    // dropShadow: boolean
-    // dropShadowAlpha: number
-    // dropShadowAngle: number
-    // dropShadowBlur: number
-    // dropShadowColor: string | number
-    // dropShadowDistance: number
+    align: 'left' | 'center' | 'right'
     fontFamily: string | string[]
     fontSize: number
-    fontStyle: TextStyleFontStyle
-    fontWeight: TextStyleFontWeight
+    fontStyle: 'normal' | 'italic' | 'oblique'
+    fontWeight: 'normal' | 'bold' | 'bolder' | 'lighter' | number
     letterSpacing: number
     lineHeight: number
-    // lineJoin: TextStyleLineJoin
-    // miterLimit: number
-    // padding: number
-    // textBaseline: TextStyleTextBaseline
-    // whiteSpace: TextStyleWhiteSpace
-    wordWrap: boolean
-    // wordWrapWidth: number
-    // leading: number
   }
 }
 

@@ -1,4 +1,4 @@
-export class Cache<K, V> {
+class Cache<K, V> {
   cache = new Map<K, V>()
   private compareCache = new Map<K, any[]>()
   get(key: K) {
@@ -55,7 +55,7 @@ export function createCache<K, V>() {
   return new Cache<K, V>()
 }
 
-export class ObjCache<V> {
+class ObjCache<V> {
   cache = <Record<string, V>>{}
   private compareCache = new Map<string, any[]>()
   get(key: string) {

@@ -71,10 +71,10 @@ export function cx(...args: ((string | undefined) | [boolean, string] | [string]
   return res.trim()
 }
 
-const cache = createObjCache()
-export function macro_match(_input: TemplateStringsArray) {
+const macroMatchCache = createObjCache()
+export function macroMatch(_input: TemplateStringsArray) {
   const input = _input[0]
-  const test: any = cache.getSet(input, () => {
+  const test: any = macroMatchCache.getSet(input, () => {
     const right = input.trimStart().trimEnd().split('|')
     return new Function(
       'left',
@@ -91,13 +91,6 @@ export function clone<T extends any>(object: T): T {
   const newObj: any = Array.isArray(object) ? [] : {}
   for (const key in object) newObj[key] = clone(object[key])
   return newObj
-}
-
-export function timeFor(func: (i: number) => any, count = 1) {
-  const start = performance.now()
-  for (let i = 0; i < count; i++) func(i)
-  const end = performance.now()
-  console.log(`${count}`, `all: ${end - start}ms`, `aver: ${(end - start) / count}ms`)
 }
 
 export function timeOf(count: number, func: (i: number) => any, count2 = 1, skip = 0) {
@@ -121,4 +114,20 @@ export function notUndefine<T extends any>(val: T | undefined): val is T {
 
 export function jsonFy(obj: any) {
   return JSON.stringify(obj, null, 2)
+}
+
+export function memoize<T extends any[], R extends any>(func: (...args: T) => R) {
+  const cache = createObjCache<R>()
+  return (...args: T) => {
+    const key = args.join('-')
+    return cache.getSet(key, () => func(...args))
+  }
+}
+
+export function debounce<T extends any[], R extends any>(wait: number, func: (...args: T) => R) {
+  let timeout: any
+  return (...args: T) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => func(...args), wait)
+  }
 }

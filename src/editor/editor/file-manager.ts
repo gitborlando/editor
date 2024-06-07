@@ -14,11 +14,11 @@ class FileManagerService {
   fileForage = localforage.createInstance({ name: 'editor-files' })
   isSaved$ = createSignal(false)
   fileMetaList$ = createSignal<IMeta[]>([])
-  init() {
+
+  initHook() {
     this.debug()
     this.autoSave()
   }
-  initHook() {}
   async getFileMetaList() {
     this.fileMetaList$.value = []
     const keys = await this.fileForage.keys()

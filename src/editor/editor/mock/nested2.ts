@@ -16,6 +16,9 @@ export function mockNested2() {
     alpha: 1,
     visible: true,
   }
+  const imageFill = SchemaDefault.fillImage(
+    'https://images.pexels.com/photos/24778776/pexels-photo-24778776.jpeg?auto=compress&cs=tinysrgb&h=130'
+  )
   const schema: ISchema = {
     meta: {
       type: 'meta',
@@ -50,15 +53,15 @@ export function mockNested2() {
       y: 0,
       radius: 20,
       parentId: 'page_1',
-      childIds: ['text2', 'triangle1', 'line1', /* 'rect2', */ 'rect3'],
+      childIds: ['text2', 'triangle1', 'line1', 'rect3'],
     }),
     text2: SchemaDefault.text({
       id: 'text2',
       name: '测试文本1',
       width: 100,
       height: 100,
-      x: 0,
-      y: 0,
+      x: 20,
+      y: 100,
       parentId: 'frame:1',
     }),
     rect3: SchemaDefault.rect({
@@ -69,7 +72,7 @@ export function mockNested2() {
       x: 100,
       y: 0,
       parentId: 'frame:1',
-      fills: [LinearGradient],
+      fills: [imageFill],
     }),
     triangle1: SchemaDefault.polygon({
       id: 'triangle1',
@@ -86,22 +89,10 @@ export function mockNested2() {
       height: 0,
       x: 100,
       y: 350,
+      length: 100,
       strokes: [SchemaDefault.stroke()],
       parentId: 'frame:1',
     }),
-    // irregular1: schemaDefault.star({
-    //   id: 'irregular1',
-    //   width: 100,
-    //   height: 100,
-    //   x: 500,
-    //   centerX: 525,
-    //   points: [
-    //     schemaDefault.createPoint(500, 0, 'no-bezier', 0, XY.Of(400, 0)),
-    //     schemaDefault.createPoint(500, 0, 'no-bezier', 0),
-    //     schemaDefault.createPoint(500, 100, 'no-bezier', 0, undefined, XY.Of(400, 100)),
-    //   ],
-    //   parentId: 'page1',
-    // }),
   }
 
   return schema

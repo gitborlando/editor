@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { floor } from 'src/editor/math/base'
+import { OBB } from 'src/editor/math/obb'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { Elem } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
@@ -9,14 +9,14 @@ import { hslBlueColor } from 'src/shared/utils/color'
 
 @autobind
 class StageWidgetMarqueeService {
-  marqueeElement = new Elem()
-  initHook() {
-    this.marqueeElement.draw = () => {
-      if (!StageSelect.marquee.value) return
+  marqueeElem = new Elem('marquee')
 
-      let { x, y, width, height } = StageSelect.marquee.value
-      x = floor(x) + 0.5
-      y = floor(y + 0.5)
+  initHook() {
+    StageScene.widgetRoot.addChild(this.marqueeElem)
+
+    this.marqueeElem.draw = () => {
+      const { x, y, width, height } = this.marqueeElem.obb
+      if (width === 0 && height === 0) return
 
       Surface.ctxSaveRestore((ctx) => {
         ctx.strokeStyle = hslBlueColor(65)
@@ -27,11 +27,16 @@ class StageWidgetMarqueeService {
       })
     }
 
-    StageScene.widgetRoot.addChild(this.marqueeElement)
+    StageSelect.marquee.hook((marquee) => {
+      Surface.collectDirtyRect(this.marqueeElem.aabb, 2)
 
-    StageSelect.marquee.hook(() => {
-      Surface.requestRender()
-      Surface.collectDirty(this.marqueeElement)
+      if (!marquee) {
+        this.marqueeElem.obb = OBB.IdentityOBB()
+        return
+      }
+
+      this.marqueeElem.obb = OBB.FromRect(marquee)
+      Surface.collectDirtyRect(this.marqueeElem.aabb, 2)
     })
   }
 }
