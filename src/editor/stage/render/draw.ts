@@ -10,7 +10,17 @@ import { loopFor } from 'src/shared/utils/array'
 import { createObjCache } from 'src/shared/utils/cache'
 import { hslBlueColor, rgba } from 'src/shared/utils/color'
 import { IXY, iife } from 'src/shared/utils/normal'
-import { IEllipse, IFill, IIrregular, INode, IPoint, IStroke, IText } from '../../schema/type'
+import {
+  IEllipse,
+  IFill,
+  IFillColor,
+  IIrregular,
+  INode,
+  IPoint,
+  IShadow,
+  IStroke,
+  IText,
+} from '../../schema/type'
 import { Elem } from './elem'
 
 export const StageNodeDrawer = new (class {
@@ -30,12 +40,14 @@ export const StageNodeDrawer = new (class {
 
     this.drawShapePath()
 
-    for (const fill of node.fills) {
+    node.fills.forEach((fill, i) => {
+      if (node.shadows[i]) this.drawShadow(node.shadows[i])
       Surface.ctxSaveRestore(() => this.drawFill(fill))
-    }
-    for (const stroke of node.strokes) {
+    })
+    node.strokes.forEach((stroke, i) => {
+      if (node.shadows[i]) this.drawShadow(node.shadows[i])
       Surface.ctxSaveRestore(() => this.drawStroke(stroke))
-    }
+    })
 
     this.drawOutline()
     this.drawHitTest()
@@ -47,12 +59,11 @@ export const StageNodeDrawer = new (class {
     if (!this.elem.outline) return
 
     const width = this.elem.outline === 'hover' ? 2 : 0.5
-    const path2d = new Path2D(this.path2d)
 
     Surface.ctxSaveRestore(() => {
       this.ctx.lineWidth = width / getZoom() / devicePixelRatio
       this.ctx.strokeStyle = hslBlueColor(65)
-      this.ctx.stroke(path2d)
+      this.ctx.stroke(new Path2D(this.path2d))
     })
 
     this.elem.outline = undefined
@@ -294,7 +305,8 @@ export const StageNodeDrawer = new (class {
             const rateH = height / image.height
             return Math.max(rateW, rateH)
           })
-          this.ctx.clip(new Path2D(this.path2d))
+          const path2d = new Path2D(this.path2d)
+          this.ctx.clip(path2d)
           this.ctx.drawImage(image.image, 0, 0, width / rate, height / rate, 0, 0, width, height)
         }
         break
@@ -319,6 +331,17 @@ export const StageNodeDrawer = new (class {
       default:
         break
     }
+  }
+
+  private drawShadow = (shadow: IShadow) => {
+    if (!shadow.visible) return
+
+    const { fill, blur, offsetX, offsetY, spread } = shadow
+
+    this.ctx.shadowColor = (fill as IFillColor).color
+    this.ctx.shadowBlur = blur
+    this.ctx.shadowOffsetX = offsetX
+    this.ctx.shadowOffsetY = offsetY
   }
 
   private drawHitTest = () => {

@@ -7,6 +7,7 @@ class UploaderService {
   private inputRef!: HTMLInputElement
 
   setInputRef(input: HTMLInputElement) {
+    if (this.inputRef) return
     this.inputRef = input
   }
 
@@ -34,6 +35,15 @@ class UploaderService {
       reader.onload = (e) => resolve((e.target?.result || '') as string)
       reader.onerror = (e) => reject(e.target?.error)
       reader.readAsText(file)
+    })
+  }
+
+  readAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => resolve((e.target?.result || '') as string)
+      reader.onerror = (e) => reject(e.target?.error)
+      reader.readAsDataURL(file)
     })
   }
 }

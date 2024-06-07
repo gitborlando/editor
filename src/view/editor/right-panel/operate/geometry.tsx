@@ -1,5 +1,5 @@
 import { FC, memo, useRef } from 'react'
-import { max, min } from 'src/editor/math/base'
+import { floor, max, min } from 'src/editor/math/base'
 import { IGeometry, OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -58,8 +58,8 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
         if (['rotation', 'startAngle', 'endAngle'].includes(operateKey)) {
           return newValue % 360
         }
-        if (['sides', 'points'].includes(operateKey)) {
-          return max(3, newValue)
+        if (['sides', 'pointCount'].includes(operateKey)) {
+          return max(3, floor(newValue))
         }
         if (['innerRate'].includes(operateKey)) {
           return min(1, max(0, newValue))
@@ -103,9 +103,11 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
         <GeometryItemComp label='高度' operateKey='height' />
         <GeometryItemComp label='旋转' operateKey='rotation' />
         {geometryKeys.has('radius') && <GeometryItemComp label='圆角' operateKey='radius' />}
-        {geometryKeys.has('sides') && <GeometryItemComp label='边数' operateKey='sides' />}
+        {geometryKeys.has('sides') && (
+          <GeometryItemComp label='边数' operateKey='sides' slideRate={0.01} />
+        )}
         {geometryKeys.has('pointCount') && (
-          <GeometryItemComp label='角数' operateKey='pointCount' />
+          <GeometryItemComp label='角数' operateKey='pointCount' slideRate={0.01} />
         )}
         {geometryKeys.has('startAngle') && (
           <GeometryItemComp label='起始角' operateKey='startAngle' />

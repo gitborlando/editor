@@ -67,11 +67,11 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
           {iife(() => {
             const keys = ['offsetX', 'offsetY', 'blur'] as const
             const labels = ['x偏移', 'y偏移', '模糊']
-            return keys.map((key, index) => (
+            return keys.map((key, i) => (
               <CompositeInput
                 key={key}
                 className='wh-92-28-2 mr-4 d-hover-bg [&_.label]:w-fit'
-                label={labels[index]}
+                label={labels[i]}
                 needStepHandler={false}
                 value={shadow[key].toString()}
                 onNewValueApply={(value) => setShadow(index, [key], Number(value))}

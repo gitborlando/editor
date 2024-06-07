@@ -100,14 +100,14 @@ export const TextComp: FC<{}> = ({}) => {
             onSelected={(value) => toggleTextStyle('align', value)}
           />
           <CompositeInput
-            className='w-80'
+            className='w-74'
             label='行高'
             value={lineHeight.toString()}
             onNewValueApply={(value) => setTextStyle('lineHeight', Number(value))}
             afterOperate={() => afterOperate.dispatch()}
           />
           <CompositeInput
-            className='w-80'
+            className='w-74'
             label='字间距'
             value={letterSpacing.toString()}
             onNewValueApply={(value) => setTextStyle('letterSpacing', Number(value))}

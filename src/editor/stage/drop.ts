@@ -19,10 +19,8 @@ export class StageDropService {
   private containerNode!: INodeParent
 
   initHook() {
-    Surface.inited.hook(() => {
-      Surface.addEvent('dragover', preventDefault())
-      Surface.addEvent('drop', preventDefault(this.onDrop))
-    })
+    Surface.addEvent('dragover', preventDefault())
+    Surface.addEvent('drop', preventDefault(this.onDrop))
   }
 
   private async onDrop(e: DragEvent) {
@@ -38,10 +36,12 @@ export class StageDropService {
     if (!transferData) return
 
     const { event, data } = JSON.parse(transferData)
+
     switch (event) {
       case 'dropSvg':
         this.dropSvg(data.svgStr, data.name)
         break
+
       case 'dropImage':
         await this.dropImage(data.url)
         break
@@ -56,6 +56,13 @@ export class StageDropService {
         case 'image/svg+xml':
           const svg = await Uploader.readAsText(file)
           this.dropSvg(svg, file.name)
+          break
+
+        case 'image/jpeg':
+        case 'image/png':
+        case 'image/jpg':
+          const imageDataUrl = await Uploader.readAsDataUrl(file)
+          await this.dropImage(imageDataUrl)
           break
       }
     }
