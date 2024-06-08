@@ -1,9 +1,12 @@
 import autobind from 'class-autobind-decorator'
+import { ratan2 } from 'src/editor/math/base'
+import { xy_distance } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperatePage } from 'src/editor/operate/page'
 import { SchemaDefault } from 'src/editor/schema/default'
 import { Schema } from 'src/editor/schema/schema'
 import { INode, INodeParent } from 'src/editor/schema/type'
+import { StageCursor } from 'src/editor/stage/cursor'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Drag, type IDragData } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
@@ -21,7 +24,7 @@ export type IStageCreateType = (typeof createTypes)[number]
 class StageCreateService {
   createTypes = createTypes
   currentType = createSignal<IStageCreateType>('frame')
-  private createNodeId = ''
+  private createId = ''
   private disposer = createDisposer()
 
   startInteract() {
@@ -38,36 +41,57 @@ class StageCreateService {
 
   private onCreateStart({ start }: IDragData) {
     const node = this.createNode(start)
+
     OperateNode.addNodes([node])
     OperateNode.insertAt(this.findParent(), node)
-    StageSelect.onCreateSelect(this.createNodeId)
+    StageSelect.onCreateSelect(this.createId)
+
+    if (node.type === 'line') StageCursor.setCursor('move').lock().upReset()
   }
 
-  private onCreateMove({ marquee }: IDragData) {
-    const node = Schema.find(this.createNodeId)
-    const { x, y, width, height } = StageViewport.toSceneMarquee(marquee)
-    Schema.itemReset(node, ['x'], x)
-    Schema.itemReset(node, ['y'], y)
-    Schema.itemReset(node, ['width'], width)
-    Schema.itemReset(node, ['height'], height)
+  private onCreateMove({ marquee, current, start }: IDragData) {
+    const node = Schema.find(this.createId)
+
+    if (node.type === 'line') {
+      current = StageViewport.toSceneXY(current)
+      start = StageViewport.toSceneXY(start)
+      const rotation = ratan2(current.y - start.y, current.x - start.x)
+      Schema.itemReset(node, ['x'], start.x)
+      Schema.itemReset(node, ['y'], start.y)
+      Schema.itemReset(node, ['width'], xy_distance(current, start))
+      Schema.itemReset(node, ['rotation'], rotation)
+    } else {
+      const { x, y, width, height } = StageViewport.toSceneMarquee(marquee)
+      Schema.itemReset(node, ['x'], x)
+      Schema.itemReset(node, ['y'], y)
+      Schema.itemReset(node, ['width'], width)
+      Schema.itemReset(node, ['height'], height)
+    }
+
     Schema.commitOperation('创建 node 中...')
     Schema.nextSchema()
   }
 
   private onCreateEnd() {
-    const node = Schema.find<INode>(this.createNodeId)
+    const node = Schema.find<INode>(this.createId)
+
     if (node.width === 0) {
       Schema.itemReset(node, ['width'], 100)
-      Schema.itemReset(node, ['height'], 100)
+      if (node.type !== 'line') {
+        Schema.itemReset(node, ['height'], 100)
+      }
     }
+
     Schema.finalOperation('创建节点 ' + node.name)
     StageInteract.currentType.dispatch('select')
   }
 
   private createNode(start: IXY) {
     const { x, y } = StageViewport.toSceneXY(start)
+
     const node = SchemaDefault[this.currentType.value]({ x, y, width: 0, height: 0 })
-    this.createNodeId = node.id
+    this.createId = node.id
+
     return node
   }
 
@@ -75,6 +99,7 @@ class StageCreateService {
     const frameId = [...OperateNode.hoverIds.value]
       .reverse()
       .find((id) => SchemaUtil.isById(id, 'frame'))
+
     if (frameId) return Schema.find<INodeParent>(frameId)
     return OperatePage.currentPage
   }

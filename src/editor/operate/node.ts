@@ -1,9 +1,9 @@
 import autobind from 'class-autobind-decorator'
-import { cloneDeep } from 'lodash-es'
 import { nanoid } from 'nanoid'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { createSignal } from 'src/shared/signal/signal'
 import { firstOne, stableIndex } from 'src/shared/utils/array'
+import { clone } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { xy_, xy_rotate } from '../math/xy'
 import { SchemaDefault } from '../schema/default'
@@ -137,8 +137,8 @@ class OperateNodeService {
   pasteNodes() {
     if (!this.copyIds.length) return
     const newSelectIds = <ID[]>[]
-    const clone = (oldNode: INode) => {
-      const newNode = cloneDeep(oldNode)
+    const cloneNodes = (oldNode: INode) => {
+      const newNode = clone(oldNode)
       newNode.id = nanoid()
       newNode.name = SchemaDefault.createNodeName(oldNode.type).name
       if ('childIds' in newNode) newNode.childIds = []
@@ -146,7 +146,7 @@ class OperateNodeService {
     }
     SchemaUtil.traverseIds(this.copyIds, (props) => {
       const { node, parent, depth, upLevelRef } = props
-      const newNode = clone(node)
+      const newNode = cloneNodes(node)
       const newParent = upLevelRef?.newNode || parent
       const index = newParent.childIds.indexOf(node.id)
       this.addNodes([newNode])
@@ -188,3 +188,19 @@ class OperateNodeService {
 }
 
 export const OperateNode = new OperateNodeService()
+
+let selectIdList = <string[]>[]
+let selectedNodes = <INode[]>[]
+
+export function getSelectIds() {
+  return selectIdList
+}
+
+export function getSelectNodes() {
+  return selectedNodes
+}
+
+OperateNode.selectIds.hook({ beforeAll: true }, (selectIds) => {
+  selectIdList = [...selectIds]
+  selectedNodes = selectIdList.map(Schema.find<INode>)
+})

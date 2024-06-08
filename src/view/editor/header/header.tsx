@@ -54,7 +54,6 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
         onClick={(e) => {
           StageInteract.currentType.dispatch('create')
           StageCreate.currentType.dispatch(type)
-          // e.stopPropagation()
         }}>
         <Icon size={20} className={isActive ? 'path-fill-hslb60' : ''}>
           {Asset.editor.node[type as keyof typeof Asset.editor.node]}

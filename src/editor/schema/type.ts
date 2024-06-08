@@ -1,4 +1,3 @@
-import { LINE_CAP, LINE_JOIN } from 'pixi.js'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { AllKeys, IXY } from 'src/shared/utils/normal'
 
@@ -152,7 +151,6 @@ export type IStar = INodeBase &
 export type ILine = INodeBase &
   IVectorBase & {
     type: 'line'
-    length: number
   }
 
 export type IText = INodeBase & {
@@ -201,8 +199,8 @@ export type IStroke = {
   width: number
   fill: IFill
   align: 'inner' | 'center' | 'outer'
-  cap: LINE_CAP
-  join: LINE_JOIN
+  cap: CanvasRenderingContext2D['lineCap']
+  join: CanvasRenderingContext2D['lineJoin']
 }
 
 export type IShadow = {

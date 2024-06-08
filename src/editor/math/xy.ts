@@ -1,5 +1,4 @@
-import { IXY } from 'src/shared/utils/normal'
-import { degreefy, rotatePoint } from './base'
+import { degreefy, rcos, rotatePoint, rsin } from './base'
 
 export function xy_(x: number = 0, y: number = 0) {
   return { x, y }
@@ -52,12 +51,8 @@ export function xy_divide(self: IXY, ...numbers: number[]) {
   return { x: self.x / n, y: self.y / n }
 }
 
-export function xy_distance(self: IXY, another: IXY) {
+export function xy_distance(self: IXY, another: IXY = xy_(0, 0)) {
   return Math.sqrt((self.x - another.x) ** 2 + (self.y - another.y) ** 2)
-}
-
-export function xy_distance_noSqrt(self: IXY, another: IXY) {
-  return (self.x - another.x) ** 2 + (self.y - another.y) ** 2
 }
 
 export function xy_rotate(self: IXY, origin: IXY, rotation: number) {
@@ -77,12 +72,38 @@ export function xy_opposite(self: IXY) {
   return { x: -self.x, y: -self.y }
 }
 
-export function xy_angle(self: IXY, another: IXY, origin: IXY) {
-  const radianSelf = Math.atan2(self.y - origin.y, self.x - origin.x)
-  const radianAnother = Math.atan2(another.y - origin.y, another.x - origin.x)
-  return degreefy(radianSelf - radianAnother)
+export function xy_getRotation(self: IXY, another: IXY, origin: IXY) {
+  return degreefy(
+    Math.atan2(self.y - origin.y, self.x - origin.x) -
+      Math.atan2(another.y - origin.y, another.x - origin.x)
+  )
 }
 
 export function xy_toArray(self: IXY) {
   return [self.x, self.y]
+}
+
+export function xy_xAxis(rotation: number) {
+  return { x: rcos(rotation), y: rsin(rotation) }
+}
+
+export function xy_yAxis(rotation: number) {
+  return { x: -rsin(rotation), y: rcos(rotation) }
+}
+
+export type IXY = {
+  x: number
+  y: number
+}
+
+export class XY {
+  constructor(public x: number, public y: number) {}
+
+  static From(xy: IXY) {
+    return new XY(xy.x, xy.y)
+  }
+
+  static FromArray(arr: [number, number]) {
+    return new XY(arr[0], arr[1])
+  }
 }

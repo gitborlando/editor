@@ -1,11 +1,10 @@
 import autobind from 'class-autobind-decorator'
-import { createSignal } from 'src/shared/signal/signal'
 import { createCache } from 'src/shared/utils/cache'
 import { ITraverseData, SchemaUtil } from 'src/shared/utils/schema'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { Schema } from '../schema/schema'
-import { IIrregular } from '../schema/type'
-import { OperateNode } from './node'
+import { IIrregular, INode } from '../schema/type'
+import { OperateNode, getSelectIds, getSelectNodes } from './node'
 
 function createInitGeometry() {
   return {
@@ -28,13 +27,11 @@ export type IGeometry = ReturnType<typeof createInitGeometry>
 @autobind
 class OperateGeometryService {
   geometry = createInitGeometry()
-  isChangedGeometry = createSignal(false)
   geometryKeys = new Set(<(keyof IGeometry)[]>['x', 'y', 'width', 'height', 'rotation'])
   operateKeys = new Set<keyof IGeometry>()
-  beforeOperate = createSignal<(keyof IGeometry)[]>()
-  afterOperate = createSignal()
   geometryKeyValue = createCache<keyof IGeometry, number | 'multi'>()
   private lastGeometry = createInitGeometry()
+
   initHook() {
     OperateNode.selectIds.hook(() => {
       this.setupOperateKeys()
@@ -53,33 +50,38 @@ class OperateGeometryService {
         })
       })
     })
-    this.beforeOperate.hook((keys) => {
-      this.operateKeys = new Set(keys)
-    })
-    this.afterOperate.hook(() => {
-      Schema.finalOperation('操作几何数据')
+  }
+
+  private hasStartApply = false
+
+  setGeometry(key: keyof IGeometry, value: number) {
+    this.geometry[key] = value
+    this.operateKeys.add(key)
+
+    if (this.hasStartApply) return
+    this.hasStartApply = true
+
+    queueMicrotask(() => {
+      SchemaUtil.traverseIds(getSelectIds(), this.applyChangeToNode)
+      Schema.commitOperation('设置几何数据')
+      Schema.nextSchema()
+      this.syncLastGeometry()
+      this.hasStartApply = false
       this.operateKeys.clear()
     })
   }
-  setGeometry(key: keyof IGeometry, value: number) {
-    const lastValue = this.lastGeometry[key]
-    if (value === lastValue) return
-    this.geometry[key] = value
-    this.isChangedGeometry.dispatch(true)
-    SchemaUtil.traverseIds([...OperateNode.selectIds.value], this.applyChangeToNode)
-    Schema.commitOperation('设置几何数据')
-    Schema.nextSchema()
-    this.syncLastGeometry()
-  }
+
   private syncLastGeometry() {
     Object.keys(this.lastGeometry).forEach((key) => {
       //@ts-ignore
       this.lastGeometry[key] = this.geometry[key]
     })
   }
+
   private delta(key: keyof IGeometry) {
     return this.geometry[key] - this.lastGeometry[key]
   }
+
   private setupGeometry() {
     if (OperateNode.selectIds.value.size === 1) {
       const node = OperateNode.selectingNodes[0]
@@ -106,9 +108,11 @@ class OperateGeometryService {
       })
     }
   }
+
   private setupOperateKeys() {
     this.geometryKeys = new Set(['x', 'y', 'width', 'height', 'rotation'])
-    OperateNode.selectingNodes.forEach((node) => {
+
+    getSelectNodes().forEach((node) => {
       if (node.type === 'frame') this.geometryKeys.add('radius')
       if (node.type === 'rect') this.geometryKeys.add('radius')
       if (node.type === 'polygon') this.geometryKeys.add('sides')
@@ -123,63 +127,48 @@ class OperateGeometryService {
       }
     })
   }
+
   private applyChangeToNode(traverseData: ITraverseData) {
     const { node, depth } = traverseData
 
     if (depth === 0) this.patchChangeToVectorPoints(node.id)
 
-    if (this.operateKeys.has('x')) {
-      Schema.itemReset(node, ['x'], node.x + this.delta('x'))
-    }
-    if (this.operateKeys.has('y')) {
-      Schema.itemReset(node, ['y'], node.y + this.delta('y'))
-    }
-    if (this.operateKeys.has('width') && depth === 0) {
-      Schema.itemReset(node, ['width'], node.width + this.delta('width'))
-    }
-    if (this.operateKeys.has('height') && depth === 0) {
-      Schema.itemReset(node, ['height'], node.height + this.delta('height'))
-    }
-    if (this.operateKeys.has('radius') && depth === 0) {
-      Schema.itemReset(node, ['radius'], this.geometry['radius'])
-    }
-    if (this.operateKeys.has('sides')) {
-      Schema.itemReset(node, ['sides'], this.geometry['sides'])
-    }
-    if (this.operateKeys.has('pointCount')) {
-      Schema.itemReset(node, ['pointCount'], this.geometry['pointCount'])
-    }
-    if (this.operateKeys.has('startAngle')) {
-      Schema.itemReset(node, ['startAngle'], this.geometry['startAngle'])
-    }
-    if (this.operateKeys.has('endAngle')) {
-      Schema.itemReset(node, ['endAngle'], this.geometry['endAngle'])
-    }
-    if (this.operateKeys.has('innerRate')) {
-      Schema.itemReset(node, ['innerRate'], this.geometry['innerRate'])
-    }
-    if (this.operateKeys.has('rotation')) {
-      const { getNodeCenterXY } = OperateNode
-      const centerXY = getNodeCenterXY(node)
-      const newXY = xy_rotate(node, centerXY, this.delta('rotation'))
-      Schema.itemReset(node, ['rotation'], node.rotation + this.delta('rotation'))
-      if (depth === 0) {
-        Schema.itemReset(node, ['x'], newXY.x)
-        Schema.itemReset(node, ['y'], newXY.y)
-      } else {
-        let upLevelRef = traverseData.upLevelRef!
-        while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
-        const ancestorCenter = getNodeCenterXY(upLevelRef.node)
-        const newCenter = xy_rotate(centerXY, ancestorCenter, this.delta('rotation'))
-        const centerShift = xy_minus(newCenter, centerXY)
-        Schema.itemReset(node, ['x'], newXY.x + centerShift.x)
-        Schema.itemReset(node, ['y'], newXY.y + centerShift.y)
+    this.operateKeys.forEach((key) => {
+      if ((key === 'width' || key === 'height' || key === 'radius') && depth !== 0) return
+      if (key === 'height' && node.type === 'line') return
+      if (key === 'rotation') {
+        return this.applyRotationToNode(traverseData, node, depth)
       }
+      //@ts-ignore
+      Schema.itemReset(node, [key], node[key] + this.delta(key))
+    })
+  }
+
+  private applyRotationToNode(traverseData: ITraverseData, node: INode, depth: number) {
+    const { getNodeCenterXY } = OperateNode
+    const centerXY = getNodeCenterXY(node)
+    const newXY = xy_rotate(node, centerXY, this.delta('rotation'))
+
+    Schema.itemReset(node, ['rotation'], node.rotation + this.delta('rotation'))
+
+    if (depth === 0) {
+      Schema.itemReset(node, ['x'], newXY.x)
+      Schema.itemReset(node, ['y'], newXY.y)
+    } else {
+      let upLevelRef = traverseData.upLevelRef!
+      while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
+      const ancestorCenter = getNodeCenterXY(upLevelRef.node)
+      const newCenter = xy_rotate(centerXY, ancestorCenter, this.delta('rotation'))
+      const centerShift = xy_minus(newCenter, centerXY)
+      Schema.itemReset(node, ['x'], newXY.x + centerShift.x)
+      Schema.itemReset(node, ['y'], newXY.y + centerShift.y)
     }
   }
+
   private patchChangeToVectorPoints(id: string) {
     const node = Schema.find<IIrregular>(id)
     if (node.type !== 'irregular') return
+
     node.points.forEach((point, i) => {
       if (this.operateKeys.has('width')) {
         point.x *= 1 + this.delta('width') / node.width

@@ -165,10 +165,10 @@ class SchemaDefaultService {
     return {
       type: 'line',
       points: [],
-      length: 100,
       ...nodeBase,
       ...name,
       ...option,
+      height: 0,
       fills: [],
       strokes: [this.stroke()],
     }

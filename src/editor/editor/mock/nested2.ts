@@ -72,7 +72,7 @@ export function mockNested2() {
       x: 100,
       y: 0,
       parentId: 'frame:1',
-      fills: [imageFill],
+      fills: [LinearGradient],
     }),
     triangle1: SchemaDefault.polygon({
       id: 'triangle1',
@@ -86,10 +86,8 @@ export function mockNested2() {
     line1: SchemaDefault.line({
       id: 'line1',
       width: 100,
-      height: 0,
       x: 100,
       y: 350,
-      length: 100,
       strokes: [SchemaDefault.stroke()],
       parentId: 'frame:1',
     }),

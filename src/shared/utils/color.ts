@@ -1,7 +1,7 @@
 import hexRgb from 'hex-rgb'
 import { atan, degreefy } from 'src/editor/math/base'
 import { IFillColor, IFillLinearGradient } from 'src/editor/schema/type'
-import { memoize } from 'src/shared/utils/normal'
+import { memorize } from 'src/shared/utils/normal'
 
 export function isHexColor(hex: string) {
   return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex)
@@ -45,7 +45,7 @@ export function hslColor(h: number, s: number, l: number) {
   return rgbaString(hslToRgba(h, s, l))
 }
 
-export const hslBlueColor = memoize((l: number) => {
+export const hslBlueColor = memorize((l: number) => {
   return hslColor(217, 100, l)
 })
 

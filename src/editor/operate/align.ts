@@ -5,7 +5,7 @@ import { createSignal } from 'src/shared/signal/signal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { Schema } from '../schema/schema'
 import { INode, INodeParent } from '../schema/type'
-import { OperateNode } from './node'
+import { OperateNode, getSelectNodes } from './node'
 
 const alignTypes = <const>[
   'alignLeft',
@@ -26,12 +26,14 @@ class OperateAlignService {
   afterAlign = createSignal()
   private needAlign = false
   private toAlignNodes = <INode[]>[]
+
   initHook() {
     OperateNode.selectedNodes$.hook(this.setupAlign)
     this.currentAlign.hook(this.autoAlign)
   }
+
   private setupAlign() {
-    const selectNodes = OperateNode.selectingNodes
+    const selectNodes = getSelectNodes()
     if (selectNodes.length === 0) {
       this.canAlign.dispatch(false)
     }
@@ -44,6 +46,7 @@ class OperateAlignService {
       this.canAlign.dispatch(true)
     }
   }
+
   private autoAlign() {
     this[this.currentAlign.value]()
     if (this.needAlign) {
@@ -51,54 +54,61 @@ class OperateAlignService {
       this.needAlign = false
     }
   }
+
   private alignLeft() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeBound } = this.getOBBAndBound(node)
-      const shift = alignBound.left - nodeBound.left
+      const nodeBound = this.getOBBAndBound(node)
+      const shift = alignBound.minX - nodeBound.minX
       this.horizontalAlign(node, shift)
     })
   }
+
   private alignCenter() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeBound } = this.getOBBAndBound(node)
-      const shift = alignBound.centerX - nodeBound.centerX
+      const nodeBound = this.getOBBAndBound(node)
+      const shift = (alignBound.maxX - alignBound.minX) / 2 - (nodeBound.maxX - nodeBound.minX) / 2
       this.horizontalAlign(node, shift)
     })
   }
+
   private alignRight() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeBound } = this.getOBBAndBound(node)
-      const shift = alignBound.right - nodeBound.right
+      const nodeBound = this.getOBBAndBound(node)
+      const shift = alignBound.maxX - nodeBound.maxX
       this.horizontalAlign(node, shift)
     })
   }
+
   private verticalTop() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeBound } = this.getOBBAndBound(node)
-      const shift = alignBound.top - nodeBound.top
+      const nodeBound = this.getOBBAndBound(node)
+      const shift = alignBound.minY - nodeBound.minY
       this.verticalAlign(node, shift)
     })
   }
+
   private verticalCenter() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeBound } = this.getOBBAndBound(node)
-      const shift = alignBound.centerY - nodeBound.centerY
+      const nodeBound = this.getOBBAndBound(node)
+      const shift = (alignBound.maxY - alignBound.minY) / 2 - (nodeBound.maxY - nodeBound.minY) / 2
       this.verticalAlign(node, shift)
     })
   }
+
   private verticalBottom() {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
-      const { nodeBound } = this.getOBBAndBound(node)
-      const shift = alignBound.bottom - nodeBound.bottom
+      const nodeBound = this.getOBBAndBound(node)
+      const shift = alignBound.maxY - nodeBound.maxY
       this.verticalAlign(node, shift)
     })
   }
+
   private horizontalAlign(node: INode, shift: number) {
     if (shift === 0) return
     this.needAlign = true
@@ -107,6 +117,7 @@ class OperateAlignService {
       return false
     })
   }
+
   private verticalAlign(node: INode, shift: number) {
     if (shift === 0) return
     this.needAlign = true
@@ -115,18 +126,18 @@ class OperateAlignService {
       return false
     })
   }
+
   private getAlignBound() {
-    const selectNodes = OperateNode.selectingNodes
-    if (selectNodes.length > 1) {
-      return StageWidgetTransform.transformOBB.getAABBBound()
+    if (getSelectNodes().length > 1) {
+      return StageWidgetTransform.transformOBB.aabb
     } else {
-      return StageScene.findElem(selectNodes[0].id).obb.getAABBBound()
+      return StageScene.findElem(getSelectNodes()[0].id).obb.aabb
     }
   }
+
   private getOBBAndBound(node: INode) {
     const nodeOBB = StageScene.findElem(node.id).obb
-    const nodeBound = nodeOBB.getAABBBound()
-    return { nodeBound }
+    return nodeOBB.aabb
   }
 }
 

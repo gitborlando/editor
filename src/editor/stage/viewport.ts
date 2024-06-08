@@ -50,7 +50,7 @@ class StageViewportService {
   private wheeler = new EventWheelService()
 
   initHook() {
-    Surface.inited.hook(() => {
+    Surface.inited$.hook(() => {
       this.onResizeBound()
       window.addEventListener('resize', this.onResizeBound)
       this.onWheelZoom()

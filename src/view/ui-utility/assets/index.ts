@@ -1,5 +1,5 @@
-import EditorCursorResize from './editor/cursor/resize.tsx'
-import EditorCursorSelect from './editor/cursor/select.tsx'
+import StageCursorResize from './editor/cursor/resize.tsx'
+import StageCursorSelect from './editor/cursor/select.tsx'
 import EditorFont华光钢铁直黑中黑 from './editor/font/华光钢铁直黑-中黑.ttf'
 import EditorHeaderMenu from './editor/header/menu.tsx'
 import EditorHeaderRecordRedo from './editor/header/record/redo.tsx'
@@ -49,8 +49,8 @@ import FavIconShiyangyang from './fav-icon/shiyangyang.png'
 const Asset = {
   editor: {
     cursor: {
-      resize: EditorCursorResize,
-      select: EditorCursorSelect,
+      resize: StageCursorResize,
+      select: StageCursorSelect,
     },
     font: {
       华光钢铁直黑中黑: EditorFont华光钢铁直黑中黑,

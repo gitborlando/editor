@@ -1,13 +1,11 @@
-import { camelCase } from 'lodash-es'
-import { LINE_CAP, LINE_JOIN } from 'pixi.js'
 import { xy_, xy_symmetric } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
 import { SchemaDefault } from 'src/editor/schema/default'
-import { IFrame, INode, INodeParent, IPoint } from 'src/editor/schema/type'
+import { IFrame, INode, INodeParent, IPoint, IStroke } from 'src/editor/schema/type'
 import { loopFor } from 'src/shared/utils/array'
 import { normalizeColor } from 'src/shared/utils/color'
 import { IrregularUtils } from 'src/shared/utils/irregular'
-import { IXY } from 'src/shared/utils/normal'
+import { IXY, camelCase } from 'src/shared/utils/normal'
 import arcToBezier from 'svg-arc-to-cubic-bezier'
 import { ElementNode, parse as svgParser } from 'svg-parser'
 import svgPathBoundingBox from 'svg-path-bounding-box'
@@ -129,8 +127,8 @@ export class SvgParser {
     const nodeStroke = SchemaDefault.stroke({
       fill: strokeColor,
       width: strokeWidth! * this.ratio.x,
-      join: strokeLinejoin as LINE_JOIN,
-      cap: strokeLinecap as LINE_CAP,
+      join: strokeLinejoin as IStroke['join'],
+      cap: strokeLinecap as IStroke['cap'],
     })
     node.strokes = [nodeStroke]
   }

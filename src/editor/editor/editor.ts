@@ -1,15 +1,12 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
 import { IEditorCommand, editorCommands } from 'src/editor/editor/command'
-import { EditorCursor } from 'src/editor/editor/cursor'
 import { listen } from 'src/shared/utils/event'
 
 @autobind
 export class EditorService {
   initHook() {
     this.bindHotkeys()
-
-    EditorCursor.initHook()
   }
   private bindHotkeys() {
     let isKeyDown = false

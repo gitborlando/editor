@@ -11,7 +11,6 @@ export type IStageInteractType = 'select' | 'move' | 'create'
 @autobind
 class StageInteractService {
   currentType = createSignal(<IStageInteractType>'select')
-  canHover = createSignal(true)
   private previousType?: IStageInteractType
   private interactHandlerMap = new Map<
     IStageInteractType,
@@ -22,9 +21,7 @@ class StageInteractService {
     this.interactHandlerMap.set('move', StageMove)
     this.interactHandlerMap.set('select', StageSelect)
     this.currentType.hook(this.autoInteract)
-    // this.currentType.hook(this.autoCursor)
-    Surface.inited.hook(() => {
-      //  this.bindHover()
+    Surface.inited$.hook(() => {
       this.currentType.dispatch('select')
     })
   }
@@ -36,9 +33,3 @@ class StageInteractService {
 }
 
 export const StageInteract = new StageInteractService()
-
-const interactCursorMap = {
-  select: 'auto',
-  move: 'grab',
-  create: 'crosshair',
-}

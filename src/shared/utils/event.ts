@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { INoopFunc } from './normal'
 
-export const isLeftMouse = (e: any): e is MouseEvent => e.button === 0
-export const isRightMouse = (e: any): e is MouseEvent => e.button === 2
+export const isLeftMouse = (e: MouseEvent) => e.button === 0
+export const isRightMouse = (e: MouseEvent) => e.button === 2
 
 export function listen<K extends keyof WindowEventMap>(
   type: K,
@@ -10,6 +10,17 @@ export function listen<K extends keyof WindowEventMap>(
 ) {
   window.addEventListener(type, listener)
   return () => window.removeEventListener(type, listener)
+}
+
+export function listenOnce<K extends keyof WindowEventMap>(
+  type: K,
+  listener: (this: Window, ev: WindowEventMap[K]) => any
+) {
+  const once = (ev: WindowEventMap[K]) => {
+    listener.call(window, ev)
+    window.removeEventListener(type, once)
+  }
+  window.addEventListener(type, once)
 }
 
 export function listenCapture<K extends keyof WindowEventMap>(

@@ -1,5 +1,5 @@
 import { OperateGeometry } from 'src/editor/operate/geometry'
-import { StageWidgetMarquee } from 'src/editor/stage/render/widget/marquee'
+import { StageCursor } from 'src/editor/stage/cursor'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
 import { OperateNode } from '../operate/node'
@@ -22,7 +22,6 @@ import { mockFile } from './mock/mock'
 
 function initHooks() {
   Editor.initHook()
-  // EditorCursor.initHook()
 
   FileManager.initHook()
   SchemaHistory.initHook()
@@ -40,7 +39,7 @@ function initHooks() {
   StageViewport.initHook()
   StageInteract.initHook()
   StageDrop.initHook()
-  StageWidgetMarquee.initHook()
+  StageCursor.initHook()
 
   UILeftPanelLayer.initHook()
   UILeftPanel.initHook()

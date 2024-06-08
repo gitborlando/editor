@@ -1,6 +1,6 @@
 import { Container, Graphics } from '@pixi/react'
 import { FC, Fragment, memo } from 'react'
-import { xy_angle, xy_minus, xy_opposite, xy_plus, xy_rotate } from 'src/editor/math/xy'
+import { xy_getRotation, xy_minus, xy_opposite, xy_plus, xy_rotate } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
 import { Schema } from 'src/editor/schema/schema'
 import { INode, IPoint, ISchemaPropKey } from 'src/editor/schema/type'
@@ -75,7 +75,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
             if (!handleRight) break firstIf
             if (point.symmetric === 'complete') shiftHandleRight(xy_opposite(shift))
             if (point.symmetric === 'angle') {
-              const angle = xy_angle(xy_plus(shift, handleLeft!), handleLeft!, point)
+              const angle = xy_getRotation(xy_plus(shift, handleLeft!), handleLeft!, point)
               const newHandleRight = xy_rotate(handleRight, point, angle)
               shiftHandleRight(xy_minus(newHandleRight, handleRight))
             }
@@ -83,7 +83,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
             shiftHandleRight(shift)
             if (point.symmetric === 'complete') shiftHandleLeft(xy_opposite(shift))
             if (point.symmetric === 'angle') {
-              const angle = xy_angle(xy_plus(shift, handleRight!), handleRight!, point)
+              const angle = xy_getRotation(xy_plus(shift, handleRight!), handleRight!, point)
               const newHandleLeft = xy_rotate(handleLeft!, point, angle)
               shiftHandleLeft(xy_minus(newHandleLeft, handleLeft!))
             }

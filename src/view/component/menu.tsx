@@ -13,6 +13,7 @@ type IMenuComp = {}
 export const MenuComp: FC<IMenuComp> = memo(({}) => {
   const { setRef, xy, menuOptions, closeMenu } = Menu
   useHookSignal(menuOptions)
+  useHookSignal(xy)
 
   const MenuItemComp = useMemoComp<{ item: IEditorCommand }>([], ({ item }) => {
     return (

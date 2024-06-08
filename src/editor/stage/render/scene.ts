@@ -1,6 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { OBB } from 'src/editor/math/obb'
 import { OperatePage } from 'src/editor/operate/page'
+import { StageWidgetMarquee } from 'src/editor/stage/render/widget/marquee'
 import { StageWidgetTransform } from 'src/editor/stage/render/widget/transform'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { mergeSignal } from 'src/shared/signal/signal'
@@ -22,6 +23,7 @@ class StageSceneService {
 
   initHook() {
     StageWidgetTransform.initHook()
+    StageWidgetMarquee.initHook()
 
     this.setupRootElem()
     this.hookRenderNode()
@@ -39,7 +41,7 @@ class StageSceneService {
   }
 
   private hookRenderNode() {
-    mergeSignal(Schema.inited, Surface.inited).hook(() => {
+    mergeSignal(Schema.inited, Surface.inited$).hook(() => {
       const renderPage = () => {
         this.sceneRoot.children = []
         this.render('add', [OperatePage.currentPage.id])
@@ -85,27 +87,14 @@ class StageSceneService {
 
     const elem = new Elem(node.id)
     this.elements.set(node.id, elem)
+    this.bindNodeHover(elem, node)
 
     const parent = this.elements.get(node.parentId) || this.sceneRoot
     parent.addChild(elem)
 
     this.updateNode(node)
 
-    this.bindNodeHover(elem, node)
-
     SchemaUtil.getChildren(node.id).forEach(this.mountNode)
-  }
-
-  private bindNodeHover(elem: Elem, node: INode) {
-    elem.eventHandle.addEvent('hover', ({ hovered }) => {
-      hovered ? OperateNode.hover(node.id) : OperateNode.unHover(node.id)
-
-      if (node.type === 'frame' && elem.parent === this.sceneRoot) return
-      if (OperateNode.selectIds.value.has(node.id)) return
-
-      elem.outline = hovered ? 'hover' : undefined
-      Surface.collectDirtyRect(elem.aabb)
-    })
   }
 
   private updateNode(node: INode) {
@@ -145,6 +134,18 @@ class StageSceneService {
     }
 
     Surface.collectDirtyRect(parent.aabb)
+  }
+
+  private bindNodeHover(elem: Elem, node: INode) {
+    elem.eventHandle.addEvent('hover', ({ hovered }) => {
+      hovered ? OperateNode.hover(node.id) : OperateNode.unHover(node.id)
+
+      if (node.type === 'frame' && elem.parent === this.sceneRoot) return
+      if (OperateNode.selectIds.value.has(node.id)) return
+
+      elem.outline = hovered ? 'hover' : undefined
+      Surface.collectDirtyRect(elem.aabb)
+    })
   }
 }
 

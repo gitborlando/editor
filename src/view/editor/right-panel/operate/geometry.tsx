@@ -1,11 +1,9 @@
-import { FC, memo, useRef } from 'react'
+import { FC, memo } from 'react'
 import { floor, max, min } from 'src/editor/math/base'
 import { IGeometry, OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
-import { StageViewport } from 'src/editor/stage/viewport'
-import { useHookSignal, useSignal } from 'src/shared/signal/signal-react'
-import { useDownUpTracker } from 'src/shared/utils/event'
-import { useMemoComp } from 'src/shared/utils/react'
+import { useHookSignal } from 'src/shared/signal/signal-react'
+import { useMemoComp, useZoom } from 'src/shared/utils/react'
 import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import { Flex } from 'src/view/ui-utility/widget/flex'
 
@@ -21,26 +19,12 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
     operateKey: keyof IGeometry
     slideRate?: number
   }>([], ({ label, operateKey, slideRate }) => {
-    const { geometry, geometryKeyValue, setGeometry } = OperateGeometry
-    const ref = useRef<HTMLDivElement>(null)
-    const operateDataCache = useSignal(0)
-    slideRate = (slideRate ?? 1) / StageViewport.zoom.value
-
+    const { geometryKeyValue, setGeometry } = OperateGeometry
     const { selectedNodes } = OperateNode
-    useHookSignal(selectedNodes, { after: 'geometryKeyValue' })
 
-    useHookSignal(StageViewport.zoom)
-    useDownUpTracker(
-      () => ref.current,
-      () => {
-        operateDataCache.value = geometry[operateKey]
-        OperateGeometry.beforeOperate.dispatch([operateKey])
-      },
-      () => {
-        if (operateDataCache.value === geometry[operateKey]) return
-        OperateGeometry.afterOperate.dispatch()
-      }
-    )
+    slideRate = (slideRate ?? 1) / useZoom()
+
+    useHookSignal(selectedNodes, { after: 'geometryKeyValue' })
 
     const produceValue = (newValue?: number) => {
       if (newValue !== undefined) {
@@ -84,7 +68,6 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
 
     return (
       <CompositeInput
-        ref={ref}
         className='d-hover-bg px-6'
         label={label}
         value={formatNumber(produceValue())}

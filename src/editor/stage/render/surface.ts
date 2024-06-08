@@ -9,7 +9,7 @@ import { IXY } from 'src/shared/utils/normal'
 import { Elem } from './elem'
 
 export const Surface = new (class SurfaceService {
-  inited = createSignal()
+  inited$ = createSignal()
 
   canvas!: HTMLCanvasElement
   ctx!: CanvasRenderingContext2D
@@ -17,7 +17,7 @@ export const Surface = new (class SurfaceService {
   textBreaker!: TextBreaker
 
   setCanvas = async (canvas: HTMLCanvasElement) => {
-    if (this.inited.value) return
+    if (this.inited$.value) return
 
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')!
@@ -29,7 +29,7 @@ export const Surface = new (class SurfaceService {
     this.handleEvents()
 
     this.requestRender('full')
-    this.inited.dispatch(true)
+    this.inited$.dispatch(true)
   }
 
   ctxSaveRestore(func: (ctx: CanvasRenderingContext2D) => any) {
@@ -64,7 +64,7 @@ export const Surface = new (class SurfaceService {
 
   private dirtyRects = new Set<AABB>()
 
-  collectDirtyRect(aabb: AABB, expand = 1) {
+  collectDirtyRect = (aabb: AABB, expand = 1) => {
     if (this.renderType === 'full') return
 
     this.dirtyRects.add(AABB.Expand(aabb, expand / getZoom()))
@@ -111,10 +111,10 @@ export const Surface = new (class SurfaceService {
     listener: (this: HTMLCanvasElement, ev: HTMLElementEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions
   ) => {
-    if (this.inited.value) {
+    if (this.inited$.value) {
       this.canvas.addEventListener(type, listener, options)
     } else {
-      this.inited.hook(() => this.canvas.addEventListener(type, listener, options))
+      this.inited$.hook(() => this.canvas.addEventListener(type, listener, options))
     }
   }
 

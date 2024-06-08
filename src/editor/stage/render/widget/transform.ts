@@ -1,13 +1,14 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
-import { EditorCursor } from 'src/editor/editor/cursor'
+
 import { radianfy, rcos, rsin } from 'src/editor/math/base'
 import { AABB, OBB } from 'src/editor/math/obb'
-import { xy_, xy_plus } from 'src/editor/math/xy'
+import { xy_dot, xy_getRotation, xy_xAxis, xy_yAxis } from 'src/editor/math/xy'
 import { OperateGeometry } from 'src/editor/operate/geometry'
-import { OperateNode } from 'src/editor/operate/node'
+import { OperateNode, getSelectIds, getSelectNodes } from 'src/editor/operate/node'
 import { SchemaHistory } from 'src/editor/schema/history'
 import { Schema } from 'src/editor/schema/schema'
+import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { Elem, ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
@@ -17,7 +18,8 @@ import { Drag } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
 import { createObjCache } from 'src/shared/utils/cache'
 import { hslBlueColor } from 'src/shared/utils/color'
-import { IXY, iife } from 'src/shared/utils/normal'
+import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
+import { IXY } from 'src/shared/utils/normal'
 
 @autobind
 class StageWidgetTransformService {
@@ -27,7 +29,6 @@ class StageWidgetTransformService {
   private transformElem = new Elem('transform')
   private lineElems = createObjCache<Elem>()
   private vertexElems = createObjCache<Elem>()
-  private rotateElems = createObjCache<Elem>()
 
   initHook() {
     StageScene.widgetRoot.addChild(this.transformElem)
@@ -47,11 +48,10 @@ class StageWidgetTransformService {
     Drag.onStart(() => {
       this.show.dispatch(false)
       if (hotkeys.alt) {
-        EditorCursor.setCursor('copy')
+        StageCursor.setCursor('copy')
         OperateNode.copySelectNodes()
         OperateNode.pasteNodes()
       }
-      OperateGeometry.beforeOperate.dispatch(['x', 'y'])
     })
       .onMove(({ shift }) => {
         const sceneShiftXY = StageViewport.toSceneShift(shift)
@@ -61,11 +61,9 @@ class StageWidgetTransformService {
       .onDestroy(({ dragService }) => {
         if (dragService.started) {
           if (hotkeys.alt) {
-            EditorCursor.setCursor('select')
+            StageCursor.setCursor('select')
             OperateGeometry.operateKeys.clear()
             Schema.finalOperation('alt 复制节点')
-          } else {
-            OperateGeometry.afterOperate.dispatch()
           }
         }
       })
@@ -82,9 +80,6 @@ class StageWidgetTransformService {
       this.show.dispatch(false)
     })
     StageViewport.afterZoom.hook(() => {
-      this.show.dispatch(true)
-    })
-    OperateGeometry.afterOperate.hook(() => {
       this.show.dispatch(true)
     })
     OperateNode.intoEditNodeId.hook(() => {
@@ -108,7 +103,6 @@ class StageWidgetTransformService {
 
     const [p0, p1, p2, p3] = this.transformOBB.calcVertexXY()
     this.setupTransformElem()
-    // this.setupRotation(p1)
     this.setupLine('top', p0, p1)
     this.setupLine('right', p1, p2)
     this.setupLine('bottom', p2, p3)
@@ -118,22 +112,24 @@ class StageWidgetTransformService {
     this.setupVertex('bottomRight', p2)
     this.setupVertex('bottomLeft', p3)
 
-    OperateNode.selectingNodes.map((node) => {
+    getSelectNodes().map((node) => {
       const elem = StageScene.findElem(node.id)
       if (elem) elem.outline = 'select'
     })
   }
 
   private calcTransformOBB() {
-    if (!OperateNode.selectIds.value.size) {
+    if (!getSelectIds().length) {
       return (this.transformOBB = OBB.IdentityOBB())
     }
-    if (OperateNode.selectIds.value.size === 1) {
-      const elem = StageScene.findElem(OperateNode.selectingNodes[0].id)
+
+    if (getSelectIds().length === 1) {
+      const elem = StageScene.findElem(getSelectNodes()[0].id)
       if (!elem) return (this.transformOBB = OBB.IdentityOBB())
       return (this.transformOBB = elem.obb.clone())
     }
-    const aabbList = OperateNode.selectingNodes.map((node) => {
+
+    const aabbList = getSelectNodes().map((node) => {
       return StageScene.findElem(node.id).obb.aabb
     })
     return (this.transformOBB = OBB.FromAABB(AABB.Merge(...aabbList)))
@@ -150,59 +146,62 @@ class StageWidgetTransformService {
 
   private setupLine(type: 'top' | 'bottom' | 'left' | 'right', p1: IXY, p2: IXY) {
     const spread = 10
-    const { geometry, beforeOperate, afterOperate, setGeometry } = OperateGeometry
+    const { setGeometry } = OperateGeometry
 
     const mouseover = (e: ElemMouseEvent) => {
-      if (!e.hovered) return EditorCursor.setCursor('select')
+      if (!e.hovered) return StageCursor.setCursor('select')
+
+      const selectNodes = getSelectNodes()
+      if (selectNodes.length === 1 && selectNodes[0].type === 'line') {
+        return StageCursor.setCursor('select')
+      }
 
       switch (type) {
         case 'top':
         case 'bottom':
-          return EditorCursor.setCursor('resize', this.transformOBB.rotation + 90)
+          return StageCursor.setCursor('resize', this.transformOBB.rotation + 90)
         case 'right':
         case 'left':
-          return EditorCursor.setCursor('resize', this.transformOBB.rotation)
+          return StageCursor.setCursor('resize', this.transformOBB.rotation)
       }
     }
 
     const mousedown = (e: ElemMouseEvent) => {
+      StageCursor.lock()
       e.stopPropagation()
 
       const { x, y, width, height, rotation } = OperateGeometry.geometry
 
-      Drag.onStart(() => {
-        const operateKeys = iife(() => {
-          if (type === 'top') return ['x', 'y', 'height']
-          if (type === 'right') return ['width']
-          if (type === 'bottom') return ['height']
-          if (type === 'left') return ['x', 'y', 'width']
-        }) //@ts-ignore
-        beforeOperate.dispatch(operateKeys)
+      Drag.onSlide(({ shift }) => {
+        shift = StageViewport.toSceneShift(shift)
+        const shiftW = xy_dot(shift, xy_xAxis(rotation))
+        const shiftH = xy_dot(shift, xy_yAxis(rotation))
+
+        if (getSelectNodes().length === 1 && getSelectNodes()[0].type === 'line') {
+          setGeometry('x', x + xy_dot(shift, xy_xAxis(0)))
+          setGeometry('y', y + xy_dot(shift, xy_yAxis(0)))
+          return
+        }
+
+        switch (type) {
+          case 'top':
+            setGeometry('x', x - shiftH * rsin(rotation))
+            setGeometry('y', y + shiftH * rcos(rotation))
+            setGeometry('height', height - shiftH)
+            break
+          case 'right':
+            setGeometry('width', width + shiftW)
+            break
+          case 'bottom':
+            setGeometry('height', height + shiftH)
+            break
+          case 'left':
+            setGeometry('x', x + shiftW * rcos(rotation))
+            setGeometry('y', y + shiftW * rsin(rotation))
+            setGeometry('width', width - shiftW)
+            break
+        }
       })
-        .onMove(({ shift }) => {
-          shift = StageViewport.toSceneShift(shift)
-          switch (type) {
-            case 'top':
-              setGeometry('x', x - shift.y * rsin(rotation))
-              setGeometry('y', y + shift.y * rcos(rotation))
-              setGeometry('height', height - shift.y)
-              break
-            case 'right':
-              setGeometry('width', width + shift.x)
-              break
-            case 'bottom':
-              setGeometry('height', height + shift.y)
-              break
-            case 'left':
-              setGeometry('x', x + shift.x * rcos(rotation))
-              setGeometry('y', y + shift.x * rsin(rotation))
-              setGeometry('width', width - shift.x)
-              break
-          }
-        })
-        .onDestroy(() => {
-          afterOperate.dispatch()
-        })
     }
 
     const line = this.lineElems.getSet(type, () => {
@@ -227,60 +226,85 @@ class StageWidgetTransformService {
   }
 
   private setupVertex(type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft', xy: IXY) {
+    const { setGeometry } = OperateGeometry
+
     const mouseenter = (e: ElemMouseEvent) => {
-      if (!e.hovered) return EditorCursor.setCursor('select')
+      if (!e.hovered) return StageCursor.setCursor('select')
+
+      if (getSelectNodes().length === 1 && getSelectNodes()[0].type === 'line') {
+        return StageCursor.setCursor('resize', this.transformOBB.rotation)
+      }
 
       switch (type) {
         case 'topLeft':
         case 'bottomRight':
-          return EditorCursor.setCursor('resize', this.transformOBB.rotation + 45)
+          return StageCursor.setCursor('resize', this.transformOBB.rotation + 45)
         case 'topRight':
         case 'bottomLeft':
-          return EditorCursor.setCursor('resize', this.transformOBB.rotation - 45)
+          return StageCursor.setCursor('resize', this.transformOBB.rotation - 45)
       }
+    }
+
+    const moveVertex = (e: ElemMouseEvent) => {
+      StageCursor.lock()
+      const { x, y, width, height, rotation } = OperateGeometry.geometry
+
+      Drag.onSlide(({ shift }) => {
+        shift = StageViewport.toSceneShift(shift)
+        const shiftW = xy_dot(shift, xy_xAxis(rotation))
+        const shiftH = xy_dot(shift, xy_yAxis(rotation))
+
+        if (getSelectNodes().length === 1 && getSelectNodes()[0].type === 'line') {
+          setGeometry('width', width + shiftW)
+          setGeometry('height', height + shiftH)
+          return
+        }
+
+        switch (type) {
+          case 'topLeft':
+            setGeometry('x', x - shiftH * rsin(rotation) + shiftW * rcos(rotation))
+            setGeometry('y', y + shiftW * rsin(rotation) + shiftH * rcos(rotation))
+            setGeometry('width', width - shiftW)
+            setGeometry('height', height - shiftH)
+            break
+          case 'topRight':
+            setGeometry('x', x - shiftH * rsin(rotation))
+            setGeometry('y', y + shiftH * rcos(rotation))
+            setGeometry('height', height - shiftH)
+            setGeometry('width', width + shiftW)
+            break
+          case 'bottomRight':
+            setGeometry('width', width + shiftW)
+            setGeometry('height', height + shiftH)
+            break
+          case 'bottomLeft':
+            setGeometry('x', x + shiftW * rcos(rotation))
+            setGeometry('y', y + shiftW * rsin(rotation))
+            setGeometry('width', width - shiftW)
+            setGeometry('height', height + shiftH)
+            break
+        }
+      })
+    }
+
+    const rotate = (e: ElemMouseEvent) => {
+      const { rotation, center } = this.transformOBB
+
+      StageCursor.setCursor('rotate').lock().upReset()
+
+      Drag.onSlide(({ current, start }) => {
+        current = StageViewport.toSceneXY(current)
+        start = StageViewport.toSceneXY(start)
+        const deltaRotation = xy_getRotation(current, start, center)
+
+        setGeometry('rotation', rotation + deltaRotation)
+      })
     }
 
     const mousedown = (e: ElemMouseEvent) => {
       e.stopPropagation()
-
-      const { x, y, width, height } = OperateGeometry.geometry
-      Drag.onStart(() => {
-        const operateKeys = iife(() => {
-          if (type === 'topLeft') return ['x', 'y', 'width', 'height']
-          if (type === 'topRight') return ['y', 'width', 'height']
-          if (type === 'bottomRight') return ['width', 'height']
-          if (type === 'bottomLeft') return ['x', 'width', 'height']
-        }) //@ts-ignore
-        OperateGeometry.beforeOperate.dispatch(operateKeys)
-      })
-        .onMove(({ shift }) => {
-          shift = StageViewport.toSceneShift(shift)
-          switch (type) {
-            case 'topLeft':
-              OperateGeometry.setGeometry('x', x + shift.x)
-              OperateGeometry.setGeometry('y', y + shift.y)
-              OperateGeometry.setGeometry('width', width - shift.x)
-              OperateGeometry.setGeometry('height', height - shift.y)
-              break
-            case 'topRight':
-              OperateGeometry.setGeometry('y', y + shift.y)
-              OperateGeometry.setGeometry('width', width + shift.x)
-              OperateGeometry.setGeometry('height', height - shift.y)
-              break
-            case 'bottomRight':
-              OperateGeometry.setGeometry('width', width + shift.x)
-              OperateGeometry.setGeometry('height', height + shift.y)
-              break
-            case 'bottomLeft':
-              OperateGeometry.setGeometry('x', x + shift.x)
-              OperateGeometry.setGeometry('width', width - shift.x)
-              OperateGeometry.setGeometry('height', height + shift.y)
-              break
-          }
-        })
-        .onDestroy(() => {
-          OperateGeometry.afterOperate.dispatch()
-        })
+      if (isLeftMouse(e.hostEvent)) return moveVertex(e)
+      if (isRightMouse(e.hostEvent)) rotate(e)
     }
 
     const vertexElem = this.vertexElems.getSet(type, () => {
@@ -292,75 +316,19 @@ class StageWidgetTransformService {
       return vertexElem
     })
 
-    const zoom = StageViewport.zoom.value
-    const size = 6 / zoom
+    const size = 6 / getZoom()
 
     vertexElem.hitTest = vertexElem.eventHandle.hitPoint(xy, size * 5)
 
     vertexElem.draw = (ctx, path2d) => {
       if (!this.show.value) return
 
-      path2d.roundRect(-size / 2, -size / 2, size, size, 1 / zoom)
-      ctx.lineWidth = 2 / zoom
+      path2d.roundRect(-size / 2, -size / 2, size, size, 1 / getZoom())
+      ctx.lineWidth = 2 / getZoom()
       ctx.strokeStyle = hslBlueColor(65)
       ctx.fillStyle = 'white'
       ctx.translate(xy.x, xy.y)
       ctx.rotate(radianfy(this.transformOBB.rotation))
-      ctx.stroke(path2d)
-      ctx.fill(path2d)
-    }
-  }
-
-  private setupRotation(startXY: IXY) {
-    const spread = 10
-    const { beforeOperate, afterOperate, setGeometry } = OperateGeometry
-
-    const mouseover = (e: ElemMouseEvent) => {
-      if (!e.hovered) return EditorCursor.setCursor('select')
-      return EditorCursor.setCursor('resize', this.transformOBB.rotation)
-    }
-
-    const mousedown = (e: ElemMouseEvent) => {
-      e.stopPropagation()
-
-      Drag.onStart(() => {
-        beforeOperate.dispatch(['rotation'])
-      })
-        .onMove(({ shift }) => {
-          shift = StageViewport.toSceneShift(shift)
-          const { rotation } = OperateGeometry.geometry
-          setGeometry('rotation', rotation - shift.y * rsin(rotation))
-        })
-        .onDestroy(() => {
-          afterOperate.dispatch()
-        })
-    }
-
-    const rotate = this.rotateElems.getSet('rotate', () => {
-      const rotate = new Elem('transform-rotate')
-      this.transformElem.addChild(rotate)
-      rotate.on('hover', mouseover)
-      rotate.on('mousedown', mousedown)
-      return rotate
-    })
-
-    const angle = this.transformOBB.rotation - 45
-    const sin = (rsin(angle) * 30) / getZoom()
-    const cos = (rcos(angle) * 30) / getZoom()
-    const endXY = xy_plus(startXY, xy_(cos, sin))
-
-    rotate.hitTest = rotate.eventHandle.hitPoint(endXY, 10 / getZoom())
-
-    rotate.draw = (ctx, path2d) => {
-      if (!this.show.value) return
-
-      const size = 6 / getZoom()
-      ctx.lineWidth = 1 / getZoom()
-      ctx.strokeStyle = hslBlueColor(65)
-      ctx.fillStyle = 'white'
-      path2d.moveTo(startXY.x, startXY.y)
-      path2d.lineTo(endXY.x, endXY.y)
-      path2d.roundRect(endXY.x - size / 2, endXY.y - size / 2, size, size, 1 / getZoom())
       ctx.stroke(path2d)
       ctx.fill(path2d)
     }

@@ -1,4 +1,7 @@
+import camelCase from 'camelcase'
 import { createObjCache } from './cache'
+
+export { camelCase }
 
 export const This = globalThis as any
 
@@ -45,6 +48,10 @@ export function Delete<T>(target: Record<string, T> | T[], filter: string | ((va
 
 export function iife<T extends any = any>(callback: () => T): T {
   return callback()
+}
+
+export function matchCase<T extends string, R extends any>(Case: T, obj: Record<T, R>) {
+  return obj[Case]
 }
 
 export function isNumberEqual(a: number, b: number) {
@@ -116,7 +123,7 @@ export function jsonFy(obj: any) {
   return JSON.stringify(obj, null, 2)
 }
 
-export function memoize<T extends any[], R extends any>(func: (...args: T) => R) {
+export function memorize<T extends any[], R extends any>(func: (...args: T) => R) {
   const cache = createObjCache<R>()
   return (...args: T) => {
     const key = args.join('-')

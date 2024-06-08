@@ -27,12 +27,12 @@ export class OBB {
     return xy_(this.x, this.y)
   }
 
-  calcCenter = () => {
+  private calcCenter = () => {
     const center = xy_(this.x + this.width / 2, this.y + this.height / 2)
     return xy_rotate(center, xy_(this.x, this.y), this.rotation)
   }
 
-  calcAxis = () => {
+  private calcAxis = () => {
     const cos = rcos(this.rotation)
     const sin = rsin(this.rotation)
     const widthAxis = xy_(cos, -sin)
@@ -109,27 +109,22 @@ export class OBB {
 export class AABB {
   constructor(public minX: number, public minY: number, public maxX: number, public maxY: number) {}
 
-  static Collide(self: AABB, another: AABB) {
+  static Collide(one: AABB, another: AABB) {
     return (
-      self.minX <= another.maxX &&
-      self.maxX >= another.minX &&
-      self.minY <= another.maxY &&
-      self.maxY >= another.minY
+      one.minX <= another.maxX &&
+      one.maxX >= another.minX &&
+      one.minY <= another.maxY &&
+      one.maxY >= another.minY
     )
   }
 
-  static Include(self: AABB, another: AABB) {
+  static Include(one: AABB, another: AABB) {
     let result = 1
-    let large: AABB
-    let small: AABB
-    if (self.maxX - self.minX >= another.maxX - another.minX) {
-      result = 1
-      large = self
-      small = another
-    } else {
+    let [large, small] = [one, another]
+    if (one.maxX - one.minX < another.maxX - another.minX) {
       result = 0
       large = another
-      small = self
+      small = one
     }
     const included =
       large.minX <= small.minX &&

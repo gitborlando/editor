@@ -41,12 +41,16 @@ export const StageNodeDrawer = new (class {
     this.drawShapePath()
 
     node.fills.forEach((fill, i) => {
-      if (node.shadows[i]) this.drawShadow(node.shadows[i])
-      Surface.ctxSaveRestore(() => this.drawFill(fill))
+      Surface.ctxSaveRestore(() => {
+        if (node.shadows[i]) this.drawShadow(node.shadows[i])
+        this.drawFill(fill)
+      })
     })
     node.strokes.forEach((stroke, i) => {
-      if (node.shadows[i]) this.drawShadow(node.shadows[i])
-      Surface.ctxSaveRestore(() => this.drawStroke(stroke))
+      Surface.ctxSaveRestore(() => {
+        if (node.shadows[i]) this.drawShadow(node.shadows[i])
+        this.drawStroke(stroke)
+      })
     })
 
     this.drawOutline()
