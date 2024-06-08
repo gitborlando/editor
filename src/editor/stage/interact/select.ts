@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { AABB, OBB } from 'src/editor/math/obb'
-import { OperateNode } from 'src/editor/operate/node'
+import { OperateNode, getSelectIds } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { Schema } from 'src/editor/schema/schema'
 import { ID } from 'src/editor/schema/type'
@@ -13,9 +13,9 @@ import { StageWidgetTransform } from 'src/editor/stage/render/widget/transform'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
 import { batchSignal, createSignal } from 'src/shared/signal/signal'
-import { lastOne } from 'src/shared/utils/array'
+import { firstOne } from 'src/shared/utils/array'
 import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
-import { macroMatch, noopFunc, type IRect } from 'src/shared/utils/normal'
+import { macroMatch, type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 
 import { editorCommands } from 'src/editor/editor/command'
@@ -33,49 +33,54 @@ class StageSelectService {
   private marqueeOBB?: OBB
   private doubleClickTimeStamp?: number
   private lastSelectIds = <ID[]>[]
-  private disposer = noopFunc
+
   startInteract() {
-    this.disposer = StageScene.sceneRoot.on('mousedown', this.onMouseDown)
+    StageScene.sceneRoot.addEvent('mousedown', this.onMouseDown)
     Surface.addEvent('click', this.onClick)
   }
+
   endInteract() {
-    this.disposer()
+    StageScene.sceneRoot.removeEvent('mousedown', this.onMouseDown)
     Surface.removeEvent('click', this.onClick)
   }
+
   private get hoverId() {
-    return lastOne(OperateNode.hoverIds.value)
+    return firstOne(OperateNode.hoverIds.value)
   }
+
   private onMouseDown(e: ElemMouseEvent) {
-    if (isLeftMouse(e.hostEvent)) this.onLeftMouseDown(e.hostEvent)
-    if (isRightMouse(e.hostEvent)) this.onRightMouseDown(e.hostEvent)
+    if (isLeftMouse(e.hostEvent)) this.onLeftMouseDown(e)
+    if (isRightMouse(e.hostEvent)) this.onRightMouseDown(e)
   }
+
   private onClick(e: Event) {
     if (this.hasDoubleClick(e)) this.onDoubleClick(e)
   }
+
   private onDoubleClick(e: Event) {
     this.onEditText()
     this.onEditVector()
   }
+
   private onEditText() {
     const hoverNode = Schema.find(this.hoverId)
     if (hoverNode?.type !== 'text') return
     OperateText.intoEditing.dispatch(hoverNode.id)
   }
+
   private onEditVector() {
     if (OperateNode.intoEditNodeId.value) OperateNode.intoEditNodeId.dispatch('')
     const hoverNode = Schema.find(this.hoverId)
-    //  if (hoverNode?.type !== 'vector') return
     OperateNode.intoEditNodeId.dispatch(hoverNode.id)
   }
-  private onLeftMouseDown(e: MouseEvent) {
-    // if (StageWidgetTransform.mouseOnEdge) return
-    // if (StageWidgetTransform.mouseIn(e)) return
+
+  private onLeftMouseDown(e: ElemMouseEvent) {
     this.lastSelectIds = [...OperateNode.selectIds.value]
+
     if (!this.hoverId) {
       this.clearSelect()
       this.onMarqueeSelect()
-    }
-    if (this.hoverId) {
+    } else {
       if (SchemaUtil.isPageFrame(this.hoverId)) {
         this.clearSelect()
         this.onMarqueeSelect()
@@ -85,28 +90,33 @@ class StageSelectService {
       }
     }
   }
-  private onRightMouseDown(e: MouseEvent) {
+
+  private onRightMouseDown(e: ElemMouseEvent) {
     if (this.hoverId) this.onMousedownSelect()
     this.onMenu()
   }
-  private onMenu() {
+
+  onMenu() {
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } = editorCommands
-    if (OperateNode.selectedNodes.value.length) {
+    if (getSelectIds().length) {
       const menuOptions = [nodeReHierarchyGroup, copyPasteGroup, undoRedoGroup, nodeGroup]
       return Menu.menuOptions.dispatch(menuOptions)
     }
     Menu.menuOptions.dispatch([undoRedoGroup])
   }
+
   private clearSelect() {
     if (hotkeys.shift) return
     OperateNode.clearSelect()
   }
+
   onPanelSelect(id: string) {
     this.clearSelect()
     OperateNode.select(id)
     this.afterSelect.dispatch('panel')
     OperateNode.commitFinalSelect()
   }
+
   onCreateSelect(id: string) {
     this.clearSelect()
     OperateNode.select(id)
@@ -114,6 +124,7 @@ class StageSelectService {
     this.afterSelect.dispatch('create')
     OperateNode.commitSelect()
   }
+
   private onMousedownSelect() {
     if (OperateNode.selectIds.value.has(this.hoverId)) return
     if (SchemaUtil.isPageFrame(this.hoverId)) return
@@ -124,6 +135,7 @@ class StageSelectService {
     UILeftPanelLayer.expandAncestor(this.hoverId)
     this.afterSelect.dispatch('stage-single')
   }
+
   private onMarqueeSelect() {
     const hitTest = (marqueeOBB: OBB | undefined, obb: OBB) => {
       if (!marqueeOBB) return false

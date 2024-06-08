@@ -7,7 +7,6 @@ import { Flex } from 'src/view/ui-utility/widget/flex'
 type ISettingComp = {}
 
 export const SettingComp: FC<ISettingComp> = memo(({}) => {
-  const commonItemCss = 'lay-h wh-100%-40 px-10'
   useHookSignal(onSettingsChanged)
 
   const ToggleItemComp = useMemoComp<{
@@ -16,7 +15,7 @@ export const SettingComp: FC<ISettingComp> = memo(({}) => {
     toggle: (a: boolean) => void
   }>([], ({ label, active, toggle }) => {
     return (
-      <Flex className={commonItemCss}>
+      <Flex className={'lay-h wh-100%-40 px-10'}>
         <Flex className={'lay-c normalFont'}>{label}</Flex>
         <SwitchComp active={active} toggle={toggle} classes={['ml-auto']} />
       </Flex>
@@ -41,11 +40,16 @@ export const SettingComp: FC<ISettingComp> = memo(({}) => {
   })
 
   return (
-    <Flex className={'wh-100%-fit bg-white'}>
+    <Flex className={'lay-v wh-100%-fit bg-white'}>
       <ToggleItemComp
         label='自动保存'
         active={editorSettings.autosave}
         toggle={(active) => setSettings((setting) => (setting.autosave = active))}
+      />
+      <ToggleItemComp
+        label='菜单显示工具栏'
+        active={editorSettings['menuShowTopTab']}
+        toggle={(active) => setSettings((setting) => (setting['menuShowTopTab'] = active))}
       />
     </Flex>
   )

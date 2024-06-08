@@ -10,7 +10,6 @@ import { StageCursor } from 'src/editor/stage/cursor'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Drag, type IDragData } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
-import { createDisposer } from 'src/shared/utils/disposer'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { StageViewport } from '../viewport'
@@ -25,14 +24,13 @@ class StageCreateService {
   createTypes = createTypes
   currentType = createSignal<IStageCreateType>('frame')
   private createId = ''
-  private disposer = createDisposer()
 
   startInteract() {
-    this.disposer.push(StageScene.sceneRoot.on('mousedown', this.create, { capture: true }))
+    StageScene.sceneRoot.addEvent('mousedown', this.create, { capture: true })
   }
 
   endInteract() {
-    this.disposer.dispose()
+    StageScene.sceneRoot.removeEvent('mousedown', this.create, { capture: true })
   }
 
   private create() {

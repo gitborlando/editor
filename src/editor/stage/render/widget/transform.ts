@@ -10,6 +10,7 @@ import { SchemaHistory } from 'src/editor/schema/history'
 import { Schema } from 'src/editor/schema/schema'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
+import { StageSelect } from 'src/editor/stage/interact/select'
 import { Elem, ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
@@ -33,10 +34,14 @@ class StageWidgetTransformService {
   initHook() {
     StageScene.widgetRoot.addChild(this.transformElem)
 
-    this.transformElem.on('mousedown', (e) => {
+    this.transformElem.addEvent('mousedown', (e) => {
       if (StageInteract.currentType.value !== 'select') return
-      e.stopPropagation()
-      this.move()
+      if (isLeftMouse(e.hostEvent)) {
+        e.stopPropagation()
+        this.move()
+      } else {
+        StageSelect.onMenu()
+      }
     })
 
     this.hookShow()
@@ -207,8 +212,8 @@ class StageWidgetTransformService {
     const line = this.lineElems.getSet(type, () => {
       const line = new Elem(`transform-line-${type}`)
       this.transformElem.addChild(line)
-      line.on('hover', mouseover)
-      line.on('mousedown', mousedown)
+      line.addEvent('hover', mouseover)
+      line.addEvent('mousedown', mousedown)
       return line
     })
 
@@ -309,9 +314,9 @@ class StageWidgetTransformService {
 
     const vertexElem = this.vertexElems.getSet(type, () => {
       const vertexElem = new Elem(`transform-vertex-${type}`)
-      vertexElem.on('hover', mouseenter)
-      vertexElem.on('mousedown', mousedown)
-      vertexElem.on('mousemove', (e) => e.stopPropagation())
+      vertexElem.addEvent('hover', mouseenter)
+      vertexElem.addEvent('mousedown', mousedown)
+      vertexElem.addEvent('mousemove', (e) => e.stopPropagation())
       this.transformElem.addChild(vertexElem)
       return vertexElem
     })

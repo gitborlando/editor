@@ -5,7 +5,7 @@ import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-bre
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { createSignal, multiSignal } from 'src/shared/signal/signal'
 import { reverseFor } from 'src/shared/utils/array'
-import { IXY } from 'src/shared/utils/normal'
+import { INoopFunc, IXY } from 'src/shared/utils/normal'
 import { Elem } from './elem'
 
 export const Surface = new (class SurfaceService {
@@ -38,16 +38,16 @@ export const Surface = new (class SurfaceService {
     this.ctx.restore()
   }
 
-  elemList: Elem[] = []
+  layerList: Elem[] = []
   private renderType?: 'full' | 'partial'
 
-  requestRender(renderType: 'full' | 'partial') {
-    if (this.renderType !== undefined && renderType !== 'full') return
-    this.renderType = renderType
+  requestRender(type: 'full' | 'partial') {
+    if (this.renderType !== undefined && type !== 'full') return
+    this.renderType = type
 
-    queueMicrotask(() => {
+    requestAnimationFrame(() => {
       this.ctxSaveRestore(() => {
-        renderType === 'full' ? this.fullRender() : this.partialRender()
+        type === 'full' ? this.fullRender() : this.partialRender()
       })
       this.dirtyRects.clear()
       this.renderType = undefined
@@ -59,7 +59,7 @@ export const Surface = new (class SurfaceService {
     this.ctx.transform(...this.dprMatrix)
     this.ctx.transform(...this.viewportMatrix)
 
-    this.elemList.forEach((elem) => elem.traverseDraw(this.ctx))
+    this.layerList.forEach((elem) => elem.traverseDraw(this.ctx))
   }
 
   private dirtyRects = new Set<AABB>()
@@ -90,7 +90,7 @@ export const Surface = new (class SurfaceService {
 
     while (needReTest) {
       needReTest = false
-      this.elemList.forEach((elem) => {
+      this.layerList.forEach((elem) => {
         elem.children.forEach((elem) => traverse(elem, elem))
       })
     }
@@ -154,41 +154,79 @@ export const Surface = new (class SurfaceService {
     return mx_invertToPoint(eventXY, this.viewportMatrix)
   }
 
-  private traverseElemTree = (
-    eventXY: IXY,
-    func: (elem: Elem, xy: IXY, capture: boolean) => any,
+  private traverseLayerList = (
+    func: (
+      elem: Elem,
+      capture: boolean,
+      stopped: boolean,
+      stopPropagation: INoopFunc,
+      hitList?: Elem[],
+      xy?: IXY
+    ) => any,
+    eventXY?: IXY,
     noBubble?: boolean
   ) => {
-    const traverse = (elem: Elem) => {
+    let stopped = false
+    const stopPropagation = () => (stopped = true)
+
+    const traverse = (layerIndex: number, elem: Elem, hitList?: Elem[]) => {
       if (elem.hidden) return
 
-      let xy = xy_rotate(eventXY, elem.obb.xy, -elem.obb.rotation)
-      xy = xy_minus(xy, elem.obb.xy)
+      if (eventXY) {
+        let xy = xy_rotate(eventXY, elem.obb.xy, -elem.obb.rotation)
+        xy = xy_minus(xy, elem.obb.xy)
 
-      func(elem, xy, true)
-      reverseFor(elem.children, traverse)
-      !noBubble && func(elem, xy, false)
+        func(elem, true, stopped, stopPropagation, hitList!, xy)
+
+        const subHitList: Elem[] = []
+        reverseFor(elem.children, (elem) => traverse(layerIndex, elem, subHitList))
+        this.elemsFromPoint[layerIndex].push(...subHitList.reverse())
+
+        !noBubble && func(elem, false, stopped, stopPropagation, undefined, xy)
+      } else {
+        func(elem, true, stopped, stopPropagation)
+
+        reverseFor(elem.children, (elem) => traverse(layerIndex, elem))
+        !noBubble && func(elem, false, stopped, stopPropagation)
+      }
     }
-    reverseFor(this.elemList, traverse)
+
+    reverseFor(this.layerList, (elem, i) => traverse(i, elem, []))
   }
 
-  private handleEvents = () => {
-    this.addEvent('mousedown', (e) => {
-      let stopped = false
-      const stopPropagation = () => (stopped = true)
-      this.traverseElemTree(this.getEventXY(e), (elem, xy, capture) => {
-        if (stopped) return
-        elem.eventHandle.trigger(e, xy, capture, stopPropagation)
-      })
-    })
+  elemsFromPoint: Elem[][] = []
 
-    this.addEvent('mousemove', (e) => {
-      let stopped = false
-      const stopPropagation = () => (stopped = true)
-      this.traverseElemTree(this.getEventXY(e), (elem, xy, capture) => {
-        if (stopped) return
-        elem.eventHandle.trigger(e, xy, capture, stopPropagation)
-      })
-    })
+  private handleEvents = () => {
+    this.addEvent(
+      'mousedown',
+      (e) => {
+        this.elemsFromPoint = this.layerList.map(() => [])
+
+        this.traverseLayerList((elem, capture, stopped, stopPropagation, hitList, xy) => {
+          const hit = elem.hitTest(xy!)
+          if (hit) hitList?.push(elem)
+          if (!stopped) {
+            elem.eventHandle.triggerMouseEvent(e, xy!, hit, capture, stopPropagation)
+          }
+        }, this.getEventXY(e))
+      },
+      { capture: true }
+    )
+
+    this.addEvent(
+      'mousemove',
+      (e) => {
+        this.elemsFromPoint = this.layerList.map(() => [])
+
+        this.traverseLayerList((elem, capture, stopped, stopPropagation, hitList, xy) => {
+          const hit = elem.hitTest(xy!)
+          if (hit) hitList?.unshift(elem)
+          if (!stopped) {
+            elem.eventHandle.triggerMouseEvent(e, xy!, hit, capture, stopPropagation)
+          }
+        }, this.getEventXY(e))
+      },
+      { capture: true }
+    )
   }
 })()

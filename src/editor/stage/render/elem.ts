@@ -3,7 +3,6 @@ import { OBB } from 'src/editor/math/obb'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/stage/render/surface'
 import { loopFor } from 'src/shared/utils/array'
-import { Disposer } from 'src/shared/utils/disposer'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
 
 export class Elem {
@@ -72,12 +71,16 @@ export class Elem {
     this.eventHandle.hitTest = hitTest
   }
 
-  on(type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) {
+  addEvent(type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) {
     return this.eventHandle.addEvent(type, func, option)
   }
 
+  removeEvent(type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) {
+    return this.eventHandle.removeEvent(type, func, option)
+  }
+
   destroy() {
-    this.eventHandle.disposer.dispose()
+    this.eventHandle.dispose()
     this.parent.removeChild(this)
   }
 }
@@ -103,8 +106,6 @@ class ElemEventHandler {
   hitTest = (xy: IXY) => false
   private lastHit = [false, false]
 
-  disposer = new Disposer()
-
   private mousedown: ElemEventFunc[][] = [[], []]
   private mousemove: ElemEventFunc[][] = [[], []]
   private hover: ElemEventFunc[][] = [[], []]
@@ -118,25 +119,41 @@ class ElemEventHandler {
     this[type][capture].push(func)
     this.eventCount++
 
-    const dispose = () => {
+    return () => {
       const index = this[type][capture].indexOf(func)
       if (index === -1) return
 
       this[type][capture].splice(index, 1)
-      this.disposer.delete(this.eventCount - 1)
       this.eventCount--
     }
-    this.disposer.push(dispose)
-
-    return dispose
   }
 
-  trigger(e: Event, xy: IXY, isCapture: boolean, stopPropagation: INoopFunc) {
+  removeEvent(type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) {
+    const capture = Number(option?.capture || false)
+    const index = this[type][capture].indexOf(func)
+    if (index === -1) return
+
+    this[type][capture].splice(index, 1)
+    this.eventCount--
+  }
+
+  dispose() {
+    this.mousedown = [[], []]
+    this.mousemove = [[], []]
+    this.hover = [[], []]
+    this.eventCount = 0
+  }
+
+  triggerMouseEvent(
+    e: MouseEvent,
+    xy: IXY,
+    hit: boolean,
+    isCapture: boolean,
+    stopPropagation: INoopFunc
+  ) {
     if (this.eventCount === 0) return
 
     const capture = Number(isCapture)
-    const hit = this.hitTest(xy)
-
     const mouseEvent = {
       xy,
       stopPropagation,

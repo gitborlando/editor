@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { IEditorCommand } from 'src/editor/editor/command'
 import { xy_, xy_client } from 'src/editor/math/xy'
 import { createSignal } from 'src/shared/signal/signal'
-import { clickAway, listen } from 'src/shared/utils/event'
+import { clickAway, isRightMouse, listen } from 'src/shared/utils/event'
 import { IAnyObject } from 'src/shared/utils/normal'
 
 @autobind
@@ -28,6 +28,7 @@ class MenuService {
 
   private autoPosition(e: MouseEvent) {
     if (!this.ref) return
+    if (!isRightMouse(e)) return
 
     this.xy.value = xy_client(e)
 

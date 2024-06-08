@@ -75,7 +75,7 @@ const defaultFont: Rule<object> = [
 
 const defaultScrollBar: Rule<object> = [
   /d-scroll-?(.+)?/,
-  ([_, type], { rawSelector }) => {
+  ([_, override], { rawSelector }) => {
     const selector = toEscapedSelector(rawSelector)
     return `
       ${selector}::-webkit-scrollbar { width: 4px; height: 4px }
@@ -143,12 +143,3 @@ function normalColor(val: string) {
   if (theme.colors[val]) return theme.colors[val]
   return val
 }
-
-function testRule(rule: any, test: string) {
-  const result = rule[0].exec(test)
-  if (result) {
-    console.log(rule[1](result))
-  }
-}
-
-//testRule(widthHeightRadius, 'wh-20-20-99')

@@ -1,14 +1,14 @@
 import autobind from 'class-autobind-decorator'
 import { OBB } from 'src/editor/math/obb'
+import { OperateNode } from 'src/editor/operate/node'
 import { OperatePage } from 'src/editor/operate/page'
 import { StageWidgetMarquee } from 'src/editor/stage/render/widget/marquee'
 import { StageWidgetTransform } from 'src/editor/stage/render/widget/transform'
 import { ImmuiPatch } from 'src/shared/immui/immui'
-import { mergeSignal } from 'src/shared/signal/signal'
+import { batchSignal, mergeSignal } from 'src/shared/signal/signal'
 import { createObjCache } from 'src/shared/utils/cache'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { OperateNode } from '../../operate/node'
 import { Schema } from '../../schema/schema'
 import { ID, INode, IPage } from '../../schema/type'
 import { StageNodeDrawer } from './draw'
@@ -26,7 +26,9 @@ class StageSceneService {
     StageWidgetMarquee.initHook()
 
     this.setupRootElem()
+
     this.hookRenderNode()
+    this.bindNodeHover()
   }
 
   findElem(id: string) {
@@ -34,8 +36,8 @@ class StageSceneService {
   }
 
   private setupRootElem() {
-    Surface.elemList.push(this.sceneRoot)
-    Surface.elemList.push(this.widgetRoot)
+    Surface.layerList.push(this.sceneRoot)
+    Surface.layerList.push(this.widgetRoot)
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
   }
@@ -87,7 +89,6 @@ class StageSceneService {
 
     const elem = new Elem(node.id)
     this.elements.set(node.id, elem)
-    this.bindNodeHover(elem, node)
 
     const parent = this.elements.get(node.parentId) || this.sceneRoot
     parent.addChild(elem)
@@ -136,15 +137,34 @@ class StageSceneService {
     Surface.collectDirtyRect(parent.aabb)
   }
 
-  private bindNodeHover(elem: Elem, node: INode) {
-    elem.eventHandle.addEvent('hover', ({ hovered }) => {
-      hovered ? OperateNode.hover(node.id) : OperateNode.unHover(node.id)
+  private bindNodeHover() {
+    const { clearHover, hover, hoverIds, selectIds } = OperateNode
 
-      if (node.type === 'frame' && elem.parent === this.sceneRoot) return
-      if (OperateNode.selectIds.value.has(node.id)) return
+    let lastElemsFromPoint: Elem[] = []
 
-      elem.outline = hovered ? 'hover' : undefined
-      Surface.collectDirtyRect(elem.aabb)
+    Surface.addEvent('mousemove', () => {
+      const endBatch = batchSignal(hoverIds)
+      clearHover()
+      const elemsFromPoint = Surface.elemsFromPoint[0]
+      elemsFromPoint.forEach((elem) => hover(elem.id))
+      endBatch()
+
+      lastElemsFromPoint.forEach((elem) => {
+        if (elemsFromPoint.includes(elem)) return
+        elem.outline = undefined
+        Surface.collectDirtyRect(elem.aabb)
+      })
+      lastElemsFromPoint = elemsFromPoint
+
+      const first = elemsFromPoint[0]
+      if (!first) return
+
+      const node = Schema.find(first.id)
+      if (node.type === 'frame' && first.parent === this.sceneRoot) return
+      if (selectIds.value.has(node.id)) return
+
+      first.outline = 'hover'
+      Surface.collectDirtyRect(first.aabb)
     })
   }
 }
