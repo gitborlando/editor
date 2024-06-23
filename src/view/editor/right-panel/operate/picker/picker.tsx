@@ -1,12 +1,12 @@
-import { cloneDeep } from 'lodash-es'
 import { FC, memo, useEffect } from 'react'
 import { SchemaDefault } from 'src/editor/schema/default'
 import { IFill, IFillColor, IFillImage, IFillLinearGradient } from 'src/editor/schema/type'
 
-import { StageWidgetTransform } from 'src/editor/stage/render/widget/transform'
+import { StageTransform } from 'src/editor/stage/render/widget/transform'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { Signal } from 'src/shared/signal/signal'
 import { useHookSignal } from 'src/shared/signal/signal-react'
+import { clone } from 'src/shared/utils/normal'
 import { useMemoComp } from 'src/shared/utils/react'
 import { DraggableComp } from 'src/view/component/draggable'
 import { Button } from 'src/view/ui-utility/widget/button'
@@ -31,7 +31,7 @@ export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
   const { type, xy, changeFill } = UIPickerCopy
 
   useEffect(() => {
-    UIPickerCopy.fill = cloneDeep(fill)
+    UIPickerCopy.fill = clone(fill)
   }, [fill])
 
   useEffect(() => {
@@ -45,8 +45,8 @@ export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
   })
 
   useEffect(() => {
-    StageWidgetTransform.show.dispatch(false)
-    return () => void StageWidgetTransform.show.dispatch(true)
+    StageTransform.show.dispatch(false)
+    return () => void StageTransform.show.dispatch(true)
   })
 
   const ButtonComp = useMemoComp<{ fillType: IFill['type']; label: string }>(

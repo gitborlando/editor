@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import SaveWorker from 'src/editor/schema/worker.ts?worker'
 import { createSignal } from 'src/shared/signal/signal'
 import { flushFuncs } from 'src/shared/utils/array'
 import { INoopFunc } from 'src/shared/utils/normal'
@@ -22,17 +23,20 @@ type ICommitOperationOption = Partial<ISchemaOperation> & {
 @autobind
 class SchemaService {
   schema!: ISchema
-  meta!: IMeta
-  client!: IClient
   inited = createSignal()
-  schemaChanged = createSignal()
   operationList = <ISchemaOperation[]>[]
   private immui = new Immui()
 
+  get meta() {
+    return this.find<IMeta>('meta')
+  }
+  get client() {
+    return this.find<IClient>('client')
+  }
+
   initSchema(schema: ISchema) {
     this.schema = schema
-    this.meta = this.find<IMeta>('meta')
-    this.client = this.find<IClient>('client')
+    this.saveWorker.postMessage({ fileId: this.meta.fileId })
     this.inited.dispatch()
   }
 
@@ -73,17 +77,17 @@ class SchemaService {
     this.commitHistory(description)
   }
 
-  onFlushPatches = createSignal<ImmuiPatch>()
+  flushingPatches = createSignal<ImmuiPatch>()
+  schemaChanged = createSignal<ImmuiPatch[]>()
   private matchPatchFuncs = new Set<INoopFunc>()
 
   nextSchema() {
     const [schema, patches] = this.immui.next(this.schema)
     this.schema = schema
-    this.meta = this.find<IMeta>('meta')
-    this.client = this.find<IClient>('client')
-    patches.forEach(this.onFlushPatches.dispatch)
+    SchemaHistory.patchList.push(...patches)
+    patches.forEach(this.flushingPatches.dispatch)
     flushFuncs(this.matchPatchFuncs)
-    this.schemaChanged.dispatch()
+    this.schemaChanged.dispatch(patches)
   }
 
   commitHistory(description: string) {
@@ -107,11 +111,17 @@ class SchemaService {
 
   onMatchPatch(patten: string, callback: INoopFunc) {
     return this.produceMatchPatten(patten).map((pattenKeys) => {
-      return this.onFlushPatches.hook((patch) => {
+      return this.flushingPatches.hook((patch) => {
         if (!Immui.matchPath(patch.keys, pattenKeys)) return
         this.matchPatchFuncs.add(callback)
       })
     })
+  }
+
+  private saveWorker = new SaveWorker()
+
+  save = (patches: ImmuiPatch[], reverse?: boolean) => {
+    this.saveWorker.postMessage({ patches, reverse })
   }
 }
 

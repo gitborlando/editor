@@ -58,42 +58,49 @@ export function createCache<K, V>() {
 class ObjCache<V> {
   cache = <Record<string, V>>{}
   private compareCache = new Map<string, any[]>()
+
   get(key: string) {
     return this.cache[key]
   }
+
   set(key: string, value: V) {
     this.cache[key] = value
     return value
   }
+
   delete(key: string) {
     delete this.cache[key]
   }
-  getSet(key: string, fn: () => V, compare?: unknown[]) {
-    const value = this.cache[key]
-    if (value === undefined) {
-      return this.set(key, fn())
-    }
-    if (compare) {
-      const lastCompare = this.compareCache.get(key)
-      const expired = compare?.some((i, index) => i !== lastCompare?.[index])
-      if (expired) {
-        this.compareCache.set(key, compare)
-        return this.set(key, fn())
-      }
-    }
-    return value
-  }
+
   clear() {
     this.cache = {}
   }
+
   keys() {
     return Object.keys(this.cache)
   }
+
   values() {
     return Object.values(this.cache)
   }
+
   entries() {
     return Object.entries(this.cache)
+  }
+
+  getSet(key: string, fn: () => V, compare?: unknown[]) {
+    const value = this.cache[key]
+
+    if (value === undefined) return this.set(key, fn())
+    if (!compare) return value
+
+    const lastCompare = this.compareCache.get(key)
+    if (compare?.some((i, index) => i !== lastCompare?.[index])) {
+      this.compareCache.set(key, compare)
+      return this.set(key, fn())
+    }
+
+    return value
   }
 }
 

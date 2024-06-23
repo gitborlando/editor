@@ -8,9 +8,9 @@ import { Flex } from 'src/view/ui-utility/widget/flex'
 type IRulerComp = {}
 
 export const RulerComp: FC<IRulerComp> = memo(({}) => {
-  const zoom = useHookSignal(StageViewport.zoom)
+  const zoom = useHookSignal(StageViewport.zoom$)
   const bound = useHookSignal(StageViewport.bound)
-  const stageOffset = useHookSignal(StageViewport.stageOffset)
+  const stageOffset = useHookSignal(StageViewport.offset$)
   const datumXY = OperateNode.datumXY
 
   useHookSignal(OperateNode.datumId)
@@ -77,8 +77,8 @@ export const RulerComp: FC<IRulerComp> = memo(({}) => {
     <Flex
       className='wh-100% absolute of-hidden pointer-events-none'
       style={{ width: bound.width, height: bound.height }}>
-      <Flex className='lay-h wh-100%-20'>{drawHorizontal()}</Flex>
-      <Flex className='wh-20-100% absolute left-0'>{drawVertical()}</Flex>
+      <Flex className='lay-h wh-100%-20 '>{drawHorizontal()}</Flex>
+      <Flex className='wh-20-100% absolute left-0 '>{drawVertical()}</Flex>
       <Flex className='lay-c wh-20 absolute left-0 top-0 bg-[#F7F8FA]'></Flex>
     </Flex>
   )

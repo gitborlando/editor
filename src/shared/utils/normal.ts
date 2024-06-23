@@ -4,6 +4,7 @@ import { createObjCache } from './cache'
 export { camelCase }
 
 export const This = globalThis as any
+export const dpr = devicePixelRatio
 
 export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
@@ -50,8 +51,22 @@ export function iife<T extends any = any>(callback: () => T): T {
   return callback()
 }
 
-export function matchCase<T extends string, R extends any>(Case: T, obj: Record<T, R>) {
-  return obj[Case]
+export function matchCase<T extends string, R extends any>(Case: T, obj: Record<T, R>): R
+export function matchCase<T extends string, R extends any>(
+  Case: T,
+  Default: R,
+  obj: Record<T, R>
+): R
+export function matchCase<T extends string, R extends any>(
+  ...args: [T, R, Record<T, R>] | [T, Record<T, R>]
+) {
+  if (args.length === 2) {
+    const [Case, obj] = args
+    return obj[Case]
+  } else {
+    const [Case, Default, obj] = args
+    return obj[Case] || Default
+  }
 }
 
 export function isNumberEqual(a: number, b: number) {
@@ -120,7 +135,19 @@ export function notUndefine<T extends any>(val: T | undefined): val is T {
 }
 
 export function jsonFy(obj: any) {
-  return JSON.stringify(obj, null, 2)
+  try {
+    return JSON.stringify(obj, null, 2)
+  } catch (e) {
+    console.log('jsonFy error', e)
+  }
+}
+
+export function jsonParse(obj: any) {
+  try {
+    return JSON.parse(obj)
+  } catch (e) {
+    console.log('jsonFy error', e)
+  }
 }
 
 export function memorize<T extends any[], R extends any>(func: (...args: T) => R) {
@@ -136,5 +163,26 @@ export function debounce<T extends any[], R extends any>(wait: number, func: (..
   return (...args: T) => {
     clearTimeout(timeout)
     timeout = setTimeout(() => func(...args), wait)
+  }
+}
+
+export function objKeys<K extends string>(obj: Partial<Record<K, any>>) {
+  return Object.keys(obj) as K[]
+}
+
+export function getTime() {
+  return new Date().getTime()
+}
+
+export class Raf {
+  private ids: number[] = []
+  request(callback: (next: INoopFunc) => void) {
+    const id = requestAnimationFrame(() => callback(() => this.request(callback)))
+    this.ids.push(id)
+    return this
+  }
+  cancelAll() {
+    this.ids.forEach(cancelAnimationFrame)
+    return this
   }
 }

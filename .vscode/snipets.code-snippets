@@ -58,6 +58,18 @@
     ],
     "description": "Service"
   },
+  "Public method": {
+    "prefix": "method",
+    "scope": "typescript",
+    "body": ["$1 = () => {}"],
+    "description": "Public method"
+  },
+  "Private method": {
+    "prefix": "private method",
+    "scope": "typescript",
+    "body": ["private $1 = () => {}"],
+    "description": "Private method"
+  },
   "Flex": {
     "prefix": "flex",
     "body": ["<Flex className='lay'></Flex>"],

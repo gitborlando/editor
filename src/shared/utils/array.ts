@@ -1,9 +1,11 @@
 import { INoopFunc } from './normal'
 
 export function firstOne<T extends any = any>(input: T[] | Set<T>) {
-  return [...input][0]
+  if (Array.isArray(input)) return input[0]
+  return input.values().next().value
 }
 export function lastOne<T extends any = any>(input: T[] | Set<T>) {
+  if (Array.isArray(input)) return input[input.length - 1]
   const arr = [...input]
   return arr[arr.length - 1]
 }
@@ -36,4 +38,9 @@ export function reverseFor<T>(items: T[], callback: (item: T, index: number) => 
 
 export function reverse<T extends any>(arr: T[]) {
   return arr.slice().reverse()
+}
+
+export function concat<T>(raw: T[], ...add: (T | false | undefined | null)[]) {
+  add.forEach((item) => item && raw.push(item))
+  return raw
 }

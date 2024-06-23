@@ -13,7 +13,7 @@ import { iife, isNumberEqual } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { Pixi } from '../pixi'
 import { StageViewport } from '../viewport'
-import { StageWidgetTransform } from './transform'
+import { StageTransform } from './transform'
 
 @autobind
 class StageWidgetAdsorptionService {
@@ -34,7 +34,7 @@ class StageWidgetAdsorptionService {
     // OperateNode.afterFlushDirty.hook({ after: 'calcTransformOBB' }, this.updateCloneTransformOBB)
   }
   private updateCloneTransformOBB() {
-    const { centerX, centerY, width, height, rotation } = StageWidgetTransform.transformOBB
+    const { centerX, centerY, width, height, rotation } = StageTransform.transformOBB
     this.cloneTransformOBB = new OBB(centerX, centerY, width, height, rotation)
   }
   private setupAdsorption() {
@@ -73,7 +73,7 @@ class StageWidgetAdsorptionService {
     ctx.newValue += iife(() => {
       let offset = 0
       if (minOffset >= 10 / StageViewport.zoom.value) return offset
-      const { left, right } = this.getAdsorptionBound(StageWidgetTransform.transformOBB)
+      const { left, right } = this.getAdsorptionBound(StageTransform.transformOBB)
       if (isNumberEqual(minOffset, topOffset)) {
         offset = topClosest - top
         const xs = new Set(this.hAdsorptionMap.get(topClosest))
@@ -106,7 +106,7 @@ class StageWidgetAdsorptionService {
     ctx.newValue += iife(() => {
       let offset = 0
       if (minOffset >= 10 / StageViewport.zoom.value) return offset
-      const { top, bottom } = this.getAdsorptionBound(StageWidgetTransform.transformOBB)
+      const { top, bottom } = this.getAdsorptionBound(StageTransform.transformOBB)
       if (isNumberEqual(minOffset, leftOffset)) {
         offset = leftClosest - left
         const ys = new Set(this.vAdsorptionMap.get(leftClosest))

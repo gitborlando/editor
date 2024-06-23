@@ -58,7 +58,10 @@ export class SchemaUtil {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
         const node = Schema.find<INode>(id)
-        if (node === undefined) console.log(id, ids)
+        if (node === undefined) {
+          console.log(id, ids)
+          return
+        }
         const childIds = 'childIds' in node ? node.childIds : undefined
         const parent = <INodeParent>(upLevelRef?.node || Schema.find(node.parentId))
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []

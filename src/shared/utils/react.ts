@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid'
 import {
   FC,
   ReactNode,
@@ -12,8 +13,8 @@ import {
 } from 'react'
 import { Schema } from 'src/editor/schema/schema'
 import { StageViewport } from 'src/editor/stage/viewport'
+import { IAnyObject } from 'src/shared/utils/normal'
 import { useHookSignal } from '../signal/signal-react'
-import { IAnyFunc } from './normal'
 
 export function useMemoComp<P extends {}>(deps: any[], component: FC<P>) {
   const comp = useRef(component)
@@ -37,19 +38,16 @@ export function withSuspense(node: ReactNode, fallback?: ReactNode) {
   return createElement(Suspense, { fallback }, node)
 }
 
-export function useAnimationFrame(callback: IAnyFunc) {
-  useEffect(() => {
-    const loop = () => {
-      callback()
-      requestAnimationFrame(loop)
-    }
-    requestAnimationFrame(loop)
-  }, [])
+const objectKeyMap = new WeakMap<IAnyObject, string>()
+
+export function useObjectKey(obj: IAnyObject) {
+  if (!objectKeyMap.has(obj)) objectKeyMap.set(obj, nanoid())
+  return objectKeyMap.get(obj)
 }
 
 export function useZoom() {
-  const zoom = StageViewport.zoom.value
-  useHookSignal(StageViewport.zoom)
+  const zoom = StageViewport.zoom$.value
+  useHookSignal(StageViewport.zoom$)
   return zoom
 }
 

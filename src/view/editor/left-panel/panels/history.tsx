@@ -1,10 +1,11 @@
 import { FC, memo, useEffect, useMemo, useRef, useState } from 'react'
 import ReactJson from 'react-json-view'
 import { SchemaHistory } from 'src/editor/schema/history'
-import { ISchemaHistory, ISchemaOperation } from 'src/editor/schema/type'
+import { ISchemaOperation } from 'src/editor/schema/type'
+import { ImmuiPatch } from 'src/shared/immui/immui'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { hslColor } from 'src/shared/utils/color'
-import { useMemoComp } from 'src/shared/utils/react'
+import { useMemoComp, useObjectKey } from 'src/shared/utils/react'
 import Asset from 'src/view/ui-utility/assets'
 import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
 import { Flex } from 'src/view/ui-utility/widget/flex'
@@ -12,18 +13,18 @@ import { Flex } from 'src/view/ui-utility/widget/flex'
 type IHistoryComp = {}
 
 export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
-  const { stack, index } = SchemaHistory
+  const { stack, index$: index } = SchemaHistory
   useHookSignal(index)
 
   const CardComp = useMemoComp<{
-    history: ISchemaHistory
+    history: ISchemaOperation
     active: boolean
   }>([], ({ active, history }) => {
     const randomColor = useMemo(() => hslColor(Math.random() * 360, 80, 35), [])
     const ref = useRef<HTMLDivElement>(null)
     const collapsed = useAutoSignal(true)
-    const { operations, description } = history
-    const needCollapsedItems = operations.length > 6
+    const { patches, description } = history
+    const needCollapsedItems = patches.length > 6
     const [itemCollapsed, setItemCollapsed] = useState(needCollapsedItems)
     useEffect(() => {
       if (active) ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -41,12 +42,8 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
             {Asset.editor.leftPanel.page.collapse}
           </IconButton>
         </Flex>
-        {operations.slice(0, itemCollapsed ? 6 : operations.length).map((operation, i) => (
-          <OperateDiffComp
-            key={(operation.description || '') + i}
-            operation={operation}
-            collapsed={collapsed.value}
-          />
+        {patches.slice(0, itemCollapsed ? 6 : patches.length).map((patch) => (
+          <OperateDiffComp key={useObjectKey(patch)} patch={patch} collapsed={collapsed.value} />
         ))}
         {needCollapsedItems && (
           <Flex className={'lay-h w-100% px-10'}>
@@ -61,15 +58,14 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
     )
   })
 
-  const OperateDiffComp = useMemoComp<{ operation: ISchemaOperation; collapsed: boolean }>(
+  const OperateDiffComp = useMemoComp<{ patch: ImmuiPatch; collapsed: boolean }>(
     [],
-    ({ operation, collapsed }) => {
-      const { patches } = operation
+    ({ patch, collapsed }) => {
       return (
         <Flex className='lay-v wh-100%-fit px-10 py-4'>
           <Flex className='lay-h wh-100%-fit my-6'>
             <ReactJson
-              src={patches}
+              src={patch}
               style={{ fontFamily: 'consolas', fontSize: 12 }}
               indentWidth={2}
               displayDataTypes={false}

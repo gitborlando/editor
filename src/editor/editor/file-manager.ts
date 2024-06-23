@@ -1,13 +1,10 @@
 import autobind from 'class-autobind-decorator'
-import hotkeys from 'hotkeys-js'
 import localforage from 'localforage'
 import { Uploader } from 'src/global/upload'
 import { createSignal } from 'src/shared/signal/signal'
-import { OperateNode } from '../operate/node'
-import { SchemaDefault } from '../schema/default'
+import { jsonFy, jsonParse } from 'src/shared/utils/normal'
 import { Schema } from '../schema/schema'
 import { IMeta, ISchema } from '../schema/type'
-import { editorSettings } from './settings'
 
 @autobind
 class FileManagerService {
@@ -15,10 +12,6 @@ class FileManagerService {
   isSaved$ = createSignal(false)
   fileMetaList$ = createSignal<IMeta[]>([])
 
-  initHook() {
-    this.debug()
-    this.autoSave()
-  }
   async getFileMetaList() {
     this.fileMetaList$.value = []
     const keys = await this.fileForage.keys()
@@ -27,50 +20,37 @@ class FileManagerService {
     }
     this.fileMetaList$.dispatch()
   }
-  autoSave() {
-    setInterval(async () => {
-      if (!editorSettings.autosave) return
-      await this.saveJsonFile(Schema.schema)
-      this.isSaved$.dispatch(true)
-    }, 1000)
-  }
+
   async openFile() {
     const file = await Uploader.open({ accept: '' })
-    if (!file) return
-    const json = JSON.parse(await Uploader.readAsText(file))
-    //  this.loadJsonFile(json)
+    const json = jsonParse(await Uploader.readAsText(file!)) as ISchema
+    await this.addFile(json)
   }
-  async newFile() {
-    const schema = SchemaDefault.schema()
+
+  async addFile(schema: ISchema) {
     await this.saveJsonFile(schema)
     this.openInNewTab(schema.meta.fileId)
     this.getFileMetaList()
   }
+
   async deleteFile(id: string) {
     if (id === Schema.meta.fileId) return
     await this.fileForage.removeItem(id)
     this.getFileMetaList()
   }
+
   async saveJsonFile(json: ISchema) {
     await this.fileForage.setItem(json.meta.fileId, json)
   }
-  downloadJsonFile(data: object): void {
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
+
+  async exportFile(fileId: string) {
+    const json = await this.fileForage.getItem<ISchema>(fileId)
+    const blob = new Blob([jsonFy(json)!], { type: 'application/json' })
     Uploader.download(blob)
   }
+
   openInNewTab(id: string) {
     window.open(`${location.href.split('#')[0]}#${id}`)
-  }
-  private debug() {
-    hotkeys('alt+l', () => {
-      if (OperateNode.selectIds.value.size) {
-        OperateNode.selectIds.value.forEach((id) => {
-          console.log(Schema.find(id))
-        })
-      } else {
-        console.log(Schema.schema)
-      }
-    })
   }
 }
 

@@ -1,7 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { createSignal } from 'src/shared/signal/signal'
-import { createCache } from 'src/shared/utils/cache'
-import { iife } from 'src/shared/utils/normal'
+import { iife, jsonFy, jsonParse } from 'src/shared/utils/normal'
 
 type IStorageItem = {
   type: 'normal' | 'map' | 'set'
@@ -12,40 +11,26 @@ type IStorageItem = {
 class StorageService {
   inited = createSignal(false)
 
-  private storage = createCache<string, IStorageItem>()
-  private key = 'storage'
-
-  init() {
-    this.load()
-    this.inited.dispatch()
-  }
-
   set<T>(key: string, value: T) {
     const item = iife(() => {
       if (value instanceof Set) return <IStorageItem>{ type: 'set', value: [...value] }
       if (value instanceof Map) return <IStorageItem>{ type: 'map', value: value }
       return <IStorageItem>{ type: 'normal', value: value }
     })
-    this.storage.set(key, item)
-    this.store()
+    this.storage(key, item)
   }
 
   get<T>(key: string) {
-    const item = this.storage.get(key)
+    const item = this.storage(key)
     if (!item) return
     if (item.type === 'set') return new Set(item.value) as T
     if (item.type === 'map') return new Map(Object.entries(item.value)) as T
     return item.value as T
   }
 
-  private store() {
-    localStorage.setItem(this.key, JSON.stringify(this.storage.toObject()))
-  }
-
-  private load() {
-    const settingStr = localStorage.getItem(this.key)
-    if (settingStr === null) return
-    this.storage.fromObject(JSON.parse(settingStr))
+  private storage(key: string, value?: any) {
+    if (value == undefined) return jsonParse(localStorage.getItem(key)) as unknown as IStorageItem
+    localStorage.setItem(key, jsonFy(value)!)
   }
 }
 
@@ -53,8 +38,6 @@ export const Storage = new StorageService()
 
 export function createStorageItem<T>(key: string, init: T) {
   const signal = createSignal<T>(init)
-  signal.hook((newValue) => Storage.set(key, newValue))
-
   const setting = Storage.get<T>(key)
 
   if (setting !== undefined) {
@@ -62,6 +45,8 @@ export function createStorageItem<T>(key: string, init: T) {
   } else {
     Storage.set(key, init)
   }
+
+  signal.hook((newValue) => Storage.set(key, newValue))
 
   return signal
 }

@@ -1,5 +1,5 @@
 import { FC, SVGProps, useCallback } from 'react'
-import { editorCommands } from 'src/editor/editor/command'
+import { EditorCommand } from 'src/editor/editor/command'
 import { OperateNode } from 'src/editor/operate/node'
 import { Schema } from 'src/editor/schema/schema'
 import { IIrregular, INode } from 'src/editor/schema/type'
@@ -50,7 +50,8 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     }
   }
   const makeMenu = () => {
-    const { nodeReHierarchyGroup, nodeGroup } = editorCommands
+    const { nodeReHierarchyGroup, nodeGroup } = EditorCommand
+    Menu.context = { id }
     Menu.menuOptions.dispatch([nodeReHierarchyGroup, nodeGroup])
   }
 

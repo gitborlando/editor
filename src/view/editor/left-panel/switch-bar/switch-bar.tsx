@@ -1,5 +1,5 @@
 import { FC, memo } from 'react'
-import { editorCommands } from 'src/editor/editor/command'
+import { EditorCommand } from 'src/editor/editor/command'
 import { UILeftPanel } from 'src/editor/ui-state/left-panel/left-panel'
 import { Menu } from 'src/global/menu'
 import { useHookSignal } from 'src/shared/signal/signal-react'
@@ -27,9 +27,9 @@ export const SwitchBarComp: FC<ISwitchBarComp> = memo(({}) => {
                 key={id}
                 active={currentTabId.value === id}
                 onClick={() => currentTabId.dispatch(id)}
-                onDoubleClick={() => showLeftPanel.dispatch(!showLeftPanel.value)}
+                //   onDoubleClick={() => showLeftPanel.dispatch(!showLeftPanel.value)}
                 onContextMenu={() => {
-                  const { UIleftPanelSwitchBarGroup } = editorCommands
+                  const { UIleftPanelSwitchBarGroup } = EditorCommand
                   Menu.context = { id }
                   Menu.menuOptions.dispatch([UIleftPanelSwitchBarGroup])
                 }}>

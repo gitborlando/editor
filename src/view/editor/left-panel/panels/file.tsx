@@ -1,10 +1,12 @@
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
+import { EditorCommand } from 'src/editor/editor/command'
 import { FileManager } from 'src/editor/editor/file-manager'
-import { mockFile } from 'src/editor/editor/mock/mock'
+import { SchemaDefault } from 'src/editor/schema/default'
 import { Schema } from 'src/editor/schema/schema'
 import { IMeta } from 'src/editor/schema/type'
-import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
+import { Menu } from 'src/global/menu'
+import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
 import Asset from 'src/view/ui-utility/assets'
 import { Button } from 'src/view/ui-utility/widget/button'
@@ -15,19 +17,16 @@ type IFileComp = {}
 
 export const FileComp: FC<IFileComp> = memo(({}) => {
   const HeaderComp = useMemoComp([], ({}) => {
-    const reMockFile = async () => {
-      await mockFile(true)
-    }
     return (
       <Flex className='lay-h wh-100%-32 px-10 borderBottom'>
-        <Button className='-ml-4' onClick={reMockFile}>
-          重新mock文件
+        <Button className='-ml-4' onClick={FileManager.openFile}>
+          打开文件
         </Button>
         <Flex className='lay-h ml-auto'>
           <IconButton size={14} onClick={() => {}}>
             {Asset.editor.leftPanel.file.newFolder}
           </IconButton>
-          <IconButton size={13} onClick={() => FileManager.newFile()}>
+          <IconButton size={13} onClick={() => FileManager.addFile(SchemaDefault.schema())}>
             {Asset.editor.leftPanel.file.newFile}
           </IconButton>
         </Flex>
@@ -43,12 +42,17 @@ export const FileComp: FC<IFileComp> = memo(({}) => {
 
     const ListItemComp: FC<{ meta: IMeta }> = memo(({ meta }) => {
       const selected = meta.fileId === Schema.meta.fileId
-      const isHover = useAutoSignal(false)
+
+      const makeMenu = () => {
+        const { fileGroup } = EditorCommand
+        Menu.context = { id: meta.fileId }
+        Menu.menuOptions.dispatch([fileGroup])
+      }
 
       return (
         <Flex
           className={'lay-h wh-100%-32 text-12 pointer borderBottom d-hover-border px-10'}
-          onHover={isHover.dispatch}
+          onContextMenu={makeMenu}
           onClick={() => openInNewTab(meta.fileId)}>
           {meta.name}
           {selected && (

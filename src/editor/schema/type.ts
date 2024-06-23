@@ -240,13 +240,11 @@ export type ISchemaPropKey =
 
 export type ISchemaOperation = {
   id: ID
-  timestamp: number
   patches: ImmuiPatch[]
   description?: string
-  noHistory?: boolean
 }
 
 export type ISchemaHistory = {
-  operations: ISchemaOperation[]
+  operation: ISchemaOperation
   description: string
 }

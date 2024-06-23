@@ -29,14 +29,13 @@ class OperateNodeService {
       this.hoverIds.dispatch((hoverIds) => ids.forEach((id) => hoverIds.delete(id)))
     })
     Schema.onMatchPatch('/client/selectIds', () => {
-      this.selectIds.value = new Set(Schema.client.selectIds)
+      this.selectIds.dispatch(new Set(Schema.client.selectIds))
       this.selectedNodes$.dispatch(Schema.client.selectIds.map(Schema.find<INode>))
     })
     Schema.schemaChanged.hook(() => {
       const selectedNodes = Schema.client.selectIds.map(Schema.find<INode>)
       const selectionChange = () => {
         this.lastSelectedNodeSet = new Set(selectedNodes)
-        this.selectIds.value = new Set(Schema.client.selectIds)
         this.selectedNodes.dispatch(selectedNodes)
       }
       if (this.lastSelectedNodeSet.size !== selectedNodes.length) {
@@ -136,6 +135,7 @@ class OperateNodeService {
   }
   pasteNodes() {
     if (!this.copyIds.length) return
+
     const newSelectIds = <ID[]>[]
     const cloneNodes = (oldNode: INode) => {
       const newNode = clone(oldNode)
@@ -148,15 +148,16 @@ class OperateNodeService {
       const { node, parent, depth, upLevelRef } = props
       const newNode = cloneNodes(node)
       const newParent = upLevelRef?.newNode || parent
-      const index = newParent.childIds.indexOf(node.id)
       this.addNodes([newNode])
-      this.insertAt(newParent, newNode, index + 1)
+      this.insertAt(newParent, newNode)
       props.newNode = newNode
       if (depth === 0) newSelectIds.push(newNode.id)
     })
-    this.selectIds.dispatch(new Set(newSelectIds))
-    this.commitSelect()
-    Schema.commitOperation('粘贴节点')
+    setTimeout(() => {
+      this.selectIds.dispatch(new Set(newSelectIds))
+      this.commitSelect()
+      Schema.commitOperation('粘贴节点')
+    }, 0)
   }
   paste() {
     this.pasteNodes()

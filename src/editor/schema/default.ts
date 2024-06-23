@@ -19,8 +19,10 @@ import {
   IIrregular,
   ILine,
   IMeta,
+  INode,
   INodeBase,
   INodeMeta,
+  INodeParent,
   IPage,
   IPoint,
   IPolygon,
@@ -31,6 +33,10 @@ import {
   IStroke,
   IText,
 } from './type'
+
+type NestPartial<T> = {
+  [K in keyof T]?: NestPartial<T[K]>
+}
 
 @autobind
 class SchemaDefaultService {
@@ -189,12 +195,16 @@ class SchemaDefaultService {
     rect.fills.push(this.fillImage(''))
     return rect
   }
-  text(option?: Partial<IText>): IText {
+  text(option?: NestPartial<IText>): IText {
     const name = this.createNodeName('text')
     const nodeBase = this.createNodeBase()
+    const style = (option?.style || {}) as Partial<IText['style']>
     return {
       type: 'text',
       content: '文本1',
+      ...nodeBase,
+      ...name,
+      ...(option as Partial<IText>),
       style: {
         fontSize: 16,
         fontWeight: 500,
@@ -203,10 +213,9 @@ class SchemaDefaultService {
         fontStyle: 'normal',
         letterSpacing: 0,
         lineHeight: 16,
+        ...style,
       },
-      ...nodeBase,
-      ...name,
-      ...option,
+      fills: [this.fillColor(rgb(0, 0, 0), 1)],
     }
   }
   fillColor(color = rgb(204, 204, 204), alpha = 1): IFillColor {
@@ -256,16 +265,9 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  geometryDetail({ x, y, width, height }: IRect) {
-    return {
-      x: x,
-      y: y,
-      centerX: x + width / 2,
-      centerY: y + height / 2,
-      width: width,
-      height: height,
-      rotation: 0,
-    }
+  connect(parent: INodeParent, child: INode) {
+    parent.childIds.push(child.id)
+    child.parentId = parent.id
   }
   private createSchemaMeta(): INodeMeta {
     return {
@@ -295,7 +297,7 @@ class SchemaDefaultService {
   }
   createNodeName(type: string) {
     const typeIndexMap = this.typeIndexMapCache.getSet(
-      Schema.client?.selectPageId || 'abc',
+      Schema.inited.value ? Schema.client.selectPageId : 'abc',
       () => ({
         page: ['页面', 1],
         frame: ['画板', 1],

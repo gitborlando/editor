@@ -17,7 +17,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageInteract.currentType)
 
   const RecordIcons: FC<{}> = useCallback(() => {
-    useHookSignal(SchemaHistory.index)
+    useHookSignal(SchemaHistory.index$)
     return (
       <>
         <Button disabled={!SchemaHistory.canUndo} onClick={SchemaHistory.undo}>
@@ -63,8 +63,8 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   }
 
   const ZoomComp = useMemoComp([], ({}) => {
-    useHookSignal(StageViewport.zoom)
-    return <Button style={{ width: 60 }}>{~~((StageViewport.zoom.value || 0) * 100)}%</Button>
+    useHookSignal(StageViewport.zoom$)
+    return <Button style={{ width: 60 }}>{~~((StageViewport.zoom$.value || 0) * 100)}%</Button>
   })
 
   return (

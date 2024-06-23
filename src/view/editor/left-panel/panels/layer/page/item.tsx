@@ -1,5 +1,5 @@
 import { FC, memo } from 'react'
-import { editorCommands } from 'src/editor/editor/command'
+import { EditorCommand } from 'src/editor/editor/command'
 import { OperatePage } from 'src/editor/operate/page'
 import { Schema } from 'src/editor/schema/schema'
 import { Menu } from 'src/global/menu'
@@ -17,7 +17,7 @@ export const PageItemComp: FC<IPageItemComp> = memo(({ name, id }) => {
   const selected = Schema.client.selectPageId === id
   const openMenu = () => {
     Menu.context = { id }
-    Menu.menuOptions.dispatch([editorCommands.pageGroup])
+    Menu.menuOptions.dispatch([EditorCommand.pageGroup])
   }
   const selectPage = () => {
     OperatePage.selectPage(id)

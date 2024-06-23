@@ -1,6 +1,6 @@
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
-import { IImage, ImgManager } from 'src/editor/editor/img'
+import { IImage, ImgManager } from 'src/editor/editor/img-manager'
 import { IFillImage } from 'src/editor/schema/type'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { Uploader } from 'src/global/upload'

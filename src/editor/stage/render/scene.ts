@@ -1,14 +1,14 @@
 import autobind from 'class-autobind-decorator'
 import { OBB } from 'src/editor/math/obb'
 import { OperateNode } from 'src/editor/operate/node'
-import { OperatePage } from 'src/editor/operate/page'
-import { StageWidgetMarquee } from 'src/editor/stage/render/widget/marquee'
-import { StageWidgetTransform } from 'src/editor/stage/render/widget/transform'
+import { StageMarquee } from 'src/editor/stage/render/widget/marquee'
+import { StageTransform } from 'src/editor/stage/render/widget/transform'
+import { StageVectorEdit } from 'src/editor/stage/render/widget/vector-edit'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { batchSignal, mergeSignal } from 'src/shared/signal/signal'
+import { firstOne } from 'src/shared/utils/array'
 import { createObjCache } from 'src/shared/utils/cache'
 import { macroMatch } from 'src/shared/utils/normal'
-import { SchemaUtil } from 'src/shared/utils/schema'
 import { Schema } from '../../schema/schema'
 import { ID, INode, IPage } from '../../schema/type'
 import { StageNodeDrawer } from './draw'
@@ -17,16 +17,16 @@ import { Surface } from './surface'
 
 @autobind
 class StageSceneService {
-  private elements = createObjCache<Elem>()
-  sceneRoot = new Elem('sceneRoot')
-  widgetRoot = new Elem('widgetRoot')
+  elements = createObjCache<Elem>()
+  sceneRoot = new Elem('sceneRoot', 'sceneNode')
+  widgetRoot = new Elem('widgetRoot', 'widgetNode')
 
   initHook() {
-    StageWidgetTransform.initHook()
-    StageWidgetMarquee.initHook()
+    StageTransform.initHook()
+    StageMarquee.initHook()
+    StageVectorEdit.initHook()
 
     this.setupRootElem()
-
     this.hookRenderNode()
     this.bindNodeHover()
   }
@@ -43,30 +43,36 @@ class StageSceneService {
   }
 
   private hookRenderNode() {
-    mergeSignal(Schema.inited, Surface.inited$).hook(() => {
-      const renderPage = () => {
-        this.sceneRoot.children = []
-        this.render('add', [OperatePage.currentPage.id])
-      }
-      renderPage()
-      Schema.onMatchPatch('/client/selectPageId', renderPage)
-    })
+    mergeSignal(Schema.inited, Surface.inited$).hook(this.renderPage)
 
-    Schema.onFlushPatches.hook((patch) => {
+    Schema.onMatchPatch('/client/selectPageId', this.renderPage)
+
+    Schema.flushingPatches.hook((patch) => {
       const { type, keys } = patch
-      if (keys[1] === 'childIds') {
-        this.reHierarchy(patch)
-      } else {
-        this.render(type, keys as string[])
-      }
+      if (keys[1] === 'childIds') this.reHierarchy(patch)
+      else this.render(type, keys as string[])
     })
+  }
+
+  private renderPage() {
+    Surface.clearSurface()
+    this.sceneRoot.children = []
+
+    const traverse = (id: ID) => {
+      const node = Schema.find<INode>(id)
+      this.render('add', [node.id])
+      if ('childIds' in node) node.childIds.forEach(traverse)
+    }
+
+    const page = Schema.find<IPage>(Schema.client.selectPageId)
+    page.childIds.forEach(traverse)
   }
 
   private render(op: ImmuiPatch['type'], keys: string[]) {
     const id = keys[0]
     if (macroMatch`'meta'|'client'`(id)) return
 
-    const node = Schema.find<INode | IPage>(id)
+    const node = Schema.find<INode>(id)
 
     switch (true) {
       case op === 'add' && keys.length === 1:
@@ -81,37 +87,30 @@ class StageSceneService {
     }
   }
 
-  private mountNode(node: INode | IPage) {
-    if (node.type === 'page') {
-      SchemaUtil.getChildren(node.id).forEach(this.mountNode)
-      return
-    }
+  private mountNode(node: INode) {
+    const parent = this.elements.get(node.parentId) || this.sceneRoot
 
-    const elem = new Elem(node.id)
+    const elem = new Elem(node.id, 'sceneNode', parent)
     this.elements.set(node.id, elem)
 
-    const parent = this.elements.get(node.parentId) || this.sceneRoot
-    parent.addChild(elem)
-
     this.updateNode(node)
-
-    SchemaUtil.getChildren(node.id).forEach(this.mountNode)
   }
 
   private updateNode(node: INode) {
     const elem = this.findElem(node.id)
-    Surface.collectDirtyRect(elem.aabb)
+    Surface.collectDirty(elem)
 
     elem.obb = OBB.FromRect(node, node.rotation)
     elem.draw = (ctx, path2d) => StageNodeDrawer.draw(node, elem, ctx, path2d)
+    elem.optimize = true
 
     if (node.type === 'frame') elem.clip = true
 
-    Surface.collectDirtyRect(elem.aabb)
+    Surface.collectDirty(elem)
   }
 
   private unmountNode(id: ID) {
-    const elem = this.findElem(id)
+    const elem = this.findElem(id) || this.sceneRoot
 
     elem.children.forEach((child) => {
       this.unmountNode(child.id)
@@ -120,7 +119,7 @@ class StageSceneService {
     elem.destroy()
     this.elements.delete(id)
 
-    Surface.collectDirtyRect(elem.aabb)
+    Surface.collectDirty(elem)
   }
 
   private reHierarchy(patch: ImmuiPatch) {
@@ -130,41 +129,39 @@ class StageSceneService {
 
     if (type === 'add') {
       const elem = this.findElem(value)
-      parent.children.splice(parent.children.indexOf(elem), 1)
+      const oldIndex = parent.children.indexOf(elem)
+      if (oldIndex !== -1) parent.children.splice(oldIndex, 1)
       parent.children.splice(index, 0, elem)
     }
 
-    Surface.collectDirtyRect(parent.aabb)
+    Surface.collectDirty(parent)
   }
 
   private bindNodeHover() {
-    const { clearHover, hover, hoverIds, selectIds } = OperateNode
-
-    let lastElemsFromPoint: Elem[] = []
+    let lastFirstElem: Elem
 
     Surface.addEvent('mousemove', () => {
-      const endBatch = batchSignal(hoverIds)
-      clearHover()
       const elemsFromPoint = Surface.elemsFromPoint[0]
-      elemsFromPoint.forEach((elem) => hover(elem.id))
-      endBatch()
 
-      lastElemsFromPoint.forEach((elem) => {
-        if (elemsFromPoint.includes(elem)) return
-        elem.outline = undefined
-        Surface.collectDirtyRect(elem.aabb)
+      batchSignal(OperateNode.hoverIds, () => {
+        OperateNode.clearHover()
+        elemsFromPoint.forEach((elem) => OperateNode.hover(elem.id))
       })
-      lastElemsFromPoint = elemsFromPoint
 
-      const first = elemsFromPoint[0]
-      if (!first) return
+      if (lastFirstElem && lastFirstElem.outline !== 'select') {
+        lastFirstElem.outline = undefined
+        Surface.collectDirty(lastFirstElem)
+      }
 
-      const node = Schema.find(first.id)
-      if (node.type === 'frame' && first.parent === this.sceneRoot) return
-      if (selectIds.value.has(node.id)) return
+      const firstElem = (lastFirstElem = firstOne(elemsFromPoint))
+      if (!firstElem) return
 
-      first.outline = 'hover'
-      Surface.collectDirtyRect(first.aabb)
+      const node = Schema.find(firstElem.id)
+      if (node.type === 'frame' && firstElem.parent === this.sceneRoot) return
+      if (firstElem.outline === 'select') return
+
+      firstElem.outline = 'hover'
+      Surface.collectDirty(firstElem)
     })
   }
 }

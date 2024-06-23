@@ -134,12 +134,17 @@ export class AABB {
     return included ? result : -1
   }
 
-  static Expand(aabb: AABB, expand = 0): AABB {
+  static Expand(aabb: AABB, ...expands: [number] | [number, number, number, number]): AABB {
     const { minX, minY, maxX, maxY } = aabb
-    return new AABB(minX - expand, minY - expand, maxX + expand, maxY + expand)
+    if (expands.length === 1) {
+      const expand = expands[0]
+      return new AABB(minX - expand, minY - expand, maxX + expand, maxY + expand)
+    } else {
+      return new AABB(minX - expands[0], minY - expands[1], maxX + expands[2], maxY + expands[3])
+    }
   }
 
-  static Merge(...aabbList: AABB[]) {
+  static Merge(aabbList: AABB[]) {
     let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
     aabbList.forEach((aabb) => {
       xMin = min(xMin, aabb.minX)

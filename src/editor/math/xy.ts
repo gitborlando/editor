@@ -80,7 +80,7 @@ export function xy_getRotation(self: IXY, another: IXY, origin: IXY) {
 }
 
 export function xy_toArray(self: IXY) {
-  return [self.x, self.y]
+  return [self.x, self.y] as [number, number]
 }
 
 export function xy_xAxis(rotation: number) {

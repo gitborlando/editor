@@ -1,9 +1,9 @@
 import { nanoid } from 'nanoid'
 import { ID } from 'src/editor/schema/type'
 import { createCache } from '../utils/cache'
-import { iife } from '../utils/normal'
+import { INoopFunc, iife } from '../utils/normal'
 
-type IHook<T> = (value: T, args?: any) => void
+type IHook<T> = (value: T, oldValue: T, args?: any) => void
 
 export type IHookOption = {
   id?: string
@@ -46,12 +46,12 @@ export class Signal<T extends any> {
     })
     this.optionCache.set(hook, option)
     if (option.immediately && option.once) {
-      hook(this.value)
+      hook(this.value, this.oldValue)
     } else if (option.immediately) {
-      hook(this.value)
+      hook(this.value, this.oldValue)
       this.hooks.push(hook)
     } else if (option.once) {
-      const onceFunc = () => void hook(this.value) || this.unHook(onceFunc)
+      const onceFunc = () => void hook(this.value, this.oldValue) || this.unHook(onceFunc)
       this.optionCache.set(onceFunc, option)
       this.hooks.push(onceFunc)
     } else {
@@ -67,13 +67,17 @@ export class Signal<T extends any> {
     } else if (value !== undefined) {
       this.value = value
     }
-
     if (signalBatchMap.get(this)) return
-    this.hooks.forEach((hook) => hook(this.value, args))
+    this.hooks.forEach((hook) => hook(this.value, this.oldValue, args))
   }
 
   intercept(handle: (value: T) => T | void) {
     this._intercept = handle
+  }
+
+  removeAll() {
+    this.hooks = []
+    this.optionCache.clear()
   }
 
   private unHook(hook: IHook<T>) {
@@ -146,12 +150,26 @@ export function mergeSignal(...signals: Signal<any>[]) {
 
 const signalBatchMap = createCache<Signal<any>, boolean>()
 
-export function batchSignal(...signals: Signal<any>[]) {
-  signals.forEach((signal) => signalBatchMap.set(signal, true))
-  return () => {
+export function batchSignal(...args: Signal<any>[]): INoopFunc
+export function batchSignal(...args: [...Signal<any>[], INoopFunc]): void
+export function batchSignal(...args: Signal<any>[] | [...Signal<any>[], INoopFunc]) {
+  const [signals, callback] = iife(() => {
+    if (args[args.length - 1] instanceof Function) {
+      return [args.slice(0, -1), args[args.length - 1]] as [Signal<any>[], INoopFunc]
+    } else {
+      return [args as Signal<any>[]] as [Signal<any>[]]
+    }
+  })
+  const delayDispatch = () => {
     signals.forEach((signal) => signalBatchMap.set(signal, false))
     signals.forEach((signal) => signal.dispatch())
   }
+  signals.forEach((signal) => signalBatchMap.set(signal, true))
+
+  if (!callback) return delayDispatch
+
+  callback()
+  delayDispatch()
 }
 
 export function multiSignal(...signals: Signal<any>[]) {

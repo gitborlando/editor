@@ -1,6 +1,9 @@
-import { ImgManager } from 'src/editor/editor/img'
+import autoBind from 'class-autobind-decorator'
+import { getEditorSetting } from 'src/editor/editor/editor'
+import { ImgManager } from 'src/editor/editor/img-manager'
 import { max, radianfy, rcos, rsin } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
+import { AABB } from 'src/editor/math/obb'
 import { xy_, xy_from } from 'src/editor/math/xy'
 import { SchemaDefault } from 'src/editor/schema/default'
 import { Surface } from 'src/editor/stage/render/surface'
@@ -9,7 +12,7 @@ import { getZoom } from 'src/editor/stage/viewport'
 import { loopFor } from 'src/shared/utils/array'
 import { createObjCache } from 'src/shared/utils/cache'
 import { hslBlueColor, rgba } from 'src/shared/utils/color'
-import { IXY, iife } from 'src/shared/utils/normal'
+import { IXY, iife, matchCase, memorize } from 'src/shared/utils/normal'
 import {
   IEllipse,
   IFill,
@@ -21,34 +24,35 @@ import {
   IStroke,
   IText,
 } from '../../schema/type'
-import { Elem } from './elem'
+import { Elem, ElemHitUtil } from './elem'
 
-export const StageNodeDrawer = new (class {
-  ctx!: CanvasRenderingContext2D
-  node!: INode
-  elem!: Elem
-  path2d!: Path2D
+@autoBind
+class StageNodeDrawerService {
+  private node!: INode
+  private elem!: Elem
+  private ctx!: CanvasRenderingContext2D
+  private path2d!: Path2D
+  private dirtyRects: AABB[] = []
 
   draw = (node: INode, elem: Elem, ctx: CanvasRenderingContext2D, path2d: Path2D) => {
     this.node = node
     this.elem = elem
     this.ctx = ctx
     this.path2d = path2d
+    this.dirtyRects = [elem.aabb]
 
-    this.ctx.save()
     this.elem.setMatrix(this.ctx)
-
     this.drawShapePath()
 
     node.fills.forEach((fill, i) => {
       Surface.ctxSaveRestore(() => {
-        if (node.shadows[i]) this.drawShadow(node.shadows[i])
+        this.drawShadow(node.shadows[i])
         this.drawFill(fill)
       })
     })
     node.strokes.forEach((stroke, i) => {
       Surface.ctxSaveRestore(() => {
-        if (node.shadows[i]) this.drawShadow(node.shadows[i])
+        this.drawShadow(node.shadows[i])
         this.drawStroke(stroke)
       })
     })
@@ -56,21 +60,8 @@ export const StageNodeDrawer = new (class {
     this.drawOutline()
     this.drawHitTest()
 
-    this.ctx.restore()
-  }
-
-  private drawOutline() {
-    if (!this.elem.outline) return
-
-    const width = this.elem.outline === 'hover' ? 2 : 0.5
-
-    Surface.ctxSaveRestore(() => {
-      this.ctx.lineWidth = width / getZoom() / devicePixelRatio
-      this.ctx.strokeStyle = hslBlueColor(65)
-      this.ctx.stroke(new Path2D(this.path2d))
-    })
-
-    this.elem.outline = undefined
+    const dirtyRect = AABB.Merge([...this.dirtyRects])
+    elem.getDirtyRect = (expand) => expand(dirtyRect, 1)
   }
 
   private drawShapePath = () => {
@@ -108,11 +99,9 @@ export const StageNodeDrawer = new (class {
 
       case 'text':
         this.breakText()
-        if (this.elem.outline === 'hover') this.drawTextHoverLine()
+        if (this.elem.outline === 'hover') this.drawTextHoverPath()
         break
     }
-
-    return this.path2d
   }
 
   private drawRoundRect = (width: number, height: number, radius: number) => {
@@ -223,18 +212,6 @@ export const StageNodeDrawer = new (class {
     })
   }
 
-  private drawTextHoverLine() {
-    const collideXys = this.getTextCollideXys()
-    const { fontSize } = (this.node as IText).style
-
-    for (let i = 0; i < collideXys.length; i += 2) {
-      const p1 = collideXys[i]
-      const p2 = collideXys[i + 1]
-      this.path2d.moveTo(p1.x, p1.y + fontSize / 2)
-      this.path2d.lineTo(p2.x, p2.y + fontSize / 2)
-    }
-  }
-
   private splitTextsCache = createObjCache<ISplitText[]>()
   private splitTexts!: ISplitText[]
 
@@ -257,7 +234,13 @@ export const StageNodeDrawer = new (class {
     const { style } = this.node as IText
     const { lineHeight } = style
 
-    this.splitTexts.forEach(({ text, start }, i) => {
+    this.splitTexts.forEach(({ text, start, width }, i) => {
+      if (getEditorSetting('ignoreUnVisible')) {
+        const visualWidth = width * getZoom()
+        const visualHeight = lineHeight * getZoom()
+        if (visualWidth / text.length < 2 || visualHeight < 2) return
+      }
+
       this.ctx[op](text, start, i * lineHeight)
     })
   }
@@ -299,7 +282,7 @@ export const StageNodeDrawer = new (class {
         const image = ImgManager.getImage(fill.url)
         if (!image) {
           ImgManager.getImageAsync(fill.url).then(() => {
-            Surface.collectDirtyRect(this.elem.aabb)
+            Surface.collectDirty(this.elem)
           })
         } else {
           const { width, height } = this.node
@@ -335,102 +318,145 @@ export const StageNodeDrawer = new (class {
       default:
         break
     }
+
+    switch (stroke.align) {
+      case 'center':
+        this.dirtyRects.push(AABB.Expand(this.elem.aabb, stroke.width / 2))
+        break
+      case 'outer':
+        this.dirtyRects.push(AABB.Expand(this.elem.aabb, stroke.width))
+    }
   }
 
-  private drawShadow = (shadow: IShadow) => {
-    if (!shadow.visible) return
+  private drawShadow = (shadow?: IShadow) => {
+    if (!shadow?.visible) return
 
-    const { fill, blur, offsetX, offsetY, spread } = shadow
+    let { fill, blur, offsetX, offsetY, spread } = shadow
+    offsetX = offsetX * getZoom()
+    offsetY = offsetY * getZoom()
+    blur = blur * getZoom()
 
     this.ctx.shadowColor = (fill as IFillColor).color
     this.ctx.shadowBlur = blur
     this.ctx.shadowOffsetX = offsetX
     this.ctx.shadowOffsetY = offsetY
+
+    this.dirtyRects.push(
+      AABB.Expand(this.elem.aabb, -offsetX + blur, -offsetY + blur, offsetX + blur, offsetY + blur)
+    )
+  }
+
+  private parseOutline = memorize((outlineStr: string) => {
+    const outline = matchCase(outlineStr, outlineStr, {
+      hover: `1.5-${hslBlueColor(65)}`,
+      select: `1-${hslBlueColor(65)}`,
+    })
+    return [Number(outline.split('-')[0]), outline.split('-')[1]] as const
+  })
+
+  private drawOutline = () => {
+    if (!this.elem.outline) return
+
+    const [width, color] = this.parseOutline(this.elem.outline)
+
+    Surface.ctxSaveRestore(() => {
+      this.ctx.lineWidth = width / getZoom() / devicePixelRatio
+      this.ctx.strokeStyle = color || hslBlueColor(65)
+      this.ctx.stroke(new Path2D(this.path2d))
+    })
+  }
+
+  private drawTextHoverPath() {
+    const collideXys = this.getTextCollideXys()
+    const { fontSize } = (this.node as IText).style
+
+    for (let i = 0; i < collideXys.length; i += 2) {
+      const p1 = collideXys[i]
+      const p2 = collideXys[i + 1]
+      this.path2d.moveTo(p1.x, p1.y + fontSize / 2)
+      this.path2d.lineTo(p2.x, p2.y + fontSize / 2)
+    }
   }
 
   private drawHitTest = () => {
-    const { eventHandle, obb } = this.elem
-    const { width, height } = obb
+    const { width, height } = this.elem.obb
 
     switch (this.node.type) {
       case 'frame':
       case 'rect':
         const radius = 'radius' in this.node ? this.node.radius : 0
-        eventHandle.hitTest = eventHandle.hitRoundRect(width, height, radius)
+        this.elem.hitTest = ElemHitUtil.HitRoundRect(width, height, radius)
         break
 
       case 'polygon':
-      case 'star':
-        eventHandle.hitTest = eventHandle.hitPolygon(this.node.points)
+      case 'star': {
+        this.elem.hitTest = ElemHitUtil.HitPolygon(this.node.points)
         break
+      }
 
       case 'ellipse':
-        eventHandle.hitTest = eventHandle.hitEllipse(width / 2, height / 2, width / 2, height / 2)
+        this.elem.hitTest = ElemHitUtil.HitEllipse(width / 2, height / 2, width / 2, height / 2)
         break
 
       case 'irregular':
       case 'line':
-      case 'text':
-        const xys = iife(() => {
-          if (this.node.type === 'text') return this.getTextCollideXys()
-          if (this.node.type === 'line') return this.node.points
-          return this.getIrregularCollideXys()
-        })
-        eventHandle.hitTest = eventHandle.hitPolyline(xys, 10 / getZoom())
+        const { points, strokes } = this.node
+        this.elem.eventHandle.cacheHitTest(() => {
+          const xys = iife(() => {
+            if (this.node.type === 'line') return points
+            return this.getIrregularCollideXys()
+          })
+          const strokeWidth = max(...strokes.map((s) => s.width))
+          return ElemHitUtil.HitPolyline(xys, strokeWidth * 2)
+        }, [points, strokes])
         break
+
+      case 'text': {
+        const { content, style, width } = this.node
+        this.elem.eventHandle.cacheHitTest(
+          () => ElemHitUtil.HitPolyline(this.getTextCollideXys(), style.lineHeight),
+          [content, style, width]
+        )
+        break
+      }
     }
   }
 
-  private irregularCollideXysCache = createObjCache<IXY[]>()
-
   private getIrregularCollideXys() {
     const points = (this.node as IIrregular).points
+    const collideXys = <IXY[]>[xy_from(points[0])]
 
-    return this.irregularCollideXysCache.getSet(
-      this.node.id,
-      () => {
-        const collideXys = <IXY[]>[xy_from(points[0])]
+    loopFor(points, (cur, next) => {
+      if (next.startPath) return
+      if (cur.handleRight && next.handleLeft) {
+        const [cp2, cp1] = [cur.handleRight, next.handleLeft]
+        const xys = pointsOnBezierCurves([cur, cp2, cp1, next], 0.3, 0.3)
+        collideXys.push(...xys.slice(1))
+      } else if (cur.handleRight) {
+        const xys = pointsOnBezierCurves([cur, cur.handleRight, next, next], 0.3, 0.3)
+        collideXys.push(...xys.slice(1))
+      } else if (next.handleLeft) {
+        const xys = pointsOnBezierCurves([cur, cur, next.handleLeft, next], 0.3, 0.3)
+        collideXys.push(...xys.slice(1))
+      } else {
+        collideXys.push(xy_from(next))
+      }
+    })
 
-        loopFor(points, (cur, next) => {
-          if (next.startPath) return
-          if (cur.handleRight && next.handleLeft) {
-            const [cp2, cp1] = [cur.handleRight, next.handleLeft]
-            const xys = pointsOnBezierCurves([cur, cp2, cp1, next], 0.3, 0.3)
-            collideXys.push(...xys.slice(1))
-          } else if (cur.handleRight) {
-            const xys = pointsOnBezierCurves([cur, cur.handleRight, next, next], 0.3, 0.3)
-            collideXys.push(...xys.slice(1))
-          } else if (next.handleLeft) {
-            const xys = pointsOnBezierCurves([cur, cur, next.handleLeft, next], 0.3, 0.3)
-            collideXys.push(...xys.slice(1))
-          } else {
-            collideXys.push(xy_from(next))
-          }
-        })
-        return collideXys
-      },
-      [points]
-    )
+    return collideXys
   }
-
-  private textCollideXysCache = createObjCache<IXY[]>()
 
   private getTextCollideXys() {
-    const { content, style, width } = this.node as IText
+    const collideXys = <IXY[]>[]
+    const { lineHeight, fontSize } = (this.node as IText).style
 
-    return this.textCollideXysCache.getSet(
-      this.node.id,
-      () => {
-        const collideXys = <IXY[]>[]
-        const { lineHeight, fontSize } = (this.node as IText).style
+    this.splitTexts.forEach(({ start, width }, i) => {
+      const y = i * lineHeight + fontSize / 2
+      collideXys.push(xy_(start, y), xy_(start + width, y))
+    })
 
-        this.splitTexts.forEach(({ start, width }, i) => {
-          const y = i * lineHeight + fontSize / 2
-          collideXys.push(xy_(start, y), xy_(start + width, y))
-        })
-        return collideXys
-      },
-      [content, style, width]
-    )
+    return collideXys
   }
-})()
+}
+
+export const StageNodeDrawer = new StageNodeDrawerService()

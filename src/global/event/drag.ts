@@ -7,6 +7,7 @@ export type IDragData = {
   current: IXY
   start: IXY
   shift: IXY
+  delta?: IXY
   marquee: IRect
 }
 
@@ -95,7 +96,8 @@ class DragService {
       }
 
       const { movementX, movementY } = event
-      this.current = xy_plus(this.current, xy_(movementX, movementY))
+      const delta = xy_(movementX, movementY)
+      this.current = xy_plus(this.current, delta)
       this.shift = xy_minus(this.current, this.start)
       this.marquee = this.calculateMarquee()
 
@@ -104,6 +106,7 @@ class DragService {
         current: this.current,
         start: this.start,
         shift: this.shift,
+        delta,
         marquee: this.marquee,
       })
     }

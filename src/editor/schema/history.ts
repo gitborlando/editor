@@ -1,69 +1,69 @@
 import autobind from 'class-autobind-decorator'
+import { nanoid } from 'nanoid'
+import { ImmuiPatch } from 'src/shared/immui/immui'
 import { createSignal } from 'src/shared/signal/signal'
 import { Schema } from './schema'
-import { ISchemaHistory, ISchemaOperation } from './type'
+import { ISchemaOperation } from './type'
 
 @autobind
 class SchemaHistoryService {
-  stack = <ISchemaHistory[]>[]
-  index = createSignal(-1)
-  afterReplay = createSignal<'undo' | 'redo'>()
-  private lastOperationsLength = 0
-  private isStart = false
-  private isInAction = false
+  stack = <ISchemaOperation[]>[]
+  index$ = createSignal(-1)
+  patchList: ImmuiPatch[] = []
+
   get canUndo() {
-    return this.index.value >= 0
+    return this.index$.value >= 0
   }
+
   get canRedo() {
-    return this.index.value < this.stack.length - 1
+    return this.index$.value < this.stack.length - 1
   }
-  initHook() {
-    Schema.inited.hook({ afterAll: true }, this.startRecord)
+
+  private mergePatches = () => {
+    const map = new Map<string, ImmuiPatch>()
+    this.patchList.forEach((patch) => {
+      if (!map.has(patch.path)) return map.set(patch.path, patch)
+      patch.oldValue = map.get(patch.path)!.oldValue
+      map.set(patch.path, patch)
+    })
+    return [...map.values()]
   }
-  commit(description: string) {
-    if (this.isInAction) return
-    if (!this.isStart) {
-      return (Schema.operationList = [])
+
+  private makeOperation = (description?: string) => {
+    const id = nanoid()
+    const patches = this.mergePatches()
+    Schema.save(patches)
+    return { id, patches, description }
+  }
+
+  commit(description?: string) {
+    if (this.index$.value !== this.stack.length - 1) {
+      this.stack.splice(this.index$.value + 1)
     }
-    if (this.index.value !== this.stack.length - 1) {
-      this.stack.splice(this.index.value + 1)
-    }
-    const operations = Schema.operationList.filter((i) => !i.noHistory)
-    this.stack.push({ operations, description })
-    this.index.dispatch(this.stack.length - 1)
-    Schema.operationList = []
+    this.stack.push(this.makeOperation(description))
+    this.index$.dispatch(this.stack.length - 1)
+    this.patchList.length = 0
   }
+
   undo() {
     if (!this.canUndo) return
-    const { operations } = this.stack[this.index.value]
-    this.replayOperations('undo', operations.slice().reverse())
-    this.index.dispatch(this.index.value - 1)
-    this.afterReplay.dispatch('undo')
+    const operation = this.stack[this.index$.value]
+    this.replay('undo', operation)
+    this.index$.dispatch(this.index$.value - 1)
   }
+
   redo() {
     if (!this.canRedo) return
-    const { operations } = this.stack[this.index.value + 1]
-    this.replayOperations('redo', operations)
-    this.index.dispatch(this.index.value + 1)
-    this.afterReplay.dispatch('redo')
+    const operation = this.stack[this.index$.value + 1]
+    this.replay('redo', operation)
+    this.index$.dispatch(this.index$.value + 1)
   }
-  startAction() {
-    this.isInAction = true
-  }
-  endActionWithCommit(description: string) {
-    this.isInAction = false
-    this.commit(description)
-  }
-  private startRecord() {
-    this.isStart = true
-    this.lastOperationsLength = Schema.operationList.length
-  }
-  private replayOperations(type: 'undo' | 'redo', operations: ISchemaOperation[]) {
-    operations.forEach(({ patches }) => {
-      Schema.applyPatches(patches, { reverse: type === 'undo' })
-    })
-    Schema.commitOperation('replay')
+
+  private replay(type: 'undo' | 'redo', { patches }: ISchemaOperation) {
+    Schema.applyPatches(patches, { reverse: type === 'undo' })
     Schema.nextSchema()
+    Schema.save(patches, true)
+    this.patchList.length = 0
   }
 }
 

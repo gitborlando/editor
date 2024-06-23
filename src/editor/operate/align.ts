@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { StageScene } from 'src/editor/stage/render/scene'
-import { StageWidgetTransform } from 'src/editor/stage/render/widget/transform'
+import { StageTransform } from 'src/editor/stage/render/widget/transform'
 import { createSignal } from 'src/shared/signal/signal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { Schema } from '../schema/schema'
@@ -129,7 +129,7 @@ class OperateAlignService {
 
   private getAlignBound() {
     if (getSelectNodes().length > 1) {
-      return StageWidgetTransform.transformOBB.aabb
+      return StageTransform.transformOBB.aabb
     } else {
       return StageScene.findElem(getSelectNodes()[0].id).obb.aabb
     }

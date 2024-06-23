@@ -13,6 +13,8 @@ export type ImmuiApplyPatchOption = {
 
 export default class Immui {
   private keyPathDiffMap = <any>{}
+  private order = 0
+  private mutates: { keys: IKey[]; value: any; oldValue: any }[] = []
 
   add = <T>(object: object, keyPath: string | IKey[], value: T) => {
     const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
@@ -79,8 +81,9 @@ export default class Immui {
     const traverse = (object: any, keyPathMap: any, keys: string[]) => {
       for (const key in keyPathMap) {
         const _keys = [...keys, key]
-        if (keyPathMap[key][this.symbolKey]) {
-          const [value, oldValue] = keyPathMap[key][this.symbolKey]
+
+        if (keyPathMap[key][this.symbolValue]) {
+          const [value, oldValue] = keyPathMap[key][this.symbolValue]
           if (value === oldValue) continue
 
           const path = '/' + _keys.join('/')
@@ -90,9 +93,10 @@ export default class Immui {
           else if (oldValue === undefined) patch.type = 'add'
           else patch.type = 'replace'
 
-          patches.push(patch)
+          patches[keyPathMap[key][this.symbolOrder]] = patch
         } else {
           if (!object[key]) continue
+
           const content = object[key]
           object[key] = Array.isArray(content) ? [...content] : { ...content }
           traverse(object[key], keyPathMap[key], _keys)
@@ -101,9 +105,11 @@ export default class Immui {
     }
 
     traverse(object, this.keyPathDiffMap, [])
-    this.keyPathDiffMap = {}
 
-    return [object, patches]
+    this.keyPathDiffMap = {}
+    this.order = 0
+
+    return [object, patches.filter(Boolean)]
   }
 
   applyPatches = <T extends object>(
@@ -137,7 +143,8 @@ export default class Immui {
     })
   }
 
-  private symbolKey = Symbol('value')
+  private symbolValue = Symbol('value')
+  private symbolOrder = Symbol('order')
 
   private recordChange = (keys: IKey[], value?: any, oldValue?: any) => {
     let curKeyPathDiffMap = this.keyPathDiffMap
@@ -147,20 +154,24 @@ export default class Immui {
         if (i !== keys.length - 1) {
           curKeyPathDiffMap = curKeyPathDiffMap[key] = {}
         } else {
-          curKeyPathDiffMap[key] = { [this.symbolKey]: [value, oldValue] }
+          curKeyPathDiffMap[key] = {
+            [this.symbolValue]: [value, oldValue],
+            [this.symbolOrder]: this.order++,
+          }
         }
       } else {
         if (i !== keys.length - 1) {
           curKeyPathDiffMap = curKeyPathDiffMap[key]!
         } else {
-          if (!curKeyPathDiffMap[key][this.symbolKey]) {
-            curKeyPathDiffMap[key][this.symbolKey] = []
+          if (!curKeyPathDiffMap[key][this.symbolValue]) {
+            curKeyPathDiffMap[key][this.symbolValue] = []
           }
           if (value) {
-            curKeyPathDiffMap[key][this.symbolKey][0] = value
+            curKeyPathDiffMap[key][this.symbolValue][0] = value
           } else {
-            curKeyPathDiffMap[key][this.symbolKey] = [value, oldValue]
+            curKeyPathDiffMap[key][this.symbolValue] = [value, oldValue]
           }
+          curKeyPathDiffMap[key][this.symbolOrder] = this.order++
         }
       }
     })

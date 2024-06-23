@@ -8,6 +8,7 @@ import { Schema } from 'src/editor/schema/schema'
 import { INode, INodeParent } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageScene } from 'src/editor/stage/render/scene'
+import { Surface } from 'src/editor/stage/render/surface'
 import { Drag, type IDragData } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
 import { IXY } from 'src/shared/utils/normal'
@@ -27,10 +28,12 @@ class StageCreateService {
 
   startInteract() {
     StageScene.sceneRoot.addEvent('mousedown', this.create, { capture: true })
+    StageCursor.setCursor('add').lock()
   }
 
   endInteract() {
     StageScene.sceneRoot.removeEvent('mousedown', this.create, { capture: true })
+    StageCursor.unlock().setCursor('select')
   }
 
   private create() {
@@ -44,7 +47,9 @@ class StageCreateService {
     OperateNode.insertAt(this.findParent(), node)
     StageSelect.onCreateSelect(this.createId)
 
-    if (node.type === 'line') StageCursor.setCursor('move').lock().upReset()
+    if (node.type === 'line') {
+      StageCursor.setCursor('move').lock().upReset()
+    }
   }
 
   private onCreateMove({ marquee, current, start }: IDragData) {
@@ -94,11 +99,9 @@ class StageCreateService {
   }
 
   private findParent() {
-    const frameId = [...OperateNode.hoverIds.value]
-      .reverse()
-      .find((id) => SchemaUtil.isById(id, 'frame'))
+    const frame = Surface.elemsFromPoint[0].find((elem) => SchemaUtil.isById(elem.id, 'frame'))
 
-    if (frameId) return Schema.find<INodeParent>(frameId)
+    if (frame) return Schema.find<INodeParent>(frame.id)
     return OperatePage.currentPage
   }
 }

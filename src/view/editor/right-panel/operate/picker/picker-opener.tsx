@@ -1,14 +1,13 @@
-import { cloneDeep } from 'lodash-es'
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import rgbHex from 'rgb-hex'
-import { IImage, ImgManager } from 'src/editor/editor/img'
+import { IImage, ImgManager } from 'src/editor/editor/img-manager'
 import { xy_, xy_client } from 'src/editor/math/xy'
 import { IFill, IFillColor } from 'src/editor/schema/type'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { useAutoSignal } from 'src/shared/signal/signal-react'
 import { makeLinearGradientCss, rgbToRgba } from 'src/shared/utils/color'
-import { IXY, iife } from 'src/shared/utils/normal'
+import { IXY, clone, iife } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
 import Asset from 'src/view/ui-utility/assets'
 import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
@@ -29,7 +28,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
     UIPickerCopy.type.value = fill.type
     UIPickerCopy.from = impact
     UIPickerCopy.index = index
-    UIPickerCopy.fill = cloneDeep(fill)
+    UIPickerCopy.fill = clone(fill)
   }
   const showPicker = (xy: IXY) => {
     setupUIPicker()

@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
-
 import { radianfy, rcos, rsin } from 'src/editor/math/base'
 import { AABB, OBB } from 'src/editor/math/obb'
 import { xy_dot, xy_getRotation, xy_xAxis, xy_yAxis } from 'src/editor/math/xy'
@@ -8,10 +7,11 @@ import { OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode, getSelectIds, getSelectNodes } from 'src/editor/operate/node'
 import { SchemaHistory } from 'src/editor/schema/history'
 import { Schema } from 'src/editor/schema/schema'
+import { ID } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageSelect } from 'src/editor/stage/interact/select'
-import { Elem, ElemMouseEvent } from 'src/editor/stage/render/elem'
+import { Elem, ElemHitUtil, ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
@@ -23,32 +23,21 @@ import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
 import { IXY } from 'src/shared/utils/normal'
 
 @autobind
-class StageWidgetTransformService {
+class StageTransformService {
   show = createSignal(false)
   transformOBB = OBB.IdentityOBB()
 
-  private transformElem = new Elem('transform')
+  private transformElem = new Elem('transform', 'widgetNode')
   private lineElems = createObjCache<Elem>()
   private vertexElems = createObjCache<Elem>()
 
   initHook() {
-    StageScene.widgetRoot.addChild(this.transformElem)
-
-    this.transformElem.addEvent('mousedown', (e) => {
-      if (StageInteract.currentType.value !== 'select') return
-      if (isLeftMouse(e.hostEvent)) {
-        e.stopPropagation()
-        this.move()
-      } else {
-        StageSelect.onMenu()
-      }
-    })
+    this.setupTransformElem()
 
     this.hookShow()
-    this.show.hook(() => this.render())
   }
 
-  move() {
+  move = () => {
     const { x, y } = OperateGeometry.geometry
     Drag.onStart(() => {
       this.show.dispatch(false)
@@ -57,6 +46,7 @@ class StageWidgetTransformService {
         OperateNode.copySelectNodes()
         OperateNode.pasteNodes()
       }
+      Surface.interactive = false
     })
       .onMove(({ shift }) => {
         const sceneShiftXY = StageViewport.toSceneShift(shift)
@@ -70,21 +60,23 @@ class StageWidgetTransformService {
             OperateGeometry.operateKeys.clear()
             Schema.finalOperation('alt 复制节点')
           }
+          Surface.interactive = true
+          SchemaHistory.commit('操作几何数据')
         }
       })
   }
 
   private hookShow() {
-    SchemaHistory.afterReplay.hook(() => {
+    this.show.hook(() => this.render())
+    this.show.intercept(() => {
+      if (!getSelectIds().length) return false
+      if (OperateNode.intoEditNodeId.value) return false
+    })
+    OperateNode.selectIds.hook((newIds, oldIds) => {
+      this.updateElemOutline(newIds, oldIds)
       this.show.dispatch(true)
     })
-    OperateNode.selectIds.hook(() => {
-      this.show.dispatch(true)
-    })
-    StageViewport.beforeZoom.hook(() => {
-      this.show.dispatch(false)
-    })
-    StageViewport.afterZoom.hook(() => {
+    StageViewport.zoom$.hook(() => {
       this.show.dispatch(true)
     })
     OperateNode.intoEditNodeId.hook(() => {
@@ -96,31 +88,26 @@ class StageWidgetTransformService {
   }
 
   private render() {
-    Surface.collectDirtyRect(this.transformElem.aabb, 6)
+    Surface.collectDirty(this.transformElem)
     this.calcTransformOBB()
-    Surface.collectDirtyRect(this.transformElem.aabb, 6)
+    Surface.collectDirty(this.transformElem)
 
     this.transformElem.hidden = false
-    if (this.transformOBB.width === 0) {
+    if (this.show.value === false) {
       this.transformElem.hidden = true
-      return Surface.collectDirtyRect(this.transformElem.aabb, 6)
+      return Surface.collectDirty(this.transformElem)
     }
 
     const [p0, p1, p2, p3] = this.transformOBB.calcVertexXY()
-    this.setupTransformElem()
-    this.setupLine('top', p0, p1)
-    this.setupLine('right', p1, p2)
-    this.setupLine('bottom', p2, p3)
-    this.setupLine('left', p3, p0)
-    this.setupVertex('topLeft', p0)
-    this.setupVertex('topRight', p1)
-    this.setupVertex('bottomRight', p2)
-    this.setupVertex('bottomLeft', p3)
-
-    getSelectNodes().map((node) => {
-      const elem = StageScene.findElem(node.id)
-      if (elem) elem.outline = 'select'
-    })
+    this.updateTransformElem()
+    this.updateLine('top', p0, p1)
+    this.updateLine('right', p1, p2)
+    this.updateLine('bottom', p2, p3)
+    this.updateLine('left', p3, p0)
+    this.updateVertex('topLeft', p0)
+    this.updateVertex('topRight', p1)
+    this.updateVertex('bottomRight', p2)
+    this.updateVertex('bottomLeft', p3)
   }
 
   private calcTransformOBB() {
@@ -135,22 +122,38 @@ class StageWidgetTransformService {
     }
 
     const aabbList = getSelectNodes().map((node) => {
-      return StageScene.findElem(node.id).obb.aabb
+      return StageScene.findElem(node.id).aabb
     })
-    return (this.transformOBB = OBB.FromAABB(AABB.Merge(...aabbList)))
+    return (this.transformOBB = OBB.FromAABB(AABB.Merge(aabbList)))
   }
 
-  private setupTransformElem() {
+  private setupTransformElem = () => {
+    StageScene.widgetRoot.addChild(this.transformElem)
+
+    this.transformElem.getDirtyRect = (expand) => expand(this.transformOBB.aabb, 6)
+
+    this.transformElem.addEvent('mousedown', (e) => {
+      if (StageInteract.currentType.value !== 'select') return
+
+      if (isLeftMouse(e.hostEvent)) {
+        e.stopPropagation()
+        this.move()
+      } else {
+        StageSelect.onMenu()
+      }
+    })
+  }
+
+  private updateTransformElem() {
     this.transformElem.obb = this.transformOBB
-    this.transformElem.hitTest = this.transformElem.eventHandle.hitRoundRect(
+    this.transformElem.hitTest = ElemHitUtil.HitRoundRect(
       this.transformOBB.width,
       this.transformOBB.height,
       0
     )
   }
 
-  private setupLine(type: 'top' | 'bottom' | 'left' | 'right', p1: IXY, p2: IXY) {
-    const spread = 10
+  private updateLine(type: 'top' | 'bottom' | 'left' | 'right', p1: IXY, p2: IXY) {
     const { setGeometry } = OperateGeometry
 
     const mouseover = (e: ElemMouseEvent) => {
@@ -206,18 +209,17 @@ class StageWidgetTransformService {
             setGeometry('width', width - shiftW)
             break
         }
-      })
+      }).onDestroy(() => SchemaHistory.commit('操作几何数据'))
     }
 
     const line = this.lineElems.getSet(type, () => {
-      const line = new Elem(`transform-line-${type}`)
-      this.transformElem.addChild(line)
+      const line = new Elem(`transform-line-${type}`, 'widgetNode', this.transformElem)
       line.addEvent('hover', mouseover)
       line.addEvent('mousedown', mousedown)
       return line
     })
 
-    line.hitTest = line.eventHandle.hitPolyline([p1, p2], spread / getZoom())
+    line.hitTest = ElemHitUtil.HitPolyline([p1, p2], 4 / getZoom())
 
     line.draw = (ctx, path2d) => {
       if (!this.show.value) return
@@ -230,7 +232,7 @@ class StageWidgetTransformService {
     }
   }
 
-  private setupVertex(type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft', xy: IXY) {
+  private updateVertex(type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft', xy: IXY) {
     const { setGeometry } = OperateGeometry
 
     const mouseenter = (e: ElemMouseEvent) => {
@@ -289,7 +291,7 @@ class StageWidgetTransformService {
             setGeometry('height', height + shiftH)
             break
         }
-      })
+      }).onDestroy(() => SchemaHistory.commit('操作几何数据'))
     }
 
     const rotate = (e: ElemMouseEvent) => {
@@ -313,17 +315,16 @@ class StageWidgetTransformService {
     }
 
     const vertexElem = this.vertexElems.getSet(type, () => {
-      const vertexElem = new Elem(`transform-vertex-${type}`)
+      const vertexElem = new Elem(`transform-vertex-${type}`, 'widgetNode', this.transformElem)
       vertexElem.addEvent('hover', mouseenter)
       vertexElem.addEvent('mousedown', mousedown)
       vertexElem.addEvent('mousemove', (e) => e.stopPropagation())
-      this.transformElem.addChild(vertexElem)
       return vertexElem
     })
 
     const size = 6 / getZoom()
 
-    vertexElem.hitTest = vertexElem.eventHandle.hitPoint(xy, size * 5)
+    vertexElem.hitTest = ElemHitUtil.HitPoint(xy, size * 5)
 
     vertexElem.draw = (ctx, path2d) => {
       if (!this.show.value) return
@@ -338,6 +339,21 @@ class StageWidgetTransformService {
       ctx.fill(path2d)
     }
   }
+
+  private updateElemOutline = (newIds: Set<ID>, oldIds: Set<ID>) => {
+    oldIds.forEach((id) => {
+      const elem = StageScene.findElem(id)
+      if (!elem) return
+      elem.outline = undefined
+      Surface.collectDirty(elem)
+    })
+    newIds.forEach((id) => {
+      const elem = StageScene.findElem(id)
+      if (!elem) return
+      elem.outline = 'select'
+      Surface.collectDirty(elem)
+    })
+  }
 }
 
-export const StageWidgetTransform = new StageWidgetTransformService()
+export const StageTransform = new StageTransformService()

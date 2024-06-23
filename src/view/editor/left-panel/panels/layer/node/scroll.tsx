@@ -1,5 +1,6 @@
 import { FC, memo } from 'react'
 import { max } from 'src/editor/math/base'
+import { Surface } from 'src/editor/stage/render/surface'
 import { Drag } from 'src/global/event/drag'
 import { useAutoSignal, useHookSignal, useSignal } from 'src/shared/signal/signal-react'
 import { Flex } from '../../../../../ui-utility/widget/flex'
@@ -26,9 +27,15 @@ export const ScrollComp: FC<IScrollComp> = memo(
           className='wh-100%-0 bg-[rgba(204,204,204,0.5)] absolute'
           style={{ height: sliderHeight, top: scrollHeight * rate }}
           onMouseDown={() => {
-            Drag.onStart(() => dragging.dispatch(true))
+            Drag.onStart(() => {
+              dragging.dispatch(true)
+              Surface.interactive = false
+            })
               .onMove(({ shift }) => hookScroll(scrollHeight + shift.y / rate))
-              .onDestroy(() => dragging.dispatch(false))
+              .onDestroy(() => {
+                dragging.dispatch(false)
+                Surface.interactive = true
+              })
           }}></Flex>
       </Flex>
     )

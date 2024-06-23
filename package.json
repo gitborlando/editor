@@ -16,7 +16,6 @@
     "hex-rgb": "^5.0.0",
     "hotkeys-js": "^3.13.7",
     "localforage": "^1.10.0",
-    "lodash-es": "^4.17.21",
     "nanoid": "^5.0.7",
     "pexels": "^1.4.0",
     "rc-input": "^1.4.5",

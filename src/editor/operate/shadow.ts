@@ -1,9 +1,9 @@
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
-import { cloneDeep } from 'lodash-es'
 import Immui from 'src/shared/immui/immui'
 import { createSignal } from 'src/shared/signal/signal'
 import { rgb } from 'src/shared/utils/color'
+import { clone } from 'src/shared/utils/normal'
 import { SchemaDefault } from '../schema/default'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
@@ -29,9 +29,9 @@ class OperateShadowService {
     this.shadows = []
     this.isMultiShadows = false
     const nodes = OperateNode.selectingNodes
-    if (nodes.length === 1) return (this.shadows = cloneDeep(nodes[0].shadows))
+    if (nodes.length === 1) return (this.shadows = clone(nodes[0].shadows))
     if (nodes.length > 1) {
-      if (this.isSameShadows(nodes)) return (this.shadows = cloneDeep(nodes[0].shadows))
+      if (this.isSameShadows(nodes)) return (this.shadows = clone(nodes[0].shadows))
       return (this.isMultiShadows = true)
     }
   }

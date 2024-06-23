@@ -1,6 +1,6 @@
 import { FC, memo, useRef } from 'react'
 import { IEditorCommand } from 'src/editor/editor/command'
-import { onSettingsChanged } from 'src/editor/editor/settings'
+import { Editor } from 'src/editor/editor/editor'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -50,7 +50,7 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
     )
   })
 
-  const { menuShowTopTab } = useHookSignal(onSettingsChanged)
+  const menuShowTopTab = useHookSignal(Editor.settings.menuShowTopTab)
   const showTopTab = menuShowTopTab && StageViewport.inViewport(xy.value)
 
   const TopTabComp = useMemoComp([], ({}) => {

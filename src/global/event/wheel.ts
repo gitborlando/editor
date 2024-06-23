@@ -11,6 +11,7 @@ export class EventWheelService {
   afterWheel = createSignal<IWheelData>()
 
   private wheelTimeOut?: NodeJS.Timeout
+  private curFrameTriggered = false
 
   onWheel(e: WheelEvent | ReactWheelEvent) {
     const direction = e.deltaY > 0 ? 1 : -1
@@ -21,7 +22,11 @@ export class EventWheelService {
       this.beforeWheel.dispatch({ e, direction })
     }
 
-    this.duringWheel.dispatch({ e, direction })
+    if (!this.curFrameTriggered) {
+      this.curFrameTriggered = true
+      this.duringWheel.dispatch({ e, direction })
+      requestAnimationFrame(() => (this.curFrameTriggered = false))
+    }
 
     this.wheelTimeOut = setTimeout(() => {
       this.wheelTimeOut = undefined

@@ -1,24 +1,49 @@
+import { getEditorSetting } from 'src/editor/editor/editor'
 import { radianfy } from 'src/editor/math/base'
-import { OBB } from 'src/editor/math/obb'
+import { AABB, OBB } from 'src/editor/math/obb'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/stage/render/surface'
 import { loopFor } from 'src/shared/utils/array'
+import { createObjCache } from 'src/shared/utils/cache'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
 
-export class Elem {
-  constructor(public id = '') {}
-
+export type ElemProps = {
+  id?: string
   outline?: 'hover' | 'select'
+  hidden?: boolean
+  obb?: OBB
+  draw: (ctx: CanvasRenderingContext2D, path2d: Path2D) => void
+  hitTest?: (xy: IXY) => boolean
+  addEvent?: Partial<Record<ElemEventType, ElemEventFunc>>
+}
+
+export class Elem {
+  constructor(public id = '', public type: 'sceneNode' | 'widgetNode', parent?: Elem) {
+    if (parent) {
+      this.parent = parent
+      parent.addChild(this)
+    }
+  }
+
+  outline?: 'hover' | 'select' | `${number}-${string}`
   clip = false
   hidden = false
+  optimize = false
 
   obb = OBB.IdentityOBB()
+
   get aabb() {
     return this.obb.aabb
   }
 
-  dirty = true
+  get visible() {
+    if (this.hidden) return false
+    if (this.type === 'widgetNode') return true
+    return Surface.testVisible(this.aabb)
+  }
+
   draw = (ctx: CanvasRenderingContext2D, path2d: Path2D) => {}
+  getDirtyRect = (expand: (aabb: AABB, ...expands: number[]) => AABB) => this.aabb
 
   setMatrix = (ctx: CanvasRenderingContext2D, inverse = false) => {
     const { x, y, rotation } = this.obb
@@ -31,20 +56,26 @@ export class Elem {
     }
   }
 
-  traverseDraw = (ctx: CanvasRenderingContext2D) => {
-    if (this.hidden) return
+  traverseDraw = (ctx: CanvasRenderingContext2D, customFunc?: (elem: Elem) => any) => {
+    if (!this.visible) return
+    if (customFunc?.(this) === false) return
 
-    const path2d = new Path2D()
+    if (getEditorSetting('ignoreUnVisible') && this.optimize) {
+      const visualSize = Surface.getVisualSize(this.aabb)
+      if (visualSize.x < 2 && visualSize.y < 2) return
+    }
 
     Surface.ctxSaveRestore(() => {
-      this.draw(ctx, path2d)
+      const path2d = new Path2D()
+      Surface.ctxSaveRestore(() => this.draw(ctx, path2d))
+
+      if (!this.children.length) return
 
       if (this.clip) {
         this.setMatrix(ctx)
         ctx.clip(path2d)
         this.setMatrix(ctx, true)
       }
-
       this.children.forEach((child) => child.traverseDraw(ctx))
     })
   }
@@ -81,7 +112,7 @@ export class Elem {
 
   destroy() {
     this.eventHandle.dispose()
-    this.parent.removeChild(this)
+    this.parent?.removeChild(this)
   }
 }
 
@@ -113,8 +144,14 @@ class ElemEventHandler {
 
   constructor(private elem: Elem) {}
 
-  addEvent(type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) {
-    const capture = Number(option?.capture || false)
+  private hitTestCache = createObjCache<(xy: IXY) => boolean>()
+
+  cacheHitTest = (createHitTest: () => (xy: IXY) => boolean, deps: any[]) => {
+    this.hitTest = this.hitTestCache.getSet('hitTest', createHitTest, deps)
+  }
+
+  addEvent = (type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) => {
+    const capture = option?.capture ? 0 : 1
 
     this[type][capture].push(func)
     this.eventCount++
@@ -128,8 +165,8 @@ class ElemEventHandler {
     }
   }
 
-  removeEvent(type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) {
-    const capture = Number(option?.capture || false)
+  removeEvent = (type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) => {
+    const capture = option?.capture ? 0 : 1
     const index = this[type][capture].indexOf(func)
     if (index === -1) return
 
@@ -142,18 +179,19 @@ class ElemEventHandler {
     this.mousemove = [[], []]
     this.hover = [[], []]
     this.eventCount = 0
+    this.hitTestCache.clear()
   }
 
-  triggerMouseEvent(
+  triggerMouseEvent = (
     e: MouseEvent,
     xy: IXY,
     hit: boolean,
     isCapture: boolean,
     stopPropagation: INoopFunc
-  ) {
+  ) => {
     if (this.eventCount === 0) return
 
-    const capture = Number(isCapture)
+    const capture = isCapture ? 0 : 1
     const mouseEvent = {
       xy,
       stopPropagation,
@@ -163,79 +201,74 @@ class ElemEventHandler {
     switch (e.type) {
       case 'mousedown':
         if (hit) {
-          this.mousedown[capture].forEach((func) => {
-            func({ ...mouseEvent, hovered: true })
-          })
+          this.mousedown[capture].forEach((func) => func({ ...mouseEvent, hovered: true }))
         }
         break
 
       case 'mousemove':
         if (hit) {
-          this.mousemove[capture].forEach((func) => {
-            func({ ...mouseEvent, hovered: true })
-          })
+          this.mousemove[capture].forEach((func) => func({ ...mouseEvent, hovered: true }))
         }
         if (hit !== this.lastHit[capture]) {
           this.lastHit[capture] = hit
-          this.hover[capture].forEach((func) => {
-            func({ ...mouseEvent, hovered: hit })
-          })
+          this.hover[capture].forEach((func) => func({ ...mouseEvent, hovered: hit }))
         }
         break
     }
   }
+}
 
-  hitRoundRect(w: number, h: number, r: number) {
+export class ElemHitUtil {
+  static HitRoundRect(w: number, h: number, r: number) {
     return (xy: IXY) => {
-      return this.inRoundRect(xy, w, h, r)
+      const inRect = xy.x >= 0 && xy.x <= w && xy.y >= 0 && xy.y <= h
+      if (r === 0) {
+        return inRect
+      } else {
+        if (!inRect) return false
+        if (xy_distance(xy, xy_(r, r)) > r && xy.x < r && xy.y < r) return false
+        if (xy_distance(xy, xy_(w - r, r)) > r && xy.x > w - r && xy.y < r) return false
+        if (xy_distance(xy, xy_(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r) return false
+        if (xy_distance(xy, xy_(r, h - r)) > r && xy.x < r && xy.y > h - r) return false
+        return true
+      }
     }
   }
 
-  hitPolygon(xys: IXY[]) {
+  static HitPolygon(xys: IXY[]) {
     return (xy: IXY) => {
       return this.inPolygon(xys, xy)
     }
   }
 
-  hitPolyline(xys: IXY[], spread: number) {
+  static HitPolyline(xys: IXY[], spread: number) {
+    const polygons: IXY[][] = []
+    loopFor(xys, (cur, next) => {
+      polygons.push(this.twoPointsSpreadRect(cur, next, spread))
+    })
     return (xy: IXY) => {
-      return this.inPolyline(xys, xy, spread)
+      for (let i = 0; i < polygons.length; i++) {
+        if (this.inPolygon(polygons[i], xy)) return true
+      }
+      return false
     }
   }
 
-  hitEllipse(cx: number, cy: number, a: number, b: number) {
+  static HitEllipse(cx: number, cy: number, a: number, b: number) {
     return (xy: IXY) => {
-      return this.inEllipse(xy, cx, cy, a, b)
+      const dx = xy.x - cx
+      const dy = xy.y - cy
+      return (dx * dx * a * b) / (a * a) + (dy * dy * a * b) / (b * b) <= a * b
     }
   }
 
-  hitPoint(center: IXY, size: number) {
+  static HitPoint(center: IXY, size: number) {
     return (xy: IXY) => {
-      return this.hitEllipse(center.x, center.y, size / 2, size / 2)(xy)
+      return this.HitEllipse(center.x, center.y, size / 2, size / 2)(xy)
     }
   }
 
-  private inRoundRect(xy: IXY, w: number, h: number, r: number) {
-    const inRect = xy.x >= 0 && xy.x <= w && xy.y >= 0 && xy.y <= h
-    if (r === 0) {
-      return inRect
-    } else {
-      if (!inRect) return false
-      if (xy_distance(xy, xy_(r, r)) > r && xy.x < r && xy.y < r) return false
-      if (xy_distance(xy, xy_(w - r, r)) > r && xy.x > w - r && xy.y < r) return false
-      if (xy_distance(xy, xy_(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r) return false
-      if (xy_distance(xy, xy_(r, h - r)) > r && xy.x < r && xy.y > h - r) return false
-      return true
-    }
-  }
-
-  private inEllipse(xy: IXY, cx: number, cy: number, a: number, b: number) {
-    const dx = xy.x - cx
-    const dy = xy.y - cy
-    return (dx * dx * a * b) / (a * a) + (dy * dy * a * b) / (b * b) <= a * b
-  }
-
-  private inPolygon(xys: IXY[], xy: IXY) {
+  private static inPolygon(xys: IXY[], xy: IXY) {
     let inside = false
     loopFor(xys, (cur, next) => {
       if (cur.y > xy.y && next.y > xy.y) return
@@ -249,18 +282,7 @@ class ElemEventHandler {
     return inside
   }
 
-  private inPolyline(xys: IXY[], xy: IXY, spread: number) {
-    let isCollide = false
-    loopFor(xys, (cur, next) => {
-      const fourVertex = this.twoPointsSpreadRect(cur, next, spread)
-      if (this.inPolygon(fourVertex, xy)) {
-        return (isCollide = true)
-      }
-    })
-    return isCollide
-  }
-
-  private twoPointsSpreadRect(p1: IXY, p2: IXY, spread: number) {
+  private static twoPointsSpreadRect(p1: IXY, p2: IXY, spread: number) {
     const dx = p2.x - p1.x
     const dy = p2.y - p1.y
     const radian = Math.atan2(dy, dx)
