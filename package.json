@@ -29,7 +29,8 @@
     "svg-arc-to-cubic-bezier": "^3.2.0",
     "svg-parser": "^2.0.4",
     "svg-path-bounding-box": "^1.0.4",
-    "svg-path-parser": "^1.1.0"
+    "svg-path-parser": "^1.1.0",
+    "tinyqueue": "^2.0.3"
   },
   "devDependencies": {
     "@svgr/core": "^8.1.0",

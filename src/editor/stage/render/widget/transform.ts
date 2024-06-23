@@ -33,7 +33,6 @@ class StageTransformService {
 
   initHook() {
     this.setupTransformElem()
-
     this.hookShow()
   }
 
@@ -46,7 +45,6 @@ class StageTransformService {
         OperateNode.copySelectNodes()
         OperateNode.pasteNodes()
       }
-      Surface.interactive = false
     })
       .onMove(({ shift }) => {
         const sceneShiftXY = StageViewport.toSceneShift(shift)
@@ -60,7 +58,6 @@ class StageTransformService {
             OperateGeometry.operateKeys.clear()
             Schema.finalOperation('alt 复制节点')
           }
-          Surface.interactive = true
           SchemaHistory.commit('操作几何数据')
         }
       })
@@ -142,6 +139,9 @@ class StageTransformService {
         StageSelect.onMenu()
       }
     })
+
+    this.transformElem.addEvent('mousedown', () => (Surface.interactive = false), { capture: true })
+    window.addEventListener('mouseup', () => (Surface.interactive = true))
   }
 
   private updateTransformElem() {

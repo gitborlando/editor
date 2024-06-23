@@ -1,11 +1,11 @@
-import { FC, memo, useMemo, useState } from 'react'
+import { FC, memo, useMemo } from 'react'
 import { InView } from 'react-intersection-observer'
 import usePromise from 'react-promise-suspense'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { createCache } from 'src/shared/utils/cache'
 import { hslBlueColor } from 'src/shared/utils/color'
-import { IAnyObject } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
+import { iconList } from 'src/view/ui-utility/assets/icons/list'
 import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IIconsComp = {}
@@ -15,23 +15,25 @@ const categoryLengthCache = createCache<string, number>()
 export const IconsComp: FC<IIconsComp> = memo(({}) => {
   const IconsContentComp = ({}) => {
     const categories = ['arco-design', 'iconpark']
-    const [curCategory, setCurCategory] = useState(categories[0])
+    const curCategory = useAutoSignal(categories[0])
 
     useMemo(() => {
       categories.forEach((category) => categoryLengthCache.getSet(category, () => 60))
     }, [])
 
-    const CategoryComp = useMemoComp([curCategory], () => {
+    const CategoryComp = useMemoComp([], () => {
+      useHookSignal(curCategory)
+
       return (
         <Flex className={'lay-h wh-100%-fit px-10 gap-6-6 pointer'}>
           {categories.map((category) => {
-            const selectCss = curCategory === category && { color: hslBlueColor(60) }
+            const selectCss = curCategory.value === category && { color: hslBlueColor(60) }
             return (
               <Flex
                 key={category}
                 className='lay-h wh-fit-fit-5 bg-[#F5F5F5] p-6 my-10 normalFont'
                 style={{ ...selectCss }}
-                onClick={() => setCurCategory(category)}>
+                onClick={() => curCategory.dispatch(category)}>
                 {category}
               </Flex>
             )
@@ -40,20 +42,18 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
       )
     })
 
-    const SvgListComp = useMemoComp([curCategory], ({}) => {
-      const svgSource = usePromise<[string], IAnyObject>(
-        (url) => fetch(url).then((res) => res.json()),
-        [`https://nvvxaxp63w.bja.sealos.run/get/icons/list?category=${curCategory}`]
-      ).Contents
-
-      const length = useAutoSignal(categoryLengthCache.get(curCategory))
+    const SvgListComp = useMemoComp([], ({}) => {
+      const svgSource = iconList[curCategory.value as keyof typeof iconList]
+      const length = useAutoSignal(categoryLengthCache.get(curCategory.value))
       const icons = Object.entries<any>(svgSource).slice(0, length.value)
-      useHookSignal(length, (len) => categoryLengthCache.set(curCategory, len))
+
+      useHookSignal(curCategory)
+      useHookSignal(length, (len) => categoryLengthCache.set(curCategory.value, len))
 
       return (
         <Flex className={'wh-100%-fit lay-h flex-wrap of-y-auto px-6 gap-10-10 d-scroll'}>
           {icons.map(([name, path]) => (
-            <SvgComp key={path.Key} name={name} path={path.Key} />
+            <SvgComp key={path} name={name} path={path} />
           ))}
           <InView
             className='wh-100%-30 '
@@ -62,12 +62,9 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
       )
     })
 
-    const SvgComp = useMemoComp<{ name: string; path: string }>([], ({ name, path }) => {
+    const SvgComp = useMemoComp<{ name: string; path: string }>([], ({ name }) => {
       const SvgContentComp = useMemoComp([], ({}) => {
-        const svgUrl = usePromise<[string], string>(
-          (url) => fetch(url).then((res) => res.text()),
-          [`https://nvvxaxp63w.bja.sealos.run/get/icons/url?path=${path}`]
-        )
+        const svgUrl = `${location.origin}${location.pathname}/src/view/ui-utility/assets/icons/${curCategory.value}/${name}`
         const svgStr = usePromise<[string], string>(
           (url) => fetch(url).then((res) => res.text()),
           [svgUrl]
@@ -89,6 +86,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
           </Flex>
         )
       })
+
       return withSuspense(<SvgContentComp />)
     })
 

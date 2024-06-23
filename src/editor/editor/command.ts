@@ -208,12 +208,10 @@ class EditorCommandManager {
 
       hotkeys(shortcut!, (keyboardEvent) => {
         keyboardEvent.preventDefault()
-
         if (['ctrl+c'].includes(shortcut!)) {
           if (isKeyDown) return
           isKeyDown = true
         }
-
         callback()
       })
     })
@@ -271,6 +269,7 @@ class EditorCommandManager {
     console.log({
       meta: Schema.meta,
       client: Schema.client,
+      page: curPage,
       ...nodes,
     })
   }

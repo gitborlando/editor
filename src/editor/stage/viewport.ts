@@ -127,7 +127,7 @@ class StageViewportService {
       this.afterZoom.dispatch()
     })
     Surface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))
-    window.addEventListener('wheel', (e) => e.preventDefault(), { passive: false })
+    window.addEventListener('wheel', (e) => e.ctrlKey && e.preventDefault(), { passive: false })
   }
 
   private onResizeBound() {
