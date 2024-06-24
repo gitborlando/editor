@@ -8,13 +8,11 @@ import { StageViewport } from '../viewport'
 @autobind
 class StageMoveService {
   startInteract() {
-    Surface.interactive = false
     Surface.addEvent('mousedown', this.onMoveStage)
     StageCursor.setCursor('hand').lock()
   }
 
   endInteract() {
-    Surface.interactive = true
     Surface.removeEvent('mousedown', this.onMoveStage)
     StageCursor.unlock().setCursor('select', 0)
   }
@@ -24,7 +22,7 @@ class StageMoveService {
     Drag.onDown(() => {
       StageCursor.unlock().setCursor('grab').lock()
     })
-      .onMove(({ shift, delta }) => {
+      .onMove(({ shift }) => {
         StageViewport.offset$.dispatch(xy_plus(start, shift))
         StageViewport.movingStage$.dispatch(xy_plus(start, shift))
       })

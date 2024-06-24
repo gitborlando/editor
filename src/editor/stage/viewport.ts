@@ -14,7 +14,6 @@ import {
   xy_plus,
   xy_plus_all,
 } from '../math/xy'
-import { Schema } from '../schema/schema'
 
 const initBound = {
   x: 280,
@@ -40,11 +39,11 @@ class StageViewportService {
   inited = createSignal(false)
   bound = createSignal(initBound)
   zoom$ = createSignal(1)
-  offset$ = createSignal({ x: 100, y: 100 })
+  offset$ = createSignal({ x: 0, y: 0 })
   beforeZoom = createSignal()
   afterZoom = createSignal()
 
-  movingStage$ = createSignal<IXY>({ x: 100, y: 100 })
+  movingStage$ = createSignal<IXY>({ x: 0, y: 0 })
   zoomingStage$ = createSignal()
 
   private wheeler = new EventWheelService()
@@ -94,17 +93,18 @@ class StageViewportService {
     })
     this.wheeler.duringWheel.hook(({ e }) => {
       if (!e.ctrlKey) {
-        const oldXY = Schema.client.viewport[Schema.client.selectPageId].xy
+        const oldOffset = this.offset$.value
         if (e.shiftKey) {
-          oldXY.x -= e.deltaY
+          oldOffset.x -= e.deltaY
         } else {
-          if (e.deltaY === 0) oldXY.x -= e.deltaX
-          else oldXY.y -= e.deltaY
+          if (e.deltaY === 0) oldOffset.x -= e.deltaX
+          else oldOffset.y -= e.deltaY
         }
-        this.offset$.dispatch(xy_from(oldXY))
-        this.movingStage$.dispatch(xy_from(oldXY))
+        this.offset$.dispatch(xy_from(oldOffset))
+        this.movingStage$.dispatch(xy_from(oldOffset))
         return
       }
+
       e.preventDefault()
 
       const sign = e.deltaY > 0 ? -1 : 1

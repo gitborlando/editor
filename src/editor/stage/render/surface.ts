@@ -311,7 +311,6 @@ export class StageSurface {
     reverseFor(this.layerList, (elem, i) => traverse(i, elem, []))
   }
 
-  interactive = true
   elemsFromPoint: Elem[][] = []
 
   private handleEvents = () => {
@@ -319,7 +318,7 @@ export class StageSurface {
       this.elemsFromPoint = this.layerList.map(() => [])
       this.getEventXY(e)
 
-      if (!this.interactive) return
+      if (this.isPointerEventNone) return
 
       this.traverseLayerList((elem, capture, stopped, stopPropagation, hitList, xy) => {
         const hit = elem.hitTest(xy!)
@@ -329,6 +328,18 @@ export class StageSurface {
     }
     this.addEvent('mousedown', onMouseEvent, { capture: true })
     this.addEvent('mousemove', onMouseEvent, { capture: true })
+  }
+
+  private isPointerEventNone = false
+
+  setPointerEvent(option: { pointerEventNone: boolean; cancelOnPointerUp?: boolean }) {
+    this.isPointerEventNone = option.pointerEventNone
+
+    if (option.cancelOnPointerUp !== false) {
+      window.addEventListener('pointerup', () => {
+        this.isPointerEventNone = false
+      })
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { OBB } from 'src/editor/math/obb'
 import { OperateNode } from 'src/editor/operate/node'
+import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageMarquee } from 'src/editor/stage/render/widget/marquee'
 import { StageTransform } from 'src/editor/stage/render/widget/transform'
 import { StageVectorEdit } from 'src/editor/stage/render/widget/vector-edit'
@@ -141,6 +142,8 @@ class StageSceneService {
     let lastFirstElem: Elem
 
     Surface.addEvent('mousemove', () => {
+      if (StageInteract.currentType.value !== 'select') return
+
       const elemsFromPoint = Surface.elemsFromPoint[0]
 
       batchSignal(OperateNode.hoverIds, () => {

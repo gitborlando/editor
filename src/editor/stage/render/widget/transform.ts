@@ -1,5 +1,4 @@
 import autobind from 'class-autobind-decorator'
-import hotkeys from 'hotkeys-js'
 import { radianfy, rcos, rsin } from 'src/editor/math/base'
 import { AABB, OBB } from 'src/editor/math/obb'
 import { xy_dot, xy_getRotation, xy_xAxis, xy_yAxis } from 'src/editor/math/xy'
@@ -36,11 +35,11 @@ class StageTransformService {
     this.hookShow()
   }
 
-  move = () => {
+  move = (e: ElemMouseEvent) => {
     const { x, y } = OperateGeometry.geometry
     Drag.onStart(() => {
       this.show.dispatch(false)
-      if (hotkeys.alt) {
+      if (e.hostEvent.altKey) {
         StageCursor.setCursor('copy')
         OperateNode.copySelectNodes()
         OperateNode.pasteNodes()
@@ -53,7 +52,7 @@ class StageTransformService {
       })
       .onDestroy(({ dragService }) => {
         if (dragService.started) {
-          if (hotkeys.alt) {
+          if (e.hostEvent.altKey) {
             StageCursor.setCursor('select')
             OperateGeometry.operateKeys.clear()
             Schema.finalOperation('alt 复制节点')
@@ -127,21 +126,28 @@ class StageTransformService {
   private setupTransformElem = () => {
     StageScene.widgetRoot.addChild(this.transformElem)
 
-    this.transformElem.getDirtyRect = (expand) => expand(this.transformOBB.aabb, 6)
+    this.transformElem.getDirtyRect = (expand) => {
+      return expand(this.transformOBB.aabb, 6)
+    }
 
     this.transformElem.addEvent('mousedown', (e) => {
       if (StageInteract.currentType.value !== 'select') return
 
       if (isLeftMouse(e.hostEvent)) {
         e.stopPropagation()
-        this.move()
+        this.move(e)
       } else {
         StageSelect.onMenu()
       }
     })
 
-    this.transformElem.addEvent('mousedown', () => (Surface.interactive = false), { capture: true })
-    window.addEventListener('mouseup', () => (Surface.interactive = true))
+    this.transformElem.addEvent(
+      'mousedown',
+      () => {
+        Surface.setPointerEvent({ pointerEventNone: true })
+      },
+      { capture: true }
+    )
   }
 
   private updateTransformElem() {

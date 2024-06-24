@@ -93,7 +93,7 @@ class StageSelectService {
       this.onMarqueeSelect()
     } else {
       this.onMousedownSelect()
-      StageTransform.move()
+      StageTransform.move(e)
     }
   }
 

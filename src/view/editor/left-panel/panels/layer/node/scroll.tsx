@@ -18,7 +18,9 @@ export const ScrollComp: FC<IScrollComp> = memo(
     const dragging = useSignal(false)
     const rate = contentHeight !== 0 ? viewHeight / contentHeight : 0
     const sliderHeight = max(24, viewHeight * rate)
+
     useHookSignal(dragging, (isDragging) => width.dispatch(isDragging ? 6 : 4))
+
     return (
       <Flex
         className='lay-v absolute right-0 bottom-0 pointer hover:w-6'
@@ -27,14 +29,16 @@ export const ScrollComp: FC<IScrollComp> = memo(
           className='wh-100%-0 bg-[rgba(204,204,204,0.5)] absolute'
           style={{ height: sliderHeight, top: scrollHeight * rate }}
           onMouseDown={() => {
+            Surface.setPointerEvent({ pointerEventNone: true })
+
             Drag.onStart(() => {
               dragging.dispatch(true)
-              Surface.interactive = false
             })
-              .onMove(({ shift }) => hookScroll(scrollHeight + shift.y / rate))
+              .onMove(({ shift }) => {
+                hookScroll(scrollHeight + shift.y / rate)
+              })
               .onDestroy(() => {
                 dragging.dispatch(false)
-                Surface.interactive = true
               })
           }}></Flex>
       </Flex>
