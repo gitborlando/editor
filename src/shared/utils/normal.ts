@@ -179,3 +179,7 @@ export class Raf {
     return this
   }
 }
+
+export function publicPath(path: string) {
+  return import.meta.env.DEV ? `./editor/${path}` : `./${path}`
+}

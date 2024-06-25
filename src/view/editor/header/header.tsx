@@ -4,6 +4,7 @@ import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
+import { publicPath } from 'src/shared/utils/normal'
 import { useMemoComp } from 'src/shared/utils/react'
 import Asset from 'src/view/ui-utility/assets'
 import { Button } from 'src/view/ui-utility/widget/button'
@@ -20,7 +21,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     return (
       <Flex className='lay-h ml-10 gap-8-8'>
         <Flex className='lay-h'>
-          <Icon size={28}>{'./editor/fav-icon/shiyangyang.png'}</Icon>
+          <Icon size={28}>{publicPath('fav-icon/shiyangyang.png')}</Icon>
           <h4 className='text-hslb60 text-16'>屎羊羊编辑器</h4>
         </Flex>
       </Flex>

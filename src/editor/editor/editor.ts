@@ -4,6 +4,7 @@ import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { createStorageItem } from 'src/global/storage'
+import { publicPath } from 'src/shared/utils/normal'
 import listJson from '../../../public/mock/list.json'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
@@ -57,7 +58,7 @@ export class EditorService {
       Schema.initSchema(schema)
     } else {
       const name = listJson[fileId as keyof typeof listJson].name
-      const schema = await (await fetch(`./editor/mock/${name}.json`)).json()
+      const schema = await (await fetch(publicPath(`mock/${name}.json`))).json()
       await FileManager.saveFile(schema)
       Schema.initSchema(schema)
     }
