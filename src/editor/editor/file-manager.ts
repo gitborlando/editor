@@ -3,6 +3,7 @@ import localforage from 'localforage'
 import { Uploader } from 'src/global/upload'
 import { createSignal } from 'src/shared/signal/signal'
 import { jsonFy, jsonParse } from 'src/shared/utils/normal'
+import listJson from '../../../public/mock/list.json'
 import { Schema } from '../schema/schema'
 import { IMeta, ISchema } from '../schema/type'
 
@@ -13,9 +14,11 @@ class FileManagerService {
   fileMetaList$ = createSignal<IMeta[]>([])
 
   async getFileMetaList() {
-    this.fileMetaList$.value = []
+    const mockList = Object.values(listJson) as IMeta[]
+    this.fileMetaList$.value = [...mockList]
     const keys = await this.fileForage.keys()
     for (const key of keys) {
+      if (mockList.some((meta) => meta.fileId === key)) continue
       this.fileMetaList$.value.push((await this.fileForage.getItem<ISchema>(key))!.meta)
     }
     this.fileMetaList$.dispatch()
@@ -24,11 +27,11 @@ class FileManagerService {
   async openFile() {
     const file = await Uploader.open({ accept: '' })
     const json = jsonParse(await Uploader.readAsText(file!)) as ISchema
-    await this.addFile(json)
+    await this.addNewFile(json)
   }
 
-  async addFile(schema: ISchema) {
-    await this.saveJsonFile(schema)
+  async addNewFile(schema: ISchema) {
+    await this.saveFile(schema)
     this.openInNewTab(schema.meta.fileId)
     this.getFileMetaList()
   }
@@ -39,8 +42,8 @@ class FileManagerService {
     this.getFileMetaList()
   }
 
-  async saveJsonFile(json: ISchema) {
-    await this.fileForage.setItem(json.meta.fileId, json)
+  async saveFile(schema: ISchema) {
+    await this.fileForage.setItem(schema.meta.fileId, schema)
   }
 
   async exportFile(fileId: string) {

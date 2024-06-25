@@ -109,6 +109,17 @@ export class OBB {
 export class AABB {
   constructor(public minX: number, public minY: number, public maxX: number, public maxY: number) {}
 
+  static Rect(aabb: AABB) {
+    return {
+      x: aabb.minX,
+      y: aabb.minY,
+      width: aabb.maxX - aabb.minX,
+      height: aabb.maxY - aabb.minY,
+      centerX: aabb.minX + (aabb.maxX - aabb.minX) / 2,
+      centerY: aabb.minY + (aabb.maxY - aabb.minY) / 2,
+    }
+  }
+
   static Collide(one: AABB, another: AABB) {
     return (
       one.minX <= another.maxX &&

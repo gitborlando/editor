@@ -6,9 +6,10 @@ import { StageMarquee } from 'src/editor/stage/render/widget/marquee'
 import { StageTransform } from 'src/editor/stage/render/widget/transform'
 import { StageVectorEdit } from 'src/editor/stage/render/widget/vector-edit'
 import { ImmuiPatch } from 'src/shared/immui/immui'
-import { batchSignal, mergeSignal } from 'src/shared/signal/signal'
+import { mergeSignal } from 'src/shared/signal/signal'
 import { firstOne } from 'src/shared/utils/array'
 import { createObjCache } from 'src/shared/utils/cache'
+import { IClientXY } from 'src/shared/utils/event'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { Schema } from '../../schema/schema'
@@ -20,8 +21,8 @@ import { Surface } from './surface'
 @autobind
 class StageSceneService {
   elements = createObjCache<Elem>()
-  sceneRoot = new Elem('sceneRoot', 'sceneNode')
-  widgetRoot = new Elem('widgetRoot', 'widgetNode')
+  sceneRoot = new Elem('sceneRoot', 'sceneElem')
+  widgetRoot = new Elem('widgetRoot', 'widgetElem')
 
   initHook() {
     StageTransform.initHook()
@@ -93,7 +94,7 @@ class StageSceneService {
   private mountNode(node: INode) {
     const parent = this.elements.get(node.parentId) || this.sceneRoot
 
-    const elem = new Elem(node.id, 'sceneNode', parent)
+    const elem = new Elem(node.id, 'sceneElem', parent)
     this.elements.set(node.id, elem)
 
     this.updateNode(node)
@@ -140,33 +141,36 @@ class StageSceneService {
     Surface.collectDirty(parent)
   }
 
+  getElemsFromPoint(e?: IClientXY, type: Elem['type'] = 'sceneElem') {
+    return Surface.getElemsFromPoint(e).filter((elem) => elem.type === type)
+  }
+
   private bindNodeHover() {
-    let lastFirstElem: Elem
+    OperateNode.hoverId$.hook((thisId, lastId) => {
+      if (lastId === thisId) return
+
+      const lastElem = lastId ? this.findElem(lastId) : undefined
+      const thisElem = thisId ? this.findElem(thisId) : undefined
+
+      if (lastElem && lastElem.outline !== 'select') {
+        lastElem.outline = undefined
+        Surface.collectDirty(lastElem)
+      }
+
+      if (thisElem && thisElem.outline !== 'select') {
+        const node = Schema.find(thisElem.id)
+        if (node.type === 'frame' && thisElem.parent === this.sceneRoot) return
+
+        thisElem.outline = 'hover'
+        Surface.collectDirty(thisElem)
+      }
+    })
 
     Surface.addEvent('mousemove', () => {
       if (StageInteract.currentType.value !== 'select') return
 
-      const elemsFromPoint = Surface.elemsFromPoint[0]
-
-      batchSignal(OperateNode.hoverIds, () => {
-        OperateNode.clearHover()
-        elemsFromPoint.forEach((elem) => OperateNode.hover(elem.id))
-      })
-
-      if (lastFirstElem && lastFirstElem.outline !== 'select') {
-        lastFirstElem.outline = undefined
-        Surface.collectDirty(lastFirstElem)
-      }
-
-      const firstElem = (lastFirstElem = firstOne(elemsFromPoint))
-      if (!firstElem) return
-
-      const node = Schema.find(firstElem.id)
-      if (node.type === 'frame' && firstElem.parent === this.sceneRoot) return
-      if (firstElem.outline === 'select') return
-
-      firstElem.outline = 'hover'
-      Surface.collectDirty(firstElem)
+      const elemsFromPoint = this.getElemsFromPoint()
+      OperateNode.hoverId$.dispatch(firstOne(elemsFromPoint)?.id || '')
     })
   }
 }

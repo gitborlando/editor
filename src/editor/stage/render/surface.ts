@@ -14,6 +14,7 @@ import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-bre
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { createSignal, multiSignal } from 'src/shared/signal/signal'
 import { reverseFor } from 'src/shared/utils/array'
+import { IClientXY } from 'src/shared/utils/event'
 import { INoopFunc, IXY, Raf, dpr, getTime } from 'src/shared/utils/normal'
 import TinyQueue from 'tinyqueue'
 import { Elem } from './elem'
@@ -265,10 +266,11 @@ export class StageSurface {
 
   private eventXY!: IXY
 
-  private getEventXY = (e: MouseEvent) => {
+  private getEventXY = (e: IClientXY) => {
     const bound = StageViewport.bound.value
     const xy = xy_minus(xy_client(e), bound)
     this.eventXY = mx_invertPoint(xy, this.viewportMatrix)
+    this.elemsFromPoint = []
   }
 
   private traverseLayerList = (
@@ -296,7 +298,7 @@ export class StageSurface {
 
         const subHitList: Elem[] = []
         reverseFor(elem.children, (elem) => traverse(layerIndex, elem, subHitList))
-        subHitList.forEach((i) => this.elemsFromPoint[layerIndex].push(i))
+        this.elemsFromPoint.push(...subHitList)
 
         !noBubble && func(elem, false, stopped, stopPropagation, undefined, xy)
       } else {
@@ -310,21 +312,32 @@ export class StageSurface {
     reverseFor(this.layerList, (elem, i) => traverse(i, elem, []))
   }
 
-  elemsFromPoint: Elem[][] = []
+  private elemsFromPoint: Elem[] = []
+
+  getElemsFromPoint(e?: IClientXY) {
+    if (!e) return this.elemsFromPoint
+
+    this.getEventXY(e)
+    this.traverseLayerList((elem, capture, stopped, stopPropagation, hitList, xy) => {
+      const hit = elem.hitTest(xy!)
+      if (hit) hitList?.push(elem)
+    })
+
+    return this.elemsFromPoint
+  }
 
   private handlePointerEvents = () => {
     const onMouseEvent = (e: MouseEvent) => {
-      this.elemsFromPoint = this.layerList.map(() => [])
-      this.getEventXY(e)
-
       if (this.isPointerEventNone) return
 
+      this.getEventXY(e)
       this.traverseLayerList((elem, capture, stopped, stopPropagation, hitList, xy) => {
         const hit = elem.hitTest(xy!)
         if (hit) hitList?.push(elem)
         if (!stopped) elem.eventHandle.triggerMouseEvent(e, xy!, hit, capture, stopPropagation)
       })
     }
+
     this.addEvent('mousedown', onMouseEvent, { capture: true })
     this.addEvent('mousemove', onMouseEvent, { capture: true })
   }

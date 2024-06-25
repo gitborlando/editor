@@ -16,6 +16,17 @@ type IHeaderComp = {}
 export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageInteract.currentType)
 
+  const FavIconComp = useMemoComp([], ({}) => {
+    return (
+      <Flex className='lay-h ml-10 gap-8-8'>
+        <Flex className='lay-h'>
+          <Icon size={28}>{'./editor/fav-icon/shiyangyang.png'}</Icon>
+          <h4 className='text-hslb60 text-16'>屎羊羊编辑器</h4>
+        </Flex>
+      </Flex>
+    )
+  })
+
   const RecordIcons: FC<{}> = useCallback(() => {
     useHookSignal(SchemaHistory.index$)
     return (
@@ -71,12 +82,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     <Flex
       className='lay-h w-100% borderBottom relative'
       style={{ height: StageViewport.bound.value.y }}>
-      <Flex className='lay-h ml-10 gap-8-8'>
-        <Flex className='lay-h'>
-          <Icon size={28}>{Asset.favIcon.shiyangyang}</Icon>
-          <h4 className='text-hslb60 text-16'>屎羊羊编辑器</h4>
-        </Flex>
-      </Flex>
+      <FavIconComp />
       <Flex className='lay-c absolute left-0 right-0 top-0 bottom-0 m-auto'>
         <RecordIcons />
         <Divide length={16} thickness={0.5} />

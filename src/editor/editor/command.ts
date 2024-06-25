@@ -5,13 +5,12 @@ import { SchemaHistory } from 'src/editor/schema/history'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Menu } from 'src/global/menu'
-import { lastOne } from 'src/shared/utils/array'
 import { listen } from 'src/shared/utils/event'
 import { IAnyObject } from 'src/shared/utils/normal'
 import { OperateNode, getSelectIds } from '../operate/node'
 import { OperatePage } from '../operate/page'
 import { Schema } from '../schema/schema'
-import { ID, INode, INodeParent, IPage, ISchemaItem } from '../schema/type'
+import { ID, INodeParent, IPage, ISchemaItem } from '../schema/type'
 import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
 import { UILeftPanel } from '../ui-state/left-panel/left-panel'
 
@@ -222,14 +221,8 @@ class EditorCommandManager {
     })
   }
 
-  private getSelectNodesOrHoverNodes() {
-    return OperateNode.selectedNodes.value.length
-      ? OperateNode.selectedNodes.value
-      : [Schema.find<INode>(lastOne(OperateNode.hoverIds.value))]
-  }
-
   private reHierarchy(type: 'up' | 'down' | 'top' | 'bottom') {
-    this.getSelectNodesOrHoverNodes().forEach((node) => {
+    OperateNode.selectedNodes.value.forEach((node) => {
       const parent = Schema.find<INodeParent>(node.parentId)
       let index = parent.childIds.indexOf(node.id)
       index = (() => {

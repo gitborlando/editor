@@ -26,13 +26,6 @@ export type AllKeys<T extends Record<string, any>> = T extends Record<string, an
 export type IXY = { x: number; y: number }
 export type IRect = IXY & { width: number; height: number }
 
-export function favIcon(href: string) {
-  const link = document.createElement('link')
-  link.setAttribute('rel', 'shortcut icon')
-  link.setAttribute('href', href)
-  document.head.appendChild(link)
-}
-
 export function Delete<T>(object: Record<string, T>, key: string): void
 export function Delete<T>(target: T[], find: string | ((value: T) => void)): void
 export function Delete<T>(target: Record<string, T> | T[], filter: string | ((value: T) => void)) {

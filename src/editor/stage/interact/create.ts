@@ -8,7 +8,6 @@ import { Schema } from 'src/editor/schema/schema'
 import { INode, INodeParent } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageScene } from 'src/editor/stage/render/scene'
-import { Surface } from 'src/editor/stage/render/surface'
 import { Drag, type IDragData } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
 import { IXY } from 'src/shared/utils/normal'
@@ -99,7 +98,7 @@ class StageCreateService {
   }
 
   private findParent() {
-    const frame = Surface.elemsFromPoint[0].find((elem) => SchemaUtil.isById(elem.id, 'frame'))
+    const frame = StageScene.getElemsFromPoint().find((elem) => SchemaUtil.isById(elem.id, 'frame'))
 
     if (frame) return Schema.find<INodeParent>(frame.id)
     return OperatePage.currentPage

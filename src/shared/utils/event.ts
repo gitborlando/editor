@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { INoopFunc } from './normal'
 
+export type IClientXY = { clientX: number; clientY: number }
+
 export const isLeftMouse = (e: MouseEvent) => e.button === 0
 export const isRightMouse = (e: MouseEvent) => e.button === 2
 

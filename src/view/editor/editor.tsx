@@ -29,5 +29,5 @@ export const EditorComp: FC<IEditorComp> = memo(({}) => {
     )
   })
 
-  return withSuspense(<ContentComp />, '加载中...')
+  return withSuspense(<ContentComp />, '文件较大, 传数中...')
 })

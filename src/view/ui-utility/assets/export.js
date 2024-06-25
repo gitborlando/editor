@@ -10,7 +10,7 @@ const rootDir = path.resolve(__dirname, '')
 const imports = []
 const names = []
 const asset = {}
-const ignore = ['snapshots', 'icons']
+const ignore = ['font']
 
 function recurse(root, dirs = []) {
   fs.readdirSync(root).forEach((file) => {

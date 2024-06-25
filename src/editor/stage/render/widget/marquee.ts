@@ -11,7 +11,7 @@ import { IRect } from 'src/shared/utils/normal'
 
 @autobind
 class StageMarqueeService {
-  marqueeElem = new Elem('marquee', 'widgetNode')
+  marqueeElem = new Elem('marquee', 'widgetElem')
   marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
 
   duringMarquee = createSignal<IRect>()

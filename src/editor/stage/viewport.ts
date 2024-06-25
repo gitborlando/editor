@@ -1,13 +1,16 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
+import { AABB } from 'src/editor/math/obb'
 import { OperatePage } from 'src/editor/operate/page'
 import { Schema } from 'src/editor/schema/schema'
+import { Elem } from 'src/editor/stage/render/elem'
 import { Surface } from 'src/editor/stage/render/surface'
 import { EventWheelService } from 'src/global/event/wheel'
 import { createSignal } from 'src/shared/signal/signal'
 import { IRect, IXY } from 'src/shared/utils/normal'
 import { max } from '../math/base'
 import {
+  xy_center,
   xy_client,
   xy_divide,
   xy_from,
@@ -66,6 +69,8 @@ class StageViewportService {
 
     this.zoom$.hook((zoom) => OperatePage.setCurrentViewport({ zoom }))
     this.offset$.hook((offset) => OperatePage.setCurrentViewport({ offset }))
+
+    //  hotkeys('alt+l', this.centerStage)
   }
 
   getViewport() {
@@ -150,6 +155,39 @@ class StageViewportService {
       height: window.innerHeight - y + 1,
     }
     this.bound.dispatch(this.bound.value)
+  }
+
+  centerStage() {
+    let allElemsAABB = new AABB(0, 0, 0, 0)
+
+    const traverse = (elem: Elem) => {
+      allElemsAABB = AABB.Merge([allElemsAABB, elem.aabb])
+      elem.children.forEach(traverse)
+    }
+    Surface.layerList.forEach((elem) => elem.children.forEach(traverse))
+
+    const allElemsRect = AABB.Rect(allElemsAABB)
+    const viewportRect = AABB.Rect(Surface.viewportAABB)
+
+    if (allElemsRect.width > viewportRect.width || allElemsRect.height > viewportRect.height) {
+      const zoom = Math.min(
+        viewportRect.width / allElemsRect.width,
+        viewportRect.height / allElemsRect.height
+      )
+      const shift = xy_multiply(
+        xy_minus(xy_center(viewportRect), xy_center(allElemsRect)),
+        zoom / getZoom()
+      )
+
+      this.zoom$.dispatch(zoom)
+      this.offset$.dispatch((offset) => xy_plus(offset, shift))
+      this.zoomingStage$.dispatch()
+    } else {
+      const shift = xy_minus(xy_center(viewportRect), xy_center(allElemsRect))
+
+      this.offset$.dispatch((offset) => xy_plus(offset, shift))
+      this.movingStage$.dispatch()
+    }
   }
 }
 

@@ -1,0 +1,18 @@
+{
+  "test-file-2": {
+    "type": "meta",
+    "id": "meta",
+    "fileId": "test-file-2",
+    "name": "测试文件10000板块",
+    "version": 0,
+    "pageIds": ["page_Ba7GaK6TqMMu7GqngdNN2"]
+  },
+  "test-file-1": {
+    "type": "meta",
+    "id": "meta",
+    "fileId": "test-file-1",
+    "name": "测试文件1",
+    "version": 0,
+    "pageIds": ["page_1"]
+  }
+}

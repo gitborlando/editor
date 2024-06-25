@@ -18,7 +18,7 @@ import { IXY } from 'src/shared/utils/normal'
 
 @autobind
 class StageVectorEditService {
-  container = new Elem('vector-edit', 'widgetNode')
+  container = new Elem('vector-edit', 'widgetElem')
   editingElem!: Elem
 
   intoEditNodeId!: string
@@ -81,7 +81,7 @@ class StageVectorEditService {
     const size = 8 / zoom
     const hovered = createSignal(false)
 
-    const pointElem = new Elem('vector-editor-point-' + index, 'widgetNode', this.container)
+    const pointElem = new Elem('vector-editor-point-' + index, 'widgetElem', this.container)
 
     pointElem.obb = new OBB(this.node.x + xy.x, this.node.y + xy.y, size, size, this.node.rotation)
 

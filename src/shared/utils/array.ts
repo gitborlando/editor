@@ -39,8 +39,3 @@ export function reverseFor<T>(items: T[], callback: (item: T, index: number) => 
 export function reverse<T extends any>(arr: T[]) {
   return arr.slice().reverse()
 }
-
-export function concat<T>(raw: T[], ...add: (T | false | undefined | null)[]) {
-  add.forEach((item) => item && raw.push(item))
-  return raw
-}

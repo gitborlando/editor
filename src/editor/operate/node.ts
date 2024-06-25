@@ -15,18 +15,17 @@ import { ID, INode, INodeParent } from '../schema/type'
 class OperateNodeService {
   datumId = createSignal('')
   datumXY = xy_(0, 0)
-  hoverIds = createSignal(new Set<ID>())
   selectIds = createSignal(new Set<ID>())
   afterRemoveNodes = createSignal<ID[]>()
   selectedNodes = createSignal(<INode[]>[])
   intoEditNodeId = createSignal('')
   selectedNodes$ = createSignal(<INode[]>[])
+  hoverId$ = createSignal('')
   private lastSelectedNodeSet = new Set<INode>()
   private copyIds = <ID[]>[]
   initHook() {
     this.afterRemoveNodes.hook((ids) => {
       this.selectIds.dispatch((ids) => ids.clear())
-      this.hoverIds.dispatch((hoverIds) => ids.forEach((id) => hoverIds.delete(id)))
     })
     Schema.onMatchPatch('/client/selectIds', () => {
       this.selectIds.dispatch(new Set(Schema.client.selectIds))
@@ -56,17 +55,6 @@ class OperateNodeService {
     const nodes = <INode[]>[]
     this.selectIds.value.forEach((id) => nodes.push(Schema.find(id)))
     return nodes
-  }
-  hover(id: ID) {
-    if (this.hoverIds.value.has(id)) return
-    this.hoverIds.dispatch((ids) => ids.add(id))
-  }
-  unHover(id: ID) {
-    if (!this.hoverIds.value.has(id)) return
-    this.hoverIds.dispatch((ids) => ids.delete(id))
-  }
-  clearHover() {
-    this.hoverIds.dispatch(new Set())
   }
   select(id: ID) {
     if (this.selectIds.value.has(id)) return

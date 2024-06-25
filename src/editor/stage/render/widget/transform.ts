@@ -29,7 +29,7 @@ class StageTransformService {
     return this.transformElem.obb
   }
 
-  private transformElem = new Elem('transform', 'widgetNode')
+  private transformElem = new Elem('transform', 'widgetElem')
   private lineElems = createObjCache<Elem>()
   private vertexElems = createObjCache<Elem>()
 
@@ -220,7 +220,7 @@ class StageTransformService {
     }
 
     const line = this.lineElems.getSet(type, () => {
-      const line = new Elem(`transform-line-${type}`, 'widgetNode', this.transformElem)
+      const line = new Elem(`transform-line-${type}`, 'widgetElem', this.transformElem)
       line.addEvent('hover', mouseover)
       line.addEvent('mousedown', mousedown)
       return line
@@ -322,7 +322,7 @@ class StageTransformService {
     }
 
     const vertexElem = this.vertexElems.getSet(type, () => {
-      const vertexElem = new Elem(`transform-vertex-${type}`, 'widgetNode', this.transformElem)
+      const vertexElem = new Elem(`transform-vertex-${type}`, 'widgetElem', this.transformElem)
       vertexElem.addEvent('hover', mouseenter)
       vertexElem.addEvent('mousedown', mousedown)
       vertexElem.addEvent('mousemove', (e) => e.stopPropagation())

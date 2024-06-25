@@ -18,7 +18,7 @@ export type ElemProps = {
 }
 
 export class Elem {
-  constructor(public id = '', public type: 'sceneNode' | 'widgetNode', parent?: Elem) {
+  constructor(public id = '', public type: 'sceneElem' | 'widgetElem', parent?: Elem) {
     if (parent) {
       this.parent = parent
       parent.addChild(this)
@@ -38,7 +38,7 @@ export class Elem {
 
   get visible() {
     if (this.hidden) return false
-    if (this.type === 'widgetNode') return true
+    if (this.type === 'widgetElem') return true
     return Surface.testVisible(this.aabb)
   }
 

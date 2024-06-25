@@ -43,7 +43,7 @@ class StageSelectService {
   }
 
   private get hoverId() {
-    return firstOne(OperateNode.hoverIds.value)
+    return firstOne(StageScene.getElemsFromPoint())?.id
   }
 
   private onMouseDown(e: ElemMouseEvent) {

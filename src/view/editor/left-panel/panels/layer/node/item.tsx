@@ -39,7 +39,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
 
   useHookSignal(nodeIdsInSearch)
   useHookSignal(hovered, (isHover) => {
-    isHover ? OperateNode.hover(id) : OperateNode.unHover(id)
+    isHover && OperateNode.hoverId$.dispatch(id)
   })
   const handleMouseDown = () => {
     StageSelect.onPanelSelect(id)

@@ -26,7 +26,7 @@ export const FileComp: FC<IFileComp> = memo(({}) => {
           <IconButton size={14} onClick={() => {}}>
             {Asset.editor.leftPanel.file.newFolder}
           </IconButton>
-          <IconButton size={13} onClick={() => FileManager.addFile(SchemaDefault.schema())}>
+          <IconButton size={13} onClick={() => FileManager.addNewFile(SchemaDefault.schema())}>
             {Asset.editor.leftPanel.file.newFile}
           </IconButton>
         </Flex>

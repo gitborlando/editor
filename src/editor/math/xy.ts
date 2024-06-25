@@ -12,6 +12,10 @@ export function xy_from(xy: IXY) {
   return { x: xy.x, y: xy.y }
 }
 
+export function xy_center(xy: { centerX: number; centerY: number }) {
+  return { x: xy.centerX, y: xy.centerY }
+}
+
 export function xy_mutate(self: IXY, another: IXY) {
   self.x = another.x
   self.y = another.y

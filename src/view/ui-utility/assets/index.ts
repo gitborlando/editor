@@ -1,6 +1,5 @@
-import StageCursorResize from './editor/cursor/resize.tsx'
-import StageCursorSelect from './editor/cursor/select.tsx'
-import EditorFont华光钢铁直黑中黑 from './editor/font/华光钢铁直黑-中黑.ttf'
+import EditorCursorResize from './editor/cursor/resize.tsx'
+import EditorCursorSelect from './editor/cursor/select.tsx'
 import EditorHeaderMenu from './editor/header/menu.tsx'
 import EditorHeaderRecordRedo from './editor/header/record/redo.tsx'
 import EditorHeaderRecordUndo from './editor/header/record/undo.tsx'
@@ -44,16 +43,12 @@ import EditorSharedUnVisible from './editor/shared/un-visible.tsx'
 import EditorSharedVisible from './editor/shared/visible.tsx'
 import EditorWidgetCursor from './editor/widget/cursor.tsx'
 import EditorWidgetNumberInputOperateUp from './editor/widget/number-input/operate-up.tsx'
-import FavIconShiyangyang from './fav-icon/shiyangyang.png'
 
 const Asset = {
   editor: {
     cursor: {
-      resize: StageCursorResize,
-      select: StageCursorSelect,
-    },
-    font: {
-      华光钢铁直黑中黑: EditorFont华光钢铁直黑中黑,
+      resize: EditorCursorResize,
+      select: EditorCursorSelect,
     },
     header: {
       menu: EditorHeaderMenu,
@@ -132,9 +127,6 @@ const Asset = {
         operateUp: EditorWidgetNumberInputOperateUp,
       },
     },
-  },
-  favIcon: {
-    shiyangyang: FavIconShiyangyang,
   },
 }
 

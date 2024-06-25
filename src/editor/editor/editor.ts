@@ -4,6 +4,7 @@ import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { createStorageItem } from 'src/global/storage'
+import listJson from '../../../public/mock/list.json'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
 import { OperateNode } from '../operate/node'
@@ -19,7 +20,6 @@ import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
 import { UILeftPanel } from '../ui-state/left-panel/left-panel'
 import { UIPickerCopy } from '../ui-state/right-panel/operate/picker'
 import { FileManager } from './file-manager'
-import { mockFile } from './mock/mock'
 
 @autobind
 export class EditorService {
@@ -49,17 +49,23 @@ export class EditorService {
     if (!location.hash) {
       location.hash = 'test-file-1'
     }
+
     const fileId = location.hash.slice(1)
     const schema = await FileManager.fileForage.getItem<ISchema>(fileId)
-    Schema.initSchema(schema!)
+
+    if (schema) {
+      Schema.initSchema(schema)
+    } else {
+      const name = listJson[fileId as keyof typeof listJson].name
+      const schema = await (await fetch(`./editor/mock/${name}.json`)).json()
+      await FileManager.saveFile(schema)
+      Schema.initSchema(schema)
+    }
   }
 
   initEditor = async () => {
     this.initHooks()
-
-    await mockFile()
     await this.initSchema()
-
     UILeftPanelLayer.init()
   }
 
@@ -74,6 +80,10 @@ export class EditorService {
     ignoreUnVisible: this.createSetting('ignoreUnVisible', true),
     showFPS: this.createSetting('showFPS', true),
     needSliceRender: this.createSetting('needSliceRender', true),
+  }
+
+  getSetting<T extends keyof EditorService['settings']>(name: T) {
+    return this.settings[name].value
   }
 }
 
