@@ -4,6 +4,7 @@ import usePromise from 'react-promise-suspense'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { createCache } from 'src/shared/utils/cache'
 import { hslBlueColor } from 'src/shared/utils/color'
+import { iife } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
 import { iconList } from 'src/view/ui-utility/assets/icons/list'
 import { Flex } from 'src/view/ui-utility/widget/flex'
@@ -64,7 +65,12 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
 
     const SvgComp = useMemoComp<{ name: string; path: string }>([], ({ name }) => {
       const SvgContentComp = useMemoComp([], ({}) => {
-        const svgUrl = `${location.origin}${location.pathname}/src/view/ui-utility/assets/icons/${curCategory.value}/${name}`
+        const href = iife(() => {
+          let str = `${location.origin}${location.pathname}`
+          if (str.endsWith('/')) return str
+          return str + '/'
+        })
+        const svgUrl = `${href}src/view/ui-utility/assets/icons/${curCategory.value}/${name}`
         const svgStr = usePromise<[string], string>(
           (url) => fetch(url).then((res) => res.text()),
           [svgUrl]

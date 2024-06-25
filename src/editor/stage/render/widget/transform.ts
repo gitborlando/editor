@@ -24,7 +24,10 @@ import { IXY } from 'src/shared/utils/normal'
 @autobind
 class StageTransformService {
   show = createSignal(false)
-  transformOBB = OBB.IdentityOBB()
+
+  get transformOBB() {
+    return this.transformElem.obb
+  }
 
   private transformElem = new Elem('transform', 'widgetNode')
   private lineElems = createObjCache<Elem>()
@@ -108,19 +111,17 @@ class StageTransformService {
 
   private calcTransformOBB() {
     if (!getSelectIds().length) {
-      return (this.transformOBB = OBB.IdentityOBB())
+      return (this.transformElem.obb = OBB.IdentityOBB())
     }
 
     if (getSelectIds().length === 1) {
       const elem = StageScene.findElem(getSelectNodes()[0].id)
-      if (!elem) return (this.transformOBB = OBB.IdentityOBB())
-      return (this.transformOBB = elem.obb.clone())
+      if (!elem) return (this.transformElem.obb = OBB.IdentityOBB())
+      return (this.transformElem.obb = elem.obb.clone())
     }
 
-    const aabbList = getSelectNodes().map((node) => {
-      return StageScene.findElem(node.id).aabb
-    })
-    return (this.transformOBB = OBB.FromAABB(AABB.Merge(aabbList)))
+    const aabbList = getSelectNodes().map((node) => StageScene.findElem(node.id).aabb)
+    return (this.transformElem.obb = OBB.FromAABB(AABB.Merge(aabbList)))
   }
 
   private setupTransformElem = () => {

@@ -10,6 +10,7 @@ import { batchSignal, mergeSignal } from 'src/shared/signal/signal'
 import { firstOne } from 'src/shared/utils/array'
 import { createObjCache } from 'src/shared/utils/cache'
 import { macroMatch } from 'src/shared/utils/normal'
+import { SchemaUtil } from 'src/shared/utils/schema'
 import { Schema } from '../../schema/schema'
 import { ID, INode, IPage } from '../../schema/type'
 import { StageNodeDrawer } from './draw'
@@ -77,6 +78,7 @@ class StageSceneService {
 
     switch (true) {
       case op === 'add' && keys.length === 1:
+        if (SchemaUtil.isPageById(id)) break
         this.mountNode(node)
         break
       case op === 'remove' && keys.length === 1:

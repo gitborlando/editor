@@ -1,11 +1,10 @@
 import autobind from 'class-autobind-decorator'
-import { nanoid } from 'nanoid'
+import { customAlphabet, nanoid } from 'nanoid'
 import { createCache } from 'src/shared/utils/cache'
 import { COLOR, rgb } from 'src/shared/utils/color'
 import { IRect, IXY } from 'src/shared/utils/normal'
 import Asset from 'src/view/ui-utility/assets'
 import { xy_ } from '../math/xy'
-import { Schema } from './schema'
 import {
   IClient,
   IEllipse,
@@ -295,25 +294,26 @@ class SchemaDefaultService {
       shadows: [],
     }
   }
+
+  private customNanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6)
+
   createNodeName(type: string) {
-    const typeIndexMap = this.typeIndexMapCache.getSet(
-      Schema.inited.value ? Schema.client.selectPageId : 'abc',
-      () => ({
-        page: ['页面', 1],
-        frame: ['画板', 1],
-        group: ['分组', 1],
-        rect: ['矩形', 1],
-        ellipse: ['椭圆', 1],
-        polygon: ['多边形', 1],
-        star: ['星形', 1],
-        irregular: ['矢量图形', 1],
-        line: ['线段', 1],
-        text: ['文本', 1],
-        image: ['图片', 1],
-      })
-    )
-    let nameIndex = typeIndexMap[type]!
-    return { name: nameIndex[0] + ' ' + (nameIndex[1] as number)++ }
+    const map = {
+      page: ['页面', 1],
+      frame: ['画板', 1],
+      group: ['分组', 1],
+      rect: ['矩形', 1],
+      ellipse: ['椭圆', 1],
+      polygon: ['多边形', 1],
+      star: ['星形', 1],
+      irregular: ['矢量图形', 1],
+      line: ['线段', 1],
+      text: ['文本', 1],
+      image: ['图片', 1],
+    }
+    const [name] = map[type as keyof typeof map]
+
+    return { name: `${name} ${this.customNanoid(6)}` }
   }
 }
 

@@ -40,7 +40,7 @@ export class StageSurface {
 
     this.handleResize()
     this.handleViewport()
-    this.handleEvents()
+    this.handlePointerEvents()
 
     this.inited$.dispatch(true)
   }
@@ -197,7 +197,7 @@ export class StageSurface {
   private boundAABB!: AABB
   private viewportMatrix!: IMatrix
   private prevViewportMatrix!: IMatrix
-  private viewportAABB!: AABB
+  viewportAABB!: AABB
   private prevViewportAABB!: AABB
 
   private handleViewport = () => {
@@ -278,8 +278,7 @@ export class StageSurface {
       stopped: boolean,
       stopPropagation: INoopFunc,
       hitList?: Elem[],
-      xy?: IXY,
-      parentHit?: boolean
+      xy?: IXY
     ) => any,
     noBubble?: boolean
   ) => {
@@ -313,7 +312,7 @@ export class StageSurface {
 
   elemsFromPoint: Elem[][] = []
 
-  private handleEvents = () => {
+  private handlePointerEvents = () => {
     const onMouseEvent = (e: MouseEvent) => {
       this.elemsFromPoint = this.layerList.map(() => [])
       this.getEventXY(e)

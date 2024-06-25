@@ -23,7 +23,7 @@ type ICommitOperationOption = Partial<ISchemaOperation> & {
 @autobind
 class SchemaService {
   schema!: ISchema
-  inited = createSignal()
+  inited = createSignal(false)
   operationList = <ISchemaOperation[]>[]
   private immui = new Immui()
 
@@ -37,7 +37,7 @@ class SchemaService {
   initSchema(schema: ISchema) {
     this.schema = schema
     this.saveWorker.postMessage({ fileId: this.meta.fileId })
-    this.inited.dispatch()
+    this.inited.dispatch(true)
   }
 
   find<T extends ISchemaItem>(id: ID): T {

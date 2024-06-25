@@ -1,5 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
+import { OperatePage } from 'src/editor/operate/page'
+import { Schema } from 'src/editor/schema/schema'
 import { Surface } from 'src/editor/stage/render/surface'
 import { EventWheelService } from 'src/global/event/wheel'
 import { createSignal } from 'src/shared/signal/signal'
@@ -54,6 +56,16 @@ class StageViewportService {
       this.onWheelZoom()
       this.inited.dispatch()
     })
+
+    Schema.onMatchPatch('/client/selectPageId', () => {
+      const viewport = OperatePage.getCurrentViewport()
+      this.zoom$.dispatch(viewport.zoom)
+      this.offset$.dispatch(viewport.offset)
+      this.zoomingStage$.dispatch(viewport.zoom)
+    })
+
+    this.zoom$.hook((zoom) => OperatePage.setCurrentViewport({ zoom }))
+    this.offset$.hook((offset) => OperatePage.setCurrentViewport({ offset }))
   }
 
   getViewport() {

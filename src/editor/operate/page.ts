@@ -1,5 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { xy_ } from 'src/editor/math/xy'
+import { createObjCache } from 'src/shared/utils/cache'
+import { IXY } from 'src/shared/utils/normal'
 import { SchemaDefault } from '../schema/default'
 import { Schema } from '../schema/schema'
 import { ID, IPage } from '../schema/type'
@@ -30,6 +32,20 @@ class OperatePageService {
     Schema.removeItem(page)
     Schema.itemDelete(Schema.meta, ['pageIds', Schema.meta.pageIds.indexOf(page.id)])
     Schema.finalOperation('移除页面')
+    this.pageViewport.delete(page.id)
+  }
+
+  private pageViewport = createObjCache<{ zoom: number; offset: IXY }>()
+
+  getCurrentViewport() {
+    return this.pageViewport.getSet(this.currentPage.id, () => ({ zoom: 1, offset: xy_() }))
+  }
+
+  setCurrentViewport(viewport: { zoom?: number; offset?: IXY }) {
+    const lastViewport = this.getCurrentViewport()
+    const zoom = viewport.zoom || lastViewport.zoom
+    const offset = viewport.offset || lastViewport.offset
+    this.pageViewport.set(this.currentPage.id, { zoom, offset })
   }
 }
 
