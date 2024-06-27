@@ -8,6 +8,7 @@ import { Schema } from 'src/editor/schema/schema'
 import { INode, INodeParent } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageScene } from 'src/editor/stage/render/scene'
+import { Surface } from 'src/editor/stage/render/surface'
 import { Drag, type IDragData } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
 import { IXY } from 'src/shared/utils/normal'
@@ -49,6 +50,7 @@ class StageCreateService {
     if (node.type === 'line') {
       StageCursor.setCursor('move').lock().upReset()
     }
+    Surface.disablePointEvent()
   }
 
   private onCreateMove({ marquee, current, start }: IDragData) {

@@ -344,14 +344,11 @@ export class StageSurface {
 
   private isPointerEventNone = false
 
-  setPointerEvent(option: { pointerEventNone: boolean; cancelOnPointerUp?: boolean }) {
-    this.isPointerEventNone = option.pointerEventNone
-
-    if (option.cancelOnPointerUp !== false) {
-      window.addEventListener('pointerup', () => {
-        this.isPointerEventNone = false
-      })
-    }
+  disablePointEvent() {
+    this.isPointerEventNone = true
+    window.addEventListener('pointerup', () => {
+      this.isPointerEventNone = false
+    })
   }
 }
 

@@ -144,7 +144,7 @@ class StageTransformService {
 
     Surface.addEvent('mousedown', () => {
       if (Surface.getElemsFromPoint().some((elem) => elem.id.includes('transform'))) {
-        Surface.setPointerEvent({ pointerEventNone: true })
+        Surface.disablePointEvent()
       }
     })
   }

@@ -29,7 +29,7 @@ export const ScrollComp: FC<IScrollComp> = memo(
           className='wh-100%-0 bg-[rgba(204,204,204,0.5)] absolute'
           style={{ height: sliderHeight, top: scrollHeight * rate }}
           onMouseDown={() => {
-            Surface.setPointerEvent({ pointerEventNone: true })
+            Surface.disablePointEvent()
 
             Drag.onStart(() => {
               dragging.dispatch(true)
