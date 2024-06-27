@@ -41,6 +41,7 @@ type NestPartial<T> = {
 class SchemaDefaultService {
   devFileId?: string
   typeIndexMapCache = createCache<string, Record<string, [string, number]>>()
+  allNodeCount = 0
   meta(): IMeta {
     return {
       type: 'meta',
@@ -295,7 +296,7 @@ class SchemaDefaultService {
     }
   }
 
-  private customNanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6)
+  private customNanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6)
 
   createNodeName(type: string) {
     const map = {
@@ -313,7 +314,7 @@ class SchemaDefaultService {
     }
     const [name] = map[type as keyof typeof map]
 
-    return { name: `${name} ${this.customNanoid(6)}` }
+    return { name: `${name} ${++this.allNodeCount}` }
   }
 }
 

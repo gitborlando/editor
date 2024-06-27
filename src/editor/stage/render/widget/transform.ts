@@ -142,13 +142,11 @@ class StageTransformService {
       }
     })
 
-    this.transformElem.addEvent(
-      'mousedown',
-      () => {
+    Surface.addEvent('mousedown', () => {
+      if (Surface.getElemsFromPoint().some((elem) => elem.id.includes('transform'))) {
         Surface.setPointerEvent({ pointerEventNone: true })
-      },
-      { capture: true }
-    )
+      }
+    })
   }
 
   private updateTransformElem() {
