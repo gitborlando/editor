@@ -22,6 +22,8 @@ class StageMarqueeService {
   }
 
   startMarquee() {
+    Surface.disablePointEvent()
+
     Drag.onStart()
       .onMove(({ marquee }) => {
         this.marquee = StageViewport.toSceneMarquee(marquee)

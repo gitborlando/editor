@@ -87,15 +87,18 @@ class StageTransformService {
   }
 
   private render() {
-    Surface.collectDirty(this.transformElem)
+    if (!this.transformElem.hidden) {
+      Surface.collectDirty(this.transformElem)
+    }
+
+    if (this.show.value === false) {
+      return (this.transformElem.hidden = true)
+    } else {
+      this.transformElem.hidden = false
+    }
+
     this.calcTransformOBB()
     Surface.collectDirty(this.transformElem)
-
-    this.transformElem.hidden = false
-    if (this.show.value === false) {
-      this.transformElem.hidden = true
-      return Surface.collectDirty(this.transformElem)
-    }
 
     const [p0, p1, p2, p3] = this.transformOBB.calcVertexXY()
     this.updateTransformElem()
