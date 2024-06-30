@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import { Editor } from 'src/editor/editor/editor'
 import SaveWorker from 'src/editor/schema/worker.ts?worker'
 import { createSignal } from 'src/shared/signal/signal'
 import { flushFuncs } from 'src/shared/utils/array'
@@ -121,6 +122,7 @@ class SchemaService {
   private saveWorker = new SaveWorker()
 
   save = (patches: ImmuiPatch[], reverse?: boolean) => {
+    if (!Editor.getSetting('autosave')) return
     this.saveWorker.postMessage({ patches, reverse })
   }
 }

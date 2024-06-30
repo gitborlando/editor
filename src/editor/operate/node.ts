@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { createSignal } from 'src/shared/signal/signal'
-import { firstOne, stableIndex } from 'src/shared/utils/array'
+import { firstOne, reverseFor, stableIndex } from 'src/shared/utils/array'
 import { clone } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { xy_, xy_rotate } from '../math/xy'
@@ -111,11 +111,17 @@ class OperateNodeService {
     const nodes = <INode[]>[]
     this.clearSelect()
     this.commitSelect()
-    SchemaUtil.traverseIds(ids, ({ node, parent }) => {
+    const traverse = (id: ID, parent?: INodeParent) => {
+      const node = Schema.find<INode>(id)
+      if (!parent) parent = Schema.find<INodeParent>(node.parentId)
       nodes.push(node)
       this.splice(parent, node)
-    })
-    this.removeNodes(nodes)
+      if ('childIds' in node === false) return
+      reverseFor(node.childIds, (id) => traverse(id, node))
+      // node.childIds.forEach((id) => traverse(id, node))
+    }
+    ids.forEach((id) => traverse(id))
+    this.removeNodes(nodes.reverse())
     Schema.finalOperation('删除节点')
   }
   copySelectNodes() {

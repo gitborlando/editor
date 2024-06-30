@@ -101,6 +101,8 @@ class StageSceneService {
   }
 
   private updateNode(node: INode) {
+    if (!node) return
+
     const elem = this.findElem(node.id)
     Surface.collectDirty(elem)
 
@@ -114,7 +116,8 @@ class StageSceneService {
   }
 
   private unmountNode(id: ID) {
-    const elem = this.findElem(id) || this.sceneRoot
+    const elem = this.findElem(id)
+    if (!elem) return
 
     elem.children.forEach((child) => {
       this.unmountNode(child.id)
@@ -138,7 +141,9 @@ class StageSceneService {
       parent.children.splice(index, 0, elem)
     }
 
-    Surface.collectDirty(parent)
+    if (parent !== this.sceneRoot) {
+      Surface.collectDirty(parent)
+    }
   }
 
   getElemsFromPoint(e?: IClientXY, type: Elem['type'] = 'sceneElem') {

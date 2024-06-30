@@ -1,4 +1,5 @@
 type IKey = string | number
+
 export type ImmuiPatch = {
   type: 'add' | 'remove' | 'replace'
   path: string
@@ -6,16 +7,13 @@ export type ImmuiPatch = {
   oldValue?: any
   keys: IKey[]
 }
+
 export type ImmuiApplyPatchOption = {
   reverse?: boolean
   prefix?: string
 }
 
 export default class Immui {
-  private keyPathDiffMap = <any>{}
-  private order = 0
-  private mutates: { keys: IKey[]; value: any; oldValue: any }[] = []
-
   add = <T>(object: object, keyPath: string | IKey[], value: T) => {
     const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
 
@@ -78,38 +76,59 @@ export default class Immui {
   next = <T>(object: T): [T, ImmuiPatch[]] => {
     const patches = <ImmuiPatch[]>[]
 
-    const traverse = (object: any, keyPathMap: any, keys: string[]) => {
-      for (const key in keyPathMap) {
-        const _keys = [...keys, key]
+    this.changes.forEach((change) => {
+      const { keys, value, oldValue } = change
+      if (value === oldValue) return
 
-        if (keyPathMap[key][this.symbolValue]) {
-          const [value, oldValue] = keyPathMap[key][this.symbolValue]
-          if (value === oldValue) continue
+      const patch = <any>{
+        keys: keys,
+        path: '/' + keys.join('/'),
+        value: this.clone(value),
+        oldValue: this.clone(oldValue),
+      }
 
-          const path = '/' + _keys.join('/')
-          const patch = <any>{ keys: _keys, path, value: clone(value), oldValue: clone(oldValue) }
+      if (value === undefined) patch.type = 'remove'
+      else if (oldValue === undefined) patch.type = 'add'
+      else patch.type = 'replace'
 
-          if (value === undefined) patch.type = 'remove'
-          else if (oldValue === undefined) patch.type = 'add'
-          else patch.type = 'replace'
+      patches.push(patch)
+    })
 
-          patches[keyPathMap[key][this.symbolOrder]] = patch
-        } else {
-          if (!object[key]) continue
+    const traverse = (object: any, changeChainMap: any) => {
+      if (typeof changeChainMap !== 'object') return
 
-          const content = object[key]
-          object[key] = Array.isArray(content) ? [...content] : { ...content }
-          traverse(object[key], keyPathMap[key], _keys)
-        }
+      for (const key in changeChainMap) {
+        if (!object[key]) return
+
+        object[key] = this.clone(object[key])
+        traverse(object[key], changeChainMap[key])
       }
     }
 
-    traverse(object, this.keyPathDiffMap, [])
-
-    this.keyPathDiffMap = {}
-    this.order = 0
+    traverse(object, this.changeChainMap)
+    this.changeChainMap = {}
+    this.changes = []
 
     return [object, patches.filter(Boolean)]
+  }
+
+  private changes = <{ keys: IKey[]; value?: any; oldValue?: any }[]>[]
+  private changeChainMap = <any>{}
+
+  private recordChange = (keys: IKey[], value?: any, oldValue?: any) => {
+    this.changes.push({ keys, value, oldValue })
+
+    let curMap = this.changeChainMap
+    keys.forEach((key, i) => {
+      if (i !== keys.length - 1) {
+        if (!curMap[key]) {
+          curMap[key] = {}
+        }
+        curMap = curMap[key]
+      } else {
+        curMap[key] = undefined
+      }
+    })
   }
 
   applyPatches = <T extends object>(
@@ -129,52 +148,25 @@ export default class Immui {
       switch (patch.type) {
         case 'add':
           if (reverse) this.delete(object, keys)
-          else this.add(object, keys, clone(patch.value))
+          else this.add(object, keys, this.clone(patch.value))
           return
         case 'replace':
-          if (reverse) this.reset(object, keys, clone(patch.oldValue))
-          else this.reset(object, keys, clone(patch.value))
+          if (reverse) this.reset(object, keys, this.clone(patch.oldValue))
+          else this.reset(object, keys, this.clone(patch.value))
           return
         case 'remove':
-          if (reverse) this.add(object, keys, clone(patch.oldValue))
+          if (reverse) this.add(object, keys, this.clone(patch.oldValue))
           else this.delete(object, keys)
           return
       }
     })
   }
 
-  private symbolValue = Symbol('value')
-  private symbolOrder = Symbol('order')
-
-  private recordChange = (keys: IKey[], value?: any, oldValue?: any) => {
-    let curKeyPathDiffMap = this.keyPathDiffMap
-
-    keys.forEach((key, i) => {
-      if (!curKeyPathDiffMap[key]) {
-        if (i !== keys.length - 1) {
-          curKeyPathDiffMap = curKeyPathDiffMap[key] = {}
-        } else {
-          curKeyPathDiffMap[key] = {
-            [this.symbolValue]: [value, oldValue],
-            [this.symbolOrder]: this.order++,
-          }
-        }
-      } else {
-        if (i !== keys.length - 1) {
-          curKeyPathDiffMap = curKeyPathDiffMap[key]!
-        } else {
-          if (!curKeyPathDiffMap[key][this.symbolValue]) {
-            curKeyPathDiffMap[key][this.symbolValue] = []
-          }
-          if (value) {
-            curKeyPathDiffMap[key][this.symbolValue][0] = value
-          } else {
-            curKeyPathDiffMap[key][this.symbolValue] = [value, oldValue]
-          }
-          curKeyPathDiffMap[key][this.symbolOrder] = this.order++
-        }
-      }
-    })
+  private clone(object: any) {
+    if (typeof object !== 'object') return object
+    const newObj: any = Array.isArray(object) ? [] : {}
+    for (const key in object) newObj[key] = this.clone(object[key])
+    return newObj
   }
 
   static matchPath = (path: IKey[], pattern: string[]) => {
@@ -189,11 +181,4 @@ export default class Immui {
     }
     return true
   }
-}
-
-function clone(object: any) {
-  if (typeof object !== 'object') return object
-  const newObj: any = Array.isArray(object) ? [] : {}
-  for (const key in object) newObj[key] = clone(object[key])
-  return newObj
 }
