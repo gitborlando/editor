@@ -100,6 +100,14 @@ class StageNodeDrawerService {
       case 'text':
         this.breakText()
         if (this.elem.outline === 'hover') this.drawTextHoverPath()
+
+        const { lineHeight } = node.style
+        this.dirtyRects.push(AABB.Expand(this.elem.aabb, 0, lineHeight / 2, 0, 0))
+
+        const dirtyHeight = lineHeight * this.splitTexts.length
+        this.dirtyRects.push(
+          AABB.Expand(this.elem.aabb, 0, 0, 0, this.elem.aabb.minY + dirtyHeight)
+        )
         break
     }
   }

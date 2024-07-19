@@ -83,8 +83,8 @@ export default class Immui {
       const patch = <any>{
         keys: keys,
         path: '/' + keys.join('/'),
-        value: this.clone(value),
-        oldValue: this.clone(oldValue),
+        value: this.deepClone(value),
+        oldValue: this.deepClone(oldValue),
       }
 
       if (value === undefined) patch.type = 'remove'
@@ -100,7 +100,7 @@ export default class Immui {
       for (const key in changeChainMap) {
         if (!object[key]) return
 
-        object[key] = this.clone(object[key])
+        object[key] = this.shallowClone(object[key])
         traverse(object[key], changeChainMap[key])
       }
     }
@@ -148,24 +148,29 @@ export default class Immui {
       switch (patch.type) {
         case 'add':
           if (reverse) this.delete(object, keys)
-          else this.add(object, keys, this.clone(patch.value))
+          else this.add(object, keys, this.deepClone(patch.value))
           return
         case 'replace':
-          if (reverse) this.reset(object, keys, this.clone(patch.oldValue))
-          else this.reset(object, keys, this.clone(patch.value))
+          if (reverse) this.reset(object, keys, this.deepClone(patch.oldValue))
+          else this.reset(object, keys, this.deepClone(patch.value))
           return
         case 'remove':
-          if (reverse) this.add(object, keys, this.clone(patch.oldValue))
+          if (reverse) this.add(object, keys, this.deepClone(patch.oldValue))
           else this.delete(object, keys)
           return
       }
     })
   }
 
-  private clone(object: any) {
+  private shallowClone(object: any) {
+    if (typeof object !== 'object') return object
+    return Array.isArray(object) ? [...object] : { ...object }
+  }
+
+  private deepClone(object: any) {
     if (typeof object !== 'object') return object
     const newObj: any = Array.isArray(object) ? [] : {}
-    for (const key in object) newObj[key] = this.clone(object[key])
+    for (const key in object) newObj[key] = this.deepClone(object[key])
     return newObj
   }
 

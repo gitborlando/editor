@@ -27,7 +27,6 @@ export type IClient = {
   type: 'client'
   selectIds: ID[]
   selectPageId: ID
-  viewport: Record<ID, { xy: IXY; zoom: number }>
 }
 
 export type INodeParentBase = {
@@ -38,9 +37,6 @@ export type IPage = INodeParentBase & {
   type: 'page'
   id: `page_${string}`
   name: string
-  zoom: number
-  x: number
-  y: number
 }
 
 export type INodeParent = IFrame | IGroup | IPage
@@ -74,8 +70,6 @@ export type IGeometryDetail = {
 
 export type INodeBase = INodeMeta &
   IGeometryDetail & {
-    width: number
-    height: number
     opacity: number
     hFlip: boolean
     vFlip: boolean
