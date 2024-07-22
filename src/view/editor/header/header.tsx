@@ -22,7 +22,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
       <Flex className='lay-h ml-10 gap-8-8'>
         <Flex className='lay-h'>
           <Icon size={28}>{publicPath('fav-icon/shiyangyang.png')}</Icon>
-          <h4 className='text-hslb60 text-16'>屎羊羊编辑器</h4>
+          <h4 className='text-hslb60 text-16 ml-10'>Young 编辑器</h4>
         </Flex>
       </Flex>
     )

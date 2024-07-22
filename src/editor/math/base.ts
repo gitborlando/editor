@@ -53,3 +53,7 @@ export function rotatePoint(ax: number, ay: number, ox: number, oy: number, degr
     y: (ax - ox) * sin(radian) + (ay - oy) * cos(radian) + oy,
   }
 }
+
+export function normalAngle(angle: number) {
+  return angle >= 0 ? angle % 360 : (angle % -360) + 360
+}

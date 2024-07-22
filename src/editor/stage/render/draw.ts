@@ -403,7 +403,16 @@ class StageNodeDrawerService {
       }
 
       case 'ellipse':
-        this.elem.hitTest = ElemHitUtil.HitEllipse(width / 2, height / 2, width / 2, height / 2)
+        const { startAngle, endAngle, innerRate } = this.node
+        this.elem.hitTest = ElemHitUtil.HitEllipse(
+          width / 2,
+          height / 2,
+          width / 2,
+          height / 2,
+          startAngle,
+          endAngle,
+          innerRate
+        )
         break
 
       case 'irregular':

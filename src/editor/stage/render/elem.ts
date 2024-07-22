@@ -254,17 +254,46 @@ export class ElemHitUtil {
     }
   }
 
-  static HitEllipse(cx: number, cy: number, a: number, b: number) {
+  static HitEllipse(
+    cx: number,
+    cy: number,
+    a: number,
+    b: number,
+    startAngle: number,
+    endAngle: number,
+    innerRate: number
+  ) {
     return (xy: IXY) => {
       const dx = xy.x - cx
       const dy = xy.y - cy
-      return (dx * dx * a * b) / (a * a) + (dy * dy * a * b) / (b * b) <= a * b
+      const hit = (a: number, b: number) =>
+        (dx * dx * a * b) / (a * a) + (dy * dy * a * b) / (b * b) <= a * b
+
+      const hitOuter = hit(a, b)
+      const hitInner = hit(a * innerRate, b * innerRate)
+
+      if (!hitOuter) return false
+      if (hitInner) return false
+
+      // const angle = normalAngle(degreefy(atan2(dy, dx)))
+      // startAngle = normalAngle(startAngle)
+      // endAngle = normalAngle(endAngle)
+
+      // if (startAngle === 0 && endAngle === 0) return true
+
+      // if (startAngle <= endAngle) {
+      //   return angle >= startAngle && angle <= endAngle
+      // } else {
+      //   return angle <= startAngle || angle <= endAngle
+      // }
+
+      return true
     }
   }
 
   static HitPoint(center: IXY, size: number) {
     return (xy: IXY) => {
-      return this.HitEllipse(center.x, center.y, size / 2, size / 2)(xy)
+      return this.HitEllipse(center.x, center.y, size / 2, size / 2, 0, 360, 0)(xy)
     }
   }
 
