@@ -1,10 +1,11 @@
 import autobind from 'class-autobind-decorator'
+import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { createStorageItem } from 'src/global/storage'
-import { publicPath } from 'src/shared/utils/normal'
+import { jsonParse, publicPath } from 'src/shared/utils/normal'
 import listJson from '../../../public/mock/list.json'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
@@ -21,6 +22,8 @@ import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
 import { UILeftPanel } from '../ui-state/left-panel/left-panel'
 import { UIPickerCopy } from '../ui-state/right-panel/operate/picker'
 import { FileManager } from './file-manager'
+
+const jsZip = new JSZip()
 
 @autobind
 export class EditorService {
@@ -58,7 +61,10 @@ export class EditorService {
       Schema.initSchema(schema)
     } else {
       const name = listJson[fileId as keyof typeof listJson].name
-      const schema = await (await fetch(publicPath(`mock/${name}.json`))).json()
+      const zipBuffer = await (await fetch(publicPath(`mock/${name}.zip`))).arrayBuffer()
+      const zipFiles = await jsZip.loadAsync(zipBuffer)
+      const fileText = await zipFiles.file(`${name}.json`)?.async('text')
+      const schema = jsonParse(fileText) as ISchema
       await FileManager.saveFile(schema)
       Schema.initSchema(schema)
     }
