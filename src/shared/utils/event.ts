@@ -95,3 +95,7 @@ export function useDownUpTracker(
 ) {
   useEffect(() => downUpTracker(elCallback(), downCallback, upCallback), deps)
 }
+
+export function disableDefaultTwoFingerEvent() {
+  window.addEventListener('wheel', (e) => e.preventDefault(), { passive: false })
+}
