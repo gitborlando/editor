@@ -1,5 +1,5 @@
 import { getEditorSetting } from 'src/editor/editor/editor'
-import { radianfy } from 'src/editor/math/base'
+import { atan2, degreefy, normalAngle, radianfy } from 'src/editor/math/base'
 import { AABB, OBB } from 'src/editor/math/obb'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/stage/render/surface'
@@ -266,28 +266,30 @@ export class ElemHitUtil {
     return (xy: IXY) => {
       const dx = xy.x - cx
       const dy = xy.y - cy
+
       const hit = (a: number, b: number) =>
         (dx * dx * a * b) / (a * a) + (dy * dy * a * b) / (b * b) <= a * b
 
       const hitOuter = hit(a, b)
-      const hitInner = hit(a * innerRate, b * innerRate)
-
       if (!hitOuter) return false
-      if (hitInner) return false
 
-      // const angle = normalAngle(degreefy(atan2(dy, dx)))
-      // startAngle = normalAngle(startAngle)
-      // endAngle = normalAngle(endAngle)
+      if (innerRate) {
+        const hitInner = hit(a * innerRate, b * innerRate)
+        if (hitInner) return false
+      }
 
-      // if (startAngle === 0 && endAngle === 0) return true
+      startAngle = normalAngle(startAngle)
+      endAngle = normalAngle(endAngle)
 
-      // if (startAngle <= endAngle) {
-      //   return angle >= startAngle && angle <= endAngle
-      // } else {
-      //   return angle <= startAngle || angle <= endAngle
-      // }
+      if (startAngle === 0 && endAngle === 0) return true
 
-      return true
+      const angle = normalAngle(degreefy(atan2(dy, dx)))
+
+      if (startAngle <= endAngle) {
+        return angle >= startAngle && angle <= endAngle
+      } else {
+        return angle >= startAngle || angle <= endAngle
+      }
     }
   }
 

@@ -55,5 +55,5 @@ export function rotatePoint(ax: number, ay: number, ox: number, oy: number, degr
 }
 
 export function normalAngle(angle: number) {
-  return angle >= 0 ? angle % 360 : (angle % -360) + 360
+  return (angle + 360) % 360
 }
