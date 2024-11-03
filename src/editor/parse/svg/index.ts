@@ -97,7 +97,10 @@ export class SvgParser {
           height: height * this.ratio.y,
         })
         node.points = this.parseSvgPathToPoints(d)
-        const shift = xy_(parentNode!.x - node.x - this.xy.x, parentNode!.y - node.y - this.xy.y)
+        const shift = xy_(
+          (parentNode as any)!.x - node.x - this.xy.x,
+          (parentNode as any)!.y - node.y - this.xy.y
+        )
         node.points.forEach((point) => IrregularUtils.shiftPointXY(point, shift))
         break
       }

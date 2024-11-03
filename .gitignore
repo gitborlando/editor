@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+test-html
+
 # Editor directories and files
 .idea
 .DS_Store
