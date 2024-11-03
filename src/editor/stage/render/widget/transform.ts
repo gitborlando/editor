@@ -199,23 +199,52 @@ class StageTransformService {
           return
         }
 
-        switch (type) {
-          case 'top':
-            setGeometry('x', x - shiftH * rsin(rotation))
-            setGeometry('y', y + shiftH * rcos(rotation))
-            setGeometry('height', height - shiftH)
-            break
-          case 'right':
-            setGeometry('width', width + shiftW)
-            break
-          case 'bottom':
-            setGeometry('height', height + shiftH)
-            break
-          case 'left':
-            setGeometry('x', x + shiftW * rcos(rotation))
-            setGeometry('y', y + shiftW * rsin(rotation))
-            setGeometry('width', width - shiftW)
-            break
+        if (e.hostEvent.shiftKey) {
+          switch (type) {
+            case 'top':
+              setGeometry('x', x - (shiftH / 2) * rsin(rotation))
+              setGeometry('y', y + (shiftH / 2) * rcos(rotation))
+              setGeometry('height', height - shiftH)
+              setGeometry('height', height + -shiftH)
+              break
+            case 'right':
+              setGeometry('width', width + shiftW)
+              setGeometry('x', x + (-shiftW / 2) * rcos(rotation))
+              setGeometry('y', y + (-shiftW / 2) * rsin(rotation))
+              setGeometry('width', width - -shiftW)
+              break
+            case 'bottom':
+              setGeometry('height', height + shiftH)
+              setGeometry('x', x - (-shiftH / 2) * rsin(rotation))
+              setGeometry('y', y + (-shiftH / 2) * rcos(rotation))
+              setGeometry('height', height - -shiftH)
+              break
+            case 'left':
+              setGeometry('x', x + (shiftW / 2) * rcos(rotation))
+              setGeometry('y', y + (shiftW / 2) * rsin(rotation))
+              setGeometry('width', width - shiftW)
+              setGeometry('width', width + -shiftW)
+              break
+          }
+        } else {
+          switch (type) {
+            case 'top':
+              setGeometry('x', x - shiftH * rsin(rotation))
+              setGeometry('y', y + shiftH * rcos(rotation))
+              setGeometry('height', height - shiftH)
+              break
+            case 'right':
+              setGeometry('width', width + shiftW)
+              break
+            case 'bottom':
+              setGeometry('height', height + shiftH)
+              break
+            case 'left':
+              setGeometry('x', x + shiftW * rcos(rotation))
+              setGeometry('y', y + shiftW * rsin(rotation))
+              setGeometry('width', width - shiftW)
+              break
+          }
         }
       }).onDestroy(() => SchemaHistory.commit('操作几何数据'))
     }
@@ -275,29 +304,60 @@ class StageTransformService {
           return
         }
 
-        switch (type) {
-          case 'topLeft':
-            setGeometry('x', x - shiftH * rsin(rotation) + shiftW * rcos(rotation))
-            setGeometry('y', y + shiftW * rsin(rotation) + shiftH * rcos(rotation))
-            setGeometry('width', width - shiftW)
-            setGeometry('height', height - shiftH)
-            break
-          case 'topRight':
-            setGeometry('x', x - shiftH * rsin(rotation))
-            setGeometry('y', y + shiftH * rcos(rotation))
-            setGeometry('height', height - shiftH)
-            setGeometry('width', width + shiftW)
-            break
-          case 'bottomRight':
-            setGeometry('width', width + shiftW)
-            setGeometry('height', height + shiftH)
-            break
-          case 'bottomLeft':
-            setGeometry('x', x + shiftW * rcos(rotation))
-            setGeometry('y', y + shiftW * rsin(rotation))
-            setGeometry('width', width - shiftW)
-            setGeometry('height', height + shiftH)
-            break
+        if (e.hostEvent.shiftKey) {
+          switch (type) {
+            case 'topLeft':
+              setGeometry('x', x - shiftH * rsin(rotation) + shiftW * rcos(rotation))
+              setGeometry('y', y + shiftW * rsin(rotation) + shiftH * rcos(rotation))
+              setGeometry('width', width - shiftW)
+              setGeometry('height', height - shiftH)
+              break
+            case 'topRight':
+              setGeometry('x', x - shiftH * rsin(rotation))
+              setGeometry('y', y + shiftH * rcos(rotation))
+              setGeometry('height', height - shiftH)
+              setGeometry('width', width + shiftW)
+              break
+            case 'bottomRight':
+              setGeometry('width', width + shiftW)
+              setGeometry('height', height + shiftH)
+              setGeometry('x', x - (-shiftH / 2) * rsin(rotation) + (-shiftW / 2) * rcos(rotation))
+              setGeometry('y', y + (-shiftW / 2) * rsin(rotation) + (-shiftH / 2) * rcos(rotation))
+              setGeometry('width', width - -shiftW)
+              setGeometry('height', height - -shiftH)
+              break
+            case 'bottomLeft':
+              setGeometry('x', x + shiftW * rcos(rotation))
+              setGeometry('y', y + shiftW * rsin(rotation))
+              setGeometry('width', width - shiftW)
+              setGeometry('height', height + shiftH)
+              break
+          }
+        } else {
+          switch (type) {
+            case 'topLeft':
+              setGeometry('x', x - shiftH * rsin(rotation) + shiftW * rcos(rotation))
+              setGeometry('y', y + shiftW * rsin(rotation) + shiftH * rcos(rotation))
+              setGeometry('width', width - shiftW)
+              setGeometry('height', height - shiftH)
+              break
+            case 'topRight':
+              setGeometry('x', x - shiftH * rsin(rotation))
+              setGeometry('y', y + shiftH * rcos(rotation))
+              setGeometry('height', height - shiftH)
+              setGeometry('width', width + shiftW)
+              break
+            case 'bottomRight':
+              setGeometry('width', width + shiftW)
+              setGeometry('height', height + shiftH)
+              break
+            case 'bottomLeft':
+              setGeometry('x', x + shiftW * rcos(rotation))
+              setGeometry('y', y + shiftW * rsin(rotation))
+              setGeometry('width', width - shiftW)
+              setGeometry('height', height + shiftH)
+              break
+          }
         }
       }).onDestroy(() => SchemaHistory.commit('操作几何数据'))
     }
