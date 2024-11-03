@@ -2,8 +2,9 @@ import { FC, memo } from 'react'
 import { floor, max, min } from 'src/editor/math/base'
 import { IGeometry, OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
+import { getZoom } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
-import { useMemoComp, useZoom } from 'src/shared/utils/react'
+import { useMemoComp } from 'src/shared/utils/react'
 import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import { Flex } from 'src/view/ui-utility/widget/flex'
 
@@ -22,7 +23,7 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
     const { geometryKeyValue, setGeometry } = OperateGeometry
     const { selectedNodes } = OperateNode
 
-    slideRate = (slideRate ?? 1) / useZoom()
+    slideRate = slideRate ?? 1
 
     useHookSignal(selectedNodes, { after: 'geometryKeyValue' })
 
@@ -80,8 +81,8 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
   return (
     selectedNodes.value.length !== 0 && (
       <Flex className='lay-h flex-wrap gap-4-4 p-8 borderBottom'>
-        <GeometryItemComp label='横坐标' operateKey='x' />
-        <GeometryItemComp label='纵坐标' operateKey='y' />
+        <GeometryItemComp label='横坐标' operateKey='x' slideRate={1 / getZoom()} />
+        <GeometryItemComp label='纵坐标' operateKey='y' slideRate={1 / getZoom()} />
         <GeometryItemComp label='宽度' operateKey='width' />
         <GeometryItemComp label='高度' operateKey='height' />
         <GeometryItemComp label='旋转' operateKey='rotation' />
