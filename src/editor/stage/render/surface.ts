@@ -1,6 +1,6 @@
 import autoBind from 'class-autobind-decorator'
 import { getEditorSetting } from 'src/editor/editor/editor'
-import { round } from 'src/editor/math/base'
+import { abs, max, round } from 'src/editor/math/base'
 import {
   IMatrix,
   mx_applyAABB,
@@ -9,7 +9,7 @@ import {
   mx_invertPoint,
 } from 'src/editor/math/matrix'
 import { AABB, OBB } from 'src/editor/math/obb'
-import { xy_, xy_client, xy_minus, xy_rotate, xy_toArray } from 'src/editor/math/xy'
+import { xy_, xy_center, xy_client, xy_minus, xy_rotate } from 'src/editor/math/xy'
 import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { createSignal, multiSignal } from 'src/shared/signal/signal'
@@ -86,8 +86,14 @@ export class StageSurface {
 
   private calcFullRenderElemsMinHeap() {
     this.fullRenderElemsMinHeap = new TinyQueue(undefined, (a, b) => {
-      if (a.layerIndex === b.layerIndex) return a.selfIndex - b.selfIndex
-      return a.layerIndex - b.layerIndex
+      if (a.layerIndex !== b.layerIndex) return a.layerIndex - b.layerIndex
+      const aDistance = xy_minus(xy_center(AABB.Rect(a.elem.aabb)), this.eventXY || xy_())
+      const bDistance = xy_minus(xy_center(AABB.Rect(b.elem.aabb)), this.eventXY || xy_())
+      const aLane = max(abs(aDistance.x), abs(aDistance.y))
+      const bLane = max(abs(bDistance.x), abs(bDistance.y))
+      return aLane - bLane
+      // return aDistance - bDistance
+      // return a.selfIndex - b.selfIndex
     })
     this.layerList.forEach((elem, layerIndex) =>
       elem.children.forEach((elem, selfIndex) => {
@@ -130,7 +136,7 @@ export class StageSurface {
 
   private translate = (cur: IXY, prev: IXY) => {
     const { width, height } = this.canvas
-    const [tx, ty] = xy_toArray(xy_minus(cur, prev))
+    const tr = xy_minus(cur, prev)
     const reRenderElems = new Set<Elem>()
 
     const traverse = (elem: Elem) => {
@@ -140,7 +146,7 @@ export class StageSurface {
     }
 
     this.bufferCtx.clearRect(0, 0, width, height)
-    this.bufferCtx.setTransform(1, 0, 0, 1, round(tx * dpr), round(ty * dpr))
+    this.bufferCtx.setTransform(1, 0, 0, 1, round(tr.x * 1.5), round(tr.y * 1.5))
     this.bufferCtx.drawImage(this.canvas, 0, 0, width, height, 0, 0, width, height)
 
     this.ctx.clearRect(0, 0, width, height)
@@ -329,6 +335,7 @@ export class StageSurface {
   private handlePointerEvents = () => {
     const onMouseEvent = (e: MouseEvent) => {
       if (this.isPointerEventNone) return
+      if (this.fullRenderElemsMinHeap.length) return
 
       this.getEventXY(e)
       this.traverseLayerList((elem, capture, stopped, stopPropagation, hitList, xy) => {

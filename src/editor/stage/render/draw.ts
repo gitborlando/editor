@@ -246,7 +246,10 @@ class StageNodeDrawerService {
       if (getEditorSetting('ignoreUnVisible')) {
         const visualWidth = width * getZoom()
         const visualHeight = lineHeight * getZoom()
-        if (visualWidth / text.length < 2 || visualHeight < 2) return
+        if (visualWidth / text.length < 2.5 || visualHeight < 2.5) {
+          this.ctx.fillRect(start, i * lineHeight, width, lineHeight * 0.2)
+          return
+        }
       }
 
       this.ctx[op](text, start, i * lineHeight)
