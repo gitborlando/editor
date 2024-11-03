@@ -90,6 +90,10 @@ class EditorCommandManager {
         },
       },
       {
+        name: '创建画板',
+        callback: () => OperateNode.wrapInFrame(),
+      },
+      {
         name: '删除',
         shortcut: 'del',
         callback: () => OperateNode.deleteSelectNodes(),

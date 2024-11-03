@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
+import { AABB, OBB } from 'src/editor/math/obb'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { createSignal } from 'src/shared/signal/signal'
 import { firstOne, reverseFor, stableIndex } from 'src/shared/utils/array'
@@ -159,6 +160,38 @@ class OperateNodeService {
     Schema.nextSchema()
     Schema.commitHistory('粘贴节点')
   }
+
+  wrapInFrame() {
+    const selectNodes = this.selectedNodes$.value
+    if (selectNodes.length === 0) return
+
+    const frameOBB = this.getSomeNodesMergedOBB(selectNodes)
+    const frameNode = SchemaDefault.frame({
+      width: frameOBB.width,
+      height: frameOBB.height,
+      x: frameOBB.x,
+      y: frameOBB.y,
+    })
+    this.addNodes([frameNode])
+
+    const oldParent = Schema.find<INodeParent>(selectNodes[0].parentId)
+    selectNodes.forEach((node) => this.splice(oldParent, node))
+    selectNodes.forEach((node) => this.insertAt(frameNode, node))
+    this.insertAt(oldParent, frameNode)
+
+    selectNodes.map((node) => this.unSelect(node.id))
+    this.select(frameNode.id)
+    this.commitFinalSelect()
+
+    Schema.nextSchema()
+    Schema.commitHistory('创建画板')
+  }
+
+  getSomeNodesMergedOBB(nodes: INode[]) {
+    const aabbList = nodes.map((node) => StageScene.findElem(node.id).aabb)
+    return OBB.FromAABB(AABB.Merge(aabbList))
+  }
+
   getNodeCenterXY(node: INode) {
     const center = xy_(node.x + node.width / 2, node.y + node.height / 2)
     return xy_rotate(center, xy_(node.x, node.y), node.rotation)
