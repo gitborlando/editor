@@ -1,9 +1,11 @@
 import autobind from 'class-autobind-decorator'
+import { divide } from 'src/editor/math/base'
+import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { createCache } from 'src/shared/utils/cache'
 import { ITraverseData, SchemaUtil } from 'src/shared/utils/schema'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { Schema } from '../schema/schema'
-import { INode, IVector } from '../schema/type'
+import { INode, IPolygon, IStar, IVector } from '../schema/type'
 import { OperateNode, getSelectIds, getSelectNodes } from './node'
 
 function createInitGeometry() {
@@ -82,6 +84,10 @@ class OperateGeometryService {
     return this.geometry[key] - this.lastGeometry[key]
   }
 
+  private deltaRate(key: keyof IGeometry, node: any) {
+    return divide(this.delta(key), node[key])
+  }
+
   private setupGeometry() {
     if (OperateNode.selectIds.value.size === 1) {
       const node = OperateNode.selectingNodes[0]
@@ -130,7 +136,6 @@ class OperateGeometryService {
 
   private applyChangeToNode(traverseData: ITraverseData) {
     const { node, depth } = traverseData
-    console.log('depth: ', depth)
 
     if (depth === 0) this.patchChangeToVectorPoints(node.id)
 
@@ -139,6 +144,14 @@ class OperateGeometryService {
       if (key === 'height' && node.type === 'line') return
       if (key === 'rotation') {
         return this.applyRotationToNode(traverseData, node, depth)
+      }
+      if (key === 'sides') {
+        const { width, height, sides } = node as IPolygon
+        Schema.itemReset(node, ['points'], createRegularPolygon(width, height, sides))
+      }
+      if (key === 'pointCount' || key === 'innerRate') {
+        const { width, height, pointCount, innerRate } = node as IStar
+        Schema.itemReset(node, ['points'], createStarPolygon(width, height, pointCount, innerRate))
       }
       //@ts-ignore
       Schema.itemReset(node, [key], node[key] + this.delta(key))
@@ -168,19 +181,18 @@ class OperateGeometryService {
 
   private patchChangeToVectorPoints(id: string) {
     const node = Schema.find<IVector>(id)
-    console.log('node: ', node)
     if (!node.points) return
 
     node.points.forEach((point, i) => {
       if (this.operateKeys.has('width')) {
-        point.x *= 1 + this.delta('width') / node.width
-        point.handleLeft && (point.handleLeft.x *= 1 + this.delta('width') / node.width)
-        point.handleRight && (point.handleRight.x *= 1 + this.delta('width') / node.width)
+        point.x *= 1 + this.deltaRate('width', node)
+        point.handleLeft && (point.handleLeft.x *= 1 + this.deltaRate('width', node))
+        point.handleRight && (point.handleRight.x *= 1 + this.deltaRate('width', node))
       }
       if (this.operateKeys.has('height')) {
-        point.y *= 1 + this.delta('height') / node.height
-        point.handleLeft && (point.handleLeft.y *= 1 + this.delta('height') / node.height)
-        point.handleRight && (point.handleRight.y *= 1 + this.delta('height') / node.height)
+        point.y *= 1 + this.deltaRate('height', node)
+        point.handleLeft && (point.handleLeft.y *= 1 + this.deltaRate('height', node))
+        point.handleRight && (point.handleRight.y *= 1 + this.deltaRate('height', node))
       }
     })
   }

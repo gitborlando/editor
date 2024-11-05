@@ -28,7 +28,6 @@ export default class Immui {
     if (Array.isArray(current)) {
       current.splice(<any>lastKey, 0, value)
     } else {
-      console.log(current, lastKey)
       current[lastKey] = value
     }
 

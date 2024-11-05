@@ -1,7 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { customAlphabet, nanoid } from 'nanoid'
-import { max, rcos, rsin } from 'src/editor/math/base'
-import { firstOne, lastOne } from 'src/shared/utils/array'
+import { createLine, createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { createCache } from 'src/shared/utils/cache'
 import { COLOR, rgb } from 'src/shared/utils/color'
 import { IRect, IXY } from 'src/shared/utils/normal'
@@ -139,7 +138,7 @@ class SchemaDefaultService {
     const name = this.createNodeName('polygon')
     const nodeBase = this.createNodeBase()
     const { width, height } = option || nodeBase
-    const points = this.createRegularPolygon(width!, height!, 3)
+    const points = createRegularPolygon(width!, height!, 3)
     return {
       type: 'polygon',
       sides: 3,
@@ -154,7 +153,7 @@ class SchemaDefaultService {
     const name = this.createNodeName('star')
     const nodeBase = this.createNodeBase()
     const { width, height } = option || nodeBase
-    const points = this.createStarPolygon(width!, height!, 5, 0.382)
+    const points = createStarPolygon(width!, height!, 5, 0.382)
     return {
       type: 'star',
       pointCount: 5,
@@ -170,7 +169,7 @@ class SchemaDefaultService {
     const name = this.createNodeName('line')
     const nodeBase = this.createNodeBase()
     const { x, y } = option || nodeBase
-    const points = this.createLinePolygon(xy_(x, y), 0)
+    const points = createLine(xy_(x, y), 0)
     return {
       type: 'line',
       points,
@@ -297,59 +296,6 @@ class SchemaDefaultService {
       blurs: [],
       shadows: [],
     }
-  }
-  private createLinePolygon(start: IXY, length: number) {
-    const end = xy_(start.x + length, start.y)
-    const points = [SchemaDefault.point(start), SchemaDefault.point(end)]
-    firstOne(points)!.startPath = true
-    lastOne(points).endPath = true
-    return points
-  }
-
-  private createRegularPolygon(width: number, height: number, sideCount: number) {
-    sideCount = Math.max(sideCount | 0, 3)
-    const center = xy_(width / 2, height / 2)
-    const radius = max(width, height) / 2
-    const delta = 360 / sideCount
-    const points = new Array(sideCount).fill(null).map((_, i) => {
-      const angle = i * delta - 90
-      if (width > height) {
-        const x = center.x + rcos(angle) * radius
-        const y = center.y + rsin(angle) * radius * (height / width)
-        return SchemaDefault.point({ x, y })
-      } else {
-        const x = center.x + rcos(angle) * radius * (width / height)
-        const y = center.y + rsin(angle) * radius
-        return SchemaDefault.point({ x, y })
-      }
-    })
-    firstOne(points)!.startPath = true
-    lastOne(points).endPath = true
-    return points
-  }
-
-  private createStarPolygon(width: number, height: number, pointCount: number, innerRate: number) {
-    pointCount = max(pointCount | 0, 3)
-    const center = xy_(width / 2, height / 2)
-    const outerRadius = max(width, height) / 2
-    const innerRadius = innerRate * outerRadius
-    const delta = 360 / pointCount / 2
-    const points = new Array(pointCount * 2).fill(null).map((_, i) => {
-      const radius = (-1) ** i === 1 ? outerRadius : innerRadius
-      const angle = i * delta - 90
-      if (width > height) {
-        const x = center.x + rcos(angle) * radius
-        const y = center.y + rsin(angle) * radius * (height / width)
-        return SchemaDefault.point({ x, y })
-      } else {
-        const x = center.x + rcos(angle) * radius * (width / height)
-        const y = center.y + rsin(angle) * radius
-        return SchemaDefault.point({ x, y })
-      }
-    })
-    firstOne(points)!.startPath = true
-    lastOne(points).endPath = true
-    return points
   }
 
   private customNanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6)

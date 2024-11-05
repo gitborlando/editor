@@ -19,8 +19,8 @@ export function pow3(number: number) {
 export function multiply(...numbers: number[]) {
   return numbers.reduce((i, all) => (all *= i), 1)
 }
-export function divide(...numbers: number[]) {
-  return numbers.reduce((i, all) => (all /= i), 1)
+export function divide(a: number, b: number) {
+  return b === 0 ? 1 : a / b
 }
 
 export function degreefy(radians: number) {

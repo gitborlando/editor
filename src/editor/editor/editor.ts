@@ -4,8 +4,11 @@ import { EditorCommand } from 'src/editor/editor/command'
 import { FileManager } from 'src/editor/editor/file-manager'
 import { mockPolyline } from 'src/editor/editor/mock/polyline'
 import { OperateGeometry } from 'src/editor/operate/geometry'
+import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { createStorageItem } from 'src/global/storage'
+import { jsonParse, publicPath } from 'src/shared/utils/normal'
+import listJson from '../../../public/mock/list.json'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
 import { OperateNode } from '../operate/node'
@@ -48,28 +51,32 @@ export class EditorService {
   }
 
   private initSchema = async () => {
-    const schema = mockPolyline()
-    await FileManager.saveFile(schema)
-    Schema.initSchema(schema)
+    if (false) {
+      const schema = mockPolyline()
+      if (!(await FileManager.fileForage.getItem<ISchema>(schema.meta.fileId))) {
+        await FileManager.saveFile(schema)
+      }
+      Schema.initSchema(schema)
+    } else {
+      if (!location.hash) {
+        location.hash = 'test-file-1'
+      }
 
-    // if (!location.hash) {
-    //   location.hash = 'test-file-1'
-    // }
+      const fileId = location.hash.slice(1)
+      const schema = await FileManager.fileForage.getItem<ISchema>(fileId)
 
-    // const fileId = location.hash.slice(1)
-    // const schema = await FileManager.fileForage.getItem<ISchema>(fileId)
-
-    // if (schema) {
-    //   Schema.initSchema(schema)
-    // } else {
-    //   const name = listJson[fileId as keyof typeof listJson].name
-    //   const zipBuffer = await (await fetch(publicPath(`mock/${name}.zip`))).arrayBuffer()
-    //   const zipFiles = await jsZip.loadAsync(zipBuffer)
-    //   const fileText = await zipFiles.file(`${name}.json`)?.async('text')
-    //   const schema = jsonParse(fileText) as ISchema
-    //   await FileManager.saveFile(schema)
-    //   Schema.initSchema(schema)
-    // }
+      if (schema) {
+        Schema.initSchema(schema)
+      } else {
+        const name = listJson[fileId as keyof typeof listJson].name
+        const zipBuffer = await (await fetch(publicPath(`mock/${name}.zip`))).arrayBuffer()
+        const zipFiles = await jsZip.loadAsync(zipBuffer)
+        const fileText = await zipFiles.file(`${name}.json`)?.async('text')
+        const schema = jsonParse(fileText) as ISchema
+        await FileManager.saveFile(schema)
+        Schema.initSchema(schema)
+      }
+    }
   }
 
   initEditor = async () => {

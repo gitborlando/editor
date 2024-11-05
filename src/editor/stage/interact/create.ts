@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { ratan2 } from 'src/editor/math/base'
+import { max, ratan2 } from 'src/editor/math/base'
 import { xy_distance } from 'src/editor/math/xy'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
@@ -12,7 +12,7 @@ import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { Drag, type IDragData } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
-import { clone, IXY } from 'src/shared/utils/normal'
+import { IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
@@ -56,36 +56,28 @@ class StageCreateService {
 
   private onCreateMove({ marquee, current, start }: IDragData) {
     const node = Schema.find(this.createId)
-    console.log('node: ', clone(node))
 
     if (node.type === 'line') {
       current = StageViewport.toSceneXY(current)
       start = StageViewport.toSceneXY(start)
       const rotation = ratan2(current.y - start.y, current.x - start.x)
-      Schema.itemReset(node, ['x'], start.x)
-      Schema.itemReset(node, ['y'], start.y)
-      Schema.itemReset(node, ['width'], xy_distance(current, start))
-      Schema.itemReset(node, ['rotation'], rotation)
+      OperateGeometry.setGeometry('x', start.x)
+      OperateGeometry.setGeometry('y', start.y)
+      OperateGeometry.setGeometry('width', max(1, xy_distance(current, start)))
+      OperateGeometry.setGeometry('rotation', rotation)
     } else {
       const { x, y, width, height } = StageViewport.toSceneMarquee(marquee)
-      // Schema.itemReset(node, ['x'], x)
-      // Schema.itemReset(node, ['y'], y)
-      // Schema.itemReset(node, ['width'], width)
-      // Schema.itemReset(node, ['height'], height)
       OperateGeometry.setGeometry('x', x)
       OperateGeometry.setGeometry('y', y)
-      OperateGeometry.setGeometry('width', width)
-      OperateGeometry.setGeometry('height', height)
+      OperateGeometry.setGeometry('width', max(1, width))
+      OperateGeometry.setGeometry('height', max(1, height))
     }
-
-    // Schema.commitOperation('创建 node 中...')
-    // Schema.nextSchema()
   }
 
   private onCreateEnd() {
     const node = Schema.find<INode>(this.createId)
 
-    if (node.width === 0) {
+    if (node.width === 1) {
       Schema.itemReset(node, ['width'], 100)
       if (node.type !== 'line') {
         Schema.itemReset(node, ['height'], 100)
