@@ -1,6 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { ratan2 } from 'src/editor/math/base'
 import { xy_distance } from 'src/editor/math/xy'
+import { OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperatePage } from 'src/editor/operate/page'
 import { SchemaDefault } from 'src/editor/schema/default'
@@ -11,7 +12,7 @@ import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { Drag, type IDragData } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
-import { IXY } from 'src/shared/utils/normal'
+import { clone, IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
@@ -55,6 +56,7 @@ class StageCreateService {
 
   private onCreateMove({ marquee, current, start }: IDragData) {
     const node = Schema.find(this.createId)
+    console.log('node: ', clone(node))
 
     if (node.type === 'line') {
       current = StageViewport.toSceneXY(current)
@@ -66,14 +68,18 @@ class StageCreateService {
       Schema.itemReset(node, ['rotation'], rotation)
     } else {
       const { x, y, width, height } = StageViewport.toSceneMarquee(marquee)
-      Schema.itemReset(node, ['x'], x)
-      Schema.itemReset(node, ['y'], y)
-      Schema.itemReset(node, ['width'], width)
-      Schema.itemReset(node, ['height'], height)
+      // Schema.itemReset(node, ['x'], x)
+      // Schema.itemReset(node, ['y'], y)
+      // Schema.itemReset(node, ['width'], width)
+      // Schema.itemReset(node, ['height'], height)
+      OperateGeometry.setGeometry('x', x)
+      OperateGeometry.setGeometry('y', y)
+      OperateGeometry.setGeometry('width', width)
+      OperateGeometry.setGeometry('height', height)
     }
 
-    Schema.commitOperation('创建 node 中...')
-    Schema.nextSchema()
+    // Schema.commitOperation('创建 node 中...')
+    // Schema.nextSchema()
   }
 
   private onCreateEnd() {
@@ -93,7 +99,7 @@ class StageCreateService {
   private createNode(start: IXY) {
     const { x, y } = StageViewport.toSceneXY(start)
 
-    const node = SchemaDefault[this.currentType.value]({ x, y, width: 0, height: 0 })
+    const node = SchemaDefault[this.currentType.value]({ x, y, width: 1, height: 1 })
     this.createId = node.id
 
     return node

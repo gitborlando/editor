@@ -1,11 +1,10 @@
 import autoBind from 'class-autobind-decorator'
 import { getEditorSetting } from 'src/editor/editor/editor'
 import { ImgManager } from 'src/editor/editor/img-manager'
-import { max, radianfy, rcos, rsin } from 'src/editor/math/base'
+import { max, radianfy } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
 import { AABB } from 'src/editor/math/obb'
 import { xy_, xy_from } from 'src/editor/math/xy'
-import { SchemaDefault } from 'src/editor/schema/default'
 import { Surface } from 'src/editor/stage/render/surface'
 import { ISplitText } from 'src/editor/stage/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
@@ -79,20 +78,8 @@ class StageNodeDrawerService {
         break
 
       case 'polygon':
-        node.points = this.createRegularPolygon(width, height, node.sides)
-        this.drawPolygon(node.points)
-        break
-
       case 'star':
-        node.points = this.createStarPolygon(width, height, node.pointCount, node.innerRate)
-        this.drawPolygon(node.points)
-        break
-
       case 'line':
-        node.points = this.createLinePolygon(xy_(0, 0), node.width)
-        this.drawPolygon(node.points)
-        break
-
       case 'irregular':
         this.drawIrregular(node.points)
         break
@@ -120,52 +107,8 @@ class StageNodeDrawerService {
     }
   }
 
-  private createLinePolygon(start: IXY, length: number) {
-    const end = xy_(start.x + length, start.y)
-    return [SchemaDefault.point(start), SchemaDefault.point(end)]
-  }
-
-  private createRegularPolygon(width: number, height: number, sides: number) {
-    sides = Math.max(sides | 0, 3)
-    const center = xy_(width / 2, height / 2)
-    const radius = max(width, height) / 2
-    const delta = 360 / sides
-    return new Array(sides).fill(null).map((_, i) => {
-      const angle = i * delta - 90
-      if (width > height) {
-        const x = center.x + rcos(angle) * radius
-        const y = center.y + rsin(angle) * radius * (height / width)
-        return SchemaDefault.point({ x, y })
-      } else {
-        const x = center.x + rcos(angle) * radius * (width / height)
-        const y = center.y + rsin(angle) * radius
-        return SchemaDefault.point({ x, y })
-      }
-    })
-  }
-
-  private createStarPolygon(width: number, height: number, points: number, innerRate: number) {
-    points = max(points | 0, 3)
-    const center = xy_(width / 2, height / 2)
-    const outerRadius = max(width, height) / 2
-    const innerRadius = innerRate * outerRadius
-    const delta = 360 / points / 2
-    return new Array(points * 2).fill(null).map((_, i) => {
-      const radius = (-1) ** i === 1 ? outerRadius : innerRadius
-      const angle = i * delta - 90
-      if (width > height) {
-        const x = center.x + rcos(angle) * radius
-        const y = center.y + rsin(angle) * radius * (height / width)
-        return SchemaDefault.point({ x, y })
-      } else {
-        const x = center.x + rcos(angle) * radius * (width / height)
-        const y = center.y + rsin(angle) * radius
-        return SchemaDefault.point({ x, y })
-      }
-    })
-  }
-
-  private drawPolygon = (xys: IXY[]) => {
+  private drawPolygon = (xys: IPoint[]) => {
+    return this.drawIrregular(xys)
     loopFor(xys, (cur, next, _, i) => {
       if (i === 0) this.path2d.moveTo(cur.x, cur.y)
       if (i === xys.length - 1) this.path2d.closePath()

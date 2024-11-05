@@ -146,7 +146,7 @@ export class StageSurface {
     }
 
     this.bufferCtx.clearRect(0, 0, width, height)
-    this.bufferCtx.setTransform(1, 0, 0, 1, round(tr.x * 1.5), round(tr.y * 1.5))
+    this.bufferCtx.setTransform(1, 0, 0, 1, round(tr.x * dpr), round(tr.y * dpr))
     this.bufferCtx.drawImage(this.canvas, 0, 0, width, height, 0, 0, width, height)
 
     this.ctx.clearRect(0, 0, width, height)

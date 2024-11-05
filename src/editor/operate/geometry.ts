@@ -3,7 +3,7 @@ import { createCache } from 'src/shared/utils/cache'
 import { ITraverseData, SchemaUtil } from 'src/shared/utils/schema'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { Schema } from '../schema/schema'
-import { IIrregular, INode } from '../schema/type'
+import { INode, IVector } from '../schema/type'
 import { OperateNode, getSelectIds, getSelectNodes } from './node'
 
 function createInitGeometry() {
@@ -130,6 +130,7 @@ class OperateGeometryService {
 
   private applyChangeToNode(traverseData: ITraverseData) {
     const { node, depth } = traverseData
+    console.log('depth: ', depth)
 
     if (depth === 0) this.patchChangeToVectorPoints(node.id)
 
@@ -166,8 +167,9 @@ class OperateGeometryService {
   }
 
   private patchChangeToVectorPoints(id: string) {
-    const node = Schema.find<IIrregular>(id)
-    if (node.type !== 'irregular') return
+    const node = Schema.find<IVector>(id)
+    console.log('node: ', node)
+    if (!node.points) return
 
     node.points.forEach((point, i) => {
       if (this.operateKeys.has('width')) {
