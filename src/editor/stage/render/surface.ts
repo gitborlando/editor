@@ -1,6 +1,6 @@
 import autoBind from 'class-autobind-decorator'
 import { getEditorSetting } from 'src/editor/editor/editor'
-import { abs, max, round } from 'src/editor/math/base'
+import { abs, max } from 'src/editor/math/base'
 import {
   IMatrix,
   mx_applyAABB,
@@ -134,6 +134,9 @@ export class StageSurface {
     })
   }
 
+  private xNotIntTime = 0
+  private yNotIntTime = 0
+
   private translate = (cur: IXY, prev: IXY) => {
     const { width, height } = this.canvas
     const tr = xy_minus(cur, prev)
@@ -145,12 +148,40 @@ export class StageSurface {
       reRenderElems.add(elem)
     }
 
+    const xNotInt = !Number.isInteger(tr.x * dpr)
+    const yNotInt = !Number.isInteger(tr.y * dpr)
+
+    this.xNotIntTime += xNotInt ? 1 : 0
+    this.yNotIntTime += yNotInt ? 1 : 0
+
     this.bufferCtx.clearRect(0, 0, width, height)
-    this.bufferCtx.setTransform(1, 0, 0, 1, round(tr.x * dpr), round(tr.y * dpr))
-    this.bufferCtx.drawImage(this.canvas, 0, 0, width, height, 0, 0, width, height)
+    this.bufferCtx.drawImage(
+      this.canvas,
+      0,
+      0,
+      width,
+      height,
+      tr.x * dpr + (xNotInt ? -0.5 : 0),
+      tr.y * dpr + (yNotInt ? -0.5 : 0),
+      width,
+      height
+    )
 
     this.ctx.clearRect(0, 0, width, height)
-    this.ctx.drawImage(this.bufferCanvas, 0, 0, width, height, 0, 0, width, height)
+    this.ctx.drawImage(
+      this.bufferCanvas,
+      0,
+      0,
+      width,
+      height,
+      this.xNotIntTime === 2 ? 1 : 0,
+      this.yNotIntTime === 2 ? 1 : 0,
+      width,
+      height
+    )
+
+    this.yNotIntTime = this.yNotIntTime === 2 ? 0 : this.yNotIntTime
+    this.xNotIntTime = this.xNotIntTime === 2 ? 0 : this.xNotIntTime
 
     this.layerList.forEach((elem) => elem.children.forEach(traverse))
     this.ctxSaveRestore(() => this.patchRender(reRenderElems))
