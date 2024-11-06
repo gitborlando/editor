@@ -16,7 +16,7 @@ export const FillPropComp: FC<{}> = ({}) => {
   const HeaderComp = useMemoComp([hasFills], ({}) => {
     return (
       <Flex className={`lay-h wh-100%-24 ${hasFills && 'mb-8'}`}>
-        <Flex className='lay-c labelFont'>
+        <Flex className='lay-c labelFont ml-5'>
           <h4>填充</h4>
         </Flex>
         <IconButton size={16} style={{ marginLeft: 'auto' }} onClick={addFill}>

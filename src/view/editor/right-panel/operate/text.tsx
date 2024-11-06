@@ -26,7 +26,7 @@ export const TextComp: FC<{}> = ({}) => {
   const HeaderComp = useMemoComp([], ({}) => {
     return (
       <Flex className='lay-h wh-100%-24 mb-8'>
-        <Flex className='lay-c labelFont'>
+        <Flex className='lay-c labelFont ml-5'>
           <h4>文本</h4>
         </Flex>
       </Flex>

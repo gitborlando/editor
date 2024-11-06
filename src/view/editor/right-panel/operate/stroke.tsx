@@ -18,7 +18,7 @@ export const StrokeComp: FC<{}> = ({}) => {
   const HeaderComp = useMemoComp([hasStrokes], ({}) => {
     return (
       <Flex className={`lay-h wh-100%-24 ${hasStrokes && 'mb-8'}`}>
-        <Flex className='lay-c labelFont'>
+        <Flex className='lay-c labelFont ml-5'>
           <h4>描边</h4>
         </Flex>
         <IconButton size={16} style={{ marginLeft: 'auto' }} onClick={addStroke}>

@@ -2,7 +2,7 @@ import autobind from 'class-autobind-decorator'
 import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
 import { FileManager } from 'src/editor/editor/file-manager'
-import { mockPolyline } from 'src/editor/editor/mock/polyline'
+import { mockCollide } from 'src/editor/editor/mock/collide'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
@@ -51,8 +51,9 @@ export class EditorService {
   }
 
   private initSchema = async () => {
-    if (false) {
-      const schema = mockPolyline()
+    let mockSchema = mockCollide()
+    if (mockSchema) {
+      const schema = mockSchema
       if (!(await FileManager.fileForage.getItem<ISchema>(schema.meta.fileId))) {
         await FileManager.saveFile(schema)
       }

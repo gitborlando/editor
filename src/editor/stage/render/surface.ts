@@ -395,7 +395,3 @@ export class StageSurface {
 }
 
 export const Surface = new StageSurface()
-
-export function logId(elems: Elem[] | Set<Elem>) {
-  console.log([...elems].map((elem) => elem.id))
-}

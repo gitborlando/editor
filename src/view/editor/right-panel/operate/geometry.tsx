@@ -69,7 +69,7 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
 
     return (
       <CompositeInput
-        className='d-hover-bg px-6'
+        className='d-hover-bg px-6 w-100'
         label={label}
         value={formatNumber(produceValue())}
         onNewValueApply={(v) => setGeometry(operateKey, produceValue(Number(v)) as number)}
@@ -80,7 +80,7 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
 
   return (
     selectedNodes.value.length !== 0 && (
-      <Flex className='lay-h flex-wrap gap-4-4 p-8 borderBottom'>
+      <Flex className='lay-h flex-wrap gap-4-20 p-8 borderBottom'>
         <GeometryItemComp label='横坐标' operateKey='x' slideRate={1 / getZoom()} />
         <GeometryItemComp label='纵坐标' operateKey='y' slideRate={1 / getZoom()} />
         <GeometryItemComp label='宽度' operateKey='width' />

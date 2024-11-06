@@ -1,4 +1,4 @@
-import { degreefy, rcos, rotatePoint, rsin } from './base'
+import { degreefy, rcos, rotatePoint, rsin, sqrt } from './base'
 
 export function xy_(x: number = 0, y: number = 0) {
   return { x, y }
@@ -102,6 +102,59 @@ export type IXY = {
 
 export class XY {
   constructor(public x: number, public y: number) {}
+
+  from(xy: IXY) {
+    this.x = xy.x
+    this.y = xy.y
+    return this
+  }
+
+  client(e: { clientX: number; clientY: number }) {
+    this.x = e.clientX
+    this.y = e.clientY
+    return this
+  }
+
+  center(xy: { centerX: number; centerY: number }) {
+    this.x = xy.centerX
+    this.y = xy.centerY
+    return this
+  }
+
+  plus(another: IXY) {
+    this.x = this.x + another.x
+    this.y = this.y + another.y
+    return this
+  }
+
+  minus(another: IXY) {
+    this.x = this.x - another.x
+    this.y = this.y - another.y
+    return this
+  }
+
+  multiply(...numbers: number[]) {
+    const n = numbers.reduce((a, b) => a * b, 1)
+    this.x = this.x * n
+    this.y = this.y * n
+    return this
+  }
+
+  divide(...numbers: number[]) {
+    const n = numbers.reduce((a, b) => a * b, 1)
+    this.x = this.x / n
+    this.y = this.y / n
+    return this
+  }
+
+  distance(another: IXY) {
+    return sqrt((this.x - another.x) ** 2 + (this.y - another.y) ** 2)
+  }
+
+  rotate(origin: IXY, rotation: number) {
+    if (rotation === 0) return this
+    return rotatePoint(this.x, this.y, origin.x, origin.y, rotation)
+  }
 
   static From(xy: IXY) {
     return new XY(xy.x, xy.y)

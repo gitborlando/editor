@@ -1,6 +1,5 @@
 import { Container, Graphics } from '@pixi/react'
 import { FC, Fragment, memo } from 'react'
-import { xy_getRotation, xy_minus, xy_opposite, xy_plus, xy_rotate } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
 import { Schema } from 'src/editor/schema/schema'
 import { INode, IPoint, ISchemaPropKey } from 'src/editor/schema/type'
@@ -10,6 +9,7 @@ import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { COLOR, hslBlueColor } from 'src/shared/utils/color'
 import { IXY, iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp, useZoom } from 'src/shared/utils/react'
+import { xy_getRotation, xy_minus, xy_opposite, xy_plus, xy_rotate } from 'young.xy-utils'
 import { PointComp } from './point'
 
 type IVectorEditComp = {}

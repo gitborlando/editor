@@ -9,7 +9,6 @@ export function useSignal<T extends any>(init?: T): Signal<T> {
 
 export function useAutoSignal<T extends any>(init?: T, id?: string): Signal<T> {
   const signal = useRef(createSignal(init))
-  id === 'showP' && console.log('id: ', signal.current.value)
   useHookSignal(signal.current)
   return signal.current
 }
