@@ -106,7 +106,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     return (
       <Flex
         style={{ width: '100%' }}
-        className={cx([searched, 'lay-h text-[hsl(217,100,50)]'])}
+        className={cx([searched, 'lay-h text-hsl50'])}
         onDoubleClick={() => enterReName.dispatch(id)}>
         {enterReName.value === id ? (
           <CompositeInput
@@ -161,7 +161,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
         <Flex className='wh-100%' onHover={dropInFront.dispatch}>
           {dropInFront.value && (
             <Flex
-              className='wh-100%-2 bg-hslb50 absolute pointer-events-none'
+              className='wh-100%-2 bg-hsl50 absolute pointer-events-none'
               style={{ paddingLeft: indent * 16 + 16 }}></Flex>
           )}
         </Flex>
@@ -169,7 +169,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
         <Flex className='lay-v wh-100%' onHover={dropBehind.dispatch}>
           {dropBehind.value && (
             <Flex
-              className='wh-100%-2 bg-hslb50 absolute pointer-events-none'
+              className='wh-100%-2 bg-hsl50 absolute pointer-events-none'
               style={{ bottom: 0, paddingLeft: indent * 16 + 16 }}></Flex>
           )}
         </Flex>
@@ -180,8 +180,8 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
   const nodeItemCss = cx(
     ['lay-h wh-100%-32 layer-floor:bg-white min-w-100% text-12 px-6 d-hover-border'],
     [!!nodeMoveStarted.value.moveId, ''],
-    [subSelected, 'bg-hslb97'],
-    [selected, 'bg-hslb94']
+    [subSelected, 'bg-hsl97'],
+    [selected, 'bg-hsl94']
   )
 
   return (

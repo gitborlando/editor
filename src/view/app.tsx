@@ -8,7 +8,7 @@ type IAppProps = {}
 
 export const App: FC<IAppProps> = memo(() => {
   return (
-    <Flex className='lay-v wh-100vw-100vh bg-white' onContextMenu={(e) => e.preventDefault()}>
+    <Flex className='lay-v wh-100vw-100vh bg-blue/93' onContextMenu={(e) => e.preventDefault()}>
       <EditorComp />
       <MenuComp />
       <UploaderComp />

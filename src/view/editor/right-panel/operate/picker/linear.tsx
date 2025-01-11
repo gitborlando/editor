@@ -15,12 +15,12 @@ export const PickerLinearGradientComp: FC<IPickerLinearGradientComp> = memo(({ f
 
   const StopsBar: FC<{}> = () => {
     return (
-      <Flex className='lay-h shrink-0 wh-200-20-99 relative'>
-        <Flex className='wh-200-10-99' style={{ background: makeLinearGradientCss(fill) }}></Flex>
+      <Flex className='lay-h shrink-0 wh-200-20 r-99 relative'>
+        <Flex className='wh-200-10 r-99' style={{ background: makeLinearGradientCss(fill) }}></Flex>
         {fill.stops.map((stop, index) => (
           <Flex
             key={index}
-            className='wh-12-12-99 pointer absolute b-2-white'
+            className='wh-12-12 r-99 pointer absolute b-2-white'
             style={{
               backgroundColor: `${stop.color}`,
               left: `${stop.offset * 100}%`,

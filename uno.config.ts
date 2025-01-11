@@ -1,3 +1,4 @@
+import unoPresetGitborlando from '@gitborlando/uno-preset'
 import presetRemToPx from '@unocss/preset-rem-to-px'
 import {
   Rule,
@@ -9,45 +10,13 @@ import {
 } from 'unocss'
 
 const theme = (() => {
-  const hslB = Object.fromEntries(
-    new Array(100).fill(0).map((_, i) => [`hslb${i}`, `hsl(217 100 ${i})`])
+  const hslObj = Object.fromEntries(
+    new Array(100).fill(0).map((_, i) => [`hsl${i}`, `hsl(var(--hue) 100 ${i})`])
   )
   return {
-    colors: { ...hslB },
+    colors: { ...hslObj },
   }
 })()
-
-const widthHeightRadius: Rule<object> = [
-  /wh-([^-]+)-?([^-]+)?-?([^-]+)?/,
-  ([_, w, h, r]) => ({
-    width: normal(w),
-    height: normal(h ?? w),
-    ...(r && { 'border-radius': normal(r) }),
-  }),
-]
-
-const layout: Rule<object> = [
-  /lay-(h|v|c)/,
-  ([_, d]) => {
-    if (d === 'h') return { 'align-items': 'center' }
-    if (d === 'v') return { 'align-items': 'center', 'flex-direction': 'column' }
-    if (d === 'c') return { 'align-items': 'center', 'justify-content': 'center' }
-  },
-]
-
-const border: Rule<object> = [
-  /b-(\d+)-([^-]+)-?(t|r|b|l)?/,
-  ([_, width, color, direction]) => ({
-    [`border${direction ? `-${normal(direction)}` : ''}`]: `${width}px solid ${normalColor(color)}`,
-  }),
-]
-
-const boxShadow: Rule<object> = [
-  /shadow-(\d+)-(\d+)-([^-]+)-?(inset)?/,
-  ([_, x, y, color, inset]) => ({
-    'box-shadow': `${inset || ''} 0px 0px ${x}px ${y}px ${normal(color)}`,
-  }),
-]
 
 const defaultHover: Rule<object> = [
   /d-hover-(bg|border)/,
@@ -85,8 +54,6 @@ const defaultScrollBar: Rule<object> = [
 
 const gap: Rule<object> = [/gap-(\d+)-(\d+)/, ([_, x, y]) => ({ gap: `${x}px ${y}px` })]
 
-const cursorPointer: Rule<object> = [/pointer/, () => ({ cursor: 'pointer' })]
-
 const labelFont: Rule<object> = [/labelFont/, () => ({ 'font-size': '11px', color: '#626262' })]
 const normalFont: Rule<object> = [/normalFont/, () => ({ 'font-size': '12px' })]
 
@@ -109,17 +76,12 @@ const pathFill: Rule<object> = [
 
 export default defineConfig({
   theme,
-  presets: [presetUno(), presetRemToPx({ baseFontSize: 4 })],
+  presets: [presetUno(), presetRemToPx({ baseFontSize: 4 }), unoPresetGitborlando()],
   transformers: [transformerCompileClass(), transformerVariantGroup()],
   rules: [
-    widthHeightRadius,
-    layout,
-    border,
-    cursorPointer,
     labelFont,
     normalFont,
     borderBottom,
-    boxShadow,
     gap,
     defaultHover,
     defaultScrollBar,
@@ -128,16 +90,6 @@ export default defineConfig({
     pathFill,
   ],
 })
-
-function normal(val: string) {
-  if (val === 'r') return 'right'
-  if (val === 'l') return 'left'
-  if (val === 't') return 'top'
-  if (val === 'b') return 'bottom'
-  if (val === 'fit') return 'fit-content'
-  if (!/\D/.test(val)) return val + 'px'
-  return val
-}
 
 function normalColor(val: string) {
   if (theme.colors[val]) return theme.colors[val]

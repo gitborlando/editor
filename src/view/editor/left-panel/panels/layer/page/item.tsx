@@ -32,7 +32,7 @@ export const PageItemComp: FC<IPageItemComp> = memo(({ name, id }) => {
       onContextMenu={openMenu}>
       <Flex className='lay-h text-12 px-10'>{name}</Flex>
       {selected && (
-        <Icon size={18} className={'mr-10 path-fill-hslb60'}>
+        <Icon size={18} className={'mr-10 path-fill-hsl60'}>
           {Asset.editor.leftPanel.page.pageSelect}
         </Icon>
       )}

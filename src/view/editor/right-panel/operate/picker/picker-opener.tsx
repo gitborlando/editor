@@ -72,9 +72,9 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
 
   return (
     <>
-      <Flex className='lay-h wh-92-28-2 d-hover-bg normalFont px-6'>
+      <Flex className='lay-h wh-92-28 r-2 d-hover-bg normalFont px-6'>
         <Flex
-          className='lay-h wh-18-18-2 relative mr-4 pointer [&_div]:(wh-100%-100%-2 absolute) [&_img]:(wh-100%-100%-2 absolute)'
+          className='lay-h wh-18-18 r-2 relative mr-4 pointer [&_div]:(wh-100%-100% r-2 absolute) [&_img]:(wh-100%-100% r-2 absolute)'
           onClick={(e) => showPicker(xy_client(e))}>
           <img src={Asset.editor.rightPanel.operate.fill.none}></img>
           {isColorType && (
@@ -85,7 +85,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
         </Flex>
         <ColorInputComp fill={fill} />
       </Flex>
-      <Flex className='lay-h space-between px-6 wh-54-28-2 d-hover-bg'>
+      <Flex className='lay-h space-between px-6 wh-54-28 r-2 d-hover-bg'>
         <CompositeInput
           type='number'
           needStepHandler={false}

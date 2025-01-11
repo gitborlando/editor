@@ -41,13 +41,13 @@ export const SettingComp: FC<ISettingComp> = memo(({}) => {
     classes?: string[]
   }>([], ({ active, toggle, classes }) => {
     const activeCss = active
-      ? ['b-1-#d7d7d7', 'ml-auto bg-hslb70']
-      : ['b-1-#d7d7d7', 'mr-auto bg-[#d7d7d7]']
+      ? ['bd-1-#d7d7d7', 'ml-auto bg-hsl70']
+      : ['bd-1-#d7d7d7', 'mr-auto bg-[#d7d7d7]']
     return (
       <Flex
-        className={`lay-h wh-40-20-99 px-4 pointer ${activeCss[0]} ${classes?.[0]}`}
+        className={`lay-h wh-40-20 r-99 px-4 pointer ${activeCss[0]} ${classes?.[0]}`}
         onClick={() => toggle(!active)}>
-        <Flex className={`lay-c wh-12-12-99 ${activeCss[1]} ${classes?.[1]}`}></Flex>
+        <Flex className={`lay-c wh-12-12 r-99 ${activeCss[1]} ${classes?.[1]}`}></Flex>
       </Flex>
     )
   })

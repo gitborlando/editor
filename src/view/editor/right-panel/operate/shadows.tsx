@@ -70,7 +70,7 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
             return keys.map((key, i) => (
               <CompositeInput
                 key={key}
-                className='wh-92-28-2 mr-4 d-hover-bg [&_.label]:w-fit'
+                className='wh-92-28 r-2 mr-4 d-hover-bg [&_.label]:w-fit'
                 label={labels[i]}
                 needStepHandler={false}
                 value={shadow[key].toString()}

@@ -22,7 +22,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
       <Flex className='lay-h ml-10 gap-8-8'>
         <Flex className='lay-h'>
           <Icon size={28}>{publicPath('fav-icon/shiyangyang.png')}</Icon>
-          <h4 className='text-hslb60 text-16 ml-10'>Young 编辑器</h4>
+          <h4 className='text-hsl60 text-16 ml-10'>Young 编辑器</h4>
         </Flex>
       </Flex>
     )
@@ -50,7 +50,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     const isActive = StageInteract.currentType.value === type
     return (
       <Button active={isActive} onClick={() => StageInteract.currentType.dispatch(type)}>
-        <Icon size={20} className={isActive ? 'path-fill-hslb60' : ''}>
+        <Icon size={20} className={isActive ? 'path-fill-hsl60' : ''}>
           {Asset.editor.header.stageOperate[type]}
         </Icon>
       </Button>
@@ -67,7 +67,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
           StageInteract.currentType.dispatch('create')
           StageCreate.currentType.dispatch(type)
         }}>
-        <Icon size={20} className={isActive ? 'path-fill-hslb60' : ''}>
+        <Icon size={20} className={isActive ? 'path-fill-hsl60' : ''}>
           {Asset.editor.node[type as keyof typeof Asset.editor.node]}
         </Icon>
       </Button>
@@ -81,10 +81,10 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
 
   return (
     <Flex
-      className='lay-h w-100% borderBottom relative'
+      className='lay-h w-100% borderBottom relative bg-white'
       style={{ height: StageViewport.bound.value.y }}>
       <FavIconComp />
-      <Flex className='lay-c absolute left-0 right-0 top-0 bottom-0 m-auto'>
+      <Flex className='lay-c abs-0-0 right-0 bottom-0 m-auto'>
         <RecordIcons />
         <Divide length={16} thickness={0.5} />
         {(['select', 'move'] as const).map((type) => (

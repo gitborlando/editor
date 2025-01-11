@@ -33,7 +33,7 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
   })
   return (
     <Flex
-      className='lay-h justify-around wh-fit-28-2 pointer normalFont d-hover-bg px-6'
+      className='lay-h justify-around wh-fit-28 r-2 pointer normalFont d-hover-bg px-6'
       onMouseDown={() => show.dispatch(!show.value)}
       {...rest}
       ref={innerRef}>

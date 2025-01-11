@@ -63,7 +63,7 @@ export const StrokeComp: FC<{}> = ({}) => {
         </Flex>
         <Flex className='wh-100%-28'>
           <CompositeInput
-            className='wh-92-28-2 mr-4 px-6 d-hover-bg [&_.label]:w-28'
+            className='wh-92-28 r-2 mr-4 px-6 d-hover-bg [&_.label]:w-28'
             label='粗细'
             needStepHandler={false}
             value={stroke.width.toString()}
@@ -71,7 +71,7 @@ export const StrokeComp: FC<{}> = ({}) => {
             afterOperate={() => afterOperate.dispatch()}
           />
           <Dropdown
-            className='wh-54-100%-2'
+            className='wh-54-100% r-2'
             selected={stroke.align}
             options={['inner', 'center', 'outer'] as const}
             onSelected={(selected) => toggleStroke(index, ['align'], selected as IStroke['align'])}

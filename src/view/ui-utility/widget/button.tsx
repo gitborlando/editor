@@ -1,5 +1,6 @@
+import clsx from 'clsx'
 import { ComponentPropsWithRef, forwardRef } from 'react'
-import { cx } from 'src/shared/utils/normal'
+import { cx, iife } from 'src/shared/utils/normal'
 import { Flex } from 'src/view/ui-utility/widget/flex'
 
 export type IButtonProps = ComponentPropsWithRef<'div'> & {
@@ -10,35 +11,42 @@ export type IButtonProps = ComponentPropsWithRef<'div'> & {
 
 export const Button = forwardRef<HTMLDivElement, IButtonProps>(
   ({ type = 'normal', active = false, disabled = false, className, children, ...rest }, ref) => {
-    const baseCss = cx([':uno: lay-c'], [!disabled, ':uno: pointer'])
-
-    const normalCss = cx(
-      [':uno: wh-fit-fit-4 p-6 mx-2 text-11 text-[#626262]'],
-      [disabled, ''],
-      [active, ':uno: text-[hsl(217,100,65)] bg-[hsl(217,100,95)]'],
-      [':uno: d-hover-bg']
+    const baseCss = clsx(
+      'lay-c',
+      iife(() => {
+        if (disabled) return ''
+        return 'pointer'
+      })
     )
 
-    const textCss = cx(
-      [':uno: text-[hsl(217,100,50)]'],
-      [disabled, ''],
-      [active, ':uno: text-[hsl(217,100,50)]'],
-      [':uno: text-[hsl(217,100,50)]']
+    const normalCss = clsx(
+      'wh-fit r-4 p-6 mx-2 text-11 text-[#626262]',
+      disabled ? '' : active ? 'text-hsl65 bg-hsl95' : 'd-hover-bg'
     )
 
-    const iconCss = cx(
-      [':uno: wh-fit-fit-4 p-4 mx-2'],
-      [disabled, ''],
-      [active, ':uno: bg-hslb95'],
-      [':uno: d-hover-bg']
+    const textCss = clsx(
+      'text-hsl50',
+      iife(() => {
+        if (disabled) return ''
+        if (active) return 'text-hsl50'
+      })
     )
 
-    const finalCss = cx(
-      [baseCss],
-      [type === 'text', textCss],
-      [type === 'icon', iconCss],
-      [type === 'normal', normalCss],
-      [normalCss]
+    const iconCss = clsx(
+      'wh-fit r-4 p-4 mx-2',
+      iife(() => {
+        if (disabled) return ''
+        if (active) return 'bg-hsl95'
+        return 'd-hover-bg'
+      })
+    )
+
+    const finalCss = clsx(
+      baseCss,
+      type === 'text' && textCss,
+      type === 'icon' && iconCss,
+      type === 'normal' && normalCss,
+      normalCss
     )
 
     return (

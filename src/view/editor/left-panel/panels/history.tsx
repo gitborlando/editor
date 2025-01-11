@@ -31,7 +31,7 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
     }, [active])
 
     return (
-      <Flex ref={ref} className={`lay-v wh-100%-fit borderBottom ${active && 'bg-hslb98'}`}>
+      <Flex ref={ref} className={`lay-v wh-100%-fit borderBottom ${active && 'bg-hsl98'}`}>
         <Flex style={{ color: randomColor }} className={`lay-h wh-100%-24 font-size-17 px-10 mt-8`}>
           <h6 className={`w-100% nowrap of-hidden text-ellipsis`}>{description}</h6>
           <IconButton

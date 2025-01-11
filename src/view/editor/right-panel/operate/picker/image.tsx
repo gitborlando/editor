@@ -39,7 +39,7 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
         {isHover.value && (
           <Flex className='lay-c wh-100% bg-[rgba(0,0,0,0.2)] absolute '>
             <Flex
-              className='lay-c wh-80-32-5 b-1-white text-white text-14 pointer'
+              className='lay-c wh-80-32 r-5 b-1-white text-white text-14 pointer'
               onClick={uploadImage}>
               更换图片
             </Flex>

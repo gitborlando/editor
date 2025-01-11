@@ -53,7 +53,7 @@ export const DraggableComp: FC<IDraggableComp> = ({
 
   return createPortal(
     <Flex
-      className={'lay-v wh-240-fit-6 bg-white fixed of-hidden shadow-4-0-rgba(0,0,0,0.25)'}
+      className={'lay-v wh-240-fit r-6 bg-white fixed of-hidden shadow-4-0-rgba(0,0,0,0.25)'}
       ref={ref}
       style={{
         left: position.x,

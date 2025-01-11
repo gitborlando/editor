@@ -56,7 +56,7 @@ export const FileComp: FC<IFileComp> = memo(({}) => {
           onClick={() => openInNewTab(meta.fileId)}>
           {meta.name}
           {selected && (
-            <IconButton size={16} className='ml-auto path-fill-hslb60'>
+            <IconButton size={16} className='ml-auto path-fill-hsl60'>
               {Asset.editor.leftPanel.page.pageSelect}
             </IconButton>
           )}

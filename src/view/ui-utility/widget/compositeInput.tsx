@@ -54,7 +54,7 @@ export const CompositeInput = memo(
         if (!label) return
         return (
           <Flex
-            className={cx('label', ':uno: lay-h w-36 shrink-0 text-11 text-gray mr-6')}
+            className={cx('label', 'lay-h w-36 shrink-0 text-11 text-gray mr-6')}
             style={{ ...(type === 'number' && { cursor: 'e-resize' }), flexShrink: 0 }}
             onMouseDown={() => {
               if (disabled || needLabelDrag !== true) return
@@ -86,12 +86,12 @@ export const CompositeInput = memo(
         //   // console.log('thisType: ', thisType)
         // }
         return (
-          <Flex className=':uno: lay-h translate-y-0.5'>
+          <Flex className='lay-h translate-y-0.5'>
             <RCInput
               type={thisType}
               disabled={disabled}
               value={thisValue.value}
-              className=':uno: wh-100%-14 px-4 outline-none border-none text-12 text-align-center bg-transparent'
+              className='wh-100%-14 px-4 outline-none border-none text-12 text-align-center bg-transparent'
               onFocus={(e) => {
                 active.dispatch(true)
                 onFocus?.(e)
@@ -115,7 +115,7 @@ export const CompositeInput = memo(
         const ref = useRef<HTMLDivElement>(null)
         useDownUpTracker(() => ref.current, beforeOperate, afterOperate)
         return (
-          <Flex className=':uno: lay-v wh-16-100% shrink-0' ref={ref} vshow={hover.value}>
+          <Flex className='lay-v wh-16-100% shrink-0' ref={ref} vshow={hover.value}>
             <Flex
               className='lay-c'
               onMouseDown={() => emitNewValue((numberValue() + step).toString())}>
@@ -136,7 +136,7 @@ export const CompositeInput = memo(
 
       return (
         <Flex
-          className={cx(':uno: lay-h wh-92-28-2 box-border select-none pl-4', className)}
+          className={cx('lay-h wh-92-28 r-2 box-border select-none pl-4', className)}
           ref={ref}
           onHover={hover.dispatch}>
           <DragLabelComp />

@@ -10,9 +10,7 @@ export const Flex = forwardRef<HTMLDivElement, IFlexProps>(
     return (
       <div
         ref={ref}
-        className={`${':uno: shrink-1'} ${className || ''} ${
-          vshow ? ':uno: flex' : ':uno: hidden'
-        }`}
+        className={`${'shrink-1'} ${className || ''} ${vshow ? 'flex' : 'hidden'}`}
         onMouseEnter={(e) => {
           onHover?.(true)
           onMouseEnter?.(e)

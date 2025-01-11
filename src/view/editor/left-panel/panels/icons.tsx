@@ -32,7 +32,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
             return (
               <Flex
                 key={category}
-                className='lay-h wh-fit-fit-5 bg-[#F5F5F5] p-6 my-10 normalFont'
+                className='lay-h wh-fit r-5 bg-[#F5F5F5] p-6 my-10 normalFont'
                 style={{ ...selectCss }}
                 onClick={() => curCategory.dispatch(category)}>
                 {category}
@@ -80,7 +80,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
         return (
           <Flex
             draggable
-            className={'lay-c wh-48-48-5 d-hover-bg pointer'}
+            className={'lay-c wh-48 r-5 d-hover-bg pointer'}
             onDragStart={onDragStart}>
             <Flex className='lay-c' dangerouslySetInnerHTML={{ __html: svgStr }} />
           </Flex>

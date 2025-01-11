@@ -25,7 +25,7 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
     return (
       <Flex
         id='menu'
-        className='lay-h wh-100%-30-2 pointer normalFont px-8 hover:(bg-hslb93)'
+        className='lay-h wh-100%-30 r-2 pointer normalFont px-8 hover:(bg-hsl93)'
         onMouseDown={stopPropagation(() => void item.callback() || closeMenu())}>
         <Flex>{item.name}</Flex>
         <Flex className='ml-auto'>{item.shortcut}</Flex>
@@ -96,7 +96,7 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
           StageCreate.currentType.dispatch(type)
           closeMenu()
         }}>
-        <Icon size={16} className={isActive ? 'path-fill-hslb60' : ''}>
+        <Icon size={16} className={isActive ? 'path-fill-hsl60' : ''}>
           {Asset.editor.node[type as keyof typeof Asset.editor.node]}
         </Icon>
       </Button>
@@ -107,7 +107,7 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
     <Flex
       ref={setRef}
       vshow={menuOptions.value.length > 0}
-      className='lay-v w-200-fit-2 rounded-3 bg-white p-6 fixed z-999 shadow-4-0-rgba(0,0,0,0.15)'
+      className='lay-v wh-200-fit r-2 bg-white p-6 fixed z-999 shadow-0-0-4-0-hsl0/15'
       style={{ left: xy.value.x + 5, top: xy.value.y + 5 }}>
       {menuShowTopTab && showTopTab && (
         <>
