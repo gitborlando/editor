@@ -1,5 +1,5 @@
 import { Schema } from 'src/editor/schema/schema'
-import { ID, INode, INodeParent, IPage, ISchemaItem } from 'src/editor/schema/type'
+import { ID, IFrame, INode, INodeParent, IPage, ISchemaItem } from 'src/editor/schema/type'
 
 export type ITraverseData = {
   id: ID
@@ -37,9 +37,18 @@ export class SchemaUtil {
     const childIds = (typeof id !== 'string' ? id : Schema.find<INodeParent>(id))?.childIds || []
     return childIds.map((id) => Schema.find<INode>(id))
   }
-  static findAncestor(node: INode) {
+  static findAncestor(id: ID | INode, utilFunc?: (node: INode) => boolean) {
+    let node = typeof id === 'string' ? Schema.find<INode>(id) : id
+    utilFunc ||= (node: INode) => SchemaUtil.isPageById(node.parentId)
     while (node.parentId) {
-      if (SchemaUtil.isPageById(node.parentId)) return node
+      if (utilFunc(node)) return node
+      node = Schema.find<INode>(node.parentId)
+    }
+    return node
+  }
+  static findParent(node: INode) {
+    while (node.parentId) {
+      if (SchemaUtil.is<IFrame>(node, 'frame')) return node
       node = Schema.find<INode>(node.parentId)
     }
     return node
