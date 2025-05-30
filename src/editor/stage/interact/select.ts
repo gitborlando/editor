@@ -6,7 +6,7 @@ import { AABB, OBB } from 'src/editor/math/obb'
 import { OperateNode, getSelectIds } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { Schema } from 'src/editor/schema/schema'
-import { ID } from 'src/editor/schema/type'
+import { ID, IFrame, INode } from 'src/editor/schema/type'
 import { ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
@@ -54,24 +54,44 @@ class StageSelectService {
   private onClick(e: Event) {}
 
   private onDoubleClick(e: Event) {
-    this.onEditText()
-    this.onEditVector()
+    if (!this.hoverId) return
+
+    const hoverSelected = OperateNode.selectIds.value.has(this.hoverId)
+    const hoverNode = Schema.find(this.hoverId)
+
+    if (hoverSelected) {
+      if (hoverNode.type === 'text') {
+        this.onEditText(hoverNode)
+      }
+      if (SchemaUtil.is<IFrame>(hoverNode, 'frame')) {
+        this.onEditVector(hoverNode)
+      }
+    } else if (OperateNode.selectIds.value.size === 1) {
+      const ancestor = SchemaUtil.findAncestor(
+        this.hoverId,
+        (node) => node.parentId === firstOne(OperateNode.selectIds.value)
+      )
+      this.onSelect(ancestor.id)
+    }
   }
 
-  private onEditText() {
-    const hoverNode = Schema.find(this.hoverId)
-    if (hoverNode?.type !== 'text') return
+  private onEditText(hoverNode: INode) {
     OperateText.intoEditing.dispatch(hoverNode.id)
   }
 
-  private onEditVector() {
+  private onEditVector(hoverNode: INode) {
     if (OperateNode.intoEditNodeId.value) {
       OperateNode.intoEditNodeId.dispatch('')
       OperateNode.clearSelect()
       return
     }
-    const hoverNode = Schema.find(this.hoverId)
     hoverNode && OperateNode.intoEditNodeId.dispatch(hoverNode.id)
+  }
+
+  private onDeepSelect() {
+    const hoverNode = Schema.find(this.hoverId)
+    if (hoverNode?.type !== 'text') return
+    OperateText.intoEditing.dispatch(hoverNode.id)
   }
 
   private onLeftMouseDown(e: ElemMouseEvent) {
@@ -132,14 +152,18 @@ class StageSelectService {
   }
 
   private onMousedownSelect() {
-    if (OperateNode.selectIds.value.has(this.hoverId)) return
-    if (SchemaUtil.isPageFrame(this.hoverId)) return
+    this.onSelect(this.hoverId)
+    this.afterSelect.dispatch('stage-single')
+  }
+
+  private onSelect(id: ID) {
+    if (OperateNode.selectIds.value.has(id)) return
+    if (SchemaUtil.isPageFrame(id)) return
     this.clearSelect()
-    OperateNode.select(this.hoverId)
+    OperateNode.select(id)
     if (equal([...OperateNode.selectIds.value], this.lastSelectIds)) return
     OperateNode.commitFinalSelect()
-    UILeftPanelLayer.expandAncestor(this.hoverId)
-    this.afterSelect.dispatch('stage-single')
+    UILeftPanelLayer.expandAncestor(id)
   }
 
   private onMarqueeSelect() {
