@@ -72,7 +72,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
 
         const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
           e.dataTransfer.setData(
-            'text/plain',
+            'editor-drop/svg',
             JSON.stringify({ event: 'dropSvg', data: { svgStr, name } })
           )
         }
