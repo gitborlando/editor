@@ -1,7 +1,10 @@
+import axios from 'axios'
 import autobind from 'class-autobind-decorator'
+import { fileTypeFromBuffer } from 'file-type'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
+import { API } from 'src/global/http/api'
 import { Uploader } from 'src/global/upload'
 import { IClientXY, preventDefault } from 'src/shared/utils/event'
 import { ImgManager } from '../editor/img-manager'
@@ -17,7 +20,6 @@ import { StageViewport } from './viewport'
 @autobind
 export class StageDropService {
   private sceneXY = xy_(0, 0)
-  private files: File[] = []
   private containerNode!: INodeParent
   private node!: INode
 
@@ -29,17 +31,32 @@ export class StageDropService {
   private async onDrop(e: DragEvent) {
     this.sceneXY = StageViewport.toSceneXY(xy_client(e))
     this.getContainerNode(e)
-    await this.onDropData(e)
-    await this.onDropFile(e)
+    await this.handleDrop(e)
     StageSelect.onCreateSelect(this.node.id)
     Schema.finalOperation('drop 导入文件')
   }
 
-  private async onDropData(e: DragEvent) {
-    const transferData = e.dataTransfer?.getData('text/plain')
-    if (!transferData) return
+  private async handleDrop(e: DragEvent) {
+    const dataTransfer = e.dataTransfer
+    if (!dataTransfer) return
 
-    const { event, data } = JSON.parse(transferData)
+    endDrop: for (const type of dataTransfer.types) {
+      switch (type) {
+        case 'Files':
+          await this.onDropFiles(e, [...dataTransfer.files])
+          break endDrop
+        case 'text/plain':
+          console.log('text/plain\n', dataTransfer.getData('text/plain'))
+          break
+        case 'editor-drop/svg':
+          console.log('editor-drop/svg\n', dataTransfer.getData('editor-drop/svg'))
+          break
+      }
+    }
+  }
+
+  private async onEditorDrop(e: DragEvent, dropData: string) {
+    const { event, data } = JSON.parse(dropData)
     switch (event) {
       case 'dropSvg':
         this.dropSvg(data.svgStr, data.name)
@@ -51,23 +68,45 @@ export class StageDropService {
     }
   }
 
-  private async onDropFile(e: DragEvent) {
-    this.files = Array.from(e.dataTransfer?.files || [])
+  private async onDropUrl(url: string) {
+    const res = await axios.post('http://127.0.0.1:3000/upload/url', { url })
+    await this.dropImage(res.data.url)
+  }
 
-    for (const file of this.files) {
-      switch (file.type) {
-        case 'image/svg+xml':
-          const svg = await Uploader.readAsText(file)
-          this.dropSvg(svg, file.name)
-          break
+  private async onDropFiles(e: DragEvent, files: File[]) {
+    for (const file of files) {
+      await this.onDropFile(e, file)
+    }
+  }
 
-        case 'image/jpeg':
-        case 'image/png':
-        case 'image/jpg':
-          const imageDataUrl = await Uploader.readAsDataUrl(file)
-          await this.dropImage(imageDataUrl)
-          break
-      }
+  private async onDropFile(e: DragEvent, file: File) {
+    const typeBuffer = await file.slice(0, 410).arrayBuffer()
+    const fileType = await fileTypeFromBuffer(typeBuffer)
+
+    switch (fileType?.mime || file.type) {
+      case 'image/svg+xml':
+        const svg = await Uploader.readAsText(file)
+        this.dropSvg(svg, file.name)
+        break
+
+      case 'image/jpeg':
+      case 'image/png':
+      case 'image/jpg':
+      case 'image/gif':
+      case 'image/webp':
+        const { signedUploadUrl, url } = await API.upload.static.getSignedUrl({
+          ext: fileType!.ext,
+          mineType: fileType!.mime,
+        })
+        await API.upload.static.useSignedUrl(signedUploadUrl, file, {
+          onUploadProgress: (progress) => {
+            console.log('progress: ', progress)
+          },
+          contentType: fileType!.mime,
+          cacheControl: 'immutable',
+        })
+        await this.dropImage(url)
+        break
     }
   }
 

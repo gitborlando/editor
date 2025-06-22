@@ -9,8 +9,6 @@ export type IImage = {
   image: HTMLImageElement
 }
 
-const prefix = 'local:editor-image/'
-
 @autobind
 class ImgService {
   private imageCache = createObjCache<IImage>()
@@ -34,20 +32,12 @@ class ImgService {
         resolve(base64String as string)
       }
     })
-    // const url = prefix + nanoid()
-    // this.imageStore.set(url, await file.arrayBuffer())
-    // return url
   }
 
   private async loadImage(url: string) {
     const image = <IImage>{}
     const htmlImage = new Image()
-    // if (url.startsWith(prefix)) {
-    //   image.arrayBuffer = await this.imageStore.get(url)
-    // } else {
-    //   image.arrayBuffer = await (await fetch(url)).arrayBuffer()
-    // }
-    // image.objectUrl = URL.createObjectURL(new Blob([image.arrayBuffer]))
+    htmlImage.crossOrigin = 'anonymous'
     image.objectUrl = url
     await new Promise<void>((resolve) => {
       image.image = htmlImage
