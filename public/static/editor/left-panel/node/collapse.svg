@@ -1,0 +1,9 @@
+<svg xmlns='http://www.w3.org/2000/svg' width=5.4 height=9 fill='none'>
+    <path
+      fill-rule='evenodd'
+      d='m0 9 5.4-4.5L0 0z'
+      style={
+        fill: #949494,
+      }
+    />
+  </svg>

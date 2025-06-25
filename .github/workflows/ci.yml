@@ -1,79 +1,43 @@
-# Sample workflow for building and deploying a Vite-powered app to GitHub Pages
-
-name: Deploy Vite-powered app to Pages
+name: Build and Deploy Frontend with Backup
 
 on:
   push:
     branches:
-      - 'main'
-    paths-ignore:
-      - '**/*.md'
-      - 'LICENSE'
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: 'pages'
-  cancel-in-progress: false
+      - main
 
 jobs:
-  # Build job
-  build:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v3
 
-      # - name: Install pnpm
-      #   uses: pnpm/action-setup@v2
-      #   with:
-      #     version: 8
-
-      - name: Setup node
+      - name: ⚙️ Setup Node + pnpm
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          # cache: pnpm
+          node-version: 18
 
-      # - name: Install dependencies
-      #   run: pnpm install
-
-      # - name: Build with Vite
-      #   run: pnpm build
-
-      - name: Run scripts
-        run: |
-          npm i --legacy-peer-deps
-          npm run build
-
-      - name: Configure pages
-        uses: actions/configure-pages@v3
-
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v2
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v2
         with:
-          path: ./dist
+          version: 8
 
-  # Deploy job
-  deploy:
-    # Add a dependency to the build job
-    needs: build
+      - name: 📥 Install dependencies
+        run: pnpm install
 
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      pages: write # to deploy to Pages
-      id-token: write # to verify the deployment originates from an appropriate source
+      - name: 🏗️ Build project
+        run: pnpm run build
 
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      - name: 🧠 Generate backup name
+        id: vars
+        run: |
+          echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
 
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
+      - name: 📤 Deploy via FTP
+        run: npx esno scripts/ftp.ts
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
