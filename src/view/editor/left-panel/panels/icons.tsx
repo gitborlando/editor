@@ -7,7 +7,6 @@ import { hslBlueColor } from 'src/shared/utils/color'
 import { publicPath } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
 import { Flex } from 'src/view/ui-utility/widget/flex'
-import iconList from '../../../../../public/icons/list.json'
 
 type IIconsComp = {}
 
@@ -44,6 +43,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
     })
 
     const SvgListComp = useMemoComp([], ({}) => {
+      const iconList = {} as any
       const svgSource = iconList[curCategory.value as keyof typeof iconList]
       const length = useAutoSignal(categoryLengthCache.get(curCategory.value))
       const icons = Object.entries<any>(svgSource).slice(0, length.value)

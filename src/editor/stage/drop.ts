@@ -4,7 +4,7 @@ import { fileTypeFromBuffer } from 'file-type'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
-import { API } from 'src/global/http/api'
+import { api } from 'src/global/api'
 import { Uploader } from 'src/global/upload'
 import { IClientXY, preventDefault } from 'src/shared/utils/event'
 import { ImgManager } from '../editor/img-manager'
@@ -69,8 +69,8 @@ export class StageDropService {
   }
 
   private async onDropUrl(url: string) {
-    const res = await axios.post('http://127.0.0.1:3000/upload/url', { url })
-    await this.dropImage(res.data.url)
+    const ossUrl = await api.upload.uploadControllerUploadByUrl({ url })
+    await this.dropImage(ossUrl)
   }
 
   private async onDropFiles(e: DragEvent, files: File[]) {
@@ -94,16 +94,17 @@ export class StageDropService {
       case 'image/jpg':
       case 'image/gif':
       case 'image/webp':
-        const { signedUploadUrl, url } = await API.upload.static.getSignedUrl({
+        const { signedUploadUrl, url } = await api.upload.uploadControllerGetSignedUrl({
           ext: fileType!.ext,
-          mineType: fileType!.mime,
         })
-        await API.upload.static.useSignedUrl(signedUploadUrl, file, {
+        await axios.put(signedUploadUrl, file, {
           onUploadProgress: (progress) => {
             console.log('progress: ', progress)
           },
-          contentType: fileType!.mime,
-          cacheControl: 'immutable',
+          headers: {
+            'Content-Type': fileType!.mime,
+            'Cache-Control': 'immutable',
+          },
         })
         await this.dropImage(url)
         break
