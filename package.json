@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx vite",
+    "dev": "npx vite && node scripts/gen-assets.js watch",
     "build": "npx vite build",
     "preview": "npx vite preview",
     "prepare": "husky install",
