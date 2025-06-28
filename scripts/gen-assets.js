@@ -3,7 +3,7 @@ import path from 'path'
 
 // 源目录和目标文件
 const sourceDir = 'public/static'
-const outputFile = 'src/view/assets.ts'
+const outputFile = 'src/view/static.ts'
 
 // 递归获取所有文件
 function getAllFiles(dir, files = []) {
@@ -102,7 +102,7 @@ function generateAssetsFile() {
 
   // 生成 TypeScript 代码
   const tsCode = `// 自动生成的静态资源路径常量
-export const Assets = {
+export const Static = {
 ${generateTypeScriptCode(assetsObject)}
 } as const;
 `

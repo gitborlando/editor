@@ -1,5 +1,5 @@
 // 自动生成的静态资源路径常量
-export const Assets = {
+export const Static = {
   editor: {
     cursor: {
       resize: '/static/editor/cursor/resize.svg',
