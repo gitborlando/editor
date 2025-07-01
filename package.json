@@ -7,7 +7,6 @@
     "dev": "npx vite && node scripts/gen-assets.js watch",
     "build": "npx vite build",
     "preview": "npx vite preview",
-    "prepare": "husky install",
     "reinstall": "rm -rf node_modules && pnpm install",
     "gen:api": "sh scripts/swagger.sh"
   },
@@ -57,7 +56,6 @@
     "camelcase": "^8.0.0",
     "depcheck": "^1.4.7",
     "esno": "^4.8.0",
-    "husky": "^9.0.11",
     "node-ssh": "^13.2.1",
     "pretty-quick": "^4.0.0",
     "swagger-typescript-api": "13.1.3",
