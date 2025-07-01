@@ -27,6 +27,13 @@ export default defineConfig(() => {
         src: path.resolve(__dirname, 'src'),
       },
     },
+    css: {
+      preprocessorOptions: {
+        less: {
+          additionalData: `@import "${path.resolve(__dirname, 'src/view/index.less')}";`,
+        },
+      },
+    },
     build: {
       commonjsOptions: {
         transformMixedEsModules: true,

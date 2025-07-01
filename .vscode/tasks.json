@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "生成组件",
+      "type": "shell",
+      "command": "node",
+      "args": ["scripts/gen-component.js", "${input:componentName}"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "componentName",
+      "description": "输入组件名称 (例如: UserCard, NavigationBar)",
+      "default": "MyComponent",
+      "type": "promptString"
+    }
+  ]
+}

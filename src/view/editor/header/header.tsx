@@ -11,6 +11,8 @@ import { Button } from 'src/view/ui-utility/widget/button'
 import { Divide } from 'src/view/ui-utility/widget/divide'
 import { Flex } from 'src/view/ui-utility/widget/flex'
 import { Icon } from 'src/view/ui-utility/widget/icon'
+import { Icon as ColorIcon } from 'src/view/component/icon/icon'
+import cx from 'classix'
 
 type IHeaderComp = {}
 
@@ -21,7 +23,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     return (
       <Flex className='lay-h ml-10 gap-8-8'>
         <Flex className='lay-h'>
-          <Icon size={28}>{Assets.favIcon.shiyangyang}</Icon>
+          <img src={Assets.favIcon.shiyangyang} className='wh-28' />
           <h4 className='text-hsl60 text-16 ml-10'>Young 编辑器</h4>
         </Flex>
       </Flex>
@@ -33,14 +35,16 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     return (
       <>
         <Button disabled={!SchemaHistory.canUndo} onClick={SchemaHistory.undo}>
-          <Icon size={20} className={SchemaHistory.canUndo ? '' : 'path-fill-#E6E6E6'}>
-            {Asset.editor.header.record.undo}
-          </Icon>
+          <ColorIcon
+            url={Assets.editor.header.record.undo}
+            className={cx('wh-20', !SchemaHistory.canUndo && 'text-#E6E6E6')}
+          />
         </Button>
         <Button disabled={!SchemaHistory.canRedo} onClick={SchemaHistory.redo}>
-          <Icon size={20} className={SchemaHistory.canRedo ? '' : 'path-fill-#E6E6E6'}>
-            {Asset.editor.header.record.redo}
-          </Icon>
+          <ColorIcon
+            url={Assets.editor.header.record.redo}
+            className={cx('wh-20', !SchemaHistory.canRedo && 'text-#E6E6E6')}
+          />
         </Button>
       </>
     )
