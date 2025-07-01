@@ -2,8 +2,8 @@ import fs from 'fs'
 import path from 'path'
 
 // 源目录和目标文件
-const sourceDir = 'public/static'
-const outputFile = 'src/view/static.ts'
+const sourceDir = 'src/view/assets'
+const outputFile = 'src/view/assets/assets.ts'
 
 // 递归获取所有文件
 function getAllFiles(dir, files = []) {
@@ -34,19 +34,36 @@ function pathToObject(filePath) {
   // 转换为驼峰命名
   const camelCase = nameWithoutExt.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase())
 
-  // 构建路径
-  const webPath = '/static/' + relativePath.replace(/\\/g, '/')
+  // 生成包含路径信息的导入变量名
+  const pathParts = [...parts.slice(0, -1), nameWithoutExt]
+  const fullPathCamelCase = pathParts
+    .join('-')
+    .replace(/-([a-z])/g, (match, letter) => letter.toUpperCase())
+  const importVarName = fullPathCamelCase
 
-  return { parts: parts.slice(0, -1), key: camelCase, value: webPath }
+  // 构建相对导入路径
+  const importPath = './' + relativePath.replace(/\\/g, '/')
+
+  return {
+    parts: parts.slice(0, -1),
+    key: camelCase,
+    importVarName,
+    importPath,
+    originalPath: filePath,
+  }
 }
 
 // 构建嵌套对象
 function buildNestedObject(files) {
   const result = {}
+  const imports = []
 
   for (const file of files) {
-    const { parts, key, value } = pathToObject(file)
+    const { parts, key, importVarName, importPath } = pathToObject(file)
     let current = result
+
+    // 添加import语句
+    imports.push({ importVarName, importPath })
 
     for (const part of parts) {
       // 转换为驼峰命名
@@ -58,10 +75,11 @@ function buildNestedObject(files) {
       current = current[camelPart]
     }
 
-    current[key] = value
+    // 使用导入的变量名而不是字符串路径
+    current[key] = importVarName
   }
 
-  return result
+  return { result, imports }
 }
 
 // 生成 TypeScript 代码
@@ -71,7 +89,8 @@ function generateTypeScriptCode(obj, indent = 2) {
 
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
-      code += `${spaces}${key}: '${value}',\n`
+      // 这里是导入的变量名，不加引号
+      code += `${spaces}${key}: ${value},\n`
     } else {
       code += `${spaces}${key}: {\n`
       code += generateTypeScriptCode(value, indent + 2)
@@ -80,6 +99,13 @@ function generateTypeScriptCode(obj, indent = 2) {
   }
 
   return code
+}
+
+// 生成导入语句
+function generateImportStatements(imports) {
+  return imports
+    .map(({ importVarName, importPath }) => `import ${importVarName} from '${importPath}';`)
+    .join('\n')
 }
 
 // 确保目录存在
@@ -93,16 +119,28 @@ function ensureDir(dirPath) {
 function generateAssetsFile() {
   console.log('开始生成资源路径常量...')
 
-  // 获取所有文件
-  const allFiles = getAllFiles(sourceDir)
+  // 获取所有文件（排除当前要生成的文件）
+  const allFiles = getAllFiles(sourceDir).filter(
+    (file) => path.resolve(file) !== path.resolve(outputFile)
+  )
   console.log(`找到 ${allFiles.length} 个文件`)
 
-  // 构建对象结构
-  const assetsObject = buildNestedObject(allFiles)
+  if (allFiles.length === 0) {
+    console.log('没有找到资源文件')
+    return
+  }
+
+  // 构建对象结构和导入语句
+  const { result: assetsObject, imports } = buildNestedObject(allFiles)
+
+  // 生成导入语句
+  const importStatements = generateImportStatements(imports)
 
   // 生成 TypeScript 代码
   const tsCode = `// 自动生成的静态资源路径常量
-export const Static = {
+${importStatements}
+
+export const Assets = {
 ${generateTypeScriptCode(assetsObject)}
 } as const;
 `
