@@ -38,9 +38,6 @@
   },
   "devDependencies": {
     "@gitborlando/uno-preset": "^1.0.2",
-    "@svgr/core": "^8.1.0",
-    "@svgr/plugin-jsx": "^8.1.0",
-    "@svgr/plugin-prettier": "^8.1.0",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^20.12.12",
     "@types/react": "^18.3.2",
@@ -63,5 +60,14 @@
     "unocss": "^0.60.2",
     "vite": "^5.2.11",
     "vite-plugin-react-click-to-component": "^3.0.0"
-  }
+  },
+  "prettier": {
+  "printWidth": 100,
+  "jsxBracketSameLine": true,
+  "useTabs": false,
+  "tabWidth": 2,
+  "semi": false,
+  "singleQuote": true,
+  "jsxSingleQuote": true
+}
 }
