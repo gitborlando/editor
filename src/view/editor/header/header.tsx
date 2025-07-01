@@ -4,8 +4,8 @@ import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
-import { publicPath } from 'src/shared/utils/normal'
 import { useMemoComp } from 'src/shared/utils/react'
+import { Assets } from 'src/view/assets/assets'
 import Asset from 'src/view/ui-utility/assets'
 import { Button } from 'src/view/ui-utility/widget/button'
 import { Divide } from 'src/view/ui-utility/widget/divide'
@@ -21,7 +21,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     return (
       <Flex className='lay-h ml-10 gap-8-8'>
         <Flex className='lay-h'>
-          <Icon size={28}>{publicPath('fav-icon/shiyangyang.png')}</Icon>
+          <Icon size={28}>{Assets.favIcon.shiyangyang}</Icon>
           <h4 className='text-hsl60 text-16 ml-10'>Young 编辑器</h4>
         </Flex>
       </Flex>
@@ -84,7 +84,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
       className='lay-h w-100% borderBottom relative bg-white'
       style={{ height: StageViewport.bound.value.y }}>
       <FavIconComp />
-      <Flex className='lay-c abs-0-0 right-0 bottom-0 m-auto'>
+      <Flex className='lay-c w-fit m-auto'>
         <RecordIcons />
         <Divide length={16} thickness={0.5} />
         {(['select', 'move'] as const).map((type) => (
