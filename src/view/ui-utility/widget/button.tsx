@@ -1,4 +1,3 @@
-import clsx from 'clsx'
 import { ComponentPropsWithRef, forwardRef } from 'react'
 import { cx, iife } from 'src/shared/utils/normal'
 import { Flex } from 'src/view/ui-utility/widget/flex'
@@ -11,7 +10,7 @@ export type IButtonProps = ComponentPropsWithRef<'div'> & {
 
 export const Button = forwardRef<HTMLDivElement, IButtonProps>(
   ({ type = 'normal', active = false, disabled = false, className, children, ...rest }, ref) => {
-    const baseCss = clsx(
+    const baseCss = cx(
       'lay-c',
       iife(() => {
         if (disabled) return ''
@@ -19,12 +18,12 @@ export const Button = forwardRef<HTMLDivElement, IButtonProps>(
       })
     )
 
-    const normalCss = clsx(
+    const normalCss = cx(
       'wh-fit r-4 p-6 mx-2 text-11 text-[#626262]',
       disabled ? '' : active ? 'text-hsl65 bg-hsl95' : 'd-hover-bg'
     )
 
-    const textCss = clsx(
+    const textCss = cx(
       'text-hsl50',
       iife(() => {
         if (disabled) return ''
@@ -32,7 +31,7 @@ export const Button = forwardRef<HTMLDivElement, IButtonProps>(
       })
     )
 
-    const iconCss = clsx(
+    const iconCss = cx(
       'wh-fit r-4 p-4 mx-2',
       iife(() => {
         if (disabled) return ''
@@ -41,7 +40,7 @@ export const Button = forwardRef<HTMLDivElement, IButtonProps>(
       })
     )
 
-    const finalCss = clsx(
+    const finalCss = cx(
       baseCss,
       type === 'text' && textCss,
       type === 'icon' && iconCss,

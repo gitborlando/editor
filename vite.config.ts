@@ -30,7 +30,7 @@ export default defineConfig(() => {
     css: {
       preprocessorOptions: {
         less: {
-          additionalData: `@import "${path.resolve(__dirname, 'src/view/index.less')}";`,
+          additionalData: `@import 'src/view/component/styles/variable.less';`,
         },
       },
     },
