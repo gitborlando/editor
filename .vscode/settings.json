@@ -2,7 +2,7 @@
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "editor.codeActionsOnSave": {
-    "source.organizeImports": "never"
+    "source.organizeImports": "explicit"
   },
   "cSpell.words": [
     "aabb",

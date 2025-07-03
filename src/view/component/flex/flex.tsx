@@ -1,29 +1,58 @@
-import { ComponentPropsWithRef, FC, forwardRef } from 'react'
+import { forwardRef } from 'react'
+import { FlexProps } from 'src/view/component/flex/flex-props'
+import { useClassNames } from 'src/view/hooks/use-class-names'
 import './flex.less'
-import cx from 'classix'
 
-export interface FlexProps extends ComponentPropsWithRef<'div'> {
-  vshow?: boolean
-  onHover?: (isHover: boolean) => void
-}
-
-export const Flex = forwardRef<HTMLDivElement, FlexProps>(
-  ({ vshow = true, className, onHover, onMouseEnter, onMouseLeave, ...rest }, ref) => {
+const FlexContent = forwardRef<HTMLDivElement, FlexProps>(
+  (
+    {
+      vshow = true,
+      as: As = 'div',
+      layout = '',
+      block,
+      gap,
+      className = '',
+      onHover,
+      onMouseEnter,
+      onMouseLeave,
+      children,
+      ...rest
+    },
+    ref,
+  ) => {
+    const classNames = useClassNames(className, 'flex', {
+      hidden: !vshow,
+      [layout]: !!layout,
+      [`block-${block}`]: !!block,
+      [`gap-${gap}`]: !!gap && gap % 2 === 0,
+    })
     return (
-      <div
+      <As
         ref={ref}
-        className={cx(vshow ? 'flex' : '__hidden', className)}
-        onMouseEnter={(e) => {
+        className={classNames}
+        onMouseEnter={(e: any) => {
           onHover?.(true)
           onMouseEnter?.(e)
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={(e: any) => {
           onHover?.(false)
           onMouseLeave?.(e)
         }}
-        {...rest}></div>
+        {...rest}>
+        {children}
+      </As>
     )
-  }
+  },
+)
+
+export const Flex = forwardRef<HTMLDivElement, FlexProps>(
+  ({ vif = true, children, ...rest }, ref) => {
+    return Boolean(vif) ? (
+      <FlexContent {...rest} ref={ref}>
+        {children}
+      </FlexContent>
+    ) : null
+  },
 )
 
 Flex.displayName = 'Flex'
