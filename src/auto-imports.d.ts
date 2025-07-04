@@ -12,6 +12,7 @@ declare global {
   const autorun: typeof import('mobx')['autorun']
   const computed: typeof import('mobx')['computed']
   const createRef: typeof import('react')['createRef']
+  const createSignal: typeof import('src/shared/signal/signal')['createSignal']
   const extendObservable: typeof import('mobx')['extendObservable']
   const flow: typeof import('mobx')['flow']
   const flowResult: typeof import('mobx')['flowResult']

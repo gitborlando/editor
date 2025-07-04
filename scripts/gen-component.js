@@ -43,24 +43,28 @@ try {
   process.exit(1)
 }
 
-// TSX 文件模板
-const tsxTemplate = `import { FC } from 'react'
-import { clsx } from 'clsx'
-import './${kebabCaseName}.less'
-
-export interface ${componentName}Props {
+// props 文件模板
+const propsTemplate = `export interface ${componentName}Props {
   className?: string
   children?: React.ReactNode
 }
+`
+
+// TSX 文件模板
+const tsxTemplate = `import { FC } from 'react'
+import { useClassNames } from 'src/view/hooks/use-class-names'
+import { ${componentName}Props } from './${kebabCaseName}-props'
+import './${kebabCaseName}.less'
 
 export const ${componentName}: FC<${componentName}Props> = ({ 
   className, 
   children,
   ...props 
 }) => {
+  const classNames = useClassNames(className, '${kebabCaseName}', {})
   return (
     <div 
-      className={clsx('${kebabCaseName}', className)}
+      className={classNames}
       {...props}
     >
       {children}
@@ -94,6 +98,16 @@ try {
   console.log(`🎨 创建文件: ${lessPath}`)
 } catch (error) {
   console.error('❌ 创建 LESS 文件失败:', error.message)
+  process.exit(1)
+}
+
+// 创建 props 文件
+const propsPath = join(componentDir, `${kebabCaseName}-props.ts`)
+try {
+  writeFileSync(propsPath, propsTemplate, 'utf8')
+  console.log(`📄 创建文件: ${propsPath}`)
+} catch (error) {
+  console.error('❌ 创建 props 文件失败:', error.message)
   process.exit(1)
 }
 

@@ -1,9 +1,9 @@
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import unocss from 'unocss/vite'
+import autoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import { reactClickToComponent } from 'vite-plugin-react-click-to-component'
-import autoImport from 'unplugin-auto-import/vite'
 
 const autoImportConfig = autoImport({
   imports: [
@@ -13,6 +13,7 @@ const autoImportConfig = autoImport({
     'mobx-react-lite',
     {
       'src/view/assets/assets': ['Assets'],
+      'src/shared/signal/signal': ['createSignal'],
     },
   ],
   dts: 'src/auto-imports.d.ts',

@@ -12,6 +12,7 @@
     "gen:component": "node scripts/gen-component.js"
   },
   "dependencies": {
+    "@palettebro/generator": "^2.0.5",
     "axios": "1.10.0",
     "class-autobind-decorator": "^3.0.1",
     "classix": "^2.2.2",
@@ -55,8 +56,8 @@
     "camelcase": "^8.0.0",
     "depcheck": "^1.4.7",
     "esno": "^4.8.0",
-    "less": "^4.3.0",
     "husky": "^9.1.7",
+    "less": "^4.3.0",
     "node-ssh": "^13.2.1",
     "pretty-quick": "^4.0.0",
     "swagger-typescript-api": "13.1.3",
