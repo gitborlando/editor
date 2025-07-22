@@ -1,9 +1,9 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, ReactNode, memo } from 'react'
 import { OperateNode } from 'src/editor/operate/node'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMemoComp } from 'src/shared/utils/react'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IRulerComp = {}
 
@@ -57,18 +57,22 @@ export const RulerComp: FC<IRulerComp> = memo(({}) => {
 
   const HLabelComp = useMemoComp<{ x: number; text: number }>([], ({ x, text }) => {
     return (
-      <Flex className='lay-v wh-fit absolute -translate-x-50%' style={{ left: x, top: 0 }}>
-        <Flex className='lay-c wh-1-4 b-1-#9F9F9F'></Flex>
-        <Flex className='lay-c text-10 text-[#9F9F9F]'>{text}</Flex>
+      <Flex layout='v' className='wh-fit absolute -translate-x-50%' style={{ left: x, top: 0 }}>
+        <Flex layout='c' className='wh-1-4 b-1-#9F9F9F'></Flex>
+        <Flex layout='c' className='text-10 text-[#9F9F9F]'>
+          {text}
+        </Flex>
       </Flex>
     )
   })
 
   const VLabelComp = useMemoComp<{ y: number; text: number }>([], ({ y, text }) => {
     return (
-      <Flex className='lay-h wh-fit absolute -translate-y-50%' style={{ left: 0, top: y }}>
-        <Flex className='lay-c wh-4-1 b-1-#9F9F9F'></Flex>
-        <Flex className='lay-c wh-14-10 text-10 text-[#9F9F9F] -rotate-90'>{text}</Flex>
+      <Flex layout='h' className='wh-fit absolute -translate-y-50%' style={{ left: 0, top: y }}>
+        <Flex layout='c' className='wh-4-1 b-1-#9F9F9F'></Flex>
+        <Flex layout='c' className='wh-14-10 text-10 text-[#9F9F9F] -rotate-90'>
+          {text}
+        </Flex>
       </Flex>
     )
   })
@@ -77,9 +81,11 @@ export const RulerComp: FC<IRulerComp> = memo(({}) => {
     <Flex
       className='wh-100% absolute of-hidden pointer-events-none'
       style={{ width: bound.width, height: bound.height }}>
-      <Flex className='lay-h wh-100%-20 '>{drawHorizontal()}</Flex>
+      <Flex layout='h' className='wh-100%-20 '>
+        {drawHorizontal()}
+      </Flex>
       <Flex className='wh-20-100% absolute left-0 '>{drawVertical()}</Flex>
-      <Flex className='lay-c wh-20 absolute left-0 top-0 bg-[#F7F8FA]'></Flex>
+      <Flex layout='c' className='wh-20 absolute left-0 top-0 bg-[#F7F8FA]'></Flex>
     </Flex>
   )
 })

@@ -1,8 +1,8 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo, useState } from 'react'
 import { IFillLinearGradient } from 'src/editor/schema/type'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { makeLinearGradientCss } from 'src/shared/utils/color'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 import { PickerColorComp } from './color'
 
 type IPickerLinearGradientComp = {
@@ -15,7 +15,7 @@ export const PickerLinearGradientComp: FC<IPickerLinearGradientComp> = memo(({ f
 
   const StopsBar: FC<{}> = () => {
     return (
-      <Flex className='lay-h shrink-0 wh-200-20 r-99 relative'>
+      <Flex layout='h' className='shrink-0 wh-200-20 r-99 relative'>
         <Flex className='wh-200-10 r-99' style={{ background: makeLinearGradientCss(fill) }}></Flex>
         {fill.stops.map((stop, index) => (
           <Flex
@@ -34,7 +34,7 @@ export const PickerLinearGradientComp: FC<IPickerLinearGradientComp> = memo(({ f
   }
 
   return (
-    <Flex className='lay-v wh-240-fit bg-white'>
+    <Flex layout='v' className='wh-240-fit bg-white'>
       <StopsBar />
       <PickerColorComp
         color={fill.stops[stopIndex].color}

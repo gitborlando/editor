@@ -1,3 +1,4 @@
+import { Flex, Icon } from '@gitborlando/widget'
 import RCInput, { InputProps } from 'rc-input'
 import { ComponentPropsWithRef, forwardRef, memo, useRef } from 'react'
 import { Drag } from 'src/global/event/drag'
@@ -5,9 +6,6 @@ import { useAutoSignal } from 'src/shared/signal/signal-react'
 import { useDownUpTracker } from 'src/shared/utils/event'
 import { cx, noopFunc } from 'src/shared/utils/normal'
 import { useMemoComp } from 'src/shared/utils/react'
-import Asset from 'src/view/ui-utility/assets'
-import { Flex } from 'src/view/ui-utility/widget/flex'
-import { Icon } from './icon'
 
 export type ICompositeInput = ComponentPropsWithRef<'div'> &
   InputProps & {
@@ -54,7 +52,8 @@ export const CompositeInput = memo(
         if (!label) return
         return (
           <Flex
-            className={cx('label', 'lay-h w-36 shrink-0 text-11 text-gray mr-6')}
+            layout='h'
+            className={cx('label', 'w-36 shrink-0 text-11 text-gray mr-6')}
             style={{ ...(type === 'number' && { cursor: 'e-resize' }), flexShrink: 0 }}
             onMouseDown={() => {
               if (disabled || needLabelDrag !== true) return
@@ -86,7 +85,7 @@ export const CompositeInput = memo(
         //   // console.log('thisType: ', thisType)
         // }
         return (
-          <Flex className='lay-h translate-y-0.5'>
+          <Flex layout='h' className='translate-y-0.5'>
             <RCInput
               type={thisType}
               disabled={disabled}
@@ -115,20 +114,26 @@ export const CompositeInput = memo(
         const ref = useRef<HTMLDivElement>(null)
         useDownUpTracker(() => ref.current, beforeOperate, afterOperate)
         return (
-          <Flex className='lay-v wh-16-100% shrink-0' ref={ref} vshow={hover.value}>
+          <Flex layout='v' className='wh-16-100% shrink-0' ref={ref} vshow={hover.value}>
             <Flex
-              className='lay-c'
+              layout='c'
+              className=''
               onMouseDown={() => emitNewValue((numberValue() + step).toString())}>
-              <Icon size={7} scale={0.7}>
-                {Asset.editor.widget.numberInput.operateUp}
-              </Icon>
+              <Icon
+                className='wh-7'
+                style={{ scale: '0.7' }}
+                url={Assets.editor.widget.numberInput.operateUp}
+              />
             </Flex>
             <Flex
-              className='lay-c'
+              layout='c'
+              className=''
               onMouseDown={() => emitNewValue((numberValue() - step).toString())}>
-              <Icon size={7} scale={0.7} rotate={180}>
-                {Asset.editor.widget.numberInput.operateUp}
-              </Icon>
+              <Icon
+                className='wh-7'
+                style={{ scale: '0.7', rotate: '180deg' }}
+                url={Assets.editor.widget.numberInput.operateUp}
+              />
             </Flex>
           </Flex>
         )
@@ -136,7 +141,8 @@ export const CompositeInput = memo(
 
       return (
         <Flex
-          className={cx('lay-h wh-92-28 r-2 box-border select-none pl-4', className)}
+          layout='h'
+          className={cx('wh-92-28 r-2 box-border select-none pl-4', className)}
           ref={ref}
           onHover={hover.dispatch}>
           <DragLabelComp />

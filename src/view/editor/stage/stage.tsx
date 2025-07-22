@@ -1,8 +1,8 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import { Surface } from 'src/editor/stage/render/surface'
 import { FPSComp } from 'src/view/editor/stage/fps'
 import { RulerComp } from 'src/view/editor/stage/ruler'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 export const StageComp: FC<{}> = memo(({}) => {
   return (

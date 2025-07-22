@@ -1,9 +1,9 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import { max } from 'src/editor/math/base'
 import { Surface } from 'src/editor/stage/render/surface'
 import { Drag } from 'src/global/event/drag'
 import { useAutoSignal, useHookSignal, useSignal } from 'src/shared/signal/signal-react'
-import { Flex } from '../../../../../ui-utility/widget/flex'
 
 type IScrollComp = {
   contentHeight: number
@@ -23,7 +23,8 @@ export const ScrollComp: FC<IScrollComp> = memo(
 
     return (
       <Flex
-        className='lay-v absolute right-0 bottom-0 pointer hover:w-6'
+        layout='v'
+        className='absolute right-0 bottom-0 pointer hover:w-6'
         style={{ width: width.value, height: viewHeight }}>
         <Flex
           className='wh-100%-0 bg-[rgba(204,204,204,0.5)] absolute'

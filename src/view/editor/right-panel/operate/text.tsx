@@ -1,3 +1,4 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, useRef } from 'react'
 import { ITextStyleKey, OperateText } from 'src/editor/operate/text'
 import { Schema } from 'src/editor/schema/schema'
@@ -10,7 +11,6 @@ import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { DraggableComp } from 'src/view/component/draggable'
 import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import { Dropdown } from 'src/view/ui-utility/widget/dropdown'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 export const TextComp: FC<{}> = ({}) => {
   const { intoEditing, textStyle, textStyleOptions, setTextStyle, toggleTextStyle, afterOperate } =
@@ -25,8 +25,8 @@ export const TextComp: FC<{}> = ({}) => {
 
   const HeaderComp = useMemoComp([], ({}) => {
     return (
-      <Flex className='lay-h wh-100%-24 mb-8'>
-        <Flex className='lay-c labelFont ml-5'>
+      <Flex layout='h' className='wh-100%-24 mb-8'>
+        <Flex layout='c' className='labelFont ml-5'>
           <h4>文本</h4>
         </Flex>
       </Flex>
@@ -51,7 +51,7 @@ export const TextComp: FC<{}> = ({}) => {
           intoEditing.dispatch('')
           afterOperate.dispatch()
         }}>
-        <Flex className='lay-v wh-100%-200'>
+        <Flex layout='v' className='wh-100%-200'>
           <textarea
             className='wh-100%-200 font-size-14 p-4 resize-none outline-none border-none'
             value={textNode.content}
@@ -66,7 +66,7 @@ export const TextComp: FC<{}> = ({}) => {
     const inputRef = useRef<HTMLDivElement>(null)
     createDownUpTracker(() => inputRef.current, 'fontSize')
     return (
-      <Flex className='lay-h w-100% mb-4'>
+      <Flex layout='h' className='w-100% mb-4'>
         <CompositeInput
           className='mr-4'
           ref={inputRef}
@@ -90,7 +90,7 @@ export const TextComp: FC<{}> = ({}) => {
     [align, lineHeight, letterSpacing],
     ({}) => {
       return (
-        <Flex className='lay-h w-100%'>
+        <Flex layout='h' className='w-100%'>
           <Dropdown
             className='w-80'
             selected={align}
@@ -119,7 +119,7 @@ export const TextComp: FC<{}> = ({}) => {
   )
 
   return (
-    <Flex className='lay-v wh-100%-fit bg-white borderBottom p-8'>
+    <Flex layout='v' className='wh-100%-fit bg-white borderBottom p-8'>
       <HeaderComp />
       {intoEditing.value && <TextEditComp />}
       <FontSizeWeightComp />

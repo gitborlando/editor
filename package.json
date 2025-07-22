@@ -12,6 +12,7 @@
     "gen:component": "node scripts/gen-component.js"
   },
   "dependencies": {
+    "@gitborlando/widget": "^1.0.1",
     "@palettebro/generator": "^2.0.5",
     "axios": "1.10.0",
     "class-autobind-decorator": "^3.0.1",

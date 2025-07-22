@@ -1,10 +1,8 @@
+import { Flex, Icon } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { useHookSignal } from 'src/shared/signal/signal-react'
-import Asset from 'src/view/ui-utility/assets'
 import { Button } from 'src/view/ui-utility/widget/button'
-import { Flex } from 'src/view/ui-utility/widget/flex'
-import { Icon } from 'src/view/ui-utility/widget/icon'
 
 type INodeHeaderComp = {}
 
@@ -15,7 +13,7 @@ export const NodeHeaderComp: FC<INodeHeaderComp> = memo(({}) => {
   useHookSignal(searchSlice)
 
   return (
-    <Flex className='lay-h shrink-0 px-10 wh-100%-32 bg-white'>
+    <Flex layout='h' className='shrink-0 px-10 wh-100%-32 bg-white'>
       <input
         className='wh-100%-32 bg-white labelFont outline-none border-none'
         placeholder='搜索'
@@ -27,9 +25,11 @@ export const NodeHeaderComp: FC<INodeHeaderComp> = memo(({}) => {
         type='icon'
         style={{ marginLeft: 'auto' }}
         onClick={() => allNodeExpanded.dispatch(isCollapsed ? 'expanded' : 'collapsed')}>
-        <Icon size={16} rotate={isCollapsed ? 0 : 180}>
-          {Asset.editor.leftPanel.page.collapse}
-        </Icon>
+        <Icon
+          className='wh-16'
+          style={{ rotate: isCollapsed ? '0deg' : '180deg' }}
+          url={Assets.editor.leftPanel.node.collapse}
+        />
       </Button>
     </Flex>
   )

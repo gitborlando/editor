@@ -4,7 +4,6 @@ import { createLine, createRegularPolygon, createStarPolygon } from 'src/editor/
 import { createCache } from 'src/shared/utils/cache'
 import { COLOR, rgb } from 'src/shared/utils/color'
 import { IRect, IXY } from 'src/shared/utils/normal'
-import Asset from 'src/view/ui-utility/assets'
 import { xy_ } from '../math/xy'
 import {
   IClient,
@@ -236,7 +235,7 @@ class SchemaDefaultService {
       alpha: 1,
     }
   }
-  fillImage(url: string = Asset.editor.rightPanel.operate.picker.defaultImage): IFillImage {
+  fillImage(url: string = 'Assets.editor.rightPanel.operate.picker.defaultImage'): IFillImage {
     return {
       type: 'image',
       visible: true,

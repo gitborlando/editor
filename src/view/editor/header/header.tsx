@@ -1,3 +1,5 @@
+import { Flex, Icon } from '@gitborlando/widget'
+import cx from 'classix'
 import { FC, memo, useCallback } from 'react'
 import { SchemaHistory } from 'src/editor/schema/history'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
@@ -6,13 +8,8 @@ import { StageViewport } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMemoComp } from 'src/shared/utils/react'
 import { Assets } from 'src/view/assets/assets'
-import Asset from 'src/view/ui-utility/assets'
 import { Button } from 'src/view/ui-utility/widget/button'
 import { Divide } from 'src/view/ui-utility/widget/divide'
-import { Flex } from 'src/view/ui-utility/widget/flex'
-import { Icon } from 'src/view/ui-utility/widget/icon'
-import { Icon as ColorIcon } from 'src/view/component/icon/icon'
-import cx from 'classix'
 
 type IHeaderComp = {}
 
@@ -35,13 +32,13 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     return (
       <>
         <Button disabled={!SchemaHistory.canUndo} onClick={SchemaHistory.undo}>
-          <ColorIcon
+          <Icon
             url={Assets.editor.header.record.undo}
             className={cx('wh-20', !SchemaHistory.canUndo && 'text-#E6E6E6')}
           />
         </Button>
         <Button disabled={!SchemaHistory.canRedo} onClick={SchemaHistory.redo}>
-          <ColorIcon
+          <Icon
             url={Assets.editor.header.record.redo}
             className={cx('wh-20', !SchemaHistory.canRedo && 'text-#E6E6E6')}
           />
@@ -54,9 +51,10 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     const isActive = StageInteract.currentType.value === type
     return (
       <Button active={isActive} onClick={() => StageInteract.currentType.dispatch(type)}>
-        <Icon size={20} className={isActive ? 'path-fill-hsl60' : ''}>
-          {Asset.editor.header.stageOperate[type]}
-        </Icon>
+        <Icon
+          className={cx('wh-20', isActive ? 'path-fill-hsl60' : '')}
+          url={Assets.editor.header.stageOperate[type]}
+        />
       </Button>
     )
   }
@@ -71,9 +69,10 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
           StageInteract.currentType.dispatch('create')
           StageCreate.currentType.dispatch(type)
         }}>
-        <Icon size={20} className={isActive ? 'path-fill-hsl60' : ''}>
-          {Asset.editor.node[type as keyof typeof Asset.editor.node]}
-        </Icon>
+        <Icon
+          className={cx('wh-20', isActive ? 'path-fill-hsl60' : '')}
+          url={Assets.editor.node[type as keyof typeof Assets.editor.node]}
+        />
       </Button>
     )
   }

@@ -1,3 +1,4 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo, useEffect, useMemo, useRef, useState } from 'react'
 import ReactJson from 'react-json-view'
 import { SchemaHistory } from 'src/editor/schema/history'
@@ -6,9 +7,7 @@ import { ImmuiPatch } from 'src/shared/immui/immui'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { hslColor } from 'src/shared/utils/color'
 import { useMemoComp, useObjectKey } from 'src/shared/utils/react'
-import Asset from 'src/view/ui-utility/assets'
 import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IHistoryComp = {}
 
@@ -31,22 +30,25 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
     }, [active])
 
     return (
-      <Flex ref={ref} className={`lay-v wh-100%-fit borderBottom ${active && 'bg-hsl98'}`}>
-        <Flex style={{ color: randomColor }} className={`lay-h wh-100%-24 font-size-17 px-10 mt-8`}>
+      <Flex layout='v' ref={ref} className={`wh-100%-fit borderBottom ${active && 'bg-hsl98'}`}>
+        <Flex
+          layout='h'
+          style={{ color: randomColor }}
+          className={`wh-100%-24 font-size-17 px-10 mt-8`}>
           <h6 className={`w-100% nowrap of-hidden text-ellipsis`}>{description}</h6>
           <IconButton
             size={16}
             rotate={collapsed.value ? 0 : 180}
             style={{ marginLeft: 'auto' }}
             onClick={() => collapsed.dispatch(!collapsed.value)}>
-            {Asset.editor.leftPanel.page.collapse}
+            {Assets.editor.leftPanel.page.collapse}
           </IconButton>
         </Flex>
         {patches.slice(0, itemCollapsed ? 6 : patches.length).map((patch) => (
           <OperateDiffComp key={useObjectKey(patch)} patch={patch} collapsed={collapsed.value} />
         ))}
         {needCollapsedItems && (
-          <Flex className={'lay-h w-100% px-10'}>
+          <Flex layout='h' className={'w-100% px-10'}>
             <Flex
               className='ml-auto labelFont pointer mb-8'
               onClick={() => setItemCollapsed(!itemCollapsed)}>
@@ -62,8 +64,8 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
     [],
     ({ patch, collapsed }) => {
       return (
-        <Flex className='lay-v wh-100%-fit px-10 py-4'>
-          <Flex className='lay-h wh-100%-fit my-6'>
+        <Flex layout='v' className='wh-100%-fit px-10 py-4'>
+          <Flex layout='h' className='wh-100%-fit my-6'>
             <ReactJson
               src={patch}
               style={{ fontFamily: 'consolas', fontSize: 12 }}
@@ -80,7 +82,7 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
   )
 
   return (
-    <Flex className='lay-v wh-100%-100% d-scroll of-y-auto'>
+    <Flex layout='v' className='wh-100%-100% d-scroll of-y-auto'>
       {stack.map((history, i) => (
         <CardComp active={i === index.value} history={history} key={i} />
       ))}

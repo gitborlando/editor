@@ -1,6 +1,6 @@
+import { Flex } from '@gitborlando/widget'
 import { ComponentPropsWithRef, forwardRef, memo } from 'react'
 import { cx, iife } from 'src/shared/utils/normal'
-import { Flex } from './flex'
 
 interface IDivide extends ComponentPropsWithRef<'div'> {
   direction?: 'h' | 'v'

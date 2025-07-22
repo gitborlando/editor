@@ -1,3 +1,4 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import { IImage, ImgManager } from 'src/editor/editor/img-manager'
@@ -7,7 +8,6 @@ import { Uploader } from 'src/global/upload'
 import { useAutoSignal } from 'src/shared/signal/signal-react'
 import { iife } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IPickerImageComp = {
   fill: IFillImage
@@ -34,12 +34,16 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
   })
 
   return (
-    <Flex className='lay-v wh-100%-fit bg-white relative'>
-      <Flex className='lay-c wh-100%-200 relative of-hidden bg-black' onHover={isHover.dispatch}>
+    <Flex layout='v' className='wh-100%-fit bg-white relative'>
+      <Flex
+        layout='c'
+        className='wh-100%-200 relative of-hidden bg-black'
+        onHover={isHover.dispatch}>
         {isHover.value && (
-          <Flex className='lay-c wh-100% bg-[rgba(0,0,0,0.2)] absolute '>
+          <Flex layout='c' className='wh-100% bg-[rgba(0,0,0,0.2)] absolute '>
             <Flex
-              className='lay-c wh-80-32 r-5 b-1-white text-white text-14 pointer'
+              layout='c'
+              className='wh-80-32 r-5 b-1-white text-white text-14 pointer'
               onClick={uploadImage}>
               更换图片
             </Flex>

@@ -2,6 +2,7 @@ import { FC, memo, useEffect } from 'react'
 import { SchemaDefault } from 'src/editor/schema/default'
 import { IFill, IFillColor, IFillImage, IFillLinearGradient } from 'src/editor/schema/type'
 
+import { Flex } from '@gitborlando/widget'
 import { StageTransform } from 'src/editor/stage/render/widget/transform'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { Signal } from 'src/shared/signal/signal'
@@ -10,7 +11,6 @@ import { clone } from 'src/shared/utils/normal'
 import { useMemoComp } from 'src/shared/utils/react'
 import { DraggableComp } from 'src/view/component/draggable'
 import { Button } from 'src/view/ui-utility/widget/button'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 import { PickerImageComp } from './image'
 import { PickerLinearGradientComp } from './linear'
 import { PickerSolidComp } from './solid'
@@ -66,8 +66,8 @@ export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
       closeFunc={() => show.dispatch(false)}
       clickAwayClose={() => show.value}
       xy={xy.value}>
-      <Flex className='lay-v wh-240-fit bg-white'>
-        <Flex className='lay-h justify-around wh-100%-fit py-4'>
+      <Flex layout='v' className='wh-240-fit bg-white'>
+        <Flex layout='h' className='justify-around wh-100%-fit py-4'>
           <ButtonComp fillType='color' label='颜色' />
           <ButtonComp fillType='linearGradient' label='线性' />
           <ButtonComp fillType='image' label='图片' />

@@ -10,10 +10,10 @@
     "prefix": "comp",
     "body": [
       "import { FC, memo } from 'react'",
-      "import { Flex } from 'src/view/ui-utility/widget/flex'",
+      "import { Flex } from '@gitborlando/widget'",
       "",
       "export const $1${TM_FILENAME_BASE}Comp: FC<{}> = memo(({}) => {",
-      "  return <Flex className='lay'></Flex>",
+      "  return <Flex layout=''></Flex>",
       "})"
     ],
     "description": "Component"
@@ -22,7 +22,7 @@
     "prefix": "subcomp",
     "body": [
       "const $1Comp = useMemoComp([], ({}) => {",
-      "  return (<Flex className='lay'></Flex>)",
+      "  return (<Flex layout=''></Flex>)",
       "})"
     ],
     "description": "Sub Component"
@@ -32,12 +32,12 @@
     "scope": "typescriptreact",
     "body": [
       "import { ComponentPropsWithRef, forwardRef } from 'react'",
-      "import { Flex } from 'src/view/ui-utility/widget/flex'",
+      "import { Flex } from '@gitborlando/widget'",
       "",
       "export type I$1${TM_FILENAME_BASE} = ComponentPropsWithRef<'div'> & {}",
       "",
       "export const $1${TM_FILENAME_BASE} = forwardRef<HTMLDivElement, I$1${TM_FILENAME_BASE}>(({ className, ...rest }, ref) => {",
-      "  return <Flex className='' {...rest} ref={ref}></Flex>",
+      "  return <Flex layout='' className='' {...rest} ref={ref}></Flex>",
       "})"
     ],
     "description": "Widget"
@@ -72,7 +72,7 @@
   },
   "Flex": {
     "prefix": "flex",
-    "body": ["<Flex className='lay'></Flex>"],
+    "body": ["<Flex layout=''></Flex>"],
     "description": "flex"
   }
 }

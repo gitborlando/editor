@@ -1,3 +1,4 @@
+import { Flex, Icon } from '@gitborlando/widget'
 import { FC, SVGProps, useCallback } from 'react'
 import { EditorCommand } from 'src/editor/editor/command'
 import { OperateNode } from 'src/editor/operate/node'
@@ -14,10 +15,8 @@ import { IrregularUtils } from 'src/shared/utils/irregular'
 import { cx, iife, noopFunc } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import Asset from 'src/view/ui-utility/assets'
+import { Assets } from 'src/view/assets/assets'
 import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
-import { Flex } from 'src/view/ui-utility/widget/flex'
-import { Icon } from 'src/view/ui-utility/widget/icon'
 
 type INodeItemComp = {
   id: string
@@ -60,7 +59,8 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
   const ExpandComp = useMemoComp([expand], ({}) => {
     return (
       <Flex
-        className='lay-c'
+        layout='c'
+        className=''
         onMouseDown={stopPropagation()}
         onClick={() => {
           setSingleNodeExpanded(id, !expand)
@@ -68,9 +68,11 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
         }}
         style={{ width: 8, cursor: 'pointer' }}>
         {children.length > 0 && (
-          <Icon size={8} scale={8 / 9} rotate={expand ? 90 : 0}>
-            {Asset.editor.leftPanel.node.collapse}
-          </Icon>
+          <Icon
+            className='wh-8'
+            style={{ scale: (8 / 9).toString(), rotate: expand ? '90deg' : '0deg' }}
+            url={Assets.editor.leftPanel.node.collapse}
+          />
         )}
       </Flex>
     )
@@ -88,16 +90,18 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
       )
     })
     return (
-      <Flex className='lay-c px-6'>
-        <Icon size={12} scale={12 / 10}>
-          {iife(() => {
-            if (node.type === 'frame') return Asset.editor.node.frame
-            if (node.type === 'text') return Asset.editor.node.text
-            if (node.type === 'irregular') return PathSvgComp
-            if (node.type === 'group') return () => null
-            return Asset.editor.node[node.type as keyof typeof Asset.editor.node]
+      <Flex layout='c' className='px-6'>
+        <Icon
+          className='wh-12'
+          style={{ scale: (12 / 10).toString() }}
+          url={iife(() => {
+            if (node.type === 'frame') return Assets.editor.node.frame
+            if (node.type === 'text') return Assets.editor.node.text
+            if (node.type === 'irregular') return PathSvgComp as any
+            if (node.type === 'group') return null as any
+            return Assets.editor.node[node.type as keyof typeof Assets.editor.node]
           })}
-        </Icon>
+        />
       </Flex>
     )
   }, [])
@@ -106,7 +110,8 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     return (
       <Flex
         style={{ width: '100%' }}
-        className={cx([searched, 'lay-h text-hsl50'])}
+        className={cx([searched, 'text-hsl50'])}
+        layout='h'
         onDoubleClick={() => enterReName.dispatch(id)}>
         {enterReName.value === id ? (
           <CompositeInput
@@ -153,7 +158,8 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
 
     return (
       <Flex
-        className='lay-v wh-100%-32 absolute'
+        layout='v'
+        className='wh-100%-32 absolute'
         style={{
           ...(!nodeMoveStarted.value.moveId && { pointerEvents: 'none' }),
           ...(dropInSide.value && { boxShadow: 'inset 0 0 0px 0.7px ' + hslBlueColor(50) }),
@@ -166,7 +172,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
           )}
         </Flex>
         {isContainerNode && <Flex className='wh-100%' onHover={dropInSide.dispatch}></Flex>}
-        <Flex className='lay-v wh-100%' onHover={dropBehind.dispatch}>
+        <Flex layout='v' className='wh-100%' onHover={dropBehind.dispatch}>
           {dropBehind.value && (
             <Flex
               className='wh-100%-2 bg-hsl50 absolute pointer-events-none'
@@ -178,15 +184,15 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
   })
 
   const nodeItemCss = cx(
-    ['lay-h wh-100%-32 layer-floor:bg-white min-w-100% text-12 px-6 d-hover-border'],
+    ['wh-100%-32 layer-floor:bg-white min-w-100% text-12 px-6 d-hover-border'],
     [!!nodeMoveStarted.value.moveId, ''],
     [subSelected, 'bg-hsl97'],
     [selected, 'bg-hsl94']
   )
 
   return (
-    <Flex className='lay-v w-100% pointer' onHover={hovered.dispatch} onContextMenu={makeMenu}>
-      <Flex className={nodeItemCss} onMouseDown={handleMouseDown}>
+    <Flex layout='v' className='w-100% pointer' onHover={hovered.dispatch} onContextMenu={makeMenu}>
+      <Flex layout='h' className={nodeItemCss} onMouseDown={handleMouseDown}>
         <Flex style={{ width: indent * 16 }}></Flex>
         <ExpandComp />
         <IconComp />

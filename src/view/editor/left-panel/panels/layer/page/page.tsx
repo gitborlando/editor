@@ -1,3 +1,4 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import { Schema } from 'src/editor/schema/schema'
 import { IPage } from 'src/editor/schema/type'
@@ -5,7 +6,6 @@ import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMatchPatch } from 'src/shared/utils/react'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 import { PageHeaderComp } from './header'
 import { PageItemComp } from './item'
 
@@ -18,10 +18,11 @@ export const PageComp: FC<IPageComp> = memo(({}) => {
   useMatchPatch(`/meta/pageIds/...`)
 
   return (
-    <Flex className='lay-v shrink-0 wh-100%-fit borderBottom'>
+    <Flex layout='v' className='shrink-0 wh-100%-fit borderBottom'>
       <PageHeaderComp />
       <Flex
-        className='lay-v wh-100% of-overlay d-scroll'
+        layout='v'
+        className='wh-100% of-overlay d-scroll'
         vshow={allPageExpanded.value}
         style={{ height: pagePanelHeight.value - 37 }}>
         {Schema.meta.pageIds.map((id) => {
@@ -30,7 +31,8 @@ export const PageComp: FC<IPageComp> = memo(({}) => {
         })}
       </Flex>
       <Flex
-        className='lay-c shrink-0 wh-100%-5 n-resize'
+        layout='c'
+        className='shrink-0 wh-100%-5 n-resize'
         vshow={allPageExpanded.value}
         onMouseDown={() => {
           let lastHeight = pagePanelHeight.value

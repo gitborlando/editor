@@ -1,9 +1,9 @@
 import { FC, memo, useEffect, useRef } from 'react'
 import { Editor } from 'src/editor/editor/editor'
 
+import { Flex } from '@gitborlando/widget'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMemoComp } from 'src/shared/utils/react'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 export const FPSComp: FC<{}> = memo(({}) => {
   const showFPS = useHookSignal(Editor.settings.showFPS)
@@ -39,7 +39,8 @@ export const FPSComp: FC<{}> = memo(({}) => {
     return (
       <Flex
         ref={ref}
-        className='lay-c wh-fit absolute top-20 right-10 text-20 pointer-events-none'></Flex>
+        layout='c'
+        className='wh-fit absolute top-20 right-10 text-20 pointer-events-none'></Flex>
     )
   })
 

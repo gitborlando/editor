@@ -9,7 +9,6 @@ import { HistoryComp } from 'src/view/editor/left-panel/panels/history'
 import { IconsComp } from 'src/view/editor/left-panel/panels/icons'
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer/layer'
 import { SettingComp } from 'src/view/editor/left-panel/panels/setting'
-import Asset from 'src/view/ui-utility/assets'
 
 type ISwitchTabOption = {
   id: string
@@ -57,36 +56,36 @@ UILeftPanel.switchTabMap.hook(() => {
 UILeftPanel.registerSwitchTab({
   id: 'file',
   name: '文件',
-  icon: Asset.editor.leftPanel.switchBar.file,
+  icon: Assets.editor.leftPanel.switchBar.file,
   panel: FileComp,
 })
 UILeftPanel.registerSwitchTab({
   id: 'layer',
   name: '图层',
-  icon: Asset.editor.leftPanel.switchBar.layer,
+  icon: Assets.editor.leftPanel.switchBar.layer,
   panel: LayerComp,
 })
 UILeftPanel.registerSwitchTab({
   id: 'history',
   name: '历史',
-  icon: Asset.editor.leftPanel.switchBar.record,
+  icon: Assets.editor.leftPanel.switchBar.record,
   panel: HistoryComp,
 })
 UILeftPanel.registerSwitchTab({
   id: 'source',
   name: '图片',
-  icon: Asset.editor.leftPanel.switchBar.image,
+  icon: Assets.editor.leftPanel.switchBar.image,
   panel: GalleryComp,
 })
 UILeftPanel.registerSwitchTab({
   id: 'icon',
   name: '图标',
-  icon: Asset.editor.leftPanel.switchBar.record,
+  icon: Assets.editor.leftPanel.switchBar.record,
   panel: IconsComp,
 })
 UILeftPanel.registerSwitchTab({
   id: 'setting',
   name: '设置',
-  icon: Asset.editor.leftPanel.switchBar.record,
+  icon: Assets.editor.leftPanel.switchBar.record,
   panel: SettingComp,
 })

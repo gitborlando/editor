@@ -1,12 +1,10 @@
+import { Flex, Icon } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import { EditorCommand } from 'src/editor/editor/command'
 import { OperatePage } from 'src/editor/operate/page'
 import { Schema } from 'src/editor/schema/schema'
 import { Menu } from 'src/global/menu'
 import { useMatchPatch } from 'src/shared/utils/react'
-import Asset from 'src/view/ui-utility/assets'
-import { Flex } from 'src/view/ui-utility/widget/flex'
-import { Icon } from 'src/view/ui-utility/widget/icon'
 
 type IPageItemComp = {
   name: string
@@ -27,14 +25,18 @@ export const PageItemComp: FC<IPageItemComp> = memo(({ name, id }) => {
 
   return (
     <Flex
-      className='lay-h justify-between wh-100%-32 bg-white pointer shrink-0 d-hover-border'
+      layout='h'
+      className='justify-between wh-100%-32 bg-white pointer shrink-0 d-hover-border'
       onClick={selectPage}
       onContextMenu={openMenu}>
-      <Flex className='lay-h text-12 px-10'>{name}</Flex>
+      <Flex layout='h' className='text-12 px-10'>
+        {name}
+      </Flex>
       {selected && (
-        <Icon size={18} className={'mr-10 path-fill-hsl60'}>
-          {Asset.editor.leftPanel.page.pageSelect}
-        </Icon>
+        <Icon
+          className='wh-18 mr-10 path-fill-hsl60'
+          url={Assets.editor.leftPanel.page.pageSelect}
+        />
       )}
     </Flex>
   )

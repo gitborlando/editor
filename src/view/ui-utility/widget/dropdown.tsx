@@ -1,11 +1,9 @@
+import { Flex, Icon } from '@gitborlando/widget'
 import { ComponentPropsWithRef, forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useAutoSignal, useSignal } from 'src/shared/signal/signal-react'
 import { stopPropagation, useClickAway } from 'src/shared/utils/event'
 import { iife } from 'src/shared/utils/normal'
-import { Flex } from 'src/view/ui-utility/widget/flex'
-import Asset from '../assets'
-import { Icon } from './icon'
 
 export type IDropdown = ComponentPropsWithRef<'div'> & {
   options: string[]
@@ -33,7 +31,8 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
   })
   return (
     <Flex
-      className='lay-h justify-around wh-fit-28 r-2 pointer normalFont d-hover-bg px-6'
+      layout='h'
+      className='justify-around wh-fit-28 r-2 pointer normalFont d-hover-bg px-6'
       onMouseDown={() => show.dispatch(!show.value)}
       {...rest}
       ref={innerRef}>
@@ -43,14 +42,17 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
         const index = options.indexOf(selected)!
         return translateArray[index]
       })}
-      <Icon size={16} rotate={show.value ? 180 : 0}>
-        {Asset.editor.leftPanel.page.collapse}
-      </Icon>
+      <Icon
+        className='wh-16'
+        style={{ rotate: show.value ? '180deg' : '0deg' }}
+        url={Assets.editor.leftPanel.page.collapse}
+      />
       {show.value &&
         createPortal(
           <Flex
             ref={listRef}
-            className='lay-v bg-white rounded-2 fixed normalFont shadow-3-0-rgba(0,0,0,0.5)'
+            layout='v'
+            className='bg-white rounded-2 fixed normalFont shadow-3-0-rgba(0,0,0,0.5)'
             style={{
               left: bound.value.x,
               top: bound.value.y,
@@ -60,7 +62,8 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
             {options.map((option, index) => (
               <Flex
                 key={option}
-                className='lay-h h-100% px-6 d-hover-bg'
+                layout='h'
+                className='h-100% px-6 d-hover-bg'
                 style={{ width: bound.value.width, height: bound.value.height }}
                 onMouseDown={stopPropagation(() => {
                   onSelected(option)

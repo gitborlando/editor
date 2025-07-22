@@ -1,11 +1,10 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, Fragment } from 'react'
 import { OperateFill } from 'src/editor/operate/fill'
 import { IFill } from 'src/editor/schema/type'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
-import Asset from 'src/view/ui-utility/assets'
 import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
 import { Divide } from 'src/view/ui-utility/widget/divide'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 import { PickerOpener } from './picker/picker-opener'
 
 export const FillPropComp: FC<{}> = ({}) => {
@@ -15,12 +14,12 @@ export const FillPropComp: FC<{}> = ({}) => {
 
   const HeaderComp = useMemoComp([hasFills], ({}) => {
     return (
-      <Flex className={`lay-h wh-100%-24 ${hasFills && 'mb-8'}`}>
-        <Flex className='lay-c labelFont ml-5'>
+      <Flex layout='h' className={`wh-100%-24 ${hasFills && 'mb-8'}`}>
+        <Flex layout='c' className='labelFont ml-5'>
           <h4>填充</h4>
         </Flex>
         <IconButton size={16} style={{ marginLeft: 'auto' }} onClick={addFill}>
-          {Asset.editor.leftPanel.page.add}
+          {Assets.editor.leftPanel.page.add}
         </IconButton>
       </Flex>
     )
@@ -43,26 +42,28 @@ export const FillPropComp: FC<{}> = ({}) => {
     const { setFill, deleteFill } = OperateFill
 
     return (
-      <Flex className='lay-h wh-100%-28'>
+      <Flex layout='h' className='wh-100%-28'>
         <PickerOpener fill={fill} index={index} impact='fill' />
         <IconButton
           size={16}
           style={{ marginLeft: 'auto' }}
           onClick={() => setFill(index, ['visible'], !fill.visible)}>
-          {fill.visible ? Asset.editor.shared.visible : Asset.editor.shared.unVisible}
+          {fill.visible ? Assets.editor.shared.visible : Assets.editor.shared.unVisible}
         </IconButton>
         <IconButton size={16} onClick={() => deleteFill(index)}>
-          {Asset.editor.shared.minus}
+          {Assets.editor.shared.minus}
         </IconButton>
       </Flex>
     )
   })
 
   return (
-    <Flex className='lay-v wh-100%-fit bg-white borderBottom p-8'>
+    <Flex layout='v' className='wh-100%-fit bg-white borderBottom p-8'>
       <HeaderComp />
       {isMultiFills ? (
-        <Flex className='lay-c h-24 mt-8 mr-auto d-font-label'>点击 + 重置并修改多个填充</Flex>
+        <Flex layout='c' className='h-24 mt-8 mr-auto d-font-label'>
+          点击 + 重置并修改多个填充
+        </Flex>
       ) : (
         <FillListComp fills={fills} />
       )}

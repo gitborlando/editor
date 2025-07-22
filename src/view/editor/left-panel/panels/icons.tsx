@@ -1,3 +1,4 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo, useMemo } from 'react'
 import { InView } from 'react-intersection-observer'
 import usePromise from 'react-promise-suspense'
@@ -6,7 +7,6 @@ import { createCache } from 'src/shared/utils/cache'
 import { hslBlueColor } from 'src/shared/utils/color'
 import { publicPath } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IIconsComp = {}
 
@@ -25,13 +25,14 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
       useHookSignal(curCategory)
 
       return (
-        <Flex className={'lay-h wh-100%-fit px-10 gap-6-6 pointer'}>
+        <Flex layout='h' className={'wh-100%-fit px-10 gap-6-6 pointer'}>
           {categories.map((category) => {
             const selectCss = curCategory.value === category && { color: hslBlueColor(60) }
             return (
               <Flex
                 key={category}
-                className='lay-h wh-fit r-5 bg-[#F5F5F5] p-6 my-10 normalFont'
+                layout='h'
+                className='wh-fit r-5 bg-[#F5F5F5] p-6 my-10 normalFont'
                 style={{ ...selectCss }}
                 onClick={() => curCategory.dispatch(category)}>
                 {category}
@@ -52,7 +53,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
       useHookSignal(length, (len) => categoryLengthCache.set(curCategory.value, len))
 
       return (
-        <Flex className={'wh-100%-fit lay-h flex-wrap of-y-auto px-6 gap-10-10 d-scroll'}>
+        <Flex layout='h' className={'wh-100%-fit flex-wrap of-y-auto px-6 gap-10-10 d-scroll'}>
           {icons.map(([name, path]) => (
             <SvgComp key={path} name={name} path={path} />
           ))}
@@ -80,9 +81,10 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
         return (
           <Flex
             draggable
-            className={'lay-c wh-48 r-5 d-hover-bg pointer'}
+            layout='c'
+            className={'wh-48 r-5 d-hover-bg pointer'}
             onDragStart={onDragStart}>
-            <Flex className='lay-c' dangerouslySetInnerHTML={{ __html: svgStr }} />
+            <Flex layout='c' dangerouslySetInnerHTML={{ __html: svgStr }} />
           </Flex>
         )
       })
@@ -91,7 +93,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
     })
 
     return (
-      <Flex className={'lay-v wh-100%-100% bg-white'}>
+      <Flex layout='v' className={'wh-100%-100% bg-white'}>
         <CategoryComp />
         <SvgListComp />
       </Flex>

@@ -1,3 +1,4 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import { floor, max, min } from 'src/editor/math/base'
 import { IGeometry, OperateGeometry } from 'src/editor/operate/geometry'
@@ -6,7 +7,6 @@ import { getZoom } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMemoComp } from 'src/shared/utils/react'
 import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IGeometryPropsComp = {}
 
@@ -80,7 +80,7 @@ export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
 
   return (
     selectedNodes.value.length !== 0 && (
-      <Flex className='lay-h flex-wrap gap-4-20 p-8 borderBottom'>
+      <Flex layout='h' className='flex-wrap gap-4-20 p-8 borderBottom'>
         <GeometryItemComp label='横坐标' operateKey='x' slideRate={1 / getZoom()} />
         <GeometryItemComp label='纵坐标' operateKey='y' slideRate={1 / getZoom()} />
         <GeometryItemComp label='宽度' operateKey='width' />

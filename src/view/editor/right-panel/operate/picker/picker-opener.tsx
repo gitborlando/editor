@@ -1,3 +1,4 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import rgbHex from 'rgb-hex'
@@ -9,9 +10,7 @@ import { useAutoSignal } from 'src/shared/signal/signal-react'
 import { makeLinearGradientCss, rgbToRgba } from 'src/shared/utils/color'
 import { IXY, clone, iife } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
-import Asset from 'src/view/ui-utility/assets'
 import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 import { PickerComp } from './picker'
 
 type IPickerOpener = {
@@ -72,11 +71,12 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
 
   return (
     <>
-      <Flex className='lay-h wh-92-28 r-2 d-hover-bg normalFont px-6'>
+      <Flex layout='h' className='wh-92-28 r-2 d-hover-bg normalFont px-6'>
         <Flex
-          className='lay-h wh-18-18 r-2 relative mr-4 pointer [&_div]:(wh-100%-100% r-2 absolute) [&_img]:(wh-100%-100% r-2 absolute)'
+          layout='h'
+          className='wh-18-18 r-2 relative mr-4 pointer [&_div]:(wh-100%-100% r-2 absolute) [&_img]:(wh-100%-100% r-2 absolute)'
           onClick={(e) => showPicker(xy_client(e))}>
-          <img src={Asset.editor.rightPanel.operate.fill.none}></img>
+          <img src={Assets.editor.rightPanel.operate.fill.none}></img>
           {isColorType && (
             <Flex style={{ backgroundColor: rgbToRgba(fill.color, fill.alpha) }}></Flex>
           )}
@@ -85,7 +85,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
         </Flex>
         <ColorInputComp fill={fill} />
       </Flex>
-      <Flex className='lay-h space-between px-6 wh-54-28 r-2 d-hover-bg'>
+      <Flex layout='h' className='space-between px-6 wh-54-28 r-2 d-hover-bg'>
         <CompositeInput
           type='number'
           needStepHandler={false}
@@ -98,7 +98,9 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
             // })
           }}
         />
-        <Flex className='lay-c labelFont'>%</Flex>
+        <Flex layout='c' className='labelFont'>
+          %
+        </Flex>
       </Flex>
       {isShowPicker.value && <PickerComp fill={fill} show={isShowPicker} />}
     </>

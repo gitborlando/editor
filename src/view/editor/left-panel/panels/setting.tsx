@@ -1,9 +1,9 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import { Editor } from 'src/editor/editor/editor'
 import { Signal } from 'src/shared/signal/signal'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMemoComp } from 'src/shared/utils/react'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type ISettingComp = {}
 
@@ -28,8 +28,10 @@ export const SettingComp: FC<ISettingComp> = memo(({}) => {
     toggle: (a: boolean) => void
   }>([], ({ label, active, toggle }) => {
     return (
-      <Flex className={'lay-h wh-100%-40 px-10'}>
-        <Flex className={'lay-c normalFont'}>{label}</Flex>
+      <Flex layout='h' className={'wh-100%-40 px-10'}>
+        <Flex layout='c' className={'normalFont'}>
+          {label}
+        </Flex>
         <SwitchComp active={active} toggle={toggle} classes={['ml-auto']} />
       </Flex>
     )
@@ -45,15 +47,16 @@ export const SettingComp: FC<ISettingComp> = memo(({}) => {
       : ['bd-1-#d7d7d7', 'mr-auto bg-[#d7d7d7]']
     return (
       <Flex
-        className={`lay-h wh-40-20 r-99 px-4 pointer ${activeCss[0]} ${classes?.[0]}`}
+        layout='h'
+        className={`wh-40-20 r-99 px-4 pointer ${activeCss[0]} ${classes?.[0]}`}
         onClick={() => toggle(!active)}>
-        <Flex className={`lay-c wh-12-12 r-99 ${activeCss[1]} ${classes?.[1]}`}></Flex>
+        <Flex layout='c' className={`wh-12-12 r-99 ${activeCss[1]} ${classes?.[1]}`}></Flex>
       </Flex>
     )
   })
 
   return (
-    <Flex className={'lay-v wh-100%-fit bg-white'}>
+    <Flex layout='v' className={'wh-100%-fit bg-white'}>
       <ToggleItemComp label='自动保存' active={autosave.value} toggle={toggle(autosave)} />
       <ToggleItemComp label='开发模式' active={devMode.value} toggle={toggle(devMode)} />
       <ToggleItemComp

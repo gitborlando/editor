@@ -1,3 +1,4 @@
+import { Flex, Icon } from '@gitborlando/widget'
 import { nanoid } from 'nanoid'
 import { Photo, createClient } from 'pexels'
 import { FC, useRef } from 'react'
@@ -5,9 +6,6 @@ import { InView } from 'react-intersection-observer'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
-import Asset from 'src/view/ui-utility/assets'
-import { Flex } from 'src/view/ui-utility/widget/flex'
-import { Icon } from 'src/view/ui-utility/widget/icon'
 
 const pexels = createClient('1vbcKedpSbDaktXlI6jmDczCNUBMqDkXL3Gndwp7HMblwGoENO4xlDnm')
 
@@ -58,9 +56,7 @@ export const GalleryComp: FC<IGalleryComp> = ({}) => {
         <img className='wh-100%' src={photo.src.small} onClick={applyImageFill}></img>
         {loadingWebImageUrl.value === photoUrl && (
           <Flex className='lay-c wh-100% bg-[rgba(0,0,0,0.5)] absolute'>
-            <Icon size={20} className='absolute'>
-              {Asset.editor.shared.loading}
-            </Icon>
+            <Icon className='wh-20 absolute' url={Assets.editor.shared.loading} />
           </Flex>
         )}
       </Flex>
@@ -84,7 +80,7 @@ export const GalleryComp: FC<IGalleryComp> = ({}) => {
         </Flex>
         <Flex className='lay-c wh-100%-40 shrink-0'>
           <InView as={'div'} className='wh-fit-fit' onChange={(inView) => inView && load()}>
-            <Icon size={20}>{Asset.editor.shared.loading}</Icon>
+            <Icon className='wh-20' url={Assets.editor.shared.loading} />
           </InView>
         </Flex>
       </Flex>

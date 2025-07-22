@@ -1,3 +1,4 @@
+import { Flex, Icon } from '@gitborlando/widget'
 import { FC, ReactNode, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { xy_, xy_plus } from 'src/editor/math/xy'
@@ -6,10 +7,7 @@ import { createSignal } from 'src/shared/signal/signal'
 import { useAutoSignal } from 'src/shared/signal/signal-react'
 import { useClickAway } from 'src/shared/utils/event'
 import { IXY } from 'src/shared/utils/normal'
-import { Flex } from 'src/view/ui-utility/widget/flex'
-import Asset from '../ui-utility/assets'
 import { Button } from '../ui-utility/widget/button'
-import { Icon } from '../ui-utility/widget/icon'
 
 type IDraggableComp = {
   children: ReactNode
@@ -53,7 +51,8 @@ export const DraggableComp: FC<IDraggableComp> = ({
 
   return createPortal(
     <Flex
-      className={'lay-v wh-240-fit r-6 bg-white fixed of-hidden shadow-4-0-rgba(0,0,0,0.25)'}
+      layout='v'
+      className={'wh-240-fit r-6 bg-white fixed of-hidden shadow-4-0-rgba(0,0,0,0.25)'}
       ref={ref}
       style={{
         left: position.x,
@@ -66,7 +65,8 @@ export const DraggableComp: FC<IDraggableComp> = ({
         draggableCount > 1 && zIndex.dispatch(maxZIndex.value++)
       }}>
       <Flex
-        className={'lay-h-0 wh-100%-30 justify-between borderBottom pl-10 pr-4'}
+        layout='h'
+        className={'wh-100%-30 justify-between borderBottom pl-10 pr-4'}
         onMouseDown={() => {
           const start = position
           const { innerWidth, innerHeight } = window
@@ -82,9 +82,7 @@ export const DraggableComp: FC<IDraggableComp> = ({
           onMouseDown={(e) => e.stopPropagation()}
           onClick={closeFunc}
           className='ml-auto pointer'>
-          <Icon size={16} rotate={45}>
-            {Asset.editor.leftPanel.page.add}
-          </Icon>
+          <Icon className='wh-16' url={Assets.editor.leftPanel.page.add} />
         </Button>
       </Flex>
       {children}

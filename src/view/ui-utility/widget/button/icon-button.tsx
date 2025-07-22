@@ -1,16 +1,14 @@
+import { Icon, IconProps } from '@gitborlando/widget'
 import { ComponentPropsWithRef, forwardRef } from 'react'
 import { Button, IButtonProps } from '../button'
-import { IIconProps, Icon } from '../icon'
 
-export type IIconButton = ComponentPropsWithRef<'div'> & IButtonProps & IIconProps & {}
+export type IIconButton = ComponentPropsWithRef<'div'> & IButtonProps & IconProps & {}
 
 export const IconButton = forwardRef<HTMLDivElement, IIconButton>(
   ({ className, children, ...rest }, ref) => {
-    const { size, rotate, scale } = rest
-    const iconProps = { size, rotate, scale }
     return (
       <Button type='icon' className={className} {...rest} ref={ref}>
-        <Icon {...iconProps}>{children}</Icon>
+        <Icon url={children as string} />
       </Button>
     )
   }

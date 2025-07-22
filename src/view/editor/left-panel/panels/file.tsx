@@ -1,3 +1,4 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
 import { EditorCommand } from 'src/editor/editor/command'
@@ -8,10 +9,8 @@ import { IMeta } from 'src/editor/schema/type'
 import { Menu } from 'src/global/menu'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
-import Asset from 'src/view/ui-utility/assets'
 import { Button } from 'src/view/ui-utility/widget/button'
 import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 type IFileComp = {}
 
@@ -24,10 +23,10 @@ export const FileComp: FC<IFileComp> = memo(({}) => {
         </Button>
         <Flex className='lay-h ml-auto'>
           <IconButton size={14} onClick={() => {}}>
-            {Asset.editor.leftPanel.file.newFolder}
+            {Assets.editor.leftPanel.file.newFolder}
           </IconButton>
           <IconButton size={13} onClick={() => FileManager.addNewFile(SchemaDefault.schema())}>
-            {Asset.editor.leftPanel.file.newFile}
+            {Assets.editor.leftPanel.file.newFile}
           </IconButton>
         </Flex>
       </Flex>
@@ -57,7 +56,7 @@ export const FileComp: FC<IFileComp> = memo(({}) => {
           {meta.name}
           {selected && (
             <IconButton size={16} className='ml-auto path-fill-hsl60'>
-              {Asset.editor.leftPanel.page.pageSelect}
+              {Assets.editor.leftPanel.page.pageSelect}
             </IconButton>
           )}
         </Flex>

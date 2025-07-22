@@ -1,6 +1,6 @@
+import { Flex } from '@gitborlando/widget'
 import { ComponentPropsWithRef, forwardRef } from 'react'
 import { cx, iife } from 'src/shared/utils/normal'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 
 export type IButtonProps = ComponentPropsWithRef<'div'> & {
   type?: 'text' | 'normal' | 'icon'
@@ -11,7 +11,6 @@ export type IButtonProps = ComponentPropsWithRef<'div'> & {
 export const Button = forwardRef<HTMLDivElement, IButtonProps>(
   ({ type = 'normal', active = false, disabled = false, className, children, ...rest }, ref) => {
     const baseCss = cx(
-      'lay-c',
       iife(() => {
         if (disabled) return ''
         return 'pointer'
@@ -42,14 +41,14 @@ export const Button = forwardRef<HTMLDivElement, IButtonProps>(
 
     const finalCss = cx(
       baseCss,
-      type === 'text' && textCss,
-      type === 'icon' && iconCss,
-      type === 'normal' && normalCss,
+      ...(type === 'text' ? [textCss] : []),
+      ...(type === 'icon' ? [iconCss] : []),
+      ...(type === 'normal' ? [normalCss] : []),
       normalCss
     )
 
     return (
-      <Flex className={cx(finalCss, className)} {...(!disabled && rest)} ref={ref}>
+      <Flex layout='c' className={cx(finalCss, className)} {...(!disabled && rest)} ref={ref}>
         {children}
       </Flex>
     )

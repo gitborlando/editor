@@ -1,13 +1,12 @@
+import { Flex } from '@gitborlando/widget'
 import { FC, Fragment } from 'react'
 import { OperateShadow } from 'src/editor/operate/shadow'
 import { IShadow } from 'src/editor/schema/type'
 import { iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
-import Asset from 'src/view/ui-utility/assets'
 import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
 import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import { Divide } from 'src/view/ui-utility/widget/divide'
-import { Flex } from 'src/view/ui-utility/widget/flex'
 import { PickerOpener } from './picker/picker-opener'
 
 type IShadowComp = {}
@@ -19,12 +18,12 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
 
   const HeaderComp = useMemoComp([hasShadows], ({}) => {
     return (
-      <Flex className={`lay-h wh-100%-24 ${hasShadows && 'mb-8'}`}>
-        <Flex className='lay-c labelFont ml-5'>
+      <Flex layout='h' className={`wh-100%-24 ${hasShadows && 'mb-8'}`}>
+        <Flex layout='c' className='labelFont ml-5'>
           <h4>阴影</h4>
         </Flex>
         <IconButton size={16} style={{ marginLeft: 'auto' }} onClick={addShadow}>
-          {Asset.editor.leftPanel.page.add}
+          {Assets.editor.leftPanel.page.add}
         </IconButton>
       </Flex>
     )
@@ -50,17 +49,17 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
     const { deleteShadow, setShadow, toggleShadow, afterOperate } = OperateShadow
 
     return (
-      <Flex className='lay-v wh-100%-fit'>
+      <Flex layout='v' className='wh-100%-fit'>
         <Flex className='wh-100%-28 mb-4'>
           <PickerOpener fill={shadow.fill} index={index} impact='shadow' />
           <IconButton
             size={16}
             style={{ marginLeft: 'auto' }}
             onClick={() => toggleShadow(index, ['visible'], !shadow.visible)}>
-            {shadow.visible ? Asset.editor.shared.visible : Asset.editor.shared.unVisible}
+            {shadow.visible ? Assets.editor.shared.visible : Assets.editor.shared.unVisible}
           </IconButton>
           <IconButton size={16} onClick={() => deleteShadow(index)}>
-            {Asset.editor.shared.minus}
+            {Assets.editor.shared.minus}
           </IconButton>
         </Flex>
         <Flex className='wh-100%-28'>
@@ -85,12 +84,14 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
   })
 
   return (
-    <Flex className='lay-v wh-100%-fit bg-white borderBottom p-8'>
+    <Flex layout='v' className='wh-100%-fit bg-white borderBottom p-8'>
       <HeaderComp />
       {!isMultiShadows ? (
         <ShadowListComp shadows={shadows} />
       ) : (
-        <Flex className='lay-c h-24 mt-8 mr-auto labelFont'>点击 + 重置并修改多个描边</Flex>
+        <Flex layout='c' className='h-24 mt-8 mr-auto labelFont'>
+          点击 + 重置并修改多个描边
+        </Flex>
       )}
     </Flex>
   )

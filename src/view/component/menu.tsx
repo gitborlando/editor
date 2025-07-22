@@ -1,3 +1,4 @@
+import { Flex, Icon } from '@gitborlando/widget'
 import { FC, memo, useRef } from 'react'
 import { IEditorCommand } from 'src/editor/editor/command'
 import { Editor } from 'src/editor/editor/editor'
@@ -8,11 +9,8 @@ import { Menu } from 'src/global/menu'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { stopPropagation } from 'src/shared/utils/event'
 import { useMemoComp } from 'src/shared/utils/react'
-import Asset from 'src/view/ui-utility/assets'
 import { Button } from 'src/view/ui-utility/widget/button'
 import { Divide } from 'src/view/ui-utility/widget/divide'
-import { Flex } from 'src/view/ui-utility/widget/flex'
-import { Icon } from 'src/view/ui-utility/widget/icon'
 
 type IMenuComp = {}
 
@@ -26,7 +24,10 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
       <Flex
         id='menu'
         className='lay-h wh-100%-30 r-2 pointer normalFont px-8 hover:(bg-hsl93)'
-        onMouseDown={stopPropagation(() => void item.callback() || closeMenu())}>
+        onMouseDown={stopPropagation(() => {
+          item.callback()
+          closeMenu()
+        })}>
         <Flex>{item.name}</Flex>
         <Flex className='ml-auto'>{item.shortcut}</Flex>
       </Flex>
@@ -80,7 +81,7 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
           StageInteract.currentType.dispatch(type)
           closeMenu()
         }}>
-        <Icon size={16}>{Asset.editor.header.stageOperate[type]}</Icon>
+        <Icon className='wh-16' url={Assets.editor.header.stageOperate[type]} />
       </Button>
     )
   }
@@ -96,9 +97,7 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
           StageCreate.currentType.dispatch(type)
           closeMenu()
         }}>
-        <Icon size={16} className={isActive ? 'path-fill-hsl60' : ''}>
-          {Asset.editor.node[type as keyof typeof Asset.editor.node]}
-        </Icon>
+        <Icon className='wh-16' url={Assets.editor.node[type as keyof typeof Assets.editor.node]} />
       </Button>
     )
   }
@@ -106,7 +105,7 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
   return (
     <Flex
       ref={setRef}
-      vshow={menuOptions.value.length > 0}
+      vif={menuOptions.value.length > 0}
       className='lay-v wh-200-fit r-2 bg-white p-6 fixed z-999 shadow-0-0-4-0-hsl0/15'
       style={{ left: xy.value.x + 5, top: xy.value.y + 5 }}>
       {menuShowTopTab && showTopTab && (

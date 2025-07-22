@@ -33,6 +33,8 @@ import editorRightPanelOperateAlignAlignRight from './editor/right-panel/operate
 import editorRightPanelOperateAlignVerticalBottom from './editor/right-panel/operate/align/vertical-bottom.svg';
 import editorRightPanelOperateAlignVerticalCenter from './editor/right-panel/operate/align/vertical-center.svg';
 import editorRightPanelOperateAlignVerticalTop from './editor/right-panel/operate/align/vertical-top.svg';
+import editorRightPanelOperateFillNone from './editor/right-panel/operate/fill/none.png';
+import editorRightPanelOperatePickerDefaultImage from './editor/right-panel/operate/picker/default-image.png';
 import editorSharedDelete from './editor/shared/delete.svg';
 import editorSharedLoading from './editor/shared/loading.svg';
 import editorSharedLock from './editor/shared/lock.svg';
@@ -103,6 +105,12 @@ export const Assets = {
           verticalBottom: editorRightPanelOperateAlignVerticalBottom,
           verticalCenter: editorRightPanelOperateAlignVerticalCenter,
           verticalTop: editorRightPanelOperateAlignVerticalTop,
+        },
+        fill: {
+          none: editorRightPanelOperateFillNone,
+        },
+        picker: {
+          defaultImage: editorRightPanelOperatePickerDefaultImage,
         },
       },
     },
