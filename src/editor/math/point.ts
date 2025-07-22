@@ -1,6 +1,6 @@
+import { firstOne, lastOne, optionalSet, range } from '@gitborlando/utils'
 import { divide, max, rcos, rsin } from 'src/editor/math/base'
 import { IXY, xy_ } from 'src/editor/math/xy'
-import { createArray, firstOne, lastOne } from 'src/shared/utils/array'
 
 export type IPoint = {
   type: 'point'
@@ -28,8 +28,8 @@ export function point(option?: Partial<IPoint>): IPoint {
 export function createLine(start: IXY, length: number) {
   const end = xy_(start.x + length, start.y)
   const points = [point(start), point(end)]
-  firstOne(points).startPath = true
-  lastOne(points).endPath = true
+  optionalSet(firstOne(points), 'startPath', true)
+  optionalSet(lastOne(points), 'endPath', true)
   return points
 }
 
@@ -38,7 +38,7 @@ export function createRegularPolygon(width: number, height: number, sideCount: n
   const center = xy_(width / 2, height / 2)
   const radius = max(width, height) / 2
   const delta = 360 / sideCount
-  const points = createArray(sideCount).map((i) => {
+  const points = range(sideCount).map((i) => {
     const angle = i * delta - 90
     if (width > height) {
       const x = center.x + rcos(angle) * radius
@@ -50,8 +50,8 @@ export function createRegularPolygon(width: number, height: number, sideCount: n
       return point({ x, y })
     }
   })
-  firstOne(points).startPath = true
-  lastOne(points).endPath = true
+  optionalSet(firstOne(points), 'startPath', true)
+  optionalSet(lastOne(points), 'endPath', true)
   return points
 }
 
@@ -59,14 +59,14 @@ export function createStarPolygon(
   width: number,
   height: number,
   pointCount: number,
-  innerRate: number
+  innerRate: number,
 ) {
   pointCount = max(pointCount | 0, 3)
   const center = xy_(width / 2, height / 2)
   const outerRadius = max(width, height) / 2
   const innerRadius = innerRate * outerRadius
   const delta = 360 / pointCount / 2
-  const points = createArray(pointCount * 2).map((i) => {
+  const points = range(pointCount * 2).map((i) => {
     const radius = (-1) ** i === 1 ? outerRadius : innerRadius
     const angle = i * delta - 90
     if (width > height) {
@@ -79,7 +79,7 @@ export function createStarPolygon(
       return point({ x, y })
     }
   })
-  firstOne(points).startPath = true
-  lastOne(points).endPath = true
+  optionalSet(firstOne(points), 'startPath', true)
+  optionalSet(lastOne(points), 'endPath', true)
   return points
 }

@@ -1,3 +1,5 @@
+import { createSignal } from 'src/shared/signal/signal'
+
 export const hue$ = createSignal(280)
 
 export const theme$ = createSignal({

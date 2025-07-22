@@ -1,7 +1,7 @@
+import { createCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { customAlphabet, nanoid } from 'nanoid'
 import { createLine, createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
-import { createCache } from 'src/shared/utils/cache'
 import { COLOR, rgb } from 'src/shared/utils/color'
 import { IRect, IXY } from 'src/shared/utils/normal'
 import { xy_ } from '../math/xy'

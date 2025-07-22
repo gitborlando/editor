@@ -1,3 +1,4 @@
+import { DragData } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { max, ratan2 } from 'src/editor/math/base'
 import { xy_distance } from 'src/editor/math/xy'
@@ -10,7 +11,7 @@ import { INode, INodeParent } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
-import { Drag, type IDragData } from 'src/global/event/drag'
+import { Drag } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
@@ -41,7 +42,7 @@ class StageCreateService {
     Drag.onDown(this.onCreateStart).onMove(this.onCreateMove).onDestroy(this.onCreateEnd)
   }
 
-  private onCreateStart({ start }: IDragData) {
+  private onCreateStart({ start }: DragData) {
     const node = this.createNode(start)
 
     OperateNode.addNodes([node])
@@ -54,7 +55,7 @@ class StageCreateService {
     Surface.disablePointEvent()
   }
 
-  private onCreateMove({ marquee, current, start }: IDragData) {
+  private onCreateMove({ marquee, current, start }: DragData) {
     const node = Schema.find(this.createId)
 
     if (node.type === 'line') {

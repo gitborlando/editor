@@ -38,7 +38,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
       ({ index, point }) => {
         const size = zoom < 1.5 ? 3 : 5
         const handleSize = zoom < 1.5 ? 2 : 3
-        const { handleLeft, handleRight } = point
+        const { handleL: handleLeft, handleR: handleRight } = point
         const selected = index === curIndex.value
 
         const resetNodePoint = (keys: ISchemaPropKey[], value: any) => {
@@ -152,7 +152,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
             />
           </>
         )
-      }
+      },
     )
 
     const OutlinesComp = useMemoComp([zoom, node], ({}) => {

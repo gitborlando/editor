@@ -1,10 +1,9 @@
+import { createObjCache, loopFor } from '@gitborlando/utils'
 import { getEditorSetting } from 'src/editor/editor/editor'
 import { atan2, degreefy, normalAngle, radianfy } from 'src/editor/math/base'
 import { AABB, OBB } from 'src/editor/math/obb'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/stage/render/surface'
-import { loopFor } from 'src/shared/utils/array'
-import { createObjCache } from 'src/shared/utils/cache'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
 
 export type ElemProps = {
@@ -18,7 +17,11 @@ export type ElemProps = {
 }
 
 export class Elem {
-  constructor(public id = '', public type: 'sceneElem' | 'widgetElem', parent?: Elem) {
+  constructor(
+    public id = '',
+    public type: 'sceneElem' | 'widgetElem',
+    parent?: Elem,
+  ) {
     if (parent) {
       this.parent = parent
       parent.addChild(this)
@@ -187,7 +190,7 @@ class ElemEventHandler {
     xy: IXY,
     hit: boolean,
     isCapture: boolean,
-    stopPropagation: INoopFunc
+    stopPropagation: INoopFunc,
   ) => {
     if (this.eventCount === 0) return
 
@@ -261,7 +264,7 @@ export class ElemHitUtil {
     b: number,
     startAngle: number,
     endAngle: number,
-    innerRate: number
+    innerRate: number,
   ) {
     return (xy: IXY) => {
       const dx = xy.x - cx

@@ -1,8 +1,8 @@
+import { loopFor } from '@gitborlando/utils'
 import { xy_, xy_symmetric } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
 import { SchemaDefault } from 'src/editor/schema/default'
 import { IFrame, INode, INodeParent, IPoint, IStroke } from 'src/editor/schema/type'
-import { loopFor } from 'src/shared/utils/array'
 import { normalizeColor } from 'src/shared/utils/color'
 import { IrregularUtils } from 'src/shared/utils/irregular'
 import { IXY, camelCase } from 'src/shared/utils/normal'
@@ -35,7 +35,10 @@ type SvgNode = ElementNode & { properties: ISvgProps }
 
 export class SvgParser {
   private ratio!: IXY
-  constructor(private svg: string, private xy: IXY) {}
+  constructor(
+    private svg: string,
+    private xy: IXY,
+  ) {}
 
   parse() {
     const svgNode = svgParser(this.svg).children[0] as SvgNode
@@ -99,7 +102,7 @@ export class SvgParser {
         node.points = this.parseSvgPathToPoints(d)
         const shift = xy_(
           (parentNode as any)!.x - node.x - this.xy.x,
-          (parentNode as any)!.y - node.y - this.xy.y
+          (parentNode as any)!.y - node.y - this.xy.y,
         )
         node.points.forEach((point) => IrregularUtils.shiftPointXY(point, shift))
         break
@@ -184,8 +187,8 @@ export class SvgParser {
     function dealCurvePoint(x: number, y: number, x1: number, y1: number, x2: number, y2: number) {
       const handleLeft = { x: x2, y: y2 }
       const handleRight = { x: x1, y: y1 }
-      const point = SchemaDefault.point({ x, y, handleLeft })
-      points[points.length - 1].handleRight = handleRight
+      const point = SchemaDefault.point({ x, y, handleL: handleLeft })
+      points[points.length - 1].handleR = handleRight
       points.push(point)
     }
 
@@ -208,9 +211,9 @@ export class SvgParser {
           break
         case 'smooth curveto':
           const handleLeft = { x: command.x2, y: command.y2 }
-          const handleRight = xy_symmetric(prevPoint.handleLeft!, prevPoint)
-          const point = SchemaDefault.point({ x, y, handleLeft })
-          prevPoint.handleRight = handleRight
+          const handleRight = xy_symmetric(prevPoint.handleL!, prevPoint)
+          const point = SchemaDefault.point({ x, y, handleL: handleLeft })
+          prevPoint.handleR = handleRight
           points.push(point)
           break
         case 'elliptical arc':

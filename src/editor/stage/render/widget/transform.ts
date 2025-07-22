@@ -1,3 +1,4 @@
+import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { radianfy, rcos, rsin } from 'src/editor/math/base'
 import { AABB, OBB } from 'src/editor/math/obb'
@@ -16,7 +17,6 @@ import { Surface } from 'src/editor/stage/render/surface'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
 import { createSignal } from 'src/shared/signal/signal'
-import { createObjCache } from 'src/shared/utils/cache'
 import { hslBlueColor } from 'src/shared/utils/color'
 import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
 import { IXY } from 'src/shared/utils/normal'
@@ -53,8 +53,8 @@ class StageTransformService {
         OperateGeometry.setGeometry('x', x + sceneShiftXY.x)
         OperateGeometry.setGeometry('y', y + sceneShiftXY.y)
       })
-      .onDestroy(({ dragService }) => {
-        if (dragService.started) {
+      .onDestroy(() => {
+        if (Drag.started) {
           if (e.hostEvent.altKey) {
             StageCursor.setCursor('select')
             OperateGeometry.operateKeys.clear()
@@ -157,7 +157,7 @@ class StageTransformService {
     this.transformElem.hitTest = ElemHitUtil.HitRoundRect(
       this.transformOBB.width,
       this.transformOBB.height,
-      0
+      0,
     )
   }
 

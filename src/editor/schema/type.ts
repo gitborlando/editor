@@ -96,8 +96,8 @@ export type IPoint = {
   x: number
   y: number
   radius: number
-  handleLeft?: IXY
-  handleRight?: IXY
+  handleL?: IXY
+  handleR?: IXY
   endPath?: boolean
   startPath?: boolean
 }

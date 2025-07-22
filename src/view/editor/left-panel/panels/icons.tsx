@@ -1,9 +1,9 @@
+import { createCache } from '@gitborlando/utils'
 import { Flex } from '@gitborlando/widget'
 import { FC, memo, useMemo } from 'react'
 import { InView } from 'react-intersection-observer'
 import usePromise from 'react-promise-suspense'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
-import { createCache } from 'src/shared/utils/cache'
 import { hslBlueColor } from 'src/shared/utils/color'
 import { publicPath } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
@@ -68,13 +68,13 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
       const SvgContentComp = useMemoComp([], ({}) => {
         const svgStr = usePromise<[string], string>(
           (url) => fetch(url).then((res) => res.text()),
-          [publicPath(`icons/${curCategory.value}/${name}`)]
+          [publicPath(`icons/${curCategory.value}/${name}`)],
         )
 
         const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
           e.dataTransfer.setData(
             'editor-drop/svg',
-            JSON.stringify({ event: 'dropSvg', data: { svgStr, name } })
+            JSON.stringify({ event: 'dropSvg', data: { svgStr, name } }),
           )
         }
 

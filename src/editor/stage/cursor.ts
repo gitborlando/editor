@@ -1,7 +1,7 @@
+import { createObjCache } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { floor } from 'src/editor/math/base'
 import { Surface } from 'src/editor/stage/render/surface'
-import { createObjCache } from 'src/shared/utils/cache'
 import { listen, listenOnce } from 'src/shared/utils/event'
 
 export type IStageCursorType =
@@ -57,11 +57,11 @@ class StageCursorService {
     return this.svgCache.getSet(`${this.type}-${this.rotation}`, () => {
       if (this.type === 'resize') {
         return `url('${URL.createObjectURL(
-          new Blob([this.resizeSvg(this.rotation)], { type: 'image/svg+xml' })
+          new Blob([this.resizeSvg(this.rotation)], { type: 'image/svg+xml' }),
         )}') 14 14, auto`
       }
       return `url('${URL.createObjectURL(
-        new Blob([this[this.type]], { type: 'image/svg+xml' })
+        new Blob([this[this.type]], { type: 'image/svg+xml' }),
       )}') 5 5, auto`
     })
   }
@@ -101,7 +101,7 @@ class StageCursorService {
     </svg>`
 
   private resizeSvg = (
-    degree: number
+    degree: number,
   ) => `<svg width='25' height='25' viewBox='0 0 25 25' fill='none' xmlns='http://www.w3.org/2000/svg'>
     <path transform='rotate(${degree} 12.5 12.5)' d='M23.9611 11.8673L20.2565 16.2419V13.301V12.901H19.8565H12.4758H5.00089H4.60089V13.301V16.2169L1.02101 11.8627L4.60089 7.78206V10.6414V11.0414H5.00089H12.4758H19.6995H20.0995V10.6414V7.7337L23.9611 11.8673Z' fill='black' stroke='white' stroke-width='0.8'/>
     </svg>`

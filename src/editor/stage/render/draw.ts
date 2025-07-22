@@ -1,3 +1,4 @@
+import { createObjCache, loopFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { getEditorSetting } from 'src/editor/editor/editor'
 import { ImgManager } from 'src/editor/editor/img-manager'
@@ -8,8 +9,6 @@ import { xy_, xy_from } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/stage/render/surface'
 import { ISplitText } from 'src/editor/stage/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
-import { loopFor } from 'src/shared/utils/array'
-import { createObjCache } from 'src/shared/utils/cache'
 import { hslBlueColor, rgba } from 'src/shared/utils/color'
 import { IXY, iife, matchCase, memorize } from 'src/shared/utils/normal'
 import {
@@ -93,7 +92,7 @@ class StageNodeDrawerService {
 
         const dirtyHeight = lineHeight * this.splitTexts.length
         this.dirtyRects.push(
-          AABB.Expand(this.elem.aabb, 0, 0, 0, this.elem.aabb.minY + dirtyHeight)
+          AABB.Expand(this.elem.aabb, 0, 0, 0, this.elem.aabb.minY + dirtyHeight),
         )
         break
     }
@@ -150,13 +149,13 @@ class StageNodeDrawerService {
       if (cur.startPath) {
         this.path2d.moveTo(cur.x, cur.y)
       }
-      if (cur.handleRight && next.handleLeft) {
-        const [cp2, cp1] = [next.handleLeft, cur.handleRight]
+      if (cur.handleR && next.handleL) {
+        const [cp2, cp1] = [next.handleL, cur.handleR]
         this.path2d.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, next.x, next.y)
-      } else if (cur.handleRight) {
-        this.path2d.quadraticCurveTo(cur.handleRight.x, cur.handleRight.y, next.x, next.y)
-      } else if (next.handleLeft) {
-        this.path2d.quadraticCurveTo(next.handleLeft.x, next.handleLeft.y, cur.x, cur.y)
+      } else if (cur.handleR) {
+        this.path2d.quadraticCurveTo(cur.handleR.x, cur.handleR.y, next.x, next.y)
+      } else if (next.handleL) {
+        this.path2d.quadraticCurveTo(next.handleL.x, next.handleL.y, cur.x, cur.y)
       } else if (!next.startPath) {
         this.path2d.lineTo(next.x, next.y)
       }
@@ -177,7 +176,7 @@ class StageNodeDrawerService {
     this.splitTexts = this.splitTextsCache.getSet(
       this.node.id,
       () => Surface.textBreaker.breakText(content, width, style, letterSpacing),
-      [content, width, style]
+      [content, width, style],
     )
   }
 
@@ -296,7 +295,7 @@ class StageNodeDrawerService {
     this.ctx.shadowOffsetY = offsetY
 
     this.dirtyRects.push(
-      AABB.Expand(this.elem.aabb, -offsetX + blur, -offsetY + blur, offsetX + blur, offsetY + blur)
+      AABB.Expand(this.elem.aabb, -offsetX + blur, -offsetY + blur, offsetX + blur, offsetY + blur),
     )
   }
 
@@ -357,7 +356,7 @@ class StageNodeDrawerService {
           height / 2,
           startAngle,
           endAngle,
-          innerRate
+          innerRate,
         )
         break
 
@@ -378,7 +377,7 @@ class StageNodeDrawerService {
         const { content, style, width } = this.node
         this.elem.eventHandle.cacheHitTest(
           () => ElemHitUtil.HitPolyline(this.getTextCollideXys(), style.lineHeight),
-          [content, style, width]
+          [content, style, width],
         )
         break
       }
@@ -391,15 +390,15 @@ class StageNodeDrawerService {
 
     loopFor(points, (cur, next) => {
       if (next.startPath) return
-      if (cur.handleRight && next.handleLeft) {
-        const [cp2, cp1] = [cur.handleRight, next.handleLeft]
+      if (cur.handleR && next.handleL) {
+        const [cp2, cp1] = [cur.handleR, next.handleL]
         const xys = pointsOnBezierCurves([cur, cp2, cp1, next], 0.3, 0.3)
         collideXys.push(...xys.slice(1))
-      } else if (cur.handleRight) {
-        const xys = pointsOnBezierCurves([cur, cur.handleRight, next, next], 0.3, 0.3)
+      } else if (cur.handleR) {
+        const xys = pointsOnBezierCurves([cur, cur.handleR, next, next], 0.3, 0.3)
         collideXys.push(...xys.slice(1))
-      } else if (next.handleLeft) {
-        const xys = pointsOnBezierCurves([cur, cur, next.handleLeft, next], 0.3, 0.3)
+      } else if (next.handleL) {
+        const xys = pointsOnBezierCurves([cur, cur, next.handleL, next], 0.3, 0.3)
         collideXys.push(...xys.slice(1))
       } else {
         collideXys.push(xy_from(next))

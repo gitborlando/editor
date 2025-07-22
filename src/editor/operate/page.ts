@@ -1,6 +1,6 @@
+import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { xy_ } from 'src/editor/math/xy'
-import { createObjCache } from 'src/shared/utils/cache'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaDefault } from '../schema/default'
 import { Schema } from '../schema/schema'

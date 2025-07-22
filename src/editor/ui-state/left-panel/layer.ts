@@ -1,3 +1,4 @@
+import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import { OperateNode } from 'src/editor/operate/node'
@@ -6,7 +7,6 @@ import { Schema } from 'src/editor/schema/schema'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { createStorageItem } from 'src/global/storage'
 import { createSignal } from 'src/shared/signal/signal'
-import { createObjCache } from 'src/shared/utils/cache'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { ceil, floor, max, min } from '../../math/base'
 import { ID, INode, INodeParent } from '../../schema/type'
@@ -180,7 +180,7 @@ class UILeftPanelLayerService {
       ({ id, upLevelRef }) => {
         if (!this.nodeIdsInSearch.value.has(id) || !upLevelRef?.id) return
         this.setSingleNodeExpanded(upLevelRef.id, true)
-      }
+      },
     )
     this.afterSearch.dispatch()
   }

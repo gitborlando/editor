@@ -1,3 +1,4 @@
+import { firstOne } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
@@ -16,7 +17,6 @@ import { StageVectorEdit } from 'src/editor/stage/render/widget/vector-edit'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Menu } from 'src/global/menu'
 import { batchSignal, createSignal } from 'src/shared/signal/signal'
-import { firstOne } from 'src/shared/utils/array'
 import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
 import { macroMatch, type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
@@ -69,7 +69,7 @@ class StageSelectService {
     } else if (OperateNode.selectIds.value.size === 1) {
       const ancestor = SchemaUtil.findAncestor(
         this.hoverId,
-        (node) => node.parentId === firstOne(OperateNode.selectIds.value)
+        (node) => node.parentId === firstOne(OperateNode.selectIds.value),
       )
       this.onSelect(ancestor.id)
     }

@@ -1,7 +1,7 @@
+import { createCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { divide } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
-import { createCache } from 'src/shared/utils/cache'
 import { ITraverseData, SchemaUtil } from 'src/shared/utils/schema'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { Schema } from '../schema/schema'
@@ -186,13 +186,13 @@ class OperateGeometryService {
     node.points.forEach((point, i) => {
       if (this.operateKeys.has('width')) {
         point.x *= 1 + this.deltaRate('width', node)
-        point.handleLeft && (point.handleLeft.x *= 1 + this.deltaRate('width', node))
-        point.handleRight && (point.handleRight.x *= 1 + this.deltaRate('width', node))
+        point.handleL && (point.handleL.x *= 1 + this.deltaRate('width', node))
+        point.handleR && (point.handleR.x *= 1 + this.deltaRate('width', node))
       }
       if (this.operateKeys.has('height')) {
         point.y *= 1 + this.deltaRate('height', node)
-        point.handleLeft && (point.handleLeft.y *= 1 + this.deltaRate('height', node))
-        point.handleRight && (point.handleRight.y *= 1 + this.deltaRate('height', node))
+        point.handleL && (point.handleL.y *= 1 + this.deltaRate('height', node))
+        point.handleR && (point.handleR.y *= 1 + this.deltaRate('height', node))
       }
     })
   }

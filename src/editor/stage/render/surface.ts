@@ -1,3 +1,4 @@
+import { reverseFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { getEditorSetting } from 'src/editor/editor/editor'
 import { abs, max } from 'src/editor/math/base'
@@ -13,7 +14,6 @@ import { xy_, xy_center, xy_client, xy_minus, xy_rotate } from 'src/editor/math/
 import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { createSignal, multiSignal } from 'src/shared/signal/signal'
-import { reverseFor } from 'src/shared/utils/array'
 import { IClientXY } from 'src/shared/utils/event'
 import { INoopFunc, IXY, Raf, dpr, getTime } from 'src/shared/utils/normal'
 import TinyQueue from 'tinyqueue'
@@ -99,7 +99,7 @@ export class StageSurface {
       elem.children.forEach((elem, selfIndex) => {
         if (!elem.visible) return
         this.fullRenderElemsMinHeap.push({ elem, selfIndex, layerIndex })
-      })
+      }),
     )
   }
 
@@ -164,7 +164,7 @@ export class StageSurface {
       tr.x * dpr + (xNotInt ? -0.5 : 0),
       tr.y * dpr + (yNotInt ? -0.5 : 0),
       width,
-      height
+      height,
     )
 
     this.ctx.clearRect(0, 0, width, height)
@@ -177,7 +177,7 @@ export class StageSurface {
       this.xNotIntTime === 2 ? 1 : 0,
       this.yNotIntTime === 2 ? 1 : 0,
       width,
-      height
+      height,
     )
 
     this.yNotIntTime = this.yNotIntTime === 2 ? 0 : this.yNotIntTime
@@ -193,7 +193,7 @@ export class StageSurface {
     const expand = (aabb: AABB, ...expands: number[]) =>
       AABB.Expand(
         aabb,
-        ...(expands.map((i) => i / getZoom()) as [number] | [number, number, number, number])
+        ...(expands.map((i) => i / getZoom()) as [number] | [number, number, number, number]),
       )
     this.dirtyRects.add(elem.getDirtyRect(expand))
     this.requestRender('partialRender')
@@ -284,7 +284,7 @@ export class StageSurface {
   addEvent = <K extends keyof HTMLElementEventMap>(
     type: K,
     listener: (this: HTMLCanvasElement, ev: HTMLElementEventMap[K]) => any,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ) => {
     if (this.inited$.value) {
       this.canvas.addEventListener(type, listener, options)
@@ -296,7 +296,7 @@ export class StageSurface {
   removeEvent<K extends keyof HTMLElementEventMap>(
     type: K,
     listener: (this: HTMLCanvasElement, ev: HTMLElementEventMap[K]) => any,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ) {
     this.canvas.removeEventListener(type, listener, options)
   }
@@ -317,9 +317,9 @@ export class StageSurface {
       stopped: boolean,
       stopPropagation: INoopFunc,
       hitList?: Elem[],
-      xy?: IXY
+      xy?: IXY,
     ) => any,
-    noBubble?: boolean
+    noBubble?: boolean,
   ) => {
     let stopped = false
     const stopPropagation = () => (stopped = true)

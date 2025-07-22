@@ -1,5 +1,5 @@
+import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { createObjCache } from 'src/shared/utils/cache'
 
 export type IImage = {
   objectUrl: string
