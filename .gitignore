@@ -22,3 +22,5 @@ test-html
 *.njsproj
 *.sln
 *.sw?
+
+auto-imports.d.ts
