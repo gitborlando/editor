@@ -18,7 +18,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noEmit": true,
-    "paths": {}
+    "jsx": "react-jsx",
+    "paths": {
+      "src/*": ["src/*"]
+    }
   },
-  "include": ["packages", "client", "server"]
+  "include": ["src"]
 }
