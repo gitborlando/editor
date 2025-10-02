@@ -1,10 +1,8 @@
-import axios from 'axios'
 import autobind from 'class-autobind-decorator'
 import { fileTypeFromBuffer } from 'file-type'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
-import { api } from 'src/global/api'
 import { Uploader } from 'src/global/upload'
 import { IClientXY, preventDefault } from 'src/shared/utils/event'
 import { ImgManager } from '../editor/img-manager'
@@ -69,8 +67,9 @@ export class StageDropService {
   }
 
   private async onDropUrl(url: string) {
-    const ossUrl = await api.upload.uploadControllerUploadByUrl({ url })
-    await this.dropImage(ossUrl)
+    // const ossUrl = await api.upload.uploadControllerUploadByUrl({ url })
+    // await this.dropImage(ossUrl)
+    await this.dropImage(url)
   }
 
   private async onDropFiles(e: DragEvent, files: File[]) {
@@ -94,20 +93,20 @@ export class StageDropService {
       case 'image/jpg':
       case 'image/gif':
       case 'image/webp':
-        const { signedUploadUrl, url } = await api.upload.uploadControllerGetSignedUrl({
-          ext: fileType!.ext,
-        })
-        await axios.put(signedUploadUrl, file, {
-          onUploadProgress: (progress) => {
-            console.log('progress: ', progress)
-          },
-          headers: {
-            'Content-Type': fileType!.mime,
-            'Cache-Control': 'immutable',
-          },
-        })
-        await this.dropImage(url)
-        break
+      // const { signedUploadUrl, url } = await api.upload.uploadControllerGetSignedUrl({
+      //   ext: fileType!.ext,
+      // })
+      // await axios.put(signedUploadUrl, file, {
+      //   onUploadProgress: (progress) => {
+      //     console.log('progress: ', progress)
+      //   },
+      //   headers: {
+      //     'Content-Type': fileType!.mime,
+      //     'Cache-Control': 'immutable',
+      //   },
+      // })
+      // await this.dropImage(url)
+      // break
     }
   }
 

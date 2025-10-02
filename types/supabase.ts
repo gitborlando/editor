@@ -11,17 +11,20 @@ export type Database = {
       files: {
         Row: {
           createdAt: string
-          id: number
+          id: string
+          name: string
           url: string
         }
         Insert: {
           createdAt?: string
-          id?: number
-          url?: string
+          id?: string
+          name: string
+          url: string
         }
         Update: {
           createdAt?: string
-          id?: number
+          id?: string
+          name?: string
           url?: string
         }
         Relationships: []
