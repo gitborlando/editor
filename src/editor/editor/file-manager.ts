@@ -3,7 +3,6 @@ import localforage from 'localforage'
 import { Uploader } from 'src/global/upload'
 import { createSignal } from 'src/shared/signal/signal'
 import { jsonFy, jsonParse } from 'src/shared/utils/normal'
-import listJson from '../../../public/mock/list.json'
 import { Schema } from '../schema/schema'
 import { IMeta, ISchema } from '../schema/type'
 
@@ -14,7 +13,7 @@ class FileManagerService {
   fileMetaList$ = createSignal<IMeta[]>([])
 
   async getFileMetaList() {
-    const mockList = Object.values(listJson) as IMeta[]
+    const mockList = [] as IMeta[]
     this.fileMetaList$.value = [...mockList]
     const keys = await this.fileForage.keys()
     for (const key of keys) {

@@ -9,20 +9,18 @@ const autoImportConfig = autoImport({
   imports: [
     'react',
     'react-router',
-    'mobx',
     'mobx-react-lite',
     {
       'src/view/assets/assets': ['Assets'],
       'src/shared/signal/signal': ['createSignal'],
     },
   ],
-  dts: 'src/auto-imports.d.ts',
   exclude: ['src/shared/**'],
 })
 
 export default defineConfig(() => {
   return {
-    plugins: [autoImportConfig, react(), unocss(), reactClickToComponent()],
+    plugins: [react(), unocss(), autoImportConfig, reactClickToComponent()],
     resolve: {
       alias: {
         src: path.resolve(__dirname, 'src'),

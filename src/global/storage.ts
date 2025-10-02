@@ -1,4 +1,4 @@
-import { StorageUtil } from '@gitborlando/utils'
+import { StorageUtil } from '@gitborlando/utils/browser'
 import { createSignal } from 'src/shared/signal/signal'
 
 export const Storage = new StorageUtil()
