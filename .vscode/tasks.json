@@ -3,9 +3,9 @@
   "tasks": [
     {
       "label": "生成组件",
-      "type": "shell",
-      "command": "node",
-      "args": ["scripts/gen-component.js", "${input:componentName}"]
+      "type": "process",
+      "command": "npx",
+      "args": ["tsx", "scripts/gen-comp.ts", "${input:componentName}", "${input:dirName}"]
     }
   ],
   "inputs": [
@@ -13,6 +13,12 @@
       "id": "componentName",
       "description": "输入组件名称 (例如: UserCard, NavigationBar)",
       "default": "MyComponent",
+      "type": "promptString"
+    },
+    {
+      "id": "dirName",
+      "description": "输入文件夹名称 (例如: files, user)",
+      "default": "src/view/component",
       "type": "promptString"
     }
   ]
