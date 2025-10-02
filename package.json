@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "edgeone": "edgeone pages dev",
     "dev": "npx vite",
     "build": "npx vite build",
     "preview": "npx vite preview",
@@ -60,6 +61,7 @@
     "basic-ftp": "^5.0.5",
     "camelcase": "^8.0.0",
     "depcheck": "^1.4.7",
+    "edgeone": "^1.1.15",
     "esno": "^4.8.0",
     "husky": "^9.1.7",
     "less": "^4.4.0",

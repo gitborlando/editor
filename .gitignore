@@ -24,3 +24,10 @@ test-html
 *.sw?
 
 auto-imports.d.ts
+
+# Tencent Cloud EdgeOne
+.env
+.edgeone/*
+!.edgeone/project.json
+.tef_dist/*
+  
