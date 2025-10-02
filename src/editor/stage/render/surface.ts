@@ -1,6 +1,6 @@
 import { reverseFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
-import { getEditorSetting } from 'src/editor/editor/editor'
+import { EditorSetting } from 'src/editor/editor/setting'
 import { abs, max } from 'src/editor/math/base'
 import {
   IMatrix,
@@ -107,7 +107,7 @@ export class StageSurface {
     this.ctx.transform(...this.dprMatrix)
     this.ctx.transform(...this.viewportMatrix)
 
-    if (!getEditorSetting('needSliceRender')) {
+    if (!EditorSetting.setting.needSliceRender) {
       this.layerList.forEach((elem) => elem.traverseDraw(this.ctx))
       return
     }

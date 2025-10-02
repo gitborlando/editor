@@ -6,7 +6,6 @@ import { mockCollide } from 'src/editor/editor/mock/collide'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
-import { createStorageItem } from 'src/global/storage'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
 import { OperateNode } from '../operate/node'
@@ -83,27 +82,6 @@ export class EditorService {
     await this.initSchema()
     UILeftPanelLayer.init()
   }
-
-  private createSetting = <T>(name: string, value: T) => {
-    return createStorageItem<T>(`Editor.User.${name}`, value)
-  }
-
-  settings = {
-    autosave: this.createSetting('autoSave', true),
-    menuShowTopTab: this.createSetting('menuShowTopTab', true),
-    devMode: this.createSetting('devMode', false),
-    ignoreUnVisible: this.createSetting('ignoreUnVisible', true),
-    showFPS: this.createSetting('showFPS', true),
-    needSliceRender: this.createSetting('needSliceRender', true),
-  }
-
-  getSetting<T extends keyof EditorService['settings']>(name: T) {
-    return this.settings[name].value
-  }
 }
 
 export const Editor = new EditorService()
-
-export function getEditorSetting<T extends keyof EditorService['settings']>(name: T) {
-  return Editor.settings[name].value
-}

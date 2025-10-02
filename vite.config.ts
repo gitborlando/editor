@@ -31,7 +31,7 @@ export default defineConfig(() => {
     css: {
       preprocessorOptions: {
         less: {
-          additionalData: `@import 'src/view/component/styles/variable.less';`,
+          additionalData: `@import 'src/view/styles/variable.less';`,
         },
       },
     },

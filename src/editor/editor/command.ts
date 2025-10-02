@@ -1,6 +1,6 @@
 import hotkeys from 'hotkeys-js'
-import { getEditorSetting } from 'src/editor/editor/editor'
 import { FileManager } from 'src/editor/editor/file-manager'
+import { EditorSetting } from 'src/editor/editor/setting'
 import { SchemaHistory } from 'src/editor/schema/history'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageScene } from 'src/editor/stage/render/scene'
@@ -67,7 +67,7 @@ class EditorCommandManager {
       },
     ]
 
-    if (getEditorSetting('devMode')) {
+    if (EditorSetting.setting.devMode) {
       commands.push({
         name: '打印 schema',
         callback: () => {
@@ -100,7 +100,7 @@ class EditorCommandManager {
       },
     ]
 
-    if (getEditorSetting('devMode')) {
+    if (EditorSetting.setting.devMode) {
       commands.push(
         {
           name: '打印 schema',
@@ -117,7 +117,7 @@ class EditorCommandManager {
               console.log(StageScene.findElem(id))
             })
           },
-        }
+        },
       )
     }
 

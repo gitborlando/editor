@@ -1,12 +1,11 @@
-import { FC, memo, useEffect, useRef } from 'react'
-import { Editor } from 'src/editor/editor/editor'
+import { FC, useEffect, useRef } from 'react'
 
 import { Flex } from '@gitborlando/widget'
-import { useHookSignal } from 'src/shared/signal/signal-react'
+import { EditorSetting } from 'src/editor/editor/setting'
 import { useMemoComp } from 'src/shared/utils/react'
 
-export const FPSComp: FC<{}> = memo(({}) => {
-  const showFPS = useHookSignal(Editor.settings.showFPS)
+export const FPSComp: FC<{}> = observer(({}) => {
+  const { showFPS } = EditorSetting.setting
 
   const ContentComp = useMemoComp([], ({}) => {
     const ref = useRef<HTMLDivElement>(null)
@@ -24,7 +23,7 @@ export const FPSComp: FC<{}> = memo(({}) => {
         const time = performance.now()
         if (time > prevTime + 1000) {
           ref.current!.innerText = `${Math.round(
-            Math.max((frames * 1000) / (time - prevTime), 0)
+            Math.max((frames * 1000) / (time - prevTime), 0),
           )}fps`
           prevTime = time
           frames = 0

@@ -1,7 +1,7 @@
 import { Flex, Icon } from '@gitborlando/widget'
-import { FC, memo, useRef } from 'react'
+import { FC, useRef } from 'react'
 import { IEditorCommand } from 'src/editor/editor/command'
-import { Editor } from 'src/editor/editor/editor'
+import { EditorSetting } from 'src/editor/editor/setting'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -14,7 +14,7 @@ import { Divide } from 'src/view/ui-utility/widget/divide'
 
 type IMenuComp = {}
 
-export const MenuComp: FC<IMenuComp> = memo(({}) => {
+export const MenuComp: FC<IMenuComp> = observer(({}) => {
   const { setRef, xy, menuOptions, closeMenu } = Menu
   useHookSignal(menuOptions)
   useHookSignal(xy)
@@ -51,7 +51,7 @@ export const MenuComp: FC<IMenuComp> = memo(({}) => {
     )
   })
 
-  const menuShowTopTab = useHookSignal(Editor.settings.menuShowTopTab)
+  const menuShowTopTab = EditorSetting.setting.menuShowTopTab
   const showTopTab = menuShowTopTab && StageViewport.inViewport(xy.value)
 
   const TopTabComp = useMemoComp([], ({}) => {

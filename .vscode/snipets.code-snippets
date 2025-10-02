@@ -9,23 +9,18 @@
   "Component": {
     "prefix": "comp",
     "body": [
-      "import { FC, memo } from 'react'",
-      "import { Flex } from '@gitborlando/widget'",
+      "import { FC } from 'react'",
       "",
-      "export const $1${TM_FILENAME_BASE}Comp: FC<{}> = memo(({}) => {",
-      "  return <Flex layout=''></Flex>",
-      "})"
+      "export const $1${TM_FILENAME_BASE}Comp: FC<{}> = observer(({}) => {",
+      "  return <G></G>",
+      "})",
     ],
-    "description": "Component"
+    "description": "Component",
   },
   "Sub Component": {
     "prefix": "subcomp",
-    "body": [
-      "const $1Comp = useMemoComp([], ({}) => {",
-      "  return (<Flex layout=''></Flex>)",
-      "})"
-    ],
-    "description": "Sub Component"
+    "body": ["const $1Comp: FC<{}> = ({}) => { return (<G></G>) }"],
+    "description": "Sub Component",
   },
   "Widget": {
     "prefix": "widget",
@@ -38,9 +33,9 @@
       "",
       "export const $1${TM_FILENAME_BASE} = forwardRef<HTMLDivElement, I$1${TM_FILENAME_BASE}>(({ className, ...rest }, ref) => {",
       "  return <Flex layout='' className='' {...rest} ref={ref}></Flex>",
-      "})"
+      "})",
     ],
-    "description": "Widget"
+    "description": "Widget",
   },
   "Service": {
     "prefix": "service",
@@ -49,30 +44,14 @@
       "",
       "@autobind",
       "class $1${TM_FILENAME_BASE}Service {",
-      "  initHook() {",
+      "  constructor() {",
+      "    makeAutoObservable(this)",
       "  }",
       "}",
       "",
       "export const $1${TM_FILENAME_BASE} = new $1${TM_FILENAME_BASE}Service()",
-      ""
+      "",
     ],
-    "description": "Service"
+    "description": "Service",
   },
-  "Public method": {
-    "prefix": "method",
-    "scope": "typescript",
-    "body": ["$1 = () => {}"],
-    "description": "Public method"
-  },
-  "Private method": {
-    "prefix": "private method",
-    "scope": "typescript",
-    "body": ["private $1 = () => {}"],
-    "description": "Private method"
-  },
-  "Flex": {
-    "prefix": "flex",
-    "body": ["<Flex layout=''></Flex>"],
-    "description": "flex"
-  }
 }

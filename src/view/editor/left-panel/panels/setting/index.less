@@ -1,0 +1,31 @@
+.editor-setting {
+  padding: 12px;
+  height: fit-content;
+}
+
+.boolean-setting {
+  height: fit-content;
+  justify-content: space-between;
+}
+
+.switch {
+  width: 40px;
+  height: 20px;
+  border-radius: 99px;
+  padding: 4px;
+  cursor: pointer;
+  outline: 1px solid @light-gray;
+  transition: all 0.3s ease;
+
+  &-checked .switch-inner {
+    background-color: @color;
+    margin-left: auto;
+  }
+
+  &-inner {
+    width: 12px;
+    height: 12px;
+    border-radius: 99px;
+    background-color: @light-gray;
+  }
+}

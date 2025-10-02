@@ -1,7 +1,7 @@
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
-import { getEditorSetting } from 'src/editor/editor/editor'
 import { ImgManager } from 'src/editor/editor/img-manager'
+import { EditorSetting } from 'src/editor/editor/setting'
 import { max, radianfy } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
 import { AABB } from 'src/editor/math/obb'
@@ -185,7 +185,7 @@ class StageNodeDrawerService {
     const { lineHeight } = style
 
     this.splitTexts.forEach(({ text, start, width }, i) => {
-      if (getEditorSetting('ignoreUnVisible')) {
+      if (EditorSetting.setting.ignoreUnVisible) {
         const visualWidth = width * getZoom()
         const visualHeight = lineHeight * getZoom()
         if (visualWidth / text.length < 2.5 || visualHeight < 2.5) {

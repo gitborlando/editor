@@ -1,6 +1,6 @@
 import { flushFuncs } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { Editor } from 'src/editor/editor/editor'
+import { EditorSetting } from 'src/editor/editor/setting'
 import SaveWorker from 'src/editor/schema/worker.ts?worker'
 import { createSignal } from 'src/shared/signal/signal'
 import { INoopFunc } from 'src/shared/utils/normal'
@@ -122,7 +122,7 @@ class SchemaService {
   private saveWorker = new SaveWorker()
 
   save = (patches: ImmuiPatch[], reverse?: boolean) => {
-    if (!Editor.getSetting('autosave')) return
+    if (!EditorSetting.setting.autosave) return
     this.saveWorker.postMessage({ patches, reverse })
   }
 }

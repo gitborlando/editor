@@ -1,4 +1,6 @@
+import cx from 'classix'
 import { ComponentPropsWithRef, FC, memo } from 'react'
+import './index.less'
 
 export const Grid: FC<
   {
@@ -6,15 +8,14 @@ export const Grid: FC<
     vertical?: string
     gap?: number
   } & ComponentPropsWithRef<'div'>
-> = memo(({ children, style, horizontal, vertical, gap, ...rest }) => {
+> = memo(({ children, style, className, horizontal, vertical, gap, ...rest }) => {
   return (
     <div
+      className={cx('grid', className)}
       style={{
         ...style,
-        display: 'grid',
         gridTemplateColumns: horizontal,
         gridTemplateRows: vertical,
-        gap,
       }}
       {...rest}>
       {children}

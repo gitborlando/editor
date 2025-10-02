@@ -8,7 +8,7 @@ import { GalleryComp } from 'src/view/editor/left-panel/panels/gallery'
 import { HistoryComp } from 'src/view/editor/left-panel/panels/history'
 import { IconsComp } from 'src/view/editor/left-panel/panels/icons'
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer/layer'
-import { SettingComp } from 'src/view/editor/left-panel/panels/setting'
+import { SettingComp } from 'src/view/editor/left-panel/panels/setting/setting'
 
 type ISwitchTabOption = {
   id: string
@@ -27,7 +27,7 @@ class UILeftPanelService {
   switchTabIds = <string[]>[]
   initHook() {
     this.showLeftPanel.hook({ immediately: true }, (show) =>
-      StageViewport.bound.dispatch((bound) => (bound.x = show ? 280 : 40))
+      StageViewport.bound.dispatch((bound) => (bound.x = show ? 280 : 40)),
     )
   }
   registerSwitchTab(option: ISwitchTabOption) {

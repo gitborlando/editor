@@ -1,5 +1,5 @@
 import { createObjCache, loopFor } from '@gitborlando/utils'
-import { getEditorSetting } from 'src/editor/editor/editor'
+import { EditorSetting } from 'src/editor/editor/setting'
 import { atan2, degreefy, normalAngle, radianfy } from 'src/editor/math/base'
 import { AABB, OBB } from 'src/editor/math/obb'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
@@ -63,7 +63,7 @@ export class Elem {
     if (!this.visible) return
     if (customFunc?.(this) === false) return
 
-    if (getEditorSetting('ignoreUnVisible') && this.optimize) {
+    if (EditorSetting.setting.ignoreUnVisible && this.optimize) {
       const visualSize = Surface.getVisualSize(this.aabb)
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
