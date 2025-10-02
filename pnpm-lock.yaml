@@ -22,6 +22,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.58.0
         version: 2.58.0
+      '@tanstack/react-query':
+        specifier: ^5.90.2
+        version: 5.90.2(react@19.2.0)
       '@types/node':
         specifier: ^24.1.0
         version: 24.6.2
@@ -34,6 +37,12 @@ importers:
       classix:
         specifier: ^2.2.2
         version: 2.2.4
+      cos-js-sdk-v5:
+        specifier: ^1.10.1
+        version: 1.10.1
+      dayjs:
+        specifier: ^1.11.18
+        version: 1.11.18
       defu:
         specifier: ^6.1.4
         version: 6.1.4
@@ -100,6 +109,9 @@ importers:
       rgb-hex:
         specifier: ^4.1.0
         version: 4.1.0
+      suspend-react:
+        specifier: ^0.1.3
+        version: 0.1.3(react@19.2.0)
       svg-arc-to-cubic-bezier:
         specifier: ^3.2.0
         version: 3.2.0
@@ -1249,6 +1261,20 @@ packages:
         integrity: sha512-Tm1RmQpoAKdQr4/8wiayGti/no+If7RtveVZjHR8zbO7hhQjmPW2Ok5ZBPf1MGkt5c+9R85AVMsTfSaqAP1sUg==,
       }
 
+  '@tanstack/query-core@5.90.2':
+    resolution:
+      {
+        integrity: sha512-k/TcR3YalnzibscALLwxeiLUub6jN5EDLwKDiO7q5f4ICEoptJ+n9+7vcEFy5/x/i6Q+Lb/tXrsKCggf5uQJXQ==,
+      }
+
+  '@tanstack/react-query@5.90.2':
+    resolution:
+      {
+        integrity: sha512-CLABiR+h5PYfOWr/z+vWFt5VsOA2ekQeRQBFSKlcoW6Ndx/f8rfyVmq4LbgOM4GG2qtxAxjLYLOpCNTYm4uKzw==,
+      }
+    peerDependencies:
+      react: ^18 || ^19
+
   '@tokenizer/inflate@0.2.7':
     resolution:
       {
@@ -2302,6 +2328,12 @@ packages:
         integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==,
       }
 
+  cos-js-sdk-v5@1.10.1:
+    resolution:
+      {
+        integrity: sha512-a4SRfCY5g6Z35C7OWe9te/S1zk77rVQzfpvZ33gmTdJQzKxbNbEG7Aw/v453XwVMsQB352FIf7KRMm5Ya/wlZQ==,
+      }
+
   cos-nodejs-sdk-v5@2.15.4:
     resolution:
       {
@@ -2807,6 +2839,13 @@ packages:
     resolution:
       {
         integrity: sha512-B9/wizE4WngqQftFPmdaMYlXoJlJOYxGQOanC77fq9k8+Z0v5dDSVh+3glErdIROP//s/jgb7ZuxKfB8nVyo0g==,
+      }
+    hasBin: true
+
+  fast-xml-parser@4.5.0:
+    resolution:
+      {
+        integrity: sha512-/PlTQCI96+fZMAOLMZK4CWG1ItCbfZ/0jx7UIJFChPNrx7tcEgerUgWbeieCM9MfHInUDyK8DWYZ+YrywDJuTg==,
       }
     hasBin: true
 
@@ -5162,6 +5201,14 @@ packages:
       }
     engines: { node: '>= 0.4' }
 
+  suspend-react@0.1.3:
+    resolution:
+      {
+        integrity: sha512-aqldKgX9aZqpoDp3e8/BZ8Dm7x1pJl+qI3ZKxDN0i/IQTWUwBx/ManmlVJ3wowqbno6c2bmiIfs+Um6LbsjJyQ==,
+      }
+    peerDependencies:
+      react: '>=17.0'
+
   svg-arc-to-cubic-bezier@3.2.0:
     resolution:
       {
@@ -6355,6 +6402,13 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@tanstack/query-core@5.90.2': {}
+
+  '@tanstack/react-query@5.90.2(react@19.2.0)':
+    dependencies:
+      '@tanstack/query-core': 5.90.2
+      react: 19.2.0
+
   '@tokenizer/inflate@0.2.7':
     dependencies:
       debug: 4.4.3
@@ -7014,6 +7068,10 @@ snapshots:
 
   core-util-is@1.0.3: {}
 
+  cos-js-sdk-v5@1.10.1:
+    dependencies:
+      fast-xml-parser: 4.5.0
+
   cos-nodejs-sdk-v5@2.15.4:
     dependencies:
       conf: 9.0.2
@@ -7345,6 +7403,10 @@ snapshots:
   fast-safe-stringify@2.1.1: {}
 
   fast-xml-parser@4.2.5:
+    dependencies:
+      strnum: 1.1.2
+
+  fast-xml-parser@4.5.0:
     dependencies:
       strnum: 1.1.2
 
@@ -8698,6 +8760,10 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
+
+  suspend-react@0.1.3(react@19.2.0):
+    dependencies:
+      react: 19.2.0
 
   svg-arc-to-cubic-bezier@3.2.0: {}
 

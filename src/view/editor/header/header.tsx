@@ -82,11 +82,14 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     return <Button style={{ width: 60 }}>{~~((StageViewport.zoom$.value || 0) * 100)}%</Button>
   })
 
+  const navigate = useNavigate()
+
   return (
     <Flex
       className='lay-h w-100% borderBottom relative bg-white'
       style={{ height: StageViewport.bound.value.y }}>
       <FavIconComp />
+      <Button onClick={() => navigate('/')}>文件列表</Button>
       <Flex className='lay-c w-fit m-auto'>
         <RecordIcons />
         <Divide length={16} thickness={0.5} />

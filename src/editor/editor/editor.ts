@@ -1,11 +1,14 @@
+import { jsonParse } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
 import { FileManager } from 'src/editor/editor/file-manager'
 import { mockCollide } from 'src/editor/editor/mock/collide'
+import { EditorSetting } from 'src/editor/editor/setting'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
+import { FileService } from 'src/global/api/service/file'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
 import { OperateNode } from '../operate/node'
@@ -26,6 +29,7 @@ const jsZip = new JSZip()
 @autobind
 export class EditorService {
   private initHooks() {
+    EditorSetting.initHook()
     EditorCommand.initHook()
 
     OperateNode.initHook()
@@ -47,39 +51,34 @@ export class EditorService {
     UIPickerCopy.initHook()
   }
 
-  private initSchema = async () => {
-    let mockSchema = mockCollide()
-    if (mockSchema) {
-      const schema = mockSchema
-      if (!(await FileManager.fileForage.getItem<ISchema>(schema.meta.fileId))) {
-        await FileManager.saveFile(schema)
-      }
-      Schema.initSchema(schema)
-    } else {
-      if (!location.hash) {
-        location.hash = 'test-file-1'
-      }
-
-      const fileId = location.hash.slice(1)
-      const schema = await FileManager.fileForage.getItem<ISchema>(fileId)
-
-      if (schema) {
+  initSchema = async (fileId: string, onProgress?: (progress: number) => void) => {
+    if (fileId === 'mock') {
+      let mockSchema = mockCollide()
+      if (mockSchema) {
+        const schema = mockSchema
+        if (!(await FileManager.fileForage.getItem<ISchema>(schema.meta.fileId))) {
+          await FileManager.saveFile(schema)
+        }
         Schema.initSchema(schema)
-      } else {
-        // const name = listJson[fileId as keyof typeof listJson].name
-        // const zipBuffer = await (await fetch(publicPath(`mock/${name}.zip`))).arrayBuffer()
-        // const zipFiles = await jsZip.loadAsync(zipBuffer)
-        // const fileText = await zipFiles.file(`${name}.json`)?.async('text')
-        // const schema = jsonParse(fileText) as ISchema
-        // await FileManager.saveFile(schema)
-        // Schema.initSchema(schema)
+      }
+    } else {
+      const fileMeta = await FileService.getFile(fileId)
+      console.log('fileMeta: ', fileMeta)
+      if (fileMeta) {
+        const zipBuffer = await FileService.loadFile(fileMeta.url, onProgress)
+        const zipFiles = await jsZip.loadAsync(zipBuffer)
+        const fileText = await zipFiles
+          .file(`${decodeURIComponent(fileMeta.name)}.json`)
+          ?.async('text')
+        const schema = jsonParse(fileText) as ISchema
+        console.log('schema: ', schema)
+        Schema.initSchema(schema)
       }
     }
   }
 
   initEditor = async () => {
     this.initHooks()
-    await this.initSchema()
     UILeftPanelLayer.init()
   }
 }

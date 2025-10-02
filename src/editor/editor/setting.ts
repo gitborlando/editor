@@ -23,6 +23,9 @@ class EditorSettingService {
     makeAutoObservable(this, {
       setting: observable.ref,
     })
+  }
+
+  initHook() {
     this.autoSaveSetting()
     this.loadSetting()
   }

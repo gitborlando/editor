@@ -6,9 +6,10 @@ export const Grid: FC<
   {
     horizontal?: string
     vertical?: string
+    center?: boolean
     gap?: number
   } & ComponentPropsWithRef<'div'>
-> = memo(({ children, style, className, horizontal, vertical, gap, ...rest }) => {
+> = memo(({ children, style, className, horizontal, vertical, gap, center, ...rest }) => {
   return (
     <div
       className={cx('grid', className)}
@@ -16,6 +17,8 @@ export const Grid: FC<
         ...style,
         gridTemplateColumns: horizontal,
         gridTemplateRows: vertical,
+        gap: gap,
+        ...(center && { justifyContent: 'center', alignItems: 'center' }),
       }}
       {...rest}>
       {children}

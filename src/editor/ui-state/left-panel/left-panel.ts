@@ -3,7 +3,6 @@ import { FC } from 'react'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { createStorageItem } from 'src/global/storage'
 import { createSignal } from 'src/shared/signal/signal'
-import { FileComp } from 'src/view/editor/left-panel/panels/file'
 import { GalleryComp } from 'src/view/editor/left-panel/panels/gallery'
 import { HistoryComp } from 'src/view/editor/left-panel/panels/history'
 import { IconsComp } from 'src/view/editor/left-panel/panels/icons'
@@ -52,12 +51,6 @@ export const UILeftPanel = new UILeftPanelService()
 
 UILeftPanel.switchTabMap.hook(() => {
   UILeftPanel.switchTabIds = [...UILeftPanel.switchTabMap.value.keys()]
-})
-UILeftPanel.registerSwitchTab({
-  id: 'file',
-  name: '文件',
-  icon: Assets.editor.leftPanel.switchBar.file,
-  panel: FileComp,
 })
 UILeftPanel.registerSwitchTab({
   id: 'layer',
