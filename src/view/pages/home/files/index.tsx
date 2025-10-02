@@ -1,4 +1,5 @@
 import { Card } from '@arco-design/web-react'
+import { miniId } from '@gitborlando/utils'
 import { Icon } from '@gitborlando/widget'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
@@ -9,7 +10,7 @@ import { suspense } from 'src/view/component/suspense'
 import { Tables } from 'types/supabase'
 import './index.less'
 
-export const FilesComp: FC<{}> = suspense(
+export const HomeFilesComp: FC<{}> = suspense(
   observer(({}) => {
     const { data } = useSuspenseQuery({
       queryKey: ['files'],
@@ -17,11 +18,16 @@ export const FilesComp: FC<{}> = suspense(
     })
 
     return (
-      <G className='files' horizontal='repeat(auto-fill, 320px)' gap={24}>
-        <NewFileComp />
-        {data?.map((file) => (
-          <FileItemComp key={file.id} file={file} />
-        ))}
+      <G style={{ minHeight: 0, minWidth: 0, overflow: 'auto' }}>
+        <G
+          className='home-files'
+          horizontal='repeat(auto-fill, 320px)'
+          gap={24}
+          style={{ justifyContent: 'center' }}>
+          {data?.map((file) => (
+            <FileItemComp key={file.id + miniId()} file={file} />
+          ))}
+        </G>
       </G>
     )
   }),
@@ -35,9 +41,9 @@ const FileItemComp: FC<{ file: Tables<'files'> }> = ({ file }) => {
   return (
     <Card
       onClick={() => handleClick()}
-      className='files-item'
+      className='home-files-item'
       cover={
-        <G className='files-item-cover'>
+        <G className='home-files-item-cover'>
           <img
             draggable={false}
             src={
@@ -59,11 +65,9 @@ const NewFileComp: FC<{}> = ({}) => {
   return (
     <Card
       onClick={() => {}}
-      className='files-item'
+      className='home-files-item'
       cover={
-        <G
-          className='files-item-newFile'
-          style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <G center className='home-files-item-newFile'>
           <Icon url={Assets.editor.leftPanel.file.newFile} />
         </G>
       }>

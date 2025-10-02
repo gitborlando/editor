@@ -18,7 +18,11 @@ export const Grid: FC<
         gridTemplateColumns: horizontal,
         gridTemplateRows: vertical,
         gap: gap,
-        ...(center && { justifyContent: 'center', alignItems: 'center' }),
+        ...(horizontal && center && { alignItems: 'center' }),
+        ...(vertical && center && { justifyContent: 'center' }),
+        ...(!horizontal &&
+          !vertical &&
+          center && { justifyContent: 'center', alignItems: 'center' }),
       }}
       {...rest}>
       {children}

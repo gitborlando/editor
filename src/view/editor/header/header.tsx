@@ -16,17 +16,6 @@ type IHeaderComp = {}
 export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageInteract.currentType)
 
-  const FavIconComp = useMemoComp([], ({}) => {
-    return (
-      <Flex className='lay-h ml-10 gap-8-8'>
-        <Flex className='lay-h'>
-          <img src={Assets.favIcon.shiyangyang} className='wh-28' />
-          <h4 className='text-hsl60 text-16 ml-10'>Young 编辑器</h4>
-        </Flex>
-      </Flex>
-    )
-  })
-
   const RecordIcons: FC<{}> = useCallback(() => {
     useHookSignal(SchemaHistory.index$)
     return (
@@ -88,7 +77,6 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     <Flex
       className='lay-h w-100% borderBottom relative bg-white'
       style={{ height: StageViewport.bound.value.y }}>
-      <FavIconComp />
       <Button onClick={() => navigate('/')}>文件列表</Button>
       <Flex className='lay-c w-fit m-auto'>
         <RecordIcons />

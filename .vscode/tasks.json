@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "生成组件",
+      "label": "gen-comp",
       "type": "process",
       "command": "npx",
       "args": ["tsx", "scripts/gen-comp.ts", "${input:componentName}", "${input:dirName}"]

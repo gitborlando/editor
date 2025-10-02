@@ -1,11 +1,11 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { EditorComp } from 'src/view/editor/editor'
-import { FilesComp } from 'src/view/pages/files'
+import { HomeComp } from 'src/view/pages/home'
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <FilesComp />,
+    element: <HomeComp />,
   },
   {
     path: '/fileId/:fileId',
