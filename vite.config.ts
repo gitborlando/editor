@@ -1,11 +1,11 @@
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import unocss from 'unocss/vite'
-import autoImport from 'unplugin-auto-import/vite'
+import autoImportPlugin from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import { reactClickToComponent } from 'vite-plugin-react-click-to-component'
 
-const autoImportConfig = autoImport({
+const autoImport = autoImportPlugin({
   imports: [
     'react',
     'react-router',
@@ -13,6 +13,7 @@ const autoImportConfig = autoImport({
     {
       'src/view/assets/assets': ['Assets'],
       'src/shared/signal/signal': ['createSignal'],
+      'src/view/component/grid': ['Grid', 'G'],
     },
   ],
   exclude: ['src/shared/**'],
@@ -20,7 +21,7 @@ const autoImportConfig = autoImport({
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), unocss(), autoImportConfig, reactClickToComponent()],
+    plugins: [react(), unocss(), autoImport, reactClickToComponent()],
     resolve: {
       alias: {
         src: path.resolve(__dirname, 'src'),
