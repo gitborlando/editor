@@ -2,6 +2,7 @@ import { firstOne, reverseFor, stableIndex } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { AABB, OBB } from 'src/editor/math/obb'
+import { YClients } from 'src/editor/schema/y-clients'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { createSignal } from 'src/shared/signal/signal'
 import { clone } from 'src/shared/utils/normal'
@@ -58,14 +59,17 @@ class OperateNodeService {
     return nodes
   }
   select(id: ID) {
+    YClients.select(id)
     if (this.selectIds.value.has(id)) return
     this.selectIds.dispatch((ids) => ids.add(id))
   }
   unSelect(id: ID) {
+    YClients.unSelect(id)
     if (!this.selectIds.value.has(id)) return
     this.selectIds.dispatch((ids) => ids.delete(id))
   }
   clearSelect() {
+    YClients.clearSelect()
     this.selectIds.dispatch(new Set())
   }
   commitSelect() {

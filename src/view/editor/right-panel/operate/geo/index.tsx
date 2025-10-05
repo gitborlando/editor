@@ -1,42 +1,26 @@
-import { Flex } from '@gitborlando/widget'
-import { FC, memo } from 'react'
+import { FC, useMemo } from 'react'
 import { floor, max, min } from 'src/editor/math/base'
 import { IGeometry, OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
 import { getZoom } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
+import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
+import './index.less'
 
-type IGeometryPropsComp = {}
+interface EditorRightOperateGeoProps {}
 
-export const GeometryComp: FC<IGeometryPropsComp> = memo(({}) => {
-  const { geometryKeys } = OperateGeometry
-  const { selectedNodes } = OperateNode
-  useHookSignal(selectedNodes, { after: 'geometryKeyValue' })
-
+export const EditorRightOperateGeo: FC<EditorRightOperateGeoProps> = observer(({}) => {
+  const selectIds = useHookSignal(OperateNode.selectIds)
   return (
-    selectedNodes.value.length !== 0 && (
-      <Flex layout='h' className='flex-wrap gap-4-20 p-8 borderBottom'>
+    selectIds.size > 0 && (
+      <G className='editor-right-operate-geo borderBottom' horizontal='auto auto'>
         <GeometryItemComp label='横坐标' operateKey='x' slideRate={1 / getZoom()} />
         <GeometryItemComp label='纵坐标' operateKey='y' slideRate={1 / getZoom()} />
         <GeometryItemComp label='宽度' operateKey='width' />
         <GeometryItemComp label='高度' operateKey='height' />
         <GeometryItemComp label='旋转' operateKey='rotation' />
-        {geometryKeys.has('radius') && <GeometryItemComp label='圆角' operateKey='radius' />}
-        {geometryKeys.has('sides') && (
-          <GeometryItemComp label='边数' operateKey='sides' slideRate={0.01} />
-        )}
-        {geometryKeys.has('pointCount') && (
-          <GeometryItemComp label='角数' operateKey='pointCount' slideRate={0.01} />
-        )}
-        {geometryKeys.has('startAngle') && (
-          <GeometryItemComp label='起始角' operateKey='startAngle' />
-        )}
-        {geometryKeys.has('endAngle') && <GeometryItemComp label='结束角' operateKey='endAngle' />}
-        {geometryKeys.has('innerRate') && (
-          <GeometryItemComp label='内径比' operateKey='innerRate' slideRate={0.01} />
-        )}
-      </Flex>
+      </G>
     )
   )
 })
@@ -46,12 +30,25 @@ const GeometryItemComp: FC<{
   operateKey: keyof IGeometry
   slideRate?: number
 }> = ({ label, operateKey, slideRate }) => {
-  const { geometryKeyValue, setGeometry } = OperateGeometry
-  const { selectedNodes } = OperateNode
+  const { setGeometry } = OperateGeometry
+  const selectedNodes = useSelectNodes()
+  // const selectIds = useHookSignal(OperateNode.selectIds)
+  // const { selectedNodes } = OperateNode
 
   slideRate = slideRate ?? 1
 
-  useHookSignal(selectedNodes, { after: 'geometryKeyValue' })
+  // useHookSignal(selectedNodes, { after: 'geometryKeyValue' })
+
+  const value = useMemo(() => {
+    const nodes = selectedNodes //[...selectIds].map((id) => state[id])
+    let value = t<any>(nodes[0])[operateKey]
+    for (const node of nodes) {
+      if (t<any>(node)[operateKey] === value) continue
+      value = 'multi'
+      break
+    }
+    return value
+  }, [selectedNodes, operateKey])
 
   const produceValue = (newValue?: number) => {
     if (newValue !== undefined) {
@@ -80,11 +77,10 @@ const GeometryItemComp: FC<{
 
     if (operateKey === 'x' || operateKey === 'y') {
       const datum = OperateNode.datumXY[operateKey]
-      const value = geometryKeyValue.get(operateKey)
       if (value === 'multi') return value
       return value - datum
     }
-    return geometryKeyValue.get(operateKey)
+    return value
   }
 
   const formatNumber = (value: number | 'multi'): string => {
@@ -95,7 +91,7 @@ const GeometryItemComp: FC<{
 
   return (
     <CompositeInput
-      className='d-hover-bg px-6 w-100'
+      className='d-hover-bg px-6 w-100 h-24'
       label={label}
       value={formatNumber(produceValue())}
       onNewValueApply={(v) => setGeometry(operateKey, produceValue(Number(v)) as number)}

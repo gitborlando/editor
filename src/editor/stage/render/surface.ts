@@ -15,9 +15,11 @@ import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-bre
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { createSignal, multiSignal } from 'src/shared/signal/signal'
 import { IClientXY } from 'src/shared/utils/event'
-import { INoopFunc, IXY, Raf, dpr, getTime } from 'src/shared/utils/normal'
+import { INoopFunc, IXY, Raf, getTime } from 'src/shared/utils/normal'
 import TinyQueue from 'tinyqueue'
 import { Elem } from './elem'
+
+const dpr = devicePixelRatio
 
 @autoBind
 export class StageSurface {

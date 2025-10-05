@@ -8,7 +8,7 @@ import { EditorSetting } from 'src/editor/editor/setting'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
-import { FileService } from 'src/global/api/service/file'
+import { FileService } from 'src/global/data/file'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
 import { OperateNode } from '../operate/node'
@@ -29,7 +29,7 @@ const jsZip = new JSZip()
 @autobind
 export class EditorService {
   private initHooks() {
-    EditorSetting.initHook()
+    EditorSetting.init()
     EditorCommand.initHook()
 
     OperateNode.initHook()
@@ -62,8 +62,7 @@ export class EditorService {
         Schema.initSchema(schema)
       }
     } else {
-      const fileMeta = await FileService.getFile(fileId)
-      console.log('fileMeta: ', fileMeta)
+      const fileMeta = await FileService.getFileMeta(fileId)
       if (fileMeta) {
         const zipBuffer = await FileService.loadFile(fileMeta.url, onProgress)
         const zipFiles = await jsZip.loadAsync(zipBuffer)
@@ -71,15 +70,16 @@ export class EditorService {
           .file(`${decodeURIComponent(fileMeta.name)}.json`)
           ?.async('text')
         const schema = jsonParse(fileText) as ISchema
-        console.log('schema: ', schema)
         Schema.initSchema(schema)
+        YState.initSchema(fileId, schema as unknown as V1.Schema)
       }
     }
+
+    UILeftPanelLayer.init()
   }
 
   initEditor = async () => {
     this.initHooks()
-    UILeftPanelLayer.init()
   }
 }
 

@@ -123,7 +123,7 @@ class SchemaService {
 
   save = (patches: ImmuiPatch[], reverse?: boolean) => {
     if (!EditorSetting.setting.autosave) return
-    this.saveWorker.postMessage({ patches, reverse })
+    // this.saveWorker.postMessage({ patches, reverse })
   }
 }
 

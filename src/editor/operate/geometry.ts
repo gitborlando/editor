@@ -2,7 +2,8 @@ import { createCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { divide } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
-import { ITraverseData, SchemaUtil } from 'src/shared/utils/schema'
+import { SchemaUtil2 } from 'src/editor/schema/utils'
+import { ITraverseData } from 'src/shared/utils/schema'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { Schema } from '../schema/schema'
 import { INode, IPolygon, IStar, IVector } from '../schema/type'
@@ -64,7 +65,12 @@ class OperateGeometryService {
     this.hasStartApply = true
 
     queueMicrotask(() => {
-      SchemaUtil.traverseIds(getSelectIds(), this.applyChangeToNode)
+      const traverse = SchemaUtil2.createTraverse({
+        finder: YState.find<V1.Node>,
+        callback: this.applyChangeToNode,
+      })
+      traverse(getSelectIds())
+      // SchemaUtil.traverseIds(getSelectIds(), this.applyChangeToNode)
       Schema.commitOperation('设置几何数据')
       Schema.nextSchema()
       this.syncLastGeometry()
@@ -147,14 +153,17 @@ class OperateGeometryService {
       }
       if (key === 'sides') {
         const { width, height, sides } = node as IPolygon
-        Schema.itemReset(node, ['points'], createRegularPolygon(width, height, sides))
+        t<V1.Polygon>(node).points = createRegularPolygon(width, height, sides)
+        // Schema.itemReset(node, ['points'], createRegularPolygon(width, height, sides))
       }
       if (key === 'pointCount' || key === 'innerRate') {
         const { width, height, pointCount, innerRate } = node as IStar
-        Schema.itemReset(node, ['points'], createStarPolygon(width, height, pointCount, innerRate))
+        t<V1.Star>(node).points = createStarPolygon(width, height, pointCount, innerRate)
+        // Schema.itemReset(node, ['points'], createStarPolygon(width, height, pointCount, innerRate))
       }
       //@ts-ignore
-      Schema.itemReset(node, [key], node[key] + this.delta(key))
+      // Schema.itemReset(node, [key], node[key] + this.delta(key))
+      t<any>(node)[key] = t<any>(node)[key] + this.delta(key)
     })
   }
 

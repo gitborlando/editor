@@ -2,19 +2,17 @@ import cx from 'classix'
 import { FC } from 'react'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { Text } from 'src/view/component/text'
+import { useSnapshot } from 'valtio'
 import './index.less'
 
 type ISettingComp = {}
 
 export const SettingComp: FC<ISettingComp> = observer(({}) => {
   const { autosave, mockMode, showFPS, devMode, ignoreUnVisible, menuShowTopTab, needSliceRender } =
-    EditorSetting.setting
+    useSnapshot(EditorSetting.setting)
 
   const toggle = (key: keyof typeof EditorSetting.setting) => {
-    return (value: boolean) =>
-      EditorSetting.setSetting((draft) => {
-        draft[key] = value
-      })
+    return (value: boolean) => (EditorSetting.setting[key] = value)
   }
 
   return (

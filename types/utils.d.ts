@@ -1,3 +1,9 @@
-/// <reference types="immer" />
+type ID = string
 
-type ImmerSetter<T> = (draft: import('immer').Draft<T>) => import('immer').Draft<T> | void
+type Patch = {
+  type: 'add' | 'remove' | 'replace'
+  path: string
+  keys: (string | number)[]
+  value?: any
+  oldValue?: any
+}

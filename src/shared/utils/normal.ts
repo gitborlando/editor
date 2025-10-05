@@ -1,4 +1,3 @@
-import { Is } from '@gitborlando/utils'
 import camelCase from 'camelcase'
 
 export { camelCase }
@@ -19,8 +18,6 @@ export {
   type AllKeys,
   type ValueOf,
 } from '@gitborlando/utils'
-
-export const dpr = devicePixelRatio
 
 export type INoopFunc = typeof noopFunc
 export function noopFunc() {}
@@ -70,13 +67,4 @@ export function timeOf(count: number, func: (i: number) => any, count2 = 1, skip
 
 export function getTime() {
   return new Date().getTime()
-}
-
-export function publicPath(path: string) {
-  return import.meta.env.DEV ? `./editor/${path}` : `./${path}`
-}
-
-export function optionalSet<T>(target: T | undefined | null, key: keyof T, value: T[keyof T]) {
-  if (Is.nullable(target)) return
-  target[key] = value
 }

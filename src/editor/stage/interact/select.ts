@@ -152,7 +152,7 @@ class StageSelectService {
   }
 
   private onMousedownSelect() {
-    this.onSelect(this.hoverId)
+    this.onSelect(this.hoverId!)
     this.afterSelect.dispatch('stage-single')
   }
 

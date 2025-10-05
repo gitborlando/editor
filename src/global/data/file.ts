@@ -1,7 +1,7 @@
 import axios from 'axios'
 import autobind from 'class-autobind-decorator'
 import { Database } from 'types/supabase'
-import { supabase } from '../supabase'
+import { supabase } from '../sdk/supabase'
 
 @autobind
 class FileServiceClass {
@@ -15,7 +15,7 @@ class FileServiceClass {
     }
   }
 
-  async getFile(id: string) {
+  async getFileMeta(id: string) {
     const { data } = await supabase.from('files').select().eq('id', id)
     return data?.[0]
   }

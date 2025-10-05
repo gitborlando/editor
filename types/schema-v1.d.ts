@@ -1,11 +1,10 @@
 namespace V1 {
   type Schema = {
     meta: Meta
-    client: Client
     [id: string & {}]: SchemaItem
   }
 
-  type SchemaItem = Node | Page | Meta | Client
+  type SchemaItem = Node | Page | Meta
 
   type NodeOrPage = Node | Page
 
@@ -14,15 +13,19 @@ namespace V1 {
     id: 'meta'
     fileId: string
     name: string
-    version: number
+    version: `v${number}`
     pageIds: string[]
+    userId: string
   }
 
   type Client = {
-    id: 'client'
-    type: 'client'
-    selectIds: D[]
-    selectPageId: D
+    userId: string
+    selectIds: Record<string, boolean>
+    selectPageId: string
+  }
+
+  type Clients = {
+    [userId: string]: Client
   }
 
   type NodeParentBase = {

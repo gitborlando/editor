@@ -5,7 +5,6 @@ import { InView } from 'react-intersection-observer'
 import usePromise from 'react-promise-suspense'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { hslBlueColor } from 'src/shared/utils/color'
-import { publicPath } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
 
 type IIconsComp = {}
@@ -68,7 +67,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
       const SvgContentComp = useMemoComp([], ({}) => {
         const svgStr = usePromise<[string], string>(
           (url) => fetch(url).then((res) => res.text()),
-          [publicPath(`icons/${curCategory.value}/${name}`)],
+          [`icons/${curCategory.value}/${name}`],
         )
 
         const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {

@@ -14,6 +14,8 @@ const autoImport = autoImportPlugin({
       'src/view/assets/assets': ['Assets'],
       'src/shared/signal/signal': ['createSignal'],
       'src/view/component/grid': ['Grid', 'G'],
+      'src/editor/schema/y-state': ['YState'],
+      'src/shared/utils/global': ['t'],
     },
   ],
   exclude: ['src/shared/**'],

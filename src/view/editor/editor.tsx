@@ -16,7 +16,7 @@ type IEditorComp = {}
 export const EditorComp: FC<IEditorComp> = suspense(
   memo(({}) => {
     const { fileId } = useParams<{ fileId: string }>()
-    useMemo(() => Editor.initEditor, ['editor-init'])
+    useMemo(() => Editor.initEditor(), [])
     suspend(() => Editor.initSchema(fileId!), [fileId])
     useHookSignal(Schema.schemaChanged, { afterAll: true })
 

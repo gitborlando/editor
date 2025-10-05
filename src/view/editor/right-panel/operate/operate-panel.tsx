@@ -3,6 +3,7 @@ import { FC, memo } from 'react'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { useHookSignal } from 'src/shared/signal/signal-react'
+import { EditorRightOperateGeo } from 'src/view/editor/right-panel/operate/geo'
 import { AlignComp } from './align'
 import { FillPropComp } from './fill'
 import { GeometryComp } from './geometry'
@@ -17,6 +18,7 @@ export const OperatePanelComp: FC<{}> = memo(({}) => {
     <Flex layout='v' className='wh-100% of-y-auto d-scroll'>
       <AlignComp />
       <GeometryComp />
+      <EditorRightOperateGeo />
       <FillPropComp />
       <StrokeComp />
       <ShadowComp />

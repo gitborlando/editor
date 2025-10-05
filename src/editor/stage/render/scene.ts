@@ -54,6 +54,12 @@ class StageSceneService {
       if (keys[1] === 'childIds') this.reHierarchy(patch)
       else this.render(type, keys as string[])
     })
+
+    YState.flushPatch$.hook((op) => {
+      const { type, keys } = op
+      if (keys[1] === 'childIds') this.reHierarchy(op)
+      else this.render(type, keys as string[])
+    })
   }
 
   private renderPage() {
@@ -61,12 +67,14 @@ class StageSceneService {
     this.sceneRoot.children = []
 
     const traverse = (id: ID) => {
-      const node = Schema.find<INode>(id)
+      // const node = Schema.find<INode>(id)
+      const node = YState.find<INode>(id)
       this.render('add', [node.id])
       if ('childIds' in node) node.childIds.forEach(traverse)
     }
 
-    const page = Schema.find<IPage>(Schema.client.selectPageId)
+    // const page = Schema.find<IPage>(Schema.client.selectPageId)
+    const page = YState.find<IPage>(Schema.client.selectPageId)
     page.childIds.forEach(traverse)
   }
 
@@ -74,7 +82,8 @@ class StageSceneService {
     const id = keys[0]
     if (macroMatch`'meta'|'client'`(id)) return
 
-    const node = Schema.find<INode>(id)
+    // const node = Schema.find<INode>(id)
+    const node = YState.find<INode>(id)
 
     switch (true) {
       case op === 'add' && keys.length === 1:

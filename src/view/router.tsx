@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { EditorComp } from 'src/view/editor/editor'
 import { HomeComp } from 'src/view/pages/home'
+import { Test } from 'src/view/pages/test'
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
   {
     path: '*',
     element: <Navigate to='/' />,
+  },
+  {
+    path: '/t',
+    element: <Test />,
   },
 ])
 
