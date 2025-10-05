@@ -5,10 +5,22 @@
       "label": "gen-comp",
       "type": "process",
       "command": "npx",
-      "args": ["tsx", "scripts/gen-comp.ts", "${input:componentName}", "${input:dirName}"]
+      "args": [
+        "tsx",
+        "scripts/gen-comp.ts",
+        "${input:dirName}",
+        "${input:componentName}",
+        "${input:prefix}"
+      ]
     }
   ],
   "inputs": [
+    {
+      "id": "dirName",
+      "description": "输入文件夹名称 (例如: files, user)",
+      "default": "src/view/component",
+      "type": "promptString"
+    },
     {
       "id": "componentName",
       "description": "输入组件名称 (例如: UserCard, NavigationBar)",
@@ -16,9 +28,9 @@
       "type": "promptString"
     },
     {
-      "id": "dirName",
-      "description": "输入文件夹名称 (例如: files, user)",
-      "default": "src/view/component",
+      "id": "prefix",
+      "description": "输入组件前缀 (例如: src, view)",
+      "default": "pages",
       "type": "promptString"
     }
   ]

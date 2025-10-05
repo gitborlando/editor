@@ -11,8 +11,8 @@ importers:
         specifier: ^2.66.5
         version: 2.66.5(@types/react@19.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@gitborlando/utils':
-        specifier: ^4.2.0
-        version: 4.2.0(react@19.2.0)
+        specifier: ^4.5.0
+        version: 4.5.0(react@19.2.0)
       '@gitborlando/widget':
         specifier: ^1.0.1
         version: 1.0.2(react@19.2.0)
@@ -916,10 +916,10 @@ packages:
     peerDependencies:
       unocss: ^0.65.4
 
-  '@gitborlando/utils@4.2.0':
+  '@gitborlando/utils@4.5.0':
     resolution:
       {
-        integrity: sha512-81CJxBvJsdQss1oejbqGRuDoAFb1Vd9/2xW50wI8WNDXamaXYYhiuf2Jtrd3CAnV0HhWG5l0HRclNx/g+SkSyQ==,
+        integrity: sha512-In5c8EvzgKWR7VRNyNc1IrHSPZ2dS3HpsiRObIvPiTlW3K8gmbGfThiI+YX61Bi8DLhTcC+nGYlzxJ4ZKGNvOw==,
       }
     peerDependencies:
       react: '>=16.8.0'
@@ -6259,7 +6259,7 @@ snapshots:
     dependencies:
       unocss: 66.5.2(postcss@8.5.6)(vite@7.1.8(@types/node@24.6.2)(jiti@2.6.1)(less@4.4.1)(tsx@4.20.6))
 
-  '@gitborlando/utils@4.2.0(react@19.2.0)':
+  '@gitborlando/utils@4.5.0(react@19.2.0)':
     dependencies:
       react: 19.2.0
 
