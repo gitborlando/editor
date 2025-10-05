@@ -16,7 +16,7 @@ export const SwitchBarComp: FC<ISwitchBarComp> = memo(({}) => {
   useHookSignal(switchTabMap)
 
   return (
-    <Flex layout='v' className='shrink-0 wh-40-100% bg-white b-1-#E3E3E3-r py-8'>
+    <Flex layout='v' className='shrink-0 wh-40-100% bg-white bd-1-#E3E3E3-r py-8'>
       <Flex layout='v' className='wh-100%-fit gap-10-10'>
         {switchTabIds
           .filter((id) => !popupTabIds.value.has(id))
@@ -24,6 +24,7 @@ export const SwitchBarComp: FC<ISwitchBarComp> = memo(({}) => {
             const tab = findSwitchTab(id)
             return (
               <Button
+                className='r-3!'
                 key={id}
                 active={currentTabId.value === id}
                 onClick={() => currentTabId.dispatch(id)}

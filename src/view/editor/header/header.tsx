@@ -41,7 +41,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
     return (
       <Button active={isActive} onClick={() => StageInteract.currentType.dispatch(type)}>
         <Icon
-          className={cx('wh-20', isActive ? 'path-fill-hsl60' : '')}
+          className={cx('wh-20', isActive ? 'text-hsl60' : '')}
           url={Assets.editor.header.stageOperate[type]}
         />
       </Button>
@@ -59,7 +59,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
           StageCreate.currentType.dispatch(type)
         }}>
         <Icon
-          className={cx('wh-20', isActive ? 'path-fill-hsl60' : '')}
+          className={cx('wh-20', isActive ? 'text-hsl60' : '')}
           url={Assets.editor.node[type as keyof typeof Assets.editor.node]}
         />
       </Button>
