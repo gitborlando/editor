@@ -4,6 +4,7 @@ import { Icon } from '@gitborlando/widget'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import { FC } from 'react'
+import Scrollbars from 'react-custom-scrollbars-2'
 import { FileService } from 'src/global/api/service/file'
 import { Loading } from 'src/view/component/loading'
 import { suspense } from 'src/view/component/suspense'
@@ -19,15 +20,17 @@ export const HomeFilesComp: FC<{}> = suspense(
 
     return (
       <G style={{ minHeight: 0, minWidth: 0, overflow: 'auto' }}>
-        <G
-          className='home-files'
-          horizontal='repeat(auto-fill, 320px)'
-          gap={24}
-          style={{ justifyContent: 'center' }}>
-          {data?.map((file) => (
-            <FileItemComp key={file.id + miniId()} file={file} />
-          ))}
-        </G>
+        <Scrollbars>
+          <G
+            className='home-files'
+            horizontal='repeat(auto-fill, 320px)'
+            gap={24}
+            style={{ justifyContent: 'center' }}>
+            {data?.map((file) => (
+              <FileItemComp key={file.id + miniId()} file={file} />
+            ))}
+          </G>
+        </Scrollbars>
       </G>
     )
   }),

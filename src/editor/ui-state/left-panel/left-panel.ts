@@ -3,9 +3,9 @@ import { FC } from 'react'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { createStorageItem } from 'src/global/storage'
 import { createSignal } from 'src/shared/signal/signal'
-import { GalleryComp } from 'src/view/editor/left-panel/panels/gallery'
 import { HistoryComp } from 'src/view/editor/left-panel/panels/history'
 import { IconsComp } from 'src/view/editor/left-panel/panels/icons'
+import { EditorLeftPanelImages } from 'src/view/editor/left-panel/panels/images'
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer/layer'
 import { SettingComp } from 'src/view/editor/left-panel/panels/setting/setting'
 
@@ -68,7 +68,7 @@ UILeftPanel.registerSwitchTab({
   id: 'source',
   name: '图片',
   icon: Assets.editor.leftPanel.switchBar.image,
-  panel: GalleryComp,
+  panel: EditorLeftPanelImages,
 })
 UILeftPanel.registerSwitchTab({
   id: 'icon',

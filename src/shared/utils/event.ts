@@ -8,7 +8,7 @@ export const isRightMouse = (e: MouseEvent) => e.button === 2
 
 export function listen<K extends keyof WindowEventMap>(
   type: K,
-  listener: (this: Window, ev: WindowEventMap[K]) => any
+  listener: (this: Window, ev: WindowEventMap[K]) => any,
 ) {
   window.addEventListener(type, listener)
   return () => window.removeEventListener(type, listener)
@@ -16,7 +16,7 @@ export function listen<K extends keyof WindowEventMap>(
 
 export function listenOnce<K extends keyof WindowEventMap>(
   type: K,
-  listener: (this: Window, ev: WindowEventMap[K]) => any
+  listener: (this: Window, ev: WindowEventMap[K]) => any,
 ) {
   const once = (ev: WindowEventMap[K]) => {
     listener.call(window, ev)
@@ -27,7 +27,7 @@ export function listenOnce<K extends keyof WindowEventMap>(
 
 export function listenCapture<K extends keyof WindowEventMap>(
   type: K,
-  listener: (this: Window, ev: WindowEventMap[K]) => any
+  listener: (this: Window, ev: WindowEventMap[K]) => any,
 ) {
   window.addEventListener(type, listener, true)
   return () => window.removeEventListener(type, listener, true)
@@ -72,7 +72,7 @@ export function useClickAway(props: IClickAwayProps) {
 export function downUpTracker(
   el: HTMLElement | null,
   _downCallback: INoopFunc,
-  _upCallback: INoopFunc
+  _upCallback: INoopFunc,
 ) {
   if (!el) return
   const downCallback = () => {
@@ -91,11 +91,7 @@ export function useDownUpTracker(
   elCallback: () => HTMLElement | null,
   downCallback: INoopFunc,
   upCallback: INoopFunc,
-  deps: any[] = []
+  deps: any[] = [],
 ) {
   useEffect(() => downUpTracker(elCallback(), downCallback, upCallback), deps)
-}
-
-export function disableDefaultTwoFingerEvent() {
-  window.addEventListener('wheel', (e) => e.preventDefault(), { passive: false })
 }
