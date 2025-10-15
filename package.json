@@ -10,7 +10,8 @@
     "preview": "npx vite preview",
     "re-i": "rm -rf node_modules pnpm-lock.yaml && pnpm i",
     "gen:supabase-types": "npx supabase gen types typescript --project-id sucnlytjgnhjgvwykfbg > types/supabase.ts",
-    "gen:assets": "tsx scripts/gen-assets.ts"
+    "gen:assets": "tsx scripts/gen-assets.ts",
+    "prepare": "npx simple-git-hooks"
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.5",
@@ -80,10 +81,10 @@
     "depcheck": "^1.4.7",
     "edgeone": "^1.1.15",
     "esno": "^4.8.0",
-    "husky": "^9.1.7",
     "less": "^4.4.0",
     "node-ssh": "^13.2.1",
     "pretty-quick": "^4.2.2",
+    "simple-git-hooks": "^2.13.1",
     "supabase": "^2.47.2",
     "swagger-typescript-api": "13.2.7",
     "tsx": "^4.20.3",
@@ -101,5 +102,8 @@
     "semi": false,
     "singleQuote": true,
     "jsxSingleQuote": true
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx pretty-quick --staged"
   }
 }
