@@ -4,6 +4,7 @@ import unocss from 'unocss/vite'
 import autoImportPlugin from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import { reactClickToComponent } from 'vite-plugin-react-click-to-component'
+import reactXIf from 'vite-plugin-react-x-if'
 
 const autoImport = autoImportPlugin({
   imports: [
@@ -11,6 +12,8 @@ const autoImport = autoImportPlugin({
     'react-router',
     'mobx-react-lite',
     {
+      classix: ['cx'],
+      '@gitborlando/signal': ['Signal'],
       'src/view/assets/assets': ['Assets'],
       'src/shared/signal/signal': ['createSignal'],
       'src/view/component/grid': ['Grid', 'G'],
@@ -23,7 +26,7 @@ const autoImport = autoImportPlugin({
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), unocss(), autoImport, reactClickToComponent()],
+    plugins: [react(), unocss(), autoImport, reactClickToComponent(), reactXIf()],
     resolve: {
       alias: {
         src: path.resolve(__dirname, 'src'),

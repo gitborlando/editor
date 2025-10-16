@@ -1,11 +1,11 @@
 import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
-import { Schema } from 'src/editor/schema/schema'
 import { IPage } from 'src/editor/schema/type'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMatchPatch } from 'src/shared/utils/react'
+import { useSnapshot } from 'valtio'
 import { PageHeaderComp } from './header'
 import { PageItemComp } from './item'
 
@@ -16,6 +16,7 @@ export const PageComp: FC<IPageComp> = memo(({}) => {
   useHookSignal(pagePanelHeight)
   useHookSignal(allPageExpanded)
   useMatchPatch(`/meta/pageIds/...`)
+  const { meta } = useSnapshot(YState.state)
 
   return (
     <Flex layout='v' className='shrink-0 wh-100%-fit borderBottom'>
@@ -25,8 +26,8 @@ export const PageComp: FC<IPageComp> = memo(({}) => {
         className='wh-100% of-overlay d-scroll'
         vshow={allPageExpanded.value}
         style={{ height: pagePanelHeight.value - 37 }}>
-        {Schema.meta.pageIds.map((id) => {
-          const page = Schema.find<IPage>(id)
+        {meta.pageIds.map((id) => {
+          const page = YState.findSnap<IPage>(id)
           return <PageItemComp key={page.id} name={page.name} id={page.id} />
         })}
       </Flex>

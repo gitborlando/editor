@@ -2,15 +2,16 @@ import { createObjCache, firstOne } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { OBB } from 'src/editor/math/obb'
 import { OperateNode } from 'src/editor/operate/node'
+import { YClients } from 'src/editor/schema/y-clients'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageMarquee } from 'src/editor/stage/render/widget/marquee'
 import { StageTransform } from 'src/editor/stage/render/widget/transform'
 import { StageVectorEdit } from 'src/editor/stage/render/widget/vector-edit'
 import { ImmuiPatch } from 'src/shared/immui/immui'
-import { mergeSignal } from 'src/shared/signal/signal'
 import { IClientXY } from 'src/shared/utils/event'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
+import { subscribeKey } from 'valtio/utils'
 import { Schema } from '../../schema/schema'
 import { ID, INode, IPage } from '../../schema/type'
 import { StageNodeDrawer } from './draw'
@@ -45,37 +46,37 @@ class StageSceneService {
   }
 
   private hookRenderNode() {
-    mergeSignal(Schema.inited, Surface.inited$).hook(this.renderPage)
+    Signal.merge(YState.inited$, Surface.inited$).hook(() => {
+      this.firstRenderPage()
 
-    Schema.onMatchPatch('/client/selectPageId', this.renderPage)
+      subscribeKey(YClients.client, 'selectPageId', () => {
+        this.firstRenderPage()
+      })
 
-    Schema.flushingPatches.hook((patch) => {
-      const { type, keys } = patch
-      if (keys[1] === 'childIds') this.reHierarchy(patch)
-      else this.render(type, keys as string[])
-    })
-
-    YState.flushPatch$.hook((op) => {
-      const { type, keys } = op
-      if (keys[1] === 'childIds') this.reHierarchy(op)
-      else this.render(type, keys as string[])
+      this.hookPatchRender()
     })
   }
 
-  private renderPage() {
+  private firstRenderPage() {
     Surface.clearSurface()
     this.sceneRoot.children = []
 
     const traverse = (id: ID) => {
-      // const node = Schema.find<INode>(id)
       const node = YState.find<INode>(id)
       this.render('add', [node.id])
       if ('childIds' in node) node.childIds.forEach(traverse)
     }
 
-    // const page = Schema.find<IPage>(Schema.client.selectPageId)
-    const page = YState.find<IPage>(Schema.client.selectPageId)
+    const page = YState.find<IPage>(YClients.client.selectPageId)
     page.childIds.forEach(traverse)
+  }
+
+  private hookPatchRender() {
+    YState.flushPatch$.hook((op) => {
+      const { type, keys } = op
+      if (keys[1] === 'childIds') this.reHierarchy(op)
+      else this.render(type, keys as string[])
+    })
   }
 
   private render(op: ImmuiPatch['type'], keys: string[]) {
@@ -137,7 +138,7 @@ class StageSceneService {
     Surface.collectDirty(elem)
   }
 
-  private reHierarchy(patch: ImmuiPatch) {
+  private reHierarchy(patch: Patch) {
     const { type, keys, value } = patch
     const [id, _, index] = keys as [ID, string, number]
     const parent = this.findElem(id) || this.sceneRoot

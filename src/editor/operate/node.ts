@@ -200,6 +200,7 @@ class OperateNodeService {
     const center = xy_(node.x + node.width / 2, node.y + node.height / 2)
     return xy_rotate(center, xy_(node.x, node.y), node.rotation)
   }
+
   private autoGetDatumId(selectIds: Set<string>) {
     if (selectIds.size === 0) {
       this.datumId.dispatch('')

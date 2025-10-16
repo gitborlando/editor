@@ -3,11 +3,11 @@ import { FC } from 'react'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { createStorageItem } from 'src/global/storage'
 import { createSignal } from 'src/shared/signal/signal'
-import { HistoryComp } from 'src/view/editor/left-panel/panels/history'
 import { IconsComp } from 'src/view/editor/left-panel/panels/icons'
 import { EditorLeftPanelImages } from 'src/view/editor/left-panel/panels/images'
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer/layer'
 import { SettingComp } from 'src/view/editor/left-panel/panels/setting/setting'
+import { UndoComp } from 'src/view/editor/left-panel/panels/undo'
 
 type ISwitchTabOption = {
   id: string
@@ -62,7 +62,7 @@ UILeftPanel.registerSwitchTab({
   id: 'history',
   name: '历史',
   icon: Assets.editor.leftPanel.switchBar.record,
-  panel: HistoryComp,
+  panel: UndoComp,
 })
 UILeftPanel.registerSwitchTab({
   id: 'source',

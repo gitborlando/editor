@@ -1,5 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
+import { YUndo } from 'src/editor/schema/y-undo'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { createSignal } from 'src/shared/signal/signal'
 import { Schema } from './schema'
@@ -46,6 +47,8 @@ class SchemaHistoryService {
   }
 
   undo() {
+    YUndo.undo()
+    return
     if (!this.canUndo) return
     const operation = this.stack[this.index$.value]
     this.replay('undo', operation)
@@ -53,6 +56,8 @@ class SchemaHistoryService {
   }
 
   redo() {
+    YUndo.redo()
+    return
     if (!this.canRedo) return
     const operation = this.stack[this.index$.value + 1]
     this.replay('redo', operation)

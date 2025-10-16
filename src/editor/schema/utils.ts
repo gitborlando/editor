@@ -1,7 +1,7 @@
 import { Schema } from 'src/editor/schema/schema'
 import { IFrame, INode, INodeParent, IPage, ISchemaItem } from 'src/editor/schema/type'
 
-type ITraverseData = {
+export type SchemaUtilTraverseData = {
   id: ID
   node: V1.Node
   index: number
@@ -10,11 +10,11 @@ type ITraverseData = {
   parent: V1.NodeParent
   ancestors: string[]
   abort: AbortController
-  upLevelRef: ITraverseData | undefined
+  upLevelRef: SchemaUtilTraverseData | undefined
   [key: string & {}]: any
 }
 
-type ITraverseCallback = (arg: ITraverseData) => any
+type ITraverseCallback = (arg: SchemaUtilTraverseData) => any
 
 export class SchemaUtil2 {
   static isPageById(id: ID) {
@@ -82,7 +82,7 @@ export class SchemaUtil2 {
     bubbleCallback?: ITraverseCallback
   }) {
     const abort = new AbortController()
-    const traverse = (ids: string[], depth: number, upLevelRef?: ITraverseData) => {
+    const traverse = (ids: string[], depth: number, upLevelRef?: SchemaUtilTraverseData) => {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
         const node = finder(id)

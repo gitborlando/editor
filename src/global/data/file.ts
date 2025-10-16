@@ -16,6 +16,13 @@ class FileServiceClass {
   }
 
   async getFileMeta(id: string) {
+    return {
+      url: 'https://cos.editor.gitborlando.com/files/%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B61.zip',
+      createdAt: '2025-10-02T17:21:33.287943+00:00',
+      id: 'b0fc888c-9d03-4bba-b337-d5dddb87ef2a',
+      name: '测试文件1',
+      y_schema_id: '84ef9622-cb22-48d6-aad7-bc5db4cab55a',
+    }
     const { data } = await supabase.from('files').select().eq('id', id)
     return data?.[0]
   }

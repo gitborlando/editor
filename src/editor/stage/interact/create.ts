@@ -62,16 +62,16 @@ class StageCreateService {
       current = StageViewport.toSceneXY(current)
       start = StageViewport.toSceneXY(start)
       const rotation = ratan2(current.y - start.y, current.x - start.x)
-      OperateGeometry.setGeometry('x', start.x)
-      OperateGeometry.setGeometry('y', start.y)
-      OperateGeometry.setGeometry('width', max(1, xy_distance(current, start)))
-      OperateGeometry.setGeometry('rotation', rotation)
+      OperateGeometry.setActiveGeometry('x', start.x)
+      OperateGeometry.setActiveGeometry('y', start.y)
+      OperateGeometry.setActiveGeometry('width', max(1, xy_distance(current, start)))
+      OperateGeometry.setActiveGeometry('rotation', rotation)
     } else {
       const { x, y, width, height } = StageViewport.toSceneMarquee(marquee)
-      OperateGeometry.setGeometry('x', x)
-      OperateGeometry.setGeometry('y', y)
-      OperateGeometry.setGeometry('width', max(1, width))
-      OperateGeometry.setGeometry('height', max(1, height))
+      OperateGeometry.setActiveGeometry('x', x)
+      OperateGeometry.setActiveGeometry('y', y)
+      OperateGeometry.setActiveGeometry('width', max(1, width))
+      OperateGeometry.setActiveGeometry('height', max(1, height))
     }
   }
 

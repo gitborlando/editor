@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import { YUndo } from 'src/editor/schema/y-undo'
 import { UserService } from 'src/global/data/user'
 import { proxy, Snapshot, snapshot, subscribe } from 'valtio'
 import { bind } from 'valtio-yjs'
@@ -6,61 +7,57 @@ import * as Y from 'yjs'
 
 @autobind
 class YClientsService {
-  clientsDoc!: Y.Doc
-  clients!: Snapshot<V1.Clients>
-  clientsProxy!: V1.Clients
+  doc!: Y.Doc
+  snap!: Snapshot<V1.Clients>
+  proxy!: V1.Clients
 
   get client() {
-    return this.clients[UserService.userId]
-  }
-
-  get clientProxy() {
-    return this.clientsProxy[UserService.userId]
-  }
-
-  get selectIds() {
-    return this.client.selectIds
-  }
-
-  get selectPageId() {
-    return this.client.selectPageId
+    return this.proxy[UserService.userId]
   }
 
   constructor() {
-    this.initClients()
-    subscribe(this.clientsProxy, () => {
-      this.clients = snapshot(this.clientsProxy)
-    })
-    this.init()
+    this.bind()
   }
 
   init() {
-    this.clientsProxy[UserService.userId] = {
+    this.proxy[UserService.userId] = {
       userId: UserService.userId,
       selectIds: {},
-      selectPageId: '',
+      selectPageId: YState.snap.meta.pageIds[0],
     }
+    YUndo.initClientUndo(this.doc.getMap('clients'))
   }
 
   select(id: string) {
-    // if (this.selectIds[id]) return
-    this.clientProxy.selectIds[id] = true
+    if (this.client.selectIds[id]) return
+    this.client.selectIds[id] = true
+    YUndo.track({ type: 'client', description: `选中节点 ${id}` })
   }
 
   unSelect(id: string) {
-    // if (!this.selectIds[id]) return
-    console.log('id: ', id)
-    Reflect.deleteProperty(this.clientProxy.selectIds, id)
+    if (!this.client.selectIds[id]) return
+    delete this.client.selectIds[id]
+    YUndo.track({ type: 'client', description: `取消选中节点 ${id}` })
   }
 
   clearSelect() {
-    this.clientProxy.selectIds = {}
+    this.client.selectIds = {}
+    YUndo.track({ type: 'client', description: `清空选中节点` })
   }
 
-  private initClients() {
-    this.clientsDoc = new Y.Doc()
-    this.clientsProxy = proxy({})
-    bind(this.clientsProxy, this.clientsDoc.getMap('clients'))
+  selectPage(id: string) {
+    this.client.selectPageId = id
+    const page = YState.state[id]
+    YUndo.track({ type: 'client', description: `选择页面 ${page.name}` })
+  }
+
+  private bind() {
+    this.doc = new Y.Doc()
+    this.proxy = proxy({})
+    bind(this.proxy, this.doc.getMap('clients'))
+    subscribe(this.proxy, () => {
+      this.snap = snapshot(this.proxy)
+    })
   }
 }
 

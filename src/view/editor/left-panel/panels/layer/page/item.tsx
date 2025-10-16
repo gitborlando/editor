@@ -1,10 +1,10 @@
-import { Flex, Icon } from '@gitborlando/widget'
+import { Flex } from '@gitborlando/widget'
+import { Check } from 'lucide-react'
 import { FC, memo } from 'react'
 import { EditorCommand } from 'src/editor/editor/command'
-import { OperatePage } from 'src/editor/operate/page'
-import { Schema } from 'src/editor/schema/schema'
+import { YClients } from 'src/editor/schema/y-clients'
 import { Menu } from 'src/global/menu'
-import { useMatchPatch } from 'src/shared/utils/react'
+import { useSelectPageId } from 'src/view/hooks/schema/use-y-client'
 
 type IPageItemComp = {
   name: string
@@ -12,16 +12,18 @@ type IPageItemComp = {
 }
 
 export const PageItemComp: FC<IPageItemComp> = memo(({ name, id }) => {
-  const selected = Schema.client.selectPageId === id
   const openMenu = () => {
     Menu.context = { id }
     Menu.menuOptions.dispatch([EditorCommand.pageGroup])
   }
   const selectPage = () => {
-    OperatePage.selectPage(id)
-    Schema.commitHistory('选择页面 ' + id)
+    YClients.selectPage(id)
+    // Schema.commitHistory('选择页面 ' + id)
   }
-  useMatchPatch(`/client/selectPageId`)
+  // useMatchPatch(`/client/selectPageId`)
+
+  const selectPageId = useSelectPageId()
+  const selected = selectPageId === id
 
   return (
     <Flex
@@ -32,12 +34,7 @@ export const PageItemComp: FC<IPageItemComp> = memo(({ name, id }) => {
       <Flex layout='h' className='text-12 px-10'>
         {name}
       </Flex>
-      {selected && (
-        <Icon
-          className='wh-18 mr-10 path-fill-hsl60'
-          url={Assets.editor.leftPanel.page.pageSelect}
-        />
-      )}
+      <Check x-if={selected} size={18} className='mr-10 text-hsl60' />
     </Flex>
   )
 })

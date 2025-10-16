@@ -1,3 +1,4 @@
+import { Signal } from '@gitborlando/signal'
 import { reverseFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { EditorSetting } from 'src/editor/editor/setting'
@@ -13,7 +14,7 @@ import { AABB, OBB } from 'src/editor/math/obb'
 import { xy_, xy_center, xy_client, xy_minus, xy_rotate } from 'src/editor/math/xy'
 import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
-import { createSignal, multiSignal } from 'src/shared/signal/signal'
+import { multiSignal } from 'src/shared/signal/signal'
 import { IClientXY } from 'src/shared/utils/event'
 import { INoopFunc, IXY, Raf, getTime } from 'src/shared/utils/normal'
 import TinyQueue from 'tinyqueue'
@@ -23,7 +24,7 @@ const dpr = devicePixelRatio
 
 @autoBind
 export class StageSurface {
-  inited$ = createSignal()
+  inited$ = Signal.create(false)
   layerList: Elem[] = []
 
   textBreaker!: TextBreaker

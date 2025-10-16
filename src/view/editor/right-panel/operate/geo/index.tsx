@@ -1,101 +1,119 @@
 import { FC, useMemo } from 'react'
-import { floor, max, min } from 'src/editor/math/base'
-import { IGeometry, OperateGeometry } from 'src/editor/operate/geometry'
+import { AllGeometry, OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
 import { getZoom } from 'src/editor/stage/viewport'
-import { useHookSignal } from 'src/shared/signal/signal-react'
+import { MULTI_VALUE } from 'src/global/constant'
+import { twoDecimal } from 'src/shared/utils/normal'
+import { SlideInput } from 'src/view/editor/right-panel/operate/components/slide-input'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
-import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import './index.less'
 
 interface EditorRightOperateGeoProps {}
 
 export const EditorRightOperateGeo: FC<EditorRightOperateGeoProps> = observer(({}) => {
-  const selectIds = useHookSignal(OperateNode.selectIds)
+  const { activeKeys, setupActiveKeys, setupActiveGeometry } = OperateGeometry
+  const nodes = useSelectNodes()
+
+  useMemo(() => {
+    setupActiveKeys(nodes)
+    setupActiveGeometry(nodes)
+  }, [nodes])
+
   return (
-    selectIds.size > 0 && (
-      <G className='editor-right-operate-geo borderBottom' horizontal='auto auto'>
-        <GeometryItemComp label='横坐标' operateKey='x' slideRate={1 / getZoom()} />
-        <GeometryItemComp label='纵坐标' operateKey='y' slideRate={1 / getZoom()} />
-        <GeometryItemComp label='宽度' operateKey='width' />
-        <GeometryItemComp label='高度' operateKey='height' />
-        <GeometryItemComp label='旋转' operateKey='rotation' />
-      </G>
-    )
+    <G
+      x-if={nodes.length > 0}
+      className='editor-right-operate-geo borderBottom'
+      horizontal='auto auto'
+      gap={8}>
+      <GeometryItemComp label='横轴' operateKey='x' slideRate={1 / getZoom()} />
+      <GeometryItemComp label='纵轴' operateKey='y' slideRate={1 / getZoom()} />
+      <GeometryItemComp label='宽度' operateKey='width' />
+      <GeometryItemComp label='高度' operateKey='height' />
+      <GeometryItemComp label='旋转' operateKey='rotation' />
+      <GeometryItemComp
+        x-if={activeKeys.has('radius')}
+        label='圆角'
+        operateKey='radius'
+        slideRate={1 / getZoom()}
+      />
+      <GeometryItemComp
+        x-if={activeKeys.has('sides')}
+        label='边数'
+        operateKey='sides'
+        slideRate={0.01}
+      />
+      <GeometryItemComp
+        x-if={activeKeys.has('pointCount')}
+        label='角数'
+        operateKey='pointCount'
+        slideRate={0.01}
+      />
+      <GeometryItemComp
+        x-if={activeKeys.has('startAngle')}
+        label='起始角'
+        operateKey='startAngle'
+      />
+      <GeometryItemComp x-if={activeKeys.has('endAngle')} label='结束角' operateKey='endAngle' />
+      <GeometryItemComp
+        x-if={activeKeys.has('innerRate')}
+        label='内径比'
+        operateKey='innerRate'
+        slideRate={0.01}
+      />
+    </G>
   )
 })
 
 const GeometryItemComp: FC<{
   label: string
-  operateKey: keyof IGeometry
+  operateKey: keyof AllGeometry
   slideRate?: number
-}> = ({ label, operateKey, slideRate }) => {
-  const { setGeometry } = OperateGeometry
-  const selectedNodes = useSelectNodes()
-  // const selectIds = useHookSignal(OperateNode.selectIds)
-  // const { selectedNodes } = OperateNode
+}> = ({ label, operateKey, slideRate = 1 }) => {
+  const { activeGeometry, setActiveGeometry } = OperateGeometry
 
-  slideRate = slideRate ?? 1
+  const value = activeGeometry[operateKey]
+  const isMultiValue = t<any>(value) === MULTI_VALUE
 
-  // useHookSignal(selectedNodes, { after: 'geometryKeyValue' })
-
-  const value = useMemo(() => {
-    const nodes = selectedNodes //[...selectIds].map((id) => state[id])
-    let value = t<any>(nodes[0])[operateKey]
-    for (const node of nodes) {
-      if (t<any>(node)[operateKey] === value) continue
-      value = 'multi'
-      break
-    }
-    return value
-  }, [selectedNodes, operateKey])
-
-  const produceValue = (newValue?: number) => {
-    if (newValue !== undefined) {
-      if (operateKey === 'x') {
-        const datum = OperateNode.datumXY.x
-        return newValue + datum
-      }
-      if (operateKey === 'y') {
-        const datum = OperateNode.datumXY.y
-        return newValue + datum
-      }
-      if (['width', 'height', 'radius'].includes(operateKey)) {
-        return max(0, newValue)
-      }
-      if (['rotation', 'startAngle', 'endAngle'].includes(operateKey)) {
-        return newValue % 360
-      }
-      if (['sides', 'pointCount'].includes(operateKey)) {
-        return max(3, floor(newValue))
-      }
-      if (['innerRate'].includes(operateKey)) {
-        return min(1, max(0, newValue))
-      }
-      return newValue
-    }
-
+  const inputValue = useRef(0)
+  const correctedValue = useMemo(() => {
+    if (isMultiValue) return value
     if (operateKey === 'x' || operateKey === 'y') {
       const datum = OperateNode.datumXY[operateKey]
-      if (value === 'multi') return value
       return value - datum
     }
     return value
+  }, [value])
+  inputValue.current = correctedValue
+
+  const correctSetValue = (value: number) => {
+    value = value === undefined ? 0 : value
+
+    if (operateKey === 'x' || operateKey === 'y') {
+      const datum = OperateNode.datumXY[operateKey]
+      return value + datum
+    }
+    if (['rotation', 'startAngle', 'endAngle'].includes(operateKey)) {
+      return value % 360
+    }
+    return value
   }
 
-  const formatNumber = (value: number | 'multi'): string => {
-    if (value === undefined) console.log(operateKey)
-    if (value === 'multi') return value
-    return value?.toFixed(Number.isInteger(value) ? 0 : 2)
+  const handleOnBlur = () => {
+    if (t<any>(inputValue.current) === MULTI_VALUE) return
+    setActiveGeometry(operateKey, inputValue.current)
   }
 
   return (
-    <CompositeInput
-      className='d-hover-bg px-6 w-100 h-24'
-      label={label}
-      value={formatNumber(produceValue())}
-      onNewValueApply={(v) => setGeometry(operateKey, produceValue(Number(v)) as number)}
+    <SlideInput
+      className='editor-right-operate-geo-input'
+      size='small'
+      prefix={label}
+      value={isMultiValue ? MULTI_VALUE : twoDecimal(correctedValue)}
       slideRate={slideRate}
+      onSlide={(v) => setActiveGeometry(operateKey, correctSetValue(v), true)}
+      onChange={(v) => (inputValue.current = correctSetValue(v))}
+      onBlur={handleOnBlur}
+      {...(isMultiValue ? { placeholder: MULTI_VALUE } : {})}
     />
   )
 }

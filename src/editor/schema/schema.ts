@@ -1,7 +1,6 @@
 import { flushFuncs } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { EditorSetting } from 'src/editor/editor/setting'
-import SaveWorker from 'src/editor/schema/worker.ts?worker'
 import { createSignal } from 'src/shared/signal/signal'
 import { INoopFunc } from 'src/shared/utils/normal'
 import Immui, { ImmuiApplyPatchOption, ImmuiPatch } from '../../shared/immui/immui'
@@ -37,7 +36,6 @@ class SchemaService {
 
   initSchema(schema: ISchema) {
     this.schema = schema
-    this.saveWorker.postMessage({ fileId: this.meta.fileId })
     this.inited.dispatch(true)
   }
 
@@ -118,8 +116,6 @@ class SchemaService {
       })
     })
   }
-
-  private saveWorker = new SaveWorker()
 
   save = (patches: ImmuiPatch[], reverse?: boolean) => {
     if (!EditorSetting.setting.autosave) return

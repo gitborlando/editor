@@ -6,7 +6,6 @@ import { useHookSignal } from 'src/shared/signal/signal-react'
 import { EditorRightOperateGeo } from 'src/view/editor/right-panel/operate/geo'
 import { AlignComp } from './align'
 import { FillPropComp } from './fill'
-import { GeometryComp } from './geometry'
 import { ShadowComp } from './shadows'
 import { StrokeComp } from './stroke'
 import { TextComp } from './text'
@@ -17,7 +16,6 @@ export const OperatePanelComp: FC<{}> = memo(({}) => {
   return (
     <Flex layout='v' className='wh-100% of-y-auto d-scroll'>
       <AlignComp />
-      <GeometryComp />
       <EditorRightOperateGeo />
       <FillPropComp />
       <StrokeComp />

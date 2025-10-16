@@ -7,6 +7,7 @@ import { mockCollide } from 'src/editor/editor/mock/collide'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
+import { YClients } from 'src/editor/schema/y-clients'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { FileService } from 'src/global/data/file'
 import { OperateAlign } from '../operate/align'
@@ -28,6 +29,8 @@ const jsZip = new JSZip()
 
 @autobind
 export class EditorService {
+  inited$ = Signal.create(false)
+
   private initHooks() {
     EditorSetting.init()
     EditorCommand.initHook()
@@ -72,6 +75,7 @@ export class EditorService {
         const schema = jsonParse(fileText) as ISchema
         Schema.initSchema(schema)
         YState.initSchema(fileId, schema as unknown as V1.Schema)
+        YClients.init()
       }
     }
 
@@ -79,7 +83,10 @@ export class EditorService {
   }
 
   initEditor = async () => {
+    if (this.inited$.value) return
+
     this.initHooks()
+    this.inited$.dispatch(true)
   }
 }
 

@@ -1,13 +1,15 @@
 import { Flex, Icon } from '@gitborlando/widget'
 import cx from 'classix'
-import { FC, memo, useCallback } from 'react'
-import { SchemaHistory } from 'src/editor/schema/history'
+import { Redo, Undo } from 'lucide-react'
+import { FC, memo } from 'react'
+import { YUndo } from 'src/editor/schema/y-undo'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMemoComp } from 'src/shared/utils/react'
 import { Assets } from 'src/view/assets/assets'
+import { IconButton } from 'src/view/component/button'
 import { Button } from 'src/view/ui-utility/widget/button'
 import { Divide } from 'src/view/ui-utility/widget/divide'
 
@@ -15,26 +17,6 @@ type IHeaderComp = {}
 
 export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
   useHookSignal(StageInteract.currentType)
-
-  const RecordIcons: FC<{}> = useCallback(() => {
-    useHookSignal(SchemaHistory.index$)
-    return (
-      <>
-        <Button disabled={!SchemaHistory.canUndo} onClick={SchemaHistory.undo}>
-          <Icon
-            url={Assets.editor.header.record.undo}
-            className={cx('wh-20', !SchemaHistory.canUndo && 'text-#E6E6E6')}
-          />
-        </Button>
-        <Button disabled={!SchemaHistory.canRedo} onClick={SchemaHistory.redo}>
-          <Icon
-            url={Assets.editor.header.record.redo}
-            className={cx('wh-20', !SchemaHistory.canRedo && 'text-#E6E6E6')}
-          />
-        </Button>
-      </>
-    )
-  }, [])
 
   const StageOperateIcon: FC<{ type: 'select' | 'move' }> = ({ type }) => {
     const isActive = StageInteract.currentType.value === type
@@ -79,7 +61,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
       style={{ height: StageViewport.bound.value.y }}>
       <Button onClick={() => navigate('/')}>文件列表</Button>
       <Flex className='lay-c w-fit m-auto'>
-        <RecordIcons />
+        <UndoGroup />
         <Divide length={16} thickness={0.5} />
         {(['select', 'move'] as const).map((type) => (
           <StageOperateIcon key={type} type={type} />
@@ -93,5 +75,22 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
       </Flex>
       <Flex className='lay-h mr-10 ml-auto gap-8-8'></Flex>
     </Flex>
+  )
+})
+
+const UndoGroup: FC<{}> = observer(() => {
+  return (
+    <>
+      <IconButton
+        icon={<Undo size={20} className='text-#5C5C66' />}
+        disabled={!YUndo.canUndo}
+        onClick={YUndo.undo}
+      />
+      <IconButton
+        icon={<Redo size={20} className='text-#5C5C66' />}
+        disabled={!YUndo.canRedo}
+        onClick={YUndo.redo}
+      />
+    </>
   )
 })

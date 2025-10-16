@@ -39,7 +39,7 @@ class StageTransformService {
   }
 
   move = (e: ElemMouseEvent) => {
-    const { x, y } = OperateGeometry.geometry
+    const { x, y } = OperateGeometry.activeGeometry
     Drag.onStart(() => {
       this.show.dispatch(false)
       if (e.hostEvent.altKey) {
@@ -50,8 +50,8 @@ class StageTransformService {
     })
       .onMove(({ shift }) => {
         const sceneShiftXY = StageViewport.toSceneShift(shift)
-        OperateGeometry.setGeometry('x', x + sceneShiftXY.x)
-        OperateGeometry.setGeometry('y', y + sceneShiftXY.y)
+        OperateGeometry.setActiveGeometry('x', x + sceneShiftXY.x)
+        OperateGeometry.setActiveGeometry('y', y + sceneShiftXY.y)
       })
       .onDestroy(() => {
         if (Drag.started) {
@@ -162,7 +162,7 @@ class StageTransformService {
   }
 
   private updateLine(type: 'top' | 'bottom' | 'left' | 'right', p1: IXY, p2: IXY) {
-    const { setGeometry } = OperateGeometry
+    const { setActiveGeometry: setGeometry } = OperateGeometry
 
     const mouseover = (e: ElemMouseEvent) => {
       if (!e.hovered) return StageCursor.setCursor('select')
@@ -186,7 +186,7 @@ class StageTransformService {
       StageCursor.lock()
       e.stopPropagation()
 
-      const { x, y, width, height, rotation } = OperateGeometry.geometry
+      const { x, y, width, height, rotation } = OperateGeometry.activeGeometry
 
       Drag.onSlide(({ shift }) => {
         shift = StageViewport.toSceneShift(shift)
@@ -270,7 +270,7 @@ class StageTransformService {
   }
 
   private updateVertex(type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft', xy: IXY) {
-    const { setGeometry } = OperateGeometry
+    const { setActiveGeometry: setGeometry } = OperateGeometry
 
     const mouseenter = (e: ElemMouseEvent) => {
       if (!e.hovered) return StageCursor.setCursor('select')
@@ -291,7 +291,7 @@ class StageTransformService {
 
     const moveVertex = (e: ElemMouseEvent) => {
       StageCursor.lock()
-      const { x, y, width, height, rotation } = OperateGeometry.geometry
+      const { x, y, width, height, rotation } = OperateGeometry.activeGeometry
 
       Drag.onSlide(({ shift }) => {
         shift = StageViewport.toSceneShift(shift)

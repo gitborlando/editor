@@ -1,15 +1,13 @@
-import { createCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { divide } from 'src/editor/math/base'
+import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
-import { SchemaUtil2 } from 'src/editor/schema/utils'
-import { ITraverseData } from 'src/shared/utils/schema'
+import { SchemaUtil2, SchemaUtilTraverseData } from 'src/editor/schema/utils'
+import { MULTI_VALUE } from 'src/global/constant'
 import { xy_minus, xy_rotate } from '../math/xy'
-import { Schema } from '../schema/schema'
-import { INode, IPolygon, IStar, IVector } from '../schema/type'
-import { OperateNode, getSelectIds, getSelectNodes } from './node'
+import { IPolygon, IStar } from '../schema/type'
+import { OperateNode, getSelectIds } from './node'
 
-function createInitGeometry() {
+function createAllGeometry() {
   return {
     x: 0,
     y: 0,
@@ -25,41 +23,59 @@ function createInitGeometry() {
   }
 }
 
-export type IGeometry = ReturnType<typeof createInitGeometry>
+function createActiveKeys(set: Set<keyof AllGeometry>, keys: (keyof AllGeometry)[] = []) {
+  set.clear()
+  keys.forEach((key) => set.add(key))
+  return set
+}
+
+export type AllGeometry = ReturnType<typeof createAllGeometry>
 
 @autobind
 class OperateGeometryService {
-  geometry = createInitGeometry()
-  geometryKeys = new Set(<(keyof IGeometry)[]>['x', 'y', 'width', 'height', 'rotation'])
-  operateKeys = new Set<keyof IGeometry>()
-  geometryKeyValue = createCache<keyof IGeometry, number | 'multi'>()
-  private lastGeometry = createInitGeometry()
+  activeGeometry = createAllGeometry()
+  activeKeys = createActiveKeys(new Set())
+  operateKeys = createActiveKeys(new Set())
+  deltaKeys = createActiveKeys(new Set())
 
-  initHook() {
-    OperateNode.selectIds.hook(() => {
-      this.setupOperateKeys()
-      this.setupGeometry()
-      this.syncLastGeometry()
+  initHook() {}
+
+  setupActiveKeys(selectedNodes: V1.Node[]) {
+    createActiveKeys(this.activeKeys, ['x', 'y', 'width', 'height', 'rotation'])
+
+    selectedNodes.forEach((node) => {
+      if (node.type === 'frame') this.activeKeys.add('radius')
+      if (node.type === 'rect') this.activeKeys.add('radius')
+      if (node.type === 'polygon') this.activeKeys.add('sides')
+      if (node.type === 'star') {
+        this.activeKeys.add('innerRate')
+        this.activeKeys.add('pointCount')
+      }
+      if (node.type === 'ellipse') {
+        this.activeKeys.add('startAngle')
+        this.activeKeys.add('endAngle')
+        this.activeKeys.add('innerRate')
+      }
     })
-    OperateNode.selectedNodes.hook({ id: 'geometryKeyValue' }, (nodes) => {
-      this.geometryKeyValue.clear()
-      this.geometryKeys.forEach((key) => {
-        nodes.forEach((_node) => {
-          const node = _node as any
-          if (!Object.hasOwn(node, key)) return
-          let last = this.geometryKeyValue.getSet(key, () => node[key])
-          if (last === 'multi') return
-          if (node[key] !== last) this.geometryKeyValue.set(key, 'multi')
-        })
+  }
+
+  setupActiveGeometry(selectedNodes: V1.Node[]) {
+    const geometry = <any>{}
+    selectedNodes.forEach((node, i) => {
+      this.activeKeys.forEach((key) => {
+        if (i === 0) geometry[key] = t<any>(node)[key]
+        else if (geometry[key] !== t<any>(node)[key]) geometry[key] = MULTI_VALUE
       })
     })
+    this.activeGeometry = geometry
   }
 
   private hasStartApply = false
 
-  setGeometry(key: keyof IGeometry, value: number) {
-    this.geometry[key] = value
+  setActiveGeometry(key: keyof AllGeometry, value: number, delta?: boolean) {
+    if (delta) this.deltaKeys.add(key)
     this.operateKeys.add(key)
+    this.activeGeometry[key] = value
 
     if (this.hasStartApply) return
     this.hasStartApply = true
@@ -70,129 +86,82 @@ class OperateGeometryService {
         callback: this.applyChangeToNode,
       })
       traverse(getSelectIds())
-      // SchemaUtil.traverseIds(getSelectIds(), this.applyChangeToNode)
-      Schema.commitOperation('设置几何数据')
-      Schema.nextSchema()
-      this.syncLastGeometry()
       this.hasStartApply = false
       this.operateKeys.clear()
+      this.deltaKeys.clear()
     })
   }
 
-  private syncLastGeometry() {
-    Object.keys(this.lastGeometry).forEach((key) => {
-      //@ts-ignore
-      this.lastGeometry[key] = this.geometry[key]
-    })
+  private delta(key: keyof AllGeometry, node: V1.Node) {
+    if (this.deltaKeys.has(key)) return this.activeGeometry[key]
+    return this.activeGeometry[key] - t<any>(node)[key]
   }
 
-  private delta(key: keyof IGeometry) {
-    return this.geometry[key] - this.lastGeometry[key]
+  private deltaRate(key: keyof AllGeometry, node: any) {
+    return divide(this.delta(key, node), node[key])
   }
 
-  private deltaRate(key: keyof IGeometry, node: any) {
-    return divide(this.delta(key), node[key])
-  }
-
-  private setupGeometry() {
-    if (OperateNode.selectIds.value.size === 1) {
-      const node = OperateNode.selectingNodes[0]
-      this.geometryKeys.forEach((key) => {
-        //@ts-ignore
-        this.geometry[key] = node[key]
-      })
-    }
-    if (OperateNode.selectIds.value.size > 1) {
-      const propKeys = [...this.geometryKeys]
-      const tempObj = <any>{}
-      const multiValueArr = <string[]>[]
-      OperateNode.selectingNodes.forEach((node, i) => {
-        propKeys.forEach((key) => {
-          //@ts-ignore
-          if (i === 0) tempObj[key] = node[key]
-          //@ts-ignore
-          else if (tempObj[key] !== node[key]) multiValueArr.push(key)
-        })
-      })
-      propKeys.forEach((key) => {
-        if (!multiValueArr.includes(key)) this.geometry[key] = tempObj[key]
-        else this.geometry[key] = 0
-      })
-    }
-  }
-
-  private setupOperateKeys() {
-    this.geometryKeys = new Set(['x', 'y', 'width', 'height', 'rotation'])
-
-    getSelectNodes().forEach((node) => {
-      if (node.type === 'frame') this.geometryKeys.add('radius')
-      if (node.type === 'rect') this.geometryKeys.add('radius')
-      if (node.type === 'polygon') this.geometryKeys.add('sides')
-      if (node.type === 'star') {
-        this.geometryKeys.add('innerRate')
-        this.geometryKeys.add('pointCount')
-      }
-      if (node.type === 'ellipse') {
-        this.geometryKeys.add('startAngle')
-        this.geometryKeys.add('endAngle')
-        this.geometryKeys.add('innerRate')
-      }
-    })
-  }
-
-  private applyChangeToNode(traverseData: ITraverseData) {
+  private applyChangeToNode(traverseData: SchemaUtilTraverseData) {
     const { node, depth } = traverseData
 
     if (depth === 0) this.patchChangeToVectorPoints(node.id)
 
     this.operateKeys.forEach((key) => {
-      if ((key === 'width' || key === 'height' || key === 'radius') && depth !== 0) return
-      if (key === 'height' && node.type === 'line') return
+      if (key === 'width') {
+        if (depth !== 0) return
+        return (node.width = max(0, node.width + this.delta(key, node)))
+      }
+      if (key === 'height') {
+        if (depth !== 0 || node.type === 'line') return
+        return (node.height = max(0, node.height + this.delta(key, node)))
+      }
+      if (key === 'radius') {
+        if (depth !== 0) return
+        return (t<any>(node).radius = max(0, t<any>(node).radius + this.delta(key, node)))
+      }
       if (key === 'rotation') {
         return this.applyRotationToNode(traverseData, node, depth)
       }
       if (key === 'sides') {
         const { width, height, sides } = node as IPolygon
-        t<V1.Polygon>(node).points = createRegularPolygon(width, height, sides)
-        // Schema.itemReset(node, ['points'], createRegularPolygon(width, height, sides))
+        return (t<V1.Polygon>(node).points = createRegularPolygon(width, height, sides))
       }
       if (key === 'pointCount' || key === 'innerRate') {
-        const { width, height, pointCount, innerRate } = node as IStar
-        t<V1.Star>(node).points = createStarPolygon(width, height, pointCount, innerRate)
-        // Schema.itemReset(node, ['points'], createStarPolygon(width, height, pointCount, innerRate))
+        let { width, height, pointCount, innerRate } = node as IStar
+        pointCount = max(3, floor(pointCount))
+        innerRate = min(1, max(0, innerRate))
+        return (t<V1.Star>(node).points = createStarPolygon(width, height, pointCount, innerRate))
       }
-      //@ts-ignore
-      // Schema.itemReset(node, [key], node[key] + this.delta(key))
-      t<any>(node)[key] = t<any>(node)[key] + this.delta(key)
+      t<any>(node)[key] = t<any>(node)[key] + this.delta(key, node)
     })
   }
 
-  private applyRotationToNode(traverseData: ITraverseData, node: INode, depth: number) {
+  private applyRotationToNode(traverseData: SchemaUtilTraverseData, node: V1.Node, depth: number) {
     const { getNodeCenterXY } = OperateNode
     const centerXY = getNodeCenterXY(node)
-    const newXY = xy_rotate(node, centerXY, this.delta('rotation'))
+    const newXY = xy_rotate(node, centerXY, this.delta('rotation', node))
 
-    Schema.itemReset(node, ['rotation'], node.rotation + this.delta('rotation'))
+    node.rotation = node.rotation + this.delta('rotation', node)
 
     if (depth === 0) {
-      Schema.itemReset(node, ['x'], newXY.x)
-      Schema.itemReset(node, ['y'], newXY.y)
+      node.x = newXY.x
+      node.y = newXY.y
     } else {
       let upLevelRef = traverseData.upLevelRef!
       while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
       const ancestorCenter = getNodeCenterXY(upLevelRef.node)
-      const newCenter = xy_rotate(centerXY, ancestorCenter, this.delta('rotation'))
+      const newCenter = xy_rotate(centerXY, ancestorCenter, this.delta('rotation', node))
       const centerShift = xy_minus(newCenter, centerXY)
-      Schema.itemReset(node, ['x'], newXY.x + centerShift.x)
-      Schema.itemReset(node, ['y'], newXY.y + centerShift.y)
+      node.x = newXY.x + centerShift.x
+      node.y = newXY.y + centerShift.y
     }
   }
 
   private patchChangeToVectorPoints(id: string) {
-    const node = Schema.find<IVector>(id)
+    const node = YState.find<V1.Vector>(id)
     if (!node.points) return
 
-    node.points.forEach((point, i) => {
+    node.points.forEach((point) => {
       if (this.operateKeys.has('width')) {
         point.x *= 1 + this.deltaRate('width', node)
         point.handleL && (point.handleL.x *= 1 + this.deltaRate('width', node))

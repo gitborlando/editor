@@ -68,3 +68,7 @@ export function timeOf(count: number, func: (i: number) => any, count2 = 1, skip
 export function getTime() {
   return new Date().getTime()
 }
+
+export function twoDecimal(number: number) {
+  return Number(number.toFixed(Number.isInteger(number) ? 0 : 2))
+}

@@ -55,8 +55,8 @@ class StageWidgetAdsorptionService {
     this.sortedAdsorptionY = [...this.hAdsorptionMap.keys()].sort()
   }
   private adsorption() {
-    this.cloneTransformOBB.shiftX(OperateGeometry.geometry.x - this.cloneTransformOBB.xy.x)
-    this.cloneTransformOBB.shiftY(OperateGeometry.geometry.y - this.cloneTransformOBB.xy.y)
+    this.cloneTransformOBB.shiftX(OperateGeometry.activeGeometry.x - this.cloneTransformOBB.xy.x)
+    this.cloneTransformOBB.shiftY(OperateGeometry.activeGeometry.y - this.cloneTransformOBB.xy.y)
     if (key === 'y' /* || key === 'height' */) this.horizontalAdsorption(key, ctx)
     if (key === 'x' /* || key === 'width' */) this.verticalAdsorption(key, ctx)
   }
