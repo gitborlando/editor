@@ -1,4 +1,5 @@
 import { Flex, Icon } from '@gitborlando/widget'
+import { Plus } from 'lucide-react'
 import { FC, memo } from 'react'
 import { OperatePage } from 'src/editor/operate/page'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
@@ -17,7 +18,7 @@ export const PageHeaderComp: FC<IPageHeaderComp> = memo(({}) => {
     if (allPageExpanded.value === false) {
       allPageExpanded.dispatch(true)
     }
-    OperatePage.addPage()
+    // OperatePage.addPage()
   }
 
   return (
@@ -26,11 +27,11 @@ export const PageHeaderComp: FC<IPageHeaderComp> = memo(({}) => {
         {OperatePage.currentPage.name}
       </Flex>
       <Button type='icon' style={{ marginLeft: 'auto' }} onClick={newPage}>
-        <Icon className='wh-16 path-fill-#393939' url={Assets.editor.leftPanel.page.add} />
+        <Plus size={16} color='#393939' />
       </Button>
       <Button type='icon' onClick={() => allPageExpanded.dispatch(!allPageExpanded.value)}>
         <Icon
-          className='wh-16 path-fill-#393939'
+          className='wh-16 text-#393939'
           style={{ rotate: allPageExpanded.value ? '180deg' : '0deg' }}
           url={Assets.editor.leftPanel.page.collapse}
         />
