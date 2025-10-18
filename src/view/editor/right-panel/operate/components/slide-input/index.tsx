@@ -7,7 +7,7 @@ interface SlideInputProps {
   prefix?: ReactNode
   slideRate?: number
   onSlide?: (value: number) => void
-  afterSlide?: () => void
+  afterSlide?: (changed: boolean) => void
 }
 
 export const SlideInput: FC<SlideInputProps & InputNumberProps> = observer(
@@ -35,13 +35,13 @@ const LabelComp: FC<{
   label: ReactNode
   slideRate?: number
   onSlide?: (value: number) => void
-  afterSlide?: () => void
+  afterSlide?: (changed: boolean) => void
 }> = ({ label, slideRate = 1, onSlide, afterSlide }) => {
   const handleDragLabel = () => {
     Drag.needInfinity()
       .onStart()
       .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
-      .onDestroy(({ shift }) => shift.x !== 0 && shift.y !== 0 && afterSlide?.())
+      .onDestroy(({ shift }) => afterSlide?.(shift.x !== 0 || shift.y !== 0))
   }
   return (
     <G onMouseDown={handleDragLabel} className='slide-input-label'>

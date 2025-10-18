@@ -1,12 +1,12 @@
 import { objectKey } from '@gitborlando/utils'
 import { FC } from 'react'
-import { YUndo } from 'src/editor/schema/y-undo'
 import { Text } from 'src/view/component/text'
 
 export const UndoComp: FC<{}> = observer(({}) => {
+  const { next, stack } = YUndo
   return (
     <G style={{ alignContent: 'flex-start' }} gap={0}>
-      {YUndo.stack.map((item, i) => (
+      {stack.map((item, i) => (
         <G
           key={objectKey(item)}
           style={{
@@ -14,8 +14,8 @@ export const UndoComp: FC<{}> = observer(({}) => {
             height: 32,
             alignContent: 'center',
             paddingLeft: 8,
-            color: YUndo.next === i + 1 ? 'rgba(0, 100, 255)' : '#000000',
-            backgroundColor: YUndo.next === i + 1 ? 'rgba(0, 100, 255, 0.1)' : '#FFFFFF',
+            color: next === i + 1 ? 'rgba(0, 100, 255)' : '#000000',
+            backgroundColor: next === i + 1 ? 'rgba(0, 100, 255, 0.1)' : '#FFFFFF',
           }}>
           <Text>{`[${item.type}] ${item.description}`}</Text>
         </G>
