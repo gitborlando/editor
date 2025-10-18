@@ -65,8 +65,9 @@ class YUndoService {
   track(info: YUndoInfo) {
     if (!this.shouldTrack) return
 
-    this.next++
-    this.stack.push(info)
+    this.stack.splice(this.next, this.stack.length - this.next, info)
+    this.next = this.stack.length
+
     const { type } = info
     if (type === 'state') this.stateUndo.stopCapturing()
     if (type === 'client') this.clientUndo.stopCapturing()

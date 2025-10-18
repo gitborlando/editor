@@ -1,3 +1,4 @@
+import { Is } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { YUndo } from 'src/editor/schema/y-undo'
 import { UserService } from 'src/global/data/user'
@@ -41,6 +42,7 @@ class YClientsService {
   }
 
   clearSelect() {
+    if (Is.empty(this.client.selectIds)) return
     this.client.selectIds = {}
     YUndo.track({ type: 'client', description: `清空选中节点` })
   }
