@@ -1,6 +1,7 @@
 import { FC, useMemo } from 'react'
 import { AllGeometry, OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
+import { YUndo } from 'src/editor/schema/y-undo'
 import { getZoom } from 'src/editor/stage/viewport'
 import { MULTI_VALUE } from 'src/global/constant'
 import { twoDecimal } from 'src/shared/utils/normal'
@@ -100,7 +101,12 @@ const GeometryItemComp: FC<{
 
   const handleOnBlur = () => {
     if (t<any>(inputValue.current) === MULTI_VALUE) return
+    if (inputValue.current === correctedValue) return
     setActiveGeometry(operateKey, inputValue.current)
+  }
+
+  const handleAfterSlide = () => {
+    YUndo.track({ type: 'state', description: `修改几何属性: ${label}` })
   }
 
   return (
@@ -111,6 +117,7 @@ const GeometryItemComp: FC<{
       value={isMultiValue ? MULTI_VALUE : twoDecimal(correctedValue)}
       slideRate={slideRate}
       onSlide={(v) => setActiveGeometry(operateKey, correctSetValue(v), true)}
+      afterSlide={handleAfterSlide}
       onChange={(v) => (inputValue.current = correctSetValue(v))}
       onBlur={handleOnBlur}
       {...(isMultiValue ? { placeholder: MULTI_VALUE } : {})}

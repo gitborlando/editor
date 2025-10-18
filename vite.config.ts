@@ -18,6 +18,7 @@ const autoImport = autoImportPlugin({
       'src/shared/signal/signal': ['createSignal'],
       'src/view/component/grid': ['Grid', 'G'],
       'src/editor/schema/y-state': ['YState'],
+      'src/editor/schema/y-undo': ['YUndo'],
       'src/shared/utils/global': ['t'],
     },
   ],

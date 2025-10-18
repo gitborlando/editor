@@ -39,7 +39,6 @@ class StageTransformService {
   }
 
   move = (e: ElemMouseEvent) => {
-    const { x, y } = OperateGeometry.activeGeometry
     Drag.onStart(() => {
       this.show.dispatch(false)
       if (e.hostEvent.altKey) {
@@ -48,10 +47,10 @@ class StageTransformService {
         OperateNode.pasteNodes()
       }
     })
-      .onMove(({ shift }) => {
-        const sceneShiftXY = StageViewport.toSceneShift(shift)
-        OperateGeometry.setActiveGeometry('x', x + sceneShiftXY.x)
-        OperateGeometry.setActiveGeometry('y', y + sceneShiftXY.y)
+      .onMove(({ delta }) => {
+        delta = StageViewport.toSceneShift(delta ?? { x: 0, y: 0 })
+        OperateGeometry.setActiveGeometry('x', delta.x, true)
+        OperateGeometry.setActiveGeometry('y', delta.y, true)
       })
       .onDestroy(() => {
         if (Drag.started) {
@@ -61,6 +60,7 @@ class StageTransformService {
             Schema.finalOperation('alt 复制节点')
           }
           SchemaHistory.commit('操作几何数据')
+          YUndo.track({ type: 'state', description: '移动节点' })
         }
       })
   }
@@ -162,7 +162,7 @@ class StageTransformService {
   }
 
   private updateLine(type: 'top' | 'bottom' | 'left' | 'right', p1: IXY, p2: IXY) {
-    const { setActiveGeometry: setGeometry } = OperateGeometry
+    const { setActiveGeometry } = OperateGeometry
 
     const mouseover = (e: ElemMouseEvent) => {
       if (!e.hovered) return StageCursor.setCursor('select')
@@ -194,55 +194,55 @@ class StageTransformService {
         const shiftH = xy_dot(shift, xy_yAxis(rotation))
 
         if (getSelectNodes().length === 1 && getSelectNodes()[0].type === 'line') {
-          setGeometry('x', x + xy_dot(shift, xy_xAxis(0)))
-          setGeometry('y', y + xy_dot(shift, xy_yAxis(0)))
+          setActiveGeometry('x', x + xy_dot(shift, xy_xAxis(0)))
+          setActiveGeometry('y', y + xy_dot(shift, xy_yAxis(0)))
           return
         }
 
         if (e.hostEvent.shiftKey) {
           switch (type) {
             case 'top':
-              setGeometry('x', x - (shiftH / 2) * rsin(rotation))
-              setGeometry('y', y + (shiftH / 2) * rcos(rotation))
-              setGeometry('height', height - shiftH)
-              setGeometry('height', height + -shiftH)
+              setActiveGeometry('x', x - (shiftH / 2) * rsin(rotation))
+              setActiveGeometry('y', y + (shiftH / 2) * rcos(rotation))
+              setActiveGeometry('height', height - shiftH)
+              setActiveGeometry('height', height + -shiftH)
               break
             case 'right':
-              setGeometry('width', width + shiftW)
-              setGeometry('x', x + (-shiftW / 2) * rcos(rotation))
-              setGeometry('y', y + (-shiftW / 2) * rsin(rotation))
-              setGeometry('width', width - -shiftW)
+              setActiveGeometry('width', width + shiftW)
+              setActiveGeometry('x', x + (-shiftW / 2) * rcos(rotation))
+              setActiveGeometry('y', y + (-shiftW / 2) * rsin(rotation))
+              setActiveGeometry('width', width - -shiftW)
               break
             case 'bottom':
-              setGeometry('height', height + shiftH)
-              setGeometry('x', x - (-shiftH / 2) * rsin(rotation))
-              setGeometry('y', y + (-shiftH / 2) * rcos(rotation))
-              setGeometry('height', height - -shiftH)
+              setActiveGeometry('height', height + shiftH)
+              setActiveGeometry('x', x - (-shiftH / 2) * rsin(rotation))
+              setActiveGeometry('y', y + (-shiftH / 2) * rcos(rotation))
+              setActiveGeometry('height', height - -shiftH)
               break
             case 'left':
-              setGeometry('x', x + (shiftW / 2) * rcos(rotation))
-              setGeometry('y', y + (shiftW / 2) * rsin(rotation))
-              setGeometry('width', width - shiftW)
-              setGeometry('width', width + -shiftW)
+              setActiveGeometry('x', x + (shiftW / 2) * rcos(rotation))
+              setActiveGeometry('y', y + (shiftW / 2) * rsin(rotation))
+              setActiveGeometry('width', width - shiftW)
+              setActiveGeometry('width', width + -shiftW)
               break
           }
         } else {
           switch (type) {
             case 'top':
-              setGeometry('x', x - shiftH * rsin(rotation))
-              setGeometry('y', y + shiftH * rcos(rotation))
-              setGeometry('height', height - shiftH)
+              setActiveGeometry('x', x - shiftH * rsin(rotation))
+              setActiveGeometry('y', y + shiftH * rcos(rotation))
+              setActiveGeometry('height', height - shiftH)
               break
             case 'right':
-              setGeometry('width', width + shiftW)
+              setActiveGeometry('width', width + shiftW)
               break
             case 'bottom':
-              setGeometry('height', height + shiftH)
+              setActiveGeometry('height', height + shiftH)
               break
             case 'left':
-              setGeometry('x', x + shiftW * rcos(rotation))
-              setGeometry('y', y + shiftW * rsin(rotation))
-              setGeometry('width', width - shiftW)
+              setActiveGeometry('x', x + shiftW * rcos(rotation))
+              setActiveGeometry('y', y + shiftW * rsin(rotation))
+              setActiveGeometry('width', width - shiftW)
               break
           }
         }
@@ -270,7 +270,7 @@ class StageTransformService {
   }
 
   private updateVertex(type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft', xy: IXY) {
-    const { setActiveGeometry: setGeometry } = OperateGeometry
+    const { setActiveGeometry } = OperateGeometry
 
     const mouseenter = (e: ElemMouseEvent) => {
       if (!e.hovered) return StageCursor.setCursor('select')
@@ -299,63 +299,69 @@ class StageTransformService {
         const shiftH = xy_dot(shift, xy_yAxis(rotation))
 
         if (getSelectNodes().length === 1 && getSelectNodes()[0].type === 'line') {
-          setGeometry('width', width + shiftW)
-          setGeometry('height', height + shiftH)
+          setActiveGeometry('width', width + shiftW)
+          setActiveGeometry('height', height + shiftH)
           return
         }
 
         if (e.hostEvent.shiftKey) {
           switch (type) {
             case 'topLeft':
-              setGeometry('x', x - shiftH * rsin(rotation) + shiftW * rcos(rotation))
-              setGeometry('y', y + shiftW * rsin(rotation) + shiftH * rcos(rotation))
-              setGeometry('width', width - shiftW)
-              setGeometry('height', height - shiftH)
+              setActiveGeometry('x', x - shiftH * rsin(rotation) + shiftW * rcos(rotation))
+              setActiveGeometry('y', y + shiftW * rsin(rotation) + shiftH * rcos(rotation))
+              setActiveGeometry('width', width - shiftW)
+              setActiveGeometry('height', height - shiftH)
               break
             case 'topRight':
-              setGeometry('x', x - shiftH * rsin(rotation))
-              setGeometry('y', y + shiftH * rcos(rotation))
-              setGeometry('height', height - shiftH)
-              setGeometry('width', width + shiftW)
+              setActiveGeometry('x', x - shiftH * rsin(rotation))
+              setActiveGeometry('y', y + shiftH * rcos(rotation))
+              setActiveGeometry('height', height - shiftH)
+              setActiveGeometry('width', width + shiftW)
               break
             case 'bottomRight':
-              setGeometry('width', width + shiftW)
-              setGeometry('height', height + shiftH)
-              setGeometry('x', x - (-shiftH / 2) * rsin(rotation) + (-shiftW / 2) * rcos(rotation))
-              setGeometry('y', y + (-shiftW / 2) * rsin(rotation) + (-shiftH / 2) * rcos(rotation))
-              setGeometry('width', width - -shiftW)
-              setGeometry('height', height - -shiftH)
+              setActiveGeometry('width', width + shiftW)
+              setActiveGeometry('height', height + shiftH)
+              setActiveGeometry(
+                'x',
+                x - (-shiftH / 2) * rsin(rotation) + (-shiftW / 2) * rcos(rotation),
+              )
+              setActiveGeometry(
+                'y',
+                y + (-shiftW / 2) * rsin(rotation) + (-shiftH / 2) * rcos(rotation),
+              )
+              setActiveGeometry('width', width - -shiftW)
+              setActiveGeometry('height', height - -shiftH)
               break
             case 'bottomLeft':
-              setGeometry('x', x + shiftW * rcos(rotation))
-              setGeometry('y', y + shiftW * rsin(rotation))
-              setGeometry('width', width - shiftW)
-              setGeometry('height', height + shiftH)
+              setActiveGeometry('x', x + shiftW * rcos(rotation))
+              setActiveGeometry('y', y + shiftW * rsin(rotation))
+              setActiveGeometry('width', width - shiftW)
+              setActiveGeometry('height', height + shiftH)
               break
           }
         } else {
           switch (type) {
             case 'topLeft':
-              setGeometry('x', x - shiftH * rsin(rotation) + shiftW * rcos(rotation))
-              setGeometry('y', y + shiftW * rsin(rotation) + shiftH * rcos(rotation))
-              setGeometry('width', width - shiftW)
-              setGeometry('height', height - shiftH)
+              setActiveGeometry('x', x - shiftH * rsin(rotation) + shiftW * rcos(rotation))
+              setActiveGeometry('y', y + shiftW * rsin(rotation) + shiftH * rcos(rotation))
+              setActiveGeometry('width', width - shiftW)
+              setActiveGeometry('height', height - shiftH)
               break
             case 'topRight':
-              setGeometry('x', x - shiftH * rsin(rotation))
-              setGeometry('y', y + shiftH * rcos(rotation))
-              setGeometry('height', height - shiftH)
-              setGeometry('width', width + shiftW)
+              setActiveGeometry('x', x - shiftH * rsin(rotation))
+              setActiveGeometry('y', y + shiftH * rcos(rotation))
+              setActiveGeometry('height', height - shiftH)
+              setActiveGeometry('width', width + shiftW)
               break
             case 'bottomRight':
-              setGeometry('width', width + shiftW)
-              setGeometry('height', height + shiftH)
+              setActiveGeometry('width', width + shiftW)
+              setActiveGeometry('height', height + shiftH)
               break
             case 'bottomLeft':
-              setGeometry('x', x + shiftW * rcos(rotation))
-              setGeometry('y', y + shiftW * rsin(rotation))
-              setGeometry('width', width - shiftW)
-              setGeometry('height', height + shiftH)
+              setActiveGeometry('x', x + shiftW * rcos(rotation))
+              setActiveGeometry('y', y + shiftW * rsin(rotation))
+              setActiveGeometry('width', width - shiftW)
+              setActiveGeometry('height', height + shiftH)
               break
           }
         }
@@ -372,7 +378,7 @@ class StageTransformService {
         start = StageViewport.toSceneXY(start)
         const deltaRotation = xy_getRotation(current, start, center)
 
-        setGeometry('rotation', rotation + deltaRotation)
+        setActiveGeometry('rotation', rotation + deltaRotation)
       })
     }
 

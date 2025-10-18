@@ -2,6 +2,7 @@ import autobind from 'class-autobind-decorator'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { SchemaUtil2, SchemaUtilTraverseData } from 'src/editor/schema/utils'
+import { YUndo } from 'src/editor/schema/y-undo'
 import { MULTI_VALUE } from 'src/global/constant'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { IPolygon, IStar } from '../schema/type'
@@ -86,6 +87,9 @@ class OperateGeometryService {
         callback: this.applyChangeToNode,
       })
       traverse(getSelectIds())
+
+      if (!delta) YUndo.track({ type: 'state', description: `修改几何属性: ${key}` })
+
       this.hasStartApply = false
       this.operateKeys.clear()
       this.deltaKeys.clear()
