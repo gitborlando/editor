@@ -1,5 +1,26 @@
-.icon-button {
+.button {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &.arco-btn-text:not(.arco-btn-icon-only) {
+    padding-left: 0px;
+    padding-right: 8px;
+    & span {
+      margin-left: 0;
+    }
+  }
+  &.arco-btn-text:not(.arco-btn-disabled) {
+    color: inherit;
+    &.button-active {
+      color: var(--color);
+      background-color: var(--color-bg);
+    }
+  }
+  &.arco-btn-text.arco-btn-disabled {
+    color: var(--gray-border);
+  }
+  &.arco-btn-text:not(.arco-btn-disabled):not(.arco-btn-loading):hover {
+    color: var(--color);
+  }
 }

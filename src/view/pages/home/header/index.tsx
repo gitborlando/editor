@@ -6,7 +6,7 @@ interface HomeHeaderProps {}
 
 export const HomeHeaderComp: FC<HomeHeaderProps> = observer(({}) => {
   return (
-    <G className={'homeHeader'} center horizontal='auto auto'>
+    <G className='homeHeader' horizontal='auto auto' center>
       <TitleComp />
       <Button type='primary' style={{ marginLeft: 'auto' }}>
         新建文件

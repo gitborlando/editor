@@ -1,10 +1,17 @@
-import { Button, ButtonProps } from '@arco-design/web-react'
+import { Button as ArcoButton, ButtonProps } from '@arco-design/web-react'
 import cx from 'classix'
 import { FC } from 'react'
 import './index.less'
 
-export const IconButton: FC<ButtonProps> = observer(({ icon, className, size, ...rest }) => {
-  return (
-    <Button type='text' icon={icon} className={cx('icon-button', className as string)} {...rest} />
-  )
-})
+export const Button: FC<ButtonProps & { active?: boolean }> = observer(
+  ({ children, className, size, type = 'text', active = false, ...rest }) => {
+    return (
+      <ArcoButton
+        type={type}
+        className={cx('button', active && 'button-active', className as string)}
+        {...rest}>
+        {children}
+      </ArcoButton>
+    )
+  },
+)

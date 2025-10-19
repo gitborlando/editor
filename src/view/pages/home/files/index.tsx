@@ -21,11 +21,7 @@ export const HomeFilesComp: FC<{}> = suspense(
     return (
       <G style={{ minHeight: 0, minWidth: 0, overflow: 'auto' }}>
         <Scrollbars>
-          <G
-            className='home-files'
-            horizontal='repeat(auto-fill, 320px)'
-            gap={24}
-            style={{ justifyContent: 'center' }}>
+          <G className='home-files' horizontal='repeat(auto-fill, 320px)' gap={24}>
             {data?.map((file) => (
               <FileItemComp key={file.id + miniId()} file={file} />
             ))}
