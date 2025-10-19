@@ -28,6 +28,9 @@ importers:
       '@hocuspocus/server':
         specifier: ^3.2.5
         version: 3.2.5(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)
+      '@multiavatar/multiavatar':
+        specifier: ^1.0.7
+        version: 1.0.7
       '@palettebro/generator':
         specifier: ^2.0.5
         version: 2.0.5(typescript@5.9.3)
@@ -1098,6 +1101,12 @@ packages:
     resolution:
       {
         integrity: sha512-ztmtTd6xwnuh2/xu+Vb01btgV8SQWYCaK56CkRK8gEkWe5TuDyBcYJ0wgkMRn+2VcE9KUmhvkz+N9GHrqw/C0g==,
+      }
+
+  '@multiavatar/multiavatar@1.0.7':
+    resolution:
+      {
+        integrity: sha512-Yg9Uw57bmlErsWL0CSv4d6D4ZqVBE00OZmYr9MRgygoXZdboNtsEI6FbBRw1AY8l88Sm1ARcyojtlm2uwUn0Zg==,
       }
 
   '@napi-rs/wasm-runtime@1.0.7':
@@ -6761,6 +6770,8 @@ snapshots:
   '@lifeomic/attempt@3.1.0': {}
 
   '@material/material-color-utilities@0.3.0': {}
+
+  '@multiavatar/multiavatar@1.0.7': {}
 
   '@napi-rs/wasm-runtime@1.0.7':
     dependencies:

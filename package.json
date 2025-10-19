@@ -21,6 +21,7 @@
     "@gitborlando/widget": "^1.0.1",
     "@hocuspocus/provider": "^3.2.5",
     "@hocuspocus/server": "^3.2.5",
+    "@multiavatar/multiavatar": "^1.0.7",
     "@palettebro/generator": "^2.0.5",
     "@supabase/supabase-js": "^2.58.0",
     "@tanstack/react-query": "^5.90.2",

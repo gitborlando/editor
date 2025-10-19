@@ -1,7 +1,7 @@
 import { Is } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { YUndo } from 'src/editor/schema/y-undo'
-import { UserService } from 'src/global/data/user'
+import { UserService } from 'src/global/service/user'
 import { proxy, Snapshot, snapshot, subscribe } from 'valtio'
 import { bind } from 'valtio-yjs'
 import * as Y from 'yjs'
