@@ -75,7 +75,7 @@ export class EditorService {
         const schema = jsonParse(fileText) as ISchema
         Schema.initSchema(schema)
         YState.initSchema(fileId, schema as unknown as V1.Schema)
-        YClients.init()
+        YClients.initClient()
       }
     }
 

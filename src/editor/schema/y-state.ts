@@ -1,5 +1,6 @@
 import { Signal } from '@gitborlando/signal'
 import autobind from 'class-autobind-decorator'
+import { YClients } from 'src/editor/schema/y-clients'
 import { YUndo } from 'src/editor/schema/y-undo'
 import { proxy, Snapshot, snapshot, subscribe } from 'valtio'
 import { bind } from 'valtio-yjs'
@@ -28,7 +29,10 @@ class YStateService {
     // YWS.init(fileId, this.doc)
     if (mockSchema) Object.assign(this.state, mockSchema)
     this.snap = snapshot(this.state)
+
+    YClients.clientId = this.doc.clientID
     YUndo.initStateUndo(this.doc.getMap('schema'))
+
     this.inited$.dispatch(true)
   }
 

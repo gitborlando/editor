@@ -1,32 +1,33 @@
+import { XY } from '@gitborlando/geo'
 import { Is } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { YUndo } from 'src/editor/schema/y-undo'
-import { UserService } from 'src/global/service/user'
-import { proxy, Snapshot, snapshot, subscribe } from 'valtio'
+import { proxy, snapshot, subscribe } from 'valtio'
 import { bind } from 'valtio-yjs'
 import * as Y from 'yjs'
 
 @autobind
 class YClientsService {
+  othersSnap!: V1.Clients
+  others!: V1.Clients
+
   doc!: Y.Doc
-  snap!: Snapshot<V1.Clients>
-  proxy!: V1.Clients
+  clientId!: number
+  client!: V1.Client
+  clientSnap!: V1.Client
 
-  get client() {
-    return this.proxy[UserService.userId]
-  }
-
-  constructor() {
-    this.bind()
-  }
-
-  init() {
-    this.proxy[UserService.userId] = {
-      userId: UserService.userId,
+  initClient() {
+    this.client = proxy({
       selectIds: {},
       selectPageId: YState.snap.meta.pageIds[0],
-    }
-    YUndo.initClientUndo(this.doc.getMap('clients'))
+      cursor: new XY(0, 0),
+    })
+    this.doc = new Y.Doc()
+    bind(this.client, this.doc.getMap('client'))
+    subscribe(this.client, () => {
+      this.clientSnap = snapshot(this.client)
+    })
+    YUndo.initClientUndo(this.doc.getMap('client'))
   }
 
   select(id: string) {
@@ -51,15 +52,6 @@ class YClientsService {
     this.client.selectPageId = id
     const page = YState.state[id]
     YUndo.track({ type: 'client', description: `选择页面 ${page.name}` })
-  }
-
-  private bind() {
-    this.doc = new Y.Doc()
-    this.proxy = proxy({})
-    bind(this.proxy, this.doc.getMap('clients'))
-    subscribe(this.proxy, () => {
-      this.snap = snapshot(this.proxy)
-    })
   }
 }
 

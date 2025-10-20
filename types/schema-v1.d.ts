@@ -19,13 +19,13 @@ namespace V1 {
   }
 
   type Client = {
-    userId: string
     selectIds: Record<string, boolean>
     selectPageId: string
+    cursor: import('@gitborlando/geo').IXY
   }
 
   type Clients = {
-    [userId: string]: Client
+    [clientId: number]: Client
   }
 
   type NodeParentBase = {
