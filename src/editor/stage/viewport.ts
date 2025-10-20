@@ -24,8 +24,8 @@ const initBound = {
   x: 280,
   y: 44,
   right: 240,
-  width: window.innerWidth - 520,
-  height: window.innerHeight - 44 + 1,
+  width: window.innerWidth - 280 - 240,
+  height: window.innerHeight - 44,
 }
 
 const stepByZoom = [
@@ -172,11 +172,11 @@ class StageViewportService {
     if (allElemsRect.width > viewportRect.width || allElemsRect.height > viewportRect.height) {
       const zoom = Math.min(
         viewportRect.width / allElemsRect.width,
-        viewportRect.height / allElemsRect.height
+        viewportRect.height / allElemsRect.height,
       )
       const shift = xy_multiply(
         xy_minus(xy_center(viewportRect), xy_center(allElemsRect)),
-        zoom / getZoom()
+        zoom / getZoom(),
       )
 
       this.zoom$.dispatch(zoom)

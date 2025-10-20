@@ -80,7 +80,8 @@ export const RulerComp: FC<IRulerComp> = memo(({}) => {
   return (
     <Flex
       className='wh-100% absolute of-hidden pointer-events-none'
-      style={{ width: bound.width, height: bound.height }}>
+      /*       style={{ width: bound.width, height: bound.height }} */
+    >
       <Flex layout='h' className='wh-100%-20 '>
         {drawHorizontal()}
       </Flex>

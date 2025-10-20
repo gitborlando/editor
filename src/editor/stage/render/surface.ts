@@ -35,12 +35,15 @@ export class StageSurface {
   private bufferCanvas = new OffscreenCanvas(0, 0)
   private bufferCtx = this.bufferCanvas.getContext('2d')!
 
-  setCanvas = async (canvas: HTMLCanvasElement) => {
+  async initTextBreaker() {
+    this.textBreaker = await createTextBreaker()
+  }
+
+  setCanvas = (canvas: HTMLCanvasElement) => {
     if (this.inited$.value) return
 
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')!
-    this.textBreaker = await createTextBreaker()
 
     this.handleResize()
     this.handleViewport()
