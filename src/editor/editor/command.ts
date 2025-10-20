@@ -1,5 +1,4 @@
 import hotkeys from 'hotkeys-js'
-import { FileManager } from 'src/editor/editor/file-manager'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { SchemaHistory } from 'src/editor/schema/history'
 import { StageInteract } from 'src/editor/stage/interact/interact'
@@ -180,14 +179,12 @@ class EditorCommandManager {
         name: '删除文件',
         callback: () => {
           const { id } = Menu.context
-          FileManager.deleteFile(id)
         },
       },
       {
         name: '导出文件',
         callback: () => {
           const { id } = Menu.context
-          FileManager.exportFile(id)
         },
       },
     ]

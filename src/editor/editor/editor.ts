@@ -2,7 +2,6 @@ import { jsonParse } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
-import { FileManager } from 'src/editor/editor/file-manager'
 import { mockCollide } from 'src/editor/editor/mock/collide'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { OperateGeometry } from 'src/editor/operate/geometry'
@@ -59,9 +58,6 @@ export class EditorService {
       let mockSchema = mockCollide()
       if (mockSchema) {
         const schema = mockSchema
-        if (!(await FileManager.fileForage.getItem<ISchema>(schema.meta.fileId))) {
-          await FileManager.saveFile(schema)
-        }
         Schema.initSchema(schema)
       }
     } else {

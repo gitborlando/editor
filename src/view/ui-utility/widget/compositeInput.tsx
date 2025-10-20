@@ -1,5 +1,5 @@
+import { InputNumber, InputProps } from '@arco-design/web-react'
 import { Flex, Icon } from '@gitborlando/widget'
-import RCInput, { InputProps } from 'rc-input'
 import { ComponentPropsWithRef, forwardRef, memo, useRef } from 'react'
 import { Drag } from 'src/global/event/drag'
 import { useAutoSignal } from 'src/shared/signal/signal-react'
@@ -41,7 +41,7 @@ export const CompositeInput = memo(
         onFocus,
         onBlur,
       },
-      ref
+      ref,
     ) => {
       const active = useAutoSignal(false)
       const hover = useAutoSignal(false)
@@ -86,7 +86,7 @@ export const CompositeInput = memo(
         // }
         return (
           <Flex layout='h' className='translate-y-0.5'>
-            <RCInput
+            <InputNumber
               type={thisType}
               disabled={disabled}
               value={thisValue.value}
@@ -97,12 +97,12 @@ export const CompositeInput = memo(
                 beforeOperate?.()
               }}
               onChange={(e) => {
-                thisValue.dispatch(e.target.value)
+                thisValue.dispatch(e)
               }}
               onBlur={(e) => {
                 active.dispatch(false)
                 onBlur?.(e)
-                emitNewValue(e.target.value)
+                emitNewValue(e)
                 afterOperate?.()
               }}
             />
@@ -150,6 +150,6 @@ export const CompositeInput = memo(
           {/* {needStepHandler === true && !disabled && <OperateComp />} */}
         </Flex>
       )
-    }
-  )
+    },
+  ),
 )

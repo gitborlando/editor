@@ -13,6 +13,7 @@ const autoImport = autoImportPlugin({
     'mobx-react-lite',
     {
       classix: ['cx'],
+      valtio: ['useSnapshot'],
       '@gitborlando/signal': ['Signal'],
       'src/view/assets/assets': ['Assets'],
       'src/shared/signal/signal': ['createSignal'],
