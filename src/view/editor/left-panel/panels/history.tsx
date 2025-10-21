@@ -5,8 +5,8 @@ import { SchemaHistory } from 'src/editor/schema/history'
 import { ISchemaOperation } from 'src/editor/schema/type'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
-import { hslColor } from 'src/shared/utils/color'
 import { useMemoComp, useObjectKey } from 'src/shared/utils/react'
+import { hslColor } from 'src/utils/color'
 import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
 
 type IHistoryComp = {}
@@ -78,7 +78,7 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
           </Flex>
         </Flex>
       )
-    }
+    },
   )
 
   return (

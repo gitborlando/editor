@@ -9,8 +9,9 @@ import { xy_, xy_from } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/stage/render/surface'
 import { ISplitText } from 'src/editor/stage/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
-import { hslBlueColor, rgba } from 'src/shared/utils/color'
+import { hslBlueColor } from 'src/shared/utils/color'
 import { IXY, iife, matchCase, memorize } from 'src/shared/utils/normal'
+import { rgba } from 'src/utils/color'
 import {
   IEllipse,
   IFill,

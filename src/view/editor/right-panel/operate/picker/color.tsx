@@ -1,8 +1,8 @@
 import { FC, memo, useEffect } from 'react'
 import { RgbaStringColorPicker } from 'react-colorful'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
-import { rgb } from 'src/shared/utils/color'
 import { useDownUpTracker } from 'src/shared/utils/event'
+import { rgb } from 'src/utils/color'
 
 type IPickerColorComp = {
   color: string
@@ -18,7 +18,7 @@ export const PickerColorComp: FC<IPickerColorComp> = memo(({ color, onChange }) 
   useDownUpTracker(
     () => document.getElementById('$$RgbaStringColorPicker'),
     beforeOperate.dispatch,
-    afterOperate.dispatch
+    afterOperate.dispatch,
   )
   useEffect(() => injectCss(), [])
 

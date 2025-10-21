@@ -46,7 +46,7 @@ export const SwitchBarComp: FC<{}> = memo(({}) => {
           layer: <Lucide icon={Layers} size={16} />,
           undo: <Lucide icon={History} />,
           images: <Lucide icon={Image} />,
-          setting: <Lucide icon={Settings} />,
+          setting: <Lucide icon={Settings} size={19} />,
         })
         const toolTip = matchCase(id, {
           layer: '图层',

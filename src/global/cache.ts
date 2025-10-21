@@ -1,3 +1,3 @@
 import { createCache } from '@gitborlando/utils'
 
-export const commonCache = createCache<string, any>()
+export const globalCache = createCache<string, any>()

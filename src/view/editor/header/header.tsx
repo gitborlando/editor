@@ -24,7 +24,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
       className='editor-header borderBottom'
       style={{ height: StageViewport.bound.value.y }}>
       <Button onClick={() => navigate('/')} icon={<Lucide icon={ChevronLeft} />}>
-        文件列表(1)
+        文件列表
       </Button>
       <G center horizontal gap={0} className='editor-header-centerGroup'>
         <UndoGroup />
