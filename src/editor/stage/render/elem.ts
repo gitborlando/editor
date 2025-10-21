@@ -1,19 +1,23 @@
+import { AABB, OBB } from '@gitborlando/geo'
 import { createObjCache, loopFor } from '@gitborlando/utils'
+import { FC } from 'react'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { atan2, degreefy, normalAngle, radianfy } from 'src/editor/math/base'
-import { AABB, OBB } from 'src/editor/math/obb'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/stage/render/surface'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
+
+export const ElemReact: FC<ElemProps> = 'elem' as unknown as FC<ElemProps>
 
 export type ElemProps = {
   id?: string
   outline?: 'hover' | 'select'
   hidden?: boolean
   obb?: OBB
+  getDirtyRect?: (expand: (aabb: AABB, ...expands: number[]) => AABB) => AABB
   draw: (ctx: CanvasRenderingContext2D, path2d: Path2D) => void
   hitTest?: (xy: IXY) => boolean
-  addEvent?: Partial<Record<ElemEventType, ElemEventFunc>>
+  events?: Partial<Record<ElemEventType, ElemEventFunc>>
 }
 
 export class Elem {
@@ -33,7 +37,15 @@ export class Elem {
   hidden = false
   optimize = false
 
-  obb = OBB.IdentityOBB()
+  private _obb = OBB.identityOBB()
+  get obb() {
+    return this._obb
+  }
+  set obb(obb: OBB) {
+    Surface.collectDirty(this)
+    this._obb = obb
+    Surface.collectDirty(this)
+  }
 
   get aabb() {
     return this.obb.aabb

@@ -1,9 +1,10 @@
+import { AABB, OBB } from '@gitborlando/geo'
 import { firstOne } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
+import { makeObservable, observable } from 'mobx'
 import { EditorCommand } from 'src/editor/editor/command'
-import { AABB, OBB } from 'src/editor/math/obb'
 import { OperateNode, getSelectIds } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { Schema } from 'src/editor/schema/schema'
@@ -11,10 +12,11 @@ import { ID, IFrame, INode } from 'src/editor/schema/type'
 import { ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
-import { StageMarquee } from 'src/editor/stage/render/widget/marquee'
 import { StageTransform } from 'src/editor/stage/render/widget/transform'
 import { StageVectorEdit } from 'src/editor/stage/render/widget/vector-edit'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
+import { Drag } from 'src/global/event/drag'
 import { Menu } from 'src/global/menu'
 import { batchSignal, createSignal } from 'src/shared/signal/signal'
 import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
@@ -25,10 +27,16 @@ type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 
 @autobind
 class StageSelectService {
-  marquee = createSignal<IRect | undefined>()
+  marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
   afterSelect = createSignal<ISelectType>()
   private marqueeOBB?: OBB
   private lastSelectIds = <ID[]>[]
+
+  constructor() {
+    makeObservable(this, {
+      marquee: observable,
+    })
+  }
 
   startInteract() {
     StageScene.sceneRoot.addEvent('mousedown', this.onMouseDown)
@@ -89,7 +97,7 @@ class StageSelectService {
   }
 
   private onDeepSelect() {
-    const hoverNode = Schema.find(this.hoverId)
+    const hoverNode = Schema.find(this.hoverId!)
     if (hoverNode?.type !== 'text') return
     OperateText.intoEditing.dispatch(hoverNode.id)
   }
@@ -169,7 +177,7 @@ class StageSelectService {
   private onMarqueeSelect() {
     const hitTest = (marqueeOBB: OBB | undefined, obb: OBB) => {
       if (!marqueeOBB) return false
-      const aabbResult = AABB.Collide(marqueeOBB.aabb, obb.aabb)
+      const aabbResult = AABB.collide(marqueeOBB.aabb, obb.aabb)
       if (macroMatch`-180|-90|0|90|180`(obb.rotation)) return aabbResult
       return aabbResult && marqueeOBB.collide(obb)
     }
@@ -180,7 +188,7 @@ class StageSelectService {
         if (!elem.visible) return false
 
         if (childIds?.length && depth === 0) {
-          if (AABB.Include(this.marqueeOBB!.aabb, elem.aabb) === 1) {
+          if (AABB.include(this.marqueeOBB!.aabb, elem.aabb) === 1) {
             OperateNode.select(node.id)
             UILeftPanelLayer.needExpandIds.add(node.id)
             return false
@@ -195,16 +203,20 @@ class StageSelectService {
         return false
       })
     }
-    StageMarquee.duringMarquee.hook(() => {
-      this.marqueeOBB = StageMarquee.marqueeElem.obb
-      batchSignal(OperateNode.selectIds, () => traverseTest())
-    })
-    StageMarquee.afterMarquee.hook(() => {
-      this.afterSelect.dispatch('marquee')
-      if (equal([...OperateNode.selectIds.value], this.lastSelectIds)) return
-      OperateNode.commitFinalSelect()
-    })
-    StageMarquee.startMarquee()
+
+    Surface.disablePointEvent()
+    Drag.onStart()
+      .onMove(({ marquee }) => {
+        this.marquee = StageViewport.toSceneMarquee(marquee)
+        this.marqueeOBB = OBB.fromRect(this.marquee)
+        batchSignal(OperateNode.selectIds, () => traverseTest())
+      })
+      .onDestroy(() => {
+        this.marquee = { x: 0, y: 0, width: 0, height: 0 }
+        this.afterSelect.dispatch('marquee')
+        if (equal([...OperateNode.selectIds.value], this.lastSelectIds)) return
+        OperateNode.commitFinalSelect()
+      })
   }
 }
 

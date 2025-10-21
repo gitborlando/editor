@@ -72,3 +72,7 @@ export function getTime() {
 export function twoDecimal(number: number) {
   return Number(number.toFixed(Number.isInteger(number) ? 0 : 2))
 }
+
+export function cleanObject(object: IAnyObject) {
+  for (const key in object) delete object[key]
+}

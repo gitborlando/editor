@@ -24,11 +24,17 @@ class YStateService {
   }
 
   async initSchema(fileId: string, mockSchema?: V1.Schema) {
+    console.log('fileId: ', fileId)
+    this.doc = new Y.Doc()
     // this.yIndexDB = new IndexeddbPersistence(fileId, this.doc)
     // await this.yIndexDB.whenSynced
     // YWS.init(fileId, this.doc)
-    if (mockSchema) Object.assign(this.state, mockSchema)
+    this.state = proxy(mockSchema)
     this.snap = snapshot(this.state)
+    bind(this.state, this.doc.getMap('schema'))
+
+    this.unSub?.()
+    this.unSub = this.subscribeState()
 
     YClients.clientId = this.doc.clientID
     YUndo.initStateUndo(this.doc.getMap('schema'))
@@ -44,13 +50,7 @@ class YStateService {
     return this.state[id] as T
   }
 
-  private bind() {
-    this.doc = new Y.Doc()
-    this.state = proxy({} as V1.Schema)
-    bind(this.state, this.doc.getMap('schema'))
-    this.unSub?.()
-    this.unSub = this.subscribeState()
-  }
+  private bind() {}
 
   private subscribeState() {
     return subscribe(this.state, (unstable_ops: any[]) => {

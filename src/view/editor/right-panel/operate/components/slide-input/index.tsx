@@ -36,7 +36,7 @@ const LabelComp: FC<{
   slideRate?: number
   onSlide?: (value: number) => void
   afterSlide?: (changed: boolean) => void
-}> = ({ label, slideRate = 1, onSlide, afterSlide }) => {
+}> = observer(({ label, slideRate = 1, onSlide, afterSlide }) => {
   const handleDragLabel = () => {
     Drag.needInfinity()
       .onStart()
@@ -48,4 +48,4 @@ const LabelComp: FC<{
       {label}
     </G>
   )
-}
+})

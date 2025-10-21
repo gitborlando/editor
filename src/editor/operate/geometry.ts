@@ -4,9 +4,11 @@ import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { SchemaUtil2, SchemaUtilTraverseData } from 'src/editor/schema/utils'
 import { YUndo } from 'src/editor/schema/y-undo'
 import { MULTI_VALUE } from 'src/global/constant'
+import { cleanObject } from 'src/shared/utils/normal'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { IPolygon, IStar } from '../schema/type'
-import { OperateNode, getSelectIds } from './node'
+import { getSelectIds } from '../schema/y-clients'
+import { OperateNode } from './node'
 
 function createAllGeometry() {
   return {
@@ -61,14 +63,14 @@ class OperateGeometryService {
   }
 
   setupActiveGeometry(selectedNodes: V1.Node[]) {
-    const geometry = <any>{}
+    cleanObject(this.activeGeometry)
     selectedNodes.forEach((node, i) => {
       this.activeKeys.forEach((key) => {
-        if (i === 0) geometry[key] = t<any>(node)[key]
-        else if (geometry[key] !== t<any>(node)[key]) geometry[key] = MULTI_VALUE
+        if (i === 0) this.activeGeometry[key] = t<any>(node)[key]
+        else if (this.activeGeometry[key] !== t<any>(node)[key])
+          t<any>(this.activeGeometry)[key] = MULTI_VALUE
       })
     })
-    this.activeGeometry = geometry
   }
 
   private hasStartApply = false

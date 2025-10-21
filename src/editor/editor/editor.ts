@@ -53,6 +53,14 @@ export class EditorService {
     UIPickerCopy.initHook()
   }
 
+  dispose() {
+    Editor.inited$.value = false
+    YState.inited$.value = false
+
+    StageInteract.dispose()
+    StageScene.dispose()
+  }
+
   initSchema = async (fileId: string, onProgress?: (progress: number) => void) => {
     if (fileId === 'mock') {
       let mockSchema = mockCollide()

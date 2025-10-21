@@ -1,5 +1,5 @@
+import { OBB } from '@gitborlando/geo'
 import autobind from 'class-autobind-decorator'
-import { OBB } from 'src/editor/math/obb'
 import { Elem } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
@@ -18,7 +18,7 @@ class StageMarqueeService {
   afterMarquee = createSignal()
 
   initHook() {
-    this.setupMarqueeElem()
+    // this.setupMarqueeElem()
   }
 
   startMarquee() {
@@ -60,7 +60,7 @@ class StageMarqueeService {
 
   private resetMarqueeElemOBB() {
     Surface.collectDirty(this.marqueeElem)
-    this.marqueeElem.obb = OBB.FromRect(this.marquee)
+    this.marqueeElem.obb = OBB.fromRect(this.marquee)
     Surface.collectDirty(this.marqueeElem)
   }
 }

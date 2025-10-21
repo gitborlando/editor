@@ -1,12 +1,9 @@
+import { OBB } from '@gitborlando/geo'
 import { createObjCache, firstOne } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { OBB } from 'src/editor/math/obb'
 import { OperateNode } from 'src/editor/operate/node'
 import { YClients } from 'src/editor/schema/y-clients'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { StageMarquee } from 'src/editor/stage/render/widget/marquee'
-import { StageTransform } from 'src/editor/stage/render/widget/transform'
-import { StageVectorEdit } from 'src/editor/stage/render/widget/vector-edit'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { IClientXY } from 'src/shared/utils/event'
 import { macroMatch } from 'src/shared/utils/normal'
@@ -21,17 +18,25 @@ import { Surface } from './surface'
 @autobind
 class StageSceneService {
   elements = createObjCache<Elem>()
-  sceneRoot = new Elem('sceneRoot', 'sceneElem')
-  widgetRoot = new Elem('widgetRoot', 'widgetElem')
+  sceneRoot!: Elem
+  widgetRoot!: Elem
 
   initHook() {
-    StageTransform.initHook()
-    StageMarquee.initHook()
-    StageVectorEdit.initHook()
+    this.sceneRoot = new Elem('sceneRoot', 'sceneElem')
+    this.widgetRoot = new Elem('widgetRoot', 'widgetElem')
+    // StageTransform.initHook()
+    // StageVectorEdit.initHook()
 
     this.setupRootElem()
     this.hookRenderNode()
     this.bindNodeHover()
+  }
+
+  dispose() {
+    this.elements.clear()
+    this.sceneRoot.destroy()
+    this.widgetRoot.destroy()
+    Surface.layerList = []
   }
 
   findElem(id: string) {
@@ -39,8 +44,7 @@ class StageSceneService {
   }
 
   private setupRootElem() {
-    Surface.layerList.push(this.sceneRoot)
-    Surface.layerList.push(this.widgetRoot)
+    Surface.layerList.push(this.sceneRoot, this.widgetRoot)
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
   }
@@ -115,7 +119,7 @@ class StageSceneService {
     const elem = this.findElem(node.id)
     Surface.collectDirty(elem)
 
-    elem.obb = OBB.FromRect(node, node.rotation)
+    elem.obb = OBB.fromRect(node, node.rotation)
     elem.draw = (ctx, path2d) => StageNodeDrawer.draw(node, elem, ctx, path2d)
     elem.optimize = true
 

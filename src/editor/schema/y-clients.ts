@@ -2,6 +2,7 @@ import { XY } from '@gitborlando/geo'
 import { Is } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { YUndo } from 'src/editor/schema/y-undo'
+import { commonCache } from 'src/global/cache'
 import { proxy, snapshot, subscribe } from 'valtio'
 import { bind } from 'valtio-yjs'
 import * as Y from 'yjs'
@@ -56,3 +57,12 @@ class YClientsService {
 }
 
 export const YClients = new YClientsService()
+
+export function getSelectIds() {
+  const selectIds = commonCache.getSet(
+    'selectIds',
+    () => Object.keys(YClients.clientSnap.selectIds),
+    [YClients.clientSnap.selectIds],
+  )
+  return t<string[]>(selectIds)
+}

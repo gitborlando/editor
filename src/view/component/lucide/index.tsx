@@ -6,6 +6,6 @@ interface LucideProps extends LucidePropsType {
   icon: React.ForwardRefExoticComponent<any>
 }
 
-export const Lucide: FC<LucideProps> = observer(({ icon: Icon, className, ...rest }) => {
-  return <Icon className={cx('lucide', className)} {...rest} size={20} />
+export const Lucide: FC<LucideProps> = observer(({ icon: Icon, className, size = 18, ...rest }) => {
+  return <Icon className={cx('lucide', className)} {...rest} size={size} strokeWidth={1.5} />
 })

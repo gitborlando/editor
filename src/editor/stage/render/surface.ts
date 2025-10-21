@@ -1,3 +1,4 @@
+import { AABB, OBB } from '@gitborlando/geo'
 import { Signal } from '@gitborlando/signal'
 import { reverseFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
@@ -10,7 +11,6 @@ import {
   mx_invertAABB,
   mx_invertPoint,
 } from 'src/editor/math/matrix'
-import { AABB, OBB } from 'src/editor/math/obb'
 import { xy_, xy_center, xy_client, xy_minus, xy_rotate } from 'src/editor/math/xy'
 import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
@@ -93,8 +93,8 @@ export class StageSurface {
   private calcFullRenderElemsMinHeap() {
     this.fullRenderElemsMinHeap = new TinyQueue(undefined, (a, b) => {
       if (a.layerIndex !== b.layerIndex) return a.layerIndex - b.layerIndex
-      const aDistance = xy_minus(xy_center(AABB.Rect(a.elem.aabb)), this.eventXY || xy_())
-      const bDistance = xy_minus(xy_center(AABB.Rect(b.elem.aabb)), this.eventXY || xy_())
+      const aDistance = xy_minus(xy_center(AABB.rect(a.elem.aabb)), this.eventXY || xy_())
+      const bDistance = xy_minus(xy_center(AABB.rect(b.elem.aabb)), this.eventXY || xy_())
       const aLane = max(abs(aDistance.x), abs(aDistance.y))
       const bLane = max(abs(bDistance.x), abs(bDistance.y))
       return aLane - bLane
@@ -150,7 +150,7 @@ export class StageSurface {
 
     const traverse = (elem: Elem) => {
       if (!elem.visible) return
-      if (AABB.Include(this.prevViewportAABB, elem.aabb) === 1) return
+      if (AABB.include(this.prevViewportAABB, elem.aabb) === 1) return
       reRenderElems.add(elem)
     }
 
@@ -197,7 +197,7 @@ export class StageSurface {
 
   collectDirty = (elem: Elem) => {
     const expand = (aabb: AABB, ...expands: number[]) =>
-      AABB.Expand(
+      AABB.expand(
         aabb,
         ...(expands.map((i) => i / getZoom()) as [number] | [number, number, number, number]),
       )
@@ -207,15 +207,15 @@ export class StageSurface {
 
   private partialRender = () => {
     const reRenderElems = new Set<Elem>()
-    let dirtyArea = AABB.Merge([...this.dirtyRects])
+    let dirtyArea = AABB.merge(...this.dirtyRects)
     let needReTest = true
 
     const traverse = (elem: Elem) => {
       if (!elem.visible) return
-      if (!AABB.Collide(dirtyArea, elem.aabb)) return
+      if (!AABB.collide(dirtyArea, elem.aabb)) return
 
-      if (AABB.Include(dirtyArea, elem.aabb) !== 1) {
-        dirtyArea = AABB.Merge([dirtyArea, elem.aabb])
+      if (AABB.include(dirtyArea, elem.aabb) !== 1) {
+        dirtyArea = AABB.merge(dirtyArea, elem.aabb)
         needReTest = true
       }
       reRenderElems.add(elem)
@@ -252,7 +252,7 @@ export class StageSurface {
       this.viewportMatrix = mx_create(zoom, 0, 0, zoom, x, y)
       this.prevViewportAABB = mx_invertAABB(this.boundAABB, this.prevViewportMatrix)
       this.viewportAABB = mx_invertAABB(this.boundAABB, this.viewportMatrix)
-      this.layerList.forEach((elem) => (elem.obb = OBB.FromAABB(this.viewportAABB)))
+      this.layerList.forEach((elem) => (elem.obb = OBB.fromAABB(this.viewportAABB)))
     })
 
     StageViewport.zoomingStage$.hook(() => {
@@ -279,7 +279,7 @@ export class StageSurface {
   }
 
   testVisible = (aabb: AABB) => {
-    return AABB.Collide(aabb, this.viewportAABB)
+    return AABB.collide(aabb, this.viewportAABB)
   }
 
   getVisualSize = (aabb: AABB) => {

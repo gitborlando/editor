@@ -25,6 +25,9 @@ class StageInteractService {
       this.currentType.dispatch('select')
     })
   }
+  dispose() {
+    this.interactHandlerMap.get(this.previousType!)?.endInteract()
+  }
   private autoInteract() {
     this.interactHandlerMap.get(this.previousType!)?.endInteract()
     this.interactHandlerMap.get(this.currentType.value)?.startInteract()

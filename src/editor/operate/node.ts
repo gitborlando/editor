@@ -60,13 +60,13 @@ class OperateNodeService {
   }
   select(id: ID) {
     YClients.select(id)
-    if (this.selectIds.value.has(id)) return
-    this.selectIds.dispatch((ids) => ids.add(id))
+    // if (this.selectIds.value.has(id)) return
+    // this.selectIds.dispatch((ids) => ids.add(id))
   }
   unSelect(id: ID) {
     YClients.unSelect(id)
-    if (!this.selectIds.value.has(id)) return
-    this.selectIds.dispatch((ids) => ids.delete(id))
+    // if (!this.selectIds.value.has(id)) return
+    // this.selectIds.dispatch((ids) => ids.delete(id))
   }
   clearSelect() {
     YClients.clearSelect()

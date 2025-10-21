@@ -16,7 +16,7 @@ export const EditorLeftPanelState = proxy({
   currentTabId: t<(typeof EditorLeftPanelIds)[number]>('layer'),
 })
 
-export const LeftPanelComp: FC<{}> = memo(({}) => {
+export const LeftPanelComp: FC<{}> = observer(({}) => {
   const { currentTabId } = useSnapshot(EditorLeftPanelState)
 
   return (
@@ -43,7 +43,7 @@ export const SwitchBarComp: FC<{}> = memo(({}) => {
     <G center className='w-40 bd-1-#E3E3E3-r py-8' style={{ alignContent: 'flex-start' }} gap={8}>
       {EditorLeftPanelIds.map((id) => {
         const icon = matchCase(id, {
-          layer: <Lucide icon={Layers} />,
+          layer: <Lucide icon={Layers} size={16} />,
           undo: <Lucide icon={History} />,
           images: <Lucide icon={Image} />,
           setting: <Lucide icon={Settings} />,
