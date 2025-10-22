@@ -152,7 +152,7 @@ class StageViewportService {
     this.bound.value = {
       ...this.bound.value,
       width: window.innerWidth - x - right,
-      height: window.innerHeight - y + 1,
+      height: window.innerHeight - y,
     }
     this.bound.dispatch(this.bound.value)
   }
