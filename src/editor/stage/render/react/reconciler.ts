@@ -1,7 +1,6 @@
 import { ReactNode } from 'react'
 import Reconciler, { HostConfig } from 'react-reconciler'
 import { Elem, ElemProps } from 'src/editor/stage/render/elem'
-import { Surface } from 'src/editor/stage/render/surface'
 
 const hostConfig: HostConfig<
   'elem',
@@ -28,6 +27,7 @@ const hostConfig: HostConfig<
           // @ts-ignore
           elem.addEvent(eventType, value[eventType])
         }
+      } else if (key === 'children') {
       } else {
         // @ts-ignore
         elem[key] = props[key]
@@ -78,12 +78,12 @@ const hostConfig: HostConfig<
           // @ts-ignore
           instance.addEvent(eventType, updatePayload.events[eventType])
         }
+      } else if (key === 'children') {
       } else {
         // @ts-ignore
         instance[key] = updatePayload[key]
       }
     }
-    Surface.collectDirty(instance)
   },
   commitMount(instance) {},
   getRootHostContext() {

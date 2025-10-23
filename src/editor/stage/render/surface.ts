@@ -194,14 +194,15 @@ export class StageSurface {
   }
 
   private dirtyRects = new Set<AABB>()
+  private expand = (aabb: AABB, ...expands: number[]) =>
+    AABB.expand(
+      aabb,
+      ...(expands.map((i) => i / getZoom()) as [number] | [number, number, number, number]),
+    )
 
-  collectDirty = (elem: Elem) => {
-    const expand = (aabb: AABB, ...expands: number[]) =>
-      AABB.expand(
-        aabb,
-        ...(expands.map((i) => i / getZoom()) as [number] | [number, number, number, number]),
-      )
-    this.dirtyRects.add(elem.getDirtyRect(expand))
+  collectDirty = (elem: Elem, time: 'before' | 'after' = 'before') => {
+    const dirtyRect = elem.getDirtyRect(this.expand)
+    this.dirtyRects.add(dirtyRect)
     this.requestRender('partialRender')
   }
 

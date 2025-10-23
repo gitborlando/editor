@@ -3,8 +3,9 @@ import { renderElem } from 'src/editor/stage/render/react/reconciler'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { FPSComp } from 'src/view/editor/stage/fps'
-import { MarqueeComp } from 'src/view/editor/stage/marquee'
+import { EditorStageMarqueeComp } from 'src/view/editor/stage/marquee'
 import { RulerComp } from 'src/view/editor/stage/ruler'
+import { EditorStageTransformComp } from 'src/view/editor/stage/transform'
 import { useUnmount } from 'src/view/hooks/common'
 
 export const StageComp: FC<{}> = observer(({}) => {
@@ -13,7 +14,13 @@ export const StageComp: FC<{}> = observer(({}) => {
   })
 
   useEffect(() => {
-    return renderElem(<MarqueeComp />, StageScene.widgetRoot)
+    return renderElem(
+      <>
+        <EditorStageTransformComp />
+        <EditorStageMarqueeComp />
+      </>,
+      StageScene.widgetRoot,
+    )
   }, [])
 
   return (

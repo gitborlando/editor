@@ -1,6 +1,6 @@
 import { AABB, OBB } from '@gitborlando/geo'
 import { createObjCache, loopFor } from '@gitborlando/utils'
-import { FC } from 'react'
+import { FC, ReactNode } from 'react'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { atan2, degreefy, normalAngle, radianfy } from 'src/editor/math/base'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
@@ -14,10 +14,11 @@ export type ElemProps = {
   outline?: 'hover' | 'select'
   hidden?: boolean
   obb?: OBB
-  getDirtyRect?: (expand: (aabb: AABB, ...expands: number[]) => AABB) => AABB
-  draw: (ctx: CanvasRenderingContext2D, path2d: Path2D) => void
+  dirtyExpand?: number
+  draw?: (ctx: CanvasRenderingContext2D, path2d: Path2D) => void
   hitTest?: (xy: IXY) => boolean
   events?: Partial<Record<ElemEventType, ElemEventFunc>>
+  children?: ReactNode[]
 }
 
 export class Elem {
@@ -36,15 +37,16 @@ export class Elem {
   clip = false
   hidden = false
   optimize = false
+  dirtyExpand = 1
 
   private _obb = OBB.identityOBB()
   get obb() {
     return this._obb
   }
   set obb(obb: OBB) {
-    Surface.collectDirty(this)
+    Surface.collectDirty(this, 'before')
     this._obb = obb
-    Surface.collectDirty(this)
+    Surface.collectDirty(this, 'after')
   }
 
   get aabb() {
@@ -58,7 +60,8 @@ export class Elem {
   }
 
   draw = (ctx: CanvasRenderingContext2D, path2d: Path2D) => {}
-  getDirtyRect = (expand: (aabb: AABB, ...expands: number[]) => AABB) => this.aabb
+  getDirtyRect = (expand: (aabb: AABB, ...expands: number[]) => AABB) =>
+    expand(this.aabb, this.dirtyExpand)
 
   setMatrix = (ctx: CanvasRenderingContext2D, inverse = false) => {
     const { x, y, rotation } = this.obb
