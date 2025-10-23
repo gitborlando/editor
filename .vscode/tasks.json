@@ -12,6 +12,12 @@
         "${input:componentName}",
         "${input:prefix}"
       ]
+    },
+    {
+      "label": "hard sync",
+      "type": "process",
+      "command": "git",
+      "args": ["reset", "--hard", "origin/refact"]
     }
   ],
   "inputs": [
