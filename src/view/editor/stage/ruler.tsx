@@ -9,7 +9,7 @@ type IRulerComp = {}
 
 export const RulerComp: FC<IRulerComp> = memo(({}) => {
   const zoom = useHookSignal(StageViewport.zoom$)
-  const bound = useHookSignal(StageViewport.bound)
+  const bound = StageViewport.bound
   const stageOffset = useHookSignal(StageViewport.offset$)
   const datumXY = OperateNode.datumXY
 
@@ -78,10 +78,7 @@ export const RulerComp: FC<IRulerComp> = memo(({}) => {
   })
 
   return (
-    <Flex
-      className='wh-100% absolute of-hidden pointer-events-none'
-      /*       style={{ width: bound.width, height: bound.height }} */
-    >
+    <Flex className='wh-100% absolute of-hidden pointer-events-none'>
       <Flex layout='h' className='wh-100%-20 '>
         {drawHorizontal()}
       </Flex>

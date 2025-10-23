@@ -1,3 +1,4 @@
+import { XY } from '@gitborlando/geo'
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
 import { AABB } from 'src/editor/math/obb'
@@ -20,13 +21,14 @@ import {
   xy_plus_all,
 } from '../math/xy'
 
-const initBound = {
-  x: 280,
-  y: 44,
+const createInitBound = () => ({
+  left: 280,
+  top: 44,
   right: 240,
+  bottom: 0,
   width: window.innerWidth - 280 - 240,
-  height: window.innerHeight - 44,
-}
+  height: window.innerHeight - 44 - 0,
+})
 
 const stepByZoom = [
   [0, 0.02],
@@ -42,7 +44,7 @@ const stepByZoom = [
 @autobind
 class StageViewportService {
   inited = createSignal(false)
-  bound = createSignal(initBound)
+  bound = createInitBound()
   zoom$ = createSignal(1)
   offset$ = createSignal({ x: 0, y: 0 })
   beforeZoom = createSignal()
@@ -53,9 +55,15 @@ class StageViewportService {
 
   private wheeler = new EventWheelService()
 
+  constructor() {
+    makeObservable(this, {
+      bound: observable,
+    })
+  }
+
   initHook() {
     Surface.inited$.hook(() => {
-      window.addEventListener('resize', this.onResizeBound)
+      this.onResizeBound()
       this.onWheelZoom()
       this.inited.dispatch()
     })
@@ -77,7 +85,7 @@ class StageViewportService {
     return { zoom: this.zoom$.value, x: this.offset$.value.x, y: this.offset$.value.y }
   }
   toViewportXY(xy: IXY) {
-    return xy_minus(xy, this.bound.value)
+    return XY.from(xy).minus(XY.of(this.bound.left, this.bound.top))
   }
   toStageXY(xy: IXY) {
     return xy_minus(this.toViewportXY(xy), this.offset$.value)
@@ -96,11 +104,15 @@ class StageViewportService {
     }
   }
   sceneStageToClientXY(xy: IXY) {
-    return xy_plus_all(xy_multiply(xy, this.zoom$.value), this.offset$.value, this.bound.value)
+    return xy_plus_all(
+      xy_multiply(xy, this.zoom$.value),
+      this.offset$.value,
+      XY.of(this.bound.left, this.bound.top),
+    )
   }
   inViewport(xy: IXY) {
-    const { x, y, width } = this.bound.value
-    return xy.x > x && xy.x < x + width && xy.y > y
+    const { left, top, right, bottom } = this.bound
+    return xy.x > left && xy.x < right && xy.y > top && xy.y < bottom
   }
 
   private onWheelZoom() {
@@ -148,13 +160,14 @@ class StageViewportService {
   }
 
   private onResizeBound() {
-    const { x, y, right } = this.bound.value
-    this.bound.value = {
-      ...this.bound.value,
-      width: window.innerWidth - x - right,
-      height: window.innerHeight - y,
-    }
-    this.bound.dispatch(this.bound.value)
+    window.addEventListener(
+      'resize',
+      action(() => {
+        const { left, top, right, bottom } = this.bound
+        this.bound.width = window.innerWidth - left - right
+        this.bound.height = window.innerHeight - top - bottom
+      }),
+    )
   }
 
   centerStage() {

@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { FC } from 'react'
-import { StageViewport } from 'src/editor/stage/viewport'
 import { createStorageItem } from 'src/global/storage'
 import { createSignal } from 'src/shared/signal/signal'
 
@@ -20,9 +19,9 @@ class UILeftPanelService {
   panelHeight = window.innerHeight - 48
   switchTabIds = <string[]>[]
   initHook() {
-    this.showLeftPanel.hook({ immediately: true }, (show) =>
-      StageViewport.bound.dispatch((bound) => (bound.x = show ? 280 : 40)),
-    )
+    // this.showLeftPanel.hook({ immediately: true }, (show) =>
+    //   StageViewport.bound.dispatch((bound) => (bound.x = show ? 280 : 40)),
+    // )
   }
   registerSwitchTab(option: ISwitchTabOption) {
     this.switchTabMap.dispatch((map) => map.set(option.id, option))

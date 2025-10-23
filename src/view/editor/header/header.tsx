@@ -1,6 +1,6 @@
 import { Icon } from '@gitborlando/widget'
 import { ChevronLeft, Redo, Undo } from 'lucide-react'
-import { FC, memo } from 'react'
+import { FC } from 'react'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -13,7 +13,7 @@ import './index.less'
 
 type IHeaderComp = {}
 
-export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
+export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
   useHookSignal(StageInteract.currentType)
   const navigate = useNavigate()
 
@@ -22,7 +22,7 @@ export const HeaderComp: FC<IHeaderComp> = memo(({}) => {
       center
       horizontal='auto 1fr auto'
       className='editor-header borderBottom'
-      style={{ height: StageViewport.bound.value.y }}>
+      style={{ height: StageViewport.bound.top }}>
       <Button onClick={() => navigate('/')} icon={<Lucide icon={ChevronLeft} />}>
         文件列表
       </Button>

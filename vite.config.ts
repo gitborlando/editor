@@ -14,7 +14,8 @@ const autoImport = autoImportPlugin({
     {
       classix: ['cx'],
       valtio: ['useSnapshot'],
-      '@gitborlando/geo': ['AABB', 'OBB'],
+      mobx: ['makeObservable', 'observable', 'reaction', 'autorun', 'action'],
+      '@gitborlando/geo': ['AABB', 'OBB', 'XY'],
       '@gitborlando/signal': ['Signal'],
       'src/view/assets/assets': ['Assets'],
       'src/shared/signal/signal': ['createSignal'],

@@ -22,7 +22,7 @@ export const LeftPanelComp: FC<{}> = observer(({}) => {
   return (
     <G
       horizontal='auto 1fr'
-      style={{ width: StageViewport.bound.value.x }}
+      style={{ width: StageViewport.bound.left }}
       className='bd-1-#E3E3E3-r'
       gap={0}>
       <SwitchBarComp />

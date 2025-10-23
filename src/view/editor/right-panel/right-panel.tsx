@@ -9,7 +9,7 @@ export const RightPanelComp: FC<{}> = ({}) => {
   useHookSignal(currentTab)
 
   return (
-    <G style={{ width: StageViewport.bound.value.right }} className='bd-1-#E3E3E3-l'>
+    <G style={{ width: StageViewport.bound.right }} className='bd-1-#E3E3E3-l'>
       {currentTab.value === 'operate' && <OperatePanelComp />}
     </G>
   )

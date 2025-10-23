@@ -1,5 +1,4 @@
-import { AABB, OBB } from '@gitborlando/geo'
-import { Signal } from '@gitborlando/signal'
+import { AABB } from '@gitborlando/geo'
 import { reverseFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { EditorSetting } from 'src/editor/editor/setting'
@@ -45,7 +44,7 @@ export class StageSurface {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')!
 
-    this.handleResize()
+    this.autoResize()
     this.handleViewport()
     this.handlePointerEvents()
 
@@ -265,18 +264,24 @@ export class StageSurface {
     })
   }
 
-  private handleResize = () => {
-    StageViewport.bound.hook({ immediately: true }, ({ width, height }) => {
-      this.canvas.width = this.bufferCanvas.width = width * dpr
-      this.canvas.height = this.bufferCanvas.height = height * dpr
-      this.canvas.style.width = `${width}px`
-      this.canvas.style.height = `${height}px`
-      this.boundAABB = new AABB(0, 0, width, height)
-    })
+  private autoResize() {
+    reaction(
+      () => ({ ...StageViewport.bound }),
+      ({ width, height }) => {
+        console.log('height: ', height)
+        this.canvas.width = this.bufferCanvas.width = width * dpr
+        this.canvas.height = this.bufferCanvas.height = height * dpr
+        this.canvas.style.width = `${width}px`
+        this.canvas.style.height = `${height}px`
+        this.boundAABB = new AABB(0, 0, width, height)
+      },
+      { fireImmediately: true },
+    )
 
-    StageViewport.bound.hook(() => {
-      this.requestRender('firstFullRender')
-    })
+    reaction(
+      () => ({ ...StageViewport.bound }),
+      () => this.requestRender('firstFullRender'),
+    )
   }
 
   testVisible = (aabb: AABB) => {
@@ -311,8 +316,8 @@ export class StageSurface {
   private eventXY!: IXY
 
   private getEventXY = (e: IClientXY) => {
-    const bound = StageViewport.bound.value
-    const xy = xy_minus(xy_client(e), bound)
+    const bound = StageViewport.bound
+    const xy = xy_minus(xy_client(e), XY.of(bound.left, bound.top))
     this.eventXY = mx_invertPoint(xy, this.viewportMatrix)
     this.elemsFromPoint = []
   }
