@@ -42,7 +42,7 @@ export class EditorService {
     OperateText.initHook()
 
     StageScene.initHook()
-    StageViewport.initHook()
+    StageViewport.init()
     StageInteract.initHook()
     StageDrop.initHook()
     StageCursor.initHook()

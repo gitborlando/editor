@@ -13,7 +13,6 @@ import {
 import { xy_, xy_center, xy_client, xy_minus, xy_rotate } from 'src/editor/math/xy'
 import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
-import { multiSignal } from 'src/shared/signal/signal'
 import { IClientXY } from 'src/shared/utils/event'
 import { INoopFunc, IXY, Raf, getTime } from 'src/shared/utils/normal'
 import TinyQueue from 'tinyqueue'
@@ -24,6 +23,8 @@ const dpr = devicePixelRatio
 @autoBind
 export class StageSurface {
   inited$ = Signal.create(false)
+  disposing$ = Signal.create()
+
   layerList: Elem[] = []
 
   textBreaker!: TextBreaker
@@ -44,8 +45,8 @@ export class StageSurface {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')!
 
-    this.autoResize()
-    this.handleViewport()
+    this.onResize()
+    this.onZoomMove()
     this.handlePointerEvents()
 
     this.inited$.dispatch(true)
@@ -244,31 +245,35 @@ export class StageSurface {
   viewportAABB!: AABB
   private prevViewportAABB!: AABB
 
-  private handleViewport = () => {
-    const viewportSignal = multiSignal(StageViewport.zoom$, StageViewport.offset$)
-    viewportSignal.hook({ immediately: true }, () => {
-      const { zoom, x, y } = StageViewport.getViewport()
-      this.prevViewportMatrix = this.viewportMatrix || mx_create(zoom, 0, 0, zoom, x, y)
-      this.viewportMatrix = mx_create(zoom, 0, 0, zoom, x, y)
+  private onZoomMove = () => {
+    autorun(() => {
+      const { zoom, offset } = StageViewport
+      this.prevViewportMatrix =
+        this.viewportMatrix || mx_create(zoom, 0, 0, zoom, offset.x, offset.y)
+      this.viewportMatrix = mx_create(zoom, 0, 0, zoom, offset.x, offset.y)
       this.prevViewportAABB = mx_invertAABB(this.boundAABB, this.prevViewportMatrix)
       this.viewportAABB = mx_invertAABB(this.boundAABB, this.viewportMatrix)
       this.layerList.forEach((elem) => (elem.obb = OBB.fromAABB(this.viewportAABB)))
     })
 
-    StageViewport.zoomingStage$.hook(() => {
-      this.requestRender('firstFullRender')
-    })
+    reaction(
+      () => ({
+        zoom: StageViewport.zoom,
+        offset: { ...StageViewport.offset },
+      }),
+      () => this.requestRender('firstFullRender'),
+    )
 
-    StageViewport.movingStage$.hook((value, oldValue) => {
-      this.translate(value, oldValue)
-    })
+    reaction(
+      () => ({ ...StageViewport.offset }),
+      (offset, prevOffset) => this.translate(offset, prevOffset),
+    )
   }
 
-  private autoResize() {
+  private onResize() {
     reaction(
       () => ({ ...StageViewport.bound }),
       ({ width, height }) => {
-        console.log('height: ', height)
         this.canvas.width = this.bufferCanvas.width = width * dpr
         this.canvas.height = this.bufferCanvas.height = height * dpr
         this.canvas.style.width = `${width}px`

@@ -1,25 +1,8 @@
-import { XY } from '@gitborlando/geo'
+import { IRect, IXY, max, XY } from '@gitborlando/geo'
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
-import { AABB } from 'src/editor/math/obb'
-import { OperatePage } from 'src/editor/operate/page'
-import { Schema } from 'src/editor/schema/schema'
-import { Elem } from 'src/editor/stage/render/elem'
 import { Surface } from 'src/editor/stage/render/surface'
 import { EventWheelService } from 'src/global/event/wheel'
-import { createSignal } from 'src/shared/signal/signal'
-import { IRect, IXY } from 'src/shared/utils/normal'
-import { max } from '../math/base'
-import {
-  xy_center,
-  xy_client,
-  xy_divide,
-  xy_from,
-  xy_minus,
-  xy_multiply,
-  xy_plus,
-  xy_plus_all,
-} from '../math/xy'
 
 const createInitBound = () => ({
   left: 280,
@@ -43,72 +26,59 @@ const stepByZoom = [
 
 @autobind
 class StageViewportService {
-  inited = createSignal(false)
+  zoom = 1
+  offset = XY.of(0, 0) as IXY
   bound = createInitBound()
-  zoom$ = createSignal(1)
-  offset$ = createSignal({ x: 0, y: 0 })
-  beforeZoom = createSignal()
-  afterZoom = createSignal()
-
-  movingStage$ = createSignal<IXY>({ x: 0, y: 0 })
-  zoomingStage$ = createSignal()
 
   private wheeler = new EventWheelService()
 
   constructor() {
     makeObservable(this, {
       bound: observable,
+      zoom: observable,
+      offset: observable,
     })
   }
 
-  initHook() {
+  init() {
+    this.onResizeBound()
     Surface.inited$.hook(() => {
-      this.onResizeBound()
       this.onWheelZoom()
-      this.inited.dispatch()
     })
 
-    Schema.onMatchPatch('/client/selectPageId', () => {
-      const viewport = OperatePage.getCurrentViewport()
-      this.zoom$.dispatch(viewport.zoom)
-      this.offset$.dispatch(viewport.offset)
-      this.zoomingStage$.dispatch(viewport.zoom)
-    })
+    // Schema.onMatchPatch('/client/selectPageId', () => {
+    //   const viewport = OperatePage.getCurrentViewport()
+    //   this.zoom$.dispatch(viewport.zoom)
+    //   this.offset$.dispatch(viewport.offset)
+    //   this.zoomingStage$.dispatch(viewport.zoom)
+    // })
 
-    this.zoom$.hook((zoom) => OperatePage.setCurrentViewport({ zoom }))
-    this.offset$.hook((offset) => OperatePage.setCurrentViewport({ offset }))
+    // this.zoom$.hook((zoom) => OperatePage.setCurrentViewport({ zoom }))
+    // this.offset$.hook((offset) => OperatePage.setCurrentViewport({ offset }))
 
     //  hotkeys('alt+l', this.centerStage)
   }
 
-  getViewport() {
-    return { zoom: this.zoom$.value, x: this.offset$.value.x, y: this.offset$.value.y }
-  }
   toViewportXY(xy: IXY) {
     return XY.from(xy).minus(XY.of(this.bound.left, this.bound.top))
   }
   toStageXY(xy: IXY) {
-    return xy_minus(this.toViewportXY(xy), this.offset$.value)
+    return XY.from(this.toViewportXY(xy)).minus(this.offset)
   }
   toSceneXY(xy: IXY) {
-    return xy_divide(this.toStageXY(xy), this.zoom$.value)
+    return XY.from(this.toStageXY(xy)).divide(this.zoom)
   }
   toSceneShift(xy: IXY) {
-    return xy_divide(xy, this.zoom$.value)
+    return XY.from(xy).divide(this.zoom)
   }
-  toSceneMarquee(marquee: IRect) {
-    return {
-      ...this.toSceneXY(marquee),
-      width: marquee.width / this.zoom$.value,
-      height: marquee.height / this.zoom$.value,
-    }
+  toSceneMarquee(_marquee: IRect) {
+    const marquee = { ..._marquee }
+    marquee.width /= this.zoom
+    marquee.height /= this.zoom
+    return marquee
   }
   sceneStageToClientXY(xy: IXY) {
-    return xy_plus_all(
-      xy_multiply(xy, this.zoom$.value),
-      this.offset$.value,
-      XY.of(this.bound.left, this.bound.top),
-    )
+    return XY.from(xy).multiply(this.zoom).plus(this.offset).plus(XY.leftTop(this.bound))
   }
   inViewport(xy: IXY) {
     const { left, top, right, bottom } = this.bound
@@ -118,42 +88,38 @@ class StageViewportService {
   private onWheelZoom() {
     this.wheeler.beforeWheel.hook(({ e }) => {
       if (hotkeys.ctrl) e.preventDefault()
-      this.beforeZoom.dispatch(true)
     })
     this.wheeler.duringWheel.hook(({ e }) => {
       if (!e.ctrlKey) {
-        const oldOffset = this.offset$.value
+        const oldOffset = XY.from(this.offset)
         if (e.shiftKey) {
           oldOffset.x -= e.deltaY
         } else {
           if (e.deltaY === 0) oldOffset.x -= e.deltaX
           else oldOffset.y -= e.deltaY
         }
-        this.offset$.dispatch(xy_from(oldOffset))
-        this.movingStage$.dispatch(xy_from(oldOffset))
+        this.offset = oldOffset
         return
       }
 
       e.preventDefault()
 
       const sign = e.deltaY > 0 ? -1 : 1
-      const step = stepByZoom.findLast(([_zoom, _step]) => _zoom <= this.zoom$.value)![1] * sign
+      const step = stepByZoom.findLast(([_zoom, _step]) => _zoom <= this.zoom)![1] * sign
 
-      const newZoom = max(0.01, this.zoom$.value + step)
-      const zoomDelta = newZoom - this.zoom$.value
+      const newZoom = max(0.01, this.zoom + step)
+      const zoomDelta = newZoom - this.zoom
 
-      const sceneStageXY = this.toSceneXY(xy_client(e))
-      const newOffset = xy_plus(this.offset$.value, xy_multiply(sceneStageXY, -zoomDelta))
+      const sceneStageXY = this.toSceneXY(XY.client(e))
+      const newOffset = XY.from(sceneStageXY).multiply(-zoomDelta).plus(this.offset)
 
-      this.zoom$.dispatch(newZoom)
-      this.offset$.dispatch(newOffset)
-
-      this.zoomingStage$.dispatch()
-      this.movingStage$.value = xy_from(newOffset)
+      runInAction(() => {
+        this.zoom = newZoom
+        this.offset = newOffset
+      })
     })
     this.wheeler.afterWheel.hook(({ e }) => {
       if (hotkeys.ctrl) e.preventDefault()
-      this.afterZoom.dispatch()
     })
     Surface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))
     window.addEventListener('wheel', (e) => e.ctrlKey && e.preventDefault(), { passive: false })
@@ -170,42 +136,40 @@ class StageViewportService {
     )
   }
 
-  centerStage() {
-    let allElemsAABB = new AABB(0, 0, 0, 0)
+  //   centerStage() {
+  //     let allElemsAABB = new AABB(0, 0, 0, 0)
 
-    const traverse = (elem: Elem) => {
-      allElemsAABB = AABB.Merge([allElemsAABB, elem.aabb])
-      elem.children.forEach(traverse)
-    }
-    Surface.layerList.forEach((elem) => elem.children.forEach(traverse))
+  //     const traverse = (elem: Elem) => {
+  //       allElemsAABB = AABB.Merge([allElemsAABB, elem.aabb])
+  //       elem.children.forEach(traverse)
+  //     }
+  //     Surface.layerList.forEach((elem) => elem.children.forEach(traverse))
 
-    const allElemsRect = AABB.Rect(allElemsAABB)
-    const viewportRect = AABB.Rect(Surface.viewportAABB)
+  //     const allElemsRect = AABB.Rect(allElemsAABB)
+  //     const viewportRect = AABB.Rect(Surface.viewportAABB)
 
-    if (allElemsRect.width > viewportRect.width || allElemsRect.height > viewportRect.height) {
-      const zoom = Math.min(
-        viewportRect.width / allElemsRect.width,
-        viewportRect.height / allElemsRect.height,
-      )
-      const shift = xy_multiply(
-        xy_minus(xy_center(viewportRect), xy_center(allElemsRect)),
-        zoom / getZoom(),
-      )
+  //     if (allElemsRect.width > viewportRect.width || allElemsRect.height > viewportRect.height) {
+  //       const zoom = Math.min(
+  //         viewportRect.width / allElemsRect.width,
+  //         viewportRect.height / allElemsRect.height,
+  //       )
+  //       const shift = xy_multiply(
+  //         xy_minus(xy_center(viewportRect), xy_center(allElemsRect)),
+  //         zoom / getZoom(),
+  //       )
 
-      this.zoom$.dispatch(zoom)
-      this.offset$.dispatch((offset) => xy_plus(offset, shift))
-      this.zoomingStage$.dispatch()
-    } else {
-      const shift = xy_minus(xy_center(viewportRect), xy_center(allElemsRect))
+  //       this.zoom$.dispatch(zoom)
+  //       this.offset$.dispatch((offset) => xy_plus(offset, shift))
+  //       this.zoomingStage$.dispatch()
+  //     } else {
+  //       const shift = xy_minus(xy_center(viewportRect), xy_center(allElemsRect))
 
-      this.offset$.dispatch((offset) => xy_plus(offset, shift))
-      this.movingStage$.dispatch()
-    }
-  }
+  //       this.offset$.dispatch((offset) => xy_plus(offset, shift))
+  //       this.movingStage$.dispatch()
+  //     }
+  //   }
 }
 
 export const StageViewport = new StageViewportService()
 
-export function getZoom() {
-  return StageViewport.zoom$.value
-}
+export const getZoom = () => StageViewport.zoom

@@ -5,10 +5,11 @@ import { Schema } from 'src/editor/schema/schema'
 import { INode, IPoint, ISchemaPropKey } from 'src/editor/schema/type'
 import { StageDraw } from 'src/editor/stage/draw/draw'
 import { PIXI } from 'src/editor/stage/pixi'
+import { getZoom } from 'src/editor/stage/viewport'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { COLOR, hslBlueColor } from 'src/shared/utils/color'
 import { IXY, iife } from 'src/shared/utils/normal'
-import { useMatchPatch, useMemoComp, useZoom } from 'src/shared/utils/react'
+import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { xy_getRotation, xy_minus, xy_opposite, xy_plus, xy_rotate } from 'young.xy-utils'
 import { PointComp } from './point'
 
@@ -19,7 +20,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
   useHookSignal(intoEditNodeId)
 
   const VectorEditContentComp = useMemoComp([intoEditNodeId.value], ({}) => {
-    const zoom = useZoom()
+    const zoom = getZoom()
     const node = Schema.find<INode>(intoEditNodeId.value)
     const curIndex = useAutoSignal()
     const curHandleIndex = useAutoSignal()

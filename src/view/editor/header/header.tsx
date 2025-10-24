@@ -3,7 +3,7 @@ import { ChevronLeft, Redo, Undo } from 'lucide-react'
 import { FC } from 'react'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { StageViewport } from 'src/editor/stage/viewport'
+import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { Assets } from 'src/view/assets/assets'
 import { Button } from 'src/view/component/button'
@@ -78,7 +78,6 @@ const UndoGroup: FC<{}> = observer(() => {
   )
 })
 
-const ZoomComp = ({}) => {
-  useHookSignal(StageViewport.zoom$)
-  return <Button style={{ width: 60 }}>{~~((StageViewport.zoom$.value || 0) * 100)}%</Button>
-}
+const ZoomComp = observer(({}) => {
+  return <Button style={{ width: 60 }}>{~~((getZoom() || 0) * 100)}%</Button>
+})

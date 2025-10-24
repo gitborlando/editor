@@ -13,7 +13,6 @@ import { ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { StageTransform } from 'src/editor/stage/render/widget/transform'
-import { StageVectorEdit } from 'src/editor/stage/render/widget/vector-edit'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
@@ -104,11 +103,6 @@ class StageSelectService {
 
   private onLeftMouseDown(e: ElemMouseEvent) {
     this.lastSelectIds = [...OperateNode.selectIds.value]
-
-    if (OperateNode.intoEditNodeId.value) {
-      StageVectorEdit.startMarqueeSelect()
-      return
-    }
 
     if (!this.hoverId) {
       this.clearSelect()

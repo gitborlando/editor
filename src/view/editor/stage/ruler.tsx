@@ -1,5 +1,5 @@
 import { Flex } from '@gitborlando/widget'
-import { FC, ReactNode, memo } from 'react'
+import { FC, ReactNode } from 'react'
 import { OperateNode } from 'src/editor/operate/node'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { useHookSignal } from 'src/shared/signal/signal-react'
@@ -7,10 +7,8 @@ import { useMemoComp } from 'src/shared/utils/react'
 
 type IRulerComp = {}
 
-export const RulerComp: FC<IRulerComp> = memo(({}) => {
-  const zoom = useHookSignal(StageViewport.zoom$)
-  const bound = StageViewport.bound
-  const stageOffset = useHookSignal(StageViewport.offset$)
+export const RulerComp: FC<IRulerComp> = observer(({}) => {
+  const { bound, zoom, offset } = StageViewport
   const datumXY = OperateNode.datumXY
 
   useHookSignal(OperateNode.datumId)
@@ -18,7 +16,7 @@ export const RulerComp: FC<IRulerComp> = memo(({}) => {
   const drawHorizontal = () => {
     const hLabels: ReactNode[] = []
     const width = bound.width / zoom
-    const offsetX = (stageOffset.x + datumXY.x) / zoom
+    const offsetX = (offset.x + datumXY.x) / zoom
     const step = getStepByZoom()
     const start = getNearestIntMultiple(-offsetX, step)
     const end = getNearestIntMultiple(width - offsetX, step)
@@ -32,7 +30,7 @@ export const RulerComp: FC<IRulerComp> = memo(({}) => {
   const drawVertical = () => {
     const vLabels: ReactNode[] = []
     const height = bound.height / zoom
-    const offsetY = (stageOffset.y + datumXY.y) / zoom
+    const offsetY = (offset.y + datumXY.y) / zoom
     const step = getStepByZoom()
     const start = getNearestIntMultiple(-offsetY, step)
     const end = getNearestIntMultiple(height - offsetY, step)

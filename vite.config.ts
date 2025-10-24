@@ -10,11 +10,11 @@ const autoImport = autoImportPlugin({
   imports: [
     'react',
     'react-router',
+    'mobx',
     'mobx-react-lite',
     {
       classix: ['cx'],
       valtio: ['useSnapshot'],
-      mobx: ['makeObservable', 'observable', 'reaction', 'autorun', 'action'],
       '@gitborlando/geo': ['AABB', 'OBB', 'XY'],
       '@gitborlando/signal': ['Signal'],
       'src/view/assets/assets': ['Assets'],

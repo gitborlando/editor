@@ -12,9 +12,7 @@ import {
   useState,
 } from 'react'
 import { Schema } from 'src/editor/schema/schema'
-import { StageViewport } from 'src/editor/stage/viewport'
 import { IAnyObject } from 'src/shared/utils/normal'
-import { useHookSignal } from '../signal/signal-react'
 
 export function useMemoComp<P extends {}>(deps: any[], component: FC<P>) {
   const comp = useRef(component)
@@ -28,9 +26,9 @@ export function useMemoComp<P extends {}>(deps: any[], component: FC<P>) {
       (prev, cur) => {
         if (depsChanged.current) return false //@ts-ignore
         return Object.keys(prev).every((key) => prev[key] === cur[key])
-      }
+      },
     ),
-    [deps.length]
+    [deps.length],
   )
 }
 
@@ -43,12 +41,6 @@ const objectKeyMap = new WeakMap<IAnyObject, string>()
 export function useObjectKey(obj: IAnyObject) {
   if (!objectKeyMap.has(obj)) objectKeyMap.set(obj, nanoid())
   return objectKeyMap.get(obj)
-}
-
-export function useZoom() {
-  const zoom = StageViewport.zoom$.value
-  useHookSignal(StageViewport.zoom$)
-  return zoom
 }
 
 export function useAsyncEffect(callback: Function, deps = []) {

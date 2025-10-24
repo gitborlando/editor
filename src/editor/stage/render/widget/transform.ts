@@ -75,9 +75,7 @@ class StageTransformService {
       this.updateElemOutline(newIds, oldIds)
       this.show.dispatch(true)
     })
-    StageViewport.zoom$.hook(() => {
-      this.show.dispatch(true)
-    })
+
     OperateNode.intoEditNodeId.hook(() => {
       this.show.dispatch(false)
     })

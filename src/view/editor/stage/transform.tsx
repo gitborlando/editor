@@ -35,46 +35,42 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   )
 })
 
-const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY }> = ({
-  type,
-  p1,
-  p2,
-}) => {
-  return (
-    <ElemReact
-      id={`transform-line-${type}`}
-      draw={(ctx, path2d) => {
-        ctx.lineWidth = 1 / getZoom()
-        ctx.strokeStyle = mainColor()
-        path2d.moveTo(p1.x, p1.y)
-        path2d.lineTo(p2.x, p2.y)
-        ctx.stroke(path2d)
-      }}
-    />
-  )
-}
+const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY }> = observer(
+  ({ type, p1, p2 }) => {
+    return (
+      <ElemReact
+        id={`transform-line-${type}`}
+        draw={(ctx, path2d) => {
+          ctx.lineWidth = 1 / getZoom()
+          ctx.strokeStyle = mainColor()
+          path2d.moveTo(p1.x, p1.y)
+          path2d.lineTo(p2.x, p2.y)
+          ctx.stroke(path2d)
+        }}
+      />
+    )
+  },
+)
 
-const VertexComp: FC<{ type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft'; xy: IXY }> = ({
-  type,
-  xy,
-}) => {
-  const size = 6 / getZoom()
-  const obb = OBB.fromCenter(xy, size, size, transformOBB.rotation)
+const VertexComp: FC<{ type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft'; xy: IXY }> =
+  observer(({ type, xy }) => {
+    const size = 6 / getZoom()
+    const obb = OBB.fromCenter(xy, size, size, transformOBB.rotation)
 
-  return (
-    <ElemReact
-      id={`transform-vertex-${type}`}
-      obb={obb}
-      draw={(ctx, path2d) => {
-        path2d.roundRect(-size / 2, -size / 2, size, size, 1 / getZoom())
-        ctx.lineWidth = 2 / getZoom()
-        ctx.strokeStyle = mainColor()
-        ctx.fillStyle = 'white'
-        ctx.translate(xy.x, xy.y)
-        ctx.rotate(radianfy(transformOBB.rotation))
-        ctx.stroke(path2d)
-        ctx.fill(path2d)
-      }}
-    />
-  )
-}
+    return (
+      <ElemReact
+        id={`transform-vertex-${type}`}
+        obb={obb}
+        draw={(ctx, path2d) => {
+          path2d.roundRect(-size / 2, -size / 2, size, size, 1 / getZoom())
+          ctx.lineWidth = 2 / getZoom()
+          ctx.strokeStyle = mainColor()
+          ctx.fillStyle = 'white'
+          ctx.translate(xy.x, xy.y)
+          ctx.rotate(radianfy(transformOBB.rotation))
+          ctx.stroke(path2d)
+          ctx.fill(path2d)
+        }}
+      />
+    )
+  })
