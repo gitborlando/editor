@@ -1,6 +1,5 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { proxy, snapshot, subscribe } from 'valtio'
 
 const initSetting = () => {
   return {
@@ -16,23 +15,27 @@ const initSetting = () => {
 
 @autobind
 class EditorSettingService {
-  setting = proxy(initSetting())
+  @observable setting = initSetting()
+
+  constructor() {
+    makeObservable(this)
+  }
 
   init() {
-    this.autoSaveSetting()
     this.loadSetting()
+    this.autoSaveSetting()
   }
 
   private loadSetting() {
     const savedSetting = jsonParse(localStorage.getItem('editor.setting'))
-    Object.assign(this.setting, savedSetting || initSetting())
+    this.setting = savedSetting || initSetting()
   }
 
   private autoSaveSetting() {
-    subscribe(this.setting, () => {
-      const setting = snapshot(this.setting)
-      localStorage.setItem('editor.setting', jsonFy(setting) || '')
-    })
+    reaction(
+      () => jsonFy(this.setting),
+      (json) => localStorage.setItem('editor.setting', json || ''),
+    )
   }
 }
 

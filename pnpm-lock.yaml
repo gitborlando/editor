@@ -121,6 +121,9 @@ importers:
       react-router:
         specifier: ^7.9.4
         version: 7.9.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
       rgb-hex:
         specifier: ^4.1.0
         version: 4.1.0
@@ -5061,6 +5064,12 @@ packages:
       }
     engines: { node: '>= 14.18.0' }
 
+  reflect-metadata@0.2.2:
+    resolution:
+      {
+        integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==,
+      }
+
   reftools@1.1.9:
     resolution:
       {
@@ -9069,6 +9078,8 @@ snapshots:
       picomatch: 2.3.1
 
   readdirp@4.1.2: {}
+
+  reflect-metadata@0.2.2: {}
 
   reftools@1.1.9: {}
 
