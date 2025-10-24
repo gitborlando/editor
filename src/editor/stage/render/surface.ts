@@ -200,7 +200,7 @@ export class StageSurface {
       ...(expands.map((i) => i / getZoom()) as [number] | [number, number, number, number]),
     )
 
-  collectDirty = (elem: Elem, time: 'before' | 'after' = 'before') => {
+  collectDirty = (elem: Elem) => {
     const dirtyRect = elem.getDirtyRect(this.expand)
     this.dirtyRects.add(dirtyRect)
     this.requestRender('partialRender')

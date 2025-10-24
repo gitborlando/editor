@@ -19,10 +19,10 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     )
   }, [selectNodes])
 
-  const [p0, p1, p2, p3] = transformOBB.calcVertexXY()
+  const [p0, p1, p2, p3] = transformOBB.vertexes
 
   return (
-    <ElemReact id='transform' obb={transformOBB}>
+    <ElemReact x-if={selectNodes.length > 0} id='transform' obb={transformOBB}>
       <LineComp type='top' p1={p0} p2={p1} />
       <LineComp type='bottom' p1={p2} p2={p3} />
       <LineComp type='left' p1={p0} p2={p3} />
@@ -61,6 +61,7 @@ const VertexComp: FC<{ type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLef
       <ElemReact
         id={`transform-vertex-${type}`}
         obb={obb}
+        dirtyExpand={2 / getZoom()}
         draw={(ctx, path2d) => {
           path2d.roundRect(-size / 2, -size / 2, size, size, 1 / getZoom())
           ctx.lineWidth = 2 / getZoom()

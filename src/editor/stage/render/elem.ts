@@ -44,9 +44,9 @@ export class Elem {
     return this._obb
   }
   set obb(obb: OBB) {
-    Surface.collectDirty(this, 'before')
+    Surface.collectDirty(this)
     this._obb = obb
-    Surface.collectDirty(this, 'after')
+    Surface.collectDirty(this)
   }
 
   get aabb() {
@@ -131,6 +131,7 @@ export class Elem {
   destroy() {
     this.eventHandle.dispose()
     this.parent?.removeChild(this)
+    Surface.collectDirty(this)
   }
 }
 
