@@ -71,11 +71,12 @@ class StageViewportService {
   toSceneShift(xy: IXY) {
     return XY.from(xy).divide(this.zoom)
   }
-  toSceneMarquee(_marquee: IRect) {
-    const marquee = { ..._marquee }
-    marquee.width /= this.zoom
-    marquee.height /= this.zoom
-    return marquee
+  toSceneMarquee(marquee: IRect) {
+    return {
+      ...this.toSceneXY(marquee),
+      width: marquee.width / this.zoom,
+      height: marquee.height / this.zoom,
+    }
   }
   sceneStageToClientXY(xy: IXY) {
     return XY.from(xy).multiply(this.zoom).plus(this.offset).plus(XY.leftTop(this.bound))
