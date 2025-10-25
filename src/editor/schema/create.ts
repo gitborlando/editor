@@ -1,87 +1,45 @@
-import { createCache } from '@gitborlando/utils'
+import { IXY } from '@gitborlando/geo'
+import { miniId } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { customAlphabet, nanoid } from 'nanoid'
+import { defu } from 'defu'
 import { createLine, createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { COLOR } from 'src/shared/utils/color'
-import { IRect, IXY } from 'src/shared/utils/normal'
 import { rgb } from 'src/utils/color'
-import { xy_ } from '../math/xy'
-import {
-  IClient,
-  IEllipse,
-  IFillColor,
-  // IFillGonicGradient,
-  IFillImage,
-  IFillLinearGradient,
-  // IFillRadialGradient,
-  IFrame,
-  IGroup,
-  IIrregular,
-  ILine,
-  IMeta,
-  INode,
-  INodeBase,
-  INodeMeta,
-  INodeParent,
-  IPage,
-  IPoint,
-  IPolygon,
-  IRectangle,
-  ISchema,
-  IShadow,
-  IStar,
-  IStroke,
-  IText,
-} from './type'
-
-type NestPartial<T> = {
-  [K in keyof T]?: NestPartial<T[K]>
-}
 
 @autobind
-class SchemaDefaultService {
-  devFileId?: string
-  typeIndexMapCache = createCache<string, Record<string, [string, number]>>()
-  allNodeCount = 0
-  meta(): IMeta {
+class SchemaCreateService {
+  meta(): V1.Meta {
     return {
       type: 'meta',
       id: 'meta',
-      fileId: nanoid(),
+      fileId: '',
       name: '无标题',
-      version: 0,
+      version: 'v0',
       pageIds: [],
+      userId: '',
     }
   }
-  client(): IClient {
-    return {
-      id: 'client',
-      type: 'client',
-      selectIds: [],
-      selectPageId: '',
-    }
-  }
-  schema(): ISchema {
+
+  schema(): V1.Schema {
     const page = this.page()
     const meta = this.meta()
-    const client = this.client()
     meta.pageIds = [page.id]
-    client.selectPageId = page.id
     return {
       meta,
-      client,
       [page.id]: page,
     }
   }
-  page(): IPage {
+
+  page(): V1.Page {
     return {
       type: 'page',
-      id: `page_${nanoid()}`,
+      id: `page_${miniId()}`,
       childIds: [],
       ...this.createNodeName('page'),
     }
   }
-  point(option?: Partial<IPoint>): IPoint {
+
+  point(option?: Partial<V1.Point>): V1.Point {
     return {
       type: 'point',
       symmetric: 'angle',
@@ -91,7 +49,8 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  frame(option?: Partial<IFrame>): IFrame {
+
+  frame(option?: Partial<V1.Frame>): V1.Frame {
     const name = this.createNodeName('frame')
     const nodeBase = this.createNodeBase()
     return {
@@ -104,7 +63,8 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  group(option?: Partial<IGroup>): IGroup {
+
+  group(option?: Partial<V1.Group>): V1.Group {
     const name = this.createNodeName('group')
     const nodeBase = this.createNodeBase()
     return {
@@ -115,12 +75,14 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  rect(option?: Partial<IRectangle>): IRectangle {
+
+  rect(option?: Partial<V1.Rectangle>): V1.Rectangle {
     const name = this.createNodeName('rect')
     const nodeBase = this.createNodeBase()
     return { type: 'rect', points: [], radius: 0, ...nodeBase, ...name, ...option }
   }
-  ellipse(option?: Partial<IEllipse>): IEllipse {
+
+  ellipse(option?: Partial<V1.Ellipse>): V1.Ellipse {
     const name = this.createNodeName('ellipse')
     const nodeBase = this.createNodeBase()
     return {
@@ -134,7 +96,8 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  polygon(option?: Partial<IPolygon>): IPolygon {
+
+  polygon(option?: Partial<V1.Polygon>): V1.Polygon {
     const name = this.createNodeName('polygon')
     const nodeBase = this.createNodeBase()
     const { width, height } = option || nodeBase
@@ -149,7 +112,8 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  star(option?: Partial<IStar>): IStar {
+
+  star(option?: Partial<V1.Star>): V1.Star {
     const name = this.createNodeName('star')
     const nodeBase = this.createNodeBase()
     const { width, height } = option || nodeBase
@@ -165,11 +129,12 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  line(option?: Partial<ILine>): ILine {
+
+  line(option?: Partial<V1.Line>): V1.Line {
     const name = this.createNodeName('line')
     const nodeBase = this.createNodeBase()
     const { x, y } = option || nodeBase
-    const points = createLine(xy_(x, y), 0)
+    const points = createLine(XY._(x, y), 0)
     return {
       type: 'line',
       points,
@@ -181,7 +146,8 @@ class SchemaDefaultService {
       strokes: [this.stroke()],
     }
   }
-  irregular(option?: Partial<IIrregular>): IIrregular {
+
+  irregular(option?: Partial<V1.Path>): V1.Path {
     const name = this.createNodeName('irregular')
     const nodeBase = this.createNodeBase()
     return {
@@ -192,38 +158,44 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  image(option?: Partial<IRect>): IRect {
+
+  image(option?: Partial<V1.Rectangle>): V1.Rectangle {
     const rect = this.rect(option)
     rect.fills.push(this.fillImage(''))
     return rect
   }
-  text(option?: NestPartial<IText>): IText {
+
+  text(option?: NestPartial<V1.Text>): V1.Text {
     const name = this.createNodeName('text')
     const nodeBase = this.createNodeBase()
-    const style = (option?.style || {}) as Partial<IText['style']>
-    return {
-      type: 'text',
-      content: '文本1',
-      ...nodeBase,
-      ...name,
-      ...(option as Partial<IText>),
-      style: {
-        fontSize: 16,
-        fontWeight: 500,
-        align: 'center',
-        fontFamily: 'Arial',
-        fontStyle: 'normal',
-        letterSpacing: 0,
-        lineHeight: 16,
-        ...style,
+    return defu(
+      {
+        type: 'text',
+        content: '文本1',
+        ...nodeBase,
+        ...name,
+        style: {
+          fontSize: 16,
+          fontWeight: 500,
+          align: 'center',
+          fontFamily: 'Arial',
+          fontStyle: 'normal',
+          letterSpacing: 0,
+          lineHeight: 16,
+          decoration: 'none',
+          decorationColor: '',
+        },
+        fills: [this.fillColor(COLOR.black, 1)],
       },
-      fills: [this.fillColor(rgb(0, 0, 0), 1)],
-    }
+      option,
+    )
   }
-  fillColor(color = rgb(204, 204, 204), alpha = 1): IFillColor {
+
+  fillColor(color = rgb(204, 204, 204), alpha = 1): V1.FillColor {
     return { type: 'color', visible: true, color, alpha }
   }
-  fillLinearGradient(start: IXY = xy_(0, 0), end: IXY = xy_(1, 1)): IFillLinearGradient {
+
+  fillLinearGradient(start: IXY = XY._(0, 0), end: IXY = XY._(1, 1)): V1.FillLinearGradient {
     return {
       type: 'linearGradient',
       visible: true,
@@ -236,7 +208,8 @@ class SchemaDefaultService {
       alpha: 1,
     }
   }
-  fillImage(url: string = 'Assets.editor.rightPanel.operate.picker.defaultImage'): IFillImage {
+
+  fillImage(url: string = 'Assets.editor.rightPanel.operate.picker.defaultImage'): V1.FillImage {
     return {
       type: 'image',
       visible: true,
@@ -245,8 +218,9 @@ class SchemaDefaultService {
       alpha: 1,
     }
   }
-  stroke(option?: Partial<IStroke>) {
-    return <IStroke>{
+
+  stroke(option?: Partial<V1.Stroke>) {
+    return <V1.Stroke>{
       visible: true,
       fill: this.fillColor(rgb(0, 0, 0)),
       align: 'center',
@@ -256,8 +230,9 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  shadow(option?: Partial<IShadow>) {
-    return <IShadow>{
+
+  shadow(option?: Partial<V1.Shadow>): V1.Shadow {
+    return <V1.Shadow>{
       visible: true,
       offsetX: 5,
       offsetY: 5,
@@ -267,20 +242,26 @@ class SchemaDefaultService {
       ...option,
     }
   }
-  connect(parent: INodeParent, child: INode) {
-    parent.childIds.push(child.id)
-    child.parentId = parent.id
+
+  outline(option?: Partial<V1.Outline>): V1.Outline {
+    return <V1.Outline>{
+      color: rgb(0, 0, 0),
+      width: 1,
+      ...option,
+    }
   }
-  private createSchemaMeta(): INodeMeta {
+
+  private createSchemaMeta(): V1.NodeMeta {
     return {
-      id: nanoid(),
+      id: miniId(),
       name: '',
       lock: false,
       visible: true,
       parentId: '',
     }
   }
-  private createNodeBase(): INodeBase {
+
+  private createNodeBase(): V1.NodeBase {
     return {
       ...this.createSchemaMeta(),
       x: 0,
@@ -298,7 +279,7 @@ class SchemaDefaultService {
     }
   }
 
-  private customNanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6)
+  private allNodeCount = 0
 
   createNodeName(type: string) {
     const map = {
@@ -320,4 +301,4 @@ class SchemaDefaultService {
   }
 }
 
-export const SchemaDefault = new SchemaDefaultService()
+export const SchemaCreate = new SchemaCreateService()

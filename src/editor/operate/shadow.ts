@@ -4,7 +4,7 @@ import Immui from 'src/shared/immui/immui'
 import { createSignal } from 'src/shared/signal/signal'
 import { clone } from 'src/shared/utils/normal'
 import { rgb } from 'src/utils/color'
-import { SchemaDefault } from '../schema/default'
+import { SchemaCreate } from '../schema/create'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { INode, IShadow } from '../schema/type'
@@ -37,8 +37,8 @@ class OperateShadowService {
   }
   addShadow() {
     const shadowsLength = this.shadows.length
-    const shadow = SchemaDefault.shadow({
-      fill: SchemaDefault.fillColor(rgb(0, 0, 0), shadowsLength ? 0.25 : 1),
+    const shadow = SchemaCreate.shadow({
+      fill: SchemaCreate.fillColor(rgb(0, 0, 0), shadowsLength ? 0.25 : 1),
     })
     this.immui.add(this.shadows, [shadowsLength], shadow)
     this.applyChangeToSchema()

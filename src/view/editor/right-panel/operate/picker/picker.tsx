@@ -1,5 +1,5 @@
 import { FC, memo, useEffect } from 'react'
-import { SchemaDefault } from 'src/editor/schema/default'
+import { SchemaCreate } from 'src/editor/schema/create'
 import { IFill, IFillColor, IFillImage, IFillLinearGradient } from 'src/editor/schema/type'
 
 import { Flex } from '@gitborlando/widget'
@@ -16,9 +16,9 @@ import { PickerLinearGradientComp } from './linear'
 import { PickerSolidComp } from './solid'
 
 const createFillCache = () => ({
-  color: SchemaDefault.fillColor(),
-  linearGradient: SchemaDefault.fillLinearGradient(),
-  image: SchemaDefault.fillImage(),
+  color: SchemaCreate.fillColor(),
+  linearGradient: SchemaCreate.fillLinearGradient(),
+  image: SchemaCreate.fillImage(),
 })
 let fillCache = createFillCache()
 
@@ -57,7 +57,7 @@ export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
           {label}
         </Button>
       )
-    }
+    },
   )
 
   return (

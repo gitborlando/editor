@@ -8,7 +8,7 @@ import { createSignal } from 'src/shared/signal/signal'
 import { clone } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { xy_, xy_rotate } from '../math/xy'
-import { SchemaDefault } from '../schema/default'
+import { SchemaCreate } from '../schema/create'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { ID, INode, INodeParent } from '../schema/type'
@@ -139,7 +139,7 @@ class OperateNodeService {
     const cloneNodes = (oldNode: INode) => {
       const newNode = clone(oldNode)
       newNode.id = nanoid()
-      newNode.name = SchemaDefault.createNodeName(oldNode.type).name
+      newNode.name = SchemaCreate.createNodeName(oldNode.type).name
       if ('childIds' in newNode) newNode.childIds = []
       return newNode
     }
@@ -170,7 +170,7 @@ class OperateNodeService {
     if (selectNodes.length === 0) return
 
     const frameOBB = this.getSomeNodesMergedOBB(selectNodes)
-    const frameNode = SchemaDefault.frame({
+    const frameNode = SchemaCreate.frame({
       width: frameOBB.width,
       height: frameOBB.height,
       x: frameOBB.x,

@@ -1,7 +1,7 @@
 import { loopFor } from '@gitborlando/utils'
 import { xy_, xy_symmetric } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
-import { SchemaDefault } from 'src/editor/schema/default'
+import { SchemaCreate } from 'src/editor/schema/create'
 import { IFrame, INode, INodeParent, IPoint, IStroke } from 'src/editor/schema/type'
 import { normalizeColor } from 'src/shared/utils/color'
 import { IrregularUtils } from 'src/shared/utils/irregular'
@@ -61,39 +61,39 @@ export class SvgParser {
           viewBoxArr = viewBox!.split(' ').map(Number)
           properties.width = viewBoxArr[2]
           properties.height = viewBoxArr[3]
-          node = SchemaDefault.frame({ width: properties.width, height: properties.height })
+          node = SchemaCreate.frame({ width: properties.width, height: properties.height })
         } else {
           if (viewBox) viewBoxArr = viewBox!.split(' ').map(Number)
           else viewBoxArr = [0, 0, width!, height!]
-          node = SchemaDefault.frame({ width, height })
+          node = SchemaCreate.frame({ width, height })
         }
         this.ratio = xy_(properties.width! / viewBoxArr[2], properties.height! / viewBoxArr[3])
         break
       }
       case 'rect': {
-        node = SchemaDefault.rect({ x, y, width, height })
+        node = SchemaCreate.rect({ x, y, width, height })
         if (r) node.radius = r
         break
       }
       case 'circle': {
         const [x, y] = [cx! - r!, cy! - r!]
-        node = SchemaDefault.ellipse({ x, y, width: r! * 2, height: r! * 2 })
+        node = SchemaCreate.ellipse({ x, y, width: r! * 2, height: r! * 2 })
         break
       }
       case 'polyline': {
-        node = SchemaDefault.irregular()
+        node = SchemaCreate.irregular()
         node.points = this.parsePolylineToPoints(properties)
         break
       }
       case 'line': {
-        node = SchemaDefault.irregular()
+        node = SchemaCreate.irregular()
         node.points = this.parseLineToPoints(properties)
         break
       }
       case 'path': {
         const d = properties.d as string
         const { minX, minY, width, height } = svgPathBoundingBox(d)
-        node = SchemaDefault.irregular({
+        node = SchemaCreate.irregular({
           x: minX * this.ratio.x,
           y: minY * this.ratio.y,
           width: width * this.ratio.x,
@@ -129,8 +129,8 @@ export class SvgParser {
     const { stroke, strokeWidth, strokeLinejoin, strokeLinecap } = svgNode.properties
     if (!stroke || stroke === 'none' || svgNode.tagName === 'svg') return
     const solidColor = normalizeColor(stroke)
-    const strokeColor = SchemaDefault.fillColor(solidColor.color, solidColor.alpha)
-    const nodeStroke = SchemaDefault.stroke({
+    const strokeColor = SchemaCreate.fillColor(solidColor.color, solidColor.alpha)
+    const nodeStroke = SchemaCreate.stroke({
       fill: strokeColor,
       width: strokeWidth! * this.ratio.x,
       join: strokeLinejoin as IStroke['join'],
@@ -144,7 +144,7 @@ export class SvgParser {
     const { fill } = svgNode.properties
     if (fill && fill !== 'none' && svgNode.tagName !== 'svg') {
       const solidColor = normalizeColor(fill)
-      const fillColor = SchemaDefault.fillColor(solidColor.color, solidColor.alpha)
+      const fillColor = SchemaCreate.fillColor(solidColor.color, solidColor.alpha)
       node.fills = [fillColor]
     }
   }
@@ -153,7 +153,7 @@ export class SvgParser {
     const points = <IPoint[]>[]
     const numbers = properties.points!.split(' ').map(Number)
     for (let i = 0; i < numbers.length - 1; i += 2) {
-      const point = SchemaDefault.point({ x: numbers[i], y: numbers[i + 1] })
+      const point = SchemaCreate.point({ x: numbers[i], y: numbers[i + 1] })
       if (i === 0) point.startPath = true
       if (i === numbers.length - 2) point.endPath = true
       points.push(point)
@@ -169,8 +169,8 @@ export class SvgParser {
     const y1 = properties.y1 as number
     const x2 = properties.x2 as number
     const y2 = properties.y2 as number
-    const point1 = SchemaDefault.point({ x: x1, y: y1, startPath: true })
-    const point2 = SchemaDefault.point({ x: x2, y: y2, endPath: true })
+    const point1 = SchemaCreate.point({ x: x1, y: y1, startPath: true })
+    const point2 = SchemaCreate.point({ x: x2, y: y2, endPath: true })
     const points = [point1, point2]
     loopFor(points, (cur, next) => {
       if (cur.endPath) next.startPath = true
@@ -187,7 +187,7 @@ export class SvgParser {
     function dealCurvePoint(x: number, y: number, x1: number, y1: number, x2: number, y2: number) {
       const handleLeft = { x: x2, y: y2 }
       const handleRight = { x: x1, y: y1 }
-      const point = SchemaDefault.point({ x, y, handleL: handleLeft })
+      const point = SchemaCreate.point({ x, y, handleL: handleLeft })
       points[points.length - 1].handleR = handleRight
       points.push(point)
     }
@@ -198,12 +198,12 @@ export class SvgParser {
 
       switch (command.command) {
         case 'moveto':
-          points.push(SchemaDefault.point({ x, y, startPath: true }))
+          points.push(SchemaCreate.point({ x, y, startPath: true }))
           break
         case 'lineto':
         case 'horizontal lineto':
         case 'vertical lineto':
-          points.push(SchemaDefault.point({ x, y }))
+          points.push(SchemaCreate.point({ x, y }))
           break
         case 'curveto':
           const { x1, y1, x2, y2 } = command
@@ -212,7 +212,7 @@ export class SvgParser {
         case 'smooth curveto':
           const handleLeft = { x: command.x2, y: command.y2 }
           const handleRight = xy_symmetric(prevPoint.handleL!, prevPoint)
-          const point = SchemaDefault.point({ x, y, handleL: handleLeft })
+          const point = SchemaCreate.point({ x, y, handleL: handleLeft })
           prevPoint.handleR = handleRight
           points.push(point)
           break

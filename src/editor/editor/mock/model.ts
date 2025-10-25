@@ -1,14 +1,14 @@
-import { SchemaDefault } from 'src/editor/schema/default'
+import { SchemaCreate } from 'src/editor/schema/create'
 import { ISchema } from 'src/editor/schema/type'
 
 export function schemaModel() {
   const schema = <ISchema>{}
 
-  const meta = SchemaDefault.meta()
-  const client = SchemaDefault.client()
-  const page = SchemaDefault.page()
+  const meta = SchemaCreate.meta()
+  const client = SchemaCreate.client()
+  const page = SchemaCreate.page()
 
-  const star = SchemaDefault.star()
+  const star = SchemaCreate.star()
 
   schema.meta = meta
   schema.client = client

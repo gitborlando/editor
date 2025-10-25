@@ -10,7 +10,7 @@ import { xy_, xy_client } from '../math/xy'
 import { OperateNode } from '../operate/node'
 import { OperatePage } from '../operate/page'
 import { SvgParser } from '../parse/svg'
-import { SchemaDefault } from '../schema/default'
+import { SchemaCreate } from '../schema/create'
 import { Schema } from '../schema/schema'
 import { INode, INodeParent } from '../schema/type'
 import { StageViewport } from './viewport'
@@ -119,8 +119,8 @@ export class StageDropService {
   private async dropImage(url: string) {
     const image = await ImgManager.getImageAsync(url)
     const option = { ...this.sceneXY, width: image.width, height: image.height }
-    this.node = SchemaDefault.rect(option)
-    this.node.fills = [SchemaDefault.fillImage(url)]
+    this.node = SchemaCreate.rect(option)
+    this.node.fills = [SchemaCreate.fillImage(url)]
     OperateNode.addNodes([this.node])
     OperateNode.insertAt(this.containerNode, this.node)
   }

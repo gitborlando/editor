@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.6",
-    "@gitborlando/geo": "^3.0.0",
+    "@gitborlando/geo": "^3.1.0",
     "@gitborlando/signal": "^1.0.1",
     "@gitborlando/utils": "^4.5.0",
     "@gitborlando/widget": "^1.0.2",

@@ -1,12 +1,12 @@
-import { SchemaDefault } from 'src/editor/schema/default'
+import { SchemaCreate } from 'src/editor/schema/create'
 import { ISchema } from 'src/editor/schema/type'
 
 export function mockCollide() {
   const schema = <ISchema>{}
 
-  const meta = SchemaDefault.meta()
-  const client = SchemaDefault.client()
-  const page = SchemaDefault.page()
+  const meta = SchemaCreate.meta()
+  const client = SchemaCreate.client()
+  const page = SchemaCreate.page()
   schema.meta = meta
   schema.client = client
 
@@ -14,7 +14,7 @@ export function mockCollide() {
   meta.pageIds.push(page.id)
   client.selectPageId = page.id
 
-  const frame = SchemaDefault.frame()
+  const frame = SchemaCreate.frame()
   frame.x = 100
   frame.y = 100
   frame.width = 500
@@ -23,7 +23,7 @@ export function mockCollide() {
   page.childIds.push(frame.id)
 
   for (let i = 0; i < 3; i++) {
-    const rect = SchemaDefault.rect()
+    const rect = SchemaCreate.rect()
     rect.x = 100 + i * 50
     rect.y = 100 + i * 50
     rect.width = 100

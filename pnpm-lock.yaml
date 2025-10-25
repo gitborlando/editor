@@ -11,8 +11,8 @@ importers:
         specifier: ^2.66.6
         version: 2.66.6(@types/react@19.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@gitborlando/geo':
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.1.0
+        version: 3.1.0
       '@gitborlando/signal':
         specifier: ^1.0.1
         version: 1.0.1
@@ -959,10 +959,10 @@ packages:
       }
     engines: { node: '>=14' }
 
-  '@gitborlando/geo@3.0.0':
+  '@gitborlando/geo@3.1.0':
     resolution:
       {
-        integrity: sha512-CUveJHKLQ86bpQbedTuFT3dkRPlznq/mhH+ZYcYXVBPoYxcBmEtMHLkQmsUQe8I5qAsCx0QjldvEp1WXo8CsBg==,
+        integrity: sha512-5ZZph3EK+8WP+lzPWTCGf2uxCjNpHah+jsoW0nlm6+XIJZXsL6lcJyevFYsx//822Gwv+cHsCQ9KaumCfKZXUQ==,
       }
 
   '@gitborlando/signal@1.0.1':
@@ -6643,7 +6643,7 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@gitborlando/geo@3.0.0': {}
+  '@gitborlando/geo@3.1.0': {}
 
   '@gitborlando/signal@1.0.1': {}
 
