@@ -3,7 +3,6 @@ import { miniId } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { defu } from 'defu'
 import { createLine, createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
-import { COLOR } from 'src/shared/utils/color'
 import { rgb } from 'src/utils/color'
 
 @autobind
@@ -79,7 +78,14 @@ class SchemaCreateService {
   rect(option?: Partial<V1.Rectangle>): V1.Rectangle {
     const name = this.createNodeName('rect')
     const nodeBase = this.createNodeBase()
-    return { type: 'rect', points: [], radius: 0, ...nodeBase, ...name, ...option }
+    return {
+      type: 'rect',
+      points: [],
+      radius: 0,
+      ...nodeBase,
+      ...name,
+      ...option,
+    }
   }
 
   ellipse(option?: Partial<V1.Ellipse>): V1.Ellipse {
@@ -140,10 +146,10 @@ class SchemaCreateService {
       points,
       ...nodeBase,
       ...name,
-      ...option,
       height: 0,
       fills: [],
       strokes: [this.stroke()],
+      ...option,
     }
   }
 
@@ -182,8 +188,6 @@ class SchemaCreateService {
           fontStyle: 'normal',
           letterSpacing: 0,
           lineHeight: 16,
-          decoration: 'none',
-          decorationColor: '',
         },
         fills: [this.fillColor(COLOR.black, 1)],
       },
@@ -244,9 +248,17 @@ class SchemaCreateService {
   }
 
   outline(option?: Partial<V1.Outline>): V1.Outline {
-    return <V1.Outline>{
-      color: rgb(0, 0, 0),
-      width: 1,
+    return {
+      color: COLOR.blue,
+      width: 0,
+      ...option,
+    }
+  }
+
+  textDecoration(option?: Partial<V1.TextDecoration>): V1.TextDecoration {
+    return {
+      style: 'underline',
+      color: COLOR.blue,
       ...option,
     }
   }
@@ -272,6 +284,7 @@ class SchemaCreateService {
       rotation: 0,
       hFlip: false,
       vFlip: false,
+      outline: this.outline(),
       fills: [this.fillColor(rgb(204, 204, 204), 1)],
       strokes: [],
       blurs: [],

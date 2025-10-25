@@ -126,7 +126,7 @@ export class StageDropService {
   }
 
   private getContainerNode(e: IClientXY) {
-    const hoverIds = StageScene.getElemsFromPoint(e).map((elem) => elem.id)
+    const hoverIds = StageScene.elemsFromPoint(e).map((elem) => elem.id)
 
     this.containerNode =
       hoverIds.map(Schema.find<INodeParent>).find((node) => node?.type === 'frame') ||

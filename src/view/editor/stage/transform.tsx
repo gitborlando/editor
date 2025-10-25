@@ -1,12 +1,15 @@
 import { IXY } from '@gitborlando/geo'
 import { FC } from 'react'
-import { radianfy } from 'src/editor/math/base'
+import { SchemaCreate } from 'src/editor/schema/create'
 import { ElemReact } from 'src/editor/stage/render/elem'
 import { getZoom } from 'src/editor/stage/viewport'
-import { mainColor } from 'src/global/color'
+import { COLOR, themeColor } from 'src/global/color'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 
 let transformOBB = OBB.identityOBB()
+
+const createStroke = () =>
+  SchemaCreate.stroke({ fill: SchemaCreate.fillColor(themeColor()), width: 1 / getZoom() })
 
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const selectNodes = useSelectNodes()
@@ -19,10 +22,12 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     )
   }, [selectNodes])
 
+  const node = SchemaCreate.rect({ id: 'transform', fills: [] })
+
   const [p0, p1, p2, p3] = transformOBB.vertexes
 
   return (
-    <ElemReact x-if={selectNodes.length > 0} id='transform' obb={transformOBB}>
+    <ElemReact x-if={selectNodes.length > 0} node={node}>
       <LineComp type='top' p1={p0} p2={p1} />
       <LineComp type='bottom' p1={p2} p2={p3} />
       <LineComp type='left' p1={p0} p2={p3} />
@@ -37,41 +42,28 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 
 const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY }> = observer(
   ({ type, p1, p2 }) => {
-    return (
-      <ElemReact
-        id={`transform-line-${type}`}
-        draw={(ctx, path2d) => {
-          ctx.lineWidth = 1 / getZoom()
-          ctx.strokeStyle = mainColor()
-          path2d.moveTo(p1.x, p1.y)
-          path2d.lineTo(p2.x, p2.y)
-          ctx.stroke(path2d)
-        }}
-      />
-    )
+    const line = SchemaCreate.line({
+      id: `transform-line-${type}`,
+      points: [SchemaCreate.point({ x: p1.x, y: p1.y }), SchemaCreate.point({ x: p2.x, y: p2.y })],
+      strokes: [createStroke()],
+    })
+
+    return <ElemReact node={line} />
   },
 )
 
 const VertexComp: FC<{ type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft'; xy: IXY }> =
   observer(({ type, xy }) => {
-    const size = 6 / getZoom()
+    const size = 8 / getZoom()
     const obb = OBB.fromCenter(xy, size, size, transformOBB.rotation)
 
-    return (
-      <ElemReact
-        id={`transform-vertex-${type}`}
-        obb={obb}
-        dirtyExpand={2 / getZoom()}
-        draw={(ctx, path2d) => {
-          path2d.roundRect(-size / 2, -size / 2, size, size, 1 / getZoom())
-          ctx.lineWidth = 2 / getZoom()
-          ctx.strokeStyle = mainColor()
-          ctx.fillStyle = 'white'
-          ctx.translate(xy.x, xy.y)
-          ctx.rotate(radianfy(transformOBB.rotation))
-          ctx.stroke(path2d)
-          ctx.fill(path2d)
-        }}
-      />
-    )
+    const rect = SchemaCreate.rect({
+      id: `transform-vertex-${type}`,
+      ...obb,
+      strokes: [createStroke()],
+      fills: [SchemaCreate.fillColor(COLOR.white)],
+      radius: 2 / getZoom(),
+    })
+
+    return <ElemReact node={rect} />
   })

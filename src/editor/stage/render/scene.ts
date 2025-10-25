@@ -1,17 +1,16 @@
-import { OBB } from '@gitborlando/geo'
-import { createObjCache, firstOne } from '@gitborlando/utils'
+import { createObjCache, firstOne, optionalSet } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { OperateNode } from 'src/editor/operate/node'
+import defu from 'defu'
+import { SchemaCreate } from 'src/editor/schema/create'
 import { YClients } from 'src/editor/schema/y-clients'
 import { StageInteract } from 'src/editor/stage/interact/interact'
+import { themeColor } from 'src/global/color'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { IClientXY } from 'src/shared/utils/event'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { subscribeKey } from 'valtio/utils'
-import { Schema } from '../../schema/schema'
-import { ID, INode, IPage } from '../../schema/type'
-import { StageNodeDrawer } from './draw'
+import { ID, IPage } from '../../schema/type'
 import { Elem } from './elem'
 import { Surface } from './surface'
 
@@ -24,27 +23,30 @@ class StageSceneService {
   initHook() {
     this.sceneRoot = new Elem('sceneRoot', 'sceneElem')
     this.widgetRoot = new Elem('widgetRoot', 'widgetElem')
-    // StageTransform.initHook()
-    // StageVectorEdit.initHook()
 
     this.setupRootElem()
     this.hookRenderNode()
-    this.bindNodeHover()
+
+    this.onHover()
   }
 
   dispose() {
     this.elements.clear()
     this.sceneRoot.destroy()
     this.widgetRoot.destroy()
-    Surface.layerList = []
+    Surface.rootElems = []
   }
 
   findElem(id: string) {
     return this.elements.get(id)
   }
 
+  elemsFromPoint(e?: IClientXY) {
+    return Surface.getElemsFromPoint(e).filter((elem) => elem.type === 'sceneElem')
+  }
+
   private setupRootElem() {
-    Surface.layerList.push(this.sceneRoot, this.widgetRoot)
+    Surface.rootElems.push(this.sceneRoot, this.widgetRoot)
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
   }
@@ -66,12 +68,12 @@ class StageSceneService {
     this.sceneRoot.children = []
 
     const traverse = (id: ID) => {
-      const node = YState.find<INode>(id)
+      const node = YState.findSnap<V1.Node>(id)
       this.render('add', [node.id])
       if ('childIds' in node) node.childIds.forEach(traverse)
     }
 
-    const page = YState.find<IPage>(YClients.client.selectPageId)
+    const page = YState.findSnap<IPage>(YClients.client.selectPageId)
     page.childIds.forEach(traverse)
   }
 
@@ -87,8 +89,7 @@ class StageSceneService {
     const id = keys[0]
     if (macroMatch`'meta'|'client'`(id)) return
 
-    // const node = Schema.find<INode>(id)
-    const node = YState.find<INode>(id)
+    const node = YState.findSnap<V1.Node>(id)
 
     switch (true) {
       case op === 'add' && keys.length === 1:
@@ -99,33 +100,30 @@ class StageSceneService {
         this.unmountNode(id)
         break
       default:
-        this.updateNode(node as INode)
+        this.updateNode(node)
         break
     }
   }
 
-  private mountNode(node: INode) {
+  private mountNode(node: V1.Node) {
     const parent = this.elements.get(node.parentId) || this.sceneRoot
 
-    const elem = new Elem(node.id, 'sceneElem', parent)
+    const elem = new Elem(node.id, 'sceneElem')
     this.elements.set(node.id, elem)
+    parent.addChild(elem)
 
     this.updateNode(node)
   }
 
-  private updateNode(node: INode) {
+  private updateNode(node: V1.Node) {
     if (!node) return
 
     const elem = this.findElem(node.id)
-    Surface.collectDirty(elem)
 
-    elem.obb = OBB.fromRect(node, node.rotation)
-    elem.draw = (ctx, path2d) => StageNodeDrawer.draw(node, elem, ctx, path2d)
+    elem.node = node
     elem.optimize = true
 
     if (node.type === 'frame') elem.clip = true
-
-    Surface.collectDirty(elem)
   }
 
   private unmountNode(id: ID) {
@@ -138,8 +136,6 @@ class StageSceneService {
 
     elem.destroy()
     this.elements.delete(id)
-
-    Surface.collectDirty(elem)
   }
 
   private reHierarchy(patch: Patch) {
@@ -159,36 +155,30 @@ class StageSceneService {
     }
   }
 
-  getElemsFromPoint(e?: IClientXY, type: Elem['type'] = 'sceneElem') {
-    return Surface.getElemsFromPoint(e).filter((elem) => elem.type === type)
-  }
+  private onHover() {
+    let lastHovered: Elem | undefined
 
-  private bindNodeHover() {
-    OperateNode.hoverId$.hook((thisId, lastId) => {
-      if (lastId === thisId) return
-
-      const lastElem = lastId ? this.findElem(lastId) : undefined
-      const thisElem = thisId ? this.findElem(thisId) : undefined
-
-      if (lastElem && lastElem.outline !== 'select') {
-        lastElem.outline = undefined
-        Surface.collectDirty(lastElem)
-      }
-
-      if (thisElem && thisElem.outline !== 'select') {
-        const node = Schema.find(thisElem.id)
-        if (node.type === 'frame' && thisElem.parent === this.sceneRoot) return
-
-        thisElem.outline = 'hover'
-        Surface.collectDirty(thisElem)
-      }
-    })
-
-    Surface.addEvent('mousemove', () => {
+    Surface.addEvent('mousemove', (e) => {
       if (StageInteract.currentType.value !== 'select') return
 
-      const elemsFromPoint = this.getElemsFromPoint()
-      OperateNode.hoverId$.dispatch(firstOne(elemsFromPoint)?.id || '')
+      const elem = firstOne(this.elemsFromPoint(e))
+
+      if (lastHovered) {
+        if (lastHovered.node.type === 'text') {
+          optionalSet(lastHovered.node.style, 'decoration', undefined)
+          lastHovered.node = lastHovered.node
+        } else {
+          lastHovered.node = { ...lastHovered.node, outline: undefined }
+        }
+      }
+      if (elem) {
+        lastHovered = elem
+        if (elem.node.type === 'text') {
+          elem.node = defu(elem.node, { style: { decoration: SchemaCreate.textDecoration() } })
+        } else {
+          elem.node = defu(elem.node, { outline: { width: 2, color: themeColor() } })
+        }
+      }
     })
   }
 }

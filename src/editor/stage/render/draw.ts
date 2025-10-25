@@ -1,66 +1,60 @@
+import { AABB } from '@gitborlando/geo'
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { max, radianfy } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
-import { AABB } from 'src/editor/math/obb'
 import { xy_, xy_from } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/stage/render/surface'
 import { ISplitText } from 'src/editor/stage/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
-import { hslBlueColor } from 'src/shared/utils/color'
-import { IXY, iife, matchCase, memorize } from 'src/shared/utils/normal'
+import { themeColor } from 'src/global/color'
+import { iife, IXY } from 'src/shared/utils/normal'
 import { rgba } from 'src/utils/color'
-import {
-  IEllipse,
-  IFill,
-  IFillColor,
-  IIrregular,
-  INode,
-  IPoint,
-  IShadow,
-  IStroke,
-  IText,
-} from '../../schema/type'
-import { Elem, ElemHitUtil } from './elem'
+import { Elem, HitTest } from './elem'
 
 @autoBind
-class StageNodeDrawerService {
-  private node!: INode
+class ElemDrawerService {
+  private node!: V1.Node
   private elem!: Elem
   private ctx!: CanvasRenderingContext2D
   private path2d!: Path2D
   private dirtyRects: AABB[] = []
 
-  draw = (node: INode, elem: Elem, ctx: CanvasRenderingContext2D, path2d: Path2D) => {
-    this.node = node
+  draw = (elem: Elem, ctx: CanvasRenderingContext2D, path2d: Path2D) => {
+    this.node = elem.node
     this.elem = elem
     this.ctx = ctx
     this.path2d = path2d
     this.dirtyRects = [elem.aabb]
 
-    this.elem.setMatrix(this.ctx)
+    Surface.setMatrix(this.elem.obb)
+
     this.drawShapePath()
 
-    node.fills.forEach((fill, i) => {
+    this.node.fills.forEach((fill, i) => {
       Surface.ctxSaveRestore(() => {
-        this.drawShadow(node.shadows[i])
+        this.drawShadow(this.node.shadows[i])
         this.drawFill(fill)
       })
     })
-    node.strokes.forEach((stroke, i) => {
+
+    this.node.strokes.forEach((stroke, i) => {
       Surface.ctxSaveRestore(() => {
-        this.drawShadow(node.shadows[i])
+        this.drawShadow(this.node.shadows[i])
         this.drawStroke(stroke)
       })
     })
 
     this.drawOutline()
-    this.drawHitTest()
+    this.drawTextDecoration()
 
-    const dirtyRect = AABB.Merge([...this.dirtyRects])
-    elem.getDirtyRect = (expand) => expand(dirtyRect, 1)
+    this.updateHitTest()
+
+    // const dirtyRect = AABB.merge(...this.dirtyRects)
+    // console.log('dirtyRect: ', dirtyRect)
+    // elem.dirtyRect = dirtyRect
   }
 
   private drawShapePath = () => {
@@ -81,19 +75,19 @@ class StageNodeDrawerService {
       case 'star':
       case 'line':
       case 'irregular':
-        this.drawIrregular(node.points)
+        this.drawPath(node.points)
         break
 
       case 'text':
         this.breakText()
-        if (this.elem.outline === 'hover') this.drawTextHoverPath()
+        // if (this.elem.outline === 'hover') this.drawTextHoverPath()
 
         const { lineHeight } = node.style
-        this.dirtyRects.push(AABB.Expand(this.elem.aabb, 0, lineHeight / 2, 0, 0))
+        this.dirtyRects.push(AABB.expand(this.elem.aabb, 0, lineHeight / 2, 0, 0))
 
         const dirtyHeight = lineHeight * this.splitTexts.length
         this.dirtyRects.push(
-          AABB.Expand(this.elem.aabb, 0, 0, 0, this.elem.aabb.minY + dirtyHeight),
+          AABB.expand(this.elem.aabb, 0, 0, 0, this.elem.aabb.minY + dirtyHeight),
         )
         break
     }
@@ -107,17 +101,8 @@ class StageNodeDrawerService {
     }
   }
 
-  private drawPolygon = (xys: IPoint[]) => {
-    return this.drawIrregular(xys)
-    loopFor(xys, (cur, next, _, i) => {
-      if (i === 0) this.path2d.moveTo(cur.x, cur.y)
-      if (i === xys.length - 1) this.path2d.closePath()
-      else this.path2d.lineTo(next.x, next.y)
-    })
-  }
-
   private drawEllipse = () => {
-    const { width, height, startAngle, endAngle, innerRate } = this.node as IEllipse
+    const { width, height, startAngle, endAngle, innerRate } = this.node as V1.Ellipse
     const [cx, cy] = [width / 2, height / 2]
     const startRadian = radianfy(startAngle)
     const endRadian = radianfy(endAngle)
@@ -142,7 +127,7 @@ class StageNodeDrawerService {
     this.path2d.closePath()
   }
 
-  private drawIrregular(points: IPoint[]) {
+  private drawPath(points: V1.Point[]) {
     loopFor(points, (cur, next, last, i) => {
       if (i === points.length - 1 && cur.endPath) {
         return this.path2d.closePath()
@@ -167,7 +152,7 @@ class StageNodeDrawerService {
   private splitTexts!: ISplitText[]
 
   private breakText() {
-    const { content, style, width } = this.node as IText
+    const { content, style, width } = this.node as V1.Text
     const { fontWeight, fontSize, fontFamily, letterSpacing } = style
 
     this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`
@@ -182,7 +167,7 @@ class StageNodeDrawerService {
   }
 
   private fillOrStrokeText = (op: 'fillText' | 'strokeText') => {
-    const { style } = this.node as IText
+    const { style } = this.node as V1.Text
     const { lineHeight } = style
 
     this.splitTexts.forEach(({ text, start, width }, i) => {
@@ -199,7 +184,7 @@ class StageNodeDrawerService {
     })
   }
 
-  private drawFill = (fill: IFill) => {
+  private drawFill = (fill: V1.Fill) => {
     if (!fill.visible) {
       this.ctx.fillStyle = rgba(0, 0, 0, 0.0001)
       return this.ctx.fill(this.path2d)
@@ -254,7 +239,7 @@ class StageNodeDrawerService {
     }
   }
 
-  private drawStroke = (stroke: IStroke) => {
+  private drawStroke = (stroke: V1.Stroke) => {
     if (!stroke.visible) return
 
     this.ctx.lineWidth = stroke.width
@@ -275,14 +260,14 @@ class StageNodeDrawerService {
 
     switch (stroke.align) {
       case 'center':
-        this.dirtyRects.push(AABB.Expand(this.elem.aabb, stroke.width / 2))
+        this.dirtyRects.push(AABB.expand(this.elem.aabb, stroke.width / 2))
         break
       case 'outer':
-        this.dirtyRects.push(AABB.Expand(this.elem.aabb, stroke.width))
+        this.dirtyRects.push(AABB.expand(this.elem.aabb, stroke.width))
     }
   }
 
-  private drawShadow = (shadow?: IShadow) => {
+  private drawShadow = (shadow?: V1.Shadow) => {
     if (!shadow?.visible) return
 
     let { fill, blur, offsetX, offsetY, spread } = shadow
@@ -290,39 +275,38 @@ class StageNodeDrawerService {
     offsetY = offsetY * getZoom()
     blur = blur * getZoom()
 
-    this.ctx.shadowColor = (fill as IFillColor).color
+    this.ctx.shadowColor = (fill as V1.FillColor).color
     this.ctx.shadowBlur = blur
     this.ctx.shadowOffsetX = offsetX
     this.ctx.shadowOffsetY = offsetY
 
     this.dirtyRects.push(
-      AABB.Expand(this.elem.aabb, -offsetX + blur, -offsetY + blur, offsetX + blur, offsetY + blur),
+      AABB.expand(this.elem.aabb, -offsetX + blur, -offsetY + blur, offsetX + blur, offsetY + blur),
     )
   }
 
-  private parseOutline = memorize((outlineStr: string) => {
-    const outline = matchCase(outlineStr, outlineStr, {
-      hover: `1.5-${hslBlueColor(65)}`,
-      select: `1-${hslBlueColor(65)}`,
-    })
-    return [Number(outline.split('-')[0]), outline.split('-')[1]] as const
-  })
-
   private drawOutline = () => {
-    if (!this.elem.outline) return
+    if (!this.node.outline) return
 
-    const [width, color] = this.parseOutline(this.elem.outline)
+    const { width, color } = this.node.outline
+    if (width <= 0) return
 
     Surface.ctxSaveRestore(() => {
       this.ctx.lineWidth = width / getZoom() / devicePixelRatio
-      this.ctx.strokeStyle = color || hslBlueColor(65)
+      this.ctx.strokeStyle = color || themeColor()
       this.ctx.stroke(new Path2D(this.path2d))
     })
   }
 
-  private drawTextHoverPath() {
+  private drawTextDecoration() {
+    if (this.node.type !== 'text') return
+    if (!this.node.style.decoration) return
+
+    const { style, color } = this.node.style.decoration
+    if (!style || style === 'none') return
+
     const collideXys = this.getTextCollideXys()
-    const { fontSize } = (this.node as IText).style
+    const { fontSize } = (this.node as V1.Text).style
 
     for (let i = 0; i < collideXys.length; i += 2) {
       const p1 = collideXys[i]
@@ -330,27 +314,33 @@ class StageNodeDrawerService {
       this.path2d.moveTo(p1.x, p1.y + fontSize / 2)
       this.path2d.lineTo(p2.x, p2.y + fontSize / 2)
     }
+
+    Surface.ctxSaveRestore(() => {
+      this.ctx.lineWidth = 1 / getZoom()
+      this.ctx.strokeStyle = color || themeColor()
+      this.ctx.stroke(new Path2D(this.path2d))
+    })
   }
 
-  private drawHitTest = () => {
+  private updateHitTest = () => {
     const { width, height } = this.elem.obb
 
     switch (this.node.type) {
       case 'frame':
       case 'rect':
         const radius = 'radius' in this.node ? this.node.radius : 0
-        this.elem.hitTest = ElemHitUtil.HitRoundRect(width, height, radius)
+        this.elem.hitTest = HitTest.hitRoundRect(width, height, radius)
         break
 
       case 'polygon':
       case 'star': {
-        this.elem.hitTest = ElemHitUtil.HitPolygon(this.node.points)
+        this.elem.hitTest = HitTest.hitPolygon(this.node.points)
         break
       }
 
       case 'ellipse':
         const { startAngle, endAngle, innerRate } = this.node
-        this.elem.hitTest = ElemHitUtil.HitEllipse(
+        this.elem.hitTest = HitTest.hitEllipse(
           width / 2,
           height / 2,
           width / 2,
@@ -367,17 +357,17 @@ class StageNodeDrawerService {
         this.elem.eventHandle.cacheHitTest(() => {
           const xys = iife(() => {
             if (this.node.type === 'line') return points
-            return this.getIrregularCollideXys()
+            return this.getPathCollideXys()
           })
           const strokeWidth = max(...strokes.map((s) => s.width))
-          return ElemHitUtil.HitPolyline(xys, strokeWidth * 2)
+          return HitTest.hitPolyline(xys, strokeWidth * 2)
         }, [points, strokes])
         break
 
       case 'text': {
         const { content, style, width } = this.node
         this.elem.eventHandle.cacheHitTest(
-          () => ElemHitUtil.HitPolyline(this.getTextCollideXys(), style.lineHeight),
+          () => HitTest.hitPolyline(this.getTextCollideXys(), style.lineHeight),
           [content, style, width],
         )
         break
@@ -385,8 +375,8 @@ class StageNodeDrawerService {
     }
   }
 
-  private getIrregularCollideXys() {
-    const points = (this.node as IIrregular).points
+  private getPathCollideXys() {
+    const points = (this.node as V1.Path).points
     const collideXys = <IXY[]>[xy_from(points[0])]
 
     loopFor(points, (cur, next) => {
@@ -411,7 +401,7 @@ class StageNodeDrawerService {
 
   private getTextCollideXys() {
     const collideXys = <IXY[]>[]
-    const { lineHeight, fontSize } = (this.node as IText).style
+    const { lineHeight, fontSize } = (this.node as V1.Text).style
 
     this.splitTexts.forEach(({ start, width }, i) => {
       const y = i * lineHeight + fontSize / 2
@@ -422,4 +412,4 @@ class StageNodeDrawerService {
   }
 }
 
-export const StageNodeDrawer = new StageNodeDrawerService()
+export const ElemDrawer = new ElemDrawerService()

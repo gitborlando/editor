@@ -45,7 +45,6 @@ class YClientsService {
   clearSelect() {
     if (Is.empty(this.client.selectIds)) return
     this.client.selectIds = {}
-    // YUndo.track({ type: 'client', description: `清空选中节点` })
   }
 
   selectPage(id: string) {

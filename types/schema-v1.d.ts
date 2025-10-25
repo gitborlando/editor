@@ -69,6 +69,7 @@ namespace V1 {
       strokes: Stroke[]
       blurs: any[]
       shadows: Shadow[]
+      outline?: Outline
     }
 
   type Frame = NodeBase &
@@ -150,8 +151,7 @@ namespace V1 {
       fontWeight: 'normal' | 'bold' | 'bolder' | 'lighter' | number
       letterSpacing: number
       lineHeight: number
-      decoration: 'none' | 'underline'
-      decorationColor: string
+      decoration?: TextDecoration
     }
   }
 
@@ -202,6 +202,11 @@ namespace V1 {
 
   type Outline = {
     width: number
+    color: string
+  }
+
+  type TextDecoration = {
+    style: 'none' | 'underline'
     color: string
   }
 

@@ -28,6 +28,7 @@ type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 @autobind
 class StageSelectService {
   marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
+
   afterSelect = createSignal<ISelectType>()
   private marqueeOBB?: OBB
   private lastSelectIds = <ID[]>[]
@@ -51,7 +52,7 @@ class StageSelectService {
   }
 
   private get hoverId() {
-    return firstOne(StageScene.getElemsFromPoint())?.id
+    return firstOne(StageScene.elemsFromPoint())?.id
   }
 
   private onMouseDown(e: ElemMouseEvent) {

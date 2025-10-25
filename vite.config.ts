@@ -23,6 +23,7 @@ const autoImport = autoImportPlugin({
       'src/editor/schema/y-state': ['YState'],
       'src/editor/schema/y-undo': ['YUndo'],
       'src/shared/utils/global': ['t'],
+      'src/global/color': ['COLOR'],
     },
   ],
   exclude: ['src/shared/**'],

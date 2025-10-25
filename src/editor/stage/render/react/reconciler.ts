@@ -20,7 +20,7 @@ const hostConfig: HostConfig<
   supportsMutation: true,
 
   createInstance(type, props) {
-    const elem = new Elem(type, 'widgetElem')
+    const elem = new Elem(props.node.id, 'widgetElem')
     for (const key in props) {
       if (key === 'events') {
         for (const eventType in props.events) {

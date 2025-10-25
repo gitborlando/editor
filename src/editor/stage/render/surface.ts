@@ -1,4 +1,4 @@
-import { AABB } from '@gitborlando/geo'
+import { AABB, Angle, OBB } from '@gitborlando/geo'
 import { reverseFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { EditorSetting } from 'src/editor/editor/setting'
@@ -23,17 +23,16 @@ const dpr = devicePixelRatio
 @autoBind
 export class StageSurface {
   inited$ = Signal.create(false)
-  disposing$ = Signal.create()
 
-  layerList: Elem[] = []
-
-  textBreaker!: TextBreaker
+  rootElems: Elem[] = []
 
   private canvas!: HTMLCanvasElement
   private ctx!: CanvasRenderingContext2D
 
   private bufferCanvas = new OffscreenCanvas(0, 0)
   private bufferCtx = this.bufferCanvas.getContext('2d')!
+
+  textBreaker!: TextBreaker
 
   async initTextBreaker() {
     this.textBreaker = await createTextBreaker()
@@ -64,6 +63,17 @@ export class StageSurface {
     this.ctx.save()
     func(this.ctx)
     this.ctx.restore()
+  }
+
+  setMatrix = (obb: OBB, inverse = false) => {
+    const { x, y, rotation } = obb
+    if (!inverse) {
+      this.ctx.translate(x, y)
+      this.ctx.rotate(Angle.radianFy(rotation))
+    } else {
+      this.ctx.rotate(-Angle.radianFy(rotation))
+      this.ctx.translate(-x, -y)
+    }
   }
 
   private renderTasks: INoopFunc[] = []
@@ -101,7 +111,7 @@ export class StageSurface {
       // return aDistance - bDistance
       // return a.selfIndex - b.selfIndex
     })
-    this.layerList.forEach((elem, layerIndex) =>
+    this.rootElems.forEach((elem, layerIndex) =>
       elem.children.forEach((elem, selfIndex) => {
         if (!elem.visible) return
         this.fullRenderElemsMinHeap.push({ elem, selfIndex, layerIndex })
@@ -114,7 +124,7 @@ export class StageSurface {
     this.ctx.transform(...this.viewportMatrix)
 
     if (!EditorSetting.setting.needSliceRender) {
-      this.layerList.forEach((elem) => elem.traverseDraw(this.ctx))
+      this.rootElems.forEach((elem) => elem.traverseDraw())
       return
     }
 
@@ -123,7 +133,7 @@ export class StageSurface {
     const startTime = getTime()
     while (getTime() - startTime <= 4) {
       const elem = this.fullRenderElemsMinHeap.pop()?.elem
-      elem?.traverseDraw(this.ctx)
+      elem?.traverseDraw()
     }
 
     this.requestRender('nextFullRender')
@@ -133,9 +143,9 @@ export class StageSurface {
     this.ctx.transform(...this.dprMatrix)
     this.ctx.transform(...this.viewportMatrix)
 
-    this.layerList.forEach((elem) => {
+    this.rootElems.forEach((elem) => {
       elem.children.forEach((elem) => {
-        reRenderElems.has(elem) && elem.traverseDraw(this.ctx)
+        reRenderElems.has(elem) && elem.traverseDraw()
       })
     })
   }
@@ -189,20 +199,14 @@ export class StageSurface {
     this.yNotIntTime = this.yNotIntTime === 2 ? 0 : this.yNotIntTime
     this.xNotIntTime = this.xNotIntTime === 2 ? 0 : this.xNotIntTime
 
-    this.layerList.forEach((elem) => elem.children.forEach(traverse))
+    this.rootElems.forEach((elem) => elem.children.forEach(traverse))
     this.ctxSaveRestore(() => this.patchRender(reRenderElems))
   }
 
   private dirtyRects = new Set<AABB>()
-  private expand = (aabb: AABB, ...expands: number[]) =>
-    AABB.expand(
-      aabb,
-      ...(expands.map((i) => i / getZoom()) as [number] | [number, number, number, number]),
-    )
 
   collectDirty = (elem: Elem) => {
-    const dirtyRect = elem.getDirtyRect(this.expand)
-    this.dirtyRects.add(dirtyRect)
+    this.dirtyRects.add(elem.getDirtyRect())
     this.requestRender('partialRender')
   }
 
@@ -226,7 +230,7 @@ export class StageSurface {
     while (needReTest) {
       needReTest = false
       reRenderElems.clear()
-      this.layerList.forEach((elem) => elem.children.forEach(traverse))
+      this.rootElems.forEach((elem) => elem.children.forEach(traverse))
     }
 
     dirtyArea = mx_applyAABB(dirtyArea, this.viewportMatrix)
@@ -253,7 +257,6 @@ export class StageSurface {
       this.viewportMatrix = mx_create(zoom, 0, 0, zoom, offset.x, offset.y)
       this.prevViewportAABB = mx_invertAABB(this.boundAABB, this.prevViewportMatrix)
       this.viewportAABB = mx_invertAABB(this.boundAABB, this.viewportMatrix)
-      this.layerList.forEach((elem) => (elem.obb = OBB.fromAABB(this.viewportAABB)))
     })
     reaction(
       () => StageViewport.zoom,
@@ -357,7 +360,7 @@ export class StageSurface {
       }
     }
 
-    reverseFor(this.layerList, (elem, i) => traverse(i, elem, []))
+    reverseFor(this.rootElems, (elem, i) => traverse(i, elem, []))
   }
 
   private elemsFromPoint: Elem[] = []

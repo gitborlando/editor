@@ -1,21 +1,18 @@
-import { AABB, OBB } from '@gitborlando/geo'
+import { max, OBB } from '@gitborlando/geo'
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import { FC, ReactNode } from 'react'
 import { EditorSetting } from 'src/editor/editor/setting'
-import { atan2, degreefy, normalAngle, radianfy } from 'src/editor/math/base'
+import { atan2, degreefy, normalAngle } from 'src/editor/math/base'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
+import { ElemDrawer } from 'src/editor/stage/render/draw'
 import { Surface } from 'src/editor/stage/render/surface'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
 
 export const ElemReact: FC<ElemProps> = 'elem' as unknown as FC<ElemProps>
 
 export type ElemProps = {
-  id?: string
-  outline?: 'hover' | 'select'
+  node: V1.Node
   hidden?: boolean
-  obb?: OBB
-  dirtyExpand?: number
-  draw?: (ctx: CanvasRenderingContext2D, path2d: Path2D) => void
   hitTest?: (xy: IXY) => boolean
   events?: Partial<Record<ElemEventType, ElemEventFunc>>
   children?: ReactNode[]
@@ -25,28 +22,24 @@ export class Elem {
   constructor(
     public id = '',
     public type: 'sceneElem' | 'widgetElem',
-    parent?: Elem,
-  ) {
-    if (parent) {
-      this.parent = parent
-      parent.addChild(this)
-    }
-  }
-
-  outline?: 'hover' | 'select' | `${number}-${string}`
+  ) {}
   clip = false
   hidden = false
   optimize = false
-  dirtyExpand = 1
 
-  private _obb = OBB.identityOBB()
-  get obb() {
-    return this._obb
+  private _node!: V1.Node
+  get node() {
+    return this._node
   }
-  set obb(obb: OBB) {
+  set node(node: V1.Node) {
+    if (this._node) Surface.collectDirty(this)
+    this._node = node
     Surface.collectDirty(this)
-    this._obb = obb
-    Surface.collectDirty(this)
+  }
+
+  get obb() {
+    if (!this._node) return OBB.identityOBB()
+    return OBB.fromRect(this.node, this.node.rotation)
   }
 
   get aabb() {
@@ -59,42 +52,34 @@ export class Elem {
     return Surface.testVisible(this.aabb)
   }
 
-  draw = (ctx: CanvasRenderingContext2D, path2d: Path2D) => {}
-  getDirtyRect = (expand: (aabb: AABB, ...expands: number[]) => AABB) =>
-    expand(this.aabb, this.dirtyExpand)
-
-  setMatrix = (ctx: CanvasRenderingContext2D, inverse = false) => {
-    const { x, y, rotation } = this.obb
-    if (!inverse) {
-      ctx.translate(x, y)
-      ctx.rotate(radianfy(rotation))
-    } else {
-      ctx.rotate(-radianfy(rotation))
-      ctx.translate(-x, -y)
-    }
+  getDirtyRect() {
+    const { center, width, height, rotation } = this.obb
+    const strokeWidth = this.node.strokes.reduce((acc, stroke) => acc + stroke.width, 0)
+    const outlineWidth = this.node.outline?.width || 0
+    const extend = max(strokeWidth, outlineWidth)
+    return OBB.fromCenter(center, width + extend * 2, height + extend * 2, rotation).aabb
   }
 
-  traverseDraw = (ctx: CanvasRenderingContext2D, customFunc?: (elem: Elem) => any) => {
+  traverseDraw() {
     if (!this.visible) return
-    if (customFunc?.(this) === false) return
 
     if (EditorSetting.setting.ignoreUnVisible && this.optimize) {
       const visualSize = Surface.getVisualSize(this.aabb)
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
-    Surface.ctxSaveRestore(() => {
+    Surface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
-      Surface.ctxSaveRestore(() => this.draw(ctx, path2d))
+      Surface.ctxSaveRestore(() => ElemDrawer.draw(this, ctx, path2d))
 
       if (!this.children.length) return
 
       if (this.clip) {
-        this.setMatrix(ctx)
+        Surface.setMatrix(this.obb)
         ctx.clip(path2d)
-        this.setMatrix(ctx, true)
+        Surface.setMatrix(this.obb, true)
       }
-      this.children.forEach((child) => child.traverseDraw(ctx))
+      this.children.forEach((child) => child.traverseDraw())
     })
   }
 
@@ -237,8 +222,8 @@ class ElemEventHandler {
   }
 }
 
-export class ElemHitUtil {
-  static HitRoundRect(w: number, h: number, r: number) {
+export class HitTest {
+  static hitRoundRect(w: number, h: number, r: number) {
     return (xy: IXY) => {
       const inRect = xy.x >= 0 && xy.x <= w && xy.y >= 0 && xy.y <= h
       if (r === 0) {
@@ -254,13 +239,13 @@ export class ElemHitUtil {
     }
   }
 
-  static HitPolygon(xys: IXY[]) {
+  static hitPolygon(xys: IXY[]) {
     return (xy: IXY) => {
       return this.inPolygon(xys, xy)
     }
   }
 
-  static HitPolyline(xys: IXY[], spread: number) {
+  static hitPolyline(xys: IXY[], spread: number) {
     const polygons: IXY[][] = []
     loopFor(xys, (cur, next) => {
       polygons.push(this.twoPointsSpreadRect(cur, next, spread))
@@ -273,7 +258,7 @@ export class ElemHitUtil {
     }
   }
 
-  static HitEllipse(
+  static hitEllipse(
     cx: number,
     cy: number,
     a: number,
@@ -312,9 +297,9 @@ export class ElemHitUtil {
     }
   }
 
-  static HitPoint(center: IXY, size: number) {
+  static hitPoint(center: IXY, size: number) {
     return (xy: IXY) => {
-      return this.HitEllipse(center.x, center.y, size / 2, size / 2, 0, 360, 0)(xy)
+      return HitTest.hitEllipse(center.x, center.y, size / 2, size / 2, 0, 360, 0)(xy)
     }
   }
 

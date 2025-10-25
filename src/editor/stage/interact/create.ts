@@ -1,4 +1,4 @@
-import { DragData } from '@gitborlando/utils'
+import { DragData } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
 import { max, ratan2 } from 'src/editor/math/base'
 import { xy_distance } from 'src/editor/math/xy'
@@ -99,7 +99,7 @@ class StageCreateService {
   }
 
   private findParent() {
-    const frame = StageScene.getElemsFromPoint().find((elem) => SchemaUtil.isById(elem.id, 'frame'))
+    const frame = StageScene.elemsFromPoint().find((elem) => SchemaUtil.isById(elem.id, 'frame'))
 
     if (frame) return Schema.find<INodeParent>(frame.id)
     return OperatePage.currentPage

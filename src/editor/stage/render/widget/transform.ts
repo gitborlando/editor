@@ -11,7 +11,7 @@ import { ID } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageSelect } from 'src/editor/stage/interact/select'
-import { Elem, ElemHitUtil, ElemMouseEvent } from 'src/editor/stage/render/elem'
+import { Elem, ElemMouseEvent, HitTest } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
@@ -128,9 +128,9 @@ class StageTransformService {
   private setupTransformElem = () => {
     StageScene.widgetRoot.addChild(this.transformElem)
 
-    this.transformElem.getDirtyRect = (expand) => {
-      return expand(this.transformOBB.aabb, 6)
-    }
+    // this.transformElem.getDirtyRect = (expand) => {
+    //   return expand(this.transformOBB.aabb, 6)
+    // }
 
     this.transformElem.addEvent('mousedown', (e) => {
       if (StageInteract.currentType.value !== 'select') return
@@ -151,12 +151,12 @@ class StageTransformService {
   }
 
   private updateTransformElem() {
-    this.transformElem.obb = this.transformOBB
-    this.transformElem.hitTest = ElemHitUtil.HitRoundRect(
-      this.transformOBB.width,
-      this.transformOBB.height,
-      0,
-    )
+    // this.transformElem.obb = this.transformOBB
+    // this.transformElem.hitTest = HitTest.HitRoundRect(
+    //   this.transformOBB.width,
+    //   this.transformOBB.height,
+    //   0,
+    // )
   }
 
   private updateLine(type: 'top' | 'bottom' | 'left' | 'right', p1: IXY, p2: IXY) {
@@ -248,13 +248,13 @@ class StageTransformService {
     }
 
     const line = this.lineElems.getSet(type, () => {
-      const line = new Elem(`transform-line-${type}`, 'widgetElem', this.transformElem)
+      const line = new Elem(`transform-line-${type}`, 'widgetElem')
       line.addEvent('hover', mouseover)
       line.addEvent('mousedown', mousedown)
       return line
     })
 
-    line.hitTest = ElemHitUtil.HitPolyline([p1, p2], 4 / getZoom())
+    line.hitTest = HitTest.HitPolyline([p1, p2], 4 / getZoom())
 
     line.draw = (ctx, path2d) => {
       if (!this.show.value) return
@@ -396,7 +396,7 @@ class StageTransformService {
 
     const size = 6 / getZoom()
 
-    vertexElem.hitTest = ElemHitUtil.HitPoint(xy, size * 5)
+    vertexElem.hitTest = HitTest.HitPoint(xy, size * 5)
 
     vertexElem.draw = (ctx, path2d) => {
       if (!this.show.value) return
