@@ -27,7 +27,7 @@ const stepByZoom = [
 @autobind
 class StageViewportService {
   zoom = 1
-  offset = XY.of(0, 0) as IXY
+  offset = XY._(0, 0)
   bound = createInitBound()
 
   private wheeler = new EventWheelService()
@@ -45,18 +45,6 @@ class StageViewportService {
     Surface.inited$.hook(() => {
       this.onWheelZoom()
     })
-
-    // Schema.onMatchPatch('/client/selectPageId', () => {
-    //   const viewport = OperatePage.getCurrentViewport()
-    //   this.zoom$.dispatch(viewport.zoom)
-    //   this.offset$.dispatch(viewport.offset)
-    //   this.zoomingStage$.dispatch(viewport.zoom)
-    // })
-
-    // this.zoom$.hook((zoom) => OperatePage.setCurrentViewport({ zoom }))
-    // this.offset$.hook((offset) => OperatePage.setCurrentViewport({ offset }))
-
-    //  hotkeys('alt+l', this.centerStage)
   }
 
   toViewportXY(xy: IXY) {
@@ -92,14 +80,14 @@ class StageViewportService {
     })
     this.wheeler.duringWheel.hook(({ e }) => {
       if (!e.ctrlKey) {
-        const oldOffset = XY.from(this.offset)
+        const old = XY.from(this.offset)
         if (e.shiftKey) {
-          oldOffset.x -= e.deltaY
+          old.x -= e.deltaY
         } else {
-          if (e.deltaY === 0) oldOffset.x -= e.deltaX
-          else oldOffset.y -= e.deltaY
+          if (e.deltaY === 0) old.x -= e.deltaX
+          else old.y -= e.deltaY
         }
-        this.offset = oldOffset
+        this.offset = old
         return
       }
 

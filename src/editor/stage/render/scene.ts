@@ -17,16 +17,15 @@ import { Surface } from './surface'
 @autobind
 class StageSceneService {
   elements = createObjCache<Elem>()
+
   sceneRoot!: Elem
   widgetRoot!: Elem
 
-  initHook() {
-    this.sceneRoot = new Elem('sceneRoot', 'sceneElem')
-    this.widgetRoot = new Elem('widgetRoot', 'widgetElem')
+  rootElems: Elem[] = []
 
+  initHook() {
     this.setupRootElem()
     this.hookRenderNode()
-
     this.onHover()
   }
 
@@ -34,7 +33,7 @@ class StageSceneService {
     this.elements.clear()
     this.sceneRoot.destroy()
     this.widgetRoot.destroy()
-    Surface.rootElems = []
+    this.rootElems = []
   }
 
   findElem(id: string) {
@@ -46,9 +45,11 @@ class StageSceneService {
   }
 
   private setupRootElem() {
-    Surface.rootElems.push(this.sceneRoot, this.widgetRoot)
+    this.sceneRoot = new Elem('sceneRoot', 'sceneElem')
+    this.widgetRoot = new Elem('widgetRoot', 'widgetElem')
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
+    this.rootElems.push(this.sceneRoot, this.widgetRoot)
   }
 
   private hookRenderNode() {

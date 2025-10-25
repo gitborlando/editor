@@ -11,6 +11,7 @@ import {
   mx_invertPoint,
 } from 'src/editor/math/matrix'
 import { xy_, xy_center, xy_client, xy_minus, xy_rotate } from 'src/editor/math/xy'
+import { StageScene } from 'src/editor/stage/render/scene'
 import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { IClientXY } from 'src/shared/utils/event'
@@ -23,8 +24,6 @@ const dpr = devicePixelRatio
 @autoBind
 export class StageSurface {
   inited$ = Signal.create(false)
-
-  rootElems: Elem[] = []
 
   private canvas!: HTMLCanvasElement
   private ctx!: CanvasRenderingContext2D
@@ -111,7 +110,7 @@ export class StageSurface {
       // return aDistance - bDistance
       // return a.selfIndex - b.selfIndex
     })
-    this.rootElems.forEach((elem, layerIndex) =>
+    StageScene.rootElems.forEach((elem, layerIndex) =>
       elem.children.forEach((elem, selfIndex) => {
         if (!elem.visible) return
         this.fullRenderElemsMinHeap.push({ elem, selfIndex, layerIndex })
@@ -124,7 +123,7 @@ export class StageSurface {
     this.ctx.transform(...this.viewportMatrix)
 
     if (!EditorSetting.setting.needSliceRender) {
-      this.rootElems.forEach((elem) => elem.traverseDraw())
+      StageScene.rootElems.forEach((elem) => elem.traverseDraw())
       return
     }
 
@@ -143,7 +142,7 @@ export class StageSurface {
     this.ctx.transform(...this.dprMatrix)
     this.ctx.transform(...this.viewportMatrix)
 
-    this.rootElems.forEach((elem) => {
+    StageScene.rootElems.forEach((elem) => {
       elem.children.forEach((elem) => {
         reRenderElems.has(elem) && elem.traverseDraw()
       })
@@ -199,7 +198,7 @@ export class StageSurface {
     this.yNotIntTime = this.yNotIntTime === 2 ? 0 : this.yNotIntTime
     this.xNotIntTime = this.xNotIntTime === 2 ? 0 : this.xNotIntTime
 
-    this.rootElems.forEach((elem) => elem.children.forEach(traverse))
+    StageScene.rootElems.forEach((elem) => elem.children.forEach(traverse))
     this.ctxSaveRestore(() => this.patchRender(reRenderElems))
   }
 
@@ -230,7 +229,7 @@ export class StageSurface {
     while (needReTest) {
       needReTest = false
       reRenderElems.clear()
-      this.rootElems.forEach((elem) => elem.children.forEach(traverse))
+      StageScene.rootElems.forEach((elem) => elem.children.forEach(traverse))
     }
 
     dirtyArea = mx_applyAABB(dirtyArea, this.viewportMatrix)
@@ -360,7 +359,7 @@ export class StageSurface {
       }
     }
 
-    reverseFor(this.rootElems, (elem, i) => traverse(i, elem, []))
+    reverseFor(StageScene.rootElems, (elem, i) => traverse(i, elem, []))
   }
 
   private elemsFromPoint: Elem[] = []
