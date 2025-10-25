@@ -1,4 +1,6 @@
 namespace V1 {
+  type IXY = { x: number; y: number }
+
   type Schema = {
     meta: Meta
     [id: string & {}]: SchemaItem
@@ -21,7 +23,7 @@ namespace V1 {
   type Client = {
     selectIds: Record<string, boolean>
     selectPageId: string
-    cursor: import('@gitborlando/geo').IXY
+    cursor: IXY
   }
 
   type Clients = {
@@ -40,7 +42,7 @@ namespace V1 {
 
   type NodeParent = Frame | Group | Page
 
-  type Node = Frame | Group | Rectangle | Ellipse | Text | Line | Polygon | Star | Irregular
+  type Node = Frame | Group | Rectangle | Ellipse | Text | Line | Polygon | Star | Path
 
   type NodeMeta = {
     id: string
@@ -92,13 +94,13 @@ namespace V1 {
     startPath?: boolean
   }
 
-  type Vector = Rectangle | Ellipse | Polygon | Star | Line | Irregular
+  type Vector = Rectangle | Ellipse | Polygon | Star | Line | Path
 
   type VectorBase = {
     points: Point[]
   }
 
-  type Irregular = NodeBase &
+  type Path = NodeBase &
     VectorBase & {
       type: 'irregular'
     }
@@ -148,6 +150,8 @@ namespace V1 {
       fontWeight: 'normal' | 'bold' | 'bolder' | 'lighter' | number
       letterSpacing: number
       lineHeight: number
+      decoration: 'none' | 'underline'
+      decorationColor: string
     }
   }
 
@@ -196,6 +200,11 @@ namespace V1 {
     fill: Fill
   }
 
+  type Outline = {
+    width: number
+    color: string
+  }
+
   type SchemaPropKey =
     | keyof Meta
     | keyof Client
@@ -206,7 +215,7 @@ namespace V1 {
     | keyof Rectangle
     | keyof Polygon
     | keyof Star
-    | keyof Irregular
+    | keyof Path
     | keyof Ellipse
     | keyof Line
     | keyof FillColor
