@@ -255,17 +255,12 @@ export class StageSurface {
       this.viewportAABB = mx_invertAABB(this.boundAABB, this.viewportMatrix)
       this.layerList.forEach((elem) => (elem.obb = OBB.fromAABB(this.viewportAABB)))
     })
-
     reaction(
-      () => ({
-        zoom: StageViewport.zoom,
-        offset: { ...StageViewport.offset },
-      }),
+      () => StageViewport.zoom,
       () => this.requestRender('firstFullRender'),
     )
-
     reaction(
-      () => ({ ...StageViewport.offset }),
+      () => XY.from(StageViewport.offset),
       (offset, prevOffset) => this.translate(offset, prevOffset),
     )
   }
@@ -282,7 +277,6 @@ export class StageSurface {
       },
       { fireImmediately: true },
     )
-
     reaction(
       () => ({ ...StageViewport.bound }),
       () => this.requestRender('firstFullRender'),

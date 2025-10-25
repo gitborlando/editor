@@ -66,7 +66,7 @@ export function timeOf(count: number, func: (i: number) => any, count2 = 1, skip
 }
 
 export function getTime() {
-  return new Date().getTime()
+  return performance.now()
 }
 
 export function cleanObject(object: IAnyObject) {
