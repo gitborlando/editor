@@ -5,10 +5,11 @@ import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
 import { makeObservable, observable } from 'mobx'
 import { EditorCommand } from 'src/editor/editor/command'
-import { OperateNode, getSelectIds } from 'src/editor/operate/node'
+import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { Schema } from 'src/editor/schema/schema'
 import { ID, IFrame, INode } from 'src/editor/schema/type'
+import { getSelectIds, YClients } from 'src/editor/schema/y-clients'
 import { ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
@@ -17,7 +18,7 @@ import { StageViewport } from 'src/editor/stage/viewport'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
 import { Menu } from 'src/global/menu'
-import { batchSignal, createSignal } from 'src/shared/signal/signal'
+import { createSignal } from 'src/shared/signal/signal'
 import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
 import { macroMatch, type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
@@ -102,7 +103,7 @@ class StageSelectService {
   }
 
   private onLeftMouseDown(e: ElemMouseEvent) {
-    this.lastSelectIds = [...OperateNode.selectIds.value]
+    this.lastSelectIds = getSelectIds()
 
     if (!this.hoverId) {
       this.clearSelect()
@@ -135,7 +136,7 @@ class StageSelectService {
 
   private clearSelect() {
     if (hotkeys.shift) return
-    OperateNode.clearSelect()
+    YClients.clearSelect()
   }
 
   onPanelSelect(id: string) {
@@ -175,22 +176,23 @@ class StageSelectService {
       if (macroMatch`-180|-90|0|90|180`(obb.rotation)) return aabbResult
       return aabbResult && marqueeOBB.collide(obb)
     }
+
     const traverseTest = () => {
       this.clearSelect()
       SchemaUtil.traverseCurPageChildIds(({ id, node, childIds, depth }) => {
-        const elem = StageScene.findElem(node.id)
+        const elem = StageScene.findElem(id)
         if (!elem.visible) return false
 
         if (childIds?.length && depth === 0) {
           if (AABB.include(this.marqueeOBB!.aabb, elem.aabb) === 1) {
-            OperateNode.select(node.id)
-            UILeftPanelLayer.needExpandIds.add(node.id)
+            YUndo.untrackScope(() => YClients.select(id))
+            UILeftPanelLayer.needExpandIds.add(id)
             return false
           }
           return
         }
         if (hitTest(this.marqueeOBB, elem.obb)) {
-          OperateNode.select(id)
+          YUndo.untrackScope(() => YClients.select(id))
           UILeftPanelLayer.needExpandIds.add(node.parentId)
           return
         }
@@ -203,13 +205,15 @@ class StageSelectService {
       .onMove(({ marquee }) => {
         this.marquee = StageViewport.toSceneMarquee(marquee)
         this.marqueeOBB = OBB.fromRect(this.marquee)
-        batchSignal(OperateNode.selectIds, () => traverseTest())
+        traverseTest()
       })
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }
         this.afterSelect.dispatch('marquee')
-        if (equal([...OperateNode.selectIds.value], this.lastSelectIds)) return
-        OperateNode.commitFinalSelect()
+
+        if (!equal(getSelectIds(), this.lastSelectIds)) {
+          YUndo.track({ type: 'client', description: `选中 ${getSelectIds().length} 个节点` })
+        }
       })
   }
 }

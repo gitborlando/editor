@@ -25,9 +25,8 @@ class YClientsService {
     })
     this.doc = new Y.Doc()
     bind(this.client, this.doc.getMap('client'))
-    subscribe(this.client, () => {
-      this.clientSnap = snapshot(this.client)
-    })
+    this.clientSnap = snapshot(this.client)
+    subscribe(this.client, () => (this.clientSnap = snapshot(this.client)))
     YUndo.initClientUndo(this.doc.getMap('client'))
   }
 
@@ -46,7 +45,7 @@ class YClientsService {
   clearSelect() {
     if (Is.empty(this.client.selectIds)) return
     this.client.selectIds = {}
-    YUndo.track({ type: 'client', description: `清空选中节点` })
+    // YUndo.track({ type: 'client', description: `清空选中节点` })
   }
 
   selectPage(id: string) {
