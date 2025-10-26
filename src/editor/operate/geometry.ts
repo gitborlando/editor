@@ -7,7 +7,7 @@ import { MULTI_VALUE } from 'src/global/constant'
 import { cleanObject } from 'src/shared/utils/normal'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { IPolygon, IStar } from '../schema/type'
-import { getSelectIds } from '../schema/y-clients'
+import { getSelectIdMap } from '../schema/y-clients'
 import { OperateNode } from './node'
 
 function createAllGeometry() {
@@ -88,7 +88,7 @@ class OperateGeometryService {
         finder: YState.find<V1.Node>,
         callback: this.applyChangeToNode,
       })
-      traverse(getSelectIds())
+      traverse(Object.keys(getSelectIdMap()))
 
       this.hasStartApply = false
       this.operateKeys.clear()

@@ -9,7 +9,8 @@ import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { Schema } from 'src/editor/schema/schema'
 import { ID, IFrame, INode } from 'src/editor/schema/type'
-import { getSelectIds, YClients } from 'src/editor/schema/y-clients'
+import { SchemaUtil2, SchemaUtilTraverseData } from 'src/editor/schema/utils'
+import { getSelectIdMap, YClients } from 'src/editor/schema/y-clients'
 import { ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
@@ -31,7 +32,7 @@ class StageSelectService {
 
   afterSelect = createSignal<ISelectType>()
   private marqueeOBB?: OBB
-  private lastSelectIds = <ID[]>[]
+  private lastSelectIdMap = <Record<string, boolean>>{}
 
   startInteract() {
     StageScene.sceneRoot.addEvent('mousedown', this.onMouseDown)
@@ -98,9 +99,9 @@ class StageSelectService {
   }
 
   private onLeftMouseDown(e: ElemMouseEvent) {
-    this.lastSelectIds = getSelectIds()
+    this.lastSelectIdMap = getSelectIdMap()
 
-    if (!this.hoverId || SchemaUtil.isPageFrame(this.hoverId)) {
+    if (!this.hoverId || SchemaUtil2.isFirstLayerFrame(this.hoverId)) {
       this.clearSelect()
       this.onMarqueeSelect()
       return
@@ -117,7 +118,7 @@ class StageSelectService {
 
   onMenu() {
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } = EditorCommand
-    if (getSelectIds().length) {
+    if (getSelectIdMap().length) {
       const menuOptions = [nodeReHierarchyGroup, copyPasteGroup, undoRedoGroup, nodeGroup]
       return Menu.menuOptions.dispatch(menuOptions)
     }
@@ -131,9 +132,9 @@ class StageSelectService {
 
   onPanelSelect(id: string) {
     this.clearSelect()
-    OperateNode.select(id)
+    YClients.select(id)
     this.afterSelect.dispatch('panel')
-    OperateNode.commitFinalSelect()
+    YUndo.track({ type: 'client', description: `选中节点 ${id}` })
   }
 
   onCreateSelect(id: string) {
@@ -150,13 +151,19 @@ class StageSelectService {
   }
 
   private onSelect(id: ID) {
-    if (OperateNode.selectIds.value.has(id)) return
-    if (SchemaUtil.isPageFrame(id)) return
+    if (getSelectIdMap()[id]) return
+    if (SchemaUtil2.isFirstLayerFrame(id)) return
+
     this.clearSelect()
-    OperateNode.select(id)
-    if (equal([...OperateNode.selectIds.value], this.lastSelectIds)) return
-    OperateNode.commitFinalSelect()
-    UILeftPanelLayer.expandAncestor(id)
+    YClients.select(id)
+
+    if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
+      YUndo.track({
+        type: 'client',
+        description: `选中 ${Object.keys(getSelectIdMap()).length} 个节点`,
+      })
+      // UILeftPanelLayer.expandAncestor(id)
+    }
   }
 
   private onMarqueeSelect() {
@@ -167,42 +174,46 @@ class StageSelectService {
       return aabbResult && marqueeOBB.collide(obb)
     }
 
-    const traverseTest = () => {
-      this.clearSelect()
-      SchemaUtil.traverseCurPageChildIds(({ id, node, childIds, depth }) => {
-        const elem = StageScene.findElem(id)
-        if (!elem.visible) return false
+    const traverseTest = ({ id, node, childIds, depth }: SchemaUtilTraverseData) => {
+      const elem = StageScene.findElem(id)
+      if (!elem.visible) return false
 
-        if (childIds?.length && depth === 0) {
-          if (AABB.include(this.marqueeOBB!.aabb, elem.aabb) === 1) {
-            YUndo.untrackScope(() => YClients.select(id))
-            UILeftPanelLayer.needExpandIds.add(id)
-            return false
-          }
-          return
-        }
-        if (hitTest(this.marqueeOBB, elem.obb)) {
+      if (childIds?.length && depth === 0) {
+        if (AABB.include(this.marqueeOBB!.aabb, elem.aabb) === 1) {
           YUndo.untrackScope(() => YClients.select(id))
-          UILeftPanelLayer.needExpandIds.add(node.parentId)
-          return
+          UILeftPanelLayer.needExpandIds.add(id)
+          return false
         }
-        return false
-      })
+        return
+      }
+      if (hitTest(this.marqueeOBB, elem.obb)) {
+        YUndo.untrackScope(() => YClients.select(id))
+        UILeftPanelLayer.needExpandIds.add(node.parentId)
+        return
+      }
+      return false
     }
 
+    const traverse = SchemaUtil2.createCurrentPageTraverse({
+      finder: YState.findSnap<V1.Node>,
+      callback: traverseTest,
+    })
+
     Surface.disablePointEvent()
+
     Drag.onStart()
       .onMove(({ marquee }) => {
         this.marquee = StageViewport.toSceneMarquee(marquee)
         this.marqueeOBB = OBB.fromRect(this.marquee)
-        traverseTest()
+        this.clearSelect()
+        traverse()
       })
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }
         this.afterSelect.dispatch('marquee')
 
-        if (!equal(getSelectIds(), this.lastSelectIds)) {
-          YUndo.track({ type: 'client', description: `选中 ${getSelectIds().length} 个节点` })
+        if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
+          YUndo.track({ type: 'client', description: `选中 ${getSelectIdMap().length} 个节点` })
         }
       })
   }

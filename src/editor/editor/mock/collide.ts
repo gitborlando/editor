@@ -1,18 +1,14 @@
 import { SchemaCreate } from 'src/editor/schema/create'
-import { ISchema } from 'src/editor/schema/type'
 
 export function mockCollide() {
-  const schema = <ISchema>{}
+  const schema = <V1.Schema>{}
 
   const meta = SchemaCreate.meta()
-  const client = SchemaCreate.client()
   const page = SchemaCreate.page()
   schema.meta = meta
-  schema.client = client
 
   schema[page.id] = page
   meta.pageIds.push(page.id)
-  client.selectPageId = page.id
 
   const frame = SchemaCreate.frame()
   frame.x = 100

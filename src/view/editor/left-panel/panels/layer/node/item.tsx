@@ -4,6 +4,7 @@ import { EditorCommand } from 'src/editor/editor/command'
 import { OperateNode } from 'src/editor/operate/node'
 import { Schema } from 'src/editor/schema/schema'
 import { IIrregular, INode } from 'src/editor/schema/type'
+import { getSelectIdMap } from 'src/editor/schema/y-clients'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
@@ -29,8 +30,8 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
   const { nodeMoveDropDetail, nodeMoveStarted, nodeMoveEnded, enterReName } = UILeftPanelLayer
   const node = Schema.find<INode>(id)
   const expand = UILeftPanelLayer.getNodeExpanded(id)
-  const selected = Schema.client.selectIds.includes(id)
-  const subSelected = ancestors.some((i) => Schema.client.selectIds.includes(i)) && !selected
+  const selected = getSelectIdMap()[id]
+  const subSelected = ancestors.some((i) => getSelectIdMap()[i]) && !selected
   const searched = nodeIdsInSearch.value.has(id)
   const isContainerNode = SchemaUtil.isById(id, 'nodeParent')
   const children = SchemaUtil.getChildren(id)
@@ -187,7 +188,7 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     ['wh-100%-32 layer-floor:bg-white min-w-100% text-12 px-6 d-hover-border'],
     [!!nodeMoveStarted.value.moveId, ''],
     [subSelected, 'bg-hsl97'],
-    [selected, 'bg-hsl94']
+    [selected, 'bg-hsl94'],
   )
 
   return (

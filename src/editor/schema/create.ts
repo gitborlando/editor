@@ -8,6 +8,16 @@ import { defuOverrideArray } from 'src/utils/defu'
 
 @autobind
 class SchemaCreateService {
+  schema(): V1.Schema {
+    const page = this.page()
+    const meta = this.meta()
+    meta.pageIds = [page.id]
+    return {
+      meta,
+      [page.id]: page,
+    }
+  }
+
   meta(): V1.Meta {
     return {
       type: 'meta',
@@ -17,16 +27,6 @@ class SchemaCreateService {
       version: 'v0',
       pageIds: [],
       userId: '',
-    }
-  }
-
-  schema(): V1.Schema {
-    const page = this.page()
-    const meta = this.meta()
-    meta.pageIds = [page.id]
-    return {
-      meta,
-      [page.id]: page,
     }
   }
 

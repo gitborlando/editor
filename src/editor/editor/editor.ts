@@ -21,7 +21,6 @@ import { StageInteract } from '../stage/interact/interact'
 import { StageScene } from '../stage/render/scene'
 import { StageViewport } from '../stage/viewport'
 import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
-import { UIPickerCopy } from '../ui-state/right-panel/operate/picker'
 
 const jsZip = new JSZip()
 
@@ -49,7 +48,7 @@ export class EditorService {
 
     UILeftPanelLayer.initHook()
 
-    UIPickerCopy.initHook()
+    // UIPickerCopy.initHook()
   }
 
   dispose() {
@@ -64,8 +63,9 @@ export class EditorService {
     if (fileId === 'mock') {
       let mockSchema = mockCollide()
       if (mockSchema) {
-        const schema = mockSchema
-        Schema.initSchema(schema)
+        // Schema.initSchema(mockSchema)
+        YState.initSchema(fileId, mockSchema as unknown as V1.Schema)
+        YClients.initClient()
       }
     } else {
       const fileMeta = await FileService.getFileMeta(fileId)

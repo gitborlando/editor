@@ -4,6 +4,7 @@ import equal from 'fast-deep-equal'
 import { OperateNode } from 'src/editor/operate/node'
 import { SchemaHistory } from 'src/editor/schema/history'
 import { Schema } from 'src/editor/schema/schema'
+import { SchemaUtil2 } from 'src/editor/schema/utils'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { createStorageItem } from 'src/global/storage'
 import { createSignal } from 'src/shared/signal/signal'
@@ -153,16 +154,20 @@ class UILeftPanelLayerService {
     let inFrontCount = floor(this.nodeScrollHeight.value / 32)
     let inViewCount = ceil(this.nodeViewHeight.value / 32) + 1
     this.nodeScrollShift.value = this.nodeScrollHeight.value - inFrontCount * 32
-    SchemaUtil.traverseCurPageChildIds(({ id, ancestors, depth }) => {
-      this.nodeListHeight.value += 32
-      if (inFrontCount > 0) {
-        inFrontCount--
-      } else if (inViewCount !== 0) {
-        inViewCount--
-        inViewNodeInfo.push({ id, indent: depth, ancestors })
-      }
-      if (this.getNodeExpanded(id) === false) return false
+    const traverse = SchemaUtil2.createCurrentPageTraverse({
+      finder: YState.findSnap<V1.Node>,
+      callback: ({ id, ancestors, depth }) => {
+        this.nodeListHeight.value += 32
+        if (inFrontCount > 0) {
+          inFrontCount--
+        } else if (inViewCount !== 0) {
+          inViewCount--
+          inViewNodeInfo.push({ id, indent: depth, ancestors })
+        }
+        if (this.getNodeExpanded(id) === false) return false
+      },
     })
+    traverse()
     const thisInViewIds = inViewNodeInfo.map((info) => info.id)
     if (!equal(this.lastInViewIds, thisInViewIds)) {
       this.lastInViewIds = thisInViewIds
@@ -173,27 +178,34 @@ class UILeftPanelLayerService {
   private searchNode() {
     this.nodeIdsInSearch.value.clear()
     if (this.searchSlice.value === '') return this.afterSearch.dispatch()
-    SchemaUtil.traverseCurPageChildIds(
-      ({ id, node }) => {
+
+    const traverse = SchemaUtil2.createCurrentPageTraverse({
+      finder: YState.findSnap<V1.Node>,
+      callback: ({ id, node }) => {
         node.name.includes(this.searchSlice.value) && this.nodeIdsInSearch.value.add(id)
       },
-      ({ id, upLevelRef }) => {
+      bubbleCallback: ({ id, upLevelRef }) => {
         if (!this.nodeIdsInSearch.value.has(id) || !upLevelRef?.id) return
         this.setSingleNodeExpanded(upLevelRef.id, true)
       },
-    )
+    })
+    traverse()
     this.afterSearch.dispatch()
   }
   private autoScroll(ids: Set<string>) {
     if (ids.size === 0) return
     this.nodeScrollHeight.value = 0
-    SchemaUtil.traverseCurPageChildIds(({ id, abort, upLevelRef }) => {
-      if (ids.has(id)) return abort.abort()
-      if (!upLevelRef) return (this.nodeScrollHeight.value = this.nodeScrollHeight.value + 32)
-      if (this.getNodeExpanded(upLevelRef.id)) {
-        this.nodeScrollHeight.value = this.nodeScrollHeight.value + 32
-      }
+    const traverse = SchemaUtil2.createCurrentPageTraverse({
+      finder: YState.findSnap<V1.Node>,
+      callback: ({ id, abort, upLevelRef }) => {
+        if (ids.has(id)) return abort.abort()
+        if (!upLevelRef) return (this.nodeScrollHeight.value = this.nodeScrollHeight.value + 32)
+        if (this.getNodeExpanded(upLevelRef.id)) {
+          this.nodeScrollHeight.value = this.nodeScrollHeight.value + 32
+        }
+      },
     })
+    traverse()
     this.nodeScrollHeight.dispatch()
   }
 }

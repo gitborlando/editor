@@ -40,7 +40,8 @@ class SchemaService {
   }
 
   find<T extends ISchemaItem>(id: ID): T {
-    return this.schema[id] as T
+    return YState.findSnap<any>(id)
+    // return this.schema[id] as T
   }
 
   addItem(item: INodeOrPage) {

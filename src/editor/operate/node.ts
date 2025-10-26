@@ -75,7 +75,7 @@ class OperateNodeService {
   commitSelect() {
     const selectIdArr = [...this.selectIds.value]
     this.autoGetDatumId(this.selectIds.value)
-    Schema.itemReset(Schema.client, ['selectIds'], selectIdArr)
+    // Schema.itemReset(Schema.client, ['selectIds'], selectIdArr)
     Schema.commitOperation(`选择节点`)
   }
   commitFinalSelect() {

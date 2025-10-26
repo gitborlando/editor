@@ -96,6 +96,10 @@ class YClientsService {
 
 export const YClients = new YClientsService()
 
+export function getSelectIdMap() {
+  return YClients.clientSnap.selectIds
+}
+
 export function getSelectIds() {
   const selectIds = globalCache.getSet(
     'selectIds',

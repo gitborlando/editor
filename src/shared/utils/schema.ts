@@ -1,5 +1,6 @@
 import { Schema } from 'src/editor/schema/schema'
-import { ID, IFrame, INode, INodeParent, IPage, ISchemaItem } from 'src/editor/schema/type'
+import { ID, IFrame, INode, INodeParent, ISchemaItem } from 'src/editor/schema/type'
+import { YClients } from 'src/editor/schema/y-clients'
 
 export type ITraverseData = {
   id: ID
@@ -54,13 +55,13 @@ export class SchemaUtil {
     return node
   }
   static traverseCurPageChildIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
-    const curPage = Schema.find<IPage>(Schema.client.selectPageId)
+    const curPage = YState.findSnap<V1.Page>(YClients.clientSnap.selectPageId)
     this.traverseIds(curPage.childIds, callback, bubbleCallback)
   }
   static traverseIds(
     ids: string[],
     callback: ITraverseCallback,
-    bubbleCallback?: ITraverseCallback
+    bubbleCallback?: ITraverseCallback,
   ) {
     const abort = new AbortController()
     const traverse = (ids: string[], depth: number, upLevelRef?: ITraverseData) => {

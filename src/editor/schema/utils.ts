@@ -1,5 +1,6 @@
 import { Schema } from 'src/editor/schema/schema'
-import { IFrame, INode, INodeParent, IPage, ISchemaItem } from 'src/editor/schema/type'
+import { IFrame, INode, INodeParent, ISchemaItem } from 'src/editor/schema/type'
+import { YClients } from 'src/editor/schema/y-clients'
 
 export type SchemaUtilTraverseData = {
   id: ID
@@ -34,8 +35,8 @@ export class SchemaUtil2 {
     return 'childIds' in node
   }
 
-  static isPageFrame(id: ID) {
-    const node = Schema.find(id)
+  static isFirstLayerFrame(id: ID) {
+    const node = YState.findSnap(id)
     return node.type === 'frame' && this.isPageById(node.parentId)
   }
 
@@ -62,14 +63,18 @@ export class SchemaUtil2 {
     return node
   }
 
-  static traverseCurPageChildIds(callback: ITraverseCallback, bubbleCallback?: ITraverseCallback) {
-    const curPage = Schema.find<IPage>(Schema.client.selectPageId)
-    const traverse = this.createTraverse({
-      finder: (id) => Schema.find<INode>(id),
-      callback,
-      bubbleCallback,
-    })
-    traverse(curPage.childIds)
+  static createCurrentPageTraverse({
+    finder,
+    callback,
+    bubbleCallback,
+  }: {
+    finder: (id: ID) => V1.Node
+    callback: ITraverseCallback
+    bubbleCallback?: ITraverseCallback
+  }) {
+    const curPage = YState.findSnap<V1.Page>(YClients.clientSnap.selectPageId)
+    const traverse = this.createTraverse({ finder, callback, bubbleCallback })
+    return () => traverse(curPage.childIds)
   }
 
   static createTraverse({
