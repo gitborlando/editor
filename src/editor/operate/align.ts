@@ -1,7 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { StageScene } from 'src/editor/stage/render/scene'
-import { StageTransform } from 'src/editor/stage/render/widget/transform'
-import { createSignal } from 'src/shared/signal/signal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { Schema } from '../schema/schema'
 import { INode, INodeParent } from '../schema/type'
@@ -21,9 +19,9 @@ export type IAlignType = (typeof alignTypes)[number]
 @autobind
 class OperateAlignService {
   alignTypes = alignTypes
-  canAlign = createSignal(false)
-  currentAlign = createSignal<IAlignType>()
-  afterAlign = createSignal()
+  canAlign = Signal.create(false)
+  currentAlign = Signal.create<IAlignType>()
+  afterAlign = Signal.create()
   private needAlign = false
   private toAlignNodes = <INode[]>[]
 
@@ -129,7 +127,7 @@ class OperateAlignService {
 
   private getAlignBound() {
     if (getSelectNodes().length > 1) {
-      return StageTransform.transformOBB.aabb
+      // return StageTransform.transformOBB.aabb
     } else {
       return StageScene.findElem(getSelectNodes()[0].id).obb.aabb
     }

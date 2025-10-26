@@ -1,10 +1,9 @@
 import { StorageUtil } from '@gitborlando/utils/browser'
-import { createSignal } from 'src/shared/signal/signal'
 
 export const Storage = new StorageUtil()
 
 export function createStorageItem<T>(key: string, init: T) {
-  const signal = createSignal<T>(init)
+  const signal = Signal.create<T>(init)
   const setting = Storage.get<T>(key)
 
   if (setting !== undefined) {

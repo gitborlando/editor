@@ -18,7 +18,6 @@ const autoImport = autoImportPlugin({
       '@gitborlando/geo': ['AABB', 'OBB', 'XY'],
       '@gitborlando/signal': ['Signal'],
       'src/view/assets/assets': ['Assets'],
-      'src/shared/signal/signal': ['createSignal'],
       'src/view/component/grid': ['Grid', 'G'],
       'src/editor/schema/y-state': ['YState'],
       'src/editor/schema/y-undo': ['YUndo'],

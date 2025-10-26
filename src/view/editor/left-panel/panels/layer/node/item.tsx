@@ -138,15 +138,15 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
     const dropInFront = useAutoSignal(false)
     const dropInSide = useAutoSignal(false)
     const dropBehind = useAutoSignal(false)
-    dropInFront.intercept((value) => !subSelected && value)
-    dropInSide.intercept((value) => {
-      if (SchemaUtil.isById(id, 'nodeParent') && expand && selected) return false
-      return value
-    })
-    dropBehind.intercept((value) => {
-      if (SchemaUtil.isById(id, 'nodeParent') && expand && selected) return false
-      return !subSelected && value
-    })
+    // dropInFront.intercept((value) => !subSelected && value)
+    // dropInSide.intercept((value) => {
+    //   if (SchemaUtil.isById(id, 'nodeParent') && expand && selected) return false
+    //   return value
+    // })
+    // dropBehind.intercept((value) => {
+    //   if (SchemaUtil.isById(id, 'nodeParent') && expand && selected) return false
+    //   return !subSelected && value
+    // })
     useHookSignal(dropInFront, (value) => {
       if (value === true) nodeMoveDropDetail.value = { id, type: 'before' }
     })

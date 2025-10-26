@@ -2,14 +2,13 @@ import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
 import { YUndo } from 'src/editor/schema/y-undo'
 import { ImmuiPatch } from 'src/shared/immui/immui'
-import { createSignal } from 'src/shared/signal/signal'
 import { Schema } from './schema'
 import { ISchemaOperation } from './type'
 
 @autobind
 class SchemaHistoryService {
   stack = <ISchemaOperation[]>[]
-  index$ = createSignal(-1)
+  index$ = Signal.create(-1)
   patchList: ImmuiPatch[] = []
 
   get canUndo() {

@@ -18,7 +18,6 @@ import { StageViewport } from 'src/editor/stage/viewport'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
 import { Menu } from 'src/global/menu'
-import { createSignal } from 'src/shared/signal/signal'
 import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
 import { macroMatch, type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
@@ -30,7 +29,7 @@ type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 class StageSelectService {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
 
-  afterSelect = createSignal<ISelectType>()
+  afterSelect = Signal.create<ISelectType>()
   private marqueeOBB?: OBB
   private lastSelectIdMap = <Record<string, boolean>>{}
 

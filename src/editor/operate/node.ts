@@ -4,7 +4,6 @@ import { nanoid } from 'nanoid'
 import { AABB, OBB } from 'src/editor/math/obb'
 import { YClients } from 'src/editor/schema/y-clients'
 import { StageScene } from 'src/editor/stage/render/scene'
-import { createSignal } from 'src/shared/signal/signal'
 import { clone } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { xy_, xy_rotate } from '../math/xy'
@@ -15,14 +14,14 @@ import { ID, INode, INodeParent } from '../schema/type'
 
 @autobind
 class OperateNodeService {
-  datumId = createSignal('')
+  datumId = Signal.create('')
   datumXY = xy_(0, 0)
-  selectIds = createSignal(new Set<ID>())
-  afterRemoveNodes = createSignal<ID[]>()
-  selectedNodes = createSignal(<INode[]>[])
-  intoEditNodeId = createSignal('')
-  selectedNodes$ = createSignal(<INode[]>[])
-  hoverId$ = createSignal('')
+  selectIds = Signal.create(new Set<ID>())
+  afterRemoveNodes = Signal.create<ID[]>()
+  selectedNodes = Signal.create(<INode[]>[])
+  intoEditNodeId = Signal.create('')
+  selectedNodes$ = Signal.create(<INode[]>[])
+  hoverId$ = Signal.create('')
   private lastSelectedNodeSet = new Set<INode>()
   private copyIds = <ID[]>[]
   initHook() {
@@ -46,12 +45,12 @@ class OperateNodeService {
         if (!this.lastSelectedNodeSet.has(node)) return selectionChange()
       }
     })
-    this.intoEditNodeId.intercept((id) => {
-      if (!id) return ''
-      const node = Schema.find(id)
-      if (node.type === 'irregular') return id
-      return ''
-    })
+    // this.intoEditNodeId.intercept((id) => {
+    //   if (!id) return ''
+    //   const node = Schema.find(id)
+    //   if (node.type === 'irregular') return id
+    //   return ''
+    // })
   }
   get selectingNodes() {
     const nodes = <INode[]>[]

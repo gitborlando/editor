@@ -12,7 +12,6 @@ import { StageCursor } from 'src/editor/stage/cursor'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { Drag } from 'src/global/event/drag'
-import { createSignal } from 'src/shared/signal/signal'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { StageViewport } from '../viewport'
@@ -25,7 +24,7 @@ export type IStageCreateType = (typeof createTypes)[number]
 @autobind
 class StageCreateService {
   createTypes = createTypes
-  currentType = createSignal<IStageCreateType>('frame')
+  currentType = Signal.create<IStageCreateType>('frame')
   private createId = ''
 
   startInteract() {

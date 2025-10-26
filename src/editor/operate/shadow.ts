@@ -1,7 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import Immui from 'src/shared/immui/immui'
-import { createSignal } from 'src/shared/signal/signal'
 import { clone } from 'src/shared/utils/normal'
 import { rgb } from 'src/utils/color'
 import { SchemaCreate } from '../schema/create'
@@ -15,7 +14,7 @@ import { OperateNode } from './node'
 class OperateShadowService {
   shadows = <IShadow[]>[]
   isMultiShadows = false
-  afterOperate = createSignal()
+  afterOperate = Signal.create()
   private immui = new Immui()
   initHook() {
     OperateNode.selectedNodes$.hook(this.setupShadows)

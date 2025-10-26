@@ -7,9 +7,8 @@ import { Schema } from 'src/editor/schema/schema'
 import { SchemaUtil2 } from 'src/editor/schema/utils'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { createStorageItem } from 'src/global/storage'
-import { createSignal } from 'src/shared/signal/signal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { ceil, floor, max, min } from '../../math/base'
+import { ceil, floor } from '../../math/base'
 import { ID, INode, INodeParent } from '../../schema/type'
 import { UILeftPanel } from './left-panel'
 
@@ -24,21 +23,21 @@ type IAllNodeExpanded = 'expanded' | 'collapsed' | 'partial-expanded'
 @autobind
 class UILeftPanelLayerService {
   allPageExpanded = createStorageItem('LeftPanel.LayerPanel.pagePanelExpanded', true)
-  pagePanelHeight = createSignal(200)
-  nodeViewHeight = createSignal(0)
-  nodeListHeight = createSignal(0)
-  nodeScrollHeight = createSignal(0)
-  nodeScrollShift = createSignal(0)
-  searchSlice = createSignal('')
-  inViewNodeInfo = createSignal(new Set<INodeInfo>())
-  nodeIdsInSearch = createSignal(new Set<string>())
-  singleNodeExpanded = createSignal()
-  allNodeExpanded = createSignal(<IAllNodeExpanded>'collapsed')
-  afterSearch = createSignal()
-  nodeMoveDropDetail = createSignal({ type: <'before' | 'in' | 'after'>'', id: '' })
-  nodeMoveStarted = createSignal({ moveId: '' })
-  nodeMoveEnded = createSignal()
-  enterReName = createSignal<string>()
+  pagePanelHeight = Signal.create(200)
+  nodeViewHeight = Signal.create(0)
+  nodeListHeight = Signal.create(0)
+  nodeScrollHeight = Signal.create(0)
+  nodeScrollShift = Signal.create(0)
+  searchSlice = Signal.create('')
+  inViewNodeInfo = Signal.create(new Set<INodeInfo>())
+  nodeIdsInSearch = Signal.create(new Set<string>())
+  singleNodeExpanded = Signal.create()
+  allNodeExpanded = Signal.create(<IAllNodeExpanded>'collapsed')
+  afterSearch = Signal.create()
+  nodeMoveDropDetail = Signal.create({ type: <'before' | 'in' | 'after'>'', id: '' })
+  nodeMoveStarted = Signal.create({ moveId: '' })
+  nodeMoveEnded = Signal.create()
+  enterReName = Signal.create<string>()
   needExpandIds = new Set<string>()
   private lastInViewIds = <ID[]>[]
   private nodeExpandCache = createObjCache<boolean>()
@@ -99,9 +98,9 @@ class UILeftPanelLayerService {
       this.calcNodeListChange()
       this.nodeMoveStarted.value.moveId = ''
     })
-    this.nodeScrollHeight.intercept((value) => {
-      return max(0, min(this.nodeListHeight.value - this.nodeViewHeight.value, value))
-    })
+    // this.nodeScrollHeight.intercept((value) => {
+    //   return max(0, min(this.nodeListHeight.value - this.nodeViewHeight.value, value))
+    // })
     this.nodeScrollHeight.hook(() => {
       this.calcNodeListChange()
     })

@@ -3,7 +3,6 @@ import { FC, ReactNode, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { xy_, xy_plus } from 'src/editor/math/xy'
 import { Drag } from 'src/global/event/drag'
-import { createSignal } from 'src/shared/signal/signal'
 import { useAutoSignal } from 'src/shared/signal/signal-react'
 import { useClickAway } from 'src/shared/utils/event'
 import { IXY } from 'src/shared/utils/normal'
@@ -21,7 +20,7 @@ type IDraggableComp = {
 }
 
 let draggableCount = 0
-const maxZIndex = createSignal(0)
+const maxZIndex = Signal.create(0)
 
 export const DraggableComp: FC<IDraggableComp> = ({
   closeFunc,
@@ -87,7 +86,7 @@ export const DraggableComp: FC<IDraggableComp> = ({
       </Flex>
       {children}
     </Flex>,
-    document.querySelector('#draggable-portal')!
+    document.querySelector('#draggable-portal')!,
   )
 }
 

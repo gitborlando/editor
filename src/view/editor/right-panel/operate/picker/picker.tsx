@@ -1,11 +1,9 @@
+import { Signal } from '@gitborlando/signal'
+import { Flex } from '@gitborlando/widget'
 import { FC, memo, useEffect } from 'react'
 import { SchemaCreate } from 'src/editor/schema/create'
 import { IFill, IFillColor, IFillImage, IFillLinearGradient } from 'src/editor/schema/type'
-
-import { Flex } from '@gitborlando/widget'
-import { StageTransform } from 'src/editor/stage/render/widget/transform'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
-import { Signal } from 'src/shared/signal/signal'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { clone } from 'src/shared/utils/normal'
 import { useMemoComp } from 'src/shared/utils/react'
@@ -44,10 +42,10 @@ export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
     changeFill(fillCache[type.value])
   })
 
-  useEffect(() => {
-    StageTransform.show.dispatch(false)
-    return () => void StageTransform.show.dispatch(true)
-  })
+  // useEffect(() => {
+  //   StageTransform.show.dispatch(false)
+  //   return () => void StageTransform.show.dispatch(true)
+  // })
 
   const ButtonComp = useMemoComp<{ fillType: IFill['type']; label: string }>(
     [type.value],

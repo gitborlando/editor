@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import Immui from 'src/shared/immui/immui'
-import { createSignal } from 'src/shared/signal/signal'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { ID, IText } from '../schema/type'
@@ -38,8 +37,8 @@ type IBaseStyleKey = keyof IBaseStyle
 @autobind
 class OperateTextService {
   textStyle = createBaseStyle()
-  afterOperate = createSignal()
-  intoEditing = createSignal<ID>()
+  afterOperate = Signal.create()
+  intoEditing = Signal.create<ID>()
   textNodes = <IText[]>[]
   textStyleOptions = createTextStyleOptions()
   private immui = new Immui()

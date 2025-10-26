@@ -1,7 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { FC } from 'react'
 import { createStorageItem } from 'src/global/storage'
-import { createSignal } from 'src/shared/signal/signal'
 
 type ISwitchTabOption = {
   id: string
@@ -12,8 +11,8 @@ type ISwitchTabOption = {
 
 @autobind
 class UILeftPanelService {
-  currentTabId = createSignal('layer')
-  switchTabMap = createSignal(new Map<string, ISwitchTabOption>())
+  currentTabId = Signal.create('layer')
+  switchTabMap = Signal.create(new Map<string, ISwitchTabOption>())
   popupTabIds = createStorageItem('Editor.LeftPanel.popupTabIds', new Set<string>())
   showLeftPanel = createStorageItem('Editor.LeftPanel.showLeftPanel', true)
   panelHeight = window.innerHeight - 48

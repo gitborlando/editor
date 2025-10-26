@@ -25,7 +25,7 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
     const curIndex = useAutoSignal()
     const curHandleIndex = useAutoSignal()
 
-    curIndex.intercept(() => (curHandleIndex.value = undefined))
+    // curIndex.intercept(() => (curHandleIndex.value = undefined))
 
     const points = iife(() => {
       if (node?.type === 'irregular') return node.points

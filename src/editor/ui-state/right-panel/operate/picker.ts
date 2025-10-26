@@ -2,7 +2,6 @@ import autobind from 'class-autobind-decorator'
 import { xy_ } from 'src/editor/math/xy'
 import { IFill, IFillKeys } from 'src/editor/schema/type'
 import Immui, { ImmuiPatch } from 'src/shared/immui/immui'
-import { createSignal } from 'src/shared/signal/signal'
 import { IXY } from 'src/shared/utils/normal'
 
 type IOperateType = 'solid-color'
@@ -10,20 +9,20 @@ type IOperateType = 'solid-color'
 @autobind
 class UIPickerService {
   fill!: IFill
-  show = createSignal(false)
-  type = createSignal(<'color' | 'linearGradient' | 'image'>'color')
-  xy = createSignal(<IXY>xy_(0, 0))
-  beforeOperate = createSignal(<{ type: IOperateType }>{})
-  afterOperate = createSignal(<{ type: IOperateType; value?: any }>{})
-  loadingWebImageUrl = createSignal('')
+  show = Signal.create(false)
+  type = Signal.create(<'color' | 'linearGradient' | 'image'>'color')
+  xy = Signal.create(<IXY>xy_(0, 0))
+  beforeOperate = Signal.create(<{ type: IOperateType }>{})
+  afterOperate = Signal.create(<{ type: IOperateType; value?: any }>{})
+  loadingWebImageUrl = Signal.create('')
   from = <'fill' | 'stroke' | 'shadow'>''
   index = 0
-  onChange = createSignal<ImmuiPatch[]>()
+  onChange = Signal.create<ImmuiPatch[]>()
   private immui = new Immui()
   initHook() {
-    this.onChange.intercept((patches) => {
-      return patches.map((patch) => ({ ...patch, path: patch.path.slice(2) }))
-    })
+    // this.onChange.intercept((patches) => {
+    //   return patches.map((patch) => ({ ...patch, path: patch.path.slice(2) }))
+    // })
   }
   setFill(keys: IFillKeys[], value: any) {
     this.immui.reset([this.fill], [0, ...keys], value)

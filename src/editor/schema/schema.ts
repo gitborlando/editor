@@ -1,7 +1,6 @@
 import { flushFuncs } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { EditorSetting } from 'src/editor/editor/setting'
-import { createSignal } from 'src/shared/signal/signal'
 import { INoopFunc } from 'src/shared/utils/normal'
 import Immui, { ImmuiApplyPatchOption, ImmuiPatch } from '../../shared/immui/immui'
 import { SchemaHistory } from './history'
@@ -23,7 +22,7 @@ type ICommitOperationOption = Partial<ISchemaOperation> & {
 @autobind
 class SchemaService {
   schema!: ISchema
-  inited = createSignal(false)
+  inited = Signal.create(false)
   operationList = <ISchemaOperation[]>[]
   private immui = new Immui()
 
@@ -77,8 +76,8 @@ class SchemaService {
     this.commitHistory(description)
   }
 
-  flushingPatches = createSignal<ImmuiPatch>()
-  schemaChanged = createSignal<ImmuiPatch[]>()
+  flushingPatches = Signal.create<ImmuiPatch>()
+  schemaChanged = Signal.create<ImmuiPatch[]>()
   private matchPatchFuncs = new Set<INoopFunc>()
 
   nextSchema() {
