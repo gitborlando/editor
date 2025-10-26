@@ -13,7 +13,6 @@ export const ElemReact: FC<ElemProps> = 'elem' as unknown as FC<ElemProps>
 export type ElemProps = {
   node: V1.Node
   hidden?: boolean
-  hitTest?: (xy: IXY) => boolean
   events?: Partial<Record<ElemEventType, ElemEventFunc>>
   children?: ReactNode[]
 }
@@ -32,7 +31,7 @@ export class Elem {
     return this._node
   }
   set node(node: V1.Node) {
-    if (this._node) Surface.collectDirty(this)
+    Surface.collectDirty(this)
     this._node = node
     Surface.collectDirty(this)
   }
@@ -53,6 +52,8 @@ export class Elem {
   }
 
   getDirtyRect() {
+    if (!this.node) return null
+
     const { center, width, height, rotation } = this.obb
     const strokeWidth = this.node.strokes.reduce((acc, stroke) => acc + stroke.width, 0)
     const outlineWidth = this.node.outline?.width || 0

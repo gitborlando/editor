@@ -205,7 +205,10 @@ export class StageSurface {
   private dirtyRects = new Set<AABB>()
 
   collectDirty = (elem: Elem) => {
-    this.dirtyRects.add(elem.getDirtyRect())
+    const dirtyRect = elem.getDirtyRect()
+    if (!dirtyRect) return
+
+    this.dirtyRects.add(dirtyRect)
     this.requestRender('partialRender')
   }
 
