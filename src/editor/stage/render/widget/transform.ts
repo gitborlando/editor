@@ -133,7 +133,7 @@ class StageTransformService {
     // }
 
     this.transformElem.addEvent('mousedown', (e) => {
-      if (StageInteract.currentType.value !== 'select') return
+      if (StageInteract.interaction !== 'select') return
 
       if (isLeftMouse(e.hostEvent)) {
         e.stopPropagation()

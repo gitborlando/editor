@@ -78,7 +78,7 @@ export const MenuComp: FC<IMenuComp> = observer(({}) => {
     return (
       <Button
         onMouseDown={() => {
-          StageInteract.currentType.dispatch(type)
+          StageInteract.interaction = type
           closeMenu()
         }}>
         <Icon className='wh-16' url={Assets.editor.header.stageOperate[type]} />
@@ -88,12 +88,12 @@ export const MenuComp: FC<IMenuComp> = observer(({}) => {
 
   const CreateShapeIcon: FC<{ type: IStageCreateType }> = ({ type }) => {
     const isActive =
-      StageInteract.currentType.value === 'create' && StageCreate.currentType.value === type
+      StageInteract.interaction === 'create' && StageCreate.currentType.value === type
     return (
       <Button
         active={isActive}
         onMouseDown={(e) => {
-          StageInteract.currentType.dispatch('create')
+          StageInteract.interaction = 'create'
           StageCreate.currentType.dispatch(type)
           closeMenu()
         }}>

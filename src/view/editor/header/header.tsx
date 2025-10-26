@@ -4,17 +4,13 @@ import { FC } from 'react'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
-import { useHookSignal } from 'src/shared/signal/signal-react'
 import { Assets } from 'src/view/assets/assets'
 import { Button } from 'src/view/component/button'
 import { Lucide } from 'src/view/component/lucide'
 
 import './index.less'
 
-type IHeaderComp = {}
-
-export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
-  useHookSignal(StageInteract.currentType)
+export const HeaderComp: FC<{}> = observer(({}) => {
   const navigate = useNavigate()
 
   return (
@@ -44,30 +40,29 @@ export const HeaderComp: FC<IHeaderComp> = observer(({}) => {
   )
 })
 
-const StageOperateIcon: FC<{ type: 'select' | 'move' }> = ({ type }) => {
-  const isActive = StageInteract.currentType.value === type
+const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) => {
+  const isActive = StageInteract.interaction === type
   return (
     <Button
       active={isActive}
       icon={<Icon url={Assets.editor.header.stageOperate[type]} className='wh-20' />}
-      onClick={() => StageInteract.currentType.dispatch(type)}></Button>
+      onClick={() => (StageInteract.interaction = type)}></Button>
   )
-}
+})
 
-const CreateShapeIcon: FC<{ type: IStageCreateType }> = ({ type }) => {
-  const isActive =
-    StageInteract.currentType.value === 'create' && StageCreate.currentType.value === type
+const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
+  const isActive = StageInteract.interaction === 'create' && StageCreate.currentType.value === type
   const iconUrl = Assets.editor.node[type as keyof typeof Assets.editor.node]
   return (
     <Button
       active={isActive}
       icon={<Icon url={iconUrl} className='wh-20' />}
       onClick={(e) => {
-        StageInteract.currentType.dispatch('create')
+        StageInteract.interaction = 'create'
         StageCreate.currentType.dispatch(type)
       }}></Button>
   )
-}
+})
 
 const UndoGroup: FC<{}> = observer(() => {
   return (

@@ -3,7 +3,7 @@ import { firstOne } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
-import { makeObservable, observable } from 'mobx'
+import { observable } from 'mobx'
 import { EditorCommand } from 'src/editor/editor/command'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
@@ -27,28 +27,22 @@ type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 
 @autobind
 class StageSelectService {
-  marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
+  @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
 
   afterSelect = createSignal<ISelectType>()
   private marqueeOBB?: OBB
   private lastSelectIds = <ID[]>[]
 
-  constructor() {
-    makeObservable(this, {
-      marquee: observable,
-    })
-  }
-
   startInteract() {
     StageScene.sceneRoot.addEvent('mousedown', this.onMouseDown)
     Surface.addEvent('click', this.onClick)
     Surface.addEvent('dblclick', this.onDoubleClick)
-  }
 
-  endInteract() {
-    StageScene.sceneRoot.removeEvent('mousedown', this.onMouseDown)
-    Surface.removeEvent('click', this.onClick)
-    Surface.removeEvent('dblclick', this.onDoubleClick)
+    return () => {
+      StageScene.sceneRoot.removeEvent('mousedown', this.onMouseDown)
+      Surface.removeEvent('click', this.onClick)
+      Surface.removeEvent('dblclick', this.onDoubleClick)
+    }
   }
 
   private get hoverId() {
@@ -219,4 +213,4 @@ class StageSelectService {
   }
 }
 
-export const StageSelect = new StageSelectService()
+export const StageSelect = makeObservable(new StageSelectService())

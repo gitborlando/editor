@@ -31,11 +31,11 @@ class StageCreateService {
   startInteract() {
     StageScene.sceneRoot.addEvent('mousedown', this.create, { capture: true })
     StageCursor.setCursor('add').lock()
-  }
 
-  endInteract() {
-    StageScene.sceneRoot.removeEvent('mousedown', this.create, { capture: true })
-    StageCursor.unlock().setCursor('select')
+    return () => {
+      StageScene.sceneRoot.removeEvent('mousedown', this.create, { capture: true })
+      StageCursor.unlock().setCursor('select')
+    }
   }
 
   private create() {
@@ -86,7 +86,7 @@ class StageCreateService {
     }
 
     Schema.finalOperation('创建节点 ' + node.name)
-    StageInteract.currentType.dispatch('select')
+    StageInteract.interaction = 'select'
   }
 
   private createNode(start: IXY) {

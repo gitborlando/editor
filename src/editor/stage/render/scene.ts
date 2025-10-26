@@ -160,7 +160,7 @@ class StageSceneService {
     let lastHovered: Elem | undefined
 
     Surface.addEvent('mousemove', (e) => {
-      if (StageInteract.currentType.value !== 'select') return
+      if (StageInteract.interaction !== 'select') return
 
       const elem = firstOne(this.elemsFromPoint(e))
 

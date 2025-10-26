@@ -164,11 +164,11 @@ class EditorCommandManager {
     return [
       {
         shortcut: 'v',
-        callback: () => StageInteract.currentType.dispatch('select'),
+        callback: () => (StageInteract.interaction = 'select'),
       },
       {
         shortcut: 'h',
-        callback: () => StageInteract.currentType.dispatch('move'),
+        callback: () => (StageInteract.interaction = 'move'),
       },
     ]
   }

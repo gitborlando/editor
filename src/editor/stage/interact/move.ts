@@ -10,12 +10,12 @@ class StageMoveService {
     Surface.disablePointEvent(false)
     Surface.addEvent('mousedown', this.onMoveStage)
     StageCursor.setCursor('hand').lock()
-  }
 
-  endInteract() {
-    Surface.enablePointEvent()
-    Surface.removeEvent('mousedown', this.onMoveStage)
-    StageCursor.unlock().setCursor('select', 0)
+    return () => {
+      Surface.enablePointEvent()
+      Surface.removeEvent('mousedown', this.onMoveStage)
+      StageCursor.unlock().setCursor('select', 0)
+    }
   }
 
   private onMoveStage() {
