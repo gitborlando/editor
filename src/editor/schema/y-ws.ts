@@ -5,16 +5,20 @@ import * as Y from 'yjs'
 
 @autobind
 class YWSService {
-  yWS!: HocuspocusProvider
+  inited$ = Signal.create(false)
+
+  provider!: HocuspocusProvider
   awareness!: Awareness
 
   init(fileId: string, document: Y.Doc) {
-    this.yWS = new HocuspocusProvider({
+    this.provider = new HocuspocusProvider({
       url: 'ws://localhost:1234',
       name: fileId,
       document,
     })
-    this.awareness = this.yWS.awareness!
+    this.awareness = this.provider.awareness!
+
+    this.inited$.dispatch(true)
   }
 }
 

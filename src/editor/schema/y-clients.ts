@@ -36,7 +36,9 @@ class YClientsService {
     YUndo.initClientUndo(this.doc.getMap('client'))
 
     this.subscribeClient()
-    this.subscribeOthers()
+    YWS.inited$.hook(() => {
+      this.subscribeOthers()
+    })
 
     this.onMouseMove()
   }
@@ -67,7 +69,9 @@ class YClientsService {
   private subscribeClient() {
     subscribe(this.client, () => {
       this.clientSnap = snapshot(this.client)
-      YWS.awareness.setLocalState(this.clientSnap)
+      if (YWS.inited$.value) {
+        YWS.awareness.setLocalState(this.clientSnap)
+      }
     })
   }
 

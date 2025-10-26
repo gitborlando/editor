@@ -2,7 +2,6 @@ import { Signal } from '@gitborlando/signal'
 import autobind from 'class-autobind-decorator'
 import { YClients } from 'src/editor/schema/y-clients'
 import { YUndo } from 'src/editor/schema/y-undo'
-import { YWS } from 'src/editor/schema/y-ws'
 import { proxy, Snapshot, snapshot, subscribe } from 'valtio'
 import { bind } from 'valtio-yjs'
 import { IndexeddbPersistence } from 'y-indexeddb'
@@ -24,7 +23,7 @@ class YStateService {
     this.doc = new Y.Doc()
     // this.yIndexDB = new IndexeddbPersistence(fileId, this.doc)
     // await this.yIndexDB.whenSynced
-    YWS.init(fileId, this.doc)
+    // YWS.init(fileId, this.doc)
 
     this.state = proxy(mockSchema)
     this.snap = snapshot(this.state)
