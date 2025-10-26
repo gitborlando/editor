@@ -1,6 +1,25 @@
+import { objKeys } from '@gitborlando/utils'
 import { ReactNode } from 'react'
 import Reconciler, { HostConfig } from 'react-reconciler'
 import { Elem, ElemProps } from 'src/editor/stage/render/elem'
+
+function applyProps(elem: Elem, props: ElemProps, oldProps?: ElemProps) {
+  const oldEvents = oldProps?.events || {}
+  for (const key of objKeys(oldEvents)) {
+    elem.removeEvent(key, oldEvents[key]!)
+  }
+
+  for (const key of objKeys(props)) {
+    if (key === 'events') {
+      const events = props.events || {}
+      for (const eventType of objKeys(events)) {
+        elem.addEvent(eventType, events[eventType]!)
+      }
+    } else if (key !== 'children') {
+      elem[key] = props[key] as any
+    }
+  }
+}
 
 const hostConfig: HostConfig<
   'elem',
@@ -19,20 +38,9 @@ const hostConfig: HostConfig<
 > = {
   supportsMutation: true,
 
-  createInstance(type, props) {
+  createInstance(_, props) {
     const elem = new Elem(props.node.id, 'widgetElem')
-    for (const key in props) {
-      if (key === 'events') {
-        for (const eventType in props.events) {
-          // @ts-ignore
-          elem.addEvent(eventType, value[eventType])
-        }
-      } else if (key === 'children') {
-      } else {
-        // @ts-ignore
-        elem[key] = props[key]
-      }
-    }
+    applyProps(elem, props)
     return elem
   },
   getPublicInstance(instance) {
@@ -69,22 +77,9 @@ const hostConfig: HostConfig<
   },
   resetAfterCommit() {},
   prepareUpdate(instance, type, oldProps, newProps) {
-    return newProps
+    applyProps(instance, newProps, oldProps)
   },
-  commitUpdate(instance, updatePayload) {
-    for (const key in updatePayload) {
-      if (key === 'events') {
-        for (const eventType in updatePayload.events) {
-          // @ts-ignore
-          instance.addEvent(eventType, updatePayload.events[eventType])
-        }
-      } else if (key === 'children') {
-      } else {
-        // @ts-ignore
-        instance[key] = updatePayload[key]
-      }
-    }
-  },
+  commitUpdate(instance, updatePayload) {},
   commitMount(instance) {},
   getRootHostContext() {
     return null

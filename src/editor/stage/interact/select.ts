@@ -13,7 +13,6 @@ import { getSelectIds, YClients } from 'src/editor/schema/y-clients'
 import { ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
-import { StageTransform } from 'src/editor/stage/render/widget/transform'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
@@ -22,6 +21,7 @@ import { createSignal } from 'src/shared/signal/signal'
 import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
 import { macroMatch, type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
+import { moveTransformer } from 'src/view/editor/stage/transform'
 
 type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 
@@ -100,19 +100,14 @@ class StageSelectService {
   private onLeftMouseDown(e: ElemMouseEvent) {
     this.lastSelectIds = getSelectIds()
 
-    if (!this.hoverId) {
+    if (!this.hoverId || SchemaUtil.isPageFrame(this.hoverId)) {
       this.clearSelect()
       this.onMarqueeSelect()
       return
     }
 
-    if (SchemaUtil.isPageFrame(this.hoverId)) {
-      this.clearSelect()
-      this.onMarqueeSelect()
-    } else {
-      this.onMousedownSelect()
-      StageTransform.move(e)
-    }
+    this.onMousedownSelect()
+    moveTransformer(e)
   }
 
   private onRightMouseDown(e: ElemMouseEvent) {

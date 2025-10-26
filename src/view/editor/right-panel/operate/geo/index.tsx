@@ -121,7 +121,7 @@ const GeometryItemComp: FC<{
   const handleOnBlur = () => {
     if (t<any>(inputValue.current) === MULTI_VALUE) return
     if (inputValue.current === correctedValue) return
-    setActiveGeometry(operateKey, inputValue.current)
+    setActiveGeometry(operateKey, inputValue.current, false)
   }
 
   const handleAfterSlide = () => {
@@ -135,7 +135,7 @@ const GeometryItemComp: FC<{
       prefix={label}
       value={isMultiValue ? MULTI_VALUE : twoDecimal(correctedValue)}
       slideRate={slideRate}
-      onSlide={(v) => setActiveGeometry(operateKey, correctSetValue(v), true)}
+      onSlide={(v) => setActiveGeometry(operateKey, correctSetValue(v))}
       afterSlide={handleAfterSlide}
       onChange={(v) => (inputValue.current = correctSetValue(v))}
       onBlur={handleOnBlur}

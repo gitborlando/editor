@@ -75,7 +75,7 @@ class OperateGeometryService {
 
   private hasStartApply = false
 
-  setActiveGeometry(key: keyof AllGeometry, value: number, delta?: boolean) {
+  setActiveGeometry(key: keyof AllGeometry, value: number, delta: boolean = true) {
     if (delta) this.deltaKeys.add(key)
     this.operateKeys.add(key)
     this.activeGeometry[key] = value
@@ -90,11 +90,13 @@ class OperateGeometryService {
       })
       traverse(getSelectIds())
 
-      if (!delta) YUndo.track({ type: 'state', description: `修改几何属性: ${key}` })
-
       this.hasStartApply = false
       this.operateKeys.clear()
       this.deltaKeys.clear()
+
+      if (!delta) {
+        YUndo.track({ type: 'state', description: `修改几何属性: ${key}` })
+      }
     })
   }
 

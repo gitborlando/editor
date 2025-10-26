@@ -160,6 +160,7 @@ class StageSceneService {
       if (StageInteract.interaction !== 'select') return
 
       const hovered = firstOne(this.elemsFromPoint(e))
+      if (lastHovered === hovered) return
 
       case1: if (lastHovered) {
         const nodeState = YState.find<V1.Node>(lastHovered.node.id)
