@@ -46,8 +46,6 @@ export class EditorService {
     StageDrop.initHook()
     StageCursor.initHook()
 
-    UILeftPanelLayer.initHook()
-
     // UIPickerCopy.initHook()
   }
 
@@ -82,6 +80,7 @@ export class EditorService {
       }
     }
 
+    UILeftPanelLayer.initHook()
     UILeftPanelLayer.init()
   }
 
