@@ -2,6 +2,7 @@ import { IXY } from '@gitborlando/geo'
 import { miniId } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { createLine, createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
+import { themeColor } from 'src/global/color'
 import { rgb } from 'src/utils/color'
 import { defuOverrideArray } from 'src/utils/defu'
 
@@ -230,7 +231,7 @@ class SchemaCreateService {
   stroke(option?: Partial<V1.Stroke>) {
     return <V1.Stroke>{
       visible: true,
-      fill: this.fillColor(rgb(0, 0, 0)),
+      fill: this.fillColor(COLOR.black),
       align: 'center',
       width: 1,
       cap: 'round',
@@ -246,15 +247,15 @@ class SchemaCreateService {
       offsetY: 5,
       blur: 2,
       spread: 2,
-      fill: this.fillColor(rgb(0, 0, 0)),
+      fill: this.fillColor(COLOR.black),
       ...option,
     }
   }
 
   outline(option?: Partial<V1.Outline>): V1.Outline {
     return {
-      color: COLOR.blue,
-      width: 0,
+      color: themeColor(),
+      width: 2,
       ...option,
     }
   }
@@ -262,7 +263,7 @@ class SchemaCreateService {
   textDecoration(option?: Partial<V1.TextDecoration>): V1.TextDecoration {
     return {
       style: 'underline',
-      color: COLOR.blue,
+      color: themeColor(),
       ...option,
     }
   }

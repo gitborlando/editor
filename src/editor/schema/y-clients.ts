@@ -105,11 +105,18 @@ export function getSelectIds() {
   return t<string[]>(selectIds)
 }
 
-export function getAllSelectIds() {
-  const selectIds = globalCache.getSet(
-    'allSelectIds',
-    () => Object.values(YClients.othersSnap).flatMap((client) => Object.keys(client.selectIds)),
-    [YClients.othersSnap],
+export function getAllSelectIdMap() {
+  const allSelectIdMap = globalCache.getSet(
+    'allSelectIdMap',
+    () => {
+      const allSelectMap = {}
+      Object.assign(allSelectMap, YClients.clientSnap.selectIds)
+      for (const [_, client] of Object.entries(YClients.othersSnap || {})) {
+        Object.assign(allSelectMap, client.selectIds)
+      }
+      return allSelectMap
+    },
+    [YClients.othersSnap, YClients.clientSnap],
   )
-  return t<string[]>(selectIds)
+  return t<Record<string, boolean>>(allSelectIdMap)
 }

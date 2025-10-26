@@ -1,10 +1,8 @@
-import { createObjCache, firstOne, optionalSet } from '@gitborlando/utils'
+import { createObjCache, firstOne } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import defu from 'defu'
 import { SchemaCreate } from 'src/editor/schema/create'
-import { YClients } from 'src/editor/schema/y-clients'
+import { getAllSelectIdMap, YClients } from 'src/editor/schema/y-clients'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { themeColor } from 'src/global/color'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { IClientXY } from 'src/shared/utils/event'
 import { macroMatch } from 'src/shared/utils/normal'
@@ -24,16 +22,15 @@ class StageSceneService {
   rootElems: Elem[] = []
 
   initHook() {
-    this.setupRootElem()
+    this.setupRootElems()
     this.hookRenderNode()
     this.onHover()
   }
 
   dispose() {
     this.elements.clear()
-    this.sceneRoot.destroy()
-    this.widgetRoot.destroy()
-    this.rootElems = []
+    this.rootElems.forEach((elem) => elem.destroy())
+    this.rootElems.length = 0
   }
 
   findElem(id: string) {
@@ -44,7 +41,7 @@ class StageSceneService {
     return Surface.getElemsFromPoint(e).filter((elem) => elem.type === 'sceneElem')
   }
 
-  private setupRootElem() {
+  private setupRootElems() {
     this.sceneRoot = new Elem('sceneRoot', 'sceneElem')
     this.widgetRoot = new Elem('widgetRoot', 'widgetElem')
     this.sceneRoot.hitTest = () => true
@@ -162,22 +159,27 @@ class StageSceneService {
     Surface.addEvent('mousemove', (e) => {
       if (StageInteract.interaction !== 'select') return
 
-      const elem = firstOne(this.elemsFromPoint(e))
+      const hovered = firstOne(this.elemsFromPoint(e))
 
-      if (lastHovered) {
-        if (lastHovered.node.type === 'text') {
-          optionalSet(lastHovered.node.style, 'decoration', undefined)
-          lastHovered.node = lastHovered.node
+      case1: if (lastHovered) {
+        const nodeState = YState.find<V1.Node>(lastHovered.node.id)
+        if (nodeState.type === 'text') {
+          nodeState.style.decoration = undefined
         } else {
-          lastHovered.node = { ...lastHovered.node, outline: undefined }
+          if (getAllSelectIdMap()[lastHovered.node.id]) break case1
+          nodeState.outline = undefined
         }
       }
-      if (elem) {
-        lastHovered = elem
-        if (elem.node.type === 'text') {
-          elem.node = defu(elem.node, { style: { decoration: SchemaCreate.textDecoration() } })
-        } else {
-          elem.node = defu(elem.node, { outline: { width: 2, color: themeColor() } })
+      case2: if (hovered) {
+        lastHovered = hovered
+
+        if (getAllSelectIdMap()[hovered.node.id]) break case2
+
+        const nodeState = YState.find<V1.Node>(hovered.node.id)
+        if (nodeState.type === 'text') {
+          nodeState.style.decoration = SchemaCreate.textDecoration()
+        } else if (nodeState.type !== 'frame') {
+          nodeState.outline = SchemaCreate.outline()
         }
       }
     })
