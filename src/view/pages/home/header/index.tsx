@@ -1,4 +1,4 @@
-import { Button } from '@arco-design/web-react'
+import { Button, Typography } from '@arco-design/web-react'
 import { FC } from 'react'
 import { UserService } from 'src/global/service/user'
 import './index.less'
@@ -16,6 +16,7 @@ export const HomeHeaderComp: FC<HomeHeaderProps> = observer(({}) => {
         <G
           dangerouslySetInnerHTML={{ __html: UserService.avatar }}
           style={{ width: '32px', height: '32px' }}></G>
+        <Typography.Text style={{ alignSelf: 'center' }}>{UserService.userName}</Typography.Text>
       </G>
     </G>
   )

@@ -11,6 +11,7 @@ export const HUE_MAP = {
 }
 
 export const COLOR = {
+  random: () => hslRgb(Math.random() * 360, 100, 50),
   white: hslRgb(0, 0, 100),
   black: hslRgb(0, 0, 0),
   blue: hslRgb(HUE_MAP.blue, 100, 50),

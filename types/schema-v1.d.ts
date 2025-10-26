@@ -21,6 +21,8 @@ namespace V1 {
   }
 
   type Client = {
+    userId: string
+    userName: string
     selectIds: Record<string, boolean>
     selectPageId: string
     cursor: IXY

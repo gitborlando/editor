@@ -2,6 +2,7 @@ import { FC } from 'react'
 import { renderElem } from 'src/editor/stage/render/react/reconciler'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
+import { EditorStageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
 import { EditorStageMarqueeComp } from 'src/view/editor/stage/marquee'
 import { RulerComp } from 'src/view/editor/stage/ruler'
@@ -18,6 +19,7 @@ export const StageComp: FC<{}> = observer(({}) => {
       <>
         <EditorStageTransformComp />
         <EditorStageMarqueeComp />
+        <EditorStageCursorsComp />
       </>,
       StageScene.widgetRoot,
     )

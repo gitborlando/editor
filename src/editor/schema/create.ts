@@ -1,9 +1,9 @@
 import { IXY } from '@gitborlando/geo'
 import { miniId } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { defu } from 'defu'
 import { createLine, createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { rgb } from 'src/utils/color'
+import { defuOverrideArray } from 'src/utils/defu'
 
 @autobind
 class SchemaCreateService {
@@ -174,24 +174,28 @@ class SchemaCreateService {
   text(option?: NestPartial<V1.Text>): V1.Text {
     const name = this.createNodeName('text')
     const nodeBase = this.createNodeBase()
-    return defu(
-      {
-        type: 'text',
-        content: '文本1',
-        ...nodeBase,
-        ...name,
-        style: {
-          fontSize: 16,
-          fontWeight: 500,
-          align: 'center',
-          fontFamily: 'Arial',
-          fontStyle: 'normal',
-          letterSpacing: 0,
-          lineHeight: 16,
+    return t<V1.Text>(
+      defuOverrideArray(
+        {
+          ...nodeBase,
+          ...name,
+          ...option,
         },
-        fills: [this.fillColor(COLOR.black, 1)],
-      },
-      option,
+        {
+          type: 'text',
+          content: '文本1',
+          style: {
+            fontSize: 16,
+            fontWeight: 500,
+            align: 'center',
+            fontFamily: 'Arial',
+            fontStyle: 'normal',
+            letterSpacing: 0,
+            lineHeight: 16,
+          },
+          fills: [this.fillColor(COLOR.black, 1)],
+        },
+      ),
     )
   }
 
@@ -284,7 +288,6 @@ class SchemaCreateService {
       rotation: 0,
       hFlip: false,
       vFlip: false,
-      outline: this.outline(),
       fills: [this.fillColor(rgb(204, 204, 204), 1)],
       strokes: [],
       blurs: [],
