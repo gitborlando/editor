@@ -43,7 +43,7 @@ export const SwitchBarComp: FC<{}> = memo(({}) => {
     <G center className='w-40 bd-1-#E3E3E3-r py-8' style={{ alignContent: 'flex-start' }} gap={8}>
       {EditorLeftPanelIds.map((id) => {
         const icon = matchCase(id, {
-          layer: <Lucide icon={Layers} size={16} />,
+          layer: <Lucide icon={Layers} size={17} />,
           undo: <Lucide icon={History} />,
           images: <Lucide icon={Image} />,
           setting: <Lucide icon={Settings} size={19} />,
