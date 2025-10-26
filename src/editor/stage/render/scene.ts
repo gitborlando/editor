@@ -1,6 +1,6 @@
 import { createObjCache, firstOne } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { SchemaCreate } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/create'
 import { getAllSelectIdMap, YClients } from 'src/editor/schema/y-clients'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { ImmuiPatch } from 'src/shared/immui/immui'
@@ -178,9 +178,9 @@ class StageSceneService {
 
         const nodeState = YState.find<V1.Node>(hovered.node.id)
         if (nodeState.type === 'text') {
-          nodeState.style.decoration = SchemaCreate.textDecoration()
+          nodeState.style.decoration = SchemaCreator.textDecoration()
         } else if (nodeState.type !== 'frame') {
-          nodeState.outline = SchemaCreate.outline()
+          nodeState.outline = SchemaCreator.outline()
         }
       }
     })

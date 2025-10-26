@@ -3,7 +3,7 @@ import equal from 'fast-deep-equal'
 import Immui from 'src/shared/immui/immui'
 import { clone } from 'src/shared/utils/normal'
 import { rgb } from 'src/utils/color'
-import { SchemaCreate } from '../schema/create'
+import { SchemaCreator } from '../schema/create'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { IFill, IFillKeys, INode } from '../schema/type'
@@ -33,7 +33,7 @@ class OperateFillService {
   addFill() {
     if (!OperateNode.selectedNodes.value.length) return
     const fillsLength = this.fills.length
-    const fill = SchemaCreate.fillColor(rgb(204, 204, 204), fillsLength ? 0.25 : 1)
+    const fill = SchemaCreator.fillColor(rgb(204, 204, 204), fillsLength ? 0.25 : 1)
     this.immui.add(this.fills, [fillsLength], fill)
     this.applyChangeToSchema()
     SchemaHistory.commit('添加 fill')

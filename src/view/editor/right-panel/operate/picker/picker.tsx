@@ -1,7 +1,7 @@
 import { Signal } from '@gitborlando/signal'
 import { Flex } from '@gitborlando/widget'
 import { FC, memo, useEffect } from 'react'
-import { SchemaCreate } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/create'
 import { IFill, IFillColor, IFillImage, IFillLinearGradient } from 'src/editor/schema/type'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { useHookSignal } from 'src/shared/signal/signal-react'
@@ -14,9 +14,9 @@ import { PickerLinearGradientComp } from './linear'
 import { PickerSolidComp } from './solid'
 
 const createFillCache = () => ({
-  color: SchemaCreate.fillColor(),
-  linearGradient: SchemaCreate.fillLinearGradient(),
-  image: SchemaCreate.fillImage(),
+  color: SchemaCreator.fillColor(),
+  linearGradient: SchemaCreator.fillLinearGradient(),
+  image: SchemaCreator.fillImage(),
 })
 let fillCache = createFillCache()
 

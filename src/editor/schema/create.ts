@@ -7,7 +7,7 @@ import { rgb } from 'src/utils/color'
 import { defuOverrideArray } from 'src/utils/defu'
 
 @autobind
-class SchemaCreateService {
+class SchemaCreatorService {
   schema(): V1.Schema {
     const page = this.page()
     const meta = this.meta()
@@ -316,6 +316,15 @@ class SchemaCreateService {
 
     return { name: `${name} ${++this.allNodeCount}` }
   }
+
+  addToSchema(schema: V1.Schema, item: V1.SchemaItem) {
+    schema[item.id] = item
+  }
+
+  addChild(parent: V1.NodeParent, child: V1.Node) {
+    parent.childIds.push(child.id)
+    child.parentId = parent.id
+  }
 }
 
-export const SchemaCreate = new SchemaCreateService()
+export const SchemaCreator = new SchemaCreatorService()

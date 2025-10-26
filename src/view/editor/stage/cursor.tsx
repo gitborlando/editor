@@ -1,6 +1,6 @@
 import { IXY } from '@gitborlando/geo'
 import { FC } from 'react'
-import { SchemaCreate } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/create'
 import { YClients } from 'src/editor/schema/y-clients'
 import { ElemReact } from 'src/editor/stage/render/elem'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -20,14 +20,14 @@ export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
 const CursorComp: FC<{ xy: IXY; name: string }> = observer(({ xy, name }) => {
   xy = StageViewport.toStageXY(xy)
   const [color] = useState(() => COLOR.random())
-  const node = SchemaCreate.rect({
+  const node = SchemaCreator.rect({
     ...xy,
     width: 10,
     height: 10,
     radius: 5,
-    fills: [SchemaCreate.fillColor(color, 1)],
+    fills: [SchemaCreator.fillColor(color, 1)],
   })
-  const text = SchemaCreate.text({
+  const text = SchemaCreator.text({
     x: xy.x + 6,
     y: xy.y + 16,
     width: 60,
@@ -42,7 +42,7 @@ const CursorComp: FC<{ xy: IXY; name: string }> = observer(({ xy, name }) => {
       letterSpacing: 0,
       lineHeight: 16,
     },
-    fills: [SchemaCreate.fillColor(color, 1)],
+    fills: [SchemaCreator.fillColor(color, 1)],
   })
 
   return (

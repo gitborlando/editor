@@ -7,7 +7,7 @@ import { StageScene } from 'src/editor/stage/render/scene'
 import { clone } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { xy_, xy_rotate } from '../math/xy'
-import { SchemaCreate } from '../schema/create'
+import { SchemaCreator } from '../schema/create'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { ID, INode, INodeParent } from '../schema/type'
@@ -138,7 +138,7 @@ class OperateNodeService {
     const cloneNodes = (oldNode: INode) => {
       const newNode = clone(oldNode)
       newNode.id = nanoid()
-      newNode.name = SchemaCreate.createNodeName(oldNode.type).name
+      newNode.name = SchemaCreator.createNodeName(oldNode.type).name
       if ('childIds' in newNode) newNode.childIds = []
       return newNode
     }
@@ -169,7 +169,7 @@ class OperateNodeService {
     if (selectNodes.length === 0) return
 
     const frameOBB = this.getSomeNodesMergedOBB(selectNodes)
-    const frameNode = SchemaCreate.frame({
+    const frameNode = SchemaCreator.frame({
       width: frameOBB.width,
       height: frameOBB.height,
       x: frameOBB.x,

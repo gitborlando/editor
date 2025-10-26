@@ -5,7 +5,7 @@ import { xy_distance } from 'src/editor/math/xy'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperatePage } from 'src/editor/operate/page'
-import { SchemaCreate } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/create'
 import { Schema } from 'src/editor/schema/schema'
 import { INode, INodeParent } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
@@ -91,7 +91,7 @@ class StageCreateService {
   private createNode(start: IXY) {
     const { x, y } = StageViewport.toSceneXY(start)
 
-    const node = SchemaCreate[this.currentType.value]({ x, y, width: 1, height: 1 })
+    const node = SchemaCreator[this.currentType.value]({ x, y, width: 1, height: 1 })
     this.createId = node.id
 
     return node

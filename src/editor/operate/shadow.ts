@@ -3,7 +3,7 @@ import equal from 'fast-deep-equal'
 import Immui from 'src/shared/immui/immui'
 import { clone } from 'src/shared/utils/normal'
 import { rgb } from 'src/utils/color'
-import { SchemaCreate } from '../schema/create'
+import { SchemaCreator } from '../schema/create'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { INode, IShadow } from '../schema/type'
@@ -36,8 +36,8 @@ class OperateShadowService {
   }
   addShadow() {
     const shadowsLength = this.shadows.length
-    const shadow = SchemaCreate.shadow({
-      fill: SchemaCreate.fillColor(rgb(0, 0, 0), shadowsLength ? 0.25 : 1),
+    const shadow = SchemaCreator.shadow({
+      fill: SchemaCreator.fillColor(rgb(0, 0, 0), shadowsLength ? 0.25 : 1),
     })
     this.immui.add(this.shadows, [shadowsLength], shadow)
     this.applyChangeToSchema()

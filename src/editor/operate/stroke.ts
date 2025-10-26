@@ -3,7 +3,7 @@ import equal from 'fast-deep-equal'
 import Immui from 'src/shared/immui/immui'
 import { clone } from 'src/shared/utils/normal'
 import { rgb } from 'src/utils/color'
-import { SchemaCreate } from '../schema/create'
+import { SchemaCreator } from '../schema/create'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { INode, IStroke } from '../schema/type'
@@ -36,8 +36,8 @@ class OperateStrokeService {
   }
   addStroke() {
     const strokesLength = this.strokes.length
-    const stroke = SchemaCreate.stroke({
-      fill: SchemaCreate.fillColor(rgb(0, 0, 0), strokesLength ? 0.25 : 1),
+    const stroke = SchemaCreator.stroke({
+      fill: SchemaCreator.fillColor(rgb(0, 0, 0), strokesLength ? 0.25 : 1),
     })
     this.immui.add(this.strokes, [strokesLength], stroke)
     this.applyChangeToSchema()

@@ -2,7 +2,7 @@ import { Angle, IXY, XY, xy_xAxis, xy_yAxis } from '@gitborlando/geo'
 import { isLeftMouse, isRightMouse } from '@gitborlando/utils/browser'
 import { FC } from 'react'
 import { OperateGeometry } from 'src/editor/operate/geometry'
-import { SchemaCreate } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/create'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { ElemMouseEvent, ElemReact } from 'src/editor/stage/render/elem'
@@ -15,7 +15,7 @@ import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 let transformOBB = OBB.identityOBB()
 
 const createStroke = () =>
-  SchemaCreate.stroke({ fill: SchemaCreate.fillColor(themeColor()), width: 1 / getZoom() })
+  SchemaCreator.stroke({ fill: SchemaCreator.fillColor(themeColor()), width: 1 / getZoom() })
 
 export const moveTransformer = (e: ElemMouseEvent) => {
   Drag.onStart(() => {
@@ -53,7 +53,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     )
   }, [selectNodes])
 
-  const node = SchemaCreate.rect({
+  const node = SchemaCreator.rect({
     id: 'transform',
     ...transformOBB,
     fills: [],
@@ -91,9 +91,12 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
   ({ type, p1, p2 }) => {
     const { setActiveGeometry } = OperateGeometry
     const selectedNodes = useSelectNodes()
-    const line = SchemaCreate.line({
+    const line = SchemaCreator.line({
       id: `transform-line-${type}`,
-      points: [SchemaCreate.point({ x: p1.x, y: p1.y }), SchemaCreate.point({ x: p2.x, y: p2.y })],
+      points: [
+        SchemaCreator.point({ x: p1.x, y: p1.y }),
+        SchemaCreator.point({ x: p2.x, y: p2.y }),
+      ],
       strokes: [createStroke()],
     })
 
@@ -197,11 +200,11 @@ const VertexComp: FC<{ type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLef
     const obb = OBB.fromCenter(xy, size, size, transformOBB.rotation)
     const selectedNodes = useSelectNodes()
 
-    const rect = SchemaCreate.rect({
+    const rect = SchemaCreator.rect({
       id: `transform-vertex-${type}`,
       ...obb,
       strokes: [createStroke()],
-      fills: [SchemaCreate.fillColor(COLOR.white)],
+      fills: [SchemaCreator.fillColor(COLOR.white)],
       radius: 2 / getZoom(),
     })
 
