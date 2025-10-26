@@ -1,8 +1,8 @@
 import { IRect, IXY, max, XY } from '@gitborlando/geo'
+import { WheelUtil } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
 import { Surface } from 'src/editor/stage/render/surface'
-import { EventWheelService } from 'src/global/event/wheel'
 
 const createInitBound = () => ({
   left: 280,
@@ -30,7 +30,7 @@ class StageViewportService {
   offset = XY._(0, 0)
   bound = createInitBound()
 
-  private wheeler = new EventWheelService()
+  private wheeler = new WheelUtil()
 
   constructor() {
     makeObservable(this, {
@@ -80,7 +80,7 @@ class StageViewportService {
     })
     this.wheeler.duringWheel.hook(({ e }) => {
       if (!e.ctrlKey) {
-        const old = XY.from(this.offset)
+        const old = { ...XY.from(this.offset) }
         if (e.shiftKey) {
           old.x -= e.deltaY
         } else {
