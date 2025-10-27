@@ -1,5 +1,5 @@
 import { AABB, OBB } from '@gitborlando/geo'
-import { firstOne } from '@gitborlando/utils'
+import { firstOne, objKeys } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
@@ -212,7 +212,10 @@ class StageSelectService {
         this.afterSelect.dispatch('marquee')
 
         if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
-          YUndo.track({ type: 'client', description: `选中 ${getSelectIdMap().length} 个节点` })
+          YUndo.track({
+            type: 'client',
+            description: `选中 ${objKeys(getSelectIdMap()).length} 个节点`,
+          })
         }
       })
   }

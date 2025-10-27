@@ -63,7 +63,7 @@ export class EditorService {
       if (mockSchema) {
         // Schema.initSchema(mockSchema)
         YState.initSchema(fileId, mockSchema as unknown as V1.Schema)
-        YClients.initClient()
+        YClients.init()
       }
     } else {
       const fileMeta = await FileService.getFileMeta(fileId)
@@ -76,7 +76,7 @@ export class EditorService {
         const schema = jsonParse(fileText) as ISchema
         Schema.initSchema(schema)
         YState.initSchema(fileId, schema as unknown as V1.Schema)
-        YClients.initClient()
+        YClients.init()
       }
     }
 

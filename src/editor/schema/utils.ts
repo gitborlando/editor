@@ -1,6 +1,6 @@
 import { Schema } from 'src/editor/schema/schema'
 import { IFrame, INode, INodeParent, ISchemaItem } from 'src/editor/schema/type'
-import { YClients } from 'src/editor/schema/y-clients'
+import { getSelectPageId } from 'src/editor/schema/y-clients'
 
 export type SchemaUtilTraverseData = {
   id: ID
@@ -72,7 +72,7 @@ export class SchemaUtil2 {
     callback: ITraverseCallback
     bubbleCallback?: ITraverseCallback
   }) {
-    const curPage = YState.findSnap<V1.Page>(YClients.clientSnap.selectPageId)
+    const curPage = YState.findSnap<V1.Page>(getSelectPageId())
     const traverse = this.createTraverse({ finder, callback, bubbleCallback })
     return () => traverse(curPage.childIds)
   }

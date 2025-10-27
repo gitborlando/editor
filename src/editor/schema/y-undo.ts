@@ -1,10 +1,13 @@
+import { clone } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { computed, makeObservable, observable } from 'mobx'
+import { NeedUndoClientState, YClients } from 'src/editor/schema/y-clients'
 import * as Y from 'yjs'
 
 type YUndoInfo = {
-  type: 'client' | 'state' | 'all'
+  type: 'state' | 'client' | 'all'
   description: string
+  clientState?: NeedUndoClientState
 }
 
 @autobind
@@ -34,18 +37,32 @@ class YUndoService {
     this.stateUndo = new Y.UndoManager(stateMap)
   }
 
-  initClientUndo(clientMap: Y.Map<V1.Clients>) {
-    this.clientUndo = new Y.UndoManager(clientMap)
+  initClientUndo() {
+    this.initClientState = this.getClientState()
+  }
+
+  private initClientState!: NeedUndoClientState
+
+  private getClientState() {
+    return clone({
+      selectIds: YClients.client.selectIds,
+      selectPageId: YClients.client.selectPageId,
+    })
+  }
+
+  private applyClientState() {
+    const clientState = this.stack[this.next - 1]?.clientState || this.initClientState
+    Object.assign(YClients.client, clientState)
   }
 
   undo() {
     this.next = Math.max(this.next - 1, 0)
     const { type } = this.stack[this.next]
     if (type === 'state') this.stateUndo.undo()
-    if (type === 'client') this.clientUndo.undo()
+    if (type === 'client') this.applyClientState()
     if (type === 'all') {
       this.stateUndo.undo()
-      this.clientUndo.undo()
+      this.applyClientState()
     }
   }
 
@@ -53,10 +70,10 @@ class YUndoService {
     this.next = Math.min(this.next + 1, this.stack.length)
     const { type } = this.stack[this.next - 1]
     if (type === 'state') this.stateUndo.redo()
-    if (type === 'client') this.clientUndo.redo()
+    if (type === 'client') this.applyClientState()
     if (type === 'all') {
       this.stateUndo.redo()
-      this.clientUndo.redo()
+      this.applyClientState()
     }
   }
 
@@ -65,16 +82,17 @@ class YUndoService {
   track(info: YUndoInfo) {
     if (!this.shouldTrack) return
 
+    const { type } = info
+
+    if (type === 'state' || type === 'all') {
+      this.stateUndo.stopCapturing()
+    }
+    if (type === 'client' || type === 'all') {
+      info.clientState = this.getClientState()
+    }
+
     this.stack.splice(this.next, this.stack.length - this.next, info)
     this.next = this.stack.length
-
-    const { type } = info
-    if (type === 'state') this.stateUndo.stopCapturing()
-    if (type === 'client') this.clientUndo.stopCapturing()
-    if (type === 'all') {
-      this.stateUndo.stopCapturing()
-      this.clientUndo.stopCapturing()
-    }
   }
 
   untrackScope(callback: () => void) {

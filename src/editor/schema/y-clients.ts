@@ -7,20 +7,22 @@ import { YWS } from 'src/editor/schema/y-ws'
 import { globalCache } from 'src/global/cache'
 import { UserService } from 'src/global/service/user'
 import { proxy, snapshot, subscribe } from 'valtio'
-import { bind } from 'valtio-yjs'
-import * as Y from 'yjs'
+
+export type NeedUndoClientState = {
+  selectIds: Record<string, boolean>
+  selectPageId: string
+}
 
 @autobind
 class YClientsService {
   othersSnap!: V1.Clients
   others!: V1.Clients
 
-  doc!: Y.Doc
   clientId!: number
   client!: V1.Client
   clientSnap!: V1.Client
 
-  initClient() {
+  init() {
     this.client = proxy({
       userId: UserService.userId,
       userName: UserService.userName,
@@ -28,31 +30,32 @@ class YClientsService {
       selectPageId: YState.snap.meta.pageIds[0],
       cursor: new XY(0, 0),
     })
-    this.others = proxy({})
-    this.doc = new Y.Doc()
-    bind(this.client, this.doc.getMap('client'))
-    this.clientSnap = snapshot(this.client)
-    subscribe(this.client, () => (this.clientSnap = snapshot(this.client)))
-    YUndo.initClientUndo(this.doc.getMap('client'))
-
     this.subscribeClient()
+
+    this.others = proxy({})
     YWS.inited$.hook(() => {
       this.subscribeOthers()
     })
 
     this.onMouseMove()
+
+    YUndo.initClientUndo()
   }
 
   select(id: string) {
     if (this.client.selectIds[id]) return
     this.client.selectIds[id] = true
-    YUndo.track({ type: 'client', description: `选中节点 ${id}` })
+
+    const name = YState.state[id].name
+    YUndo.track({ type: 'client', description: `选中节点 ${name}` })
   }
 
   unSelect(id: string) {
     if (!this.client.selectIds[id]) return
     delete this.client.selectIds[id]
-    YUndo.track({ type: 'client', description: `取消选中节点 ${id}` })
+
+    const name = YState.state[id].name
+    YUndo.track({ type: 'client', description: `取消选中节点 ${name}` })
   }
 
   clearSelect() {
@@ -62,11 +65,13 @@ class YClientsService {
 
   selectPage(id: string) {
     this.client.selectPageId = id
+
     const page = YState.state[id]
     YUndo.track({ type: 'client', description: `选择页面 ${page.name}` })
   }
 
   private subscribeClient() {
+    this.clientSnap = snapshot(this.client)
     subscribe(this.client, () => {
       this.clientSnap = snapshot(this.client)
       if (YWS.inited$.value) {
@@ -85,7 +90,6 @@ class YClientsService {
     })
     subscribe(this.others, () => {
       this.othersSnap = snapshot(this.others)
-      console.log('othersSnap: ', this.othersSnap)
     })
   }
 
@@ -123,4 +127,8 @@ export function getAllSelectIdMap() {
     [YClients.othersSnap, YClients.clientSnap],
   )
   return t<Record<string, boolean>>(allSelectIdMap)
+}
+
+export function getSelectPageId() {
+  return YClients.clientSnap.selectPageId
 }
