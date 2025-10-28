@@ -21,6 +21,7 @@ import { Menu } from 'src/global/menu'
 import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
 import { macroMatch, type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
+import { collectDisposer } from 'src/utils/disposer'
 import { moveTransformer } from 'src/view/editor/stage/transform'
 
 type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
@@ -28,25 +29,25 @@ type ISelectType = 'panel' | 'create' | 'stage-single' | 'marquee'
 @autobind
 class StageSelectService {
   @observable marquee: IRect = { x: 0, y: 0, width: 0, height: 0 }
+  @observable hoverId?: string
 
-  afterSelect = Signal.create<ISelectType>()
   private marqueeOBB?: OBB
   private lastSelectIdMap = <Record<string, boolean>>{}
 
-  startInteract() {
-    StageScene.sceneRoot.addEvent('mousedown', this.onMouseDown)
-    Surface.addEvent('click', this.onClick)
-    Surface.addEvent('dblclick', this.onDoubleClick)
+  afterSelect = Signal.create<ISelectType>()
 
-    return () => {
-      StageScene.sceneRoot.removeEvent('mousedown', this.onMouseDown)
-      Surface.removeEvent('click', this.onClick)
-      Surface.removeEvent('dblclick', this.onDoubleClick)
-    }
+  startInteract() {
+    return collectDisposer(
+      StageScene.sceneRoot.addEvent('mousedown', this.onMouseDown),
+      Surface.addEvent('click', this.onClick),
+      Surface.addEvent('dblclick', this.onDoubleClick),
+      Surface.addEvent('mousemove', this.onHover),
+    )
   }
 
-  private get hoverId() {
-    return firstOne(StageScene.elemsFromPoint())?.id
+  private onHover(e: MouseEvent) {
+    const hovered = firstOne(StageScene.elemsFromPoint(XY.client(e)))
+    this.hoverId = hovered?.id
   }
 
   private onMouseDown(e: ElemMouseEvent) {

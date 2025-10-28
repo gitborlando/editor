@@ -26,6 +26,7 @@ namespace V1 {
     selectIds: Record<string, boolean>
     selectPageId: string
     cursor: IXY
+    color: string
   }
 
   type Clients = {
@@ -209,6 +210,7 @@ namespace V1 {
 
   type TextDecoration = {
     style: 'none' | 'underline'
+    width: number
     color: string
   }
 

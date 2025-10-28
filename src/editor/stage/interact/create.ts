@@ -14,6 +14,7 @@ import { Surface } from 'src/editor/stage/render/surface'
 import { Drag } from 'src/global/event/drag'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
+import { collectDisposer } from 'src/utils/disposer'
 import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
 import { StageSelect } from './select'
@@ -28,11 +29,13 @@ class StageCreateService {
   private createId = ''
 
   startInteract() {
-    StageScene.sceneRoot.addEvent('mousedown', this.create, { capture: true })
+    const disposer = collectDisposer(
+      StageScene.sceneRoot.addEvent('mousedown', this.create, { capture: true }),
+    )
     StageCursor.setCursor('add').lock()
 
     return () => {
-      StageScene.sceneRoot.removeEvent('mousedown', this.create, { capture: true })
+      disposer()
       StageCursor.unlock().setCursor('select')
     }
   }

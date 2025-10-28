@@ -10,11 +10,10 @@ import {
   mx_invertAABB,
   mx_invertPoint,
 } from 'src/editor/math/matrix'
-import { xy_, xy_center, xy_client, xy_minus, xy_rotate } from 'src/editor/math/xy'
+import { xy_, xy_center, xy_minus, xy_rotate } from 'src/editor/math/xy'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
-import { IClientXY } from 'src/shared/utils/event'
 import { INoopFunc, IXY, Raf, getTime } from 'src/shared/utils/normal'
 import TinyQueue from 'tinyqueue'
 import { Elem } from './elem'
@@ -307,6 +306,9 @@ export class StageSurface {
     } else {
       this.inited$.hook(() => this.canvas.addEventListener(type, listener, options))
     }
+    return () => {
+      this.canvas.removeEventListener(type, listener, options)
+    }
   }
 
   removeEvent<K extends keyof HTMLElementEventMap>(
@@ -319,9 +321,9 @@ export class StageSurface {
 
   private eventXY!: IXY
 
-  private getEventXY = (e: IClientXY) => {
+  private getEventXY = (xy: IXY) => {
     const bound = StageViewport.bound
-    const xy = xy_minus(xy_client(e), XY.of(bound.left, bound.top))
+    xy = xy_minus(xy, XY.of(bound.left, bound.top))
     this.eventXY = mx_invertPoint(xy, this.viewportMatrix)
     this.elemsFromPoint = []
   }
@@ -367,7 +369,7 @@ export class StageSurface {
 
   private elemsFromPoint: Elem[] = []
 
-  getElemsFromPoint(e?: IClientXY) {
+  getElemsFromPoint(e?: IXY) {
     if (!e) return this.elemsFromPoint
 
     this.getEventXY(e)

@@ -4,7 +4,7 @@ import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 
 @autobind
-class YWSService {
+class YSyncService {
   inited$ = Signal.create(false)
 
   provider!: HocuspocusProvider
@@ -12,7 +12,7 @@ class YWSService {
 
   init(fileId: string, document: Y.Doc) {
     this.provider = new HocuspocusProvider({
-      url: 'ws://localhost:1234',
+      url: 'ws://8.134.131.253:1234',
       name: fileId,
       document,
     })
@@ -22,4 +22,4 @@ class YWSService {
   }
 }
 
-export const YWS = new YWSService()
+export const YSync = new YSyncService()

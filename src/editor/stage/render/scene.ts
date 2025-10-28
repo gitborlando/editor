@@ -1,10 +1,10 @@
+import { IXY } from '@gitborlando/geo'
 import { createObjCache, firstOne } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { SchemaCreator } from 'src/editor/schema/create'
 import { getAllSelectIdMap, YClients } from 'src/editor/schema/y-clients'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { ImmuiPatch } from 'src/shared/immui/immui'
-import { IClientXY } from 'src/shared/utils/event'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { subscribeKey } from 'valtio/utils'
@@ -24,7 +24,7 @@ class StageSceneService {
   initHook() {
     this.setupRootElems()
     this.hookRenderNode()
-    this.onHover()
+    // this.onHover()
   }
 
   dispose() {
@@ -37,8 +37,8 @@ class StageSceneService {
     return this.elements.get(id)
   }
 
-  elemsFromPoint(e?: IClientXY) {
-    return Surface.getElemsFromPoint(e).filter((elem) => elem.type === 'sceneElem')
+  elemsFromPoint(xy?: IXY) {
+    return Surface.getElemsFromPoint(xy).filter((elem) => elem.type === 'sceneElem')
   }
 
   private setupRootElems() {

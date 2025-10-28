@@ -302,8 +302,8 @@ class ElemDrawerService {
     if (this.node.type !== 'text') return
     if (!this.node.style.decoration) return
 
-    const { style, color } = this.node.style.decoration
-    if (!style || style === 'none') return
+    const { style, color, width } = this.node.style.decoration
+    if (!style || style === 'none' || width <= 0) return
 
     const collideXys = this.getTextCollideXys()
     const { fontSize } = (this.node as V1.Text).style
@@ -316,7 +316,7 @@ class ElemDrawerService {
     }
 
     Surface.ctxSaveRestore(() => {
-      this.ctx.lineWidth = 1 / getZoom()
+      this.ctx.lineWidth = width / getZoom()
       this.ctx.strokeStyle = color || themeColor()
       this.ctx.stroke(new Path2D(this.path2d))
     })

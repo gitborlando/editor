@@ -2,8 +2,9 @@ import { XY } from '@gitborlando/geo'
 import { Is } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
+import { YSync } from 'src/editor/schema/y-sync'
 import { YUndo } from 'src/editor/schema/y-undo'
-import { YWS } from 'src/editor/schema/y-ws'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { globalCache } from 'src/global/cache'
 import { UserService } from 'src/global/service/user'
 import { proxy, snapshot, subscribe } from 'valtio'
@@ -24,22 +25,23 @@ class YClientsService {
 
   init() {
     this.client = proxy({
-      userId: UserService.userId,
-      userName: UserService.userName,
       selectIds: {},
       selectPageId: YState.snap.meta.pageIds[0],
       cursor: new XY(0, 0),
+      color: COLOR.random(),
+      zoom: StageViewport.zoom,
+      offset: StageViewport.offset,
+      userId: UserService.userId,
+      userName: UserService.userName,
     })
     this.subscribeClient()
 
     this.others = proxy({})
-    YWS.inited$.hook(() => {
-      this.subscribeOthers()
-    })
-
-    this.onMouseMove()
+    this.subscribeOthers()
 
     YUndo.initClientUndo()
+
+    this.onMouseMove()
   }
 
   select(id: string) {
@@ -74,15 +76,15 @@ class YClientsService {
     this.clientSnap = snapshot(this.client)
     subscribe(this.client, () => {
       this.clientSnap = snapshot(this.client)
-      if (YWS.inited$.value) {
-        YWS.awareness.setLocalState(this.clientSnap)
+      if (YSync.inited$.value) {
+        YSync.awareness.setLocalState(this.clientSnap)
       }
     })
   }
 
   private subscribeOthers() {
-    YWS.awareness.on('update', () => {
-      const states = YWS.awareness.getStates()
+    YSync.awareness.on('update', () => {
+      const states = YSync.awareness.getStates()
       for (const [id, client] of states) {
         if (id === this.clientId) continue
         this.others[id] = client as V1.Client

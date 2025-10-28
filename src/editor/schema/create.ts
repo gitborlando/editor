@@ -1,5 +1,5 @@
 import { IXY } from '@gitborlando/geo'
-import { miniId } from '@gitborlando/utils'
+import { clone, miniId } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { createLine, createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { themeColor } from 'src/global/color'
@@ -240,6 +240,13 @@ class SchemaCreatorService {
     }
   }
 
+  solidStroke(color = COLOR.black, width = 1) {
+    return this.stroke({
+      fill: this.fillColor(color),
+      width,
+    })
+  }
+
   shadow(option?: Partial<V1.Shadow>): V1.Shadow {
     return <V1.Shadow>{
       visible: true,
@@ -264,6 +271,7 @@ class SchemaCreatorService {
     return {
       style: 'underline',
       color: themeColor(),
+      width: 1,
       ...option,
     }
   }
@@ -324,6 +332,14 @@ class SchemaCreatorService {
   addChild(parent: V1.NodeParent, child: V1.Node) {
     parent.childIds.push(child.id)
     child.parentId = parent.id
+  }
+
+  clone<T extends V1.SchemaItem>(item: T, option?: Partial<T>) {
+    const newItem = clone(item)
+    newItem.id = miniId()
+    newItem.name = this.createNodeName(newItem.type).name
+    if ('childIds' in newItem) newItem.childIds = []
+    return defuOverrideArray(option || {}, newItem) as T
   }
 }
 
