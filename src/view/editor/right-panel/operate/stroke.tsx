@@ -32,11 +32,17 @@ export const StrokeComp: FC<{}> = ({}) => {
       index !== strokes.length - 1 ? (
         <Fragment key={index}>
           <StrokeItemComp key={index} stroke={stroke} index={index} />
-          <Divide direction='h' margin={6} length={'95%'} thickness={0.2} bgColor='#E3E3E3' />
+          <Divide
+            direction='h'
+            margin={6}
+            length={'95%'}
+            thickness={0.2}
+            bgColor='#E3E3E3'
+          />
         </Fragment>
       ) : (
         <StrokeItemComp key={index} stroke={stroke} index={index} />
-      )
+      ),
     )
   })
 
@@ -54,7 +60,9 @@ export const StrokeComp: FC<{}> = ({}) => {
             size={16}
             style={{ marginLeft: 'auto' }}
             onClick={() => toggleStroke(index, ['visible'], !stroke.visible)}>
-            {stroke.visible ? Assets.editor.shared.visible : Assets.editor.shared.unVisible}
+            {stroke.visible
+              ? Assets.editor.shared.visible
+              : Assets.editor.shared.unVisible}
           </IconButton>
           <IconButton size={16} onClick={() => deleteStroke(index)}>
             {Assets.editor.shared.minus}
@@ -73,7 +81,9 @@ export const StrokeComp: FC<{}> = ({}) => {
             className='wh-54-100% r-2'
             selected={stroke.align}
             options={['inner', 'center', 'outer'] as const}
-            onSelected={(selected) => toggleStroke(index, ['align'], selected as IStroke['align'])}
+            onSelected={(selected) =>
+              toggleStroke(index, ['align'], selected as IStroke['align'])
+            }
             translateArray={['内部', '居中', '外部']}
           />
         </Flex>

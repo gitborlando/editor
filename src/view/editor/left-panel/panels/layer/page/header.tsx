@@ -31,7 +31,9 @@ export const PageHeaderComp: FC<IPageHeaderComp> = memo(({}) => {
       <Button type='icon' style={{ marginLeft: 'auto' }} onClick={newPage}>
         <Plus size={16} className='text-#393939' />
       </Button>
-      <Button type='icon' onClick={() => allPageExpanded.dispatch(!allPageExpanded.value)}>
+      <Button
+        type='icon'
+        onClick={() => allPageExpanded.dispatch(!allPageExpanded.value)}>
         <ChevronDown
           size={16}
           className='text-#393939'

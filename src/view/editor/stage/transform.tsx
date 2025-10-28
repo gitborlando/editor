@@ -15,7 +15,10 @@ import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 let transformOBB = OBB.identityOBB()
 
 const createStroke = () =>
-  SchemaCreator.stroke({ fill: SchemaCreator.fillColor(themeColor()), width: 1 / getZoom() })
+  SchemaCreator.stroke({
+    fill: SchemaCreator.fillColor(themeColor()),
+    width: 1 / getZoom(),
+  })
 
 export const moveTransformer = (e: ElemMouseEvent) => {
   Drag.onStart(() => {
@@ -47,9 +50,12 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 
   transformOBB = useMemo(() => {
     if (selectNodes.length === 0) return OBB.identityOBB()
-    if (selectNodes.length === 1) return OBB.fromRect(selectNodes[0], selectNodes[0].rotation)
+    if (selectNodes.length === 1)
+      return OBB.fromRect(selectNodes[0], selectNodes[0].rotation)
     return OBB.fromAABB(
-      AABB.merge(...selectNodes.map((node) => OBB.fromRect(node, node.rotation).aabb)),
+      AABB.merge(
+        ...selectNodes.map((node) => OBB.fromRect(node, node.rotation).aabb),
+      ),
     )
   }, [selectNodes])
 
@@ -87,8 +93,8 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   )
 })
 
-const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY }> = observer(
-  ({ type, p1, p2 }) => {
+const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY }> =
+  observer(({ type, p1, p2 }) => {
     const { setActiveGeometry } = OperateGeometry
     const selectedNodes = useSelectNodes()
     const line = SchemaCreator.line({
@@ -190,156 +196,178 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
     }
 
     return <ElemReact node={line} events={{ hover: mouseover, mousedown }} />
-  },
-)
-
-const VertexComp: FC<{ type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft'; xy: IXY }> =
-  observer(({ type, xy }) => {
-    const { setActiveGeometry } = OperateGeometry
-    const size = 8 / getZoom()
-    const obb = OBB.fromCenter(xy, size, size, transformOBB.rotation)
-    const selectedNodes = useSelectNodes()
-
-    const rect = SchemaCreator.rect({
-      id: `transform-vertex-${type}`,
-      ...obb,
-      strokes: [createStroke()],
-      fills: [SchemaCreator.fillColor(COLOR.white)],
-      radius: 2 / getZoom(),
-    })
-
-    const mouseenter = (e: ElemMouseEvent) => {
-      if (!e.hovered) return StageCursor.setCursor('select')
-
-      if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
-        return StageCursor.setCursor('resize', transformOBB.rotation)
-      }
-
-      switch (type) {
-        case 'topLeft':
-        case 'bottomRight':
-          return StageCursor.setCursor('resize', transformOBB.rotation + 45)
-        case 'topRight':
-        case 'bottomLeft':
-          return StageCursor.setCursor('resize', transformOBB.rotation - 45)
-      }
-    }
-
-    const moveVertex = (e: ElemMouseEvent) => {
-      StageCursor.lock()
-      const { rotation } = OperateGeometry.activeGeometry
-
-      Drag.onStart()
-        .onMove(({ delta }) => {
-          delta = StageViewport.toSceneShift(delta)
-          const deltaX = XY.from(delta).getDot(xy_xAxis(rotation))
-          const deltaY = XY.from(delta).getDot(xy_yAxis(rotation))
-
-          if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
-            setActiveGeometry('width', deltaX)
-            setActiveGeometry('height', deltaY)
-            return
-          }
-
-          if (e.hostEvent.shiftKey) {
-            switch (type) {
-              case 'topLeft':
-                setActiveGeometry('x', -deltaY * Angle.sin(rotation) + deltaX * Angle.cos(rotation))
-                setActiveGeometry('y', deltaX * Angle.sin(rotation) + deltaY * Angle.cos(rotation))
-                setActiveGeometry('width', -deltaX)
-                setActiveGeometry('height', -deltaY)
-                break
-              case 'topRight':
-                setActiveGeometry('x', -deltaY * Angle.sin(rotation))
-                setActiveGeometry('y', deltaY * Angle.cos(rotation))
-                setActiveGeometry('height', -deltaY)
-                setActiveGeometry('width', deltaX)
-                break
-              case 'bottomRight':
-                setActiveGeometry('width', deltaX)
-                setActiveGeometry('height', deltaY)
-                setActiveGeometry(
-                  'x',
-                  (-deltaY / 2) * Angle.sin(rotation) + (-deltaX / 2) * Angle.cos(rotation),
-                )
-                setActiveGeometry(
-                  'y',
-                  (-deltaX / 2) * Angle.sin(rotation) + (-deltaY / 2) * Angle.cos(rotation),
-                )
-                setActiveGeometry('width', -deltaX)
-                setActiveGeometry('height', -deltaY)
-                break
-              case 'bottomLeft':
-                setActiveGeometry('x', deltaX * Angle.cos(rotation))
-                setActiveGeometry('y', deltaX * Angle.sin(rotation) + Angle.cos(rotation))
-                setActiveGeometry('width', -deltaX)
-                setActiveGeometry('height', deltaY)
-                break
-            }
-          } else {
-            switch (type) {
-              case 'topLeft':
-                setActiveGeometry('x', -deltaY * Angle.sin(rotation) + deltaX * Angle.cos(rotation))
-                setActiveGeometry('y', deltaX * Angle.sin(rotation) + deltaY * Angle.cos(rotation))
-                setActiveGeometry('width', -deltaX)
-                setActiveGeometry('height', -deltaY)
-                break
-              case 'topRight':
-                setActiveGeometry('x', -deltaY * Angle.sin(rotation))
-                setActiveGeometry('y', deltaY * Angle.cos(rotation))
-                setActiveGeometry('height', -deltaY)
-                setActiveGeometry('width', deltaX)
-                break
-              case 'bottomRight':
-                setActiveGeometry('width', deltaX)
-                setActiveGeometry('height', deltaY)
-                break
-              case 'bottomLeft':
-                setActiveGeometry('x', deltaX * Angle.cos(rotation))
-                setActiveGeometry('y', deltaX * Angle.sin(rotation))
-                setActiveGeometry('width', -deltaX)
-                setActiveGeometry('height', deltaY)
-                break
-            }
-          }
-        })
-        .onDestroy(({ moved }) => {
-          if (!moved) return
-          YUndo.track({ type: 'state', description: '缩放选中形状' })
-        })
-    }
-
-    const rotate = () => {
-      const { center } = transformOBB
-
-      StageCursor.setCursor('rotate').lock().upReset()
-
-      let last: IXY
-      Drag.onStart()
-        .onMove(({ current, start }) => {
-          if (!last) last = StageViewport.toSceneXY(start)
-          current = StageViewport.toSceneXY(current)
-          const deltaRotation = XY.from(current).getAngle(last, center)
-          last = current
-
-          setActiveGeometry('rotation', deltaRotation)
-        })
-        .onDestroy(({ moved }) => {
-          if (!moved) return
-          YUndo.track({ type: 'state', description: '旋转选中形状' })
-        })
-    }
-
-    const mousedown = (e: ElemMouseEvent) => {
-      e.stopPropagation()
-      if (isLeftMouse(e.hostEvent)) return moveVertex(e)
-      if (isRightMouse(e.hostEvent)) rotate()
-    }
-
-    return (
-      <ElemReact
-        node={rect}
-        events={{ hover: mouseenter, mousemove: (e) => e.stopPropagation(), mousedown }}
-      />
-    )
   })
+
+const VertexComp: FC<{
+  type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft'
+  xy: IXY
+}> = observer(({ type, xy }) => {
+  const { setActiveGeometry } = OperateGeometry
+  const size = 8 / getZoom()
+  const obb = OBB.fromCenter(xy, size, size, transformOBB.rotation)
+  const selectedNodes = useSelectNodes()
+
+  const rect = SchemaCreator.rect({
+    id: `transform-vertex-${type}`,
+    ...obb,
+    strokes: [createStroke()],
+    fills: [SchemaCreator.fillColor(COLOR.white)],
+    radius: 2 / getZoom(),
+  })
+
+  const mouseenter = (e: ElemMouseEvent) => {
+    if (!e.hovered) return StageCursor.setCursor('select')
+
+    if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
+      return StageCursor.setCursor('resize', transformOBB.rotation)
+    }
+
+    switch (type) {
+      case 'topLeft':
+      case 'bottomRight':
+        return StageCursor.setCursor('resize', transformOBB.rotation + 45)
+      case 'topRight':
+      case 'bottomLeft':
+        return StageCursor.setCursor('resize', transformOBB.rotation - 45)
+    }
+  }
+
+  const moveVertex = (e: ElemMouseEvent) => {
+    StageCursor.lock()
+    const { rotation } = OperateGeometry.activeGeometry
+
+    Drag.onStart()
+      .onMove(({ delta }) => {
+        delta = StageViewport.toSceneShift(delta)
+        const deltaX = XY.from(delta).getDot(xy_xAxis(rotation))
+        const deltaY = XY.from(delta).getDot(xy_yAxis(rotation))
+
+        if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
+          setActiveGeometry('width', deltaX)
+          setActiveGeometry('height', deltaY)
+          return
+        }
+
+        if (e.hostEvent.shiftKey) {
+          switch (type) {
+            case 'topLeft':
+              setActiveGeometry(
+                'x',
+                -deltaY * Angle.sin(rotation) + deltaX * Angle.cos(rotation),
+              )
+              setActiveGeometry(
+                'y',
+                deltaX * Angle.sin(rotation) + deltaY * Angle.cos(rotation),
+              )
+              setActiveGeometry('width', -deltaX)
+              setActiveGeometry('height', -deltaY)
+              break
+            case 'topRight':
+              setActiveGeometry('x', -deltaY * Angle.sin(rotation))
+              setActiveGeometry('y', deltaY * Angle.cos(rotation))
+              setActiveGeometry('height', -deltaY)
+              setActiveGeometry('width', deltaX)
+              break
+            case 'bottomRight':
+              setActiveGeometry('width', deltaX)
+              setActiveGeometry('height', deltaY)
+              setActiveGeometry(
+                'x',
+                (-deltaY / 2) * Angle.sin(rotation) +
+                  (-deltaX / 2) * Angle.cos(rotation),
+              )
+              setActiveGeometry(
+                'y',
+                (-deltaX / 2) * Angle.sin(rotation) +
+                  (-deltaY / 2) * Angle.cos(rotation),
+              )
+              setActiveGeometry('width', -deltaX)
+              setActiveGeometry('height', -deltaY)
+              break
+            case 'bottomLeft':
+              setActiveGeometry('x', deltaX * Angle.cos(rotation))
+              setActiveGeometry(
+                'y',
+                deltaX * Angle.sin(rotation) + Angle.cos(rotation),
+              )
+              setActiveGeometry('width', -deltaX)
+              setActiveGeometry('height', deltaY)
+              break
+          }
+        } else {
+          switch (type) {
+            case 'topLeft':
+              setActiveGeometry(
+                'x',
+                -deltaY * Angle.sin(rotation) + deltaX * Angle.cos(rotation),
+              )
+              setActiveGeometry(
+                'y',
+                deltaX * Angle.sin(rotation) + deltaY * Angle.cos(rotation),
+              )
+              setActiveGeometry('width', -deltaX)
+              setActiveGeometry('height', -deltaY)
+              break
+            case 'topRight':
+              setActiveGeometry('x', -deltaY * Angle.sin(rotation))
+              setActiveGeometry('y', deltaY * Angle.cos(rotation))
+              setActiveGeometry('height', -deltaY)
+              setActiveGeometry('width', deltaX)
+              break
+            case 'bottomRight':
+              setActiveGeometry('width', deltaX)
+              setActiveGeometry('height', deltaY)
+              break
+            case 'bottomLeft':
+              setActiveGeometry('x', deltaX * Angle.cos(rotation))
+              setActiveGeometry('y', deltaX * Angle.sin(rotation))
+              setActiveGeometry('width', -deltaX)
+              setActiveGeometry('height', deltaY)
+              break
+          }
+        }
+      })
+      .onDestroy(({ moved }) => {
+        if (!moved) return
+        YUndo.track({ type: 'state', description: '缩放选中形状' })
+      })
+  }
+
+  const rotate = () => {
+    const { center } = transformOBB
+
+    StageCursor.setCursor('rotate').lock().upReset()
+
+    let last: IXY
+    Drag.onStart()
+      .onMove(({ current, start }) => {
+        if (!last) last = StageViewport.toSceneXY(start)
+        current = StageViewport.toSceneXY(current)
+        const deltaRotation = XY.from(current).getAngle(last, center)
+        last = current
+
+        setActiveGeometry('rotation', deltaRotation)
+      })
+      .onDestroy(({ moved }) => {
+        if (!moved) return
+        YUndo.track({ type: 'state', description: '旋转选中形状' })
+      })
+  }
+
+  const mousedown = (e: ElemMouseEvent) => {
+    e.stopPropagation()
+    if (isLeftMouse(e.hostEvent)) return moveVertex(e)
+    if (isRightMouse(e.hostEvent)) rotate()
+  }
+
+  return (
+    <ElemReact
+      node={rect}
+      events={{
+        hover: mouseenter,
+        mousemove: (e) => e.stopPropagation(),
+        mousedown,
+      }}
+    />
+  )
+})

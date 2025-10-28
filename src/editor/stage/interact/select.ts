@@ -117,9 +117,15 @@ class StageSelectService {
   }
 
   onMenu() {
-    const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } = EditorCommand
+    const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
+      EditorCommand
     if (getSelectIdMap().length) {
-      const menuOptions = [nodeReHierarchyGroup, copyPasteGroup, undoRedoGroup, nodeGroup]
+      const menuOptions = [
+        nodeReHierarchyGroup,
+        copyPasteGroup,
+        undoRedoGroup,
+        nodeGroup,
+      ]
       return Menu.menuOptions.dispatch(menuOptions)
     }
     Menu.menuOptions.dispatch([undoRedoGroup])

@@ -16,7 +16,9 @@ const SvgComponent = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) =
     </defs>
     <g opacity={1} transform='translate(0 0)  rotate(0 10 10)'>
       <g>
-        <g opacity={1} transform='translate(3.6066702008160405 3)  rotate(0 6.393329799183973 7)'>
+        <g
+          opacity={1}
+          transform='translate(3.6066702008160405 3)  rotate(0 6.393329799183973 7)'>
           <g>
             <path
               id='\u8DEF\u5F84 1'

@@ -6,7 +6,9 @@ import { InView } from 'react-intersection-observer'
 import { Loading } from 'src/view/component/loading'
 import './index.less'
 
-const pexels = createClient('1vbcKedpSbDaktXlI6jmDczCNUBMqDkXL3Gndwp7HMblwGoENO4xlDnm')
+const pexels = createClient(
+  '1vbcKedpSbDaktXlI6jmDczCNUBMqDkXL3Gndwp7HMblwGoENO4xlDnm',
+)
 
 interface EditorLeftPanelImagesProps {}
 
@@ -53,7 +55,10 @@ export const EditorLeftPanelImages: FC<EditorLeftPanelImagesProps> = ({}) => {
           </Flex>
         </G>
         <Flex className='lay-c wh-100%-40 shrink-0'>
-          <InView as={'div'} className='wh-fit-fit' onChange={(inView) => inView && load()}>
+          <InView
+            as={'div'}
+            className='wh-fit-fit'
+            onChange={(inView) => inView && load()}>
             <Loading size={20} />
           </InView>
         </Flex>

@@ -1,5 +1,11 @@
 import { Flex, Icon } from '@gitborlando/widget'
-import { ComponentPropsWithRef, forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
+import {
+  ComponentPropsWithRef,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react'
 import { createPortal } from 'react-dom'
 import { useAutoSignal, useSignal } from 'src/shared/signal/signal-react'
 import { stopPropagation, useClickAway } from 'src/shared/utils/event'
@@ -14,7 +20,15 @@ export type IDropdown = ComponentPropsWithRef<'div'> & {
 }
 
 export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
-  const { options, selected, translateArray, isMulti, onSelected, className, ...rest } = props
+  const {
+    options,
+    selected,
+    translateArray,
+    isMulti,
+    onSelected,
+    className,
+    ...rest
+  } = props
   const innerRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLInputElement>(null)
   const show = useAutoSignal(false)
@@ -73,7 +87,7 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
               </Flex>
             ))}
           </Flex>,
-          document.querySelector('#draggable-portal')!
+          document.querySelector('#draggable-portal')!,
         )}
     </Flex>
   )

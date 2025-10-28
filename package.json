@@ -98,7 +98,7 @@
     "vite-plugin-react-x-if": "^1.0.0"
   },
   "prettier": {
-    "printWidth": 100,
+    "printWidth": 85,
     "jsxBracketSameLine": true,
     "useTabs": false,
     "tabWidth": 2,

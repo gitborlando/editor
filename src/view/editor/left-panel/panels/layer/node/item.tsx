@@ -26,8 +26,10 @@ type INodeItemComp = {
 }
 
 export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
-  const { nodeIdsInSearch, singleNodeExpanded, setSingleNodeExpanded } = UILeftPanelLayer
-  const { nodeMoveDropDetail, nodeMoveStarted, nodeMoveEnded, enterReName } = UILeftPanelLayer
+  const { nodeIdsInSearch, singleNodeExpanded, setSingleNodeExpanded } =
+    UILeftPanelLayer
+  const { nodeMoveDropDetail, nodeMoveStarted, nodeMoveEnded, enterReName } =
+    UILeftPanelLayer
   const node = Schema.find<INode>(id)
   const expand = UILeftPanelLayer.getNodeExpanded(id)
   const selected = getSelectIdMap()[id]
@@ -86,7 +88,12 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
       useMatchPatch(`/${node.id}/points`)
       return (
         <svg width='20' height='20' viewBox='0 0 20 20' {...props}>
-          <path d={d} stroke='currentColor' strokeWidth={1} style={{ fill: 'none' }} />
+          <path
+            d={d}
+            stroke='currentColor'
+            strokeWidth={1}
+            style={{ fill: 'none' }}
+          />
         </svg>
       )
     })
@@ -163,7 +170,9 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
         className='wh-100%-32 absolute'
         style={{
           ...(!nodeMoveStarted.value.moveId && { pointerEvents: 'none' }),
-          ...(dropInSide.value && { boxShadow: 'inset 0 0 0px 0.7px ' + hslBlueColor(50) }),
+          ...(dropInSide.value && {
+            boxShadow: 'inset 0 0 0px 0.7px ' + hslBlueColor(50),
+          }),
         }}>
         <Flex className='wh-100%' onHover={dropInFront.dispatch}>
           {dropInFront.value && (
@@ -172,7 +181,9 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
               style={{ paddingLeft: indent * 16 + 16 }}></Flex>
           )}
         </Flex>
-        {isContainerNode && <Flex className='wh-100%' onHover={dropInSide.dispatch}></Flex>}
+        {isContainerNode && (
+          <Flex className='wh-100%' onHover={dropInSide.dispatch}></Flex>
+        )}
         <Flex layout='v' className='wh-100%' onHover={dropBehind.dispatch}>
           {dropBehind.value && (
             <Flex
@@ -192,7 +203,11 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
   )
 
   return (
-    <Flex layout='v' className='w-100% pointer' onHover={hovered.dispatch} onContextMenu={makeMenu}>
+    <Flex
+      layout='v'
+      className='w-100% pointer'
+      onHover={hovered.dispatch}
+      onContextMenu={makeMenu}>
       <Flex layout='h' className={nodeItemCss} onMouseDown={handleMouseDown}>
         <Flex style={{ width: indent * 16 }}></Flex>
         <ExpandComp />

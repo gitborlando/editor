@@ -7,7 +7,10 @@ import { StageViewport } from 'src/editor/stage/viewport'
 
 export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
   const others = useSnapshot(YClients.others)
-  const cursors = Object.values(others).map((other) => ({ xy: other.cursor, name: other.userName }))
+  const cursors = Object.values(others).map((other) => ({
+    xy: other.cursor,
+    name: other.userName,
+  }))
   return (
     <>
       {cursors.map((cursor) => (

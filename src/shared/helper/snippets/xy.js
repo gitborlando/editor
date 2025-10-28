@@ -33,7 +33,10 @@ class XY {
     return new XY(x, y)
   }
   shift = (distance, rotation) => {
-    return new XY(this.x + distance * rcos(rotation), this.y + distance * rsin(rotation))
+    return new XY(
+      this.x + distance * rcos(rotation),
+      this.y + distance * rsin(rotation),
+    )
   }
   mutate = (obj, prefix) => {
     if (prefix) {

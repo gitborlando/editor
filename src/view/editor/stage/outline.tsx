@@ -61,7 +61,10 @@ const SingleOutlineComp: FC<{
   const node = t<V1.Node>(snap[id])
   const strokeColor = hovered || selected ? themeColor() : color
   const strokeWidth = selected ? 1 : 2
-  const outline = SchemaCreator.clone<V1.Node>(node, { id: `${id}-outline`, fills: [] })
+  const outline = SchemaCreator.clone<V1.Node>(node, {
+    id: `${id}-outline`,
+    fills: [],
+  })
 
   if (node.type === 'text') {
     t<V1.Text>(outline).style.decoration = SchemaCreator.textDecoration({
@@ -69,7 +72,9 @@ const SingleOutlineComp: FC<{
       width: strokeWidth / getZoom(),
     })
   } else if (strokeWidth) {
-    t<V1.Node>(outline).strokes = [SchemaCreator.solidStroke(strokeColor, strokeWidth / getZoom())]
+    t<V1.Node>(outline).strokes = [
+      SchemaCreator.solidStroke(strokeColor, strokeWidth / getZoom()),
+    ]
   }
 
   return <ElemReact node={outline} />

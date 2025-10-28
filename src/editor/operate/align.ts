@@ -39,7 +39,10 @@ class OperateAlignService {
       this.toAlignNodes = [...selectNodes]
       this.canAlign.dispatch(true)
     }
-    if (selectNodes.length === 1 && SchemaUtil.isById(selectNodes[0].id, 'nodeParent')) {
+    if (
+      selectNodes.length === 1 &&
+      SchemaUtil.isById(selectNodes[0].id, 'nodeParent')
+    ) {
       this.toAlignNodes = SchemaUtil.getChildren(<INodeParent>selectNodes[0])
       this.canAlign.dispatch(true)
     }
@@ -66,7 +69,9 @@ class OperateAlignService {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
       const nodeBound = this.getOBBAndBound(node)
-      const shift = (alignBound.maxX - alignBound.minX) / 2 - (nodeBound.maxX - nodeBound.minX) / 2
+      const shift =
+        (alignBound.maxX - alignBound.minX) / 2 -
+        (nodeBound.maxX - nodeBound.minX) / 2
       this.horizontalAlign(node, shift)
     })
   }
@@ -93,7 +98,9 @@ class OperateAlignService {
     const alignBound = this.getAlignBound()
     this.toAlignNodes.forEach((node) => {
       const nodeBound = this.getOBBAndBound(node)
-      const shift = (alignBound.maxY - alignBound.minY) / 2 - (nodeBound.maxY - nodeBound.minY) / 2
+      const shift =
+        (alignBound.maxY - alignBound.minY) / 2 -
+        (nodeBound.maxY - nodeBound.minY) / 2
       this.verticalAlign(node, shift)
     })
   }

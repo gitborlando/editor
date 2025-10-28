@@ -140,7 +140,16 @@ const hostConfig: HostConfig<
 const reconciler = Reconciler(hostConfig)
 
 export function renderElem(reactNode: ReactNode, elem: Elem) {
-  const root = reconciler.createContainer(elem, 0, null, false, null, '', () => {}, null)
+  const root = reconciler.createContainer(
+    elem,
+    0,
+    null,
+    false,
+    null,
+    '',
+    () => {},
+    null,
+  )
   reconciler.updateContainer(reactNode, root, null, () => {})
   return () => void reconciler.updateContainer(null, root, null, () => {})
 }

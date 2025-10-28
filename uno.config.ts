@@ -11,7 +11,7 @@ import {
 
 const theme = (() => {
   const hslObj = Object.fromEntries(
-    new Array(100).fill(0).map((_, i) => [`hsl${i}`, `hsl(var(--hue) 100 ${i})`])
+    new Array(100).fill(0).map((_, i) => [`hsl${i}`, `hsl(var(--hue) 100 ${i})`]),
   )
   return {
     colors: { ...hslObj },
@@ -52,9 +52,15 @@ const defaultScrollBar: Rule<object> = [
   },
 ]
 
-const gap: Rule<object> = [/gap-(\d+)-(\d+)/, ([_, x, y]) => ({ gap: `${x}px ${y}px` })]
+const gap: Rule<object> = [
+  /gap-(\d+)-(\d+)/,
+  ([_, x, y]) => ({ gap: `${x}px ${y}px` }),
+]
 
-const labelFont: Rule<object> = [/labelFont/, () => ({ 'font-size': '11px', color: '#626262' })]
+const labelFont: Rule<object> = [
+  /labelFont/,
+  () => ({ 'font-size': '11px', color: '#626262' }),
+]
 const normalFont: Rule<object> = [/normalFont/, () => ({ 'font-size': '12px' })]
 
 const borderBottom: Rule<object> = [

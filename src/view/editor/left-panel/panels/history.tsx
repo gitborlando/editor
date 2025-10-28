@@ -30,7 +30,10 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
     }, [active])
 
     return (
-      <Flex layout='v' ref={ref} className={`wh-100%-fit borderBottom ${active && 'bg-hsl98'}`}>
+      <Flex
+        layout='v'
+        ref={ref}
+        className={`wh-100%-fit borderBottom ${active && 'bg-hsl98'}`}>
         <Flex
           layout='h'
           style={{ color: randomColor }}
@@ -45,7 +48,11 @@ export const HistoryComp: FC<IHistoryComp> = memo(({}) => {
           </IconButton>
         </Flex>
         {patches.slice(0, itemCollapsed ? 6 : patches.length).map((patch) => (
-          <OperateDiffComp key={useObjectKey(patch)} patch={patch} collapsed={collapsed.value} />
+          <OperateDiffComp
+            key={useObjectKey(patch)}
+            patch={patch}
+            collapsed={collapsed.value}
+          />
         ))}
         {needCollapsedItems && (
           <Flex layout='h' className={'w-100% px-10'}>

@@ -35,7 +35,9 @@ class UILeftPanelService {
   popUpPanel(id: string) {
     this.popupTabIds.dispatch((ids) => ids.add(id))
     if (this.currentTabId.value === id) {
-      this.currentTabId.dispatch(this.switchTabIds.find((id) => !this.popupTabIds.value.has(id)))
+      this.currentTabId.dispatch(
+        this.switchTabIds.find((id) => !this.popupTabIds.value.has(id)),
+      )
     }
   }
 }

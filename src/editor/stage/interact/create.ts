@@ -19,7 +19,15 @@ import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
 import { StageSelect } from './select'
 
-const createTypes = ['frame', 'rect', 'ellipse', 'line', 'polygon', 'star', 'text'] as const
+const createTypes = [
+  'frame',
+  'rect',
+  'ellipse',
+  'line',
+  'polygon',
+  'star',
+  'text',
+] as const
 export type IStageCreateType = (typeof createTypes)[number]
 
 @autobind
@@ -41,7 +49,9 @@ class StageCreateService {
   }
 
   private create() {
-    Drag.onDown(this.onCreateStart).onMove(this.onCreateMove).onDestroy(this.onCreateEnd)
+    Drag.onDown(this.onCreateStart)
+      .onMove(this.onCreateMove)
+      .onDestroy(this.onCreateEnd)
   }
 
   private onCreateStart({ start }: DragData) {
@@ -101,7 +111,9 @@ class StageCreateService {
   }
 
   private findParent() {
-    const frame = StageScene.elemsFromPoint().find((elem) => SchemaUtil.isById(elem.id, 'frame'))
+    const frame = StageScene.elemsFromPoint().find((elem) =>
+      SchemaUtil.isById(elem.id, 'frame'),
+    )
 
     if (frame) return Schema.find<INodeParent>(frame.id)
     return OperatePage.currentPage

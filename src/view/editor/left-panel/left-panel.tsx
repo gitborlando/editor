@@ -40,7 +40,11 @@ export const SwitchBarComp: FC<{}> = memo(({}) => {
   const { currentTabId } = useSnapshot(EditorLeftPanelState)
 
   return (
-    <G center className='w-40 bd-1-#E3E3E3-r py-8' style={{ alignContent: 'flex-start' }} gap={8}>
+    <G
+      center
+      className='w-40 bd-1-#E3E3E3-r py-8'
+      style={{ alignContent: 'flex-start' }}
+      gap={8}>
       {EditorLeftPanelIds.map((id) => {
         const icon = matchCase(id, {
           layer: <Lucide icon={Layers} size={17} />,

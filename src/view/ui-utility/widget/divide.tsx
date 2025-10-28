@@ -22,7 +22,7 @@ export const Divide = memo(
         className,
         ...rest
       },
-      ref
+      ref,
     ) => {
       const baseStyle = { boxShadow: `0 0 0 ${thickness}px ${bgColor}` }
 
@@ -48,6 +48,6 @@ export const Divide = memo(
           {...rest}
           ref={ref}></Flex>
       )
-    }
-  )
+    },
+  ),
 )

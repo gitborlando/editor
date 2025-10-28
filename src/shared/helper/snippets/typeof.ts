@@ -9,5 +9,5 @@ timeFor(
   () => {
     typeof {} === 'object'
   },
-  '100000-typeof'
+  '100000-typeof',
 )

@@ -17,7 +17,9 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
     const curCategory = useAutoSignal(categories[0])
 
     useMemo(() => {
-      categories.forEach((category) => categoryLengthCache.getSet(category, () => 60))
+      categories.forEach((category) =>
+        categoryLengthCache.getSet(category, () => 60),
+      )
     }, [])
 
     const CategoryComp = useMemoComp([], () => {
@@ -26,7 +28,9 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
       return (
         <Flex layout='h' className={'wh-100%-fit px-10 gap-6-6 pointer'}>
           {categories.map((category) => {
-            const selectCss = curCategory.value === category && { color: hslBlueColor(60) }
+            const selectCss = curCategory.value === category && {
+              color: hslBlueColor(60),
+            }
             return (
               <Flex
                 key={category}
@@ -52,13 +56,17 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
       useHookSignal(length, (len) => categoryLengthCache.set(curCategory.value, len))
 
       return (
-        <Flex layout='h' className={'wh-100%-fit flex-wrap of-y-auto px-6 gap-10-10 d-scroll'}>
+        <Flex
+          layout='h'
+          className={'wh-100%-fit flex-wrap of-y-auto px-6 gap-10-10 d-scroll'}>
           {icons.map(([name, path]) => (
             <SvgComp key={path} name={name} path={path} />
           ))}
           <InView
             className='wh-100%-30 '
-            onChange={(inView) => inView && length.dispatch(length.value + 40)}></InView>
+            onChange={(inView) =>
+              inView && length.dispatch(length.value + 40)
+            }></InView>
         </Flex>
       )
     })

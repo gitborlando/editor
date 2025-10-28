@@ -91,7 +91,8 @@ export class UnicodeTrie {
       // Ordinary BMP code point, excluding leading surrogates.
       // BMP uses a single level lookup.  BMP index starts at offset 0 in the index.
       // data is stored in the index array itself.
-      index = (this.data[codePoint >> SHIFT_2] << INDEX_SHIFT) + (codePoint & DATA_MASK)
+      index =
+        (this.data[codePoint >> SHIFT_2] << INDEX_SHIFT) + (codePoint & DATA_MASK)
       return this.data[index]
     }
 
@@ -101,14 +102,18 @@ export class UnicodeTrie {
       //   The main index has the code unit data.
       //   For this function, we need the code point data.
       index =
-        (this.data[LSCP_INDEX_2_OFFSET + ((codePoint - 0xd800) >> SHIFT_2)] << INDEX_SHIFT) +
+        (this.data[LSCP_INDEX_2_OFFSET + ((codePoint - 0xd800) >> SHIFT_2)] <<
+          INDEX_SHIFT) +
         (codePoint & DATA_MASK)
       return this.data[index]
     }
 
     if (codePoint < this.highStart) {
       // Supplemental code point, use two-level lookup.
-      index = this.data[INDEX_1_OFFSET - OMITTED_BMP_INDEX_1_LENGTH + (codePoint >> SHIFT_1)]
+      index =
+        this.data[
+          INDEX_1_OFFSET - OMITTED_BMP_INDEX_1_LENGTH + (codePoint >> SHIFT_1)
+        ]
       index = this.data[index + ((codePoint >> SHIFT_2) & INDEX_2_MASK)]
       index = (index << INDEX_SHIFT) + (codePoint & DATA_MASK)
       return this.data[index]

@@ -9,8 +9,13 @@ import { NodeItemComp } from './item'
 type INodeListComp = {}
 
 export const NodeListComp: FC<INodeListComp> = memo(({}) => {
-  const { nodeViewHeight, nodeListHeight, nodeScrollHeight, nodeScrollShift, inViewNodeInfo } =
-    UILeftPanelLayer
+  const {
+    nodeViewHeight,
+    nodeListHeight,
+    nodeScrollHeight,
+    nodeScrollShift,
+    inViewNodeInfo,
+  } = UILeftPanelLayer
   useHookSignal(inViewNodeInfo)
   useHookSignal(EventWheel.duringWheel, ({ direction }) => {
     nodeScrollHeight.dispatch(nodeScrollHeight.value + direction * 96)
@@ -27,7 +32,9 @@ export const NodeListComp: FC<INodeListComp> = memo(({}) => {
         style={{ transform: `translateY(-${nodeScrollShift.value}px)` }}
         onWheel={EventWheel.onWheel}>
         {[...inViewNodeInfo.value].map(({ id, indent, ancestors }) => {
-          return <NodeItemComp key={id} id={id} indent={indent} ancestors={ancestors} />
+          return (
+            <NodeItemComp key={id} id={id} indent={indent} ancestors={ancestors} />
+          )
         })}
       </Flex>
       {nodeListHeight.value > nodeViewHeight.value && (

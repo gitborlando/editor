@@ -37,7 +37,9 @@ export function isNumberEqual(a: number, b: number) {
 
 export function cx(...args: (string | undefined)[]): string
 export function cx(...args: ([boolean, string] | [string])[]): string
-export function cx(...args: ((string | undefined) | [boolean, string] | [string])[]) {
+export function cx(
+  ...args: ((string | undefined) | [boolean, string] | [string])[]
+) {
   const array = args.filter(Boolean) as (string | [boolean, string] | [string])[]
 
   if (typeof array[0] === 'string') return array.join(' ')
@@ -50,7 +52,12 @@ export function cx(...args: ((string | undefined) | [boolean, string] | [string]
   return res.trim()
 }
 
-export function timeOf(count: number, func: (i: number) => any, count2 = 1, skip = 0) {
+export function timeOf(
+  count: number,
+  func: (i: number) => any,
+  count2 = 1,
+  skip = 0,
+) {
   let all = 0
   for (let i = 0; i < count2; i++) {
     const start = performance.now()

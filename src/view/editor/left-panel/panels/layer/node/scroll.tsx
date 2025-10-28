@@ -3,7 +3,11 @@ import { FC, memo } from 'react'
 import { max } from 'src/editor/math/base'
 import { Surface } from 'src/editor/stage/render/surface'
 import { Drag } from 'src/global/event/drag'
-import { useAutoSignal, useHookSignal, useSignal } from 'src/shared/signal/signal-react'
+import {
+  useAutoSignal,
+  useHookSignal,
+  useSignal,
+} from 'src/shared/signal/signal-react'
 
 type IScrollComp = {
   contentHeight: number
@@ -44,5 +48,5 @@ export const ScrollComp: FC<IScrollComp> = memo(
           }}></Flex>
       </Flex>
     )
-  }
+  },
 )

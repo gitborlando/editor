@@ -25,7 +25,7 @@ const circles = Array.from({ length: polygonCount }, (_, i) => {
 
 function inRect(
   rect: { x: number; y: number; width: number; height: number },
-  xy: { x: number; y: number }
+  xy: { x: number; y: number },
 ) {
   return !(
     xy.x < rect.x ||
@@ -35,7 +35,10 @@ function inRect(
   )
 }
 
-function inCircle(circle: { x: number; y: number; r: number }, xy: { x: number; y: number }) {
+function inCircle(
+  circle: { x: number; y: number; r: number },
+  xy: { x: number; y: number },
+) {
   if (Math.abs(xy.x - circle.x) > circle.r) return false
   if (Math.abs(xy.y - circle.y) > circle.r) return false
   return (xy.x - circle.x) ** 2 + (xy.y - circle.y) ** 2 < circle.r ** 2

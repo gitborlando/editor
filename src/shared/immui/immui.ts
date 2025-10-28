@@ -15,7 +15,9 @@ export type ImmuiApplyPatchOption = {
 
 export default class Immui {
   add = <T>(object: object, keyPath: string | IKey[], value: T) => {
-    const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
+    const keys = Array.isArray(keyPath)
+      ? keyPath
+      : (keyPath.split(/\.|\//) as IKey[])
 
     let current: any = object
     for (let i = 0; i < keys.length - 1; i++) {
@@ -35,7 +37,9 @@ export default class Immui {
   }
 
   reset = <T>(object: object, keyPath: string | IKey[], value: T) => {
-    const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
+    const keys = Array.isArray(keyPath)
+      ? keyPath
+      : (keyPath.split(/\.|\//) as IKey[])
 
     let current: any = object
     for (let i = 0; i < keys.length - 1; i++) {
@@ -52,7 +56,9 @@ export default class Immui {
   }
 
   delete = (object: object, keyPath: string | IKey[]) => {
-    const keys = Array.isArray(keyPath) ? keyPath : (keyPath.split(/\.|\//) as IKey[])
+    const keys = Array.isArray(keyPath)
+      ? keyPath
+      : (keyPath.split(/\.|\//) as IKey[])
 
     let current: any = object
     for (let i = 0; i < keys.length - 1; i++) {
@@ -134,7 +140,7 @@ export default class Immui {
   applyPatches = <T extends object>(
     object: T,
     patches: ImmuiPatch[],
-    option: ImmuiApplyPatchOption = {}
+    option: ImmuiApplyPatchOption = {},
   ) => {
     const { reverse, prefix = '' } = option
 

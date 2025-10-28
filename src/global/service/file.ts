@@ -36,7 +36,8 @@ class FileServiceClass {
       axios
         .get(url, {
           responseType: 'arraybuffer',
-          onDownloadProgress: (e) => onProgress?.(Number((e.loaded / e.bytes).toFixed(2))),
+          onDownloadProgress: (e) =>
+            onProgress?.(Number((e.loaded / e.bytes).toFixed(2))),
         })
         .then((res) => {
           resolve(res.data)

@@ -7,8 +7,15 @@ import './index.less'
 type ISettingComp = {}
 
 export const SettingComp: FC<ISettingComp> = observer(({}) => {
-  const { autosave, mockMode, showFPS, devMode, ignoreUnVisible, menuShowTopTab, needSliceRender } =
-    EditorSetting.setting
+  const {
+    autosave,
+    mockMode,
+    showFPS,
+    devMode,
+    ignoreUnVisible,
+    menuShowTopTab,
+    needSliceRender,
+  } = EditorSetting.setting
 
   const toggle = (key: keyof typeof EditorSetting.setting) => {
     return (value: boolean) => (EditorSetting.setting[key] = value)
@@ -16,9 +23,21 @@ export const SettingComp: FC<ISettingComp> = observer(({}) => {
 
   return (
     <G gap={16} className='editor-setting'>
-      <BooleanSettingComp label='mock模式' value={mockMode} onChange={toggle('mockMode')} />
-      <BooleanSettingComp label='自动保存' value={autosave} onChange={toggle('autosave')} />
-      <BooleanSettingComp label='开发模式' value={devMode} onChange={toggle('devMode')} />
+      <BooleanSettingComp
+        label='mock模式'
+        value={mockMode}
+        onChange={toggle('mockMode')}
+      />
+      <BooleanSettingComp
+        label='自动保存'
+        value={autosave}
+        onChange={toggle('autosave')}
+      />
+      <BooleanSettingComp
+        label='开发模式'
+        value={devMode}
+        onChange={toggle('devMode')}
+      />
       <BooleanSettingComp
         label='不渲染不可辨认的节点'
         value={ignoreUnVisible}
@@ -34,7 +53,11 @@ export const SettingComp: FC<ISettingComp> = observer(({}) => {
         value={menuShowTopTab}
         onChange={toggle('menuShowTopTab')}
       />
-      <BooleanSettingComp label='显示 FPS' value={showFPS} onChange={toggle('showFPS')} />
+      <BooleanSettingComp
+        label='显示 FPS'
+        value={showFPS}
+        onChange={toggle('showFPS')}
+      />
     </G>
   )
 })
@@ -57,7 +80,9 @@ const SwitchComp: FC<{
   onChange: (value: boolean) => void
 }> = ({ value, onChange }) => {
   return (
-    <G className={cx('switch', value && 'switch-checked')} onClick={() => onChange(!value)}>
+    <G
+      className={cx('switch', value && 'switch-checked')}
+      onClick={() => onChange(!value)}>
       <G className='switch-inner'></G>
     </G>
   )

@@ -7,7 +7,7 @@ timeOf(
     obj[i] = i
   },
   100,
-  10
+  10,
 )
 
 const map: any = new Map()
@@ -17,5 +17,5 @@ timeOf(
     map.set(i, i)
   },
   100,
-  10
+  10,
 )

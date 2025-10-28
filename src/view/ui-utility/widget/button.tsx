@@ -9,17 +9,27 @@ export type IButtonProps = ComponentPropsWithRef<'div'> & {
 }
 
 export const Button = forwardRef<HTMLDivElement, IButtonProps>(
-  ({ type = 'normal', active = false, disabled = false, className, children, ...rest }, ref) => {
+  (
+    {
+      type = 'normal',
+      active = false,
+      disabled = false,
+      className,
+      children,
+      ...rest
+    },
+    ref,
+  ) => {
     const baseCss = cx(
       iife(() => {
         if (disabled) return ''
         return 'pointer'
-      })
+      }),
     )
 
     const normalCss = cx(
       'wh-fit r-4 p-6 mx-2 text-11 text-[#626262]',
-      disabled ? '' : active ? 'text-hsl65 bg-hsl95' : 'd-hover-bg'
+      disabled ? '' : active ? 'text-hsl65 bg-hsl95' : 'd-hover-bg',
     )
 
     const textCss = cx(
@@ -27,7 +37,7 @@ export const Button = forwardRef<HTMLDivElement, IButtonProps>(
       iife(() => {
         if (disabled) return ''
         if (active) return 'text-hsl50'
-      })
+      }),
     )
 
     const iconCss = cx(
@@ -36,7 +46,7 @@ export const Button = forwardRef<HTMLDivElement, IButtonProps>(
         if (disabled) return ''
         if (active) return 'bg-hsl95'
         return 'd-hover-bg'
-      })
+      }),
     )
 
     const finalCss = cx(
@@ -44,13 +54,17 @@ export const Button = forwardRef<HTMLDivElement, IButtonProps>(
       ...(type === 'text' ? [textCss] : []),
       ...(type === 'icon' ? [iconCss] : []),
       ...(type === 'normal' ? [normalCss] : []),
-      normalCss
+      normalCss,
     )
 
     return (
-      <Flex layout='c' className={cx(finalCss, className)} {...(!disabled && rest)} ref={ref}>
+      <Flex
+        layout='c'
+        className={cx(finalCss, className)}
+        {...(!disabled && rest)}
+        ref={ref}>
         {children}
       </Flex>
     )
-  }
+  },
 )

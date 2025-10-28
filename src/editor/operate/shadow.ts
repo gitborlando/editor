@@ -75,7 +75,9 @@ class OperateShadowService {
   private onUiPickerSetShadow() {
     UIPickerCopy.onChange.hook((patches) => {
       if (UIPickerCopy.from !== 'shadow') return
-      this.immui.applyPatches(this.shadows, patches, { prefix: `/${UIPickerCopy.index}/fill` })
+      this.immui.applyPatches(this.shadows, patches, {
+        prefix: `/${UIPickerCopy.index}/fill`,
+      })
       this.applyChangeToSchema()
     })
     UIPickerCopy.afterOperate.hook(() => {

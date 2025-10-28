@@ -59,7 +59,7 @@ function getPointsOnBezierCurveWithSplitting(
   points: readonly Point[],
   offset: number,
   tolerance: number,
-  newPoints?: Point[]
+  newPoints?: Point[],
 ): Point[] {
   const outPoints = newPoints || []
   if (flatness(points, offset) < tolerance) {
@@ -107,7 +107,7 @@ export function simplifyPoints(
   start: number,
   end: number,
   epsilon: number,
-  newPoints?: Point[]
+  newPoints?: Point[],
 ): Point[] {
   const outPoints = newPoints || []
 
@@ -141,7 +141,7 @@ export function simplifyPoints(
 export function pointsOnBezierCurves(
   points: readonly Point[],
   tolerance: number = 0.15,
-  distance?: number
+  distance?: number,
 ): Point[] {
   const newPoints: Point[] = []
   const numSegments = (points.length - 1) / 3

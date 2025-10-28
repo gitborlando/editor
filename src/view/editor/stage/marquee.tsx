@@ -13,7 +13,10 @@ export const EditorStageMarqueeComp: FC<{}> = observer(({}) => {
     id: 'marquee',
     ...marquee,
     strokes: [
-      SchemaCreator.stroke({ fill: SchemaCreator.fillColor(themeColor()), width: 1 / getZoom() }),
+      SchemaCreator.stroke({
+        fill: SchemaCreator.fillColor(themeColor()),
+        width: 1 / getZoom(),
+      }),
     ],
     fills: [SchemaCreator.fillColor(rgbToRgba(themeColor(75), 0.1))],
   })

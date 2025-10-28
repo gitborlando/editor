@@ -16,7 +16,9 @@ export const HomeHeaderComp: FC<HomeHeaderProps> = observer(({}) => {
         <G
           dangerouslySetInnerHTML={{ __html: UserService.avatar }}
           style={{ width: '32px', height: '32px' }}></G>
-        <Typography.Text style={{ alignSelf: 'center' }}>{UserService.userName}</Typography.Text>
+        <Typography.Text style={{ alignSelf: 'center' }}>
+          {UserService.userName}
+        </Typography.Text>
       </G>
     </G>
   )

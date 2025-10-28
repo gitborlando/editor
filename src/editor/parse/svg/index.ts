@@ -45,7 +45,11 @@ export class SvgParser {
     return this.parseSvgNode(svgNode, svgNode)
   }
 
-  private parseSvgNode(svgNode: SvgNode, parentSvgNode: SvgNode, parentNode?: INodeParent) {
+  private parseSvgNode(
+    svgNode: SvgNode,
+    parentSvgNode: SvgNode,
+    parentNode?: INodeParent,
+  ) {
     this.camelCaseProps(svgNode.properties)
     this.inheritParentProps(svgNode.properties, parentSvgNode.properties)
 
@@ -61,13 +65,19 @@ export class SvgParser {
           viewBoxArr = viewBox!.split(' ').map(Number)
           properties.width = viewBoxArr[2]
           properties.height = viewBoxArr[3]
-          node = SchemaCreator.frame({ width: properties.width, height: properties.height })
+          node = SchemaCreator.frame({
+            width: properties.width,
+            height: properties.height,
+          })
         } else {
           if (viewBox) viewBoxArr = viewBox!.split(' ').map(Number)
           else viewBoxArr = [0, 0, width!, height!]
           node = SchemaCreator.frame({ width, height })
         }
-        this.ratio = xy_(properties.width! / viewBoxArr[2], properties.height! / viewBoxArr[3])
+        this.ratio = xy_(
+          properties.width! / viewBoxArr[2],
+          properties.height! / viewBoxArr[3],
+        )
         break
       }
       case 'rect': {
@@ -184,7 +194,14 @@ export class SvgParser {
     const commands = makeAbsolute(parsed)
     const points: IPoint[] = []
 
-    function dealCurvePoint(x: number, y: number, x1: number, y1: number, x2: number, y2: number) {
+    function dealCurvePoint(
+      x: number,
+      y: number,
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number,
+    ) {
       const handleLeft = { x: x2, y: y2 }
       const handleRight = { x: x1, y: y1 }
       const point = SchemaCreator.point({ x, y, handleL: handleLeft })
@@ -221,7 +238,12 @@ export class SvgParser {
           const pos = { px: x0, py: y0, cx: x, cy: y, rx, ry }
           const largeArcFlag = largeArc ? 1 : 0
           const sweepFlag = sweep ? 1 : 0
-          const bezierCurves = arcToBezier({ ...pos, xAxisRotation, largeArcFlag, sweepFlag })
+          const bezierCurves = arcToBezier({
+            ...pos,
+            xAxisRotation,
+            largeArcFlag,
+            sweepFlag,
+          })
           bezierCurves.forEach(({ x, y, x1, y1, x2, y2 }) => {
             dealCurvePoint(x, y, x1, y1, x2, y2)
           })
@@ -243,8 +265,10 @@ export class SvgParser {
     if (!props.fill) props.fill = parentProps.fill
     if (!props.stroke) props.stroke = parentProps.stroke
     if (!props.strokeWidth) props.strokeWidth = parentProps.strokeWidth || 1
-    if (!props.strokeLinejoin) props.strokeLinejoin = parentProps.strokeLinejoin || 'round'
-    if (!props.strokeLinecap) props.strokeLinecap = parentProps.strokeLinecap || 'round'
+    if (!props.strokeLinejoin)
+      props.strokeLinejoin = parentProps.strokeLinejoin || 'round'
+    if (!props.strokeLinecap)
+      props.strokeLinecap = parentProps.strokeLinecap || 'round'
   }
 
   private camelCaseProps(obj: Record<string, any>) {

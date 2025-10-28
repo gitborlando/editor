@@ -14,7 +14,10 @@ export const AlignComp: FC<IAlignComp> = memo(({}) => {
   return (
     <Flex layout='h' className='shrink-0 justify-around wh-100%-36 borderBottom'>
       {alignTypes.map((type) => (
-        <Button key={type} disabled={!canAlign.value} onClick={() => currentAlign.dispatch(type)}>
+        <Button
+          key={type}
+          disabled={!canAlign.value}
+          onClick={() => currentAlign.dispatch(type)}>
           <Icon
             className={`wh-16 ${canAlign.value ? '' : 'path-fill-#E6E6E6'}`}
             url={Assets.editor.rightPanel.operate.align[type]}

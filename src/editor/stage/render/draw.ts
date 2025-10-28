@@ -102,7 +102,8 @@ class ElemDrawerService {
   }
 
   private drawEllipse = () => {
-    const { width, height, startAngle, endAngle, innerRate } = this.node as V1.Ellipse
+    const { width, height, startAngle, endAngle, innerRate } = this
+      .node as V1.Ellipse
     const [cx, cy] = [width / 2, height / 2]
     const startRadian = radianfy(startAngle)
     const endRadian = radianfy(endAngle)
@@ -118,10 +119,28 @@ class ElemDrawerService {
       if (startAngle === 0 && endAngle === 360) {
         this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
         this.path2d.moveTo(cx * (1 + innerRate), cy)
-        this.path2d.ellipse(cx, cy, cx * innerRate, cy * innerRate, 0, startRadian, endRadian, true)
+        this.path2d.ellipse(
+          cx,
+          cy,
+          cx * innerRate,
+          cy * innerRate,
+          0,
+          startRadian,
+          endRadian,
+          true,
+        )
       } else {
         this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
-        this.path2d.ellipse(cx, cy, cx * innerRate, cy * innerRate, 0, endRadian, startRadian, true)
+        this.path2d.ellipse(
+          cx,
+          cy,
+          cx * innerRate,
+          cy * innerRate,
+          0,
+          endRadian,
+          startRadian,
+          true,
+        )
       }
     }
     this.path2d.closePath()
@@ -207,11 +226,21 @@ class ElemDrawerService {
         break
 
       case 'linearGradient':
-        const start = xy_(fill.start.x * this.node.width, fill.start.y * this.node.height)
+        const start = xy_(
+          fill.start.x * this.node.width,
+          fill.start.y * this.node.height,
+        )
         const end = xy_(fill.end.x * this.node.width, fill.end.y * this.node.height)
 
-        const gradient = this.ctx.createLinearGradient(start.x, start.y, end.x, end.y)
-        fill.stops.forEach(({ offset, color }) => gradient.addColorStop(offset, color))
+        const gradient = this.ctx.createLinearGradient(
+          start.x,
+          start.y,
+          end.x,
+          end.y,
+        )
+        fill.stops.forEach(({ offset, color }) =>
+          gradient.addColorStop(offset, color),
+        )
 
         this.ctx.fillStyle = gradient
         makeFill()
@@ -233,7 +262,17 @@ class ElemDrawerService {
           })
           const path2d = new Path2D(this.path2d)
           this.ctx.clip(path2d)
-          this.ctx.drawImage(image.image, 0, 0, width / rate, height / rate, 0, 0, width, height)
+          this.ctx.drawImage(
+            image.image,
+            0,
+            0,
+            width / rate,
+            height / rate,
+            0,
+            0,
+            width,
+            height,
+          )
         }
         break
     }
@@ -281,7 +320,13 @@ class ElemDrawerService {
     this.ctx.shadowOffsetY = offsetY
 
     this.dirtyRects.push(
-      AABB.expand(this.elem.aabb, -offsetX + blur, -offsetY + blur, offsetX + blur, offsetY + blur),
+      AABB.expand(
+        this.elem.aabb,
+        -offsetX + blur,
+        -offsetY + blur,
+        offsetX + blur,
+        offsetY + blur,
+      ),
     )
   }
 

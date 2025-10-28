@@ -33,7 +33,11 @@ export function createLine(start: IXY, length: number) {
   return points
 }
 
-export function createRegularPolygon(width: number, height: number, sideCount: number) {
+export function createRegularPolygon(
+  width: number,
+  height: number,
+  sideCount: number,
+) {
   sideCount = Math.max(sideCount | 0, 3)
   const center = xy_(width / 2, height / 2)
   const radius = max(width, height) / 2

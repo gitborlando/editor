@@ -1,5 +1,24 @@
 import { UnicodeTrie } from './UnicodeTrie'
-import { BK, CR, LF, NL, SG, WJ, SP, ZWJ, BA, HY, NS, AI, AL, CJ, HL, RI, SA, XX } from './classes'
+import {
+  BK,
+  CR,
+  LF,
+  NL,
+  SG,
+  WJ,
+  SP,
+  ZWJ,
+  BA,
+  HY,
+  NS,
+  AI,
+  AL,
+  CJ,
+  HL,
+  RI,
+  SA,
+  XX,
+} from './classes'
 import { DI_BRK, IN_BRK, CI_BRK, CP_BRK, PR_BRK, pairTable } from './pairs'
 
 function mapClass(c: number) {

@@ -46,7 +46,13 @@ export function numberHalfFix(number: number) {
   return integerPart + halfFixed
 }
 
-export function rotatePoint(ax: number, ay: number, ox: number, oy: number, degree: number) {
+export function rotatePoint(
+  ax: number,
+  ay: number,
+  ox: number,
+  oy: number,
+  degree: number,
+) {
   const radian = radianfy(degree)
   return {
     x: (ax - ox) * cos(radian) - (ay - oy) * sin(radian) + ox,

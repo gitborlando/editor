@@ -22,12 +22,16 @@ export class SchemaUtil2 {
     return id.startsWith('page_')
   }
 
-  static is<T extends ISchemaItem>(item: ISchemaItem, type: ISchemaItem['type']): item is T {
+  static is<T extends ISchemaItem>(
+    item: ISchemaItem,
+    type: ISchemaItem['type'],
+  ): item is T {
     return item.type === type
   }
 
   static isById(id: ID, type: ISchemaItem['type'] | 'nodeParent'): boolean {
-    if (type === 'nodeParent') return ['page', 'frame', 'group'].includes(Schema.find(id).type)
+    if (type === 'nodeParent')
+      return ['page', 'frame', 'group'].includes(Schema.find(id).type)
     return Schema.find(id).type === type
   }
 
@@ -41,7 +45,8 @@ export class SchemaUtil2 {
   }
 
   static getChildren(id: ID | INodeParent) {
-    const childIds = (typeof id !== 'string' ? id : Schema.find<INodeParent>(id))?.childIds || []
+    const childIds =
+      (typeof id !== 'string' ? id : Schema.find<INodeParent>(id))?.childIds || []
     return childIds.map((id) => Schema.find<INode>(id))
   }
 
@@ -87,7 +92,11 @@ export class SchemaUtil2 {
     bubbleCallback?: ITraverseCallback
   }) {
     const abort = new AbortController()
-    const traverse = (ids: string[], depth: number, upLevelRef?: SchemaUtilTraverseData) => {
+    const traverse = (
+      ids: string[],
+      depth: number,
+      upLevelRef?: SchemaUtilTraverseData,
+    ) => {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
         const node = finder(id)
@@ -96,7 +105,17 @@ export class SchemaUtil2 {
         const childIds = 'childIds' in node ? node.childIds : undefined
         const parent = <INodeParent>(upLevelRef?.node || finder(node.parentId))
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []
-        const props = { id, node, index, childIds, depth, abort, upLevelRef, parent, ancestors }
+        const props = {
+          id,
+          node,
+          index,
+          childIds,
+          depth,
+          abort,
+          upLevelRef,
+          parent,
+          ancestors,
+        }
         const isContinue = callback(props)
         if (isContinue !== false && childIds) traverse(childIds, depth + 1, props)
         bubbleCallback?.(props)

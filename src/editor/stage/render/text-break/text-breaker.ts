@@ -50,7 +50,7 @@ export class TextBreaker {
       letterSpacing: number
       align: 'left' | 'center' | 'right'
     },
-    maxLines?: number
+    maxLines?: number,
   ) {
     // Trim and replace multiple spaces with single one
     text = (text || '').trim().replace(MULTIPLE_SPACE_REGEX, SPACE)
@@ -127,7 +127,9 @@ export class TextBreaker {
       while (index < breakEnd) {
         const nextIndex = Math.min(findNextGraphemeBreak(text, index), breakEnd)
         const grapheme = text.slice(index, nextIndex)
-        const graphemeWidth = LINE_BREAK_REGEX.test(grapheme) ? 0 : measureWidth(grapheme)
+        const graphemeWidth = LINE_BREAK_REGEX.test(grapheme)
+          ? 0
+          : measureWidth(grapheme)
 
         if (breakWidth + (grapheme === SPACE ? 0 : graphemeWidth) > maxWidth) {
           // Word is too long, we have to break it
@@ -157,7 +159,10 @@ export class TextBreaker {
         index = nextIndex
       }
 
-      if (currentLineWidth + getWidthWithoutLastSpace(breakEnd - 1, breakWidth) > maxWidth) {
+      if (
+        currentLineWidth + getWidthWithoutLastSpace(breakEnd - 1, breakWidth) >
+        maxWidth
+      ) {
         if (addCurrentLine()) {
           return splitText
         }
@@ -188,6 +193,8 @@ export class TextBreaker {
 }
 
 export async function createTextBreaker() {
-  const trieBuffer = new Uint8Array(await (await fetch(lineBreakClassesTrieUrl)).arrayBuffer())
+  const trieBuffer = new Uint8Array(
+    await (await fetch(lineBreakClassesTrieUrl)).arrayBuffer(),
+  )
   return new TextBreaker(trieBuffer)
 }

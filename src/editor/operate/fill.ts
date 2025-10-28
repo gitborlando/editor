@@ -69,7 +69,9 @@ class OperateFillService {
   private onUiPickerSetFill() {
     UIPickerCopy.onChange.hook((patches) => {
       if (UIPickerCopy.from !== 'fill') return
-      this.immui.applyPatches(this.fills, patches, { prefix: `/${UIPickerCopy.index}` })
+      this.immui.applyPatches(this.fills, patches, {
+        prefix: `/${UIPickerCopy.index}`,
+      })
       this.applyChangeToSchema()
     })
     UIPickerCopy.afterOperate.hook(() => {

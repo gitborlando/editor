@@ -30,32 +30,43 @@ export const FillPropComp: FC<{}> = ({}) => {
       index !== fills.length - 1 ? (
         <Fragment key={index}>
           <FillItemComp key={index} fill={fill} index={index} />
-          <Divide direction='h' margin={4} length={'95%'} thickness={0} bgColor='#E3E3E3' />
+          <Divide
+            direction='h'
+            margin={4}
+            length={'95%'}
+            thickness={0}
+            bgColor='#E3E3E3'
+          />
         </Fragment>
       ) : (
         <FillItemComp key={index} fill={fill} index={index} />
+      ),
+    )
+  })
+
+  const FillItemComp = useMemoComp<{ fill: IFill; index: number }>(
+    [],
+    ({ fill, index }) => {
+      const { setFill, deleteFill } = OperateFill
+
+      return (
+        <Flex layout='h' className='wh-100%-28'>
+          <PickerOpener fill={fill} index={index} impact='fill' />
+          <IconButton
+            size={16}
+            style={{ marginLeft: 'auto' }}
+            onClick={() => setFill(index, ['visible'], !fill.visible)}>
+            {fill.visible
+              ? Assets.editor.shared.visible
+              : Assets.editor.shared.unVisible}
+          </IconButton>
+          <IconButton size={16} onClick={() => deleteFill(index)}>
+            {Assets.editor.shared.minus}
+          </IconButton>
+        </Flex>
       )
-    )
-  })
-
-  const FillItemComp = useMemoComp<{ fill: IFill; index: number }>([], ({ fill, index }) => {
-    const { setFill, deleteFill } = OperateFill
-
-    return (
-      <Flex layout='h' className='wh-100%-28'>
-        <PickerOpener fill={fill} index={index} impact='fill' />
-        <IconButton
-          size={16}
-          style={{ marginLeft: 'auto' }}
-          onClick={() => setFill(index, ['visible'], !fill.visible)}>
-          {fill.visible ? Assets.editor.shared.visible : Assets.editor.shared.unVisible}
-        </IconButton>
-        <IconButton size={16} onClick={() => deleteFill(index)}>
-          {Assets.editor.shared.minus}
-        </IconButton>
-      </Flex>
-    )
-  })
+    },
+  )
 
   return (
     <Flex layout='v' className='wh-100%-fit bg-white borderBottom p-8'>

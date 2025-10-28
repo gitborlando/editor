@@ -75,7 +75,9 @@ class OperateStrokeService {
   private onUiPickerSetStroke() {
     UIPickerCopy.onChange.hook((patches) => {
       if (UIPickerCopy.from !== 'stroke') return
-      this.immui.applyPatches(this.strokes, patches, { prefix: `/${UIPickerCopy.index}/fill` })
+      this.immui.applyPatches(this.strokes, patches, {
+        prefix: `/${UIPickerCopy.index}/fill`,
+      })
       this.applyChangeToSchema()
     })
     UIPickerCopy.afterOperate.hook(() => {

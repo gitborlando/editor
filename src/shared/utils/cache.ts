@@ -46,7 +46,7 @@ class Cache<K, V> {
   }
   toObject() {
     return Object.fromEntries(
-      [...this.cache.entries()].map(([key, value]) => [key, value])
+      [...this.cache.entries()].map(([key, value]) => [key, value]),
     ) as Record<string | number | symbol, V>
   }
 }

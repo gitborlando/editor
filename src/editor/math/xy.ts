@@ -79,7 +79,7 @@ export function xy_opposite(self: IXY) {
 export function xy_getRotation(self: IXY, another: IXY, origin: IXY) {
   return degreefy(
     Math.atan2(self.y - origin.y, self.x - origin.x) -
-      Math.atan2(another.y - origin.y, another.x - origin.x)
+      Math.atan2(another.y - origin.y, another.x - origin.x),
   )
 }
 
@@ -101,7 +101,10 @@ export type IXY = {
 }
 
 export class XY {
-  constructor(public x: number, public y: number) {}
+  constructor(
+    public x: number,
+    public y: number,
+  ) {}
 
   from(xy: IXY) {
     this.x = xy.x

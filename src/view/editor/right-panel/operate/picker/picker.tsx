@@ -2,7 +2,12 @@ import { Signal } from '@gitborlando/signal'
 import { Flex } from '@gitborlando/widget'
 import { FC, memo, useEffect } from 'react'
 import { SchemaCreator } from 'src/editor/schema/create'
-import { IFill, IFillColor, IFillImage, IFillLinearGradient } from 'src/editor/schema/type'
+import {
+  IFill,
+  IFillColor,
+  IFillImage,
+  IFillLinearGradient,
+} from 'src/editor/schema/type'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { clone } from 'src/shared/utils/normal'
@@ -51,7 +56,9 @@ export const PickerComp: FC<IPickerComp> = memo(({ fill, show }) => {
     [type.value],
     ({ fillType, label }) => {
       return (
-        <Button active={type.value === fillType} onClick={() => type.dispatch(fillType)}>
+        <Button
+          active={type.value === fillType}
+          onClick={() => type.dispatch(fillType)}>
           {label}
         </Button>
       )

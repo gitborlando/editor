@@ -51,7 +51,8 @@ class YUndoService {
   }
 
   private applyClientState() {
-    const clientState = this.stack[this.next - 1]?.clientState || this.initClientState
+    const clientState =
+      this.stack[this.next - 1]?.clientState || this.initClientState
     Object.assign(YClients.client, clientState)
   }
 

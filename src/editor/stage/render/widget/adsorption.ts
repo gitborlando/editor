@@ -39,7 +39,10 @@ class StageWidgetAdsorptionService {
   }
   private setupAdsorption() {
     this.updateCloneTransformOBB()
-    if (OperateNode.datumId.value === '' || SchemaUtil.isPageById(OperateNode.datumId.value)) {
+    if (
+      OperateNode.datumId.value === '' ||
+      SchemaUtil.isPageById(OperateNode.datumId.value)
+    ) {
       OperateMeta.curPage.value.childIds.forEach((id) => {
         if (OperateNode.selectIds.value.has(id)) return
         this.collectAdsorption(OperateNode.getNodeRuntime(id))
@@ -55,16 +58,29 @@ class StageWidgetAdsorptionService {
     this.sortedAdsorptionY = [...this.hAdsorptionMap.keys()].sort()
   }
   private adsorption() {
-    this.cloneTransformOBB.shiftX(OperateGeometry.activeGeometry.x - this.cloneTransformOBB.xy.x)
-    this.cloneTransformOBB.shiftY(OperateGeometry.activeGeometry.y - this.cloneTransformOBB.xy.y)
+    this.cloneTransformOBB.shiftX(
+      OperateGeometry.activeGeometry.x - this.cloneTransformOBB.xy.x,
+    )
+    this.cloneTransformOBB.shiftY(
+      OperateGeometry.activeGeometry.y - this.cloneTransformOBB.xy.y,
+    )
     if (key === 'y' /* || key === 'height' */) this.horizontalAdsorption(key, ctx)
     if (key === 'x' /* || key === 'width' */) this.verticalAdsorption(key, ctx)
   }
-  private horizontalAdsorption(key: keyof IGeometryData, ctx: IValueWillChange<number>) {
+  private horizontalAdsorption(
+    key: keyof IGeometryData,
+    ctx: IValueWillChange<number>,
+  ) {
     const { top, bottom, centerY } = this.getAdsorptionBound(this.cloneTransformOBB)
     const topClosest = this.getClosestValInSortedArr(this.sortedAdsorptionY, top)
-    const bottomClosest = this.getClosestValInSortedArr(this.sortedAdsorptionY, bottom)
-    const centerClosest = this.getClosestValInSortedArr(this.sortedAdsorptionY, centerY)
+    const bottomClosest = this.getClosestValInSortedArr(
+      this.sortedAdsorptionY,
+      bottom,
+    )
+    const centerClosest = this.getClosestValInSortedArr(
+      this.sortedAdsorptionY,
+      centerY,
+    )
     const topOffset = abs(topClosest - top)
     const bottomOffset = abs(bottomClosest - bottom)
     const centerOffset = abs(centerClosest - centerY)
@@ -93,11 +109,17 @@ class StageWidgetAdsorptionService {
       return offset
     })
   }
-  private verticalAdsorption(key: keyof IGeometryData, ctx: IValueWillChange<number>) {
+  private verticalAdsorption(
+    key: keyof IGeometryData,
+    ctx: IValueWillChange<number>,
+  ) {
     const { left, right, centerX } = this.getAdsorptionBound(this.cloneTransformOBB)
     const leftClosest = this.getClosestValInSortedArr(this.sortedAdsorptionX, left)
     const rightClosest = this.getClosestValInSortedArr(this.sortedAdsorptionX, right)
-    const centerClosest = this.getClosestValInSortedArr(this.sortedAdsorptionX, centerX)
+    const centerClosest = this.getClosestValInSortedArr(
+      this.sortedAdsorptionX,
+      centerX,
+    )
     const leftOffset = abs(leftClosest - left)
     const rightOffset = abs(rightClosest - right)
     const centerOffset = abs(centerClosest - centerX)
@@ -127,7 +149,8 @@ class StageWidgetAdsorptionService {
     })
   }
   private collectAdsorption(obb: OBB) {
-    const { left, right, top, bottom, centerX, centerY } = this.getAdsorptionBound(obb)
+    const { left, right, top, bottom, centerX, centerY } =
+      this.getAdsorptionBound(obb)
     this.hAdsorptionMap.getSet(top, () => []).push(left, right)
     this.hAdsorptionMap.getSet(bottom, () => []).push(left, right)
     this.hAdsorptionMap.getSet(centerY, () => []).push(left, right)

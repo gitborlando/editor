@@ -12,7 +12,10 @@ import {
 } from 'src/editor/math/matrix'
 import { xy_, xy_center, xy_minus, xy_rotate } from 'src/editor/math/xy'
 import { StageScene } from 'src/editor/stage/render/scene'
-import { TextBreaker, createTextBreaker } from 'src/editor/stage/render/text-break/text-breaker'
+import {
+  TextBreaker,
+  createTextBreaker,
+} from 'src/editor/stage/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { INoopFunc, IXY, Raf, getTime } from 'src/shared/utils/normal'
 import TinyQueue from 'tinyqueue'
@@ -77,7 +80,9 @@ export class StageSurface {
   private renderTasks: INoopFunc[] = []
   private raf = new Raf()
 
-  private requestRender = (type: 'firstFullRender' | 'nextFullRender' | 'partialRender') => {
+  private requestRender = (
+    type: 'firstFullRender' | 'nextFullRender' | 'partialRender',
+  ) => {
     if (type === 'partialRender' && this.renderTasks.length) return
 
     if (type === 'firstFullRender') this.calcFullRenderElemsMinHeap()
@@ -95,14 +100,23 @@ export class StageSurface {
     })
   }
 
-  private fullRenderElemsMinHeap: TinyQueue<{ elem: Elem; selfIndex: number; layerIndex: number }> =
-    new TinyQueue()
+  private fullRenderElemsMinHeap: TinyQueue<{
+    elem: Elem
+    selfIndex: number
+    layerIndex: number
+  }> = new TinyQueue()
 
   private calcFullRenderElemsMinHeap() {
     this.fullRenderElemsMinHeap = new TinyQueue(undefined, (a, b) => {
       if (a.layerIndex !== b.layerIndex) return a.layerIndex - b.layerIndex
-      const aDistance = xy_minus(xy_center(AABB.rect(a.elem.aabb)), this.eventXY || xy_())
-      const bDistance = xy_minus(xy_center(AABB.rect(b.elem.aabb)), this.eventXY || xy_())
+      const aDistance = xy_minus(
+        xy_center(AABB.rect(a.elem.aabb)),
+        this.eventXY || xy_(),
+      )
+      const bDistance = xy_minus(
+        xy_center(AABB.rect(b.elem.aabb)),
+        this.eventXY || xy_(),
+      )
       const aLane = max(abs(aDistance.x), abs(aDistance.y))
       const bLane = max(abs(bDistance.x), abs(bDistance.y))
       return aLane - bLane
@@ -373,10 +387,12 @@ export class StageSurface {
     if (!e) return this.elemsFromPoint
 
     this.getEventXY(e)
-    this.traverseLayerList((elem, capture, stopped, stopPropagation, hitList, xy) => {
-      const hit = elem.hitTest(xy!)
-      if (hit) hitList?.push(elem)
-    })
+    this.traverseLayerList(
+      (elem, capture, stopped, stopPropagation, hitList, xy) => {
+        const hit = elem.hitTest(xy!)
+        if (hit) hitList?.push(elem)
+      },
+    )
 
     return this.elemsFromPoint
   }
@@ -387,11 +403,14 @@ export class StageSurface {
       if (this.fullRenderElemsMinHeap.length) return
 
       this.getEventXY(e)
-      this.traverseLayerList((elem, capture, stopped, stopPropagation, hitList, xy) => {
-        const hit = elem.hitTest(xy!)
-        if (hit) hitList?.push(elem)
-        if (!stopped) elem.eventHandle.triggerMouseEvent(e, xy!, hit, capture, stopPropagation)
-      })
+      this.traverseLayerList(
+        (elem, capture, stopped, stopPropagation, hitList, xy) => {
+          const hit = elem.hitTest(xy!)
+          if (hit) hitList?.push(elem)
+          if (!stopped)
+            elem.eventHandle.triggerMouseEvent(e, xy!, hit, capture, stopPropagation)
+        },
+      )
     }
 
     this.addEvent('mousedown', onMouseEvent, { capture: true })

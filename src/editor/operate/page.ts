@@ -38,7 +38,10 @@ class OperatePageService {
   private pageViewport = createObjCache<{ zoom: number; offset: IXY }>()
 
   getCurrentViewport() {
-    return this.pageViewport.getSet(this.currentPage.id, () => ({ zoom: 1, offset: xy_() }))
+    return this.pageViewport.getSet(this.currentPage.id, () => ({
+      zoom: 1,
+      offset: xy_(),
+    }))
   }
 
   setCurrentViewport(viewport: { zoom?: number; offset?: IXY }) {

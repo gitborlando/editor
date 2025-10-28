@@ -67,7 +67,10 @@ class StageViewportService {
     }
   }
   sceneStageToClientXY(xy: IXY) {
-    return XY.from(xy).multiply(this.zoom).plus(this.offset).plus(XY.leftTop(this.bound))
+    return XY.from(xy)
+      .multiply(this.zoom)
+      .plus(this.offset)
+      .plus(XY.leftTop(this.bound))
   }
   inViewport(xy: IXY) {
     const { left, top, right, bottom } = this.bound
@@ -94,7 +97,8 @@ class StageViewportService {
       e.preventDefault()
 
       const sign = e.deltaY > 0 ? -1 : 1
-      const step = stepByZoom.findLast(([_zoom, _step]) => _zoom <= this.zoom)![1] * sign
+      const step =
+        stepByZoom.findLast(([_zoom, _step]) => _zoom <= this.zoom)![1] * sign
 
       const newZoom = max(0.01, this.zoom + step)
       const zoomDelta = newZoom - this.zoom
@@ -111,7 +115,9 @@ class StageViewportService {
       if (hotkeys.ctrl) e.preventDefault()
     })
     Surface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent))
-    window.addEventListener('wheel', (e) => e.ctrlKey && e.preventDefault(), { passive: false })
+    window.addEventListener('wheel', (e) => e.ctrlKey && e.preventDefault(), {
+      passive: false,
+    })
   }
 
   private onResizeBound() {

@@ -55,10 +55,14 @@ export class Elem {
     if (!this.node) return null
 
     const { center, width, height, rotation } = this.obb
-    const strokeWidth = this.node.strokes.reduce((acc, stroke) => acc + stroke.width, 0)
+    const strokeWidth = this.node.strokes.reduce(
+      (acc, stroke) => acc + stroke.width,
+      0,
+    )
     const outlineWidth = this.node.outline?.width || 0
     const extend = max(strokeWidth, outlineWidth)
-    return OBB.fromCenter(center, width + extend * 2, height + extend * 2, rotation).aabb
+    return OBB.fromCenter(center, width + extend * 2, height + extend * 2, rotation)
+      .aabb
   }
 
   traverseDraw() {
@@ -106,11 +110,19 @@ export class Elem {
     this.eventHandle.hitTest = hitTest
   }
 
-  addEvent(type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) {
+  addEvent(
+    type: ElemEventType,
+    func: ElemEventFunc,
+    option?: { capture?: boolean },
+  ) {
     return this.eventHandle.addEvent(type, func, option)
   }
 
-  removeEvent(type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) {
+  removeEvent(
+    type: ElemEventType,
+    func: ElemEventFunc,
+    option?: { capture?: boolean },
+  ) {
     return this.eventHandle.removeEvent(type, func, option)
   }
 
@@ -155,7 +167,11 @@ class ElemEventHandler {
     this.hitTest = this.hitTestCache.getSet('hitTest', createHitTest, deps)
   }
 
-  addEvent = (type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) => {
+  addEvent = (
+    type: ElemEventType,
+    func: ElemEventFunc,
+    option?: { capture?: boolean },
+  ) => {
     const capture = option?.capture ? 0 : 1
 
     this[type][capture].push(func)
@@ -170,7 +186,11 @@ class ElemEventHandler {
     }
   }
 
-  removeEvent = (type: ElemEventType, func: ElemEventFunc, option?: { capture?: boolean }) => {
+  removeEvent = (
+    type: ElemEventType,
+    func: ElemEventFunc,
+    option?: { capture?: boolean },
+  ) => {
     const capture = option?.capture ? 0 : 1
     const index = this[type][capture].indexOf(func)
     if (index === -1) return
@@ -206,17 +226,23 @@ class ElemEventHandler {
     switch (e.type) {
       case 'mousedown':
         if (hit) {
-          this.mousedown[capture].forEach((func) => func({ ...mouseEvent, hovered: true }))
+          this.mousedown[capture].forEach((func) =>
+            func({ ...mouseEvent, hovered: true }),
+          )
         }
         break
 
       case 'mousemove':
         if (hit) {
-          this.mousemove[capture].forEach((func) => func({ ...mouseEvent, hovered: true }))
+          this.mousemove[capture].forEach((func) =>
+            func({ ...mouseEvent, hovered: true }),
+          )
         }
         if (hit !== this.lastHit[capture]) {
           this.lastHit[capture] = hit
-          this.hover[capture].forEach((func) => func({ ...mouseEvent, hovered: hit }))
+          this.hover[capture].forEach((func) =>
+            func({ ...mouseEvent, hovered: hit }),
+          )
         }
         break
     }
@@ -232,9 +258,12 @@ export class HitTest {
       } else {
         if (!inRect) return false
         if (xy_distance(xy, xy_(r, r)) > r && xy.x < r && xy.y < r) return false
-        if (xy_distance(xy, xy_(w - r, r)) > r && xy.x > w - r && xy.y < r) return false
-        if (xy_distance(xy, xy_(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r) return false
-        if (xy_distance(xy, xy_(r, h - r)) > r && xy.x < r && xy.y > h - r) return false
+        if (xy_distance(xy, xy_(w - r, r)) > r && xy.x > w - r && xy.y < r)
+          return false
+        if (xy_distance(xy, xy_(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r)
+          return false
+        if (xy_distance(xy, xy_(r, h - r)) > r && xy.x < r && xy.y > h - r)
+          return false
         return true
       }
     }
@@ -300,7 +329,15 @@ export class HitTest {
 
   static hitPoint(center: IXY, size: number) {
     return (xy: IXY) => {
-      return HitTest.hitEllipse(center.x, center.y, size / 2, size / 2, 0, 360, 0)(xy)
+      return HitTest.hitEllipse(
+        center.x,
+        center.y,
+        size / 2,
+        size / 2,
+        0,
+        360,
+        0,
+      )(xy)
     }
   }
 

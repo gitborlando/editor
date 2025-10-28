@@ -11,13 +11,13 @@ export function bezierParametricEquation(
   a1y: number,
   a2x: number,
   a2y: number,
-  t: number //参数t
+  t: number, //参数t
 ) {
   const newXY = xy_plus_all(
     xy_multiply(xy_(p1x, p1y), pow3(1 - t)),
     xy_multiply(xy_(a1x, a1y), 3, t, pow2(1 - t)),
     xy_multiply(xy_(a2x, a2y), 3, pow2(t), 1 - t),
-    xy_multiply(xy_(p2x, p2y), pow3(t))
+    xy_multiply(xy_(p2x, p2y), pow3(t)),
   )
   return [newXY.x, newXY.y]
 }
@@ -31,7 +31,7 @@ export function bezierMidpoint(
   a1x: number,
   a1y: number,
   a2x: number,
-  a2y: number
+  a2y: number,
 ) {
   let arr: {
     t: number
@@ -72,7 +72,7 @@ export function bezierDivide(
   a1y: number,
   a2x: number,
   a2y: number,
-  t: number
+  t: number,
 ) {
   const A = xy_(p1x, p1y)
   const B = xy_(p2x, p2y)

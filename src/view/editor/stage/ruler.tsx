@@ -55,7 +55,10 @@ export const RulerComp: FC<IRulerComp> = observer(({}) => {
 
   const HLabelComp = useMemoComp<{ x: number; text: number }>([], ({ x, text }) => {
     return (
-      <Flex layout='v' className='wh-fit absolute -translate-x-50%' style={{ left: x, top: 0 }}>
+      <Flex
+        layout='v'
+        className='wh-fit absolute -translate-x-50%'
+        style={{ left: x, top: 0 }}>
         <Flex layout='c' className='wh-1-4 b-1-#9F9F9F'></Flex>
         <Flex layout='c' className='text-10 text-[#9F9F9F]'>
           {text}
@@ -66,7 +69,10 @@ export const RulerComp: FC<IRulerComp> = observer(({}) => {
 
   const VLabelComp = useMemoComp<{ y: number; text: number }>([], ({ y, text }) => {
     return (
-      <Flex layout='h' className='wh-fit absolute -translate-y-50%' style={{ left: 0, top: y }}>
+      <Flex
+        layout='h'
+        className='wh-fit absolute -translate-y-50%'
+        style={{ left: 0, top: y }}>
         <Flex layout='c' className='wh-4-1 b-1-#9F9F9F'></Flex>
         <Flex layout='c' className='wh-14-10 text-10 text-[#9F9F9F] -rotate-90'>
           {text}

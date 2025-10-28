@@ -24,7 +24,9 @@ export const NodeHeaderComp: FC<INodeHeaderComp> = memo(({}) => {
       <Button
         type='icon'
         style={{ marginLeft: 'auto' }}
-        onClick={() => allNodeExpanded.dispatch(isCollapsed ? 'expanded' : 'collapsed')}>
+        onClick={() =>
+          allNodeExpanded.dispatch(isCollapsed ? 'expanded' : 'collapsed')
+        }>
         <Icon
           className='wh-16'
           style={{ rotate: isCollapsed ? '0deg' : '180deg' }}

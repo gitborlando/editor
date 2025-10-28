@@ -24,11 +24,16 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
   }
 
   const ImgComp = useMemoComp([fill.url], ({}) => {
-    const image = usePromise<[string], IImage>(() => ImgManager.getImageAsync(fill.url), [fill.url])
+    const image = usePromise<[string], IImage>(
+      () => ImgManager.getImageAsync(fill.url),
+      [fill.url],
+    )
     const imageBound = iife(() => {
       const { width, height } = image
       const rate = width / height
-      return rate > 1 ? { width: 240, height: 240 / rate } : { width: 200 * rate, height: 200 }
+      return rate > 1
+        ? { width: 240, height: 240 / rate }
+        : { width: 200 * rate, height: 200 }
     })
     return <img src={image.objectUrl} style={{ ...imageBound }}></img>
   })

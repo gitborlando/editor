@@ -12,23 +12,25 @@ type IPointComp = {
   onChangeEnd?: () => any
 }
 
-export const PointComp: FC<IPointComp> = memo(({ onChangeXY, select, draw, onChangeEnd }) => {
-  const [hovered, setHovered] = useState(false)
-  const onMouseDown = () => {
-    Drag.onDown(select)
-      .onMove(({ shift }) => onChangeXY(StageViewport.toSceneShift(shift)))
-      .onDestroy(({ dragService }) => dragService.started && onChangeEnd?.())
-  }
+export const PointComp: FC<IPointComp> = memo(
+  ({ onChangeXY, select, draw, onChangeEnd }) => {
+    const [hovered, setHovered] = useState(false)
+    const onMouseDown = () => {
+      Drag.onDown(select)
+        .onMove(({ shift }) => onChangeXY(StageViewport.toSceneShift(shift)))
+        .onDestroy(({ dragService }) => dragService.started && onChangeEnd?.())
+    }
 
-  return (
-    <Graphics
-      eventMode='dynamic'
-      onmouseenter={() => setHovered(true)}
-      onmouseleave={() => setHovered(false)}
-      onmousedown={onMouseDown}
-      draw={draw({ hovered })}
-    />
-  )
-})
+    return (
+      <Graphics
+        eventMode='dynamic'
+        onmouseenter={() => setHovered(true)}
+        onmouseleave={() => setHovered(false)}
+        onmousedown={onMouseDown}
+        draw={draw({ hovered })}
+      />
+    )
+  },
+)
 
 PointComp.displayName = 'PointComp'

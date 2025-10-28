@@ -13,9 +13,18 @@ import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import { Dropdown } from 'src/view/ui-utility/widget/dropdown'
 
 export const TextComp: FC<{}> = ({}) => {
-  const { intoEditing, textStyle, textStyleOptions, setTextStyle, toggleTextStyle, afterOperate } =
-    OperateText
-  const createDownUpTracker = (elFunc: () => HTMLElement | null, key: ITextStyleKey) => {
+  const {
+    intoEditing,
+    textStyle,
+    textStyleOptions,
+    setTextStyle,
+    toggleTextStyle,
+    afterOperate,
+  } = OperateText
+  const createDownUpTracker = (
+    elFunc: () => HTMLElement | null,
+    key: ITextStyleKey,
+  ) => {
     useDownUpTracker(elFunc, () => {}, afterOperate.dispatch)
   }
 
@@ -115,7 +124,7 @@ export const TextComp: FC<{}> = ({}) => {
           />
         </Flex>
       )
-    }
+    },
   )
 
   return (

@@ -15,7 +15,7 @@ export class OBB {
     public y: number,
     public width: number,
     public height: number,
-    public rotation: number
+    public rotation: number,
   ) {
     this.center = this.calcCenter()
     this.axis = this.calcAxis()
@@ -107,7 +107,12 @@ export class OBB {
 }
 
 export class AABB {
-  constructor(public minX: number, public minY: number, public maxX: number, public maxY: number) {}
+  constructor(
+    public minX: number,
+    public minY: number,
+    public maxX: number,
+    public maxY: number,
+  ) {}
 
   static Rect(aabb: AABB) {
     return {
@@ -145,13 +150,21 @@ export class AABB {
     return included ? result : -1
   }
 
-  static Expand(aabb: AABB, ...expands: [number] | [number, number, number, number]): AABB {
+  static Expand(
+    aabb: AABB,
+    ...expands: [number] | [number, number, number, number]
+  ): AABB {
     const { minX, minY, maxX, maxY } = aabb
     if (expands.length === 1) {
       const expand = expands[0]
       return new AABB(minX - expand, minY - expand, maxX + expand, maxY + expand)
     } else {
-      return new AABB(minX - expands[0], minY - expands[1], maxX + expands[2], maxY + expands[3])
+      return new AABB(
+        minX - expands[0],
+        minY - expands[1],
+        maxX + expands[2],
+        maxY + expands[3],
+      )
     }
   }
 
@@ -173,7 +186,7 @@ export class AABB {
       obb.center.x - width / 2,
       obb.center.y - height / 2,
       obb.center.x + width / 2,
-      obb.center.y + height / 2
+      obb.center.y + height / 2,
     )
   }
 }

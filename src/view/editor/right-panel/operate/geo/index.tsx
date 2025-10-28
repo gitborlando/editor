@@ -11,79 +11,94 @@ import './index.less'
 
 interface EditorRightOperateGeoProps {}
 
-export const EditorRightOperateGeo: FC<EditorRightOperateGeoProps> = observer(({}) => {
-  const { activeKeys, activeGeometry, setupActiveKeys, setupActiveGeometry } = OperateGeometry
-  const nodes = useSelectNodes()
+export const EditorRightOperateGeo: FC<EditorRightOperateGeoProps> = observer(
+  ({}) => {
+    const { activeKeys, activeGeometry, setupActiveKeys, setupActiveGeometry } =
+      OperateGeometry
+    const nodes = useSelectNodes()
 
-  useMemo(() => {
-    setupActiveKeys(nodes)
-    setupActiveGeometry(nodes)
-  }, [nodes])
+    useMemo(() => {
+      setupActiveKeys(nodes)
+      setupActiveGeometry(nodes)
+    }, [nodes])
 
-  return (
-    <G
-      x-if={nodes.length > 0}
-      className='editor-right-operate-geo borderBottom'
-      horizontal='auto auto'
-      gap={8}>
-      <GeometryItemComp
-        label='横轴'
-        operateKey='x'
-        value={activeGeometry.x}
-        slideRate={1 / getZoom()}
-      />
-      <GeometryItemComp
-        label='纵轴'
-        operateKey='y'
-        value={activeGeometry.y}
-        slideRate={1 / getZoom()}
-      />
-      <GeometryItemComp label='宽度' operateKey='width' value={activeGeometry.width} />
-      <GeometryItemComp label='高度' operateKey='height' value={activeGeometry.height} />
-      <GeometryItemComp label='旋转' operateKey='rotation' value={activeGeometry.rotation} />
-      <GeometryItemComp
-        x-if={activeKeys.has('radius')}
-        label='圆角'
-        operateKey='radius'
-        slideRate={1 / getZoom()}
-        value={activeGeometry.radius}
-      />
-      <GeometryItemComp
-        x-if={activeKeys.has('sides')}
-        label='边数'
-        operateKey='sides'
-        slideRate={0.01}
-        value={activeGeometry.sides}
-      />
-      <GeometryItemComp
-        x-if={activeKeys.has('pointCount')}
-        label='角数'
-        operateKey='pointCount'
-        slideRate={0.01}
-        value={activeGeometry.pointCount}
-      />
-      <GeometryItemComp
-        x-if={activeKeys.has('startAngle')}
-        label='起始角'
-        operateKey='startAngle'
-        value={activeGeometry.startAngle}
-      />
-      <GeometryItemComp
-        x-if={activeKeys.has('endAngle')}
-        label='结束角'
-        operateKey='endAngle'
-        value={activeGeometry.endAngle}
-      />
-      <GeometryItemComp
-        x-if={activeKeys.has('innerRate')}
-        label='内径比'
-        operateKey='innerRate'
-        slideRate={0.01}
-        value={activeGeometry.innerRate}
-      />
-    </G>
-  )
-})
+    return (
+      <G
+        x-if={nodes.length > 0}
+        className='editor-right-operate-geo borderBottom'
+        horizontal='auto auto'
+        gap={8}>
+        <GeometryItemComp
+          label='横轴'
+          operateKey='x'
+          value={activeGeometry.x}
+          slideRate={1 / getZoom()}
+        />
+        <GeometryItemComp
+          label='纵轴'
+          operateKey='y'
+          value={activeGeometry.y}
+          slideRate={1 / getZoom()}
+        />
+        <GeometryItemComp
+          label='宽度'
+          operateKey='width'
+          value={activeGeometry.width}
+        />
+        <GeometryItemComp
+          label='高度'
+          operateKey='height'
+          value={activeGeometry.height}
+        />
+        <GeometryItemComp
+          label='旋转'
+          operateKey='rotation'
+          value={activeGeometry.rotation}
+        />
+        <GeometryItemComp
+          x-if={activeKeys.has('radius')}
+          label='圆角'
+          operateKey='radius'
+          slideRate={1 / getZoom()}
+          value={activeGeometry.radius}
+        />
+        <GeometryItemComp
+          x-if={activeKeys.has('sides')}
+          label='边数'
+          operateKey='sides'
+          slideRate={0.01}
+          value={activeGeometry.sides}
+        />
+        <GeometryItemComp
+          x-if={activeKeys.has('pointCount')}
+          label='角数'
+          operateKey='pointCount'
+          slideRate={0.01}
+          value={activeGeometry.pointCount}
+        />
+        <GeometryItemComp
+          x-if={activeKeys.has('startAngle')}
+          label='起始角'
+          operateKey='startAngle'
+          value={activeGeometry.startAngle}
+        />
+        <GeometryItemComp
+          x-if={activeKeys.has('endAngle')}
+          label='结束角'
+          operateKey='endAngle'
+          value={activeGeometry.endAngle}
+        />
+        <GeometryItemComp
+          x-if={activeKeys.has('innerRate')}
+          label='内径比'
+          operateKey='innerRate'
+          slideRate={0.01}
+          value={activeGeometry.innerRate}
+        />
+      </G>
+    )
+  },
+)
 
 const GeometryItemComp: FC<{
   label: string

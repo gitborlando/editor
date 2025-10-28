@@ -66,7 +66,9 @@ class UILeftPanelLayerService {
     })
     this.searchSlice.hook(this.searchNode)
     this.afterSearch.hook(() => {
-      this.nodeIdsInSearch.value.forEach((id) => this.setSingleNodeExpanded(id, true))
+      this.nodeIdsInSearch.value.forEach((id) =>
+        this.setSingleNodeExpanded(id, true),
+      )
       this.autoScroll(this.nodeIdsInSearch.value)
       this.singleNodeExpanded.dispatch(true)
     })
@@ -125,7 +127,9 @@ class UILeftPanelLayerService {
     })
   }
   init() {
-    this.nodeViewHeight.dispatch(UILeftPanel.panelHeight - this.pagePanelHeight.value - 32)
+    this.nodeViewHeight.dispatch(
+      UILeftPanel.panelHeight - this.pagePanelHeight.value - 32,
+    )
   }
   expandAncestor(id: ID) {
     let node: INode = Schema.find(id)
@@ -181,7 +185,8 @@ class UILeftPanelLayerService {
     const traverse = SchemaUtil2.createCurrentPageTraverse({
       finder: YState.findSnap<V1.Node>,
       callback: ({ id, node }) => {
-        node.name.includes(this.searchSlice.value) && this.nodeIdsInSearch.value.add(id)
+        node.name.includes(this.searchSlice.value) &&
+          this.nodeIdsInSearch.value.add(id)
       },
       bubbleCallback: ({ id, upLevelRef }) => {
         if (!this.nodeIdsInSearch.value.has(id) || !upLevelRef?.id) return
@@ -198,7 +203,8 @@ class UILeftPanelLayerService {
       finder: YState.findSnap<V1.Node>,
       callback: ({ id, abort, upLevelRef }) => {
         if (ids.has(id)) return abort.abort()
-        if (!upLevelRef) return (this.nodeScrollHeight.value = this.nodeScrollHeight.value + 32)
+        if (!upLevelRef)
+          return (this.nodeScrollHeight.value = this.nodeScrollHeight.value + 32)
         if (this.getNodeExpanded(upLevelRef.id)) {
           this.nodeScrollHeight.value = this.nodeScrollHeight.value + 32
         }

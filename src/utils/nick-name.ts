@@ -736,12 +736,16 @@ class RandomName {
       if (this.familyNameItemsAll.length === 0) {
         throw new Error('familyNameItemsAll 数组为空')
       }
-      return this.familyNameItemsAll[randomNum(0, this.familyNameItemsAll.length - 1)]
+      return this.familyNameItemsAll[
+        randomNum(0, this.familyNameItemsAll.length - 1)
+      ]
     } else {
       if (this.familyNameItemsSin.length === 0) {
         throw new Error('familyNameItemsSin 数组为空')
       }
-      return this.familyNameItemsSin[randomNum(0, this.familyNameItemsSin.length - 1)]
+      return this.familyNameItemsSin[
+        randomNum(0, this.familyNameItemsSin.length - 1)
+      ]
     }
   }
   getFemaleName(sur: boolean = true): string {
@@ -777,7 +781,8 @@ class RandomName {
       )
     } else {
       return (
-        this.getFamilyName(sur) + this.maleNameItems[randomNum(0, this.maleNameItems.length - 1)]
+        this.getFamilyName(sur) +
+        this.maleNameItems[randomNum(0, this.maleNameItems.length - 1)]
       )
     }
   }
@@ -794,7 +799,9 @@ class RandomName {
         this.allName[randomNum(0, this.allName.length - 1)]
       )
     } else {
-      return this.getFamilyName(sur) + this.allName[randomNum(0, this.allName.length - 1)]
+      return (
+        this.getFamilyName(sur) + this.allName[randomNum(0, this.allName.length - 1)]
+      )
     }
   }
 }

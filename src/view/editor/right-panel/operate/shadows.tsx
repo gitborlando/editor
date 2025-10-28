@@ -34,11 +34,17 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
       index !== shadows.length - 1 ? (
         <Fragment key={index}>
           <ShadowItemComp key={index} shadow={shadow} index={index} />
-          <Divide direction='h' margin={6} length={'95%'} thickness={0.2} bgColor='#E3E3E3' />
+          <Divide
+            direction='h'
+            margin={6}
+            length={'95%'}
+            thickness={0.2}
+            bgColor='#E3E3E3'
+          />
         </Fragment>
       ) : (
         <ShadowItemComp key={index} shadow={shadow} index={index} />
-      )
+      ),
     )
   })
 
@@ -56,7 +62,9 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
             size={16}
             style={{ marginLeft: 'auto' }}
             onClick={() => toggleShadow(index, ['visible'], !shadow.visible)}>
-            {shadow.visible ? Assets.editor.shared.visible : Assets.editor.shared.unVisible}
+            {shadow.visible
+              ? Assets.editor.shared.visible
+              : Assets.editor.shared.unVisible}
           </IconButton>
           <IconButton size={16} onClick={() => deleteShadow(index)}>
             {Assets.editor.shared.minus}

@@ -50,7 +50,7 @@ function genName(file, dirs) {
   const name = camelCase([dirs.join('_') + '_' + assetName], { pascalCase: true })
   names.push(name)
   imports.push(
-    `import ${name} from './${dirs.join('/')}/${assetName}.${isSvg ? 'tsx' : assetType}'`
+    `import ${name} from './${dirs.join('/')}/${assetName}.${isSvg ? 'tsx' : assetType}'`,
   )
   let obj = asset
   for (let i = 0; i < dirs.length; i++) {
@@ -77,7 +77,7 @@ recurse(rootDir)
 
 fs.writeFileSync(
   path.resolve(rootDir, 'index.ts'),
-  `${imports.join('\n')}\n\nconst Asset = ${add(asset)}\n\nexport default Asset`
+  `${imports.join('\n')}\n\nconst Asset = ${add(asset)}\n\nexport default Asset`,
 )
 
 console.log('success\n')

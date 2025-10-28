@@ -17,7 +17,11 @@ type ICallback<T> = (value: T, forceUpdate: INoopFunc) => any
 export function useHookSignal<T>(signal: Signal<T>): T
 export function useHookSignal<T>(signal: Signal<T>, option: HookOption): T
 export function useHookSignal<T>(signal: Signal<T>, callback: ICallback<T>): T
-export function useHookSignal<T>(signal: Signal<T>, option: HookOption, callback: ICallback<T>): T
+export function useHookSignal<T>(
+  signal: Signal<T>,
+  option: HookOption,
+  callback: ICallback<T>,
+): T
 export function useHookSignal<T>(
   signal: Signal<T>,
   option?: HookOption | ICallback<T>,

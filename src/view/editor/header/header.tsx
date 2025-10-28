@@ -51,7 +51,8 @@ const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) =>
 })
 
 const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
-  const isActive = StageInteract.interaction === 'create' && StageCreate.currentType.value === type
+  const isActive =
+    StageInteract.interaction === 'create' && StageCreate.currentType.value === type
   const iconUrl = Assets.editor.node[type as keyof typeof Assets.editor.node]
   return (
     <Button
@@ -67,8 +68,16 @@ const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
 const UndoGroup: FC<{}> = observer(() => {
   return (
     <G horizontal gap={4}>
-      <Button icon={<Lucide icon={Undo} />} disabled={!YUndo.canUndo} onClick={YUndo.undo} />
-      <Button icon={<Lucide icon={Redo} />} disabled={!YUndo.canRedo} onClick={YUndo.redo} />
+      <Button
+        icon={<Lucide icon={Undo} />}
+        disabled={!YUndo.canUndo}
+        onClick={YUndo.undo}
+      />
+      <Button
+        icon={<Lucide icon={Redo} />}
+        disabled={!YUndo.canRedo}
+        onClick={YUndo.redo}
+      />
     </G>
   )
 })

@@ -45,7 +45,16 @@ namespace V1 {
 
   type NodeParent = Frame | Group | Page
 
-  type Node = Frame | Group | Rectangle | Ellipse | Text | Line | Polygon | Star | Path
+  type Node =
+    | Frame
+    | Group
+    | Rectangle
+    | Ellipse
+    | Text
+    | Line
+    | Polygon
+    | Star
+    | Path
 
   type NodeMeta = {
     id: string

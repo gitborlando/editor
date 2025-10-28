@@ -54,14 +54,19 @@ export const CompositeInput = memo(
           <Flex
             layout='h'
             className={cx('label', 'w-36 shrink-0 text-11 text-gray mr-6')}
-            style={{ ...(type === 'number' && { cursor: 'e-resize' }), flexShrink: 0 }}
+            style={{
+              ...(type === 'number' && { cursor: 'e-resize' }),
+              flexShrink: 0,
+            }}
             onMouseDown={() => {
               if (disabled || needLabelDrag !== true) return
               let startValue = numberValue()
               beforeOperate?.()
               Drag.needInfinity()
                 .onStart(() => active.dispatch(true))
-                .onMove(({ shift }) => emitNewValue((startValue + shift.x * slideRate).toString()))
+                .onMove(({ shift }) =>
+                  emitNewValue((startValue + shift.x * slideRate).toString()),
+                )
                 .onDestroy(() => {
                   active.dispatch(false)
                   afterOperate?.()
@@ -114,7 +119,11 @@ export const CompositeInput = memo(
         const ref = useRef<HTMLDivElement>(null)
         useDownUpTracker(() => ref.current, beforeOperate, afterOperate)
         return (
-          <Flex layout='v' className='wh-16-100% shrink-0' ref={ref} vshow={hover.value}>
+          <Flex
+            layout='v'
+            className='wh-16-100% shrink-0'
+            ref={ref}
+            vshow={hover.value}>
             <Flex
               layout='c'
               className=''

@@ -11,7 +11,7 @@ export function mx_create(
   m3: number,
   m4: number,
   m5: number,
-  m6: number
+  m6: number,
 ): IMatrix {
   return [m1, m2, m3, m4, m5, m6]
 }
@@ -19,7 +19,9 @@ export function mx_create(
 export function mx_invert(matrix: IMatrix): IMatrix {
   const [a, b, c, d, e, f] = matrix
   const invDet = 1 / (a * d - b * c)
-  return [d, -b, -c, a, c * f - d * e, b * e - a * f].map((i) => i * invDet) as IMatrix
+  return [d, -b, -c, a, c * f - d * e, b * e - a * f].map(
+    (i) => i * invDet,
+  ) as IMatrix
 }
 
 export function mx_applyPoint(xy: IXY, matrix: IMatrix) {

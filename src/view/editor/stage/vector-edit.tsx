@@ -10,7 +10,13 @@ import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { COLOR, hslBlueColor } from 'src/shared/utils/color'
 import { IXY, iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
-import { xy_getRotation, xy_minus, xy_opposite, xy_plus, xy_rotate } from 'young.xy-utils'
+import {
+  xy_getRotation,
+  xy_minus,
+  xy_opposite,
+  xy_plus,
+  xy_rotate,
+} from 'young.xy-utils'
 import { PointComp } from './point'
 
 type IVectorEditComp = {}
@@ -73,7 +79,11 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
             if (!handleRight) break firstIf
             if (point.symmetric === 'complete') shiftHandleRight(xy_opposite(shift))
             if (point.symmetric === 'angle') {
-              const angle = xy_getRotation(xy_plus(shift, handleLeft!), handleLeft!, point)
+              const angle = xy_getRotation(
+                xy_plus(shift, handleLeft!),
+                handleLeft!,
+                point,
+              )
               const newHandleRight = xy_rotate(handleRight, point, angle)
               shiftHandleRight(xy_minus(newHandleRight, handleRight))
             }
@@ -81,7 +91,11 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
             shiftHandleRight(shift)
             if (point.symmetric === 'complete') shiftHandleLeft(xy_opposite(shift))
             if (point.symmetric === 'angle') {
-              const angle = xy_getRotation(xy_plus(shift, handleRight!), handleRight!, point)
+              const angle = xy_getRotation(
+                xy_plus(shift, handleRight!),
+                handleRight!,
+                point,
+              )
               const newHandleLeft = xy_rotate(handleLeft!, point, angle)
               shiftHandleLeft(xy_minus(newHandleLeft, handleLeft!))
             }
@@ -102,7 +116,10 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
                       g.clear()
                       g.x = node.x
                       g.y = node.y
-                      g.lineStyle(1 / zoom, handelSelected ? hslBlueColor(60) : '#9F9F9F')
+                      g.lineStyle(
+                        1 / zoom,
+                        handelSelected ? hslBlueColor(60) : '#9F9F9F',
+                      )
                       g.moveTo(point.x, point.y)
                       g.lineTo(handle.x, handle.y)
                     }}
@@ -113,8 +130,12 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
                     onChangeEnd={afterReset}
                     draw={({ hovered }) =>
                       (g) => {
-                        const fillColor = handelSelected ? hslBlueColor(60) : COLOR.white
-                        const lineColor = handelSelected ? COLOR.white : hslBlueColor(60)
+                        const fillColor = handelSelected
+                          ? hslBlueColor(60)
+                          : COLOR.white
+                        const lineColor = handelSelected
+                          ? COLOR.white
+                          : hslBlueColor(60)
                         const rate = handelSelected || hovered ? 1.4 : 1
                         g.clear()
                         g.beginFill(fillColor)
@@ -124,7 +145,11 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
                         g.y = node.y + handle.y
                         g.hitArea = {
                           contains: (x, y) =>
-                            new PIXI.Circle(0, 0, (handleSize / zoom) * 1.2).contains(x, y),
+                            new PIXI.Circle(
+                              0,
+                              0,
+                              (handleSize / zoom) * 1.2,
+                            ).contains(x, y),
                         }
                       }}
                   />
@@ -147,7 +172,8 @@ export const VectorEditComp: FC<IVectorEditComp> = memo(({}) => {
                   g.x = node.x + point.x
                   g.y = node.y + point.y
                   g.hitArea = {
-                    contains: (x, y) => new PIXI.Circle(0, 0, (size / zoom) * 1.2).contains(x, y),
+                    contains: (x, y) =>
+                      new PIXI.Circle(0, 0, (size / zoom) * 1.2).contains(x, y),
                   }
                 }}
             />

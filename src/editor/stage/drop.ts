@@ -129,8 +129,9 @@ export class StageDropService {
     const hoverIds = StageScene.elemsFromPoint(e).map((elem) => elem.id)
 
     this.containerNode =
-      hoverIds.map(Schema.find<INodeParent>).find((node) => node?.type === 'frame') ||
-      OperatePage.currentPage
+      hoverIds
+        .map(Schema.find<INodeParent>)
+        .find((node) => node?.type === 'frame') || OperatePage.currentPage
   }
 }
 

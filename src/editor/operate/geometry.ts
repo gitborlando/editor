@@ -26,7 +26,10 @@ function createAllGeometry() {
   }
 }
 
-function createActiveKeys(set: Set<keyof AllGeometry>, keys: (keyof AllGeometry)[] = []) {
+function createActiveKeys(
+  set: Set<keyof AllGeometry>,
+  keys: (keyof AllGeometry)[] = [],
+) {
   set.clear()
   keys.forEach((key) => set.add(key))
   return set
@@ -125,26 +128,42 @@ class OperateGeometryService {
       }
       if (key === 'radius') {
         if (depth !== 0) return
-        return (t<any>(node).radius = max(0, t<any>(node).radius + this.delta(key, node)))
+        return (t<any>(node).radius = max(
+          0,
+          t<any>(node).radius + this.delta(key, node),
+        ))
       }
       if (key === 'rotation') {
         return this.applyRotationToNode(traverseData, node, depth)
       }
       if (key === 'sides') {
         const { width, height, sides } = node as IPolygon
-        return (t<V1.Polygon>(node).points = createRegularPolygon(width, height, sides))
+        return (t<V1.Polygon>(node).points = createRegularPolygon(
+          width,
+          height,
+          sides,
+        ))
       }
       if (key === 'pointCount' || key === 'innerRate') {
         let { width, height, pointCount, innerRate } = node as IStar
         pointCount = max(3, floor(pointCount))
         innerRate = min(1, max(0, innerRate))
-        return (t<V1.Star>(node).points = createStarPolygon(width, height, pointCount, innerRate))
+        return (t<V1.Star>(node).points = createStarPolygon(
+          width,
+          height,
+          pointCount,
+          innerRate,
+        ))
       }
       t<any>(node)[key] = t<any>(node)[key] + this.delta(key, node)
     })
   }
 
-  private applyRotationToNode(traverseData: SchemaUtilTraverseData, node: V1.Node, depth: number) {
+  private applyRotationToNode(
+    traverseData: SchemaUtilTraverseData,
+    node: V1.Node,
+    depth: number,
+  ) {
     const { getNodeCenterXY } = OperateNode
     const centerXY = getNodeCenterXY(node)
     const newXY = xy_rotate(node, centerXY, this.delta('rotation', node))
@@ -158,7 +177,11 @@ class OperateGeometryService {
       let upLevelRef = traverseData.upLevelRef!
       while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
       const ancestorCenter = getNodeCenterXY(upLevelRef.node)
-      const newCenter = xy_rotate(centerXY, ancestorCenter, this.delta('rotation', node))
+      const newCenter = xy_rotate(
+        centerXY,
+        ancestorCenter,
+        this.delta('rotation', node),
+      )
       const centerShift = xy_minus(newCenter, centerXY)
       node.x = newXY.x + centerShift.x
       node.y = newXY.y + centerShift.y

@@ -130,7 +130,10 @@ function shouldBreak(start: number, mid: number[], end: number) {
     return BreakStart
   }
   // GB6. L X (L|V|LV|LVT)
-  else if (previous === L && (next === L || next === V || next === LV || next === LVT)) {
+  else if (
+    previous === L &&
+    (next === L || next === V || next === LV || next === LVT)
+  ) {
     return NotBreak
   }
   // GB7. (LV|V) X (V|T)

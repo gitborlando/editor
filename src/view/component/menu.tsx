@@ -35,14 +35,18 @@ export const MenuComp: FC<IMenuComp> = observer(({}) => {
   })
 
   const DivideComp = useMemoComp([], ({}) => {
-    return <Divide direction='h' length='100%' margin={4} bgColor='rgba(0,0,0,0.05)' />
+    return (
+      <Divide direction='h' length='100%' margin={4} bgColor='rgba(0,0,0,0.05)' />
+    )
   })
 
   const MenuOptionsComp = useMemoComp([menuOptions.value], ({}) => {
     return (
       <Flex className='lay-v wh-200-100%'>
         {menuOptions.value.map((group, groupIndex) => {
-          const menuGroup = group.map((item, index) => <MenuItemComp key={index} item={item} />)
+          const menuGroup = group.map((item, index) => (
+            <MenuItemComp key={index} item={item} />
+          ))
           if (groupIndex !== menuOptions.value.length - 1)
             menuGroup.push(<DivideComp key={Math.random()} />)
           return menuGroup
@@ -61,7 +65,10 @@ export const MenuComp: FC<IMenuComp> = observer(({}) => {
         ref={ref}
         className='lay-h wh-200-fit pb-2 menu-scroll of-x-auto of-y-hidden'
         onWheel={(e) => {
-          ref.current?.scrollTo({ left: ref.current.scrollLeft + e.deltaY, behavior: 'auto' })
+          ref.current?.scrollTo({
+            left: ref.current.scrollLeft + e.deltaY,
+            behavior: 'auto',
+          })
         }}>
         {(['select', 'move'] as const).map((type) => (
           <StageOperateIcon key={type} type={type} />
@@ -88,7 +95,8 @@ export const MenuComp: FC<IMenuComp> = observer(({}) => {
 
   const CreateShapeIcon: FC<{ type: IStageCreateType }> = ({ type }) => {
     const isActive =
-      StageInteract.interaction === 'create' && StageCreate.currentType.value === type
+      StageInteract.interaction === 'create' &&
+      StageCreate.currentType.value === type
     return (
       <Button
         active={isActive}
@@ -97,7 +105,10 @@ export const MenuComp: FC<IMenuComp> = observer(({}) => {
           StageCreate.currentType.dispatch(type)
           closeMenu()
         }}>
-        <Icon className='wh-16' url={Assets.editor.node[type as keyof typeof Assets.editor.node]} />
+        <Icon
+          className='wh-16'
+          url={Assets.editor.node[type as keyof typeof Assets.editor.node]}
+        />
       </Button>
     )
   }

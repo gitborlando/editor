@@ -61,11 +61,16 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   })
 
   const ImgComp = useMemoComp<{ url: string }>([], ({ url }) => {
-    const image = usePromise<[string], IImage>(() => ImgManager.getImageAsync(url), [url])
+    const image = usePromise<[string], IImage>(
+      () => ImgManager.getImageAsync(url),
+      [url],
+    )
     const imageBound = iife(() => {
       const { width, height } = image
       const rate = width / height
-      return rate > 1 ? { width: 18, height: 18 / rate } : { width: 18 * rate, height: 18 }
+      return rate > 1
+        ? { width: 18, height: 18 / rate }
+        : { width: 18 * rate, height: 18 }
     })
     return <img src={image.objectUrl} style={{ ...imageBound }}></img>
   })
@@ -79,9 +84,12 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
           onClick={(e) => showPicker(xy_client(e))}>
           <img src={Assets.editor.rightPanel.operate.fill.none}></img>
           {isColorType && (
-            <Flex style={{ backgroundColor: rgbToRgba(fill.color, fill.alpha) }}></Flex>
+            <Flex
+              style={{ backgroundColor: rgbToRgba(fill.color, fill.alpha) }}></Flex>
           )}
-          {isLinearType && <Flex style={{ background: makeLinearGradientCss(fill) }}></Flex>}
+          {isLinearType && (
+            <Flex style={{ background: makeLinearGradientCss(fill) }}></Flex>
+          )}
           {isImageType && withSuspense(<ImgComp url={fill.url} />)}
         </Flex>
         <ColorInputComp fill={fill} />

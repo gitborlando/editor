@@ -1,7 +1,11 @@
 import { IXY } from '@gitborlando/geo'
 import { clone, miniId } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { createLine, createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
+import {
+  createLine,
+  createRegularPolygon,
+  createStarPolygon,
+} from 'src/editor/math/point'
 import { themeColor } from 'src/global/color'
 import { rgb } from 'src/utils/color'
 import { defuOverrideArray } from 'src/utils/defu'
@@ -204,7 +208,10 @@ class SchemaCreatorService {
     return { type: 'color', visible: true, color, alpha }
   }
 
-  fillLinearGradient(start: IXY = XY._(0, 0), end: IXY = XY._(1, 1)): V1.FillLinearGradient {
+  fillLinearGradient(
+    start: IXY = XY._(0, 0),
+    end: IXY = XY._(1, 1),
+  ): V1.FillLinearGradient {
     return {
       type: 'linearGradient',
       visible: true,
@@ -218,7 +225,9 @@ class SchemaCreatorService {
     }
   }
 
-  fillImage(url: string = 'Assets.editor.rightPanel.operate.picker.defaultImage'): V1.FillImage {
+  fillImage(
+    url: string = 'Assets.editor.rightPanel.operate.picker.defaultImage',
+  ): V1.FillImage {
     return {
       type: 'image',
       visible: true,

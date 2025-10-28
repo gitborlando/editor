@@ -70,7 +70,10 @@ const NewFileComp: FC<{}> = ({}) => {
           <Icon url={Assets.editor.leftPanel.file.newFile} />
         </G>
       }>
-      <Card.Meta title={'新建文件'} description={dayjs().format('YYYY-MM-DD HH:mm:ss')} />
+      <Card.Meta
+        title={'新建文件'}
+        description={dayjs().format('YYYY-MM-DD HH:mm:ss')}
+      />
     </Card>
   )
 }

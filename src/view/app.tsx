@@ -13,7 +13,10 @@ import router from 'src/view/router'
 
 export const App: FC = memo(() => {
   return (
-    <Flex layout='v' className='wh-100vw-100vh' onContextMenu={(e) => e.preventDefault()}>
+    <Flex
+      layout='v'
+      className='wh-100vw-100vh'
+      onContextMenu={(e) => e.preventDefault()}>
       <QueryClientProvider client={Query}>
         <MenuComp />
         <UploaderComp />
