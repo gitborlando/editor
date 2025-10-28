@@ -9,14 +9,15 @@ import { rgbToRgba } from 'src/utils/color'
 export const EditorStageMarqueeComp: FC<{}> = observer(({}) => {
   const { marquee } = StageSelect
 
+  if (marquee.width <= 0 || marquee.height <= 0) {
+    return null
+  }
+
   const rect = SchemaCreator.rect({
     id: 'marquee',
     ...marquee,
     strokes: [
-      SchemaCreator.stroke({
-        fill: SchemaCreator.fillColor(themeColor()),
-        width: 1 / getZoom(),
-      }),
+      SchemaCreator.solidStroke(rgbToRgba(themeColor(75), 0.1), 1 / getZoom()),
     ],
     fills: [SchemaCreator.fillColor(rgbToRgba(themeColor(75), 0.1))],
   })
