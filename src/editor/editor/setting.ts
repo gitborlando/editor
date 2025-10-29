@@ -10,6 +10,7 @@ const initSetting = () => {
     menuShowTopTab: true,
     needSliceRender: true,
     mockMode: false,
+    showDirtyRect: false,
   }
 }
 
@@ -40,3 +41,7 @@ class EditorSettingService {
 }
 
 export const EditorSetting = new EditorSettingService()
+
+export function getEditorSetting() {
+  return EditorSetting.setting
+}

@@ -1,16 +1,8 @@
-import { AABB, Angle, OBB } from '@gitborlando/geo'
+import { AABB, Angle, IMatrix, Matrix, OBB, abs, max } from '@gitborlando/geo'
 import { reverseFor } from '@gitborlando/utils'
+import { listen } from '@gitborlando/utils/browser'
 import autoBind from 'class-autobind-decorator'
-import { EditorSetting } from 'src/editor/editor/setting'
-import { abs, max } from 'src/editor/math/base'
-import {
-  IMatrix,
-  mx_applyAABB,
-  mx_create,
-  mx_invertAABB,
-  mx_invertPoint,
-} from 'src/editor/math/matrix'
-import { xy_, xy_center, xy_minus, xy_rotate } from 'src/editor/math/xy'
+import { getEditorSetting } from 'src/editor/editor/setting'
 import { StageScene } from 'src/editor/stage/render/scene'
 import {
   TextBreaker,
@@ -18,6 +10,7 @@ import {
 } from 'src/editor/stage/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { INoopFunc, IXY, Raf, getTime } from 'src/shared/utils/normal'
+import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
 import { Elem } from './elem'
 
@@ -109,13 +102,11 @@ export class StageSurface {
   private calcFullRenderElemsMinHeap() {
     this.fullRenderElemsMinHeap = new TinyQueue(undefined, (a, b) => {
       if (a.layerIndex !== b.layerIndex) return a.layerIndex - b.layerIndex
-      const aDistance = xy_minus(
-        xy_center(AABB.rect(a.elem.aabb)),
-        this.eventXY || xy_(),
+      const aDistance = XY.center(AABB.rect(a.elem.aabb)).minus(
+        this.eventXY || XY._(0, 0),
       )
-      const bDistance = xy_minus(
-        xy_center(AABB.rect(b.elem.aabb)),
-        this.eventXY || xy_(),
+      const bDistance = XY.center(AABB.rect(b.elem.aabb)).minus(
+        this.eventXY || XY._(0, 0),
       )
       const aLane = max(abs(aDistance.x), abs(aDistance.y))
       const bLane = max(abs(bDistance.x), abs(bDistance.y))
@@ -135,8 +126,10 @@ export class StageSurface {
     this.ctx.transform(...this.dprMatrix)
     this.ctx.transform(...this.viewportMatrix)
 
-    if (!EditorSetting.setting.needSliceRender) {
-      StageScene.rootElems.forEach((elem) => elem.traverseDraw())
+    if (!getEditorSetting().needSliceRender || getEditorSetting().showDirtyRect) {
+      StageScene.rootElems.forEach((elem) =>
+        elem.children.forEach((elem) => elem.traverseDraw()),
+      )
       return
     }
 
@@ -167,7 +160,7 @@ export class StageSurface {
 
   private translate = (cur: IXY, prev: IXY) => {
     const { width, height } = this.canvas
-    const tr = xy_minus(cur, prev)
+    const tr = XY.from(cur).minus(prev)
     const reRenderElems = new Set<Elem>()
 
     const traverse = (elem: Elem) => {
@@ -219,10 +212,10 @@ export class StageSurface {
 
   collectDirty = (elem: Elem) => {
     const dirtyRect = elem.getDirtyRect()
-    if (!dirtyRect) return
-
-    this.dirtyRects.add(dirtyRect)
-    this.requestRender('partialRender')
+    if (dirtyRect) {
+      this.dirtyRects.add(dirtyRect)
+      this.requestRender('partialRender')
+    }
   }
 
   private partialRender = () => {
@@ -248,16 +241,33 @@ export class StageSurface {
       StageScene.rootElems.forEach((elem) => elem.children.forEach(traverse))
     }
 
-    dirtyArea = mx_applyAABB(dirtyArea, this.viewportMatrix)
-    dirtyArea = mx_applyAABB(dirtyArea, this.dprMatrix)
+    // dirtyArea = mx_applyAABB(dirtyArea, this.viewportMatrix)
+    // dirtyArea = mx_applyAABB(dirtyArea, this.dprMatrix)
     const { minX, minY, maxX, maxY } = dirtyArea
     this.ctx.clearRect(minX, minY, maxX - minX, maxY - minY)
     this.dirtyRects.clear()
 
-    this.patchRender(reRenderElems)
+    if (!getEditorSetting().showDirtyRect) {
+      this.patchRender(reRenderElems)
+    } else {
+      this.devShowDirtyRect(dirtyArea)
+    }
   }
 
-  private dprMatrix = mx_create(dpr, 0, 0, dpr, 0, 0)
+  private devShowDirtyRect(dirtyArea: AABB) {
+    this.clearSurface()
+    this.fullRender()
+
+    Surface.ctxSaveRestore((ctx) => {
+      const path2d = new Path2D()
+      const { minX, minY, maxX, maxY } = dirtyArea
+      path2d.rect(minX, minY, maxX - minX, maxY - minY)
+      ctx.strokeStyle = rgba(0, 255, 100, 1)
+      ctx.stroke(path2d)
+    })
+  }
+
+  private dprMatrix: IMatrix = [dpr, 0, 0, dpr, 0, 0]
   private boundAABB!: AABB
   private viewportMatrix!: IMatrix
   private prevViewportMatrix!: IMatrix
@@ -267,11 +277,14 @@ export class StageSurface {
   private onZoomMove = () => {
     autorun(() => {
       const { zoom, offset } = StageViewport
-      this.prevViewportMatrix =
-        this.viewportMatrix || mx_create(zoom, 0, 0, zoom, offset.x, offset.y)
-      this.viewportMatrix = mx_create(zoom, 0, 0, zoom, offset.x, offset.y)
-      this.prevViewportAABB = mx_invertAABB(this.boundAABB, this.prevViewportMatrix)
-      this.viewportAABB = mx_invertAABB(this.boundAABB, this.viewportMatrix)
+      const matrix: IMatrix = [zoom, 0, 0, zoom, offset.x, offset.y]
+      this.prevViewportMatrix = this.viewportMatrix || matrix
+      this.viewportMatrix = matrix
+      this.prevViewportAABB = Matrix.invertAABB(
+        this.boundAABB,
+        this.prevViewportMatrix,
+      )
+      this.viewportAABB = Matrix.invertAABB(this.boundAABB, this.viewportMatrix)
     })
     reaction(
       () => StageViewport.zoom,
@@ -307,7 +320,7 @@ export class StageSurface {
 
   getVisualSize = (aabb: AABB) => {
     const zoom = getZoom()
-    return xy_((aabb.maxX - aabb.minX) * zoom, (aabb.maxY - aabb.minY) * zoom)
+    return XY._((aabb.maxX - aabb.minX) * zoom, (aabb.maxY - aabb.minY) * zoom)
   }
 
   addEvent = <K extends keyof HTMLElementEventMap>(
@@ -325,20 +338,11 @@ export class StageSurface {
     }
   }
 
-  removeEvent<K extends keyof HTMLElementEventMap>(
-    type: K,
-    listener: (this: HTMLCanvasElement, ev: HTMLElementEventMap[K]) => any,
-    options?: boolean | AddEventListenerOptions,
-  ) {
-    this.canvas.removeEventListener(type, listener, options)
-  }
-
   private eventXY!: IXY
 
   private getEventXY = (xy: IXY) => {
-    const bound = StageViewport.bound
-    xy = xy_minus(xy, XY.of(bound.left, bound.top))
-    this.eventXY = mx_invertPoint(xy, this.viewportMatrix)
+    xy = StageViewport.toViewportXY(xy)
+    this.eventXY = Matrix.invertPoint(xy, this.viewportMatrix)
     this.elemsFromPoint = []
   }
 
@@ -360,8 +364,9 @@ export class StageSurface {
       if (!elem.visible) return
 
       if (this.eventXY) {
-        let xy = xy_rotate(this.eventXY, elem.obb.xy, -elem.obb.rotation)
-        xy = xy_minus(xy, elem.obb.xy)
+        const xy = XY.from(this.eventXY)
+          .rotate(elem.obb.xy, -elem.obb.rotation)
+          .minus(elem.obb.xy)
 
         func(elem, true, stopped, stopPropagation, hitList!, xy)
 
@@ -421,8 +426,8 @@ export class StageSurface {
 
   disablePointEvent(setbackOnPointerUp = true) {
     this.isPointerEventNone = true
-    window.addEventListener('pointerup', () => {
-      if (setbackOnPointerUp) this.isPointerEventNone = false
+    listen('pointerup', { once: true }, () => {
+      if (setbackOnPointerUp) this.enablePointEvent()
     })
   }
 

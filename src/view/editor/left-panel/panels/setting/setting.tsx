@@ -1,6 +1,6 @@
 import cx from 'classix'
 import { FC } from 'react'
-import { EditorSetting } from 'src/editor/editor/setting'
+import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { Text } from 'src/view/component/text'
 import './index.less'
 
@@ -15,7 +15,8 @@ export const SettingComp: FC<ISettingComp> = observer(({}) => {
     ignoreUnVisible,
     menuShowTopTab,
     needSliceRender,
-  } = EditorSetting.setting
+    showDirtyRect,
+  } = getEditorSetting()
 
   const toggle = (key: keyof typeof EditorSetting.setting) => {
     return (value: boolean) => (EditorSetting.setting[key] = value)
@@ -37,6 +38,11 @@ export const SettingComp: FC<ISettingComp> = observer(({}) => {
         label='开发模式'
         value={devMode}
         onChange={toggle('devMode')}
+      />
+      <BooleanSettingComp
+        label='显示渲染脏矩形'
+        value={showDirtyRect}
+        onChange={toggle('showDirtyRect')}
       />
       <BooleanSettingComp
         label='不渲染不可辨认的节点'

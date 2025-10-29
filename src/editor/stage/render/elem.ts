@@ -1,7 +1,7 @@
 import { max, OBB } from '@gitborlando/geo'
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import { FC, ReactNode } from 'react'
-import { EditorSetting } from 'src/editor/editor/setting'
+import { getEditorSetting } from 'src/editor/editor/setting'
 import { atan2, degreefy, normalAngle } from 'src/editor/math/base'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
 import { ElemDrawer } from 'src/editor/stage/render/draw'
@@ -68,15 +68,15 @@ export class Elem {
   traverseDraw() {
     if (!this.visible) return
 
-    if (EditorSetting.setting.ignoreUnVisible && this.optimize) {
+    if (getEditorSetting().ignoreUnVisible && this.optimize) {
       const visualSize = Surface.getVisualSize(this.aabb)
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
     Surface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
-      Surface.ctxSaveRestore(() => ElemDrawer.draw(this, ctx, path2d))
 
+      Surface.ctxSaveRestore(() => ElemDrawer.draw(this, ctx, path2d))
       if (!this.children.length) return
 
       if (this.clip) {
@@ -84,6 +84,7 @@ export class Elem {
         ctx.clip(path2d)
         Surface.setMatrix(this.obb, true)
       }
+
       this.children.forEach((child) => child.traverseDraw())
     })
   }

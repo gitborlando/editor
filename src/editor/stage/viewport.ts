@@ -26,19 +26,11 @@ const stepByZoom = [
 
 @autobind
 class StageViewportService {
-  zoom = 1
-  offset = XY._(0, 0)
-  bound = createInitBound()
+  @observable zoom = 0.55
+  @observable offset = XY._(300, 300)
+  @observable bound = createInitBound()
 
   private wheeler = new WheelUtil()
-
-  constructor() {
-    makeObservable(this, {
-      bound: observable,
-      zoom: observable,
-      offset: observable,
-    })
-  }
 
   init() {
     this.onResizeBound()
@@ -48,7 +40,7 @@ class StageViewportService {
   }
 
   toViewportXY(xy: IXY) {
-    return XY.from(xy).minus(XY.of(this.bound.left, this.bound.top))
+    return XY.from(xy).minus(XY.leftTop(this.bound))
   }
   toStageXY(xy: IXY) {
     return XY.from(this.toViewportXY(xy)).minus(this.offset)
@@ -165,6 +157,6 @@ class StageViewportService {
   //   }
 }
 
-export const StageViewport = new StageViewportService()
+export const StageViewport = makeObservable(new StageViewportService())
 
 export const getZoom = () => StageViewport.zoom
