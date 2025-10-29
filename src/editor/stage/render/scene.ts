@@ -1,9 +1,7 @@
 import { IXY } from '@gitborlando/geo'
-import { createObjCache, firstOne } from '@gitborlando/utils'
+import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { SchemaCreator } from 'src/editor/schema/create'
-import { getAllSelectIdMap, YClients } from 'src/editor/schema/y-clients'
-import { StageInteract } from 'src/editor/stage/interact/interact'
+import { YClients } from 'src/editor/schema/y-clients'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
@@ -24,7 +22,6 @@ class StageSceneService {
   initHook() {
     this.setupRootElems()
     this.hookRenderNode()
-    // this.onHover()
   }
 
   dispose() {
@@ -151,39 +148,6 @@ class StageSceneService {
     if (parent !== this.sceneRoot) {
       Surface.collectDirty(parent)
     }
-  }
-
-  private onHover() {
-    let lastHovered: Elem | undefined
-
-    Surface.addEvent('mousemove', (e) => {
-      if (StageInteract.interaction !== 'select') return
-
-      const hovered = firstOne(this.elemsFromPoint(e))
-      if (lastHovered === hovered) return
-
-      case1: if (lastHovered) {
-        const nodeState = YState.find<V1.Node>(lastHovered.node.id)
-        if (nodeState.type === 'text') {
-          nodeState.style.decoration = undefined
-        } else {
-          if (getAllSelectIdMap()[lastHovered.node.id]) break case1
-          nodeState.outline = undefined
-        }
-      }
-      case2: if (hovered) {
-        lastHovered = hovered
-
-        if (getAllSelectIdMap()[hovered.node.id]) break case2
-
-        const nodeState = YState.find<V1.Node>(hovered.node.id)
-        if (nodeState.type === 'text') {
-          nodeState.style.decoration = SchemaCreator.textDecoration()
-        } else if (nodeState.type !== 'frame') {
-          nodeState.outline = SchemaCreator.outline()
-        }
-      }
-    })
   }
 }
 

@@ -47,7 +47,7 @@ class ElemDrawerService {
       })
     })
 
-    this.drawOutline()
+    // this.drawOutline()
     this.drawTextDecoration()
 
     this.updateHitTest()
@@ -337,7 +337,7 @@ class ElemDrawerService {
     if (width <= 0) return
 
     Surface.ctxSaveRestore(() => {
-      this.ctx.lineWidth = width / getZoom() / devicePixelRatio
+      this.ctx.lineWidth = width
       this.ctx.strokeStyle = color || themeColor()
       this.ctx.stroke(new Path2D(this.path2d))
     })
@@ -361,7 +361,7 @@ class ElemDrawerService {
     }
 
     Surface.ctxSaveRestore(() => {
-      this.ctx.lineWidth = width / getZoom()
+      this.ctx.lineWidth = width
       this.ctx.strokeStyle = color || themeColor()
       this.ctx.stroke(new Path2D(this.path2d))
     })

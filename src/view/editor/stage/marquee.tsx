@@ -16,10 +16,8 @@ export const EditorStageMarqueeComp: FC<{}> = observer(({}) => {
   const rect = SchemaCreator.rect({
     id: 'marquee',
     ...marquee,
-    strokes: [
-      SchemaCreator.solidStroke(rgbToRgba(themeColor(75), 0.1), 1 / getZoom()),
-    ],
-    fills: [SchemaCreator.fillColor(rgbToRgba(themeColor(75), 0.1))],
+    strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
+    fills: [SchemaCreator.fillColor(rgbToRgba(themeColor(55), 0.05))],
   })
 
   return <ElemReact node={rect} />

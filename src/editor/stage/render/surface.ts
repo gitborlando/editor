@@ -123,8 +123,7 @@ export class StageSurface {
   }
 
   private fullRender = () => {
-    this.ctx.transform(...this.dprMatrix)
-    this.ctx.transform(...this.viewportMatrix)
+    this.transformMatrix()
 
     if (!getEditorSetting().needSliceRender || getEditorSetting().showDirtyRect) {
       StageScene.rootElems.forEach((elem) =>
@@ -145,8 +144,7 @@ export class StageSurface {
   }
 
   private patchRender = (reRenderElems: Set<Elem>) => {
-    this.ctx.transform(...this.dprMatrix)
-    this.ctx.transform(...this.viewportMatrix)
+    this.transformMatrix()
 
     StageScene.rootElems.forEach((elem) => {
       elem.children.forEach((elem) => {
@@ -241,24 +239,30 @@ export class StageSurface {
       StageScene.rootElems.forEach((elem) => elem.children.forEach(traverse))
     }
 
-    // dirtyArea = mx_applyAABB(dirtyArea, this.viewportMatrix)
-    // dirtyArea = mx_applyAABB(dirtyArea, this.dprMatrix)
-    const { minX, minY, maxX, maxY } = dirtyArea
-    this.ctx.clearRect(minX, minY, maxX - minX, maxY - minY)
-    this.dirtyRects.clear()
+    this.ctxSaveRestore(() => {
+      this.transformMatrix()
+      const { minX, minY, maxX, maxY } = dirtyArea
+      this.ctx.clearRect(minX, minY, maxX - minX, maxY - minY)
+      this.dirtyRects.clear()
+    })
 
-    if (!getEditorSetting().showDirtyRect) {
-      this.patchRender(reRenderElems)
-    } else {
+    if (getEditorSetting().showDirtyRect) {
       this.devShowDirtyRect(dirtyArea)
+    } else {
+      this.patchRender(reRenderElems)
     }
   }
 
   private devShowDirtyRect(dirtyArea: AABB) {
     this.clearSurface()
-    this.fullRender()
 
-    Surface.ctxSaveRestore((ctx) => {
+    this.ctxSaveRestore(() => {
+      this.fullRender()
+    })
+
+    this.ctxSaveRestore((ctx) => {
+      this.transformMatrix()
+
       const path2d = new Path2D()
       const { minX, minY, maxX, maxY } = dirtyArea
       path2d.rect(minX, minY, maxX - minX, maxY - minY)
@@ -273,6 +277,11 @@ export class StageSurface {
   private prevViewportMatrix!: IMatrix
   viewportAABB!: AABB
   private prevViewportAABB!: AABB
+
+  private transformMatrix = () => {
+    this.ctx.transform(...this.dprMatrix)
+    this.ctx.transform(...this.viewportMatrix)
+  }
 
   private onZoomMove = () => {
     autorun(() => {

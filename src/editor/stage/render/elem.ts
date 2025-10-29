@@ -97,6 +97,16 @@ export class Elem {
     this.children.push(elem)
   }
 
+  insertBefore(elem: Elem, beforeElem: Elem) {
+    const index = this.children.indexOf(beforeElem)
+    if (index !== -1) {
+      this.children.splice(index, 0, elem)
+      elem.parent = this
+    } else {
+      this.addChild(elem)
+    }
+  }
+
   removeChild(elem: Elem) {
     const index = this.children.indexOf(elem)
     if (index !== -1) this.children.splice(index, 1)

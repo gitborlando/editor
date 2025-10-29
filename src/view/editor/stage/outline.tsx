@@ -8,7 +8,6 @@ import { getZoom } from 'src/editor/stage/viewport'
 import { themeColor } from 'src/global/color'
 
 type OutlineInfo = {
-  id: string
   hovered: boolean
   selected?: boolean
   color?: string
@@ -24,7 +23,6 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
     for (const { selectIds, color } of Object.values(otherSnap)) {
       for (const id of Object.keys(selectIds)) {
         map[id] = {
-          id,
           hovered: hoverId === id,
           selected: getSelectIdMap()[id],
           color: color,
@@ -32,50 +30,46 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
       }
     }
     if (hoverId && !SchemaUtil2.isFirstLayerFrame(hoverId)) {
-      map[hoverId] = {
-        id: hoverId,
-        hovered: true,
-      }
+      map[hoverId] = { hovered: true }
     }
     for (const [id, selected] of Object.entries(selectIds)) {
-      map[id] = {
-        id,
-        hovered: hoverId === id,
-        selected,
-      }
+      map[id] = { hovered: hoverId === id, selected }
     }
-
     return map
   }, [otherSnap, hoverId, selectIds])
 
-  return Object.values(outlineInfoLMap).map((outlineInfo) => (
-    <SingleOutlineComp key={outlineInfo.id} outlineInfo={outlineInfo} />
-  ))
+  return (
+    <>
+      {Object.entries(outlineInfoLMap).map(([id, outlineInfo]) => (
+        <SingleOutlineComp key={id} id={id} outlineInfo={outlineInfo} />
+      ))}
+    </>
+  )
 })
 
-const SingleOutlineComp: FC<{
-  outlineInfo: OutlineInfo
-}> = observer(({ outlineInfo }) => {
-  const { id, color, hovered, selected } = outlineInfo
-  const snap = t<V1.Schema>(useSnapshot(YState.state))
-  const node = t<V1.Node>(snap[id])
-  const strokeColor = hovered || selected ? themeColor() : color
-  const strokeWidth = selected ? 1 : 2
-  const outline = SchemaCreator.clone<V1.Node>(node, {
-    id: `${id}-outline`,
-    fills: [],
-  })
-
-  if (node.type === 'text') {
-    t<V1.Text>(outline).style.decoration = SchemaCreator.textDecoration({
-      color: strokeColor!,
-      width: strokeWidth / getZoom(),
+const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer(
+  ({ id, outlineInfo }) => {
+    const { color, hovered, selected } = outlineInfo
+    const snap = t<V1.Schema>(useSnapshot(YState.state))
+    const node = t<V1.Node>(snap[id])
+    const strokeColor = hovered || selected ? themeColor() : color
+    const strokeWidth = selected ? 1 : 2
+    const outline = SchemaCreator.clone<V1.Node>(node, {
+      id: `${id}-outline`,
+      fills: [],
     })
-  } else if (strokeWidth) {
-    t<V1.Node>(outline).strokes = [
-      SchemaCreator.solidStroke(strokeColor, strokeWidth / getZoom()),
-    ]
-  }
 
-  return <ElemReact node={outline} />
-})
+    if (node.type === 'text') {
+      t<V1.Text>(outline).style.decoration = SchemaCreator.textDecoration({
+        color: strokeColor!,
+        width: strokeWidth / getZoom(),
+      })
+    } else if (strokeWidth) {
+      t<V1.Node>(outline).strokes = [
+        SchemaCreator.solidStroke(strokeColor, strokeWidth / getZoom()),
+      ]
+    }
+
+    return <ElemReact node={outline} />
+  },
+)

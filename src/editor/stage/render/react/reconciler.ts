@@ -37,6 +37,8 @@ const hostConfig: HostConfig<
   any
 > = {
   supportsMutation: true,
+  supportsPersistence: false,
+  supportsHydration: false,
 
   createInstance(_, props) {
     const elem = new Elem(props.node.id, 'widgetElem')
@@ -58,20 +60,18 @@ const hostConfig: HostConfig<
   appendChildToContainer(container, child) {
     container.addChild(child)
   },
-  removeChild(parent, child) {
+  removeChild(_, child) {
     child.destroy()
   },
-  removeChildFromContainer(container, child) {
-    container.removeChild(child)
+  removeChildFromContainer(_, child) {
+    child.destroy()
   },
   insertBefore(parent, child, beforeChild) {
-    parent.children.splice(parent.children.indexOf(beforeChild), 0, child)
+    parent.insertBefore(child, beforeChild!)
   },
   insertInContainerBefore(container, child, beforeChild) {
-    const index = container.children.indexOf(beforeChild!)
-    if (index !== -1) container.children.splice(index, 0, child)
+    container.insertBefore(child, beforeChild)
   },
-
   prepareForCommit() {
     return null
   },
@@ -79,15 +79,15 @@ const hostConfig: HostConfig<
   prepareUpdate(instance, type, oldProps, newProps) {
     applyProps(instance, newProps, oldProps)
   },
-  commitUpdate(instance, updatePayload) {},
-  commitMount(instance) {},
+  commitUpdate() {},
+  commitMount() {},
   getRootHostContext() {
     return null
   },
-  getChildHostContext(parentHostContext, type, rootContainer) {
+  getChildHostContext(parentHostContext) {
     return parentHostContext
   },
-  shouldSetTextContent(type, props) {
+  shouldSetTextContent() {
     return false
   },
   clearContainer(container) {
@@ -96,45 +96,38 @@ const hostConfig: HostConfig<
   detachDeletedInstance(instance) {
     instance.destroy()
   },
-  supportsPersistence: false,
-  createTextInstance: function (
-    text: string,
-    rootContainer: Elem,
-    hostContext: Elem,
-    internalHandle: Reconciler.OpaqueHandle,
-  ): Elem {
+  createTextInstance() {
     throw new Error('Function not implemented.')
   },
-  preparePortalMount: function (containerInfo: Elem): void {
+  preparePortalMount() {
     throw new Error('Function not implemented.')
   },
-  scheduleTimeout: function (fn: (...args: unknown[]) => unknown, delay?: number) {
+  scheduleTimeout() {
     throw new Error('Function not implemented.')
   },
-  cancelTimeout: function (id: any): void {
+  cancelTimeout() {
     throw new Error('Function not implemented.')
   },
   noTimeout: undefined,
   isPrimaryRenderer: false,
-  getCurrentEventPriority: function (): Reconciler.Lane {
+  getCurrentEventPriority() {
     throw new Error('Function not implemented.')
   },
-  getInstanceFromNode: function (node: any): Reconciler.Fiber | null | undefined {
+  getInstanceFromNode() {
     throw new Error('Function not implemented.')
   },
-  beforeActiveInstanceBlur: function (): void {
+  beforeActiveInstanceBlur() {
     throw new Error('Function not implemented.')
   },
-  afterActiveInstanceBlur: function (): void {
+  afterActiveInstanceBlur() {
     throw new Error('Function not implemented.')
   },
-  prepareScopeUpdate: function (scopeInstance: any, instance: any): void {
+  prepareScopeUpdate() {
     throw new Error('Function not implemented.')
   },
-  getInstanceFromScope: function (scopeInstance: any): Elem | null {
+  getInstanceFromScope() {
     throw new Error('Function not implemented.')
   },
-  supportsHydration: false,
 }
 
 const reconciler = Reconciler(hostConfig)
