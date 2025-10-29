@@ -2,9 +2,9 @@ import hotkeys from 'hotkeys-js'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { getSelectIds } from 'src/editor/schema/y-clients'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { Menu } from 'src/global/menu'
+import { StageScene } from 'src/editor/stage/render/scene'
+import { Command, ContextMenu } from 'src/global/context-menu'
 import { listen } from 'src/shared/utils/event'
-import { IAnyObject } from 'src/shared/utils/normal'
 import { OperateNode } from '../operate/node'
 import { OperatePage } from '../operate/page'
 import { Schema } from '../schema/schema'
@@ -12,19 +12,12 @@ import { ID, INodeParent, IPage } from '../schema/type'
 import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
 import { UILeftPanel } from '../ui-state/left-panel/left-panel'
 
-export type IEditorCommand = {
-  name?: string
-  callback: (context?: IAnyObject) => any
-  shortcut?: string
-  children?: IEditorCommand[][]
-}
-
 class EditorCommandManager {
   initHook() {
     this.bindHotkeys()
   }
 
-  get copyPasteGroup(): IEditorCommand[] {
+  get copyPasteGroup(): Command[] {
     return [
       {
         name: '复制',
@@ -39,7 +32,7 @@ class EditorCommandManager {
     ]
   }
 
-  get undoRedoGroup(): IEditorCommand[] {
+  get undoRedoGroup(): Command[] {
     return [
       {
         name: '撤销',
@@ -54,12 +47,12 @@ class EditorCommandManager {
     ]
   }
 
-  get pageGroup(): IEditorCommand[] {
+  get pageGroup(): Command[] {
     const commands = [
       {
         name: '删除页面',
         callback: () => {
-          const { id } = Menu.context
+          const { id } = ContextMenu.context
           this.deletePage(id)
         },
       },
@@ -69,7 +62,7 @@ class EditorCommandManager {
       commands.push({
         name: '打印 schema',
         callback: () => {
-          const { id } = Menu.context
+          const { id } = ContextMenu.context
           this.logPageSchema(id)
         },
       })
@@ -78,12 +71,12 @@ class EditorCommandManager {
     return commands
   }
 
-  get nodeGroup(): IEditorCommand[] {
+  get nodeGroup(): Command[] {
     const commands = [
       {
         name: '重命名',
         callback: () => {
-          const { id } = Menu.context
+          const { id } = ContextMenu.context
           UILeftPanelLayer.enterReName.dispatch(id)
         },
       },
@@ -104,14 +97,20 @@ class EditorCommandManager {
           name: '打印 schema',
           shortcut: 'shift+n+s',
           callback: () => {
-            getSelectIds().forEach((id) => {})
+            getSelectIds().forEach((id) => {
+              const node = YState.findSnap<V1.SchemaItem>(id)
+              console.log(node)
+            })
           },
         },
         {
           name: '打印 elem',
           shortcut: 'shift+n+e',
           callback: () => {
-            getSelectIds().forEach((id) => {})
+            getSelectIds().forEach((id) => {
+              const elem = StageScene.findElem(id)
+              console.log(elem)
+            })
           },
         },
       )
@@ -120,7 +119,7 @@ class EditorCommandManager {
     return commands
   }
 
-  get nodeReHierarchyGroup(): IEditorCommand[] {
+  get nodeReHierarchyGroup(): Command[] {
     return [
       {
         name: '上移',
@@ -145,43 +144,45 @@ class EditorCommandManager {
     ]
   }
 
-  get UIleftPanelSwitchBarGroup(): IEditorCommand[] {
+  get UIleftPanelSwitchBarGroup(): Command[] {
     return [
       {
         name: '弹出面板',
         callback: () => {
-          const { id } = Menu.context
+          const { id } = ContextMenu.context
           UILeftPanel.popUpPanel(id)
         },
       },
     ]
   }
 
-  get createShapeGroup(): IEditorCommand[] {
+  get createShapeGroup(): Command[] {
     return [
       {
+        name: '选择',
         shortcut: 'v',
         callback: () => (StageInteract.interaction = 'select'),
       },
       {
+        name: '移动',
         shortcut: 'h',
         callback: () => (StageInteract.interaction = 'move'),
       },
     ]
   }
 
-  get fileGroup(): IEditorCommand[] {
+  get fileGroup(): Command[] {
     return [
       {
         name: '删除文件',
         callback: () => {
-          const { id } = Menu.context
+          const { id } = ContextMenu.context
         },
       },
       {
         name: '导出文件',
         callback: () => {
-          const { id } = Menu.context
+          const { id } = ContextMenu.context
         },
       },
     ]
@@ -198,7 +199,7 @@ class EditorCommandManager {
       this.UIleftPanelSwitchBarGroup,
       this.createShapeGroup,
       this.fileGroup,
-    ].flat() as IEditorCommand[]
+    ].flat() as Command[]
 
     commandList.forEach(({ shortcut, callback }) => {
       if (!shortcut) return

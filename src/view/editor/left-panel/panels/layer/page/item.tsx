@@ -1,9 +1,8 @@
 import { Flex } from '@gitborlando/widget'
 import { Check } from 'lucide-react'
-import { FC, memo } from 'react'
 import { EditorCommand } from 'src/editor/editor/command'
 import { YClients } from 'src/editor/schema/y-clients'
-import { Menu } from 'src/global/menu'
+import { ContextMenu } from 'src/global/context-menu'
 import { useSelectPageId } from 'src/view/hooks/schema/use-y-client'
 
 type IPageItemComp = {
@@ -11,10 +10,11 @@ type IPageItemComp = {
   id: string
 }
 
-export const PageItemComp: FC<IPageItemComp> = memo(({ name, id }) => {
-  const openMenu = () => {
-    Menu.context = { id }
-    Menu.menuOptions.dispatch([EditorCommand.pageGroup])
+export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
+  const openMenu = (e: React.MouseEvent) => {
+    ContextMenu.context = { id }
+    ContextMenu.menus = [EditorCommand.pageGroup]
+    ContextMenu.openMenu(e)
   }
   const selectPage = () => {
     YClients.selectPage(id)

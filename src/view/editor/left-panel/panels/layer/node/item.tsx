@@ -1,5 +1,5 @@
 import { Flex, Icon } from '@gitborlando/widget'
-import { FC, SVGProps, useCallback } from 'react'
+import { FC, SVGProps, useCallback, type MouseEvent } from 'react'
 import { EditorCommand } from 'src/editor/editor/command'
 import { OperateNode } from 'src/editor/operate/node'
 import { Schema } from 'src/editor/schema/schema'
@@ -7,8 +7,8 @@ import { IIrregular, INode } from 'src/editor/schema/type'
 import { getSelectIdMap } from 'src/editor/schema/y-clients'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
+import { ContextMenu } from 'src/global/context-menu'
 import { Drag } from 'src/global/event/drag'
-import { Menu } from 'src/global/menu'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
 import { hslBlueColor } from 'src/shared/utils/color'
 import { stopPropagation } from 'src/shared/utils/event'
@@ -51,10 +51,11 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
         .onDestroy(() => nodeMoveEnded.dispatch())
     }
   }
-  const makeMenu = () => {
+  const makeMenu = (e: MouseEvent) => {
     const { nodeReHierarchyGroup, nodeGroup } = EditorCommand
-    Menu.context = { id }
-    Menu.menuOptions.dispatch([nodeReHierarchyGroup, nodeGroup])
+    ContextMenu.context = { id }
+    ContextMenu.menus = [nodeReHierarchyGroup, nodeGroup]
+    ContextMenu.openMenu(e)
   }
 
   useMatchPatch(`/client/selectIds`)

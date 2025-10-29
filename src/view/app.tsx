@@ -2,26 +2,22 @@ import '@arco-design/web-react/dist/css/arco.css'
 import './app.less'
 import './styles/acro.less'
 
-import { Flex } from '@gitborlando/widget'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { FC, memo } from 'react'
 import { RouterProvider } from 'react-router'
 import { Query } from 'src/global/sdk/query'
-import { MenuComp } from 'src/view/component/menu'
+import { preventDefault } from 'src/shared/utils/event'
+import { ContextMenuComp } from 'src/view/component/context-menu/index'
 import { UploaderComp } from 'src/view/component/uploader'
 import router from 'src/view/router'
 
-export const App: FC = memo(() => {
+export const App = observer(() => {
   return (
-    <Flex
-      layout='v'
-      className='wh-100vw-100vh'
-      onContextMenu={(e) => e.preventDefault()}>
+    <G gap={0} onContextMenuCapture={preventDefault()}>
       <QueryClientProvider client={Query}>
-        <MenuComp />
+        <ContextMenuComp />
         <UploaderComp />
         <RouterProvider router={router} />
       </QueryClientProvider>
-    </Flex>
+    </G>
   )
 })

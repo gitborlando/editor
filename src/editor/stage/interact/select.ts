@@ -16,9 +16,8 @@ import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
+import { ContextMenu } from 'src/global/context-menu'
 import { Drag } from 'src/global/event/drag'
-import { Menu } from 'src/global/menu'
-import { isLeftMouse, isRightMouse } from 'src/shared/utils/event'
 import { macroMatch, type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { collectDisposer } from 'src/utils/disposer'
@@ -38,10 +37,10 @@ class StageSelectService {
 
   startInteract() {
     return collectDisposer(
-      StageScene.sceneRoot.addEvent('mousedown', this.onMouseDown),
-      Surface.addEvent('click', this.onClick),
+      StageScene.sceneRoot.addEvent('mousedown', this.onSceneRootMouseDown),
       Surface.addEvent('dblclick', this.onDoubleClick),
       Surface.addEvent('mousemove', this.onHover),
+      Surface.addEvent('contextmenu', this.onContextMenu),
     )
   }
 
@@ -49,13 +48,6 @@ class StageSelectService {
     const hovered = firstOne(StageScene.elemsFromPoint(XY.client(e)))
     this.hoverId = hovered?.id
   }
-
-  private onMouseDown(e: ElemMouseEvent) {
-    if (isLeftMouse(e.hostEvent)) this.onLeftMouseDown(e)
-    if (isRightMouse(e.hostEvent)) this.onRightMouseDown(e)
-  }
-
-  private onClick(e: Event) {}
 
   private onDoubleClick(e: Event) {
     if (!this.hoverId) return
@@ -79,26 +71,7 @@ class StageSelectService {
     }
   }
 
-  private onEditText(hoverNode: INode) {
-    OperateText.intoEditing.dispatch(hoverNode.id)
-  }
-
-  private onEditVector(hoverNode: INode) {
-    if (OperateNode.intoEditNodeId.value) {
-      OperateNode.intoEditNodeId.dispatch('')
-      OperateNode.clearSelect()
-      return
-    }
-    hoverNode && OperateNode.intoEditNodeId.dispatch(hoverNode.id)
-  }
-
-  private onDeepSelect() {
-    const hoverNode = Schema.find(this.hoverId!)
-    if (hoverNode?.type !== 'text') return
-    OperateText.intoEditing.dispatch(hoverNode.id)
-  }
-
-  private onLeftMouseDown(e: ElemMouseEvent) {
+  private onSceneRootMouseDown(e: ElemMouseEvent) {
     this.lastSelectIdMap = getSelectIdMap()
 
     if (!this.hoverId || SchemaUtil2.isFirstLayerFrame(this.hoverId)) {
@@ -111,12 +84,9 @@ class StageSelectService {
     moveTransformer(e)
   }
 
-  private onRightMouseDown(e: ElemMouseEvent) {
+  private onContextMenu(e: MouseEvent) {
     if (this.hoverId) this.onMousedownSelect()
-    this.onMenu()
-  }
 
-  onMenu() {
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
       EditorCommand
     if (getSelectIdMap().length) {
@@ -126,9 +96,12 @@ class StageSelectService {
         undoRedoGroup,
         nodeGroup,
       ]
-      return Menu.menuOptions.dispatch(menuOptions)
+      ContextMenu.menus = menuOptions
+      ContextMenu.openMenu(e as any)
+      return
     }
-    Menu.menuOptions.dispatch([undoRedoGroup])
+    ContextMenu.menus = [undoRedoGroup]
+    ContextMenu.openMenu(e as any)
   }
 
   private clearSelect() {
@@ -170,6 +143,12 @@ class StageSelectService {
       })
       // UILeftPanelLayer.expandAncestor(id)
     }
+  }
+
+  private onDeepSelect() {
+    const hoverNode = Schema.find(this.hoverId!)
+    if (hoverNode?.type !== 'text') return
+    OperateText.intoEditing.dispatch(hoverNode.id)
   }
 
   private onMarqueeSelect() {
@@ -225,6 +204,19 @@ class StageSelectService {
           })
         }
       })
+  }
+
+  private onEditText(hoverNode: INode) {
+    OperateText.intoEditing.dispatch(hoverNode.id)
+  }
+
+  private onEditVector(hoverNode: INode) {
+    if (OperateNode.intoEditNodeId.value) {
+      OperateNode.intoEditNodeId.dispatch('')
+      OperateNode.clearSelect()
+      return
+    }
+    hoverNode && OperateNode.intoEditNodeId.dispatch(hoverNode.id)
   }
 }
 

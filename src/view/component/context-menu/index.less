@@ -1,0 +1,19 @@
+.context-menu {
+  width: 200px;
+  min-height: fit-content;
+  border-radius: 3px;
+
+  &-item {
+    height: 32px;
+    line-height: 32px;
+    .text-label;
+    &:hover {
+      color: var(--color);
+      background-color: var(--color-bg);
+    }
+  }
+
+  &-divider {
+    margin-block: 4px;
+  }
+}
