@@ -1,5 +1,4 @@
 import cx from 'classix'
-import { FC } from 'react'
 import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { Text } from 'src/view/component/text'
 import './index.less'

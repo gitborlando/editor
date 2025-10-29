@@ -1,5 +1,4 @@
 import { Button, Typography } from '@arco-design/web-react'
-import { FC } from 'react'
 import { UserService } from 'src/global/service/user'
 import './index.less'
 

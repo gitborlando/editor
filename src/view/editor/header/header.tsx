@@ -1,10 +1,8 @@
 import { Icon } from '@gitborlando/widget'
 import { ChevronLeft, Redo, Undo } from 'lucide-react'
-import { FC } from 'react'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
-import { Assets } from 'src/view/assets/assets'
 import { Button } from 'src/view/component/button'
 import { Lucide } from 'src/view/component/lucide'
 

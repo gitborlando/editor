@@ -1,4 +1,3 @@
-import { FC } from 'react'
 import { Uploader } from 'src/global/upload'
 
 type IUploaderComp = {}

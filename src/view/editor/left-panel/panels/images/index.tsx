@@ -1,6 +1,5 @@
 import { Flex } from '@gitborlando/widget'
 import { createClient, Photo } from 'pexels'
-import { FC } from 'react'
 import Scrollbars from 'react-custom-scrollbars-2'
 import { InView } from 'react-intersection-observer'
 import { Loading } from 'src/view/component/loading'

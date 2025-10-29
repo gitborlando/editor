@@ -9,8 +9,6 @@
   "Component": {
     "prefix": "comp",
     "body": [
-      "import { FC } from 'react'",
-      "",
       "export const $1${TM_FILENAME_BASE}Comp: FC<{}> = observer(({}) => {",
       "  return <G></G>",
       "})",
@@ -44,12 +42,9 @@
       "",
       "@autobind",
       "class $1${TM_FILENAME_BASE}Service {",
-      "  constructor() {",
-      "    makeAutoObservable(this)",
-      "  }",
       "}",
       "",
-      "export const $1${TM_FILENAME_BASE} = new $1${TM_FILENAME_BASE}Service()",
+      "export const $1${TM_FILENAME_BASE} = makeObservable(new $1${TM_FILENAME_BASE}Service())",
       "",
     ],
     "description": "Service",

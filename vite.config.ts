@@ -24,6 +24,11 @@ const autoImport = autoImportPlugin({
       'src/shared/utils/global': ['t'],
       'src/global/color': ['COLOR'],
     },
+    {
+      from: 'react',
+      imports: ['FC', 'ReactNode'],
+      type: true,
+    },
   ],
   exclude: ['src/shared/**'],
 })

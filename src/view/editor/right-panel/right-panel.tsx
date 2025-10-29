@@ -1,4 +1,3 @@
-import { FC } from 'react'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { UIRightPanel } from 'src/editor/ui-state/right-panel/right-panel'
 import { useHookSignal } from 'src/shared/signal/signal-react'

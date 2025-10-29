@@ -1,5 +1,4 @@
 import { objectKey } from '@gitborlando/utils'
-import { FC } from 'react'
 import Scrollbars from 'react-custom-scrollbars-2'
 import { Text } from 'src/view/component/text'
 

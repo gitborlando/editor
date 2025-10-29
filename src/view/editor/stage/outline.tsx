@@ -1,4 +1,3 @@
-import { FC } from 'react'
 import { SchemaCreator } from 'src/editor/schema/create'
 import { SchemaUtil2 } from 'src/editor/schema/utils'
 import { getSelectIdMap, YClients } from 'src/editor/schema/y-clients'

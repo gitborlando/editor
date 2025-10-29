@@ -1,4 +1,3 @@
-import { FC } from 'react'
 import { renderElem } from 'src/editor/stage/render/react/reconciler'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'

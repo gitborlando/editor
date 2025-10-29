@@ -1,5 +1,4 @@
 import { LucideProps as LucidePropsType } from 'lucide-react'
-import { FC } from 'react'
 import './index.less'
 
 interface LucideProps extends LucidePropsType {

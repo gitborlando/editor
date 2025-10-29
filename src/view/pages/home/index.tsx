@@ -1,4 +1,3 @@
-import { FC } from 'react'
 import { HomeFilesComp } from 'src/view/pages/home/files'
 import { HomeHeaderComp } from 'src/view/pages/home/header'
 import './index.less'

@@ -1,5 +1,4 @@
 import autobind from 'class-autobind-decorator'
-import { FC } from 'react'
 import { createStorageItem } from 'src/global/storage'
 
 type ISwitchTabOption = {

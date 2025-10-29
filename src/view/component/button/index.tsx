@@ -1,6 +1,5 @@
 import { Button as ArcoButton, ButtonProps } from '@arco-design/web-react'
 import cx from 'classix'
-import { FC } from 'react'
 import './index.less'
 
 export const Button: FC<ButtonProps & { active?: boolean }> = observer(

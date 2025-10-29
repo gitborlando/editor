@@ -1,6 +1,5 @@
 import { Angle, IXY, XY, xy_xAxis, xy_yAxis } from '@gitborlando/geo'
 import { isLeftMouse, isRightMouse } from '@gitborlando/utils/browser'
-import { FC } from 'react'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { SchemaCreator } from 'src/editor/schema/create'
 import { StageCursor } from 'src/editor/stage/cursor'
