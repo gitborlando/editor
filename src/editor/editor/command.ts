@@ -1,15 +1,14 @@
 import hotkeys from 'hotkeys-js'
-import { EditorSetting } from 'src/editor/editor/setting'
-import { SchemaHistory } from 'src/editor/schema/history'
+import { getEditorSetting } from 'src/editor/editor/setting'
+import { getSelectIds } from 'src/editor/schema/y-clients'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { StageScene } from 'src/editor/stage/render/scene'
 import { Menu } from 'src/global/menu'
 import { listen } from 'src/shared/utils/event'
 import { IAnyObject } from 'src/shared/utils/normal'
-import { OperateNode, getSelectIds } from '../operate/node'
+import { OperateNode } from '../operate/node'
 import { OperatePage } from '../operate/page'
 import { Schema } from '../schema/schema'
-import { ID, INodeParent, IPage, ISchemaItem } from '../schema/type'
+import { ID, INodeParent, IPage } from '../schema/type'
 import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
 import { UILeftPanel } from '../ui-state/left-panel/left-panel'
 
@@ -45,12 +44,12 @@ class EditorCommandManager {
       {
         name: '撤销',
         shortcut: 'ctrl+z',
-        callback: () => SchemaHistory.undo(),
+        callback: () => YUndo.undo(),
       },
       {
         name: '重做',
         shortcut: 'ctrl+shift+z',
-        callback: () => SchemaHistory.redo(),
+        callback: () => YUndo.redo(),
       },
     ]
   }
@@ -66,7 +65,7 @@ class EditorCommandManager {
       },
     ]
 
-    if (EditorSetting.setting.devMode) {
+    if (getEditorSetting().devMode) {
       commands.push({
         name: '打印 schema',
         callback: () => {
@@ -99,22 +98,20 @@ class EditorCommandManager {
       },
     ]
 
-    if (EditorSetting.setting.devMode) {
+    if (getEditorSetting().devMode) {
       commands.push(
         {
           name: '打印 schema',
+          shortcut: 'shift+n+s',
           callback: () => {
-            getSelectIds().forEach((id) => {
-              console.log(Schema.find(id))
-            })
+            getSelectIds().forEach((id) => {})
           },
         },
         {
           name: '打印 elem',
+          shortcut: 'shift+n+e',
           callback: () => {
-            getSelectIds().forEach((id) => {
-              console.log(StageScene.findElem(id))
-            })
+            getSelectIds().forEach((id) => {})
           },
         },
       )
@@ -250,19 +247,18 @@ class EditorCommandManager {
   }
 
   private logPageSchema(id: ID) {
-    const curPage = Schema.find<IPage>(id)
-    const nodes: Record<ID, ISchemaItem> = {}
+    const curPage = YState.findSnap<V1.Page>(id)
+    const nodes: Record<ID, V1.SchemaItem> = {}
     const findNodes = (id: string) => {
-      const node = Schema.find(id)
+      const node = YState.findSnap<V1.SchemaItem>(id)
       nodes[node.id] = node
       if ('childIds' in node) {
-        node.childIds.map(Schema.find).forEach((node) => (nodes[node.id] = node))
+        node.childIds.map(YState.findSnap).forEach((node) => (nodes[node.id] = node))
       }
     }
     curPage.childIds.forEach(findNodes)
     console.log({
-      meta: Schema.meta,
-      client: Schema.client,
+      meta: YState.snap.meta,
       page: curPage,
       ...nodes,
     })
