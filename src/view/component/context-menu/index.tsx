@@ -38,7 +38,7 @@ export const ContextMenuComp: FC<{}> = observer(({}) => {
           })}
         </ArcoMenu>
       }>
-      <div ref={setRef}></div>
+      <div ref={setRef} style={{ position: 'fixed' }}></div>
     </Dropdown>
   )
 })
