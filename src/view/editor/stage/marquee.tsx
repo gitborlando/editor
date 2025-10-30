@@ -1,4 +1,4 @@
-import { SchemaCreator } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { ElemReact } from 'src/editor/stage/render/elem'
 import { getZoom } from 'src/editor/stage/viewport'

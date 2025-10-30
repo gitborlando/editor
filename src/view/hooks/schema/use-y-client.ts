@@ -1,4 +1,3 @@
-import { YClients } from 'src/editor/schema/y-clients'
 import { useSnapshot } from 'valtio'
 
 export function useSelectIds() {

@@ -1,9 +1,9 @@
-import { SchemaCreator } from 'src/editor/schema/create'
-import { SchemaUtil2 } from 'src/editor/schema/utils'
-import { getSelectIdMap, YClients } from 'src/editor/schema/y-clients'
+import { SchemaCreator } from 'src/editor/schema/creator'
+import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { ElemReact } from 'src/editor/stage/render/elem'
 import { getZoom } from 'src/editor/stage/viewport'
+import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
 import { themeColor } from 'src/global/color'
 
 type OutlineInfo = {
@@ -28,7 +28,7 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
         }
       }
     }
-    if (hoverId && !SchemaUtil2.isFirstLayerFrame(hoverId)) {
+    if (hoverId && !SchemaHelper.isFirstLayerFrame(hoverId)) {
       map[hoverId] = { hovered: true }
     }
     for (const [id, selected] of Object.entries(selectIds)) {

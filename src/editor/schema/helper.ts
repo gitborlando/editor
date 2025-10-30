@@ -1,6 +1,6 @@
 import { Schema } from 'src/editor/schema/schema'
 import { IFrame, INode, INodeParent, ISchemaItem } from 'src/editor/schema/type'
-import { getSelectPageId } from 'src/editor/schema/y-clients'
+import { getSelectPageId } from 'src/editor/y-state/y-clients'
 
 export type SchemaUtilTraverseData = {
   id: ID
@@ -17,7 +17,7 @@ export type SchemaUtilTraverseData = {
 
 type ITraverseCallback = (arg: SchemaUtilTraverseData) => any
 
-export class SchemaUtil2 {
+export class SchemaHelper {
   static isPageById(id: ID) {
     return id.startsWith('page_')
   }
@@ -52,7 +52,7 @@ export class SchemaUtil2 {
 
   static findAncestor(id: ID | INode, utilFunc?: (node: INode) => boolean) {
     let node = typeof id === 'string' ? Schema.find<INode>(id) : id
-    utilFunc ||= (node: INode) => SchemaUtil2.isPageById(node.parentId)
+    utilFunc ||= (node: INode) => SchemaHelper.isPageById(node.parentId)
     while (node.parentId) {
       if (utilFunc(node)) return node
       node = Schema.find<INode>(node.parentId)
@@ -62,7 +62,7 @@ export class SchemaUtil2 {
 
   static findParent(node: INode) {
     while (node.parentId) {
-      if (SchemaUtil2.is<IFrame>(node, 'frame')) return node
+      if (SchemaHelper.is<IFrame>(node, 'frame')) return node
       node = Schema.find<INode>(node.parentId)
     }
     return node

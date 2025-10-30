@@ -1,7 +1,7 @@
 import { loopFor } from '@gitborlando/utils'
 import { xy_, xy_symmetric } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
-import { SchemaCreator } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { IFrame, INode, INodeParent, IPoint, IStroke } from 'src/editor/schema/type'
 import { normalizeColor } from 'src/shared/utils/color'
 import { IrregularUtils } from 'src/shared/utils/irregular'

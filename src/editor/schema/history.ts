@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
-import { YUndo } from 'src/editor/schema/y-undo'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { Schema } from './schema'
 import { ISchemaOperation } from './type'

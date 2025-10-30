@@ -1,7 +1,6 @@
 import { IXY } from '@gitborlando/geo'
 import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { YClients } from 'src/editor/schema/y-clients'
 import { ImmuiPatch } from 'src/shared/immui/immui'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'

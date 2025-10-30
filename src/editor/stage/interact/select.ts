@@ -7,15 +7,15 @@ import { observable } from 'mobx'
 import { EditorCommand } from 'src/editor/editor/command'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
+import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
 import { Schema } from 'src/editor/schema/schema'
 import { ID, IFrame, INode } from 'src/editor/schema/type'
-import { SchemaUtil2, SchemaUtilTraverseData } from 'src/editor/schema/utils'
-import { getSelectIdMap, YClients } from 'src/editor/schema/y-clients'
 import { ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
+import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { Drag } from 'src/global/event/drag'
 import { macroMatch, type IRect } from 'src/shared/utils/normal'
@@ -74,7 +74,7 @@ class StageSelectService {
   private onSceneRootMouseDown(e: ElemMouseEvent) {
     this.lastSelectIdMap = getSelectIdMap()
 
-    if (!this.hoverId || SchemaUtil2.isFirstLayerFrame(this.hoverId)) {
+    if (!this.hoverId || SchemaHelper.isFirstLayerFrame(this.hoverId)) {
       this.clearSelect()
       this.onMarqueeSelect()
       return
@@ -131,7 +131,7 @@ class StageSelectService {
 
   private onSelect(id: ID) {
     if (getSelectIdMap()[id]) return
-    if (SchemaUtil2.isFirstLayerFrame(id)) return
+    if (SchemaHelper.isFirstLayerFrame(id)) return
 
     this.clearSelect()
     YClients.select(id)
@@ -179,7 +179,7 @@ class StageSelectService {
       return false
     }
 
-    const traverse = SchemaUtil2.createCurrentPageTraverse({
+    const traverse = SchemaHelper.createCurrentPageTraverse({
       finder: YState.findSnap<V1.Node>,
       callback: traverseTest,
     })

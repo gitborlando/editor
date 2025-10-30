@@ -1,4 +1,4 @@
-import { SchemaCreator } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { ISchema } from 'src/editor/schema/type'
 
 export function mockPolyline() {

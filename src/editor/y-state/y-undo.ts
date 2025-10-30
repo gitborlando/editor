@@ -1,7 +1,7 @@
 import { clone } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { computed, makeObservable, observable } from 'mobx'
-import { NeedUndoClientState, YClients } from 'src/editor/schema/y-clients'
+import { NeedUndoClientState, YClients } from 'src/editor/y-state/y-clients'
 import * as Y from 'yjs'
 
 type YUndoInfo = {

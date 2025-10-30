@@ -1,13 +1,12 @@
 import autobind from 'class-autobind-decorator'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
-import { SchemaUtil2, SchemaUtilTraverseData } from 'src/editor/schema/utils'
-import { YUndo } from 'src/editor/schema/y-undo'
+import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
 import { MULTI_VALUE } from 'src/global/constant'
 import { cleanObject } from 'src/shared/utils/normal'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { IPolygon, IStar } from '../schema/type'
-import { getSelectIdMap } from '../schema/y-clients'
+import { getSelectIdMap } from '../y-state/y-clients'
 import { OperateNode } from './node'
 
 function createAllGeometry() {
@@ -87,7 +86,7 @@ class OperateGeometryService {
     this.hasStartApply = true
 
     queueMicrotask(() => {
-      const traverse = SchemaUtil2.createTraverse({
+      const traverse = SchemaHelper.createTraverse({
         finder: YState.find<V1.Node>,
         callback: this.applyChangeToNode,
       })

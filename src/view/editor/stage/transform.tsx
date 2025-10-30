@@ -1,7 +1,7 @@
 import { Angle, IXY, XY, xy_xAxis, xy_yAxis } from '@gitborlando/geo'
 import { isLeftMouse, isRightMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
-import { SchemaCreator } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { ElemMouseEvent, ElemReact } from 'src/editor/stage/render/elem'

@@ -1,7 +1,7 @@
 import { Signal } from '@gitborlando/signal'
 import { Flex } from '@gitborlando/widget'
 import { FC, memo, useEffect } from 'react'
-import { SchemaCreator } from 'src/editor/schema/create'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import {
   IFill,
   IFillColor,

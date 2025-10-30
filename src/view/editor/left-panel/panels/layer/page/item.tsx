@@ -1,7 +1,6 @@
 import { Flex } from '@gitborlando/widget'
 import { Check } from 'lucide-react'
 import { EditorCommand } from 'src/editor/editor/command'
-import { YClients } from 'src/editor/schema/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { useSelectPageId } from 'src/view/hooks/schema/use-y-client'
 

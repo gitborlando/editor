@@ -1,6 +1,5 @@
 import { IXY } from '@gitborlando/geo'
-import { SchemaCreator } from 'src/editor/schema/create'
-import { YClients } from 'src/editor/schema/y-clients'
+import { SchemaCreator } from 'src/editor/schema/creator'
 import { ElemReact } from 'src/editor/stage/render/elem'
 import { StageViewport } from 'src/editor/stage/viewport'
 

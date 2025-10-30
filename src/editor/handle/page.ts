@@ -1,8 +1,6 @@
 import { Delete } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { YClients } from 'src/editor/schema/y-clients'
-import { YUndo } from 'src/editor/schema/y-undo'
-import { SchemaCreator } from '../schema/create'
+import { SchemaCreator } from '../schema/creator'
 import { IPage } from '../schema/type'
 
 @autobind

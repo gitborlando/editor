@@ -1,6 +1,6 @@
 import { Schema } from 'src/editor/schema/schema'
 import { ID, IFrame, INode, INodeParent, ISchemaItem } from 'src/editor/schema/type'
-import { getSelectPageId } from 'src/editor/schema/y-clients'
+import { getSelectPageId } from 'src/editor/y-state/y-clients'
 
 export type ITraverseData = {
   id: ID
