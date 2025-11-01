@@ -98,6 +98,7 @@ export const CooperationComp: FC<{}> = observer(({}) => {
     imageUrl: URL.createObjectURL(
       new Blob([other.userAvatar], { type: 'image/svg+xml' }),
     ),
+    color: other.color,
   }))
   return (
     <G className={cls('abc')}>
@@ -112,7 +113,6 @@ const cls = classes(css`
 
   &-centerGroup {
     justify-content: center;
-
     & > *:not(:last-child)::after {
       content: '';
       display: block;
@@ -123,7 +123,6 @@ const cls = classes(css`
       margin-left: 4px;
       margin-right: 8px;
     }
-
     &-icon {
       width: 20px;
       height: 20px;

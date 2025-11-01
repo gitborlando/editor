@@ -2,7 +2,7 @@ import { cn } from '../lib/utils'
 
 interface Avatar {
   imageUrl: string
-  profileUrl: string
+  color: string
 }
 interface AvatarCirclesProps {
   className?: string
@@ -16,33 +16,24 @@ export const AvatarCircles = ({
   avatarUrls,
 }: AvatarCirclesProps) => {
   return (
-    <div
-      className={cn(
-        'tw:z-10 tw:flex tw:-space-x-4 tw:rtl:space-x-reverse',
-        className,
-      )}>
+    <div className={cn('z-10 flex -space-x-2 rtl:space-x-reverse', className)}>
       {avatarUrls.map((url, index) => (
-        <a
-          key={index}
-          href={url.profileUrl}
-          target='_blank'
-          rel='noopener noreferrer'>
+        <div key={index}>
           <img
             key={index}
-            className='tw:h-10 tw:w-10 tw:rounded-full tw:border-2 tw:border-white tw:dark:border-gray-800'
+            className='h-8 w-8 rounded-full border-2 border-white dark:border-gray-800'
             src={url.imageUrl}
             width={40}
             height={40}
             alt={`Avatar ${index + 1}`}
+            style={{ borderColor: url.color }}
           />
-        </a>
+        </div>
       ))}
       {(numPeople ?? 0) > 0 && (
-        <a
-          className='tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-full tw:border-2 tw:border-white tw:bg-black tw:text-center tw:text-xs tw:font-medium tw:text-white tw:hover:bg-gray-600 tw:dark:border-gray-800 tw:dark:bg-white tw:dark:text-black'
-          href=''>
+        <div className='flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-black! text-center text-xs font-medium text-white hover:bg-gray-600 dark:border-gray-800 dark:bg-white dark:text-black'>
           +{numPeople}
-        </a>
+        </div>
       )}
     </div>
   )
