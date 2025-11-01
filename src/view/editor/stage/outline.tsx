@@ -20,7 +20,7 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
   const outlineInfoLMap = useMemo(() => {
     const map: Record<string, OutlineInfo> = {}
     for (const { selectIds, color } of Object.values(otherSnap)) {
-      for (const id of Object.keys(selectIds)) {
+      for (const id of Object.keys(selectIds || {})) {
         map[id] = {
           hovered: hoverId === id,
           selected: getSelectIdMap()[id],

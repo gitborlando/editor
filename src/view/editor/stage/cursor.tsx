@@ -12,7 +12,7 @@ export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
   return (
     <>
       {cursors.map((cursor) => (
-        <CursorComp {...cursor} />
+        <CursorComp x-if={cursor.xy} {...cursor} />
       ))}
     </>
   )

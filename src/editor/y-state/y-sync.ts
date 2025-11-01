@@ -10,7 +10,7 @@ class YSyncService {
   provider!: HocuspocusProvider
   awareness!: Awareness
 
-  init(fileId: string, document: Y.Doc) {
+  async init(fileId: string, document: Y.Doc) {
     this.provider = new HocuspocusProvider({
       url: 'ws://8.134.131.253:1234',
       name: fileId,

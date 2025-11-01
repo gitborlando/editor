@@ -1,10 +1,8 @@
+import hotkeys from 'hotkeys-js'
 import { configure } from 'mobx'
 import { createElement } from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './view/app'
-
-import hotkeys from 'hotkeys-js'
-import 'virtual:uno.css'
 
 configure({ enforceActions: 'never' })
 

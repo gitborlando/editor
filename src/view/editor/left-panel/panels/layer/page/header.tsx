@@ -1,16 +1,14 @@
-import { Flex } from '@gitborlando/widget'
 import { ChevronDown, Plus } from 'lucide-react'
 import { FC, memo } from 'react'
 import { HandlePage } from 'src/editor/handle/page'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMatchPatch } from 'src/shared/utils/react'
+import { IconButton } from 'src/view/component/button'
+import { Lucide } from 'src/view/component/lucide'
 import { useSelectPage } from 'src/view/hooks/schema/use-y-state'
-import { Button } from 'src/view/ui-utility/widget/button'
 
-type IPageHeaderComp = {}
-
-export const PageHeaderComp: FC<IPageHeaderComp> = memo(({}) => {
+export const PageHeaderComp: FC<{}> = memo(({}) => {
   const { allPageExpanded } = UILeftPanelLayer
   useHookSignal(allPageExpanded)
   useMatchPatch('/client/selectPageId')
@@ -24,22 +22,29 @@ export const PageHeaderComp: FC<IPageHeaderComp> = memo(({}) => {
   }
 
   return (
-    <Flex layout='h' className='shrink-0 wh-100%-32 bg-white px-6'>
-      <Flex layout='c' className='labelFont pl-6'>
+    <C horizontal='1fr auto auto' gap={4} className={cls()}>
+      <C horizontal className={cls('title')}>
         {selectPage.name}
-      </Flex>
-      <Button type='icon' style={{ marginLeft: 'auto' }} onClick={newPage}>
-        <Plus size={16} className='text-#393939' />
-      </Button>
-      <Button
-        type='icon'
-        onClick={() => allPageExpanded.dispatch(!allPageExpanded.value)}>
-        <ChevronDown
-          size={16}
-          className='text-#393939'
+      </C>
+      <IconButton onClick={newPage}>
+        <Lucide icon={Plus} />
+      </IconButton>
+      <IconButton onClick={() => allPageExpanded.dispatch(!allPageExpanded.value)}>
+        <Lucide
+          icon={ChevronDown}
           style={{ rotate: allPageExpanded.value ? '0deg' : '180deg' }}
         />
-      </Button>
-    </Flex>
+      </IconButton>
+    </C>
   )
 })
+
+const cls = classes(css`
+  padding-inline: 12px 10px;
+  height: 32px;
+
+  &-title {
+    ${styles.textLabel}
+    color: gray;
+  }
+`)

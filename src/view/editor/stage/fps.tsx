@@ -1,6 +1,4 @@
-import { Flex } from '@gitborlando/widget'
-import { FC, useEffect, useRef } from 'react'
-
+import { optionalSet } from '@gitborlando/utils'
 import { EditorSetting } from 'src/editor/editor/setting'
 
 export const FPSComp: FC<{}> = observer(({}) => {
@@ -19,7 +17,8 @@ export const FPSComp: FC<{}> = observer(({}) => {
 
       const time = performance.now()
       if (time > prevTime + 1000) {
-        ref.current!.innerText = `${Math.round(Math.max((frames * 1000) / (time - prevTime), 0))}fps`
+        const text = `${Math.round(Math.max((frames * 1000) / (time - prevTime), 0))}fps`
+        optionalSet(ref.current, 'innerText', text)
         prevTime = time
         frames = 0
       }
@@ -30,12 +29,14 @@ export const FPSComp: FC<{}> = observer(({}) => {
     return () => cancelAnimationFrame(raf)
   }, [])
 
-  return (
-    showFPS && (
-      <Flex
-        ref={ref}
-        layout='c'
-        className='wh-fit absolute top-20 right-10 text-20 pointer-events-none'></Flex>
-    )
-  )
+  return showFPS && <G ref={ref} center className={cls()}></G>
 })
+
+const cls = classes(css`
+  ${styles.fitContent}
+  position: absolute;
+  top: 20px;
+  right: 10px;
+  font-size: 20px;
+  pointer-events: none;
+`)

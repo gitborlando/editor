@@ -1,17 +1,15 @@
 import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
 import usePromise from 'react-promise-suspense'
-import rgbHex from 'rgb-hex'
 import { IImage, ImgManager } from 'src/editor/editor/img-manager'
 import { xy_, xy_client } from 'src/editor/math/xy'
-import { IFill, IFillColor } from 'src/editor/schema/type'
+import { IFill } from 'src/editor/schema/type'
 import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { useAutoSignal } from 'src/shared/signal/signal-react'
 import { makeLinearGradientCss } from 'src/shared/utils/color'
 import { IXY, clone, iife } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
 import { rgbToRgba } from 'src/utils/color'
-import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import { PickerComp } from './picker'
 
 type IPickerOpener = {
@@ -38,26 +36,25 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   const isShowPicker = useAutoSignal(false)
 
   const ColorInputComp = useMemoComp<{ fill: IFill }>([fill], ({ fill }) => {
-    return (
-      <CompositeInput
-        type='text'
-        className='d-input w-56 text-align-center'
-        disabled={!isColorType}
-        needStepHandler={false}
-        value={iife(() => {
-          if (isColorType) return rgbHex((fill as IFillColor).color)
-          if (isLinearType) return '线性渐变'
-          if (isImageType) return '图片填充'
-          return ''
-        })}
-        onNewValueApply={(value) => {
-          // currentFill.dispatch((fill) => {
-          //   ;(fill as IFillColor).color = hexToRgb(value)
-          // })
-        }}
-        beforeOperate={() => setupUIPicker()}
-      />
-    )
+    return null
+    // <CompositeInput
+    //   type='text'
+    //   className='d-input w-56 text-align-center'
+    //   disabled={!isColorType}
+    //   needStepHandler={false}
+    //   value={iife(() => {
+    //     if (isColorType) return rgbHex((fill as IFillColor).color)
+    //     if (isLinearType) return '线性渐变'
+    //     if (isImageType) return '图片填充'
+    //     return ''
+    //   })}
+    //   onNewValueApply={(value) => {
+    //     // currentFill.dispatch((fill) => {
+    //     //   ;(fill as IFillColor).color = hexToRgb(value)
+    //     // })
+    //   }}
+    //   beforeOperate={() => setupUIPicker()}
+    // />
   })
 
   const ImgComp = useMemoComp<{ url: string }>([], ({ url }) => {
@@ -95,7 +92,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
         <ColorInputComp fill={fill} />
       </Flex>
       <Flex layout='h' className='space-between px-6 wh-54-28 r-2 d-hover-bg'>
-        <CompositeInput
+        {/* <CompositeInput
           type='number'
           needStepHandler={false}
           className='width-34 d-input'
@@ -106,7 +103,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
             //   ;(fill as IFillColor).alpha = Number(value) / 100
             // })
           }}
-        />
+        /> */}
         <Flex layout='c' className='labelFont'>
           %
         </Flex>

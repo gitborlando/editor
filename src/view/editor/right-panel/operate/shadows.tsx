@@ -5,7 +5,6 @@ import { IShadow } from 'src/editor/schema/type'
 import { iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
-import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import { Divide } from 'src/view/ui-utility/widget/divide'
 import { PickerOpener } from './picker/picker-opener'
 
@@ -74,17 +73,18 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
           {iife(() => {
             const keys = ['offsetX', 'offsetY', 'blur'] as const
             const labels = ['x偏移', 'y偏移', '模糊']
-            return keys.map((key, i) => (
-              <CompositeInput
-                key={key}
-                className='wh-92-28 r-2 mr-4 d-hover-bg [&_.label]:w-fit'
-                label={labels[i]}
-                needStepHandler={false}
-                value={shadow[key].toString()}
-                onNewValueApply={(value) => setShadow(index, [key], Number(value))}
-                afterOperate={() => afterOperate.dispatch()}
-              />
-            ))
+            return keys.map(
+              (key, i) => null,
+              // <CompositeInput
+              //   key={key}
+              //   className='wh-92-28 r-2 mr-4 d-hover-bg [&_.label]:w-fit'
+              //   label={labels[i]}
+              //   needStepHandler={false}
+              //   value={shadow[key].toString()}
+              //   onNewValueApply={(value) => setShadow(index, [key], Number(value))}
+              //   afterOperate={() => afterOperate.dispatch()}
+              // />
+            )
           })}
         </Flex>
       </Flex>

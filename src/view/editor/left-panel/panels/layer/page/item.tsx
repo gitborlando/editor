@@ -1,4 +1,3 @@
-import { Flex } from '@gitborlando/widget'
 import { Check } from 'lucide-react'
 import { EditorCommand } from 'src/editor/editor/command'
 import { ContextMenu } from 'src/global/context-menu'
@@ -25,15 +24,29 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
   const selected = selectPageId === id
 
   return (
-    <Flex
-      layout='h'
-      className='justify-between wh-100%-32 bg-white pointer shrink-0 d-hover-border'
+    <G
+      horizontal='1fr auto'
+      center
+      className={cls()}
       onClick={selectPage}
       onContextMenu={openMenu}>
-      <Flex layout='h' className='text-12 px-10'>
+      <G horizontal center>
         {name}
-      </Flex>
-      <Check x-if={selected} size={18} className='mr-10 text-hsl60' />
-    </Flex>
+      </G>
+      <Check x-if={selected} size={16} />
+    </G>
   )
 })
+
+const cls = classes(css`
+  justify-content: space-between;
+  width: 100%;
+  height: 32px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  ${styles.textLabel}
+  padding-inline: 12px;
+  &:hover {
+    border: 1px solid var(--color);
+  }
+`)

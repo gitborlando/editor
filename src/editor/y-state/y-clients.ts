@@ -32,6 +32,7 @@ class YClientsService {
       offset: StageViewport.offset,
       userId: UserService.userId,
       userName: UserService.userName,
+      userAvatar: UserService.avatar,
     })
     this.subscribeClient()
 

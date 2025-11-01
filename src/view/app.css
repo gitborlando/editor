@@ -1,0 +1,3 @@
+@import './styles/base.css';
+@import '@arco-design/web-react/dist/css/arco.css' layer(arco);
+/* @import './styles/tailwind.css'; */

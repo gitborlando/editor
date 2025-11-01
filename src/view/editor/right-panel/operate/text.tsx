@@ -9,7 +9,6 @@ import { useDownUpTracker } from 'src/shared/utils/event'
 import { iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { DraggableComp } from 'src/view/component/draggable'
-import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import { Dropdown } from 'src/view/ui-utility/widget/dropdown'
 
 export const TextComp: FC<{}> = ({}) => {
@@ -76,14 +75,14 @@ export const TextComp: FC<{}> = ({}) => {
     createDownUpTracker(() => inputRef.current, 'fontSize')
     return (
       <Flex layout='h' className='w-100% mb-4'>
-        <CompositeInput
+        {/* <CompositeInput
           className='mr-4'
           ref={inputRef}
           label='大小'
           value={fontSize.toString()}
           onNewValueApply={(value) => setTextStyle('fontSize', Number(value))}
           afterOperate={() => afterOperate.dispatch()}
-        />
+        /> */}
         <Dropdown
           className='w-69' //@ts-ignore
           selected={fontWeight}
@@ -108,7 +107,7 @@ export const TextComp: FC<{}> = ({}) => {
             translateArray={['左对齐', '居中对齐', '右对齐']}
             onSelected={(value) => toggleTextStyle('align', value)}
           />
-          <CompositeInput
+          {/* <CompositeInput
             className='w-74'
             label='行高'
             value={lineHeight.toString()}
@@ -121,7 +120,7 @@ export const TextComp: FC<{}> = ({}) => {
             value={letterSpacing.toString()}
             onNewValueApply={(value) => setTextStyle('letterSpacing', Number(value))}
             afterOperate={() => afterOperate.dispatch()}
-          />
+          /> */}
         </Flex>
       )
     },

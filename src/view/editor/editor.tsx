@@ -6,9 +6,9 @@ import { suspense } from 'src/view/component/suspense'
 import { StageComp } from 'src/view/editor/stage/stage'
 import { useUnmount } from 'src/view/hooks/common'
 import { clear, suspend } from 'suspend-react'
-import { HeaderComp } from './header/header'
-import { LeftPanelComp } from './left-panel/left-panel'
-import { RightPanelComp } from './right-panel/right-panel'
+import { HeaderComp } from './header'
+import { LeftPanelComp } from './left-panel'
+import { RightPanelComp } from './right-panel'
 
 type IEditorComp = {}
 
@@ -26,9 +26,9 @@ export const EditorComp: FC<IEditorComp> = suspense(
     })
 
     return (
-      <G vertical='auto 1fr' gap={0}>
+      <G vertical='auto 1fr'>
         <HeaderComp />
-        <G horizontal='auto 1fr auto' gap={0}>
+        <G horizontal='auto 1fr auto'>
           <LeftPanelComp />
           <StageComp />
           <RightPanelComp />

@@ -1,38 +1,46 @@
-import { Flex, Icon } from '@gitborlando/widget'
-import { FC, memo } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { useHookSignal } from 'src/shared/signal/signal-react'
-import { Button } from 'src/view/ui-utility/widget/button'
+import { IconButton } from 'src/view/component/button'
+import { Lucide } from 'src/view/component/lucide'
 
-type INodeHeaderComp = {}
-
-export const NodeHeaderComp: FC<INodeHeaderComp> = memo(({}) => {
+export const NodeHeaderComp: FC<{}> = observer(({}) => {
   const { allNodeExpanded, searchSlice } = UILeftPanelLayer
   const isCollapsed = allNodeExpanded.value === 'collapsed'
   useHookSignal(allNodeExpanded)
   useHookSignal(searchSlice)
 
   return (
-    <Flex layout='h' className='shrink-0 px-10 wh-100%-32 bg-white'>
+    <G center horizontal='1fr auto' className={cls()}>
       <input
-        className='wh-100%-32 bg-white labelFont outline-none border-none'
+        className={'search'}
         placeholder='搜索'
         value={searchSlice.value}
         onChange={(e) => {
           searchSlice.dispatch(e.target.value)
         }}></input>
-      <Button
-        type='icon'
-        style={{ marginLeft: 'auto' }}
+      <IconButton
         onClick={() =>
           allNodeExpanded.dispatch(isCollapsed ? 'expanded' : 'collapsed')
         }>
-        <Icon
-          className='wh-16'
+        <Lucide
+          icon={ChevronDown}
           style={{ rotate: isCollapsed ? '0deg' : '180deg' }}
-          url={Assets.editor.leftPanel.node.collapse}
         />
-      </Button>
-    </Flex>
+      </IconButton>
+    </G>
   )
 })
+
+const cls = classes(css`
+  padding-inline: 12px;
+  height: 32px;
+
+  & input {
+    height: 22px;
+    outline: none;
+    border: none;
+    background-color: transparent;
+    ${styles.textLabel}
+  }
+`)

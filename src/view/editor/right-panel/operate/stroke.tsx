@@ -4,7 +4,6 @@ import { OperateStroke } from 'src/editor/operate/stroke'
 import { IStroke } from 'src/editor/schema/type'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
-import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 import { Divide } from 'src/view/ui-utility/widget/divide'
 import { Dropdown } from 'src/view/ui-utility/widget/dropdown'
 import { PickerOpener } from './picker/picker-opener'
@@ -69,14 +68,14 @@ export const StrokeComp: FC<{}> = ({}) => {
           </IconButton>
         </Flex>
         <Flex className='wh-100%-28'>
-          <CompositeInput
+          {/* <CompositeInput
             className='wh-92-28 r-2 mr-4 px-6 d-hover-bg [&_.label]:w-28'
             label='粗细'
             needStepHandler={false}
             value={stroke.width.toString()}
             onNewValueApply={(width) => setStroke(index, ['width'], Number(width))}
             afterOperate={() => afterOperate.dispatch()}
-          />
+          /> */}
           <Dropdown
             className='wh-54-100% r-2'
             selected={stroke.align}

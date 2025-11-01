@@ -1,29 +1,32 @@
-import { Flex, Icon } from '@gitborlando/widget'
-import { FC, memo } from 'react'
+import { Icon } from '@gitborlando/widget'
 import { OperateAlign } from 'src/editor/operate/align'
 import { useHookSignal } from 'src/shared/signal/signal-react'
-import { Assets } from 'src/view/assets/assets'
-import { Button } from 'src/view/ui-utility/widget/button'
+import { IconButton } from 'src/view/component/button'
 
-type IAlignComp = {}
-
-export const AlignComp: FC<IAlignComp> = memo(({}) => {
+export const AlignComp: FC<{}> = observer(({}) => {
   const { alignTypes, canAlign, currentAlign } = OperateAlign
   useHookSignal(canAlign)
 
   return (
-    <Flex layout='h' className='shrink-0 justify-around wh-100%-36 borderBottom'>
+    <G center horizontal className={cls()}>
       {alignTypes.map((type) => (
-        <Button
+        <IconButton
           key={type}
           disabled={!canAlign.value}
           onClick={() => currentAlign.dispatch(type)}>
-          <Icon
-            className={`wh-16 ${canAlign.value ? '' : 'path-fill-#E6E6E6'}`}
-            url={Assets.editor.rightPanel.operate.align[type]}
-          />
-        </Button>
+          <Icon url={Assets.editor.rightPanel.operate.align[type]} />
+        </IconButton>
       ))}
-    </Flex>
+    </G>
   )
 })
+
+const cls = classes(css`
+  height: 40px;
+  justify-items: center;
+  ${styles.borderBottom}
+  & .g-icon {
+    width: 16px;
+    height: 16px;
+  }
+`)

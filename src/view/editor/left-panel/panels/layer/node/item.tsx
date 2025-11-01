@@ -17,7 +17,6 @@ import { cx, iife, noopFunc } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { Assets } from 'src/view/assets/assets'
-import { CompositeInput } from 'src/view/ui-utility/widget/compositeInput'
 
 type INodeItemComp = {
   id: string
@@ -122,20 +121,19 @@ export const NodeItemComp: FC<INodeItemComp> = ({ id, indent, ancestors }) => {
         className={cx([searched, 'text-hsl50'])}
         layout='h'
         onDoubleClick={() => enterReName.dispatch(id)}>
-        {enterReName.value === id ? (
-          <CompositeInput
-            type='text'
-            needLabelDrag={false}
-            needStepHandler={false}
-            className='p-0 wh-100%-fit bg-transparent outline-none border-none text-12'
-            value={node.name}
-            onNewValueApply={(value) => {
-              node.name = value
-              // Schema.afterReName.dispatch({ id: node.id, name: value })
-            }}
-            afterOperate={() => enterReName.dispatch('')}
-          />
-        ) : (
+        {enterReName.value === id ? null : (
+          // <CompositeInput
+          //   type='text'
+          //   needLabelDrag={false}
+          //   needStepHandler={false}
+          //   className='p-0 wh-100%-fit bg-transparent outline-none border-none text-12'
+          //   value={node.name}
+          //   onNewValueApply={(value) => {
+          //     node.name = value
+          //     // Schema.afterReName.dispatch({ id: node.id, name: value })
+          //   }}
+          //   afterOperate={() => enterReName.dispatch('')}
+          // />
           <div>{node.name}</div>
         )}
       </Flex>

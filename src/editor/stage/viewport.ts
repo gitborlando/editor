@@ -26,8 +26,8 @@ const stepByZoom = [
 
 @autobind
 class StageViewportService {
-  @observable zoom = 0.55
-  @observable offset = XY._(300, 300)
+  @observable zoom = 1
+  @observable offset = XY._(0, 0)
   @observable bound = createInitBound()
 
   private wheeler = new WheelUtil()
