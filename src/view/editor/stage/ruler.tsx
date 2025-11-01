@@ -20,7 +20,7 @@ export const RulerComp: FC<{}> = observer(({}) => {
     <G className={cls()}>
       <Ruler type='horizontal' />
       <Ruler type='vertical' />
-      <G center className={cls('corner')}></G>
+      {/* <G center className={cls('corner')}></G> */}
     </G>
   )
 })

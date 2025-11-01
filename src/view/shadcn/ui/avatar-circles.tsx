@@ -8,15 +8,19 @@ interface AvatarCirclesProps {
   className?: string
   numPeople?: number
   avatarUrls: Avatar[]
+  onClick?: () => void
 }
 
 export const AvatarCircles = ({
   numPeople,
   className,
   avatarUrls,
+  onClick,
 }: AvatarCirclesProps) => {
   return (
-    <div className={cn('z-10 flex -space-x-2 rtl:space-x-reverse', className)}>
+    <div
+      className={cn('z-10 flex -space-x-2 rtl:space-x-reverse', className)}
+      onClick={onClick}>
       {avatarUrls.map((url, index) => (
         <div key={index}>
           <img

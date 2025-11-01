@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate } from 'react-router'
-import { EditorComp } from 'src/view/editor/editor'
+import { EditorComp } from 'src/view/editor'
 import { HomeComp } from 'src/view/pages/home'
 import { Test } from 'src/view/pages/test'
 

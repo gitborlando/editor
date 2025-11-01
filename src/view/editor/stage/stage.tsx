@@ -1,3 +1,4 @@
+import { CSSProperties } from 'react'
 import { renderElem } from 'src/editor/stage/render/react/reconciler'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
@@ -28,9 +29,36 @@ export const StageComp: FC<{}> = observer(({}) => {
 
   return (
     <G onContextMenu={(e) => e.preventDefault()}>
-      <canvas className='bg-[#F7F8FA]' ref={Surface.setCanvas} />
+      <canvas className={cls('canvas')} ref={Surface.setCanvas} />
       <RulerComp />
       <FPSComp />
+      <CooperateObservingBorderComp />
     </G>
   )
 })
+
+export const CooperateObservingBorderComp: FC<{}> = observer(({}) => {
+  const { observingClientId: observingUserId } = YClients
+  if (!observingUserId) return null
+  console.log('observingUserId: ', observingUserId)
+
+  const client = YClients.getClientById(observingUserId)
+
+  return (
+    <G
+      className={cls('cooperate-observing-border')}
+      style={{ '--color': client.color } as CSSProperties}></G>
+  )
+})
+
+const cls = classes(css`
+  &-canvas {
+    background-color: #f7f8fa;
+  }
+  &-cooperate-observing-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 2px solid var(--color);
+  }
+`)

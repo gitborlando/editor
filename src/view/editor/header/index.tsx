@@ -1,4 +1,3 @@
-import { clone } from '@gitborlando/utils'
 import { Icon } from '@gitborlando/widget'
 import { ChevronLeft, Redo, Undo } from 'lucide-react'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
@@ -6,7 +5,7 @@ import { StageInteract } from 'src/editor/stage/interact/interact'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { Button } from 'src/view/component/button'
 import { Lucide } from 'src/view/component/lucide'
-import { AvatarCircles } from 'src/view/shadcn/ui/avatar-circles'
+import { CooperateComp } from 'src/view/editor/header/cooperate'
 
 export const HeaderComp: FC<{}> = observer(({}) => {
   const navigate = useNavigate()
@@ -34,7 +33,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
         <ZoomComp />
       </G>
       <G center horizontal className={cls('rightGroup')}>
-        <CooperationComp />
+        <CooperateComp />
       </G>
     </G>
   )
@@ -89,22 +88,6 @@ const UndoGroup: FC<{}> = observer(() => {
 
 const ZoomComp = observer(({}) => {
   return <Button style={{ width: 60 }}>{~~((getZoom() || 0) * 100)}%</Button>
-})
-
-export const CooperationComp: FC<{}> = observer(({}) => {
-  const others = useSnapshot(YClients.others)
-  console.log('others: ', clone(others))
-  const avatarUrls = Object.values(others).map((other) => ({
-    imageUrl: URL.createObjectURL(
-      new Blob([other.userAvatar], { type: 'image/svg+xml' }),
-    ),
-    color: other.color,
-  }))
-  return (
-    <G className={cls('abc')}>
-      <AvatarCircles avatarUrls={avatarUrls} numPeople={3} />
-    </G>
-  )
 })
 
 const cls = classes(css`

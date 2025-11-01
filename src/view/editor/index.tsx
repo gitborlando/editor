@@ -1,4 +1,3 @@
-import { FC, memo } from 'react'
 import { Editor } from 'src/editor/editor/editor'
 import { Surface } from 'src/editor/stage/render/surface'
 import { Loading } from 'src/view/component/loading'
@@ -10,10 +9,8 @@ import { HeaderComp } from './header'
 import { LeftPanelComp } from './left-panel'
 import { RightPanelComp } from './right-panel'
 
-type IEditorComp = {}
-
-export const EditorComp: FC<IEditorComp> = suspense(
-  memo(({}) => {
+export const EditorComp: FC<{}> = suspense(
+  ({}) => {
     const { fileId } = useParams<{ fileId: string }>()
 
     useMemo(() => Editor.initEditor(), [])
@@ -35,6 +32,6 @@ export const EditorComp: FC<IEditorComp> = suspense(
         </G>
       </G>
     )
-  }),
+  },
   <Loading />,
 )

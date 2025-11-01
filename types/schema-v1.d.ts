@@ -28,6 +28,8 @@ namespace V1 {
     selectPageId: string
     cursor: IXY
     color: string
+    zoom: number
+    offset: IXY
   }
 
   type Clients = {

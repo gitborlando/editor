@@ -7,8 +7,9 @@ export const styles = {
   borderBottom: 'border-bottom: 1px solid var(--gray-border);',
   borderTop: 'border-top: 1px solid var(--gray-border);',
   textLabel: `font-size: 12px;`,
+  textCommon: `font-size: 13px;`,
+  textHead: `font-size: 12px;font-weight: 600;`,
   bgPrimary: `background-color: var(--color-bg);`,
-  bgHoverPrimary: `&:hover {
-    background-color: var(--color-bg);
-  }`,
+  bgHoverPrimary: `&:hover {background-color: var(--color-bg);}`,
+  bgHoverGray: `&:hover {background-color: var(--gray-bg);}`,
 }

@@ -22,6 +22,8 @@ class YClientsService {
   client!: V1.Client
   clientSnap!: V1.Client
 
+  @observable observingClientId?: number
+
   init() {
     this.client = proxy({
       selectIds: {},
@@ -72,6 +74,10 @@ class YClientsService {
     YUndo.track({ type: 'client', description: `选择页面 ${page.name}` })
   }
 
+  getClientById(id: number) {
+    return this.others[id]
+  }
+
   private subscribeClient() {
     this.clientSnap = snapshot(this.client)
     subscribe(this.client, () => {
@@ -100,7 +106,7 @@ class YClientsService {
   }
 }
 
-export const YClients = new YClientsService()
+export const YClients = makeObservable(new YClientsService())
 
 export function getSelectIdMap() {
   return YClients.clientSnap.selectIds
