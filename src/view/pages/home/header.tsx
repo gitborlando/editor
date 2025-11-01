@@ -21,7 +21,7 @@ export const HomeHeaderComp: FC<{}> = observer(({}) => {
 })
 
 const cls = classes(css`
-  height: 44px;
+  height: 48px;
   padding: 0 20px;
   justify-content: space-between;
   ${styles.borderBottom}

@@ -7,12 +7,12 @@ import { Surface } from 'src/editor/stage/render/surface'
 import { subscribe } from 'valtio'
 
 const createInitBound = () => ({
-  left: 280,
-  top: 44,
+  left: 284,
+  top: 48,
   right: 240,
   bottom: 0,
-  width: window.innerWidth - 280 - 240,
-  height: window.innerHeight - 44 - 0,
+  width: window.innerWidth - 284 - 240,
+  height: window.innerHeight - 48 - 0,
 })
 
 const stepByZoom = [

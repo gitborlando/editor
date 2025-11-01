@@ -91,6 +91,7 @@ const ZoomComp = observer(({}) => {
 })
 
 const cls = classes(css`
+  height: 48px;
   padding-inline: 4px;
   border-bottom: 1px solid var(--gray-border);
 

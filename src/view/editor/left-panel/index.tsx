@@ -68,7 +68,7 @@ const cls = classes(css`
   ${styles.borderRight}
 
   &-switchBar {
-    width: 40px;
+    width: 44px;
     align-content: start;
     padding-block: 8px;
     ${styles.borderRight}
