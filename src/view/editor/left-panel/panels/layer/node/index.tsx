@@ -1,11 +1,5 @@
-import { NodeHeaderComp } from './header'
-import { NodeListComp } from './list'
-
-export const NodeComp: FC<{}> = observer(({}) => {
-  return (
-    <G vertical>
-      <NodeHeaderComp />
-      <NodeListComp />
-    </G>
-  )
+export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
+  return <G className={cls()}></G>
 })
+
+const cls = classes(css``)
