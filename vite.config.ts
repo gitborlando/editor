@@ -19,6 +19,7 @@ const autoImport = autoImportPlugin({
       '@gitborlando/signal': ['Signal'],
       'src/view/assets/assets': ['Assets'],
       'src/view/component/grid': ['Grid', 'G', 'C'],
+      'src/view/component/lucide': ['Lucide'],
       'src/editor/y-state/y-state': ['YState'],
       'src/editor/y-state/y-clients': ['YClients'],
       'src/editor/y-state/y-undo': ['YUndo'],

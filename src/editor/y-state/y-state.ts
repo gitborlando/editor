@@ -1,7 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { proxy, Snapshot, snapshot, subscribe } from 'valtio'
-import { bind } from 'valtio-yjs'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import * as Y from 'yjs'
 
@@ -25,7 +24,7 @@ class YStateService {
 
     this.state = proxy(mockSchema)
     this.snap = snapshot(this.state)
-    bind(this.state, this.doc.getMap('schema'))
+    // bind(this.state, this.doc.getMap('schema'))
 
     this.unSub?.()
     this.unSub = this.subscribeState()

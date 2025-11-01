@@ -7,7 +7,7 @@ import {
   useRef,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { useAutoSignal, useSignal } from 'src/shared/signal/signal-react'
+import { useAutoSignal } from 'src/shared/signal/signal-react'
 import { stopPropagation, useClickAway } from 'src/shared/utils/event'
 import { iife } from 'src/shared/utils/normal'
 
@@ -32,7 +32,7 @@ export const Dropdown = forwardRef<HTMLDivElement, IDropdown>((props, ref) => {
   const innerRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLInputElement>(null)
   const show = useAutoSignal(false)
-  const bound = useSignal({ x: 0, y: 0, width: 0, height: 0 })
+  const bound = { value: { x: 0, y: 0, width: 0, height: 0 } }
   useImperativeHandle(ref, () => innerRef.current!, [])
   useEffect(() => {
     if (!innerRef.current) return

@@ -4,7 +4,7 @@ import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { Button } from 'src/view/component/button'
-import { Lucide } from 'src/view/component/lucide'
+
 import { CooperateComp } from 'src/view/editor/header/cooperate'
 
 export const HeaderComp: FC<{}> = observer(({}) => {

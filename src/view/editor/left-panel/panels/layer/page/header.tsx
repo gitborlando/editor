@@ -5,7 +5,8 @@ import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { useMatchPatch } from 'src/shared/utils/react'
 import { IconButton } from 'src/view/component/button'
-import { Lucide } from 'src/view/component/lucide'
+
+import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
 import { useSelectPage } from 'src/view/hooks/schema/use-y-state'
 
 export const PageHeaderComp: FC<{}> = memo(({}) => {
@@ -29,7 +30,11 @@ export const PageHeaderComp: FC<{}> = memo(({}) => {
       <IconButton onClick={newPage}>
         <Lucide icon={Plus} />
       </IconButton>
-      <IconButton onClick={() => allPageExpanded.dispatch(!allPageExpanded.value)}>
+      <IconButton
+        onClick={() => {
+          allPageExpanded.dispatch(!allPageExpanded.value)
+          EditorLPLayerState.pagePanelHeight = allPageExpanded.value ? 200 : 32
+        }}>
         <Lucide
           icon={ChevronDown}
           style={{ rotate: allPageExpanded.value ? '0deg' : '180deg' }}
@@ -42,7 +47,6 @@ export const PageHeaderComp: FC<{}> = memo(({}) => {
 const cls = classes(css`
   padding-inline: 12px 10px;
   height: 32px;
-
   &-title {
     ${styles.textLabel}
     color: gray;

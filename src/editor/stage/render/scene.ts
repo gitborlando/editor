@@ -68,7 +68,7 @@ class StageSceneService {
     }
 
     const page = YState.findSnap<IPage>(YClients.client.selectPageId)
-    page.childIds.forEach(traverse)
+    // page.childIds.forEach(traverse)
   }
 
   private hookPatchRender() {

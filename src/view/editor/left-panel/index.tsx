@@ -2,7 +2,7 @@ import { matchCase } from '@gitborlando/utils'
 import { History, Image, Layers, Settings } from 'lucide-react'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Button } from 'src/view/component/button'
-import { Lucide } from 'src/view/component/lucide'
+
 import { EditorLeftPanelImages } from 'src/view/editor/left-panel/panels/images'
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer'
 import { SettingComp } from 'src/view/editor/left-panel/panels/setting'

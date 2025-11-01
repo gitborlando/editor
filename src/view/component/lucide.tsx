@@ -5,7 +5,7 @@ interface LucideProps extends LucidePropsType {
 }
 
 export const Lucide: FC<LucideProps> = observer(
-  ({ icon: Icon, className, size = 18, ...rest }) => {
+  ({ icon: Icon, className, size = 16, ...rest }) => {
     return <Icon className={className} {...rest} size={size} strokeWidth={1.5} />
   },
 )

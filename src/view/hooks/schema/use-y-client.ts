@@ -5,6 +5,11 @@ export function useSelectIds() {
   return useMemo(() => Object.keys(selectIds), [selectIds])
 }
 
+export function useSelectIdMap() {
+  const { selectIds } = useSnapshot(YClients.client)
+  return selectIds
+}
+
 export function useAllSelectIdMap() {
   const { selectIds } = useSnapshot(YClients.client)
   const othersSnap = useSnapshot(YClients.others)

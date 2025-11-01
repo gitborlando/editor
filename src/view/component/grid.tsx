@@ -30,11 +30,21 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(
     const contentStyle = useMemo(() => {
       if (!center) return {}
       if (horizontal && vertical)
-        return { justifyContent: 'center', alignContent: 'center' }
+        return {
+          justifyContent: 'center',
+          alignContent: 'center',
+          justifyItems: 'center',
+          alignItems: 'center',
+        }
       if (!horizontal && !vertical)
-        return { justifyContent: 'center', alignContent: 'center' }
-      if (horizontal) return { alignContent: 'center' }
-      if (vertical) return { justifyContent: 'center' }
+        return {
+          justifyContent: 'center',
+          alignContent: 'center',
+          justifyItems: 'center',
+          alignItems: 'center',
+        }
+      if (horizontal) return { alignContent: 'center', alignItems: 'center' }
+      if (vertical) return { justifyContent: 'center', justifyItems: 'center' }
       return {}
     }, [horizontal, vertical, center])
 

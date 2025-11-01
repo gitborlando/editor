@@ -2,9 +2,12 @@ import { HookOption, Signal } from '@gitborlando/signal'
 import { useEffect, useRef, useState } from 'react'
 import { INoopFunc } from '../utils/normal'
 
-export function useSignal<T extends any>(init?: T): Signal<T> {
-  const signal = useRef(Signal.create(init))
-  return signal.current
+export function useSignal<T extends unknown>(signal: Signal<T>) {
+  return useSyncExternalStore(signal.hook, () => signal.value)
+}
+
+export function useEventSignal(signal: Signal<unknown>) {
+  return useSyncExternalStore(signal.hook, () => ({}))
 }
 
 export function useAutoSignal<T extends any>(init?: T, id?: string): Signal<T> {

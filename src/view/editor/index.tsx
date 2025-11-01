@@ -2,12 +2,12 @@ import { Editor } from 'src/editor/editor/editor'
 import { Surface } from 'src/editor/stage/render/surface'
 import { Loading } from 'src/view/component/loading'
 import { suspense } from 'src/view/component/suspense'
+import { LeftPanelComp } from 'src/view/editor/left-panel'
+import { RightPanelComp } from 'src/view/editor/right-panel'
 import { StageComp } from 'src/view/editor/stage/stage'
 import { useUnmount } from 'src/view/hooks/common'
 import { clear, suspend } from 'suspend-react'
 import { HeaderComp } from './header'
-import { LeftPanelComp } from './left-panel'
-import { RightPanelComp } from './right-panel'
 
 export const EditorComp: FC<{}> = suspense(
   ({}) => {
