@@ -21,9 +21,7 @@
     "jsx": "react-jsx",
     "paths": {
       "src/*": ["src/*"],
-      "types/*": ["types/*"],
-      "@/*": ["src/*"]
+      "types/*": ["types/*"]
     }
-  },
-  "exclude": ["node_modules", "dist"]
+  }
 }
