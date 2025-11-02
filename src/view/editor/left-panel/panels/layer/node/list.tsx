@@ -1,23 +1,25 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
+import Scrollbars from 'react-custom-scrollbars-2'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
 import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'
 
 export const EditorLeftPanelLayerNodeListComp: FC<{}> = observer(({}) => {
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollBarsRef = useRef<Scrollbars>(null)
   useHookSignal(EditorLPLayerNodeState.nodeInfoChanged)
 
   const nodeInfoList = EditorLPLayerNodeState.getNodeInfoList()
   const virtualizer = useVirtualizer({
     count: nodeInfoList.length,
     overscan: 20,
-    getScrollElement: () => scrollRef.current,
     estimateSize: () => 32,
     getItemKey: (index) => nodeInfoList[index].id,
+    getScrollElement: () =>
+      scrollBarsRef.current?.container?.firstElementChild || null,
   })
 
   return (
-    <G ref={scrollRef} className={cls()}>
+    <Scrollbars ref={scrollBarsRef} className={cls()}>
       <G style={{ height: nodeInfoList.length * 32 }}>
         {virtualizer.getVirtualItems().map((virtualItem) => {
           const nodeInfo = nodeInfoList[virtualItem.index]
@@ -26,22 +28,17 @@ export const EditorLeftPanelLayerNodeListComp: FC<{}> = observer(({}) => {
               className={cls('item')}
               key={virtualItem.key}
               data-index={virtualItem.index}
-              ref={virtualizer.measureElement}
               style={{ transform: `translateY(${virtualItem.start}px)` }}>
               <EditorLeftPanelLayerNodeItemComp nodeInfo={nodeInfo} />
             </G>
           )
         })}
       </G>
-    </G>
+    </Scrollbars>
   )
 })
 
 const cls = classes(css`
-  width: 100%;
-  position: relative;
-  overflow-y: auto;
-  min-height: 0;
   &-item {
     position: absolute;
     top: 0;
