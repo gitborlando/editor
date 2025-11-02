@@ -1,12 +1,10 @@
 import { ChevronUp } from 'lucide-react'
-import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { IconButton } from 'src/view/component/button'
 
 import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'
 
 export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
-  const { searchSlice } = UILeftPanelLayer
   const { nodeInfoChanged, getAllNodeExpanded, toggleAllNodeExpanded } =
     EditorLPLayerNodeState
 
@@ -19,12 +17,9 @@ export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    searchSlice.dispatch(value)
   }
 
-  const handleClearSearch = () => {
-    searchSlice.dispatch('')
-  }
+  const handleClearSearch = () => {}
 
   return (
     <G horizontal='1fr auto' center className={cls()}>

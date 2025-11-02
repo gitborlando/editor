@@ -19,7 +19,6 @@ import { StageDrop } from '../stage/drop'
 import { StageInteract } from '../stage/interact/interact'
 import { StageScene } from '../stage/render/scene'
 import { StageViewport } from '../stage/viewport'
-import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
 
 const jsZip = new JSZip()
 
@@ -79,8 +78,8 @@ export class EditorService {
       }
     }
 
-    UILeftPanelLayer.initHook()
-    UILeftPanelLayer.init()
+    // UILeftPanelLayer.initHook()
+    // UILeftPanelLayer.init()
   }
 
   initEditor = async () => {

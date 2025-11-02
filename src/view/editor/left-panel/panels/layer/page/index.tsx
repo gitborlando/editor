@@ -1,17 +1,13 @@
 import Scrollbars from 'react-custom-scrollbars-2'
 import { IPage } from 'src/editor/schema/type'
-import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { Drag } from 'src/global/event/drag'
-import { useHookSignal } from 'src/shared/signal/signal-react'
 import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
 import { useSnapshot } from 'valtio'
 import { PageHeaderComp } from './header'
 import { PageItemComp } from './item'
 
 export const PageComp: FC<{}> = observer(({}) => {
-  const { pagePanelHeight } = EditorLPLayerState
-  const { allPageExpanded } = UILeftPanelLayer
-  useHookSignal(allPageExpanded)
+  const { pagePanelHeight, allPageExpanded } = EditorLPLayerState
   const { meta } = useSnapshot(YState.state)
 
   return (
@@ -20,7 +16,7 @@ export const PageComp: FC<{}> = observer(({}) => {
       <G
         vertical
         className={cls('content')}
-        x-if={allPageExpanded.value}
+        x-if={allPageExpanded}
         style={{ height: pagePanelHeight - 37 }}>
         <Scrollbars style={{ height: pagePanelHeight - 37 }}>
           {meta.pageIds.map((id) => {
@@ -31,7 +27,7 @@ export const PageComp: FC<{}> = observer(({}) => {
       </G>
       <G
         className={cls('resize')}
-        x-if={allPageExpanded.value}
+        x-if={allPageExpanded}
         onMouseDown={() => {
           let lastHeight = pagePanelHeight
           Drag.onSlide(({ shift }) => {

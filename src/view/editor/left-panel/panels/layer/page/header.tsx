@@ -1,46 +1,40 @@
 import { ChevronDown, Plus } from 'lucide-react'
 import { FC, memo } from 'react'
 import { HandlePage } from 'src/editor/handle/page'
-import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
-import { useHookSignal } from 'src/shared/signal/signal-react'
-import { useMatchPatch } from 'src/shared/utils/react'
 import { IconButton } from 'src/view/component/button'
 
 import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
 import { useSelectPage } from 'src/view/hooks/schema/use-y-state'
 
 export const PageHeaderComp: FC<{}> = memo(({}) => {
-  const { allPageExpanded } = UILeftPanelLayer
-  useHookSignal(allPageExpanded)
-  useMatchPatch('/client/selectPageId')
+  const { allPageExpanded } = EditorLPLayerState
   const selectPage = useSelectPage()
   const newPage = () => {
-    if (allPageExpanded.value === false) {
-      allPageExpanded.dispatch(true)
+    if (allPageExpanded === false) {
+      EditorLPLayerState.allPageExpanded = true
     }
-    // OperatePage.addPage()
     HandlePage.addPage()
   }
 
   return (
-    <C horizontal='1fr auto auto' gap={4} className={cls()}>
-      <C horizontal className={cls('title')}>
+    <G center horizontal='1fr auto auto' gap={4} className={cls()}>
+      <G center horizontal className={cls('title')}>
         {selectPage.name}
-      </C>
+      </G>
       <IconButton onClick={newPage}>
         <Lucide icon={Plus} />
       </IconButton>
       <IconButton
         onClick={() => {
-          allPageExpanded.dispatch(!allPageExpanded.value)
-          EditorLPLayerState.pagePanelHeight = allPageExpanded.value ? 200 : 32
+          EditorLPLayerState.allPageExpanded = !allPageExpanded
+          EditorLPLayerState.pagePanelHeight = allPageExpanded ? 200 : 32
         }}>
         <Lucide
           icon={ChevronDown}
-          style={{ rotate: allPageExpanded.value ? '0deg' : '180deg' }}
+          style={{ rotate: allPageExpanded ? '0deg' : '180deg' }}
         />
       </IconButton>
-    </C>
+    </G>
   )
 })
 

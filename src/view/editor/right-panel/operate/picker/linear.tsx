@@ -1,7 +1,7 @@
 import { Flex } from '@gitborlando/widget'
 import { FC, memo, useState } from 'react'
+import { UIPickerCopy } from 'src/editor/handle/picker'
 import { IFillLinearGradient } from 'src/editor/schema/type'
-import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { makeLinearGradientCss } from 'src/shared/utils/color'
 import { PickerColorComp } from './color'
 

@@ -9,8 +9,6 @@ import { OperateNode } from '../operate/node'
 import { OperatePage } from '../operate/page'
 import { Schema } from '../schema/schema'
 import { ID, INodeParent, IPage } from '../schema/type'
-import { UILeftPanelLayer } from '../ui-state/left-panel/layer'
-import { UILeftPanel } from '../ui-state/left-panel/left-panel'
 
 class EditorCommandManager {
   initHook() {
@@ -77,7 +75,7 @@ class EditorCommandManager {
         name: '重命名',
         callback: () => {
           const { id } = ContextMenu.context
-          UILeftPanelLayer.enterReName.dispatch(id)
+          // UILeftPanelLayer.enterReName.dispatch(id)
         },
       },
       {
@@ -150,7 +148,7 @@ class EditorCommandManager {
         name: '弹出面板',
         callback: () => {
           const { id } = ContextMenu.context
-          UILeftPanel.popUpPanel(id)
+          // UILeftPanel.popUpPanel(id)
         },
       },
     ]

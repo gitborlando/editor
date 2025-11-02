@@ -3,11 +3,11 @@ import equal from 'fast-deep-equal'
 import Immui from 'src/shared/immui/immui'
 import { clone } from 'src/shared/utils/normal'
 import { rgb } from 'src/utils/color'
+import { UIPickerCopy } from '../handle/picker'
 import { SchemaCreator } from '../schema/creator'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
 import { INode, IShadow } from '../schema/type'
-import { UIPickerCopy } from '../ui-state/right-panel/operate/picker'
 import { OperateNode } from './node'
 
 @autobind

@@ -1,6 +1,7 @@
 import { Signal } from '@gitborlando/signal'
 import { Flex } from '@gitborlando/widget'
 import { FC, memo, useEffect } from 'react'
+import { UIPickerCopy } from 'src/editor/handle/picker'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import {
   IFill,
@@ -8,7 +9,6 @@ import {
   IFillImage,
   IFillLinearGradient,
 } from 'src/editor/schema/type'
-import { UIPickerCopy } from 'src/editor/ui-state/right-panel/operate/picker'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { clone } from 'src/shared/utils/normal'
 import { useMemoComp } from 'src/shared/utils/react'

@@ -14,7 +14,6 @@ import { ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { Surface } from 'src/editor/stage/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { UILeftPanelLayer } from 'src/editor/ui-state/left-panel/layer'
 import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { Drag } from 'src/global/event/drag'
@@ -119,7 +118,7 @@ class StageSelectService {
   onCreateSelect(id: string) {
     this.clearSelect()
     OperateNode.select(id)
-    UILeftPanelLayer.expandAncestor(id)
+    // UILeftPanelLayer.expandAncestor(id)
     this.afterSelect.dispatch('create')
     OperateNode.commitSelect()
   }
@@ -166,14 +165,14 @@ class StageSelectService {
       if (childIds?.length && depth === 0) {
         if (AABB.include(this.marqueeOBB!.aabb, elem.aabb) === 1) {
           YUndo.untrackScope(() => YClients.select(id))
-          UILeftPanelLayer.needExpandIds.add(id)
+          // UILeftPanelLayer.needExpandIds.add(id)
           return false
         }
         return
       }
       if (hitTest(this.marqueeOBB, elem.obb)) {
         YUndo.untrackScope(() => YClients.select(id))
-        UILeftPanelLayer.needExpandIds.add(node.parentId)
+        // UILeftPanelLayer.needExpandIds.add(node.parentId)
         return
       }
       return false
