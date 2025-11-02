@@ -54,13 +54,14 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
       }}
       gap={4}
       {...attributes}
+      {...listeners}
       horizontal='auto auto 1fr auto'
       center
       data-selected={selected}
       data-sub-selected={subSelected}
       data-dragging={isDragging}
       className={cls()}
-      onClick={handleSelect}
+      onMouseDown={handleSelect}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}>
       <Lucide
@@ -79,7 +80,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
         url={
           Assets.editor.node[node.type as keyof typeof Assets.editor.node]
         }></Icon>
-      <G className={cls('name')} {...listeners} style={{ flex: 1, minWidth: 0 }}>
+      <G className={cls('name')} style={{ flex: 1, minWidth: 0 }}>
         {node.name || '未命名'}
       </G>
     </G>

@@ -10,11 +10,9 @@ export type EditorLPLayerNodeInfo = {
 
 @autobind
 class EditorLPLayerNodeStateService {
-  allExpanded = false
-
-  nodeInfoList: EditorLPLayerNodeInfo[] = []
-  nodeExpandedMap = createCache<string, boolean>()
   nodeInfoChanged = Signal.create()
+
+  private nodeExpandedMap = createCache<string, boolean>()
 
   getNodeExpanded(id: string) {
     return this.nodeExpandedMap.get(id)
@@ -41,15 +39,15 @@ class EditorLPLayerNodeStateService {
   }
 
   getNodeInfoList() {
-    this.nodeInfoList.length = 0
+    const nodeInfoList: EditorLPLayerNodeInfo[] = []
     SchemaHelper.createCurrentPageTraverse({
       finder: YState.findSnap<V1.Node>,
       callback: ({ id, ancestors }) => {
-        this.nodeInfoList.push({ id, indent: ancestors.length, ancestors })
+        nodeInfoList.push({ id, indent: ancestors.length, ancestors })
         return !!this.nodeExpandedMap.get(id)
       },
     })()
-    return this.nodeInfoList
+    return nodeInfoList
   }
 }
 

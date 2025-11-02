@@ -5,13 +5,15 @@ import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/pan
 import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'
 
 export const EditorLeftPanelLayerNodeListComp: FC<{}> = observer(({}) => {
+  const { nodeInfoChanged, getNodeInfoList } = EditorLPLayerNodeState
   const scrollBarsRef = useRef<Scrollbars>(null)
-  useHookSignal(EditorLPLayerNodeState.nodeInfoChanged)
+  const nodeInfoList = getNodeInfoList()
 
-  const nodeInfoList = EditorLPLayerNodeState.getNodeInfoList()
+  useHookSignal(nodeInfoChanged)
+
   const virtualizer = useVirtualizer({
     count: nodeInfoList.length,
-    overscan: 20,
+    overscan: 0,
     estimateSize: () => 32,
     getItemKey: (index) => nodeInfoList[index].id,
     getScrollElement: () =>

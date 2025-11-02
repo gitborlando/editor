@@ -7,8 +7,8 @@ import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/
 export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
   const { nodeInfoChanged, getAllNodeExpanded, toggleAllNodeExpanded } =
     EditorLPLayerNodeState
-
   useHookSignal(nodeInfoChanged)
+
   const allNodeExpanded = getAllNodeExpanded()
 
   const handleToggleExpand = () => {
