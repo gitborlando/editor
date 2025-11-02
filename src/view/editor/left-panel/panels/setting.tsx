@@ -18,7 +18,7 @@ export const SettingComp: FC<{}> = observer(({}) => {
   }
 
   return (
-    <G gap={16} className={editorSettingCls()}>
+    <G className={editorSettingCls()}>
       <BooleanSettingComp
         label='mock模式'
         value={mockMode}
@@ -113,7 +113,7 @@ export const switchCls = classes(css`
     background-color: var(--gray-bg);
 
     &-checked {
-      background-color: var(--color);
+      background-color: hsl(var(--hue), 100%, 60%);
       justify-self: end;
     }
   }

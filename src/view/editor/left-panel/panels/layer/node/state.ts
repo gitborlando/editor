@@ -21,7 +21,6 @@ class EditorLPLayerNodeStateService {
   }
 
   getAllNodeExpanded() {
-    console.log(this.nodeExpandedMap.cache)
     for (const expanded of this.nodeExpandedMap.values()) {
       if (expanded) return true
     }

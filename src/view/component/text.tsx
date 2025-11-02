@@ -1,9 +1,14 @@
 import { Typography, TypographyTextProps } from '@arco-design/web-react'
 
-export const Text: FC<TypographyTextProps> = observer(
-  ({ children, className, style, ...rest }) => {
+export const Text: FC<TypographyTextProps & { active?: boolean }> = observer(
+  ({ children, className, style, active = false, ellipsis = true, ...rest }) => {
     return (
-      <Typography.Text className={cx(cls(), className)} style={style} {...rest}>
+      <Typography.Text
+        data-active={active}
+        className={cx('text', cls(), className as string)}
+        style={style}
+        ellipsis={ellipsis}
+        {...rest}>
         {children}
       </Typography.Text>
     )
@@ -12,4 +17,8 @@ export const Text: FC<TypographyTextProps> = observer(
 
 const cls = classes(css`
   align-self: center;
+  ${styles.textLabel}
+  &[data-active='true'] {
+    ${styles.textActive}
+  }
 `)

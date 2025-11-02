@@ -1,3 +1,6 @@
 .arco-popover-content {
-  padding: 8px;
+  padding: 12px;
+}
+.arco-popover-arrow {
+  display: none;
 }

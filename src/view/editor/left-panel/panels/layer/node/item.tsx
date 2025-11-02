@@ -1,13 +1,12 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { preventDefault, stopPropagation } from '@gitborlando/utils/browser'
+import { stopPropagation } from '@gitborlando/utils/browser'
 import { Icon } from '@gitborlando/widget'
 import { ChevronRight } from 'lucide-react'
 import { EditorCommand } from 'src/editor/editor/command'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { ContextMenu } from 'src/global/context-menu'
-
 import {
   EditorLPLayerNodeInfo,
   EditorLPLayerNodeState,
@@ -17,30 +16,32 @@ import { useSelectIdMap } from 'src/view/hooks/schema/use-y-client'
 export const EditorLeftPanelLayerNodeItemComp: FC<{
   nodeInfo: EditorLPLayerNodeInfo
 }> = observer(({ nodeInfo }) => {
-  const { id, indent } = nodeInfo
+  const { id, indent, ancestors } = nodeInfo
+  const { toggleNodeExpanded, getNodeExpanded } = EditorLPLayerNodeState
   const node = YState.findSnap<V1.Node>(id)
   const isParent = SchemaHelper.isNodeParent(node)
-  const expanded = EditorLPLayerNodeState.getNodeExpanded(id)
+  const expanded = getNodeExpanded(id)
   const selected = useSelectIdMap()[id]
+  const subSelected = ancestors.some((ancestor) => useSelectIdMap()[ancestor])
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id, disabled: false })
 
   const handleToggleExpand = stopPropagation(() => {
-    EditorLPLayerNodeState.toggleNodeExpanded(id, !expanded)
+    toggleNodeExpanded(id, !expanded)
   })
-
-  const handleSelect = (e: React.MouseEvent) => {
+  const handleSelect = () => {
     StageSelect.onPanelSelect(id)
   }
-
-  const handleContextMenu = preventDefault(
-    stopPropagation((e: React.MouseEvent) => {
-      ContextMenu.context = { id }
-      ContextMenu.menus = [EditorCommand.nodeGroup]
-      ContextMenu.openMenu(e)
-    }),
-  )
+  const handleDoubleClick = () => {
+    StageSelect.onPanelSelect(id)
+    toggleNodeExpanded(id, true)
+  }
+  const handleContextMenu = (e: React.MouseEvent) => {
+    ContextMenu.context = { id }
+    ContextMenu.menus = [EditorCommand.nodeGroup]
+    ContextMenu.openMenu(e)
+  }
 
   return (
     <G
@@ -56,9 +57,11 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
       horizontal='auto auto 1fr auto'
       center
       data-selected={selected}
+      data-sub-selected={subSelected}
       data-dragging={isDragging}
       className={cls()}
       onClick={handleSelect}
+      onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}>
       <Lucide
         size={14}
@@ -76,10 +79,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
         url={
           Assets.editor.node[node.type as keyof typeof Assets.editor.node]
         }></Icon>
-      <G
-        className={cls('name')}
-        {...listeners}
-        style={{ cursor: 'grab', flex: 1, minWidth: 0 }}>
+      <G className={cls('name')} {...listeners} style={{ flex: 1, minWidth: 0 }}>
         {node.name || '未命名'}
       </G>
     </G>
@@ -95,6 +95,9 @@ const cls = classes(css`
   ${styles.borderHoverPrimary}
   &[data-selected='true'] {
     ${styles.bgPrimary}
+  }
+  &[data-sub-selected='true'] {
+    background-color: var(--color-bg-half);
   }
   &[data-dragging='true'] {
     opacity: 0.5;

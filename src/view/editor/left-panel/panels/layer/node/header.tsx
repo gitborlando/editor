@@ -12,7 +12,6 @@ export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
 
   useHookSignal(nodeInfoChanged)
   const allNodeExpanded = getAllNodeExpanded()
-  console.log('allNodeExpanded: ', allNodeExpanded)
 
   const handleToggleExpand = () => {
     toggleAllNodeExpanded(!allNodeExpanded)

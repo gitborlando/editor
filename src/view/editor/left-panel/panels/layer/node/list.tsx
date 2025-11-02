@@ -19,7 +19,7 @@ export const EditorLeftPanelLayerNodeListComp: FC<{}> = observer(({}) => {
   })
 
   return (
-    <Scrollbars ref={scrollBarsRef} className={cls()}>
+    <Scrollbars autoHide ref={scrollBarsRef} className={cls()}>
       <G style={{ height: nodeInfoList.length * 32 }}>
         {virtualizer.getVirtualItems().map((virtualItem) => {
           const nodeInfo = nodeInfoList[virtualItem.index]
