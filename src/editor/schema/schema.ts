@@ -39,7 +39,7 @@ class SchemaService {
   }
 
   find<T extends ISchemaItem>(id: ID): T {
-    return YState.findSnap<any>(id)
+    return YState.find<any>(id)
     // return this.schema[id] as T
   }
 

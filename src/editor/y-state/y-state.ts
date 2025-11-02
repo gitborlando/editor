@@ -1,33 +1,46 @@
 import autobind from 'class-autobind-decorator'
-import { YSync } from 'src/editor/y-state/y-sync'
-import { proxy, Snapshot, snapshot, subscribe } from 'valtio'
+import Immut, { ImmutPatch } from 'src/utils/immut/immut'
+import { bind } from 'src/utils/immut/immut-y'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import * as Y from 'yjs'
 
 @autobind
 class YStateService {
   doc!: Y.Doc
-  snap!: Snapshot<V1.Schema>
-  state!: V1.Schema
+  immut = new Immut(<V1.Schema>{})
 
   inited$ = Signal.create(false)
-  flushPatch$ = Signal.create<Patch>()
+  flushPatch$ = Signal.create<ImmutPatch>()
 
   private yIndexDB!: IndexeddbPersistence
   private unSub?: () => void
+
+  get state() {
+    return this.immut.state
+  }
+  get push() {
+    return this.immut.push
+  }
+  get set() {
+    return this.immut.set
+  }
+  get delete() {
+    return this.immut.delete
+  }
+  get next() {
+    return this.immut.next
+  }
 
   async initSchema(fileId: string, mockSchema?: V1.Schema) {
     this.doc = new Y.Doc()
     // this.yIndexDB = new IndexeddbPersistence(fileId, this.doc)
     // await this.yIndexDB.whenSynced
-    YSync.init(fileId, this.doc)
 
-    this.state = proxy(mockSchema)
-    this.snap = snapshot(this.state)
-    // bind(this.state, this.doc.getMap('schema'))
+    this.immut.state = mockSchema!
+    bind(this.immut, this.doc.getMap('schema'))
 
     this.unSub?.()
-    this.unSub = this.subscribeState()
+    this.unSub = this.subscribeSchema()
 
     YClients.clientId = this.doc.clientID
     YUndo.initStateUndo(this.doc.getMap('schema'))
@@ -35,36 +48,15 @@ class YStateService {
     this.inited$.dispatch(true)
   }
 
-  findSnap<T extends V1.SchemaItem>(id: string): T {
-    return this.snap[id] as T
-  }
-
   find<T extends V1.SchemaItem>(id: string): T {
     return this.state[id] as T
   }
 
-  private subscribeState() {
-    return subscribe(this.state, (unstable_ops: any[]) => {
+  private subscribeSchema() {
+    return this.immut.subscribe((patches: ImmutPatch[]) => {
       if (!this.inited$.value) return
-      this.snap = snapshot(this.state)
-      this.makePatches(unstable_ops)
+      patches.forEach((patch) => this.flushPatch$.dispatch(patch))
     })
-  }
-
-  private makePatches(unstable_ops: any[]) {
-    const patches: Patch[] = []
-    unstable_ops.forEach(([type, path, value, oldValue]) => {
-      const pathStr = path.join('/')
-      const pathAndKeys = { path: pathStr, keys: path }
-      if (type === 'set') {
-        oldValue === undefined
-          ? patches.push({ type: 'add', ...pathAndKeys, value })
-          : patches.push({ type: 'replace', ...pathAndKeys, value, oldValue })
-      } else if (type === 'delete') {
-        patches.push({ type: 'remove', ...pathAndKeys, oldValue })
-      }
-    })
-    patches.forEach(this.flushPatch$.dispatch)
   }
 }
 

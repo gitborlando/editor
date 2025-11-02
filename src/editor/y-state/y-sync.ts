@@ -3,6 +3,12 @@ import autobind from 'class-autobind-decorator'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 
+export type AwarenessUpdateEvent = {
+  added: number[]
+  removed: number[]
+  updated: number[]
+}
+
 @autobind
 class YSyncService {
   inited$ = Signal.create(false)
@@ -12,7 +18,7 @@ class YSyncService {
 
   async init(fileId: string, document: Y.Doc) {
     this.provider = new HocuspocusProvider({
-      url: 'ws://8.134.131.253:1234',
+      url: 'ws://localhost:1234', // 'ws://8.134.131.253:1234',
       name: fileId,
       document,
     })

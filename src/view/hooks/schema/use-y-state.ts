@@ -1,14 +1,18 @@
+import { useShallow } from 'src/view/hooks/schema/use-shallow'
 import { useSelectIds, useSelectPageId } from 'src/view/hooks/schema/use-y-client'
-import { useSnapshot } from 'valtio'
 
 export function useSelectNodes() {
   const selectIds = useSelectIds()
-  const state = useSnapshot(YState.state)
-  return selectIds.map((id) => state[id] as V1.Node)
+  return useSchema(
+    useShallow((state) => selectIds.map((id) => state[id] as V1.Node)),
+  )
 }
 
 export function useSelectPage() {
   const selectPageId = useSelectPageId()
-  const state = useSnapshot(YState.state)
-  return state[selectPageId] as V1.Page
+  return useSchema((state) => state[selectPageId] as V1.Page)
+}
+
+export function useSchema(selector: (state: V1.Schema) => any) {
+  return useSyncExternalStore(YState.immut.subscribe, () => selector(YState.state))
 }

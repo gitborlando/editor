@@ -1,6 +1,5 @@
 import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
-import usePromise from 'react-promise-suspense'
 import { IImage, ImgManager } from 'src/editor/editor/img-manager'
 import { UIPickerCopy } from 'src/editor/handle/picker'
 import { IFillImage } from 'src/editor/schema/type'
@@ -8,6 +7,7 @@ import { Uploader } from 'src/global/upload'
 import { useAutoSignal } from 'src/shared/signal/signal-react'
 import { iife } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
+import { suspend } from 'suspend-react'
 
 type IPickerImageComp = {
   fill: IFillImage
@@ -24,7 +24,7 @@ export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
   }
 
   const ImgComp = useMemoComp([fill.url], ({}) => {
-    const image = usePromise<[string], IImage>(
+    const image = suspend<[string], IImage>(
       () => ImgManager.getImageAsync(fill.url),
       [fill.url],
     )

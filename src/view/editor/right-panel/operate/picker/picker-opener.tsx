@@ -1,6 +1,5 @@
 import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
-import usePromise from 'react-promise-suspense'
 import { IImage, ImgManager } from 'src/editor/editor/img-manager'
 import { UIPickerCopy } from 'src/editor/handle/picker'
 import { xy_, xy_client } from 'src/editor/math/xy'

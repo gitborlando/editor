@@ -2,13 +2,13 @@ import Scrollbars from 'react-custom-scrollbars-2'
 import { IPage } from 'src/editor/schema/type'
 import { Drag } from 'src/global/event/drag'
 import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
-import { useSnapshot } from 'valtio'
+import { useSchema } from 'src/view/hooks/schema/use-y-state'
 import { PageHeaderComp } from './header'
 import { PageItemComp } from './item'
 
 export const PageComp: FC<{}> = observer(({}) => {
   const { pagePanelHeight, allPageExpanded } = EditorLPLayerState
-  const { meta } = useSnapshot(YState.state)
+  const meta = useSchema((schema) => schema.meta)
 
   return (
     <G vertical className={cls()}>
@@ -20,7 +20,7 @@ export const PageComp: FC<{}> = observer(({}) => {
         style={{ height: pagePanelHeight - 37 }}>
         <Scrollbars style={{ height: pagePanelHeight - 37 }}>
           {meta.pageIds.map((id) => {
-            const page = YState.findSnap<IPage>(id)
+            const page = YState.find<IPage>(id)
             return <PageItemComp key={page.id} name={page.name} id={page.id} />
           })}
         </Scrollbars>

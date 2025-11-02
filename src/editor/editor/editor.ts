@@ -7,6 +7,7 @@ import { EditorSetting } from 'src/editor/editor/setting'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
+import { YSync } from 'src/editor/y-state/y-sync'
 import { FileService } from 'src/global/service/file'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
@@ -39,7 +40,7 @@ export class EditorService {
     OperateText.initHook()
 
     StageScene.initHook()
-    StageViewport.init()
+    // StageViewport.init()
     StageInteract.init()
     StageDrop.initHook()
     StageCursor.initHook()
@@ -73,8 +74,12 @@ export class EditorService {
           ?.async('text')
         const schema = jsonParse(fileText) as ISchema
         Schema.initSchema(schema)
+
         YState.initSchema(fileId, schema as unknown as V1.Schema)
         YClients.init()
+        YSync.init(fileId, YState.doc)
+
+        StageViewport.init()
       }
     }
 

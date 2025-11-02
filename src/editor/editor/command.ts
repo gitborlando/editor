@@ -96,7 +96,7 @@ class EditorCommandManager {
           shortcut: 'shift+n+s',
           callback: () => {
             getSelectIds().forEach((id) => {
-              const node = YState.findSnap<V1.SchemaItem>(id)
+              const node = YState.find<V1.SchemaItem>(id)
               console.log(node)
             })
           },
@@ -246,18 +246,18 @@ class EditorCommandManager {
   }
 
   private logPageSchema(id: ID) {
-    const curPage = YState.findSnap<V1.Page>(id)
+    const curPage = YState.find<V1.Page>(id)
     const nodes: Record<ID, V1.SchemaItem> = {}
     const findNodes = (id: string) => {
-      const node = YState.findSnap<V1.SchemaItem>(id)
+      const node = YState.find<V1.SchemaItem>(id)
       nodes[node.id] = node
       if ('childIds' in node) {
-        node.childIds.map(YState.findSnap).forEach((node) => (nodes[node.id] = node))
+        node.childIds.map(YState.find).forEach((node) => (nodes[node.id] = node))
       }
     }
     curPage.childIds.forEach(findNodes)
     console.log({
-      meta: YState.snap.meta,
+      meta: YState.state.meta,
       page: curPage,
       ...nodes,
     })

@@ -1,10 +1,9 @@
 import { IXY } from '@gitborlando/geo'
 import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { ImmuiPatch } from 'src/shared/immui/immui'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { subscribeKey } from 'valtio/utils'
+import { ImmutPatch } from 'src/utils/immut/immut'
 import { ID, IPage } from '../../schema/type'
 import { Elem } from './elem'
 import { Surface } from './surface'
@@ -47,12 +46,10 @@ class StageSceneService {
 
   private hookRenderNode() {
     Signal.merge(YState.inited$, Surface.inited$).hook(() => {
-      this.firstRenderPage()
-
-      subscribeKey(YClients.client, 'selectPageId', () => {
-        this.firstRenderPage()
+      autorun(() => {
+        const pageId = YClients.client.selectPageId
+        if (pageId) this.firstRenderPage()
       })
-
       this.hookPatchRender()
     })
   }
@@ -62,13 +59,13 @@ class StageSceneService {
     this.sceneRoot.children = []
 
     const traverse = (id: ID) => {
-      const node = YState.findSnap<V1.Node>(id)
+      const node = YState.find<V1.Node>(id)
       this.render('add', [node.id])
       if ('childIds' in node) node.childIds.forEach(traverse)
     }
 
-    const page = YState.findSnap<IPage>(YClients.client.selectPageId)
-    // page.childIds.forEach(traverse)
+    const page = YState.find<IPage>(YClients.client.selectPageId)
+    page.childIds.forEach(traverse)
   }
 
   private hookPatchRender() {
@@ -79,11 +76,11 @@ class StageSceneService {
     })
   }
 
-  private render(op: ImmuiPatch['type'], keys: string[]) {
+  private render(op: ImmutPatch['type'], keys: string[]) {
     const id = keys[0]
     if (macroMatch`'meta'|'client'`(id)) return
 
-    const node = YState.findSnap<V1.Node>(id)
+    const node = YState.find<V1.Node>(id)
 
     switch (true) {
       case op === 'add' && keys.length === 1:
@@ -132,7 +129,7 @@ class StageSceneService {
     this.elements.delete(id)
   }
 
-  private reHierarchy(patch: Patch) {
+  private reHierarchy(patch: ImmutPatch) {
     const { type, keys, value } = patch
     const [id, _, index] = keys as [ID, string, number]
     const parent = this.findElem(id) || this.sceneRoot

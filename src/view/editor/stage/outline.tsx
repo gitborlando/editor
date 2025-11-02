@@ -1,10 +1,12 @@
+import { entries } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { ElemReact } from 'src/editor/stage/render/elem'
 import { getZoom } from 'src/editor/stage/viewport'
-import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
+import { YClients } from 'src/editor/y-state/y-clients'
 import { themeColor } from 'src/global/color'
+import { useSchema } from 'src/view/hooks/schema/use-y-state'
 
 type OutlineInfo = {
   hovered: boolean
@@ -14,28 +16,28 @@ type OutlineInfo = {
 
 export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
   const { hoverId } = StageSelect
-  const otherSnap = t<V1.Clients>(useSnapshot(YClients.others))
-  const { selectIds } = t<V1.Client>(useSnapshot(YClients.client))
+  const others = YClients.others
+  const client = YClients.client
 
   const outlineInfoLMap = useMemo(() => {
     const map: Record<string, OutlineInfo> = {}
-    for (const { selectIds, color } of Object.values(otherSnap)) {
-      for (const id of Object.keys(selectIds || {})) {
+    for (const [_, client] of entries(others)) {
+      for (const id of Object.keys(client.selectIdMap || {})) {
         map[id] = {
           hovered: hoverId === id,
-          selected: getSelectIdMap()[id],
-          color: color,
+          selected: client.selectIdMap[id],
+          color: client.color,
         }
       }
     }
     if (hoverId && !SchemaHelper.isFirstLayerFrame(hoverId)) {
       map[hoverId] = { hovered: true }
     }
-    for (const [id, selected] of Object.entries(selectIds)) {
-      map[id] = { hovered: hoverId === id, selected }
+    for (const [id, selected] of Object.entries(client.selectIdMap)) {
+      map[id] = { hovered: hoverId === id, selected: selected as boolean }
     }
     return map
-  }, [otherSnap, hoverId, selectIds])
+  }, [others, client, hoverId])
 
   return (
     <>
@@ -49,8 +51,7 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
 const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer(
   ({ id, outlineInfo }) => {
     const { color, hovered, selected } = outlineInfo
-    const snap = t<V1.Schema>(useSnapshot(YState.state))
-    const node = t<V1.Node>(snap[id])
+    const node = t<V1.Node>(useSchema((schema) => schema[id]))
     const strokeColor = hovered || selected ? themeColor() : color
     const strokeWidth = selected ? 1 : 2
     const outline = SchemaCreator.clone<V1.Node>(node, {

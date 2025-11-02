@@ -40,7 +40,7 @@ export class SchemaHelper {
   }
 
   static isFirstLayerFrame(id: ID) {
-    const node = YState.findSnap(id)
+    const node = YState.find(id)
     return node.type === 'frame' && this.isPageById(node.parentId)
   }
 
@@ -77,7 +77,7 @@ export class SchemaHelper {
     callback: ITraverseCallback
     bubbleCallback?: ITraverseCallback
   }) {
-    const curPage = YState.findSnap<V1.Page>(getSelectPageId())
+    const curPage = YState.find<V1.Page>(getSelectPageId())
     const traverse = this.createTraverse({ finder, callback, bubbleCallback })
     return () => traverse(curPage.childIds)
   }

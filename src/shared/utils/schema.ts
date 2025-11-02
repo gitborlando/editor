@@ -63,7 +63,7 @@ export class SchemaUtil {
     callback: ITraverseCallback,
     bubbleCallback?: ITraverseCallback,
   ) {
-    const curPage = YState.findSnap<V1.Page>(getSelectPageId())
+    const curPage = YState.find<V1.Page>(getSelectPageId())
     this.traverseIds(curPage.childIds, callback, bubbleCallback)
   }
   static traverseIds(

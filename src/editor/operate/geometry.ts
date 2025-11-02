@@ -91,6 +91,7 @@ class OperateGeometryService {
         callback: this.applyChangeToNode,
       })
       traverse(Object.keys(getSelectIdMap()))
+      YState.next()
 
       this.hasStartApply = false
       this.operateKeys.clear()
@@ -119,42 +120,45 @@ class OperateGeometryService {
     this.operateKeys.forEach((key) => {
       if (key === 'width') {
         if (depth !== 0) return
-        return (node.width = max(0, node.width + this.delta(key, node)))
+        return YState.set(
+          `${node.id}.width`,
+          max(0, node.width + this.delta(key, node)),
+        )
       }
       if (key === 'height') {
         if (depth !== 0 || node.type === 'line') return
-        return (node.height = max(0, node.height + this.delta(key, node)))
+        return YState.set(
+          `${node.id}.height`,
+          max(0, node.height + this.delta(key, node)),
+        )
       }
       if (key === 'radius') {
         if (depth !== 0) return
-        return (t<any>(node).radius = max(
-          0,
-          t<any>(node).radius + this.delta(key, node),
-        ))
+        return YState.set(
+          `${node.id}.radius`,
+          max(0, t<any>(node).radius + this.delta(key, node)),
+        )
       }
       if (key === 'rotation') {
         return this.applyRotationToNode(traverseData, node, depth)
       }
       if (key === 'sides') {
         const { width, height, sides } = node as IPolygon
-        return (t<V1.Polygon>(node).points = createRegularPolygon(
-          width,
-          height,
-          sides,
-        ))
+        return YState.set(
+          `${node.id}.points`,
+          createRegularPolygon(width, height, sides),
+        )
       }
       if (key === 'pointCount' || key === 'innerRate') {
         let { width, height, pointCount, innerRate } = node as IStar
         pointCount = max(3, floor(pointCount))
         innerRate = min(1, max(0, innerRate))
-        return (t<V1.Star>(node).points = createStarPolygon(
-          width,
-          height,
-          pointCount,
-          innerRate,
-        ))
+        return YState.set(
+          `${node.id}.points`,
+          createStarPolygon(width, height, pointCount, innerRate),
+        )
       }
-      t<any>(node)[key] = t<any>(node)[key] + this.delta(key, node)
+      YState.set(`${node.id}.${key}`, t<any>(node)[key] + this.delta(key, node))
     })
   }
 
@@ -167,11 +171,11 @@ class OperateGeometryService {
     const centerXY = getNodeCenterXY(node)
     const newXY = xy_rotate(node, centerXY, this.delta('rotation', node))
 
-    node.rotation = node.rotation + this.delta('rotation', node)
+    YState.set(`${node.id}.rotation`, node.rotation + this.delta('rotation', node))
 
     if (depth === 0) {
-      node.x = newXY.x
-      node.y = newXY.y
+      YState.set(`${node.id}.x`, newXY.x)
+      YState.set(`${node.id}.y`, newXY.y)
     } else {
       let upLevelRef = traverseData.upLevelRef!
       while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
@@ -182,8 +186,8 @@ class OperateGeometryService {
         this.delta('rotation', node),
       )
       const centerShift = xy_minus(newCenter, centerXY)
-      node.x = newXY.x + centerShift.x
-      node.y = newXY.y + centerShift.y
+      YState.set(`${node.id}.x`, newXY.x + centerShift.x)
+      YState.set(`${node.id}.y`, newXY.y + centerShift.y)
     }
   }
 

@@ -1,10 +1,8 @@
 import { IRect, IXY, max, XY } from '@gitborlando/geo'
-import { clone } from '@gitborlando/utils'
 import { WheelUtil } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
 import { Surface } from 'src/editor/stage/render/surface'
-import { subscribe } from 'valtio'
 
 const createInitBound = () => ({
   left: 284,
@@ -128,20 +126,15 @@ class StageViewportService {
 
   onObserving() {
     autorun(() => {
-      YClients.client.zoom = this.zoom
+      // YClients.client.zoom = this.zoom
       YClients.client.offset = this.offset
     })
+    autorun(() => {
+      const client = YClients.observingClient
+      if (!client) return
 
-    subscribe(YClients.others, (others) => {
-      const { observingClientId } = YClients
-      if (!observingClientId) return
-
-      const client = YClients.getClientById(observingClientId)
-      console.log('client: ', client.zoom, clone(client.offset))
-      runInAction(() => {
-        this.zoom = client.zoom
-        this.offset = client.offset
-      })
+      // this.zoom = client.zoom
+      this.offset = client.offset
     })
   }
 

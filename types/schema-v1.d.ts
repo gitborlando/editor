@@ -24,7 +24,7 @@ namespace V1 {
     userId: string
     userName: string
     userAvatar: string
-    selectIds: Record<string, boolean>
+    selectIdMap: Record<string, boolean>
     selectPageId: string
     cursor: IXY
     color: string

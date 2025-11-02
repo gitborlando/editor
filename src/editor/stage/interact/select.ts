@@ -179,7 +179,7 @@ class StageSelectService {
     }
 
     const traverse = SchemaHelper.createCurrentPageTraverse({
-      finder: YState.findSnap<V1.Node>,
+      finder: YState.find<V1.Node>,
       callback: traverseTest,
     })
 

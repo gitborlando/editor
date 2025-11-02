@@ -1,4 +1,5 @@
-import { Popover } from '@arco-design/web-react'
+import { entries } from 'mobx'
+import { Popover } from 'react-tiny-popover'
 import { Text } from 'src/view/component/text'
 import { AvatarCircles } from 'src/view/shadcn/ui/avatar-circles'
 
@@ -12,22 +13,20 @@ type CooperateInfo = {
 
 export const CooperateComp: FC<{}> = observer(({}) => {
   const [show, setShow] = useState(false)
-  const others = useSnapshot(YClients.others)
 
-  const cooperates = Object.entries(others).map(([clientId, other]) => ({
+  const cooperates = entries(YClients.others).map(([clientId, other]) => ({
     clientId: Number(clientId),
     userId: other.userId,
     name: other.userName,
-    avatar: URL.createObjectURL(
-      new Blob([other.userAvatar], { type: 'image/svg+xml' }),
-    ),
+    avatar: 'createUrlFromSvgString(other.userAvatar)',
     color: other.color,
   }))
 
   return (
     <G className={cls('')}>
       <Popover
-        popupVisible={show}
+        isOpen={show}
+        positions={['bottom']}
         content={<CooperatePopup cooperates={cooperates} />}>
         <AvatarCircles
           avatarUrls={cooperates.map((cooperate) => ({
@@ -72,6 +71,11 @@ const cls = classes(css`
   &-popup {
     width: 200px;
     height: fit-content;
+    background-color: white;
+    padding: 12px;
+    ${styles.shadow}
+    ${styles.borderRadius}
+    margin-top: 12px;
     &-header {
       height: fit-content;
       margin-bottom: 8px;

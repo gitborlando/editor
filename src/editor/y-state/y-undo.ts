@@ -45,7 +45,7 @@ class YUndoService {
 
   private getClientState() {
     return clone({
-      selectIds: YClients.client.selectIds,
+      selectIds: YClients.client.selectIdMap,
       selectPageId: YClients.client.selectPageId,
     })
   }

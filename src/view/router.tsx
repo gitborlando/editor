@@ -17,7 +17,7 @@ const router = createBrowserRouter([
     element: <Navigate to='/' />,
   },
   {
-    path: '/t',
+    path: '/test',
     element: <Test />,
   },
 ])

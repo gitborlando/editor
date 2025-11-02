@@ -32,7 +32,7 @@ class EditorLPLayerNodeStateService {
 
   toggleAllNodeExpanded(expanded: boolean) {
     SchemaHelper.createCurrentPageTraverse({
-      finder: YState.findSnap<V1.Node>,
+      finder: YState.find<V1.Node>,
       callback: ({ id }) => void this.nodeExpandedMap.set(id, expanded),
     })()
     this.nodeInfoChanged.dispatch()
@@ -41,7 +41,7 @@ class EditorLPLayerNodeStateService {
   getNodeInfoList() {
     const nodeInfoList: EditorLPLayerNodeInfo[] = []
     SchemaHelper.createCurrentPageTraverse({
-      finder: YState.findSnap<V1.Node>,
+      finder: YState.find<V1.Node>,
       callback: ({ id, ancestors }) => {
         nodeInfoList.push({ id, indent: ancestors.length, ancestors })
         return !!this.nodeExpandedMap.get(id)

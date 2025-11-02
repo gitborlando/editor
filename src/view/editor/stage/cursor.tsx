@@ -1,11 +1,12 @@
 import { IXY } from '@gitborlando/geo'
+import { values } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { ElemReact } from 'src/editor/stage/render/elem'
 import { StageViewport } from 'src/editor/stage/viewport'
 
 export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
-  const others = useSnapshot(YClients.others)
-  const cursors = Object.values(others).map((other) => ({
+  const others = YClients.others
+  const cursors = values(others).map((other) => ({
     xy: other.cursor,
     name: other.userName,
   }))

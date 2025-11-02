@@ -1,29 +1,15 @@
-import { useSnapshot } from 'valtio'
-
 export function useSelectIds() {
-  const { selectIds } = useSnapshot(YClients.client)
-  return useMemo(() => Object.keys(selectIds), [selectIds])
+  return YClients.selectIdList
 }
 
 export function useSelectIdMap() {
-  const { selectIds } = useSnapshot(YClients.client)
-  return selectIds
+  return YClients.client.selectIdMap
 }
 
 export function useAllSelectIdMap() {
-  const { selectIds } = useSnapshot(YClients.client)
-  const othersSnap = useSnapshot(YClients.others)
-  return useMemo(() => {
-    const allSelectIdMap = {}
-    Object.assign(allSelectIdMap, selectIds)
-    for (const [_, client] of Object.entries(othersSnap)) {
-      Object.assign(allSelectIdMap, client.selectIds)
-    }
-    return t<Record<string, boolean>>(allSelectIdMap)
-  }, [selectIds, othersSnap])
+  return YClients.allSelectIdMap
 }
 
 export function useSelectPageId() {
-  const { selectPageId } = useSnapshot(YClients.client)
-  return selectPageId
+  return YClients.client.selectPageId
 }

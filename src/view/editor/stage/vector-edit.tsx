@@ -7,7 +7,6 @@ import { StageDraw } from 'src/editor/stage/draw/draw'
 import { PIXI } from 'src/editor/stage/pixi'
 import { getZoom } from 'src/editor/stage/viewport'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
-import { COLOR, hslBlueColor } from 'src/shared/utils/color'
 import { IXY, iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import {

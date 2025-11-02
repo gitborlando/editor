@@ -40,7 +40,6 @@ export const StageComp: FC<{}> = observer(({}) => {
 export const CooperateObservingBorderComp: FC<{}> = observer(({}) => {
   const { observingClientId: observingUserId } = YClients
   if (!observingUserId) return null
-  console.log('observingUserId: ', observingUserId)
 
   const client = YClients.getClientById(observingUserId)
 

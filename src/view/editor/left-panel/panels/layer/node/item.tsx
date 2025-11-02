@@ -18,7 +18,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
 }> = observer(({ nodeInfo }) => {
   const { id, indent, ancestors } = nodeInfo
   const { toggleNodeExpanded, getNodeExpanded } = EditorLPLayerNodeState
-  const node = YState.findSnap<V1.Node>(id)
+  const node = YState.find<V1.Node>(id)
   const isParent = SchemaHelper.isNodeParent(node)
   const expanded = getNodeExpanded(id)
   const selected = useSelectIdMap()[id]
