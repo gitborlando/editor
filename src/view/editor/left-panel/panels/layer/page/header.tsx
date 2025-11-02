@@ -1,18 +1,14 @@
 import { ChevronDown, Plus } from 'lucide-react'
-import { FC, memo } from 'react'
 import { HandlePage } from 'src/editor/handle/page'
 import { IconButton } from 'src/view/component/button'
-
 import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
 import { useSelectPage } from 'src/view/hooks/schema/use-y-state'
 
-export const PageHeaderComp: FC<{}> = memo(({}) => {
+export const PageHeaderComp: FC<{}> = observer(({}) => {
   const { allPageExpanded } = EditorLPLayerState
   const selectPage = useSelectPage()
-  const newPage = () => {
-    if (allPageExpanded === false) {
-      EditorLPLayerState.allPageExpanded = true
-    }
+  const addPage = () => {
+    EditorLPLayerState.allPageExpanded = allPageExpanded || true
     HandlePage.addPage()
   }
 
@@ -21,14 +17,11 @@ export const PageHeaderComp: FC<{}> = memo(({}) => {
       <G center horizontal className={cls('title')}>
         {selectPage.name}
       </G>
-      <IconButton onClick={newPage}>
+      <IconButton onClick={addPage}>
         <Lucide icon={Plus} />
       </IconButton>
       <IconButton
-        onClick={() => {
-          EditorLPLayerState.allPageExpanded = !allPageExpanded
-          EditorLPLayerState.pagePanelHeight = allPageExpanded ? 200 : 32
-        }}>
+        onClick={() => (EditorLPLayerState.allPageExpanded = !allPageExpanded)}>
         <Lucide
           icon={ChevronDown}
           style={{ rotate: allPageExpanded ? '0deg' : '180deg' }}
