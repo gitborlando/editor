@@ -3,6 +3,7 @@ import { Is } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
+import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
@@ -91,9 +92,26 @@ class YClientsService {
   }
 
   private syncClient() {
-    autorun(() => {
-      YSync.awareness.setLocalState(toJS(this.client))
+    const clientKeys = Object.keys(this.client) as (keyof V1.Client)[]
+    const commonKeys = clientKeys.filter((key) => key !== 'selectIdMap')
+
+    commonKeys.forEach((key) => {
+      reaction(
+        () => this.client[key],
+        (value) => {
+          YSync.awareness.setLocalStateField(key, toJS(value))
+        },
+      )
     })
+
+    StageSelect.afterSelect.hook({ immediately: true }, () => {
+      YSync.awareness.setLocalStateField(
+        'selectIdMap',
+        toJS(this.client.selectIdMap),
+      )
+    })
+
+    YSync.awareness.setLocalState(toJS(this.client))
   }
 
   private subscribeOthers() {

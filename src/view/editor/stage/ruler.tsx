@@ -75,14 +75,14 @@ export const Tick: FC<{
       center
       className={cls('ruler-tick')}
       style={{ left: offset, top: 0 }}>
-      {/* <G center className={cls('ruler-tick-border')} x-if={type === 'horizontal'} /> */}
-      {/* <G
+      <G center className={cls('ruler-tick-border')} x-if={type === 'horizontal'} />
+      <G
         center
         className={cls('ruler-tick-text')}
         style={{ ...(isVertical && { transform: 'scale(-1)' }) }}>
         {value}
-      </G> */}
-      {/* <G center className={cls('ruler-tick-border')} x-if={type === 'vertical'} /> */}
+      </G>
+      <G center className={cls('ruler-tick-border')} x-if={type === 'vertical'} />
     </G>
   )
 })

@@ -39,7 +39,7 @@ const LabelComp: FC<{
     Drag.needInfinity()
       .onStart()
       .onMove(({ delta }) => onSlide?.((delta?.x ?? 0) * slideRate))
-      .onDestroy(({ shift }) => afterSlide?.(shift.x !== 0 || shift.y !== 0))
+      .onDestroy(({ moved }) => afterSlide?.(moved))
   }
   return (
     <G onMouseDown={handleDragLabel} className={cls('label')}>

@@ -190,7 +190,7 @@ class StageSelectService {
         this.marquee = StageViewport.toSceneMarquee(marquee)
         this.marqueeOBB = OBB.fromRect(this.marquee)
         this.clearSelect()
-        traverse()
+        runInAction(() => traverse())
       })
       .onDestroy(() => {
         this.marquee = { x: 0, y: 0, width: 0, height: 0 }

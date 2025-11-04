@@ -143,17 +143,19 @@ class OperateGeometryService {
         return this.applyRotationToNode(traverseData, node, depth)
       }
       if (key === 'sides') {
-        const { width, height, sides } = node as IPolygon
-        return YState.set(
-          `${node.id}.points`,
-          createRegularPolygon(width, height, sides),
-        )
+        let { width, height, sides } = node as IPolygon
+        sides = max(3, sides + floor(this.delta(key, node)))
+        YState.set(`${node.id}.sides`, sides)
+        YState.set(`${node.id}.points`, createRegularPolygon(width, height, sides))
+        return
       }
       if (key === 'pointCount' || key === 'innerRate') {
         let { width, height, pointCount, innerRate } = node as IStar
         pointCount = max(3, floor(pointCount))
         innerRate = min(1, max(0, innerRate))
-        return YState.set(
+        YState.set(`${node.id}.pointCount`, pointCount)
+        YState.set(`${node.id}.innerRate`, innerRate)
+        YState.set(
           `${node.id}.points`,
           createStarPolygon(width, height, pointCount, innerRate),
         )

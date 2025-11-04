@@ -60,7 +60,7 @@ export const EditorRightOperateGeo: FC<EditorRightOperateGeoProps> = observer(
           x-if={activeKeys.has('sides')}
           label='边数'
           operateKey='sides'
-          slideRate={0.01}
+          slideRate={0.5 / getZoom()}
           value={activeGeometry.sides}
         />
         <GeometryItemComp
@@ -139,7 +139,6 @@ const GeometryItemComp: FC<{
 
   return (
     <SlideInput
-      className='editor-right-operate-geo-input'
       size='small'
       prefix={label}
       value={isMultiValue ? MULTI_VALUE : twoDecimal(correctedValue)}

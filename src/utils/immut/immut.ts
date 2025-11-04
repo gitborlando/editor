@@ -1,3 +1,5 @@
+import { Is } from '@gitborlando/utils'
+
 type IKey = string | number
 
 type AnyObject = Record<string, any>
@@ -18,7 +20,7 @@ export default class Immut<T extends AnyObject = AnyObject> {
     let len = isParent ? keys.length - 1 : keys.length
     for (let i = 0; i < len; i++) {
       current = current[keys[i]]
-      if (!current) console.log('Mut error at get function')
+      if (Is.falsy(current)) console.log('Immut error at get function')
     }
     return current as T
   }
@@ -64,9 +66,13 @@ export default class Immut<T extends AnyObject = AnyObject> {
   }
 
   next = () => {
+    if (!this.patches.length) return
+
     this.traverse(this.state, this.changeMap)
     this.listeners.forEach((callback) => callback(this.patches))
+
     this.patches = []
+    this.changeMap = {}
   }
 
   subscribe = (callback: (patches: ImmutPatch[]) => void) => {
@@ -75,8 +81,8 @@ export default class Immut<T extends AnyObject = AnyObject> {
   }
 
   private patches = <ImmutPatch[]>[]
-  private listeners = new Set<(...args: any) => any>()
   private changeMap = <any>{}
+  private listeners = new Set<(...args: any) => any>()
 
   private track = (patch: ImmutPatch) => {
     patch.value = this.deepClone(patch.value)
@@ -97,35 +103,22 @@ export default class Immut<T extends AnyObject = AnyObject> {
     if (typeof changeMap !== 'object') return
 
     for (const key in changeMap) {
-      if (!object[key]) return
+      if (!object[key]) continue
 
       object[key] = this.shallowClone(object[key])
       this.traverse(object[key], changeMap[key])
     }
   }
 
-  private shallowClone(object: any) {
+  private shallowClone = (object: any) => {
     if (typeof object !== 'object' || object === null) return object
     return Array.isArray(object) ? [...object] : { ...object }
   }
 
-  private deepClone(object: any) {
+  private deepClone = (object: any) => {
     if (typeof object !== 'object' || object === null) return object
     const newObj: any = Array.isArray(object) ? [] : {}
     for (const key in object) newObj[key] = this.deepClone(object[key])
     return newObj
-  }
-
-  static matchPath = (path: IKey[], pattern: string[]) => {
-    if (pattern[pattern.length - 1] !== '...') {
-      if (path[path.length - 1] !== pattern[pattern.length - 1]) return false
-      if (path.length !== pattern.length) return false
-    }
-    for (let i = 0; i < pattern.length - 1; i++) {
-      if (pattern[i] === '?' || pattern[i] === '' || pattern[i] === '...') continue
-      if (pattern[i] == path[i]) continue
-      return false
-    }
-    return true
   }
 }

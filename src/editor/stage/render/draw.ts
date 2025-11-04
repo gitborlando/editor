@@ -83,11 +83,11 @@ class ElemDrawerService {
         // if (this.elem.outline === 'hover') this.drawTextHoverPath()
 
         const { lineHeight } = node.style
-        this.dirtyRects.push(AABB.expand(this.elem.aabb, 0, lineHeight / 2, 0, 0))
+        this.dirtyRects.push(AABB.extend(this.elem.aabb, 0, lineHeight / 2, 0, 0))
 
         const dirtyHeight = lineHeight * this.splitTexts.length
         this.dirtyRects.push(
-          AABB.expand(this.elem.aabb, 0, 0, 0, this.elem.aabb.minY + dirtyHeight),
+          AABB.extend(this.elem.aabb, 0, 0, 0, this.elem.aabb.minY + dirtyHeight),
         )
         break
     }
@@ -299,10 +299,10 @@ class ElemDrawerService {
 
     switch (stroke.align) {
       case 'center':
-        this.dirtyRects.push(AABB.expand(this.elem.aabb, stroke.width / 2))
+        this.dirtyRects.push(AABB.extend(this.elem.aabb, stroke.width / 2))
         break
       case 'outer':
-        this.dirtyRects.push(AABB.expand(this.elem.aabb, stroke.width))
+        this.dirtyRects.push(AABB.extend(this.elem.aabb, stroke.width))
     }
   }
 
@@ -320,7 +320,7 @@ class ElemDrawerService {
     this.ctx.shadowOffsetY = offsetY
 
     this.dirtyRects.push(
-      AABB.expand(
+      AABB.extend(
         this.elem.aabb,
         -offsetX + blur,
         -offsetY + blur,

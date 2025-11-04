@@ -40,7 +40,7 @@ export class StageSurface {
 
     this.onResize()
     this.onZoomMove()
-    this.handlePointerEvents()
+    this.onPointerEvents()
 
     this.inited$.dispatch(true)
   }
@@ -411,7 +411,7 @@ export class StageSurface {
     return this.elemsFromPoint
   }
 
-  private handlePointerEvents = () => {
+  private onPointerEvents = () => {
     const onMouseEvent = (e: MouseEvent) => {
       if (this.isPointerEventNone) return
       if (this.fullRenderElemsMinHeap.length) return

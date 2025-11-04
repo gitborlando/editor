@@ -333,10 +333,9 @@ const VertexComp: FC<{
   }
 
   const rotate = () => {
-    const { center } = transformOBB
-
     StageCursor.setCursor('rotate').lock().upReset()
 
+    const { center } = transformOBB
     let last: IXY
     Drag.onStart()
       .onMove(({ current, start }) => {

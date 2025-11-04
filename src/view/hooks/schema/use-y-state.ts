@@ -13,6 +13,6 @@ export function useSelectPage() {
   return useSchema((state) => state[selectPageId] as V1.Page)
 }
 
-export function useSchema(selector: (state: V1.Schema) => any) {
+export function useSchema<T>(selector: (state: V1.Schema) => T): T {
   return useSyncExternalStore(YState.immut.subscribe, () => selector(YState.state))
 }

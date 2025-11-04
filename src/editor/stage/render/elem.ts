@@ -47,6 +47,7 @@ export class Elem {
 
   get visible() {
     if (this.hidden) return false
+    if (this.id === 'sceneRoot') return true
     if (this.type === 'widgetElem') return true
     return Surface.testVisible(this.aabb)
   }

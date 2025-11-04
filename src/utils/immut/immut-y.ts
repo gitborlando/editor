@@ -231,6 +231,7 @@ function subscribeI<T>(i: Immut, y: Y.Map<T>, opts: Options) {
 function subscribeY(y: Y.Map<any>, i: Immut) {
   const joinPath = (path: (string | number)[], key: string | number) =>
     path.concat(key).join('.')
+
   const observer = (events: Y.YEvent<any>[]) => {
     events.forEach((event) => {
       const path = event.path
@@ -273,6 +274,7 @@ function subscribeY(y: Y.Map<any>, i: Immut) {
         })
       }
     })
+
     i.next()
   }
 

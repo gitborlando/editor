@@ -31,6 +31,10 @@ class YStateService {
     return this.immut.next
   }
 
+  find<T extends V1.SchemaItem>(id: string): T {
+    return this.state[id] as T
+  }
+
   async initSchema(fileId: string, mockSchema?: V1.Schema) {
     this.doc = new Y.Doc()
     // this.yIndexDB = new IndexeddbPersistence(fileId, this.doc)
@@ -40,7 +44,7 @@ class YStateService {
     bind(this.immut, this.doc.getMap('schema'))
 
     this.unSub?.()
-    this.unSub = this.subscribeSchema()
+    this.unSub = this.notify()
 
     YClients.clientId = this.doc.clientID
     YUndo.initStateUndo(this.doc.getMap('schema'))
@@ -48,11 +52,7 @@ class YStateService {
     this.inited$.dispatch(true)
   }
 
-  find<T extends V1.SchemaItem>(id: string): T {
-    return this.state[id] as T
-  }
-
-  private subscribeSchema() {
+  private notify() {
     return this.immut.subscribe((patches: ImmutPatch[]) => {
       if (!this.inited$.value) return
       patches.forEach((patch) => this.flushPatch$.dispatch(patch))

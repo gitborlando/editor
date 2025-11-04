@@ -1,3 +1,3 @@
-import { DragUtil } from '@gitborlando/utils/browser'
+import { DragHelper } from '@gitborlando/utils/browser'
 
-export const Drag = new DragUtil()
+export const Drag = new DragHelper()
