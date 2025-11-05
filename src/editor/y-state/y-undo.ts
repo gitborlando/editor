@@ -65,8 +65,8 @@ class YUndoService {
     if (type === 'state') this.stateUndo.redo()
     if (type === 'client') this.applyClientState()
     if (type === 'all') {
-      this.stateUndo.redo()
       this.applyClientState()
+      this.stateUndo.redo()
     }
   }
 
@@ -90,7 +90,7 @@ class YUndoService {
 
   untrack(callback: () => void) {
     this.shouldTrack = false
-    callback()
+    runInAction(() => callback())
     this.shouldTrack = true
   }
 }

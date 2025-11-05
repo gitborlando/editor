@@ -88,19 +88,16 @@ class StageSelectService {
 
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
       EditorCommand
+    const baseMenu = [copyPasteGroup, undoRedoGroup]
+
     if (getSelectIdMap().length || this.hoverId) {
-      const menuOptions = [
-        copyPasteGroup,
-        undoRedoGroup,
-        nodeGroup,
-        nodeReHierarchyGroup,
-      ]
+      const menuOptions = [...baseMenu, nodeGroup, nodeReHierarchyGroup]
       ContextMenu.menus = menuOptions
       ContextMenu.openMenu(e as any)
-      return
+    } else {
+      ContextMenu.menus = baseMenu
+      ContextMenu.openMenu(e as any)
     }
-    ContextMenu.menus = [undoRedoGroup]
-    ContextMenu.openMenu(e as any)
   }
 
   private clearSelect() {

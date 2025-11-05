@@ -42,7 +42,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
   }
   const handleContextMenu = (e: React.MouseEvent) => {
     ContextMenu.context = { id }
-    ContextMenu.menus = [EditorCommand.nodeGroup]
+    ContextMenu.menus = [EditorCommand.nodeGroup, EditorCommand.copyPasteGroup]
     ContextMenu.openMenu(e)
   }
 
@@ -83,9 +83,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
         url={
           Assets.editor.node[node.type as keyof typeof Assets.editor.node]
         }></Icon>
-      <G className={cls('name')} style={{ flex: 1, minWidth: 0 }}>
-        {node.name || '未命名'}
-      </G>
+      <G className={cls('name')}>{node.name || '未命名'}</G>
     </G>
   )
 })
@@ -106,29 +104,11 @@ const cls = classes(css`
   &[data-dragging='true'] {
     opacity: 0.5;
   }
-  &-indent {
-    flex: 1;
-    min-width: 0;
-    gap: 4px;
-  }
-  &-expand {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
   &-name {
     flex: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-  &-check {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--color);
   }
 `)

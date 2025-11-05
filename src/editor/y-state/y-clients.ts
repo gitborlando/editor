@@ -139,7 +139,7 @@ export function getSelectIdMap() {
   return YClients.client.selectIdMap
 }
 
-export function getSelectIds() {
+export function getSelectIdList() {
   return YClients.selectIdList
 }
 

@@ -1,11 +1,9 @@
-import { firstOne, miniId, stableIndex } from '@gitborlando/utils'
+import { firstOne, iife, stableIndex } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { AABB, OBB } from 'src/editor/math/obb'
 import { SchemaHelper } from 'src/editor/schema/helper'
-import { StageSelect } from 'src/editor/stage/interact/select'
-import { getSelectIds as getSelectIdList } from 'src/editor/y-state/y-clients'
-import { clone } from 'src/shared/utils/normal'
-import { SchemaUtil } from 'src/shared/utils/schema'
+import { getSelectIdList } from 'src/editor/y-state/y-clients'
+import { collectDisposer } from 'src/utils/disposer'
 import { xy_ } from '../math/xy'
 import { SchemaCreator } from '../schema/creator'
 import { Schema } from '../schema/schema'
@@ -15,13 +13,10 @@ import { ID, INode, INodeParent } from '../schema/type'
 class HandleNodeService {
   datumId = ''
   @observable.ref datumXY = xy_(0, 0)
-  afterRemoveNodes = Signal.create<ID[]>()
-  intoEditNodeId = Signal.create('')
-
-  private copyIds = <ID[]>[]
+  copiedIds = <ID[]>[]
 
   init() {
-    StageSelect.afterSelect.hook(() => this.getDatum())
+    return collectDisposer(YClients.afterSelect$.hook(() => this.getDatum()))
   }
 
   addNodes(nodes: INode[]) {
@@ -67,16 +62,10 @@ class HandleNodeService {
   }
 
   deleteSelectedNodes() {
-    const traverse = (id: ID, parent?: INodeParent) => {
-      const node = YState.find<INode>(id)
-      if (!parent) parent = YState.find<INodeParent>(node.parentId)
-      if (SchemaHelper.isNodeParent(node)) {
-        const childIds = node.childIds.slice()
-        childIds.forEach((id) => traverse(id, node))
-      }
-      this.deleteChild(parent, node)
-    }
-    getSelectIdList().forEach((id) => traverse(id))
+    const traverse = SchemaHelper.createTraverse({
+      bubbleCallback: ({ node, parent }) => this.deleteChild(parent, node),
+    })
+    traverse(getSelectIdList())
 
     YClients.clearSelect()
     YClients.afterSelect$.dispatch()
@@ -86,36 +75,52 @@ class HandleNodeService {
   }
 
   copySelectedNodes() {
-    this.copyIds = getSelectIdList()
+    this.copiedIds = getSelectIdList()
   }
 
   pasteNodes() {
-    if (!this.copyIds.length) return
+    if (!this.copiedIds.length) return
 
     const newSelectIds = <ID[]>[]
-    const cloneNodes = (oldNode: INode) => {
-      const newNode = clone(oldNode)
-      newNode.id = miniId()
-      newNode.name = SchemaCreator.createNodeName(oldNode.type).name
-      if ('childIds' in newNode) newNode.childIds = []
-      return newNode
-    }
-    SchemaUtil.traverseIds(this.copyIds, (props) => {
-      const { node, parent, depth, upLevelRef } = props
-      const newNode = cloneNodes(node)
-      const newParent = upLevelRef?.newNode || parent
-      this.addNodes([newNode])
-      this.insertAt(newParent, newNode)
-      props.newNode = newNode
-      if (depth === 0) newSelectIds.push(newNode.id)
+    const traverse = SchemaHelper.createTraverse({
+      callback: (props) => {
+        const { node, parent, upLevelRef, depth } = props
+        const newParent = upLevelRef?.newNode || parent
+        const newNode = SchemaCreator.clone(node)
+        this.addNodes([newNode])
+        this.insertChildAt(newParent, newNode)
+        props.newNode = newNode
+        if (depth === 0) newSelectIds.push(newNode.id)
+      },
+    })
+    traverse(this.copiedIds)
+    this.copiedIds = []
+
+    YState.next()
+    YUndo.untrack(() => newSelectIds.forEach((id) => YClients.select(id)))
+    YUndo.track({
+      type: 'all',
+      description: `粘贴 ${newSelectIds.length} 个节点`,
     })
   }
 
-  paste() {
-    this.pasteNodes()
-    this.copyIds = []
-    Schema.nextSchema()
-    Schema.commitHistory('粘贴节点')
+  reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
+    const selected = getSelectIdList().map(YState.find<INode>)
+
+    selected.forEach((node) => {
+      const parent = YState.find<INodeParent>(node.parentId)
+      let index = parent.childIds.indexOf(node.id)
+      index = iife(() => {
+        if (type === 'up') return index - 1
+        if (type === 'down') return index + 1
+        if (type === 'top') return 0
+        return parent.childIds.length - 1
+      })
+      this.reHierarchy(parent, node, index)
+    })
+
+    YState.next()
+    YUndo.track({ type: 'all', description: '重新排序' })
   }
 
   wrapInFrame() {

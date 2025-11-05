@@ -4,12 +4,9 @@ import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageScene } from 'src/editor/stage/render/scene'
-import { getSelectIds } from 'src/editor/y-state/y-clients'
+import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import { Command, ContextMenu } from 'src/global/context-menu'
 import { listen } from 'src/shared/utils/event'
-import { OperateNode } from '../operate/node'
-import { Schema } from '../schema/schema'
-import { INodeParent } from '../schema/type'
 
 class EditorCommandManager {
   init() {
@@ -21,12 +18,14 @@ class EditorCommandManager {
       {
         name: '复制',
         shortcut: 'ctrl+c',
-        callback: () => OperateNode.copySelectNodes(),
+        disabled: () => !getSelectIdList().length,
+        callback: () => HandleNode.copySelectedNodes(),
       },
       {
         name: '黏贴',
         shortcut: 'ctrl+v',
-        callback: () => OperateNode.paste(),
+        disabled: () => !HandleNode.copiedIds.length,
+        callback: () => HandleNode.pasteNodes(),
       },
     ]
   }
@@ -93,7 +92,7 @@ class EditorCommandManager {
         {
           name: '打印 schema',
           callback: () => {
-            getSelectIds().forEach((id) => {
+            getSelectIdList().forEach((id) => {
               const node = YState.find<V1.SchemaItem>(id)
               console.log(node)
             })
@@ -102,7 +101,7 @@ class EditorCommandManager {
         {
           name: '打印 elem',
           callback: () => {
-            getSelectIds().forEach((id) => {
+            getSelectIdList().forEach((id) => {
               const elem = StageScene.findElem(id)
               console.log(elem)
             })
@@ -119,22 +118,22 @@ class EditorCommandManager {
       {
         name: '上移',
         shortcut: 'ctrl+]',
-        callback: () => this.reHierarchy('up'),
+        callback: () => HandleNode.reHierarchySelectedNode('up'),
       },
       {
         name: '下移',
         shortcut: 'ctrl+[',
-        callback: () => this.reHierarchy('down'),
+        callback: () => HandleNode.reHierarchySelectedNode('down'),
       },
       {
         name: '移至顶部',
         shortcut: 'ctrl+alt+]',
-        callback: () => this.reHierarchy('top'),
+        callback: () => HandleNode.reHierarchySelectedNode('top'),
       },
       {
         name: '移至底部',
         shortcut: 'ctrl+alt+[',
-        callback: () => this.reHierarchy('bottom'),
+        callback: () => HandleNode.reHierarchySelectedNode('bottom'),
       },
     ]
   }
@@ -200,21 +199,6 @@ class EditorCommandManager {
     listen('keydown', (e) => {
       if (e.altKey) e.preventDefault()
     })
-  }
-
-  private reHierarchy(type: 'up' | 'down' | 'top' | 'bottom') {
-    OperateNode.selectedNodes.value.forEach((node) => {
-      const parent = Schema.find<INodeParent>(node.parentId)
-      let index = parent.childIds.indexOf(node.id)
-      index = (() => {
-        if (type === 'up') return index - 1
-        if (type === 'down') return index + 1
-        if (type === 'top') return 0
-        return parent.childIds.length - 1
-      })()
-      OperateNode.reHierarchy(parent, node, index)
-    })
-    Schema.finalOperation('重新排序')
   }
 }
 

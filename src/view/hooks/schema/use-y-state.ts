@@ -1,8 +1,8 @@
-import { getSelectIds, getSelectPageId } from 'src/editor/y-state/y-clients'
+import { getSelectIdList, getSelectPageId } from 'src/editor/y-state/y-clients'
 import { useShallow } from 'src/view/hooks/schema/use-shallow'
 
 export function useSelectNodes() {
-  const selectIds = getSelectIds()
+  const selectIds = getSelectIdList()
   return useSchema(
     useShallow((state) => selectIds.map((id) => state[id] as V1.Node)),
   )

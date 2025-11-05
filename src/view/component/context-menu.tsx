@@ -16,7 +16,10 @@ export const ContextMenuComp: FC<{}> = observer(({}) => {
             group.forEach((item) => {
               list.push(
                 <ArcoMenu.Item
-                  className={cls('item')}
+                  className={cx(
+                    cls('item'),
+                    item.disabled?.() && cls('item-disabled'),
+                  )}
                   key={item.name}
                   onClick={() => item.callback(ContextMenu.context)}>
                   <G horizontal center>
@@ -52,15 +55,21 @@ const cls = classes(css`
     ${styles.textLabel}
     border-radius: 2px;
     padding-inline: 10px;
-    &:hover {
-      color: var(--color);
-      background-color: var(--color-bg);
-    }
-    &:hover &-name {
-      color: var(--color);
-    }
     &-shortcut {
       justify-items: end;
+    }
+    &:not(&-disabled):hover {
+      background-color: var(--color-bg);
+    }
+    &:not(&-disabled):hover &-name {
+      color: var(--color);
+    }
+    &-disabled {
+      color: #b3b3b3;
+      cursor: initial;
+      &:hover {
+        background-color: transparent;
+      }
     }
   }
 

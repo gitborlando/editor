@@ -72,7 +72,7 @@ export class SchemaHelper {
     callback,
     bubbleCallback,
   }: {
-    callback: ITraverseCallback
+    callback?: ITraverseCallback
     bubbleCallback?: ITraverseCallback
   }) {
     const curPage = YState.find<V1.Page>(getSelectPageId())
@@ -84,7 +84,7 @@ export class SchemaHelper {
     callback,
     bubbleCallback,
   }: {
-    callback: ITraverseCallback
+    callback?: ITraverseCallback
     bubbleCallback?: ITraverseCallback
   }) {
     const abort = new AbortController()
@@ -115,7 +115,7 @@ export class SchemaHelper {
           parent,
           ancestors,
         }
-        const isContinue = callback(props)
+        const isContinue = callback?.(props)
         if (isContinue !== false && childIds) traverse(childIds, depth + 1, props)
         bubbleCallback?.(props)
       })
