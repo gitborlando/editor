@@ -4,6 +4,7 @@ import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
 import { mockCollide } from 'src/editor/editor/mock/collide'
 import { EditorSetting } from 'src/editor/editor/setting'
+import { HandleNode } from 'src/editor/handle/node'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
@@ -29,7 +30,9 @@ export class EditorService {
 
   private initHooks() {
     EditorSetting.init()
-    EditorCommand.initHook()
+    EditorCommand.init()
+
+    HandleNode.init()
 
     OperateNode.initHook()
     OperateAlign.initHook()

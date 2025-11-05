@@ -240,7 +240,10 @@ function subscribeY(y: Y.Map<any>, i: Immut) {
       if (parent.y instanceof Y.Map) {
         event.changes.keys.forEach((item, k) => {
           if (item.action === 'delete') {
-            i.delete(joinPath(path, k))
+            const value = i.get(joinPath(path, k))
+            if (value !== undefined) {
+              i.delete(joinPath(path, k))
+            }
           } else {
             const yv = toJSON(parent.y.get(k))
             if (!deepEqual(yv, parent.o[k])) {
@@ -274,7 +277,6 @@ function subscribeY(y: Y.Map<any>, i: Immut) {
         })
       }
     })
-
     i.next()
   }
 

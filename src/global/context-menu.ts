@@ -5,7 +5,7 @@ import { type MouseEvent } from 'react'
 export type Command = {
   name: string
   shortcut?: string
-  callback: (context?: AnyObject) => any
+  callback: (context: any) => any
 }
 
 export type MenuItem = Command & {

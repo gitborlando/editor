@@ -88,12 +88,12 @@ class StageSelectService {
 
     const { copyPasteGroup, undoRedoGroup, nodeGroup, nodeReHierarchyGroup } =
       EditorCommand
-    if (getSelectIdMap().length) {
+    if (getSelectIdMap().length || this.hoverId) {
       const menuOptions = [
-        nodeReHierarchyGroup,
         copyPasteGroup,
         undoRedoGroup,
         nodeGroup,
+        nodeReHierarchyGroup,
       ]
       ContextMenu.menus = menuOptions
       ContextMenu.openMenu(e as any)
@@ -109,10 +109,12 @@ class StageSelectService {
   }
 
   onPanelSelect(id: string) {
+    if (getSelectIdMap()[id]) return
+
     this.clearSelect()
-    YClients.select(id)
+    YUndo.untrack(() => YClients.select(id))
+    YUndo.track({ type: 'client', description: `通过面板选中节点 ${id}` })
     this.afterSelect.dispatch('panel')
-    YUndo.track({ type: 'client', description: `选中节点 ${id}` })
   }
 
   onCreateSelect(id: string) {
@@ -164,14 +166,14 @@ class StageSelectService {
 
       if (childIds?.length && depth === 0) {
         if (AABB.include(this.marqueeOBB!.aabb, elem.aabb) === 1) {
-          YUndo.untrackScope(() => YClients.select(id))
+          YUndo.untrack(() => YClients.select(id))
           // UILeftPanelLayer.needExpandIds.add(id)
           return false
         }
         return
       }
       if (hitTest(this.marqueeOBB, elem.obb)) {
-        YUndo.untrackScope(() => YClients.select(id))
+        YUndo.untrack(() => YClients.select(id))
         // UILeftPanelLayer.needExpandIds.add(node.parentId)
         return
       }
@@ -179,7 +181,6 @@ class StageSelectService {
     }
 
     const traverse = SchemaHelper.createCurrentPageTraverse({
-      finder: YState.find<V1.Node>,
       callback: traverseTest,
     })
 

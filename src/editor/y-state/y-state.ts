@@ -18,8 +18,8 @@ class YStateService {
   get state() {
     return this.immut.state
   }
-  get push() {
-    return this.immut.push
+  get insert() {
+    return this.immut.insert
   }
   get set() {
     return this.immut.set

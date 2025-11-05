@@ -1,17 +1,18 @@
 import hotkeys from 'hotkeys-js'
 import { getEditorSetting } from 'src/editor/editor/setting'
+import { HandleNode } from 'src/editor/handle/node'
+import { HandlePage } from 'src/editor/handle/page'
 import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageScene } from 'src/editor/stage/render/scene'
 import { getSelectIds } from 'src/editor/y-state/y-clients'
 import { Command, ContextMenu } from 'src/global/context-menu'
 import { listen } from 'src/shared/utils/event'
 import { OperateNode } from '../operate/node'
-import { OperatePage } from '../operate/page'
 import { Schema } from '../schema/schema'
-import { ID, INodeParent, IPage } from '../schema/type'
+import { INodeParent } from '../schema/type'
 
 class EditorCommandManager {
-  initHook() {
+  init() {
     this.bindHotkeys()
   }
 
@@ -49,9 +50,8 @@ class EditorCommandManager {
     const commands = [
       {
         name: '删除页面',
-        callback: () => {
-          const { id } = ContextMenu.context
-          this.deletePage(id)
+        callback: ({ id }: { id: ID }) => {
+          HandlePage.removePage(YState.find<V1.Page>(id))
         },
       },
     ]
@@ -59,9 +59,8 @@ class EditorCommandManager {
     if (getEditorSetting().devMode) {
       commands.push({
         name: '打印 schema',
-        callback: () => {
-          const { id } = ContextMenu.context
-          this.logPageSchema(id)
+        callback: ({ id }: { id: ID }) => {
+          HandlePage.devLogPageSchema(id)
         },
       })
     }
@@ -80,12 +79,12 @@ class EditorCommandManager {
       },
       {
         name: '创建画板',
-        callback: () => OperateNode.wrapInFrame(),
+        callback: () => HandleNode.wrapInFrame(),
       },
       {
         name: '删除',
         shortcut: 'del',
-        callback: () => OperateNode.deleteSelectNodes(),
+        callback: () => HandleNode.deleteSelectedNodes(),
       },
     ]
 
@@ -93,7 +92,6 @@ class EditorCommandManager {
       commands.push(
         {
           name: '打印 schema',
-          shortcut: 'shift+n+s',
           callback: () => {
             getSelectIds().forEach((id) => {
               const node = YState.find<V1.SchemaItem>(id)
@@ -103,7 +101,6 @@ class EditorCommandManager {
         },
         {
           name: '打印 elem',
-          shortcut: 'shift+n+e',
           callback: () => {
             getSelectIds().forEach((id) => {
               const elem = StageScene.findElem(id)
@@ -138,18 +135,6 @@ class EditorCommandManager {
         name: '移至底部',
         shortcut: 'ctrl+alt+[',
         callback: () => this.reHierarchy('bottom'),
-      },
-    ]
-  }
-
-  get UIleftPanelSwitchBarGroup(): Command[] {
-    return [
-      {
-        name: '弹出面板',
-        callback: () => {
-          const { id } = ContextMenu.context
-          // UILeftPanel.popUpPanel(id)
-        },
       },
     ]
   }
@@ -194,7 +179,6 @@ class EditorCommandManager {
       this.pageGroup,
       this.nodeGroup,
       this.nodeReHierarchyGroup,
-      this.UIleftPanelSwitchBarGroup,
       this.createShapeGroup,
       this.fileGroup,
     ].flat() as Command[]
@@ -208,7 +192,7 @@ class EditorCommandManager {
           if (isKeyDown) return
           isKeyDown = true
         }
-        callback()
+        callback({})
       })
     })
 
@@ -231,36 +215,6 @@ class EditorCommandManager {
       OperateNode.reHierarchy(parent, node, index)
     })
     Schema.finalOperation('重新排序')
-  }
-
-  private deletePage(id: ID) {
-    const pageIds = Schema.meta.pageIds
-    const index = Schema.meta.pageIds.indexOf(id)
-    const next = pageIds[index + 1]
-    const prev = pageIds[index - 1]
-    if (!(next || prev)) return
-
-    OperatePage.removePage(Schema.find<IPage>(id))
-    OperatePage.selectPage(next || prev)
-    Schema.nextSchema()
-  }
-
-  private logPageSchema(id: ID) {
-    const curPage = YState.find<V1.Page>(id)
-    const nodes: Record<ID, V1.SchemaItem> = {}
-    const findNodes = (id: string) => {
-      const node = YState.find<V1.SchemaItem>(id)
-      nodes[node.id] = node
-      if ('childIds' in node) {
-        node.childIds.map(YState.find).forEach((node) => (nodes[node.id] = node))
-      }
-    }
-    curPage.childIds.forEach(findNodes)
-    console.log({
-      meta: YState.state.meta,
-      page: curPage,
-      ...nodes,
-    })
   }
 }
 

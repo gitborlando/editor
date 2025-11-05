@@ -1,6 +1,6 @@
 import { clone } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
-import { computed, makeObservable, observable } from 'mobx'
+import autoBind from 'auto-bind'
+import { computed, observable } from 'mobx'
 import { NeedUndoClientState, YClients } from 'src/editor/y-state/y-clients'
 import * as Y from 'yjs'
 
@@ -10,28 +10,18 @@ type YUndoInfo = {
   clientState?: NeedUndoClientState
 }
 
-@autobind
 class YUndoService {
-  stateUndo!: Y.UndoManager
-  clientUndo!: Y.UndoManager
-
   stack: YUndoInfo[] = []
-  next = 0
+  @observable next = 0
 
-  get canUndo() {
+  @computed get canUndo() {
     return this.next > 0
   }
-  get canRedo() {
+  @computed get canRedo() {
     return this.next < this.stack.length
   }
 
-  constructor() {
-    makeObservable(this, {
-      next: observable,
-      canUndo: computed,
-      canRedo: computed,
-    })
-  }
+  private stateUndo!: Y.UndoManager
 
   initStateUndo(stateMap: Y.Map<V1.Schema>) {
     this.stateUndo = new Y.UndoManager(stateMap)
@@ -50,10 +40,12 @@ class YUndoService {
     })
   }
 
+  @action
   private applyClientState() {
     const clientState =
       this.stack[this.next - 1]?.clientState || this.initClientState
-    Object.assign(YClients.client, clientState)
+    YClients.client.selectIdMap = clientState.selectIds
+    YClients.client.selectPageId = clientState.selectPageId
   }
 
   undo() {
@@ -96,11 +88,11 @@ class YUndoService {
     this.next = this.stack.length
   }
 
-  untrackScope(callback: () => void) {
+  untrack(callback: () => void) {
     this.shouldTrack = false
     callback()
     this.shouldTrack = true
   }
 }
 
-export const YUndo = new YUndoService()
+export const YUndo = autoBind(makeObservable(new YUndoService()))

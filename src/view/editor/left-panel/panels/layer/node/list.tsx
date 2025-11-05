@@ -1,6 +1,6 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { useHookSignal } from 'src/shared/signal/signal-react'
+import { useEventSignal } from 'src/shared/signal/signal-react'
 import { EditorLeftPanelLayerNodeItemComp } from 'src/view/editor/left-panel/panels/layer/node/item'
 import { EditorLPLayerNodeState } from 'src/view/editor/left-panel/panels/layer/node/state'
 
@@ -9,7 +9,7 @@ export const EditorLeftPanelLayerNodeListComp: FC<{}> = observer(({}) => {
   const scrollBarsRef = useRef<Scrollbars>(null)
   const nodeInfoList = getNodeInfoList()
 
-  useHookSignal(nodeInfoChanged)
+  useEventSignal(nodeInfoChanged)
 
   const virtualizer = useVirtualizer({
     count: nodeInfoList.length,

@@ -1,6 +1,5 @@
-import { OperateNode } from 'src/editor/operate/node'
+import { HandleNode } from 'src/editor/handle/node'
 import { StageViewport } from 'src/editor/stage/viewport'
-import { useHookSignal } from 'src/shared/signal/signal-react'
 
 const getStepByZoom = (zoom: number) => {
   const steps = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
@@ -20,7 +19,7 @@ export const RulerComp: FC<{}> = observer(({}) => {
     <G className={cls()}>
       <Ruler type='horizontal' />
       <Ruler type='vertical' />
-      {/* <G center className={cls('corner')}></G> */}
+      <G center className={cls('corner')}></G>
     </G>
   )
 })
@@ -29,11 +28,8 @@ export const Ruler: FC<{
   type: 'horizontal' | 'vertical'
 }> = observer(({ type }) => {
   const isVertical = type === 'vertical'
-  const zoom = 1
-  const { bound, offset: offsetXY } = StageViewport
-  const datumXY = OperateNode.datumXY
-
-  useHookSignal(OperateNode.datumId)
+  const { bound, zoom, offset: offsetXY } = StageViewport
+  const datumXY = HandleNode.datumXY
 
   const getTicks = () => {
     const ticks: { offset: number; value: number }[] = []

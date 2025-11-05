@@ -21,7 +21,7 @@ export const COLOR = {
 export const themeHue$ = Signal.create(HUE_MAP.blue)
 
 themeHue$.hook({ immediately: true }, (value) => {
-  const root = document.querySelector('#root') as HTMLDivElement
+  const root = document.documentElement
   root?.style.setProperty('--hue', String(value))
   root?.style.setProperty('--color', hslRgb(value, 100, 50))
   root?.style.setProperty('--color-bg', hslRgb(value, 100, 95))

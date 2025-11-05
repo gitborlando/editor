@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import { HandleNode } from 'src/editor/handle/node'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
@@ -7,7 +8,6 @@ import { cleanObject } from 'src/shared/utils/normal'
 import { xy_minus, xy_rotate } from '../math/xy'
 import { IPolygon, IStar } from '../schema/type'
 import { getSelectIdMap } from '../y-state/y-clients'
-import { OperateNode } from './node'
 
 function createAllGeometry() {
   return {
@@ -169,7 +169,7 @@ class OperateGeometryService {
     node: V1.Node,
     depth: number,
   ) {
-    const { getNodeCenterXY } = OperateNode
+    const { getNodeCenterXY } = HandleNode
     const centerXY = getNodeCenterXY(node)
     const newXY = xy_rotate(node, centerXY, this.delta('rotation', node))
 

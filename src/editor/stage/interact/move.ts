@@ -21,7 +21,7 @@ class StageMoveService {
 
   private onMoveStage() {
     const start = XY.from(StageViewport.offset)
-    Drag.onDown(() => StageCursor.unlock().setCursor('grab').lock())
+    Drag.onStart(() => StageCursor.unlock().setCursor('grab').lock())
       .onMove(({ shift }) => (StageViewport.offset = start.plus(shift)))
       .onDestroy(() => StageCursor.unlock().setCursor('hand').lock())
   }

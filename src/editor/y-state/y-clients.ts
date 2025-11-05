@@ -3,7 +3,6 @@ import { Is } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
-import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
@@ -37,6 +36,8 @@ class YClientsService {
     if (!this.observingClientId) return
     return others[this.observingClientId]
   }
+
+  afterSelect$ = Signal.create<void>()
 
   init() {
     this.client = {
@@ -104,7 +105,7 @@ class YClientsService {
       )
     })
 
-    StageSelect.afterSelect.hook({ immediately: true }, () => {
+    this.afterSelect$.hook(() => {
       YSync.awareness.setLocalStateField(
         'selectIdMap',
         toJS(this.client.selectIdMap),

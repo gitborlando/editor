@@ -20,17 +20,23 @@ export default class Immut<T extends AnyObject = AnyObject> {
     let len = isParent ? keys.length - 1 : keys.length
     for (let i = 0; i < len; i++) {
       current = current[keys[i]]
-      if (Is.falsy(current)) console.log('Immut error at get function')
+      if (Is.falsy(current) && isParent) console.log('Immut error at get function')
     }
     return current as T
   }
 
-  push = <T>(keyPath: string, value: T) => {
+  insert = <T>(keyPath: string, value: T) => {
     const keys = keyPath.split(/\.|\//) as IKey[]
-    const parent = this.get<any[]>(keyPath)
+    const lastKey = Number(keys[keys.length - 1])
 
-    parent.push(value)
-    keys.push(parent.length - 1)
+    if (Number.isNaN(lastKey)) {
+      const parent = this.get<any>(keyPath)
+      parent.push(value)
+      keys.push(parent.length - 1)
+    } else {
+      const parent = this.get<any[]>(keyPath, true)
+      parent.splice(lastKey, 0, value)
+    }
 
     this.track({ type: 'add', keys, value, oldValue: undefined })
   }
@@ -66,8 +72,6 @@ export default class Immut<T extends AnyObject = AnyObject> {
   }
 
   next = () => {
-    if (!this.patches.length) return
-
     this.traverse(this.state, this.changeMap)
     this.listeners.forEach((callback) => callback(this.patches))
 

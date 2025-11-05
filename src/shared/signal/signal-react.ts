@@ -7,7 +7,15 @@ export function useSignal<T extends unknown>(signal: Signal<T>) {
 }
 
 export function useEventSignal(signal: Signal<unknown>) {
-  return useSyncExternalStore(signal.hook, () => ({}))
+  const last = useRef({})
+  return useSyncExternalStore(
+    (callback) =>
+      signal.hook(() => {
+        last.current = {}
+        callback()
+      }),
+    () => last.current,
+  )
 }
 
 export function useAutoSignal<T extends any>(init?: T, id?: string): Signal<T> {

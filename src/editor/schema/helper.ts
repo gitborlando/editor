@@ -69,25 +69,21 @@ export class SchemaHelper {
   }
 
   static createCurrentPageTraverse({
-    finder,
     callback,
     bubbleCallback,
   }: {
-    finder: (id: ID) => V1.Node
     callback: ITraverseCallback
     bubbleCallback?: ITraverseCallback
   }) {
     const curPage = YState.find<V1.Page>(getSelectPageId())
-    const traverse = this.createTraverse({ finder, callback, bubbleCallback })
+    const traverse = this.createTraverse({ callback, bubbleCallback })
     return () => traverse(curPage.childIds)
   }
 
   static createTraverse({
-    finder,
     callback,
     bubbleCallback,
   }: {
-    finder: (id: ID) => V1.Node
     callback: ITraverseCallback
     bubbleCallback?: ITraverseCallback
   }) {
@@ -99,11 +95,14 @@ export class SchemaHelper {
     ) => {
       ids.forEach((id, index) => {
         if (abort.signal.aborted) return
-        const node = finder(id)
+
+        const node = YState.find<V1.Node>(id)
         if (node === undefined) return
 
         const childIds = 'childIds' in node ? node.childIds : undefined
-        const parent = <INodeParent>(upLevelRef?.node || finder(node.parentId))
+        const parent = t<INodeParent>(
+          upLevelRef?.node || YState.find<V1.NodeParent>(node.parentId),
+        )
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []
         const props = {
           id,

@@ -18,11 +18,14 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
 }> = observer(({ nodeInfo }) => {
   const { id, indent, ancestors } = nodeInfo
   const { toggleNodeExpanded, getNodeExpanded } = EditorLPLayerNodeState
+
   const node = YState.find<V1.Node>(id)
   const isParent = SchemaHelper.isNodeParent(node)
   const expanded = getNodeExpanded(id)
-  const selected = useSelectIdMap()[id]
-  const subSelected = ancestors.some((ancestor) => useSelectIdMap()[ancestor])
+
+  const selectIdMap = useSelectIdMap()
+  const selected = selectIdMap[id]
+  const subSelected = ancestors.some((ancestor) => selectIdMap[ancestor])
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id, disabled: false })
@@ -50,7 +53,7 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        paddingLeft: 8 + indent * 12,
+        paddingLeft: 8 + indent * 16,
       }}
       gap={4}
       {...attributes}

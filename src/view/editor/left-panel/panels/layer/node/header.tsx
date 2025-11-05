@@ -1,4 +1,4 @@
-import { ChevronUp } from 'lucide-react'
+import { ChevronsUp } from 'lucide-react'
 import { useHookSignal } from 'src/shared/signal/signal-react'
 import { IconButton } from 'src/view/component/button'
 
@@ -32,10 +32,9 @@ export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
       />
       <IconButton onClick={handleToggleExpand} className={cls('expand-button')}>
         <Lucide
-          icon={ChevronUp}
+          icon={ChevronsUp}
           style={{
             transform: allNodeExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s',
           }}
         />
       </IconButton>
@@ -49,26 +48,10 @@ const cls = classes(css`
   min-height: 32px;
   padding: 0 12px;
   gap: 8px;
-
   &-expand-button {
     flex-shrink: 0;
+    transition: transform 0.2s;
   }
-
-  &-search {
-    /* flex: 1;
-    min-width: 0;
-    position: relative;
-    background-color: var(--gray-bg);
-    border-radius: var(--border-radius);
-    padding: 4px 8px;
-    gap: 6px; */
-  }
-
-  &-search-icon {
-    /* flex-shrink: 0;
-    color: rgba(138, 138, 138, 0.6); */
-  }
-
   &-search-input {
     flex: 1;
     min-width: 0;
@@ -79,10 +62,5 @@ const cls = classes(css`
     &::placeholder {
       font-size: 12px;
     }
-  }
-
-  &-clear-button {
-    flex-shrink: 0;
-    padding: 2px;
   }
 `)

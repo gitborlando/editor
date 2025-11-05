@@ -1,4 +1,3 @@
-import { createCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 
@@ -12,7 +11,11 @@ export type EditorLPLayerNodeInfo = {
 class EditorLPLayerNodeStateService {
   nodeInfoChanged = Signal.create()
 
-  private nodeExpandedMap = createCache<string, boolean>()
+  private nodeExpandedMap = observable.map<string, boolean>()
+
+  init() {
+    return this.onNodeHierarchyChange()
+  }
 
   getNodeExpanded(id: string) {
     return this.nodeExpandedMap.get(id)
@@ -27,27 +30,37 @@ class EditorLPLayerNodeStateService {
 
   toggleNodeExpanded(id: string, expanded: boolean) {
     this.nodeExpandedMap.set(id, expanded)
-    this.nodeInfoChanged.dispatch()
   }
 
   toggleAllNodeExpanded(expanded: boolean) {
     SchemaHelper.createCurrentPageTraverse({
-      finder: YState.find<V1.Node>,
       callback: ({ id }) => void this.nodeExpandedMap.set(id, expanded),
     })()
-    this.nodeInfoChanged.dispatch()
   }
 
   getNodeInfoList() {
     const nodeInfoList: EditorLPLayerNodeInfo[] = []
     SchemaHelper.createCurrentPageTraverse({
-      finder: YState.find<V1.Node>,
       callback: ({ id, ancestors }) => {
         nodeInfoList.push({ id, indent: ancestors.length, ancestors })
         return !!this.nodeExpandedMap.get(id)
       },
     })()
     return nodeInfoList
+  }
+
+  private onNodeHierarchyChange() {
+    let changed = false
+    return YState.immut.subscribe((patches) => {
+      patches.forEach((patch) => {
+        const [id, prop] = patch.keys as [string, string]
+        if (prop !== 'childIds') return
+        if (SchemaHelper.isPageById(id)) changed = true
+        if (this.nodeExpandedMap.get(id)) changed = true
+      })
+      if (changed) this.nodeInfoChanged.dispatch()
+      changed = false
+    })
   }
 }
 

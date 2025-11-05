@@ -19,9 +19,9 @@ export const ContextMenuComp: FC<{}> = observer(({}) => {
                   className={cls('item')}
                   key={item.name}
                   onClick={() => item.callback(ContextMenu.context)}>
-                  <G horizontal>
-                    <Text>{item.name}</Text>
-                    <Text x-if={!!item.shortcut} className='justify-end'>
+                  <G horizontal center>
+                    <Text className={cls('item-name')}>{item.name}</Text>
+                    <Text x-if={!!item.shortcut} className={cls('item-shortcut')}>
                       {item.shortcut}
                     </Text>
                   </G>
@@ -43,15 +43,24 @@ export const ContextMenuComp: FC<{}> = observer(({}) => {
 const cls = classes(css`
   width: 200px;
   min-height: fit-content;
-  border-radius: 3px;
+  ${styles.borderRadius}
+  padding-inline: 4px;
 
   &-item {
     height: 32px;
     line-height: 32px;
     ${styles.textLabel}
+    border-radius: 2px;
+    padding-inline: 10px;
     &:hover {
       color: var(--color);
       background-color: var(--color-bg);
+    }
+    &:hover &-name {
+      color: var(--color);
+    }
+    &-shortcut {
+      justify-items: end;
     }
   }
 

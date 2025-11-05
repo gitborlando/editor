@@ -69,6 +69,8 @@ export const EditorLeftPanelLayerNodeComp: FC<{}> = observer(({}) => {
     setActiveId(null)
   }
 
+  useEffect(() => EditorLPLayerNodeState.init(), [])
+
   return (
     <DndContext
       sensors={sensors}

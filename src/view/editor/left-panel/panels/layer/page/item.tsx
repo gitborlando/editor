@@ -33,7 +33,7 @@ export const PageItemComp: FC<IPageItemComp> = observer(({ name, id }) => {
       <G horizontal center>
         {name}
       </G>
-      <Check x-if={selected} size={16} />
+      <Check x-if={selected} className={cls('check')} size={16} />
     </G>
   )
 })
@@ -48,5 +48,8 @@ const cls = classes(css`
   padding-inline: 12px;
   &:hover {
     border: 1px solid var(--color);
+  }
+  &-check {
+    color: var(--color);
   }
 `)
