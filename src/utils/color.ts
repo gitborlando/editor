@@ -1,29 +1,61 @@
+import colorConvert from 'color-convert'
+import { atan, degreefy } from 'src/editor/math/base'
+export { colorConvert }
+
+export const HUE_MAP = {
+  red: 0,
+  orange: 30,
+  yellow: 60,
+  green: 120,
+  blue: 216,
+  purple: 280,
+  pink: 300,
+}
+
+export const COLOR = {
+  random: () => hslRgb(Math.random() * 360, 100, 50),
+  white: hslRgb(0, 0, 100),
+  black: hslRgb(0, 0, 0),
+  gray: rgb(204, 204, 204),
+  blue: hslRgb(220, 100, 50),
+  pinkRed: hslRgb(280, 100, 50),
+}
+
 export type IRGB = { r: number; g: number; b: number }
 export type IRGBA = { r: number; g: number; b: number; a: number }
+
 export function rgb(r: number | string, g: number | string, b: number | string) {
   return `rgb(${r},${g},${b})`
 }
 export function rgba(r: number, g: number, b: number, a: number = 1) {
   return `rgba(${r},${g},${b},${a})`
 }
+export function rgbaFromObject(object: IRGBA) {
+  return rgba(object.r, object.g, object.b, object.a)
+}
 export function rgbToRgba(rgbString: string, alpha: number) {
   return rgbString.replace(/rgb/, 'rgba').replace(/\)/, `,${alpha})`)
+}
+export function rgbTuple(rgbString: string) {
+  return rgbString.match(/\d+/g)?.map(Number) as [number, number, number]
+}
+export function rgbFromTuple(tuple: [number, number, number]) {
+  return `rgb(${tuple.join(',')})`
 }
 
 export function isHexColor(hex: string) {
   return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex)
 }
-
 export function hslRgb(h: number, s: number, l: number) {
-  s /= 100
-  l /= 100
-  const k = (n: number) => (n + h / 30) % 12
-  const a = s * Math.min(l, 1 - l)
-  const f = (n: number) =>
-    l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))
-  return rgb(255 * f(0), 255 * f(8), 255 * f(4))
+  return rgbFromTuple(colorConvert.hsl.rgb(h, s, l))
 }
 
 export function hslColor(h: number, s: number, l: number) {
   return hslRgb(h, s, l)
+}
+export function makeLinearGradientCss({ start, end, stops }: V1.FillLinearGradient) {
+  const degree = degreefy(atan((end.x - start.x) / (end.y - start.y))) + 90
+  return `linear-gradient(${degree}deg, ${stops[0].color} 0%, ${stops
+    .map(({ color, offset }) => `${color} ${offset * 100}%`)
+    .join(', ')}, ${stops[stops.length - 1].color} 100%)`
 }

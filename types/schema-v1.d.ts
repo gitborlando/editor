@@ -225,30 +225,4 @@ namespace V1 {
     width: number
     color: string
   }
-
-  type SchemaPropKey =
-    | keyof Meta
-    | keyof Client
-    | keyof Page
-    | keyof NodeMeta
-    | keyof Frame
-    | keyof Group
-    | keyof Rectangle
-    | keyof Polygon
-    | keyof Star
-    | keyof Path
-    | keyof Ellipse
-    | keyof Line
-    | keyof FillColor
-    | keyof FillLinearGradient
-    | keyof FillImage
-    | keyof Shadow
-    | keyof Stroke
-    | keyof Text
-    | keyof Text['style']
-    | keyof Point
-    | keyof NodeBase
-    | keyof Schema
-    | (string & {})
-    | number
 }

@@ -1,85 +1,74 @@
-import autobind from 'class-autobind-decorator'
+import autoBind from 'auto-bind'
 import equal from 'fast-deep-equal'
-import Immui from 'src/shared/immui/immui'
+import { Patch, produceWithPatches } from 'immer'
+import { getSelectedNodes } from 'src/editor/y-state/y-state'
 import { clone } from 'src/shared/utils/normal'
-import { rgb } from 'src/utils/color'
-import { UIPickerCopy } from '../handle/picker'
 import { SchemaCreator } from '../schema/creator'
-import { SchemaHistory } from '../schema/history'
-import { Schema } from '../schema/schema'
-import { IFill, IFillKeys, INode } from '../schema/type'
-import { OperateNode } from './node'
 
-@autobind
 class OperateFillService {
-  fills = <IFill[]>[]
+  @observable.ref fills = <V1.Fill[]>[]
   isMultiFills = false
-  private immui = new Immui()
-  initHook() {
-    OperateNode.selectedNodes$.hook(this.setupFills)
-    Schema.onMatchPatch('/?/fills/...', this.setupFills)
-    this.onUiPickerSetFill()
+
+  init() {
+    YClients.afterSelect.hook(() => {
+      this.setupFills()
+    })
+    YState.subscribe((patches) => {
+      if (!patches.some((p) => p.keys[1] === 'fills')) return
+      this.updateFills()
+    })
   }
+
+  @action
   setupFills() {
     this.fills = []
     this.isMultiFills = false
-    const nodes = OperateNode.selectingNodes
+    const nodes = getSelectedNodes()
     if (nodes.length === 1) return (this.fills = clone(nodes[0].fills))
     if (nodes.length > 1) {
       if (this.isSameFills(nodes)) return (this.fills = clone(nodes[0].fills))
       return (this.isMultiFills = true)
     }
   }
-  addFill() {
-    if (!OperateNode.selectedNodes.value.length) return
-    const fillsLength = this.fills.length
-    const fill = SchemaCreator.fillColor(rgb(204, 204, 204), fillsLength ? 0.25 : 1)
-    this.immui.add(this.fills, [fillsLength], fill)
-    this.applyChangeToSchema()
-    SchemaHistory.commit('添加 fill')
+
+  updateFills() {
+    const nodes = getSelectedNodes()
+    this.fills = clone(nodes[0].fills)
   }
-  deleteFill(index: number) {
-    if (!this.fills.length) return
-    this.immui.delete(this.fills, [index])
-    this.applyChangeToSchema()
-    SchemaHistory.commit('删除 fill')
+
+  newFill() {
+    return SchemaCreator.fillColor(COLOR.gray, this.fills.length ? 0.25 : 1)
   }
-  setFill(index: number, keys: IFillKeys[], value: any) {
-    if (!this.fills.length) return
-    this.immui.reset(this.fills, [index, ...keys], value)
-    this.applyChangeToSchema()
-    SchemaHistory.commit('改变 fill')
+
+  setFills(setter: (draft: V1.Fill[]) => any) {
+    const [fills, patches] = produceWithPatches(this.fills, setter)
+    this.fills = fills
+    this.applyChangeToYState(patches)
   }
-  changeFill(index: number, newFill: IFill) {
-    if (!this.fills.length) return
-    this.immui.reset(this.fills, [index], newFill)
-    this.applyChangeToSchema()
-    SchemaHistory.commit('改变 fills')
+
+  setFill<T extends V1.Fill>(index: number, setter: (fill: T) => T | void) {
+    this.setFills((fills) => {
+      if (fills[index]) {
+        const result = setter(fills[index] as T)
+        if (result) fills[index] = result
+      }
+    })
   }
-  applyChangeToSchema() {
-    const nodes = OperateNode.selectedNodes.value
-    const patches = this.immui.next(this.fills)[1]
+
+  onAfterSetFills() {
+    YUndo.track({ type: 'state', description: '改变 fill' })
+  }
+
+  applyChangeToYState(patches: Patch[]) {
+    const nodes = getSelectedNodes()
     nodes.forEach((node) => {
-      if (this.isMultiFills) Schema.itemReset(node, ['fills'], [])
-      Schema.applyPatches(patches, { prefix: `/${node.id}/fills` })
+      if (this.isMultiFills) YState.set(`${node.id}.fills`, [])
+      YState.applyImmerPatches(patches, `${node.id}.fills`)
     })
-    Schema.commitOperation('改变 fills')
-    Schema.nextSchema()
+    YState.next()
   }
-  private onUiPickerSetFill() {
-    UIPickerCopy.onChange.hook((patches) => {
-      if (UIPickerCopy.from !== 'fill') return
-      this.immui.applyPatches(this.fills, patches, {
-        prefix: `/${UIPickerCopy.index}`,
-      })
-      this.applyChangeToSchema()
-    })
-    UIPickerCopy.afterOperate.hook(() => {
-      if (UIPickerCopy.from !== 'fill') return
-      SchemaHistory.commit('改变 fills')
-    })
-  }
-  private isSameFills(nodes: INode[]) {
+
+  private isSameFills(nodes: V1.Node[]) {
     let isSame = true
     const firstNode = nodes[0]
 
@@ -92,8 +81,9 @@ class OperateFillService {
         if (!equal(fill, otherFill)) return (isSame = false)
       })
     })
+
     return isSame
   }
 }
 
-export const OperateFill = new OperateFillService()
+export const OperateFill = autoBind(makeObservable(new OperateFillService()))

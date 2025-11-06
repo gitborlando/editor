@@ -1,4 +1,5 @@
 import autobind from 'class-autobind-decorator'
+import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import Immut, { ImmutPatch } from 'src/utils/immut/immut'
 import { bind } from 'src/utils/immut/immut-y'
 import { IndexeddbPersistence } from 'y-indexeddb'
@@ -27,8 +28,17 @@ class YStateService {
   get delete() {
     return this.immut.delete
   }
+  get track() {
+    return this.immut.track
+  }
   get next() {
     return this.immut.next
+  }
+  get subscribe() {
+    return this.immut.subscribe
+  }
+  get applyImmerPatches() {
+    return this.immut.applyImmerPatches
   }
 
   find<T extends V1.SchemaItem>(id: string): T {
@@ -44,7 +54,7 @@ class YStateService {
     bind(this.immut, this.doc.getMap('schema'))
 
     this.unSub?.()
-    this.unSub = this.notify()
+    this.unSub = this.flushPatch()
 
     YClients.clientId = this.doc.clientID
     YUndo.initStateUndo(this.doc.getMap('schema'))
@@ -52,7 +62,7 @@ class YStateService {
     this.inited$.dispatch(true)
   }
 
-  private notify() {
+  private flushPatch() {
     return this.immut.subscribe((patches: ImmutPatch[]) => {
       if (!this.inited$.value) return
       patches.forEach((patch) => this.flushPatch$.dispatch(patch))
@@ -61,3 +71,7 @@ class YStateService {
 }
 
 export const YState = new YStateService()
+
+export const getSelectedNodes = () => {
+  return getSelectIdList().map((id) => YState.find<V1.Node>(id))
+}

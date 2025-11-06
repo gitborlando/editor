@@ -1,61 +1,64 @@
-import { Flex } from '@gitborlando/widget'
-import { FC, memo } from 'react'
-import { IImage, ImgManager } from 'src/editor/editor/img-manager'
-import { UIPickerCopy } from 'src/editor/handle/picker'
-import { IFillImage } from 'src/editor/schema/type'
+import { iife } from '@gitborlando/utils'
+import { ImgManager } from 'src/editor/editor/img-manager'
 import { Uploader } from 'src/global/upload'
-import { useAutoSignal } from 'src/shared/signal/signal-react'
-import { iife } from 'src/shared/utils/normal'
-import { useMemoComp, withSuspense } from 'src/shared/utils/react'
+import { suspense } from 'src/view/component/suspense'
 import { suspend } from 'suspend-react'
 
-type IPickerImageComp = {
-  fill: IFillImage
-}
-
-export const PickerImageComp: FC<IPickerImageComp> = memo(({ fill }) => {
-  const { setFillUrl } = UIPickerCopy
-  const isHover = useAutoSignal(false)
-
+export const PickerImageComp: FC<{ fill: V1.FillImage }> = memo(({ fill }) => {
   const uploadImage = async () => {
     const file = await Uploader.open({ accept: 'image/*' })
     const url = await ImgManager.uploadLocal(file!)
-    setFillUrl(url)
   }
 
-  const ImgComp = useMemoComp([fill.url], ({}) => {
-    const image = suspend<[string], IImage>(
-      () => ImgManager.getImageAsync(fill.url),
-      [fill.url],
-    )
-    const imageBound = iife(() => {
-      const { width, height } = image
-      const rate = width / height
-      return rate > 1
-        ? { width: 240, height: 240 / rate }
-        : { width: 200 * rate, height: 200 }
-    })
-    return <img src={image.objectUrl} style={{ ...imageBound }}></img>
-  })
-
   return (
-    <Flex layout='v' className='wh-100%-fit bg-white relative'>
-      <Flex
-        layout='c'
-        className='wh-100%-200 relative of-hidden bg-black'
-        onHover={isHover.dispatch}>
-        {isHover.value && (
-          <Flex layout='c' className='wh-100% bg-[rgba(0,0,0,0.2)] absolute '>
-            <Flex
-              layout='c'
-              className='wh-80-32 r-5 b-1-white text-white text-14 pointer'
-              onClick={uploadImage}>
-              更换图片
-            </Flex>
-          </Flex>
-        )}
-        {withSuspense(<ImgComp />)}
-      </Flex>
-    </Flex>
+    <G vertical center className={cls()}>
+      <G center className={cls('content')}>
+        <G center className={cls('mask')}>
+          <G center className={cls('mask-change')} onClick={uploadImage}>
+            更换图片
+          </G>
+        </G>
+        <ImgComp url={fill.url} />
+      </G>
+    </G>
   )
 })
+
+const ImgComp: FC<{ url: string }> = suspense(({ url }) => {
+  const image = suspend(() => ImgManager.getImageAsync(url), [url])
+  const imageBound = iife(() => {
+    const { width, height } = image
+    const rate = width / height
+    return rate > 1
+      ? { width: 216, height: 216 / rate }
+      : { width: 184 * rate, height: 184 }
+  })
+  return <img src={image.objectUrl} style={{ ...imageBound }}></img>
+})
+
+const cls = classes(css`
+  &:hover &-mask {
+    display: grid;
+  }
+  &-content {
+    width: 216px;
+    height: 184px;
+    overflow: hidden;
+    border: 1px solid var(--gray-border);
+    ${styles.borderRadius}
+  }
+  &-mask {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: none;
+    &-change {
+      width: 80px;
+      height: 32px;
+      border-radius: 5px;
+      border: 1px solid white;
+      color: white;
+      ${styles.textLabel}
+      cursor: pointer;
+    }
+  }
+`)

@@ -6,13 +6,12 @@ import { mockCollide } from 'src/editor/editor/mock/collide'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { OperateGeometry } from 'src/editor/operate/geometry'
-import { ISchema } from 'src/editor/schema/type'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { FileService } from 'src/global/service/file'
+import { Disposer } from 'src/utils/disposer'
 import { OperateAlign } from '../operate/align'
 import { OperateFill } from '../operate/fill'
-import { OperateNode } from '../operate/node'
 import { OperateShadow } from '../operate/shadow'
 import { OperateStroke } from '../operate/stroke'
 import { OperateText } from '../operate/text'
@@ -27,6 +26,7 @@ const jsZip = new JSZip()
 @autobind
 export class EditorService {
   inited$ = Signal.create(false)
+  private disposer = new Disposer()
 
   private initHooks() {
     EditorSetting.init()
@@ -34,10 +34,9 @@ export class EditorService {
 
     HandleNode.init()
 
-    OperateNode.initHook()
     OperateAlign.initHook()
     OperateGeometry.initHook()
-    OperateFill.initHook()
+    OperateFill.init()
     OperateStroke.initHook()
     OperateShadow.initHook()
     OperateText.initHook()
@@ -57,6 +56,8 @@ export class EditorService {
 
     StageInteract.dispose()
     StageScene.dispose()
+
+    this.disposer.dispose()
   }
 
   initSchema = async (fileId: string, onProgress?: (progress: number) => void) => {
@@ -65,7 +66,9 @@ export class EditorService {
       if (mockSchema) {
         // Schema.initSchema(mockSchema)
         YState.initSchema(fileId, mockSchema as unknown as V1.Schema)
-        YClients.init()
+        this.disposer.add(YClients.init())
+        this.disposer.add(YSync.init(fileId, YState.doc))
+        StageViewport.init()
       }
     } else {
       const fileMeta = await FileService.getFileMeta(fileId)
@@ -75,13 +78,12 @@ export class EditorService {
         const fileText = await zipFiles
           .file(`${decodeURIComponent(fileMeta.name)}.json`)
           ?.async('text')
-        const schema = jsonParse(fileText) as ISchema
+        const schema = jsonParse(fileText) as V1.Schema
         Schema.initSchema(schema)
 
         YState.initSchema(fileId, schema as unknown as V1.Schema)
-        YClients.init()
-        YSync.init(fileId, YState.doc)
-
+        this.disposer.add(YClients.init())
+        this.disposer.add(YSync.init(fileId, YState.doc))
         StageViewport.init()
       }
     }

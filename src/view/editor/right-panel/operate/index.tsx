@@ -1,23 +1,21 @@
-import { FC, memo } from 'react'
 import Scrollbars from 'react-custom-scrollbars-2'
-import { OperateNode } from 'src/editor/operate/node'
-import { useHookSignal } from 'src/shared/signal/signal-react'
+import { getSelectIdList } from 'src/editor/y-state/y-clients'
+import { EditorRPOperateFillComp } from 'src/view/editor/right-panel/operate/fill'
+import { FillPickerComp } from 'src/view/editor/right-panel/operate/picker'
+import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
 import { AlignComp } from './align'
 import { EditorRightOperateGeo } from './geo'
 
-export const OperatePanelComp: FC<{}> = memo(({}) => {
-  useHookSignal(OperateNode.selectedNodes$)
+export const OperatePanelComp: FC<{}> = observer(({}) => {
+  const selectIdList = getSelectIdList()
 
+  if (!selectIdList.length) return null
   return (
-    <G>
-      <Scrollbars>
-        <AlignComp />
-        <EditorRightOperateGeo />
-        {/* <FillPropComp />
-        <StrokeComp />
-        <ShadowComp />
-        {OperateText.textNodes.length > 0 && <TextComp />} */}
-      </Scrollbars>
-    </G>
+    <Scrollbars>
+      <AlignComp />
+      <EditorRightOperateGeo />
+      <EditorRPOperateFillComp />
+      <FillPickerComp x-if={FillPickerState.isShowPicker} />
+    </Scrollbars>
   )
 })

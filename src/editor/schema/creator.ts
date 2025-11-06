@@ -1,16 +1,14 @@
 import { IXY } from '@gitborlando/geo'
 import { clone, miniId } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import {
   createLine,
   createRegularPolygon,
   createStarPolygon,
 } from 'src/editor/math/point'
-import { themeColor } from 'src/global/color'
 import { rgb } from 'src/utils/color'
 import { defuOverrideArray } from 'src/utils/defu'
+import { themeColor } from 'src/view/styles/color'
 
-@autobind
 class SchemaCreatorService {
   schema(): V1.Schema {
     const page = this.page()
@@ -144,17 +142,19 @@ class SchemaCreatorService {
   line(option?: Partial<V1.Line>): V1.Line {
     const name = this.createNodeName('line')
     const nodeBase = this.createNodeBase()
-    const { x, y } = option || nodeBase
-    const points = createLine(XY._(x, y), 0)
+    const start = XY._(nodeBase.x, nodeBase.y)
+    const length = option?.width || nodeBase.width
+    const rotation = option?.rotation || nodeBase.rotation
+    const points = createLine(start, length, rotation)
     return {
       type: 'line',
       points,
       ...nodeBase,
       ...name,
-      height: 0,
-      fills: [],
+      fills: [this.fillColor(COLOR.black, 1)],
       strokes: [this.stroke()],
       ...option,
+      height: 0,
     }
   }
 
@@ -204,7 +204,7 @@ class SchemaCreatorService {
     )
   }
 
-  fillColor(color = rgb(204, 204, 204), alpha = 1): V1.FillColor {
+  fillColor(color = COLOR.gray, alpha = 1): V1.FillColor {
     return { type: 'color', visible: true, color, alpha }
   }
 
@@ -226,7 +226,7 @@ class SchemaCreatorService {
   }
 
   fillImage(
-    url: string = 'Assets.editor.rightPanel.operate.picker.defaultImage',
+    url: string = Assets.editor.RP.operate.picker.defaultImage,
   ): V1.FillImage {
     return {
       type: 'image',

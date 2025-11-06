@@ -7,9 +7,10 @@ import { StageInteract } from 'src/editor/stage/interact/interact'
 import { ElemMouseEvent, ElemReact } from 'src/editor/stage/render/elem'
 import { Surface } from 'src/editor/stage/render/surface'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
-import { COLOR, themeColor } from 'src/global/color'
 import { Drag } from 'src/global/event/drag'
+import { COLOR } from 'src/utils/color'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
+import { themeColor } from 'src/view/styles/color'
 
 let transformOBB = OBB.identityOBB()
 

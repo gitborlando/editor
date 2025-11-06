@@ -1,5 +1,4 @@
 import { loopFor } from '@gitborlando/utils'
-import { IIrregular, IPoint } from 'src/editor/schema/type'
 import { IXY } from './normal'
 
 export class IrregularUtils {

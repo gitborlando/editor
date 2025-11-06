@@ -1,83 +1,48 @@
-import { Flex } from '@gitborlando/widget'
-import { FC, Fragment } from 'react'
+import { Minus, Plus } from 'lucide-react'
 import { OperateFill } from 'src/editor/operate/fill'
-import { IFill } from 'src/editor/schema/type'
-import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
-import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
-import { Divide } from 'src/view/ui-utility/widget/divide'
-import { PickerOpener } from './picker/picker-opener'
+import { IconButton } from 'src/view/component/button'
+import {
+  OpFieldComp,
+  OpFieldContentComp,
+  OpFieldHeaderComp,
+} from 'src/view/editor/right-panel/operate/components/op-field'
+import { EditorRPOperateFillItemComp } from 'src/view/editor/right-panel/operate/fill-item'
 
-export const FillPropComp: FC<{}> = ({}) => {
-  const { fills, isMultiFills, addFill } = OperateFill
-  const hasFills = fills.length > 0
-  useMatchPatch('/?/fills/...')
+export const EditorRPOperateFillComp: FC<{}> = observer(({}) => {
+  const { fills, isMultiFills, setFills, newFill } = OperateFill
 
-  const HeaderComp = useMemoComp([hasFills], ({}) => {
-    return (
-      <Flex layout='h' className={`wh-100%-24 ${hasFills && 'mb-8'}`}>
-        <Flex layout='c' className='labelFont ml-5'>
-          <h4>填充</h4>
-        </Flex>
-        <IconButton size={16} style={{ marginLeft: 'auto' }} onClick={addFill}>
-          {Assets.editor.leftPanel.page.add}
-        </IconButton>
-      </Flex>
-    )
-  })
+  const addFill = () => {
+    setFills((draft) => {
+      draft.push(newFill())
+    })
+  }
 
-  const FillListComp = useMemoComp<{ fills: IFill[] }>([], ({ fills }) => {
-    return fills.map((fill, index) =>
-      index !== fills.length - 1 ? (
-        <Fragment key={index}>
-          <FillItemComp key={index} fill={fill} index={index} />
-          <Divide
-            direction='h'
-            margin={4}
-            length={'95%'}
-            thickness={0}
-            bgColor='#E3E3E3'
-          />
-        </Fragment>
-      ) : (
-        <FillItemComp key={index} fill={fill} index={index} />
-      ),
-    )
-  })
-
-  const FillItemComp = useMemoComp<{ fill: IFill; index: number }>(
-    [],
-    ({ fill, index }) => {
-      const { setFill, deleteFill } = OperateFill
-
-      return (
-        <Flex layout='h' className='wh-100%-28'>
-          <PickerOpener fill={fill} index={index} impact='fill' />
-          <IconButton
-            size={16}
-            style={{ marginLeft: 'auto' }}
-            onClick={() => setFill(index, ['visible'], !fill.visible)}>
-            {fill.visible
-              ? Assets.editor.shared.visible
-              : Assets.editor.shared.unVisible}
-          </IconButton>
-          <IconButton size={16} onClick={() => deleteFill(index)}>
-            {Assets.editor.shared.minus}
-          </IconButton>
-        </Flex>
-      )
-    },
-  )
+  const deleteFill = (index: number) => {
+    setFills((draft) => {
+      draft.splice(index, 1)
+    })
+  }
 
   return (
-    <Flex layout='v' className='wh-100%-fit bg-white borderBottom p-8'>
-      <HeaderComp />
-      {isMultiFills ? (
-        <Flex layout='c' className='h-24 mt-8 mr-auto d-font-label'>
-          点击 + 重置并修改多个填充
-        </Flex>
-      ) : (
-        <FillListComp fills={fills} />
-      )}
-    </Flex>
+    <OpFieldComp>
+      <OpFieldHeaderComp
+        title='填充'
+        headerSlot={<IconButton icon={<Lucide icon={Plus} />} onClick={addFill} />}
+      />
+      <OpFieldContentComp x-if={fills.length > 0}>
+        {fills.map((fill, index) => (
+          <G horizontal='1fr auto' center gap={8} key={index}>
+            <EditorRPOperateFillItemComp fill={fill} index={index} />
+            <IconButton
+              size='small'
+              icon={<Lucide icon={Minus} />}
+              onClick={() => deleteFill(index)}
+            />
+          </G>
+        ))}
+      </OpFieldContentComp>
+    </OpFieldComp>
   )
-}
+})
+
+const cls = classes(css``)

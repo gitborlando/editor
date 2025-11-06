@@ -1,5 +1,4 @@
 import { Schema } from 'src/editor/schema/schema'
-import { IFrame, INode, INodeParent, ISchemaItem } from 'src/editor/schema/type'
 import { getSelectPageId } from 'src/editor/y-state/y-clients'
 
 export type SchemaUtilTraverseData = {
@@ -22,14 +21,14 @@ export class SchemaHelper {
     return id.startsWith('page_')
   }
 
-  static is<T extends ISchemaItem>(
-    item: ISchemaItem,
-    type: ISchemaItem['type'],
+  static is<T extends V1.SchemaItem>(
+    item: V1.SchemaItem,
+    type: V1.SchemaItem['type'],
   ): item is T {
     return item.type === type
   }
 
-  static isById(id: ID, type: ISchemaItem['type'] | 'nodeParent'): boolean {
+  static isById(id: ID, type: V1.SchemaItem['type'] | 'nodeParent'): boolean {
     if (type === 'nodeParent')
       return ['page', 'frame', 'group'].includes(Schema.find(id).type)
     return Schema.find(id).type === type
@@ -44,26 +43,26 @@ export class SchemaHelper {
     return node.type === 'frame' && this.isPageById(node.parentId)
   }
 
-  static getChildren(id: ID | INodeParent) {
+  static getChildren(id: ID | V1.NodeParent) {
     const childIds =
-      (typeof id !== 'string' ? id : Schema.find<INodeParent>(id))?.childIds || []
-    return childIds.map((id) => Schema.find<INode>(id))
+      (typeof id !== 'string' ? id : Schema.find<V1.NodeParent>(id))?.childIds || []
+    return childIds.map((id) => Schema.find<V1.Node>(id))
   }
 
-  static findAncestor(id: ID | INode, utilFunc?: (node: INode) => boolean) {
-    let node = typeof id === 'string' ? Schema.find<INode>(id) : id
-    utilFunc ||= (node: INode) => SchemaHelper.isPageById(node.parentId)
+  static findAncestor(id: ID | V1.Node, utilFunc?: (node: V1.Node) => boolean) {
+    let node = typeof id === 'string' ? Schema.find<V1.Node>(id) : id
+    utilFunc ||= (node: V1.Node) => SchemaHelper.isPageById(node.parentId)
     while (node.parentId) {
       if (utilFunc(node)) return node
-      node = Schema.find<INode>(node.parentId)
+      node = Schema.find<V1.Node>(node.parentId)
     }
     return node
   }
 
-  static findParent(node: INode) {
+  static findParent(node: V1.Node) {
     while (node.parentId) {
-      if (SchemaHelper.is<IFrame>(node, 'frame')) return node
-      node = Schema.find<INode>(node.parentId)
+      if (SchemaHelper.is<V1.Frame>(node, 'frame')) return node
+      node = Schema.find<V1.Node>(node.parentId)
     }
     return node
   }
@@ -100,7 +99,7 @@ export class SchemaHelper {
         if (node === undefined) return
 
         const childIds = 'childIds' in node ? node.childIds : undefined
-        const parent = t<INodeParent>(
+        const parent = t<V1.NodeParent>(
           upLevelRef?.node || YState.find<V1.NodeParent>(node.parentId),
         )
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []

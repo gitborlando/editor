@@ -1,14 +1,13 @@
 import { Schema } from 'src/editor/schema/schema'
-import { ID, IFrame, INode, INodeParent, ISchemaItem } from 'src/editor/schema/type'
 import { getSelectPageId } from 'src/editor/y-state/y-clients'
 
 export type ITraverseData = {
   id: ID
-  node: INode
+  node: V1.Node
   index: number
   depth: number
   childIds: string[] | undefined
-  parent: INodeParent
+  parent: V1.NodePareent
   ancestors: string[]
   abort: AbortController
   upLevelRef: ITraverseData | undefined
@@ -20,13 +19,13 @@ export class SchemaUtil {
   static isPageById(id: ID) {
     return id.startsWith('page_')
   }
-  static is<T extends ISchemaItem>(
-    item: ISchemaItem,
-    type: ISchemaItem['type'],
+  static is<T extends V1.SchemaItem>(
+    item: V1.SchemaItem,
+    type: V1.SchemaItem['type'],
   ): item is T {
     return item.type === type
   }
-  static isById(id: ID, type: ISchemaItem['type'] | 'nodeParent'): boolean {
+  static isById(id: ID, type: V1.SchemaItem['type'] | 'nodeParent'): boolean {
     if (type === 'nodeParent')
       return ['page', 'frame', 'group'].includes(Schema.find(id).type)
     return Schema.find(id).type === type

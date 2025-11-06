@@ -27,5 +27,12 @@ export function mockCollide() {
     SchemaCreator.addChild(frame, rect)
   }
 
+  const line = SchemaCreator.line({
+    x: 300,
+    y: 100,
+  })
+  SchemaCreator.addToSchema(schema, line)
+  SchemaCreator.addChild(frame, line)
+
   return schema
 }

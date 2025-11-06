@@ -14,7 +14,7 @@ export const Button: FC<ButtonProps & { active?: boolean }> = observer(
 )
 
 export const IconButton: FC<ButtonProps> = observer(
-  ({ children, className, size = 'mini', ...rest }) => {
+  ({ children, className, size = 'small', ...rest }) => {
     return (
       <Button
         size={size}
@@ -31,6 +31,9 @@ const cls = classes(css`
   align-items: center;
   justify-content: center;
 
+  &.arco-btn-text {
+    ${styles.borderRadius}
+  }
   &.arco-btn-text:not(.arco-btn-icon-only) {
     padding-left: 0px;
     padding-right: 8px;
@@ -41,8 +44,8 @@ const cls = classes(css`
   &.arco-btn-text:not(.arco-btn-disabled) {
     color: inherit;
     &.button-active {
-      color: var(--color);
-      background-color: var(--color-bg);
+      color: white;
+      background-color: var(--color-light);
     }
   }
   &.arco-btn-text.arco-btn-disabled {

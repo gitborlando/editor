@@ -19,7 +19,7 @@
   },
   "Sub Component": {
     "prefix": "subcomp",
-    "body": ["const $1Comp: FC<{}> = ({}) => { return (<G></G>) }"],
+    "body": ["const $1Comp: FC<{}> = observer(({}) => { return (<G></G>) })"],
     "description": "Sub Component",
   },
   "Widget": {
@@ -41,13 +41,10 @@
   "Service": {
     "prefix": "service",
     "body": [
-      "import autobind from 'class-autobind-decorator'",
-      "",
-      "@autobind",
       "class $1${TM_FILENAME_BASE}Service {",
       "}",
       "",
-      "export const $1${TM_FILENAME_BASE} = makeObservable(new $1${TM_FILENAME_BASE}Service())",
+      "export const $1${TM_FILENAME_BASE} = autoBind(makeObservable(new $1${TM_FILENAME_BASE}Service()))",
       "",
     ],
     "description": "Service",

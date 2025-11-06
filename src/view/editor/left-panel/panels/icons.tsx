@@ -3,7 +3,6 @@ import { Flex } from '@gitborlando/widget'
 import { FC, memo, useMemo } from 'react'
 import { InView } from 'react-intersection-observer'
 import { useAutoSignal, useHookSignal } from 'src/shared/signal/signal-react'
-import { hslBlueColor } from 'src/shared/utils/color'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
 
 type IIconsComp = {}
@@ -28,7 +27,7 @@ export const IconsComp: FC<IIconsComp> = memo(({}) => {
         <Flex layout='h' className={'wh-100%-fit px-10 gap-6-6 pointer'}>
           {categories.map((category) => {
             const selectCss = curCategory.value === category && {
-              color: hslBlueColor(60),
+              color: 'red',
             }
             return (
               <Flex

@@ -2,7 +2,7 @@ import { CSSProperties } from 'react'
 
 export const Loading: FC<{
   size?: number
-}> = observer(({ size = 37 }) => {
+}> = memo(({ size = 37 }) => {
   return (
     <G className={cls()} center>
       <svg

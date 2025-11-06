@@ -13,7 +13,8 @@ const autoImport = autoImportPlugin({
     'mobx',
     'mobx-react-lite',
     {
-      valtio: ['useSnapshot'],
+      color: [['default', 'Color']],
+      'auto-bind': [['default', 'autoBind']],
       '@linaria/core': ['css', 'cx'],
       '@gitborlando/geo': ['AABB', 'OBB', 'XY'],
       '@gitborlando/signal': ['Signal'],
@@ -23,14 +24,15 @@ const autoImport = autoImportPlugin({
       'src/editor/y-state/y-state': ['YState'],
       'src/editor/y-state/y-clients': ['YClients'],
       'src/editor/y-state/y-undo': ['YUndo'],
-      'src/shared/utils/global': ['t'],
-      'src/global/color': ['COLOR'],
+      'src/utils/global': ['t'],
+      'src/utils/color': ['COLOR', 'colorConvert'],
       'src/view/styles/styles': ['styles'],
       'src/view/styles/classes': ['classes'],
+      'src/utils/disposer': ['Disposer'],
     },
     {
       from: 'react',
-      imports: ['FC', 'ReactNode'],
+      imports: ['FC', 'ReactNode', 'ComponentPropsWithRef'],
       type: true,
     },
   ],
@@ -38,7 +40,7 @@ const autoImport = autoImportPlugin({
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), autoImport, reactXIf(), tailwindcss(), linaria()],
+    plugins: [autoImport, linaria(), react(), reactXIf(), tailwindcss()],
     resolve: {
       alias: {
         src: path.resolve(__dirname, 'src'),

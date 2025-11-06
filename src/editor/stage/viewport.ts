@@ -124,52 +124,19 @@ class StageViewportService {
     )
   }
 
-  onObserving() {
+  private onObserving() {
     autorun(() => {
-      // YClients.client.zoom = this.zoom
+      YClients.client.zoom = this.zoom
       YClients.client.offset = this.offset
     })
     autorun(() => {
       const client = YClients.observingClient
       if (!client) return
 
-      // this.zoom = client.zoom
+      this.zoom = client.zoom
       this.offset = client.offset
     })
   }
-
-  //   centerStage() {
-  //     let allElemsAABB = new AABB(0, 0, 0, 0)
-
-  //     const traverse = (elem: Elem) => {
-  //       allElemsAABB = AABB.Merge([allElemsAABB, elem.aabb])
-  //       elem.children.forEach(traverse)
-  //     }
-  //     Surface.layerList.forEach((elem) => elem.children.forEach(traverse))
-
-  //     const allElemsRect = AABB.Rect(allElemsAABB)
-  //     const viewportRect = AABB.Rect(Surface.viewportAABB)
-
-  //     if (allElemsRect.width > viewportRect.width || allElemsRect.height > viewportRect.height) {
-  //       const zoom = Math.min(
-  //         viewportRect.width / allElemsRect.width,
-  //         viewportRect.height / allElemsRect.height,
-  //       )
-  //       const shift = xy_multiply(
-  //         xy_minus(xy_center(viewportRect), xy_center(allElemsRect)),
-  //         zoom / getZoom(),
-  //       )
-
-  //       this.zoom$.dispatch(zoom)
-  //       this.offset$.dispatch((offset) => xy_plus(offset, shift))
-  //       this.zoomingStage$.dispatch()
-  //     } else {
-  //       const shift = xy_minus(xy_center(viewportRect), xy_center(allElemsRect))
-
-  //       this.offset$.dispatch((offset) => xy_plus(offset, shift))
-  //       this.movingStage$.dispatch()
-  //     }
-  //   }
 }
 
 export const StageViewport = makeObservable(new StageViewportService())

@@ -5,8 +5,8 @@ import { StageSelect } from 'src/editor/stage/interact/select'
 import { ElemReact } from 'src/editor/stage/render/elem'
 import { getZoom } from 'src/editor/stage/viewport'
 import { YClients } from 'src/editor/y-state/y-clients'
-import { themeColor } from 'src/global/color'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
+import { themeColor } from 'src/view/styles/color'
 
 type OutlineInfo = {
   hovered: boolean

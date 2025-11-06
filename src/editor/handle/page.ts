@@ -1,6 +1,5 @@
 import autobind from 'class-autobind-decorator'
 import { SchemaCreator } from '../schema/creator'
-import { IPage } from '../schema/type'
 
 @autobind
 class HandlePageService {
@@ -13,7 +12,7 @@ class HandlePageService {
     YUndo.track({ type: 'all', description: '添加并选中页面' })
   }
 
-  removePage(page: IPage) {
+  removePage(page: V1.Page) {
     if (YState.state.meta.pageIds.length === 1) return
 
     YState.delete(`${page.id}`)

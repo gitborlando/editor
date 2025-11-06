@@ -2,7 +2,6 @@ import { loopFor } from '@gitborlando/utils'
 import { xy_, xy_symmetric } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
 import { SchemaCreator } from 'src/editor/schema/creator'
-import { IFrame, INode, INodeParent, IPoint, IStroke } from 'src/editor/schema/type'
 import { normalizeColor } from 'src/shared/utils/color'
 import { IrregularUtils } from 'src/shared/utils/irregular'
 import { IXY, camelCase } from 'src/shared/utils/normal'
@@ -53,7 +52,7 @@ export class SvgParser {
     this.camelCaseProps(svgNode.properties)
     this.inheritParentProps(svgNode.properties, parentSvgNode.properties)
 
-    let node!: INode
+    let node!: V1.Node
     const { tagName, properties, children } = svgNode
     const { x, y, cx, cy, r, width, height } = properties
 

@@ -32,7 +32,7 @@ export const PageHeaderComp: FC<{}> = observer(({}) => {
 })
 
 const cls = classes(css`
-  padding-inline: 12px 10px;
+  padding-inline: 12px 6px;
   height: 32px;
   &-title {
     ${styles.textLabel}

@@ -2,8 +2,8 @@ import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { ElemReact } from 'src/editor/stage/render/elem'
 import { getZoom } from 'src/editor/stage/viewport'
-import { themeColor } from 'src/global/color'
 import { rgbToRgba } from 'src/utils/color'
+import { themeColor } from 'src/view/styles/color'
 
 export const EditorStageMarqueeComp: FC<{}> = observer(({}) => {
   const { marquee } = StageSelect

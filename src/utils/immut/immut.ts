@@ -1,4 +1,5 @@
-import { Is } from '@gitborlando/utils'
+import { clone, Is } from '@gitborlando/utils'
+import { Patch } from 'immer'
 
 type IKey = string | number
 
@@ -38,7 +39,7 @@ export default class Immut<T extends AnyObject = AnyObject> {
       parent.splice(lastKey, 0, value)
     }
 
-    this.track({ type: 'add', keys, value, oldValue: undefined })
+    this._track({ type: 'add', keys, value, oldValue: undefined })
   }
 
   set = <T>(keyPath: string, value: T) => {
@@ -50,9 +51,9 @@ export default class Immut<T extends AnyObject = AnyObject> {
     parent[lastKey] = value
 
     if (oldValue === undefined) {
-      this.track({ type: 'add', keys, value, oldValue: undefined })
+      this._track({ type: 'add', keys, value, oldValue: undefined })
     } else if (oldValue !== value) {
-      this.track({ type: 'replace', keys, value, oldValue })
+      this._track({ type: 'replace', keys, value, oldValue })
     }
   }
 
@@ -68,7 +69,13 @@ export default class Immut<T extends AnyObject = AnyObject> {
       delete parent[lastKey]
     }
 
-    this.track({ type: 'remove', keys, value: undefined, oldValue })
+    this._track({ type: 'remove', keys, value: undefined, oldValue })
+  }
+
+  track = <T>(type: 'add' | 'remove' | 'replace', keyPath: string, value: T) => {
+    const keys = keyPath.split(/\.|\//) as IKey[]
+    const oldValue = this.get<any>(keyPath)
+    this._track({ type, keys, value, oldValue })
   }
 
   next = () => {
@@ -84,11 +91,31 @@ export default class Immut<T extends AnyObject = AnyObject> {
     return () => this.listeners.delete(callback)
   }
 
+  applyImmerPatches = (patches: Patch[], prefix: string) => {
+    const prefixes = prefix.split('.') as (string | number)[]
+    patches.forEach((patch) => {
+      const keys = prefixes.concat(patch.path)
+      switch (patch.op) {
+        case 'add':
+          if (!Number.isNaN(Number(keys[keys.length - 1]))) {
+            this.insert(keys.join('.'), clone(patch.value))
+          } else {
+            this.set(keys.join('.'), clone(patch.value))
+          }
+          return
+        case 'replace':
+          return this.set(keys.join('.'), clone(patch.value))
+        case 'remove':
+          return this.delete(keys.join('.'))
+      }
+    })
+  }
+
   private patches = <ImmutPatch[]>[]
   private changeMap = <any>{}
   private listeners = new Set<(...args: any) => any>()
 
-  private track = (patch: ImmutPatch) => {
+  private _track = (patch: ImmutPatch) => {
     patch.value = this.deepClone(patch.value)
     patch.oldValue = this.deepClone(patch.oldValue)
     this.patches.push(patch)

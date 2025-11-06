@@ -14,7 +14,7 @@ export const AlignComp: FC<{}> = observer(({}) => {
           key={type}
           disabled={!canAlign.value}
           onClick={() => currentAlign.dispatch(type)}>
-          <Icon url={Assets.editor.rightPanel.operate.align[type]} />
+          <Icon url={Assets.editor.RP.operate.align[type]} />
         </IconButton>
       ))}
     </G>

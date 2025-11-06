@@ -5,10 +5,9 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "src/view/styles/tailwind.css",
+    "css": "src/view/app.css",
     "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": "tw"
+    "cssVariables": true
   },
   "iconLibrary": "lucide",
   "aliases": {

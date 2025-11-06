@@ -59,10 +59,10 @@ const cls = classes(css`
       justify-items: end;
     }
     &:not(&-disabled):hover {
-      background-color: var(--color-bg);
+      background-color: var(--color-light);
     }
     &:not(&-disabled):hover &-name {
-      color: var(--color);
+      color: white;
     }
     &-disabled {
       color: #b3b3b3;
@@ -72,7 +72,6 @@ const cls = classes(css`
       }
     }
   }
-
   &-divider {
     margin-block: 4px;
   }

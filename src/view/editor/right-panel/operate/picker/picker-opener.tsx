@@ -1,18 +1,16 @@
 import { Flex } from '@gitborlando/widget'
 import { FC, memo } from 'react'
-import { IImage, ImgManager } from 'src/editor/editor/img-manager'
+import { ImgManager } from 'src/editor/editor/img-manager'
 import { UIPickerCopy } from 'src/editor/handle/picker'
 import { xy_, xy_client } from 'src/editor/math/xy'
-import { IFill } from 'src/editor/schema/type'
 import { useAutoSignal } from 'src/shared/signal/signal-react'
-import { makeLinearGradientCss } from 'src/shared/utils/color'
 import { IXY, clone, iife } from 'src/shared/utils/normal'
 import { useMemoComp, withSuspense } from 'src/shared/utils/react'
-import { rgbToRgba } from 'src/utils/color'
-import { PickerComp } from './picker'
+import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
+import { suspend } from 'suspend-react'
 
 type IPickerOpener = {
-  fill: IFill
+  fill: V1.Fill
   index: number
   impact: typeof UIPickerCopy.from
 }
@@ -34,7 +32,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   }
   const isShowPicker = useAutoSignal(false)
 
-  const ColorInputComp = useMemoComp<{ fill: IFill }>([fill], ({ fill }) => {
+  const ColorInputComp = useMemoComp<{ fill: V1.Fill }>([fill], ({ fill }) => {
     return null
     // <CompositeInput
     //   type='text'
@@ -42,14 +40,14 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
     //   disabled={!isColorType}
     //   needStepHandler={false}
     //   value={iife(() => {
-    //     if (isColorType) return rgbHex((fill as IFillColor).color)
+    //     if (isColorType) return rgbHex((fill as V1.FillColor).color)
     //     if (isLinearType) return '线性渐变'
     //     if (isImageType) return '图片填充'
     //     return ''
     //   })}
     //   onNewValueApply={(value) => {
     //     // currentFill.dispatch((fill) => {
-    //     //   ;(fill as IFillColor).color = hexToRgb(value)
+    //     //   ;(fill as V1.FillColor).color = hexToRgb(value)
     //     // })
     //   }}
     //   beforeOperate={() => setupUIPicker()}
@@ -57,10 +55,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
   })
 
   const ImgComp = useMemoComp<{ url: string }>([], ({ url }) => {
-    const image = usePromise<[string], IImage>(
-      () => ImgManager.getImageAsync(url),
-      [url],
-    )
+    const image = suspend(() => ImgManager.getImageAsync(url), [url])
     const imageBound = iife(() => {
       const { width, height } = image
       const rate = width / height
@@ -78,7 +73,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
           layout='h'
           className='wh-18-18 r-2 relative mr-4 pointer [&_div]:(wh-100%-100% r-2 absolute) [&_img]:(wh-100%-100% r-2 absolute)'
           onClick={(e) => showPicker(xy_client(e))}>
-          <img src={Assets.editor.rightPanel.operate.fill.none}></img>
+          <img src={Assets.editor.RP.operate.fill.none}></img>
           {isColorType && (
             <Flex
               style={{ backgroundColor: rgbToRgba(fill.color, fill.alpha) }}></Flex>
@@ -99,7 +94,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
           beforeOperate={() => setupUIPicker()}
           onNewValueApply={(value) => {
             // currentFill.dispatch((fill) => {
-            //   ;(fill as IFillColor).alpha = Number(value) / 100
+            //   ;(fill as V1.FillColor).alpha = Number(value) / 100
             // })
           }}
         /> */}
@@ -107,7 +102,7 @@ export const PickerOpener: FC<IPickerOpener> = memo(({ fill, index, impact }) =>
           %
         </Flex>
       </Flex>
-      {isShowPicker.value && <PickerComp fill={fill} show={isShowPicker} />}
+      {isShowPicker.value && <FillPickerComp fill={fill} show={isShowPicker} />}
     </>
   )
 })

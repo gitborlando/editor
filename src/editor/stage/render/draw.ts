@@ -9,9 +9,9 @@ import { xy_, xy_from } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/stage/render/surface'
 import { ISplitText } from 'src/editor/stage/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
-import { themeColor } from 'src/global/color'
 import { iife, IXY } from 'src/shared/utils/normal'
 import { rgba } from 'src/utils/color'
+import { themeColor } from 'src/view/styles/color'
 import { Elem, HitTest } from './elem'
 
 @autoBind
@@ -49,12 +49,7 @@ class ElemDrawerService {
 
     // this.drawOutline()
     this.drawTextDecoration()
-
     this.updateHitTest()
-
-    // const dirtyRect = AABB.merge(...this.dirtyRects)
-    // console.log('dirtyRect: ', dirtyRect)
-    // elem.dirtyRect = dirtyRect
   }
 
   private drawShapePath = () => {
@@ -80,7 +75,6 @@ class ElemDrawerService {
 
       case 'text':
         this.breakText()
-        // if (this.elem.outline === 'hover') this.drawTextHoverPath()
 
         const { lineHeight } = node.style
         this.dirtyRects.push(AABB.extend(this.elem.aabb, 0, lineHeight / 2, 0, 0))

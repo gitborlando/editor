@@ -16,7 +16,7 @@ class HandleNodeService {
   copiedIds = <ID[]>[]
 
   init() {
-    return collectDisposer(YClients.afterSelect$.hook(() => this.getDatum()))
+    return collectDisposer(YClients.afterSelect.hook(() => this.getDatum()))
   }
 
   addNodes(nodes: INode[]) {
@@ -68,7 +68,7 @@ class HandleNodeService {
     traverse(getSelectIdList())
 
     YClients.clearSelect()
-    YClients.afterSelect$.dispatch()
+    YClients.afterSelect.dispatch()
 
     YState.next()
     YUndo.track({ type: 'all', description: '删除节点' })

@@ -12,14 +12,14 @@ import { OperatePage } from '../operate/page'
 import { SvgParser } from '../parse/svg'
 import { SchemaCreator } from '../schema/creator'
 import { Schema } from '../schema/schema'
-import { INode, INodeParent } from '../schema/type'
+import { INodeParent } from '../schema/type'
 import { StageViewport } from './viewport'
 
 @autobind
 export class StageDropService {
   private sceneXY = xy_(0, 0)
-  private containerNode!: INodeParent
-  private node!: INode
+  private containerNode!: V1.NodeParent
+  private node!: V1.Node
 
   initHook() {
     Surface.addEvent('dragover', preventDefault())

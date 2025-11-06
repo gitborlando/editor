@@ -41,7 +41,7 @@ export const CooperateObservingBorderComp: FC<{}> = observer(({}) => {
   const { observingClientId: observingUserId } = YClients
   if (!observingUserId) return null
 
-  const client = YClients.getClientById(observingUserId)
+  const client = YClients.others[observingUserId]
 
   return (
     <G

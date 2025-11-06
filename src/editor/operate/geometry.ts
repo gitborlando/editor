@@ -87,7 +87,6 @@ class OperateGeometryService {
 
     queueMicrotask(() => {
       const traverse = SchemaHelper.createTraverse({
-        finder: YState.find<V1.Node>,
         callback: this.applyChangeToNode,
       })
       traverse(Object.keys(getSelectIdMap()))
@@ -122,14 +121,14 @@ class OperateGeometryService {
         if (depth !== 0) return
         return YState.set(
           `${node.id}.width`,
-          max(0, node.width + this.delta(key, node)),
+          max(1, node.width + this.delta(key, node)),
         )
       }
       if (key === 'height') {
         if (depth !== 0 || node.type === 'line') return
         return YState.set(
           `${node.id}.height`,
-          max(0, node.height + this.delta(key, node)),
+          max(1, node.height + this.delta(key, node)),
         )
       }
       if (key === 'radius') {
@@ -197,16 +196,36 @@ class OperateGeometryService {
     const node = YState.find<V1.Vector>(id)
     if (!node.points) return
 
-    node.points.forEach((point) => {
+    node.points.forEach((point, i) => {
       if (this.operateKeys.has('width')) {
-        point.x *= 1 + this.deltaRate('width', node)
-        point.handleL && (point.handleL.x *= 1 + this.deltaRate('width', node))
-        point.handleR && (point.handleR.x *= 1 + this.deltaRate('width', node))
+        const deltaRate = this.deltaRate('width', node)
+        const newX = point.x * (1 + deltaRate)
+        if (i === 1) console.log('newX: ', point.x, deltaRate, newX)
+        YState.set(`${node.id}.points.${i}.x`, newX)
+
+        if (point.handleL) {
+          const handleLX = point.handleL.x * (1 + deltaRate)
+          YState.set(`${node.id}.points.${i}.handleL.x`, handleLX)
+        }
+        if (point.handleR) {
+          const handleRX = point.handleR.x * (1 + deltaRate)
+          YState.set(`${node.id}.points.${i}.handleR.x`, handleRX)
+        }
       }
+
       if (this.operateKeys.has('height')) {
-        point.y *= 1 + this.deltaRate('height', node)
-        point.handleL && (point.handleL.y *= 1 + this.deltaRate('height', node))
-        point.handleR && (point.handleR.y *= 1 + this.deltaRate('height', node))
+        const deltaRate = this.deltaRate('height', node)
+        const newY = point.y * (1 + deltaRate)
+        YState.set(`${node.id}.points.${i}.y`, newY)
+
+        if (point.handleL) {
+          const handleLY = point.handleL.y * (1 + deltaRate)
+          YState.set(`${node.id}.points.${i}.handleL.y`, handleLY)
+        }
+        if (point.handleR) {
+          const handleRY = point.handleR.y * (1 + deltaRate)
+          YState.set(`${node.id}.points.${i}.handleR.y`, handleRY)
+        }
       }
     })
   }

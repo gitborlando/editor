@@ -1,5 +1,4 @@
 import Scrollbars from 'react-custom-scrollbars-2'
-import { IPage } from 'src/editor/schema/type'
 import { Drag } from 'src/global/event/drag'
 import { EditorLPLayerState } from 'src/view/editor/left-panel/panels/layer/state'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'

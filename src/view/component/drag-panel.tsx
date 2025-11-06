@@ -1,0 +1,119 @@
+import { min } from '@gitborlando/geo'
+import { listen } from '@gitborlando/utils/browser'
+import { X } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { Drag } from 'src/global/event/drag'
+import { stopPropagation } from 'src/shared/utils/event'
+import { IXY } from 'src/shared/utils/normal'
+import { IconButton } from 'src/view/component/button'
+
+type DragPanelProps = {
+  title: string
+  children: ReactNode
+  xy?: IXY
+  headerSlot?: ReactNode
+  width?: number
+  height?: number
+  className?: string
+  closeFunc: () => void
+  clickAwayClose?: () => boolean
+  onMove?(newXY: IXY): void
+}
+
+let panelCount = 0
+let maxZIndex = 0
+
+export const DragPanel: FC<DragPanelProps> = ({
+  title,
+  closeFunc,
+  clickAwayClose,
+  children,
+  xy,
+  headerSlot,
+  width,
+  height,
+  className,
+  onMove,
+}) => {
+  const ref = useRef<HTMLDivElement>(null)
+  const [position, setPosition] = useState(xy || XY._(480, 240))
+  const [zIndex, setZIndex] = useState(0)
+
+  useEffect(() => {
+    xy ||= XY._(480, 240)
+    const bound = ref.current!.getBoundingClientRect()
+    setPosition(XY.of(xy.x, min(xy.y, innerHeight - bound.height - 12)))
+  }, [xy])
+
+  useEffect(() => {
+    panelCount++
+    maxZIndex++
+    return () => void panelCount--
+  }, [])
+
+  useEffect(() => {
+    return listen('mousedown', () => {
+      if (clickAwayClose?.()) closeFunc()
+    })
+  }, [])
+
+  const handleHeaderMouseDown = (e: React.MouseEvent) => {
+    const startXY = position
+    Drag.onSlide(({ current, shift }) => {
+      if (current.x > innerWidth || current.y > innerHeight) return
+      setPosition(XY.from(startXY).plus(shift))
+      onMove?.(position)
+    }, e)
+  }
+
+  return createPortal(
+    <G
+      className={cx(cls(), className)}
+      ref={ref}
+      style={{
+        left: position.x,
+        top: position.y,
+        zIndex: zIndex,
+        ...(width && { width }),
+        ...(height && { height }),
+      }}
+      onMouseDown={stopPropagation()}
+      onMouseDownCapture={() => panelCount > 1 && setZIndex(maxZIndex++)}>
+      <G
+        horizontal='auto 1fr auto'
+        center
+        className={cls('header')}
+        onMouseDown={handleHeaderMouseDown}>
+        <G className={cls('header-title')}>{title}</G>
+        <G className={cls('header-slot')}>{headerSlot}</G>
+        <IconButton
+          size='mini'
+          icon={<Lucide icon={X} />}
+          onMouseDown={stopPropagation()}
+          onClick={closeFunc}></IconButton>
+      </G>
+      <G>{children}</G>
+    </G>,
+    document.querySelector('#drag-panel-portal')!,
+  )
+}
+
+const cls = classes(css`
+  width: 240px;
+  height: fit-content;
+  border-radius: 2px;
+  background-color: white;
+  position: fixed;
+  overflow: hidden;
+  ${styles.shadow}
+  &-header {
+    height: 36px;
+    padding-inline: 6px;
+    ${styles.textHead}
+    ${styles.borderBottom}
+    &-title {
+      padding-left: 4px;
+      align-items: center;
+    }
+  }
+`)

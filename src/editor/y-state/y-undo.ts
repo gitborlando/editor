@@ -1,5 +1,4 @@
 import { clone } from '@gitborlando/utils'
-import autoBind from 'auto-bind'
 import { computed, observable } from 'mobx'
 import { NeedUndoClientState, YClients } from 'src/editor/y-state/y-clients'
 import * as Y from 'yjs'

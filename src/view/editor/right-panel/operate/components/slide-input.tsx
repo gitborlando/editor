@@ -49,6 +49,7 @@ const LabelComp: FC<{
 })
 
 const cls = classes(css`
+  height: 30px;
   &-label {
     ${styles.textLabel}
     cursor: e-resize;

@@ -1,3 +1,4 @@
+import { Angle } from '@gitborlando/geo'
 import { firstOne, lastOne, optionalSet, range } from '@gitborlando/utils'
 import { divide, max, rcos, rsin } from 'src/editor/math/base'
 import { IXY, xy_ } from 'src/editor/math/xy'
@@ -25,8 +26,10 @@ export function point(option?: Partial<IPoint>): IPoint {
   }
 }
 
-export function createLine(start: IXY, length: number) {
-  const end = xy_(start.x + length, start.y)
+export function createLine(start: IXY, length: number, rotation: number) {
+  const end = XY.from(start)
+    .plus({ x: Angle.cos(rotation) * length, y: Angle.sin(rotation) * length })
+    .plain()
   const points = [point(start), point(end)]
   optionalSet(firstOne(points), 'startPath', true)
   optionalSet(lastOne(points), 'endPath', true)

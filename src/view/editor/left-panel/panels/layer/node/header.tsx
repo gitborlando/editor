@@ -46,7 +46,8 @@ const cls = classes(css`
   width: 100%;
   height: 32px;
   min-height: 32px;
-  padding: 0 12px;
+  padding-inline: 12px 6px;
+  padding-block: 0;
   gap: 8px;
   &-expand-button {
     flex-shrink: 0;

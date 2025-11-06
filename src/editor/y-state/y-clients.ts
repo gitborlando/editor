@@ -6,6 +6,7 @@ import equal from 'fast-deep-equal'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { UserService } from 'src/global/service/user'
+import { Disposer } from 'src/utils/disposer'
 
 export type NeedUndoClientState = {
   selectIds: Record<string, boolean>
@@ -37,7 +38,7 @@ class YClientsService {
     return others[this.observingClientId]
   }
 
-  afterSelect$ = Signal.create<void>()
+  afterSelect = Signal.create<void>()
 
   init() {
     this.client = {
@@ -51,12 +52,8 @@ class YClientsService {
       userName: UserService.userName,
       userAvatar: UserService.avatar,
     }
-    YSync.inited$.hook(() => {
-      this.syncClient()
-      this.subscribeOthers()
-    })
     YUndo.initClientUndo()
-    this.onMouseMove()
+    return Disposer.collect(this.onMouseMove())
   }
 
   select(id: string) {
@@ -88,36 +85,39 @@ class YClientsService {
     })
   }
 
-  getClientById(id: number) {
-    return this.others[id]
-  }
+  syncSelf() {
+    YSync.awareness.setLocalState(toJS(this.client))
 
-  private syncClient() {
     const clientKeys = Object.keys(this.client) as (keyof V1.Client)[]
     const commonKeys = clientKeys.filter((key) => key !== 'selectIdMap')
+    const disposer = new Disposer()
 
-    commonKeys.forEach((key) => {
-      reaction(
-        () => this.client[key],
-        (value) => {
-          YSync.awareness.setLocalStateField(key, toJS(value))
-        },
+    commonKeys.map((key) => {
+      disposer.add(
+        reaction(
+          () => this.client[key],
+          (value) => {
+            YSync.awareness.setLocalStateField(key, toJS(value))
+          },
+        ),
       )
     })
+    disposer.add(
+      this.afterSelect.hook(() => {
+        YSync.awareness.setLocalStateField(
+          'selectIdMap',
+          toJS(this.client.selectIdMap),
+        )
+      }),
+    )
+    disposer.add(() => YSync.awareness.destroy())
 
-    this.afterSelect$.hook(() => {
-      YSync.awareness.setLocalStateField(
-        'selectIdMap',
-        toJS(this.client.selectIdMap),
-      )
-    })
-
-    YSync.awareness.setLocalState(toJS(this.client))
+    return disposer.dispose
   }
 
-  private subscribeOthers() {
+  syncOthers() {
     let prev: V1.Clients = this.others
-    YSync.awareness.on('update', () => {
+    const onUpdate = () => {
       const states = YSync.awareness.getStates()
       states.delete(this.clientId)
       const others = Object.fromEntries(states.entries()) as V1.Clients
@@ -125,11 +125,15 @@ class YClientsService {
         this.others = others
         prev = others
       }
-    })
+    }
+    YSync.awareness.on('update', onUpdate)
+    return () => {
+      YSync.awareness.off('update', onUpdate)
+    }
   }
 
   private onMouseMove() {
-    listen('mousemove', (e) => (this.client.cursor = XY.client(e)))
+    return listen('mousemove', (e) => (this.client.cursor = XY.client(e)))
   }
 }
 
