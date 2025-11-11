@@ -90,7 +90,7 @@ export const PickerSolidComp: FC<{ fill: V1.FillColor; index: number }> = memo(
     }
     return (
       <G>
-        <ColorPicker value={getRgbaFromSolidFill(fill)} onChange={handleChange} />
+        <ColorPicker color={getRgbaFromSolidFill(fill)} onChange={handleChange} />
       </G>
     )
   },

@@ -26,7 +26,7 @@ export const PickerLinearGradientComp: FC<{
         setStopIndex={setStopIndex}
       />
       <ColorPicker
-        value={fill.stops[stopIndex].color}
+        color={fill.stops[stopIndex].color}
         onChange={(color) => setStopColor(rgbaFromObject(color))}
       />
     </G>

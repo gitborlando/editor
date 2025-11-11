@@ -10,46 +10,46 @@ import { Button } from 'src/view/component/button'
 const Context = createContext({
   hue: 0,
   saturation: 0,
-  lightness: 0,
+  value: 0,
   alpha: 0,
   setHue: (hue: number) => {},
   setSaturation: (saturation: number) => {},
-  setLightness: (lightness: number) => {},
+  setValue: (value: number) => {},
   setAlpha: (alpha: number) => {},
 })
 
 export const ColorPicker: FC<{
-  value: Parameters<typeof Color>[0]
+  color: Parameters<typeof Color>[0]
   onChange: (color: IRGBA) => void
   className?: string
-}> = observer(({ value, onChange, className }) => {
-  const color = Color(value)
+}> = observer(({ color, onChange, className }) => {
+  const result = Color(color)
 
-  const [hue, setHue] = useState(color.hue())
-  const [saturation, setSaturation] = useState(color.saturationl())
-  const [lightness, setLightness] = useState(color.lightness())
-  const [alpha, setAlpha] = useState(color.alpha())
-  const lastState = useRef({ hue, saturation, lightness, alpha })
+  const [hue, setHue] = useState(result.hue())
+  const [saturation, setSaturation] = useState(result.saturationl())
+  const [value, setValue] = useState(result.value())
+  const [alpha, setAlpha] = useState(result.alpha())
+  const lastState = useRef({ hue, saturation, value, alpha })
 
   useEffect(() => {
-    if (equal(lastState.current, { hue, saturation, lightness, alpha })) return
+    if (equal(lastState.current, { hue, saturation, value: value, alpha })) return
 
-    const { r, g, b } = Color.hsl(hue, saturation, lightness).rgb().object()
+    const { r, g, b } = Color.hsv(hue, saturation, value).rgb().object()
     onChange({ r: r | 0, g: g | 0, b: b | 0, a: alpha })
 
-    lastState.current = { hue, saturation, lightness, alpha }
-  }, [hue, saturation, lightness, alpha])
+    lastState.current = { hue, saturation, value, alpha }
+  }, [hue, saturation, value, alpha])
 
   return (
     <Context.Provider
       value={{
         hue,
         saturation,
-        lightness,
+        value,
         alpha,
         setHue,
         setSaturation,
-        setLightness,
+        setValue,
         setAlpha,
       }}>
       <G className={cx(cls(), className)}>
@@ -70,11 +70,10 @@ export const ColorPicker: FC<{
 })
 
 const SquareComp: FC<{}> = observer(({}) => {
-  const { hue, saturation, lightness, setSaturation, setLightness } =
-    useContext(Context)
+  const { hue, saturation, value, setSaturation, setValue } = useContext(Context)
 
   const [x, setX] = useState(saturation / 100)
-  const [y, setY] = useState(getYFromLightnessAndSaturation(lightness, saturation))
+  const [y, setY] = useState(1 - value / 100)
   const [lastXY] = useState(() => XY._(0, 0))
   const ref = useRef<HTMLDivElement>(null)
 
@@ -89,20 +88,15 @@ const SquareComp: FC<{}> = observer(({}) => {
     x = max(0, min(1, (x - left) / width))
     y = max(0, min(1, (y - top) / height))
     setSaturation(x * 100)
-    setLightness((1 - y) * (50 + 50 * (1 - x)))
+    setValue((1 - y) * 100)
     setX(x)
     setY(y)
   }
 
-  function getYFromLightnessAndSaturation(lightness: number, saturation: number) {
-    return 1 - lightness / (50 + 50 * (1 - saturation / 100))
-  }
-
-  // useEffect(() => {
-  //   setX(saturation / 100)
-  //   setY(getYFromLightnessAndSaturation(lightness, saturation))
-  //   console.log(getYFromLightnessAndSaturation(lightness, saturation))
-  // }, [saturation, lightness])
+  useEffect(() => {
+    setX(saturation / 100)
+    setY(1 - value / 100)
+  }, [saturation, value])
 
   const handleMove = (e: React.MouseEvent) => {
     onPointerDown(...XY.client(e).tuple())
@@ -130,7 +124,7 @@ const SquareComp: FC<{}> = observer(({}) => {
         style={{
           left: `${x * 100}%`,
           top: `${y * 100}%`,
-          backgroundColor: Color.hsl(hue, saturation, lightness).string(),
+          backgroundColor: Color.hsv(hue, saturation, value).string(),
           transform: `translate(-50%, -50%)`,
         }}
       />
@@ -213,7 +207,7 @@ const AlphaComp: FC<{}> = observer(({}) => {
 })
 
 const EyeDropperComp: FC<{}> = observer(({}) => {
-  const { setHue, setSaturation, setLightness, setAlpha } = useContext(Context)
+  const { setHue, setSaturation, setValue: setValue, setAlpha } = useContext(Context)
   const handleEyeDropper = async () => {
     try {
       // @ts-expect-error - EyeDropper API is experimental
@@ -224,7 +218,7 @@ const EyeDropperComp: FC<{}> = observer(({}) => {
 
       setHue(h)
       setSaturation(s)
-      setLightness(l)
+      setValue(l)
       setAlpha(1)
     } catch (error) {}
   }
