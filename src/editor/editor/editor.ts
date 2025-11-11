@@ -7,6 +7,7 @@ import { EditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageCursor } from 'src/editor/stage/cursor'
+import { StageToolGrid } from 'src/editor/stage/tools/grid'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { FileService } from 'src/global/service/file'
 import { Disposer } from 'src/utils/disposer'
@@ -46,7 +47,7 @@ export class EditorService {
     StageInteract.init()
     StageDrop.initHook()
     StageCursor.initHook()
-
+    StageToolGrid.init()
     // UIPickerCopy.initHook()
   }
 

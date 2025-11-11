@@ -1,10 +1,8 @@
-import { IXY } from '@gitborlando/geo'
 import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { ImmutPatch } from 'src/utils/immut/immut'
-import { ID, IPage } from '../../schema/type'
 import { Elem } from './elem'
 import { Surface } from './surface'
 
@@ -64,7 +62,7 @@ class StageSceneService {
       if ('childIds' in node) node.childIds.forEach(traverse)
     }
 
-    const page = YState.find<IPage>(YClients.client.selectPageId)
+    const page = YState.find<V1.Page>(YClients.client.selectPageId)
     page.childIds.forEach(traverse)
   }
 

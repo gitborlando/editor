@@ -1,13 +1,14 @@
+import { Angle } from '@gitborlando/geo'
+import { objKeys } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { HandleNode } from 'src/editor/handle/node'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
 import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
 import { MULTI_VALUE } from 'src/global/constant'
-import { cleanObject } from 'src/shared/utils/normal'
-import { xy_minus, xy_rotate } from '../math/xy'
-import { IPolygon, IStar } from '../schema/type'
-import { getSelectIdMap } from '../y-state/y-clients'
+import { cleanObject, iife } from 'src/shared/utils/normal'
+import { xy_rotate } from '../math/xy'
+import { getSelectIdList } from '../y-state/y-clients'
 
 function createAllGeometry() {
   return {
@@ -77,6 +78,25 @@ class OperateGeometryService {
 
   private hasStartApply = false
 
+  setActiveGeometries(
+    geometries: Partial<Record<keyof AllGeometry, number>>,
+    delta: boolean = true,
+  ) {
+    for (const key of objKeys(geometries)) {
+      if (delta) this.deltaKeys.add(key)
+      this.operateKeys.add(key)
+      this.activeGeometry[key] = geometries[key] as number
+    }
+    const traverse = SchemaHelper.createTraverse({
+      callback: this.applyChangeToNode,
+    })
+    traverse(getSelectIdList())
+    YState.next()
+
+    this.operateKeys.clear()
+    this.deltaKeys.clear()
+  }
+
   setActiveGeometry(key: keyof AllGeometry, value: number, delta: boolean = true) {
     if (delta) this.deltaKeys.add(key)
     this.operateKeys.add(key)
@@ -85,26 +105,27 @@ class OperateGeometryService {
     if (this.hasStartApply) return
     this.hasStartApply = true
 
-    queueMicrotask(() => {
-      const traverse = SchemaHelper.createTraverse({
-        callback: this.applyChangeToNode,
-      })
-      traverse(Object.keys(getSelectIdMap()))
-      YState.next()
-
-      this.hasStartApply = false
-      this.operateKeys.clear()
-      this.deltaKeys.clear()
-
-      if (!delta) {
-        YUndo.track({ type: 'state', description: `修改几何属性: ${key}` })
-      }
+    const traverse = SchemaHelper.createTraverse({
+      callback: this.applyChangeToNode,
     })
+    traverse(getSelectIdList())
+    YState.next()
+
+    this.hasStartApply = false
+    this.operateKeys.clear()
+    this.deltaKeys.clear()
   }
 
   private delta(key: keyof AllGeometry, node: V1.Node) {
-    if (this.deltaKeys.has(key)) return this.activeGeometry[key]
-    return this.activeGeometry[key] - t<any>(node)[key]
+    const rawDelta = iife(() => {
+      if (this.deltaKeys.has(key)) return this.activeGeometry[key]
+      return this.activeGeometry[key] - t<any>(node)[key]
+    })
+    if (['width', 'height'].includes(key)) {
+      if (t<any>(node)[key] + rawDelta < 1) return t<any>(node)[key] - 1
+      return rawDelta
+    }
+    return rawDelta
   }
 
   private deltaRate(key: keyof AllGeometry, node: any) {
@@ -119,17 +140,11 @@ class OperateGeometryService {
     this.operateKeys.forEach((key) => {
       if (key === 'width') {
         if (depth !== 0) return
-        return YState.set(
-          `${node.id}.width`,
-          max(1, node.width + this.delta(key, node)),
-        )
+        return YState.set(`${node.id}.width`, node.width + this.delta(key, node))
       }
       if (key === 'height') {
         if (depth !== 0 || node.type === 'line') return
-        return YState.set(
-          `${node.id}.height`,
-          max(1, node.height + this.delta(key, node)),
-        )
+        return YState.set(`${node.id}.height`, node.height + this.delta(key, node))
       }
       if (key === 'radius') {
         if (depth !== 0) return
@@ -142,14 +157,14 @@ class OperateGeometryService {
         return this.applyRotationToNode(traverseData, node, depth)
       }
       if (key === 'sides') {
-        let { width, height, sides } = node as IPolygon
+        let { width, height, sides } = node as V1.Polygon
         sides = max(3, sides + floor(this.delta(key, node)))
         YState.set(`${node.id}.sides`, sides)
         YState.set(`${node.id}.points`, createRegularPolygon(width, height, sides))
         return
       }
       if (key === 'pointCount' || key === 'innerRate') {
-        let { width, height, pointCount, innerRate } = node as IStar
+        let { width, height, pointCount, innerRate } = node as V1.Star
         pointCount = max(3, floor(pointCount))
         innerRate = min(1, max(0, innerRate))
         YState.set(`${node.id}.pointCount`, pointCount)
@@ -172,7 +187,10 @@ class OperateGeometryService {
     const centerXY = getNodeCenterXY(node)
     const newXY = xy_rotate(node, centerXY, this.delta('rotation', node))
 
-    YState.set(`${node.id}.rotation`, node.rotation + this.delta('rotation', node))
+    YState.set(
+      `${node.id}.rotation`,
+      Angle.normal(node.rotation + this.delta('rotation', node)),
+    )
 
     if (depth === 0) {
       YState.set(`${node.id}.x`, newXY.x)
@@ -181,12 +199,11 @@ class OperateGeometryService {
       let upLevelRef = traverseData.upLevelRef!
       while (upLevelRef.upLevelRef) upLevelRef = upLevelRef.upLevelRef
       const ancestorCenter = getNodeCenterXY(upLevelRef.node)
-      const newCenter = xy_rotate(
-        centerXY,
+      const newCenter = XY.from(centerXY).rotate(
         ancestorCenter,
         this.delta('rotation', node),
       )
-      const centerShift = xy_minus(newCenter, centerXY)
+      const centerShift = newCenter.minus(centerXY)
       YState.set(`${node.id}.x`, newXY.x + centerShift.x)
       YState.set(`${node.id}.y`, newXY.y + centerShift.y)
     }
@@ -200,7 +217,6 @@ class OperateGeometryService {
       if (this.operateKeys.has('width')) {
         const deltaRate = this.deltaRate('width', node)
         const newX = point.x * (1 + deltaRate)
-        if (i === 1) console.log('newX: ', point.x, deltaRate, newX)
         YState.set(`${node.id}.points.${i}.x`, newX)
 
         if (point.handleL) {

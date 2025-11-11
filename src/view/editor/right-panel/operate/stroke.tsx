@@ -6,7 +6,6 @@ import {
 } from 'src/view/editor/right-panel/operate/components/op-field'
 
 export const EditorRPOperateStrokeComp: FC<{}> = ({}) => {
-  return null
   return (
     <OpFieldComp>
       <OpFieldHeaderComp

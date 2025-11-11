@@ -63,3 +63,16 @@ export function rotatePoint(
 export function normalAngle(angle: number) {
   return (angle + 360) % 360
 }
+
+export const nearestInt = (number: number, rate: number = 1) => {
+  const n = (number / rate) | 0
+  const left = rate * n
+  const right = rate * (n + 1)
+  return number - left <= right - number ? left : right
+}
+
+export const nearestPixel = (n: number) => {
+  const left = Math.floor(n)
+  const right = Math.ceil(n)
+  return (n - left < right - n ? left : right) + 0.5
+}

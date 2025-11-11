@@ -16,7 +16,7 @@ export const COLOR = {
   random: () => hslRgb(Math.random() * 360, 100, 50),
   white: hslRgb(0, 0, 100),
   black: hslRgb(0, 0, 0),
-  gray: rgb(204, 204, 204),
+  gray: rgb(216, 216, 216),
   blue: hslRgb(220, 100, 50),
   pinkRed: hslRgb(280, 100, 50),
 }

@@ -1,4 +1,4 @@
-import { AABB, Angle, IMatrix, Matrix, OBB, abs, max } from '@gitborlando/geo'
+import { AABB, Angle, IMatrix, Matrix, OBB, abs, max, round } from '@gitborlando/geo'
 import { reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import autoBind from 'class-autobind-decorator'
@@ -22,6 +22,9 @@ export class StageSurface {
 
   private canvas!: HTMLCanvasElement
   private ctx!: CanvasRenderingContext2D
+
+  private topCanvas!: HTMLCanvasElement
+  private topCtx!: CanvasRenderingContext2D
 
   private bufferCanvas = new OffscreenCanvas(0, 0)
   private bufferCtx = this.bufferCanvas.getContext('2d')!
@@ -153,12 +156,12 @@ export class StageSurface {
     })
   }
 
-  private xNotIntTime = 0
-  private yNotIntTime = 0
+  private accumulatedErrorX = 0
+  private accumulatedErrorY = 0
 
   private translate = (cur: IXY, prev: IXY) => {
     const { width, height } = this.canvas
-    const tr = XY.from(cur).minus(prev)
+    const delta = XY.from(cur).minus(prev)
     const reRenderElems = new Set<Elem>()
 
     const traverse = (elem: Elem) => {
@@ -167,11 +170,14 @@ export class StageSurface {
       reRenderElems.add(elem)
     }
 
-    const xNotInt = !Number.isInteger(tr.x * dpr)
-    const yNotInt = !Number.isInteger(tr.y * dpr)
+    const idealX = delta.x * dpr + this.accumulatedErrorX
+    const idealY = delta.y * dpr + this.accumulatedErrorY
 
-    this.xNotIntTime += xNotInt ? 1 : 0
-    this.yNotIntTime += yNotInt ? 1 : 0
+    const actualX = round(idealX)
+    const actualY = round(idealY)
+
+    this.accumulatedErrorX = idealX - actualX
+    this.accumulatedErrorY = idealY - actualY
 
     this.bufferCtx.clearRect(0, 0, width, height)
     this.bufferCtx.drawImage(
@@ -180,27 +186,14 @@ export class StageSurface {
       0,
       width,
       height,
-      tr.x * dpr + (xNotInt ? -0.5 : 0),
-      tr.y * dpr + (yNotInt ? -0.5 : 0),
+      actualX,
+      actualY,
       width,
       height,
     )
 
     this.ctx.clearRect(0, 0, width, height)
-    this.ctx.drawImage(
-      this.bufferCanvas,
-      0,
-      0,
-      width,
-      height,
-      this.xNotIntTime === 2 ? 1 : 0,
-      this.yNotIntTime === 2 ? 1 : 0,
-      width,
-      height,
-    )
-
-    this.yNotIntTime = this.yNotIntTime === 2 ? 0 : this.yNotIntTime
-    this.xNotIntTime = this.xNotIntTime === 2 ? 0 : this.xNotIntTime
+    this.ctx.drawImage(this.bufferCanvas, 0, 0, width, height, 0, 0, width, height)
 
     StageScene.rootElems.forEach((elem) => elem.children.forEach(traverse))
     this.ctxSaveRestore(() => this.patchRender(reRenderElems))
@@ -278,7 +271,7 @@ export class StageSurface {
   viewportAABB!: AABB
   private prevViewportAABB!: AABB
 
-  private transformMatrix = () => {
+  transformMatrix = () => {
     this.ctx.transform(...this.dprMatrix)
     this.ctx.transform(...this.viewportMatrix)
   }
@@ -350,7 +343,7 @@ export class StageSurface {
   private eventXY!: IXY
 
   private getEventXY = (xy: IXY) => {
-    xy = StageViewport.toViewportXY(xy)
+    xy = StageViewport.toCanvasXY(xy)
     this.eventXY = Matrix.invertPoint(xy, this.viewportMatrix)
     this.elemsFromPoint = []
   }
@@ -435,7 +428,7 @@ export class StageSurface {
 
   disablePointEvent(setbackOnPointerUp = true) {
     this.isPointerEventNone = true
-    listen('pointerup', { once: true }, () => {
+    listen('mouseup', { once: true }, () => {
       if (setbackOnPointerUp) this.enablePointEvent()
     })
   }

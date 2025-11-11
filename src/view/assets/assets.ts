@@ -21,6 +21,9 @@ import editorRightPanelOperateFillNone from './editor/right-panel/operate/fill/n
 import editorRightPanelOperateGeoX from './editor/right-panel/operate/geo/x.svg'
 import editorRightPanelOperatePickerDefaultImage from './editor/right-panel/operate/picker/default-image.png'
 import favIconShiyangyang from './fav-icon/shiyangyang.png'
+import favIconSigma2 from './fav-icon/sigma-2.svg'
+import favIconSigma4 from './fav-icon/sigma-4.svg'
+import favIconSigma from './fav-icon/sigma.svg'
 
 export const Assets = {
   editor: {
@@ -44,7 +47,7 @@ export const Assets = {
       star: editorNodeStar,
       text: editorNodeText,
     },
-    RP: {
+    rightPanel: {
       operate: {
         align: {
           alignCenter: editorRightPanelOperateAlignAlignCenter,
@@ -68,5 +71,8 @@ export const Assets = {
   },
   favIcon: {
     shiyangyang: favIconShiyangyang,
+    sigma2: favIconSigma2,
+    sigma4: favIconSigma4,
+    sigma: favIconSigma,
   },
 } as const

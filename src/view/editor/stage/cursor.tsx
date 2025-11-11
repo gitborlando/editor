@@ -1,7 +1,6 @@
 import { IXY } from '@gitborlando/geo'
 import { values } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'
-import { ElemReact } from 'src/editor/stage/render/elem'
 import { StageViewport } from 'src/editor/stage/viewport'
 
 export const EditorStageCursorsComp: FC<{}> = observer(({}) => {
@@ -49,8 +48,8 @@ const CursorComp: FC<{ xy: IXY; name: string }> = observer(({ xy, name }) => {
 
   return (
     <>
-      <ElemReact node={node} />
-      <ElemReact node={text} />
+      <elem node={node} />
+      <elem node={text} />
     </>
   )
 })

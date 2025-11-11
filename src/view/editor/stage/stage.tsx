@@ -18,6 +18,7 @@ export const StageComp: FC<{}> = observer(({}) => {
   useEffect(() => {
     return renderElem(
       <>
+        {/* <EditorStageGridComp /> */}
         <EditorStageOutlineComp />
         <EditorStageTransformComp />
         <EditorStageMarqueeComp />
@@ -52,7 +53,8 @@ export const CooperateObservingBorderComp: FC<{}> = observer(({}) => {
 
 const cls = classes(css`
   &-canvas {
-    background-color: #f7f8fa;
+    /* background-color: #f7f8fa; */
+    background-color: var(--gray-bg);
   }
   &-cooperate-observing-border {
     position: absolute;

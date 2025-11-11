@@ -29,10 +29,21 @@ export function mockCollide() {
 
   const line = SchemaCreator.line({
     x: 300,
-    y: 100,
+    y: 300,
+    rotation: 45,
   })
   SchemaCreator.addToSchema(schema, line)
   SchemaCreator.addChild(frame, line)
+
+  const polygon = SchemaCreator.polygon({
+    x: 300,
+    y: 300,
+    width: 100,
+    height: 100,
+    sides: 8,
+  })
+  SchemaCreator.addToSchema(schema, polygon)
+  SchemaCreator.addChild(frame, polygon)
 
   return schema
 }

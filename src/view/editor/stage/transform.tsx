@@ -1,10 +1,10 @@
-import { Angle, IXY, XY, xy_xAxis, xy_yAxis } from '@gitborlando/geo'
+import { Angle, IXY, XY } from '@gitborlando/geo'
 import { isLeftMouse, isRightMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { ElemMouseEvent, ElemReact } from 'src/editor/stage/render/elem'
+import { ElemMouseEvent } from 'src/editor/stage/render/elem'
 import { Surface } from 'src/editor/stage/render/surface'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
@@ -13,12 +13,6 @@ import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
 let transformOBB = OBB.identityOBB()
-
-const createStroke = () =>
-  SchemaCreator.stroke({
-    fill: SchemaCreator.fillColor(themeColor()),
-    width: 1 / getZoom(),
-  })
 
 export const moveTransformer = (e: ElemMouseEvent) => {
   Drag.onStart(() => {
@@ -30,8 +24,7 @@ export const moveTransformer = (e: ElemMouseEvent) => {
   })
     .onMove(({ delta }) => {
       delta = StageViewport.toSceneShift(delta)
-      OperateGeometry.setActiveGeometry('x', delta.x)
-      OperateGeometry.setActiveGeometry('y', delta.y)
+      OperateGeometry.setActiveGeometries({ x: delta.x, y: delta.y })
     })
     .onDestroy(({ moved }) => {
       if (!moved) return
@@ -72,15 +65,13 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     if (isLeftMouse(e.hostEvent)) {
       e.stopPropagation()
       moveTransformer(e)
-    } else {
-      // StageSelect.onMenu()
     }
   }
 
   const [p0, p1, p2, p3] = transformOBB.vertexes
 
   return (
-    <ElemReact x-if={selectNodes.length > 0} node={node} events={{ mousedown }}>
+    <elem x-if={selectNodes.length > 0} node={node} events={{ mousedown }}>
       <LineComp type='top' p1={p0} p2={p1} />
       <LineComp type='bottom' p1={p2} p2={p3} />
       <LineComp type='left' p1={p0} p2={p3} />
@@ -89,13 +80,13 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
       <VertexComp type='topRight' xy={p1} />
       <VertexComp type='bottomRight' xy={p2} />
       <VertexComp type='bottomLeft' xy={p3} />
-    </ElemReact>
+    </elem>
   )
 })
 
 const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY }> =
   observer(({ type, p1, p2 }) => {
-    const { setActiveGeometry } = OperateGeometry
+    const { setActiveGeometry, setActiveGeometries } = OperateGeometry
     const selectedNodes = useSelectNodes()
     const line = SchemaCreator.line({
       id: `transform-line-${type}`,
@@ -103,7 +94,7 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
         SchemaCreator.point({ x: p1.x, y: p1.y }),
         SchemaCreator.point({ x: p2.x, y: p2.y }),
       ],
-      strokes: [createStroke()],
+      strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     })
 
     const mouseover = (e: ElemMouseEvent) => {
@@ -132,12 +123,12 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
       Drag.onStart()
         .onMove(({ delta }) => {
           delta = StageViewport.toSceneShift(delta)
-          const deltaX = XY.from(delta).getDot(xy_xAxis(rotation))
-          const deltaY = XY.from(delta).getDot(xy_yAxis(rotation))
+          const deltaX = XY.from(delta).getDot(XY.xAxis(rotation))
+          const deltaY = XY.from(delta).getDot(XY.yAxis(rotation))
 
           if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
-            setActiveGeometry('x', XY.from(delta).getDot(xy_xAxis(0)))
-            setActiveGeometry('y', XY.from(delta).getDot(xy_yAxis(0)))
+            setActiveGeometry('x', XY.from(delta).getDot(XY.xAxis(0)))
+            setActiveGeometry('y', XY.from(delta).getDot(XY.yAxis(0)))
             return
           }
 
@@ -182,9 +173,11 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
                 setActiveGeometry('height', deltaY)
                 break
               case 'left':
-                setActiveGeometry('x', deltaX * Angle.cos(rotation))
-                setActiveGeometry('y', deltaX * Angle.sin(rotation))
-                setActiveGeometry('width', -deltaX)
+                setActiveGeometries({
+                  x: deltaX * Angle.cos(rotation),
+                  y: deltaX * Angle.sin(rotation),
+                  width: -deltaX,
+                })
                 break
             }
           }
@@ -195,14 +188,14 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
         })
     }
 
-    return <ElemReact node={line} events={{ hover: mouseover, mousedown }} />
+    return <elem node={line} events={{ hover: mouseover, mousedown }} />
   })
 
 const VertexComp: FC<{
   type: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft'
   xy: IXY
 }> = observer(({ type, xy }) => {
-  const { setActiveGeometry } = OperateGeometry
+  const { setActiveGeometry, setActiveGeometries } = OperateGeometry
   const size = 8 / getZoom()
   const obb = OBB.fromCenter(xy, size, size, transformOBB.rotation)
   const selectedNodes = useSelectNodes()
@@ -210,7 +203,7 @@ const VertexComp: FC<{
   const rect = SchemaCreator.rect({
     id: `transform-vertex-${type}`,
     ...obb,
-    strokes: [createStroke()],
+    strokes: [SchemaCreator.solidStroke(themeColor(), 1 / getZoom())],
     fills: [SchemaCreator.fillColor(COLOR.white)],
     radius: 2 / getZoom(),
   })
@@ -235,16 +228,53 @@ const VertexComp: FC<{
   const moveVertex = (e: ElemMouseEvent) => {
     StageCursor.lock()
     const { rotation } = OperateGeometry.activeGeometry
+    console.log(type)
 
     Drag.onStart()
-      .onMove(({ delta }) => {
+      .onMove(({ delta, current }) => {
         delta = StageViewport.toSceneShift(delta)
-        const deltaX = XY.from(delta).getDot(xy_xAxis(rotation))
-        const deltaY = XY.from(delta).getDot(xy_yAxis(rotation))
+        const deltaX = XY.from(delta).getDot(XY.xAxis(rotation))
+        const deltaY = XY.from(delta).getDot(XY.yAxis(rotation))
 
         if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
-          setActiveGeometry('width', deltaX)
-          setActiveGeometry('height', deltaY)
+          // setActiveGeometry('width', deltaX)
+          // setActiveGeometry('height', deltaY)
+          // return
+          current = StageViewport.toSceneXY(current)
+          const line = selectedNodes[0] as V1.Line
+
+          switch (type) {
+            case 'topLeft':
+            case 'bottomLeft': {
+              const start = XY.from(line)
+              const end = XY.of(line.width, 0).rotate(start, rotation).plus(start)
+              setActiveGeometries(
+                {
+                  x: current.x,
+                  y: current.y,
+                  width: XY.from(current).getDistance(end),
+                  rotation: Angle.normal(
+                    Angle.atan2(end.y - current.y, end.x - current.x),
+                  ),
+                },
+                false,
+              )
+              break
+            }
+            case 'topRight':
+            case 'bottomRight':
+              const start = XY.from(line)
+              setActiveGeometries(
+                {
+                  width: XY.from(current).getDistance(start),
+                  rotation: Angle.normal(
+                    Angle.atan2(current.y - start.y, current.x - start.x),
+                  ),
+                },
+                false,
+              )
+              break
+          }
           return
         }
 
@@ -360,7 +390,7 @@ const VertexComp: FC<{
   }
 
   return (
-    <ElemReact
+    <elem
       node={rect}
       events={{
         hover: mouseenter,

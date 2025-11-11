@@ -2,7 +2,6 @@ import { entries } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { StageSelect } from 'src/editor/stage/interact/select'
-import { ElemReact } from 'src/editor/stage/render/elem'
 import { getZoom } from 'src/editor/stage/viewport'
 import { YClients } from 'src/editor/y-state/y-clients'
 import { useSchema } from 'src/view/hooks/schema/use-y-state'
@@ -70,6 +69,6 @@ const SingleOutlineComp: FC<{ id: string; outlineInfo: OutlineInfo }> = observer
       ]
     }
 
-    return <ElemReact node={outline} />
+    return <elem node={outline} />
   },
 )

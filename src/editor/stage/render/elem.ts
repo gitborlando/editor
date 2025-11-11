@@ -1,6 +1,4 @@
-import { max, OBB } from '@gitborlando/geo'
 import { createObjCache, loopFor } from '@gitborlando/utils'
-import { FC, ReactNode } from 'react'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { atan2, degreefy, normalAngle } from 'src/editor/math/base'
 import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
@@ -8,7 +6,13 @@ import { ElemDrawer } from 'src/editor/stage/render/draw'
 import { Surface } from 'src/editor/stage/render/surface'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
 
-export const ElemReact: FC<ElemProps> = 'elem' as unknown as FC<ElemProps>
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      elem: ElemProps
+    }
+  }
+}
 
 export type ElemProps = {
   node: V1.Node

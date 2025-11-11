@@ -44,5 +44,3 @@ export const EditorRPOperateFillComp: FC<{}> = observer(({}) => {
     </OpFieldComp>
   )
 })
-
-const cls = classes(css``)

@@ -23,14 +23,8 @@ export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
         label={<Icon url={Assets.editor.RP.operate.geo.x} />}
         operateKey='x'
         value={activeGeometry.x}
-        slideRate={1 / getZoom()}
       />
-      <GeometryItemComp
-        label='纵轴'
-        operateKey='y'
-        value={activeGeometry.y}
-        slideRate={1 / getZoom()}
-      />
+      <GeometryItemComp label='纵轴' operateKey='y' value={activeGeometry.y} />
       <GeometryItemComp
         label='宽度'
         operateKey='width'
@@ -97,9 +91,10 @@ const GeometryItemComp: FC<{
   slideRate?: number
 }> = observer(({ label, operateKey, value, slideRate = 1 }) => {
   const { setActiveGeometry } = OperateGeometry
-  const isMultiValue = t<any>(value) === MULTI_VALUE
 
+  const isMultiValue = t<any>(value) === MULTI_VALUE
   const inputValue = useRef(0)
+
   const correctedValue = useMemo(() => {
     if (isMultiValue) return value
     if (operateKey === 'x' || operateKey === 'y') {
@@ -111,22 +106,20 @@ const GeometryItemComp: FC<{
   inputValue.current = correctedValue
 
   const correctSetValue = (value: number) => {
-    value = value === undefined ? 0 : value
-
-    if (operateKey === 'x' || operateKey === 'y') {
-      const datum = HandleNode.datumXY[operateKey]
-      return value + datum
-    }
-    if (['rotation', 'startAngle', 'endAngle'].includes(operateKey)) {
-      return value % 360
-    }
-    return value
+    return value === undefined ? 0 : value
   }
 
   const handleOnBlur = () => {
     if (t<any>(inputValue.current) === MULTI_VALUE) return
     if (inputValue.current === correctedValue) return
-    setActiveGeometry(operateKey, inputValue.current, false)
+    if (operateKey === 'x' || operateKey === 'y') {
+      const datum = HandleNode.datumXY[operateKey]
+      const value = inputValue.current + datum
+      setActiveGeometry(operateKey, value, false)
+    } else {
+      setActiveGeometry(operateKey, inputValue.current, false)
+    }
+    YUndo.track({ type: 'state', description: `修改几何属性: ${operateKey}` })
   }
 
   const handleAfterSlide = () => {

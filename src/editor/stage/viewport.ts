@@ -40,11 +40,11 @@ class StageViewportService {
     this.onObserving()
   }
 
-  toViewportXY(xy: IXY) {
+  toCanvasXY(xy: IXY) {
     return XY.from(xy).minus(XY.leftTop(this.bound))
   }
   toStageXY(xy: IXY) {
-    return XY.from(this.toViewportXY(xy)).minus(this.offset)
+    return XY.from(this.toCanvasXY(xy)).minus(this.offset)
   }
   toSceneXY(xy: IXY) {
     return XY.from(this.toStageXY(xy)).divide(this.zoom)

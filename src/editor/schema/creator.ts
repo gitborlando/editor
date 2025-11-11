@@ -110,10 +110,10 @@ class SchemaCreatorService {
     const name = this.createNodeName('polygon')
     const nodeBase = this.createNodeBase()
     const { width, height } = option || nodeBase
-    const points = createRegularPolygon(width!, height!, 3)
+    const points = createRegularPolygon(width!, height!, option?.sides || 3)
     return {
       type: 'polygon',
-      sides: 3,
+      sides: option?.sides || 3,
       radius: 0,
       points,
       ...nodeBase,
