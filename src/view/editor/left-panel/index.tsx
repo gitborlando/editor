@@ -3,10 +3,7 @@ import { History, Image, Layers, Settings } from 'lucide-react'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { Button } from 'src/view/component/button'
 
-import { EditorLeftPanelImages } from 'src/view/editor/left-panel/panels/images'
 import { LayerComp } from 'src/view/editor/left-panel/panels/layer'
-import { SettingComp } from 'src/view/editor/left-panel/panels/setting'
-import { UndoComp } from 'src/view/editor/left-panel/panels/undo'
 
 export const EditorLeftPanelIds = ['layer', 'undo', 'images', 'setting'] as const
 
@@ -19,17 +16,10 @@ export const LeftPanelComp: FC<{}> = observer(({}) => {
 
   return (
     <G
-      horizontal='auto 1fr'
+      horizontal='auto'
       style={{ width: StageViewport.bound.left }}
-      className={cls()}
-      gap={0}>
-      <SwitchBarComp />
-      <G>
-        <LayerComp x-if={currentTabId === 'layer'} />
-        <UndoComp x-if={currentTabId === 'undo'} />
-        <EditorLeftPanelImages x-if={currentTabId === 'images'} />
-        <SettingComp x-if={currentTabId === 'setting'} />
-      </G>
+      className={cls()}>
+      <LayerComp x-if={currentTabId === 'layer'} />
     </G>
   )
 })

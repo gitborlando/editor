@@ -27,36 +27,19 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(
       return templates
     }, [horizontal, vertical])
 
-    const contentStyle = useMemo(() => {
-      if (!center) return {}
-      if (horizontal && vertical)
-        return {
-          justifyContent: 'center',
-          alignContent: 'center',
-          justifyItems: 'center',
-          alignItems: 'center',
-        }
-      if (!horizontal && !vertical)
-        return {
-          justifyContent: 'center',
-          alignContent: 'center',
-          justifyItems: 'center',
-          alignItems: 'center',
-        }
-      if (horizontal) return { alignContent: 'center', alignItems: 'center' }
-      if (vertical) return { justifyContent: 'center', justifyItems: 'center' }
-      return {}
+    const layoutCss = useMemo(() => {
+      if (!center) return ''
+      if (horizontal && vertical) return cls('c')
+      if (!horizontal && !vertical) return cls('c')
+      if (horizontal) return cls('h-c')
+      if (vertical) return cls('v-c')
+      return ''
     }, [horizontal, vertical, center])
 
     return (
       <div
-        className={cx(cls(), className)}
-        style={{
-          gap: gap,
-          ...gridTemplates,
-          ...contentStyle,
-          ...style,
-        }}
+        className={cx(cls(), layoutCss, className)}
+        style={{ gap: gap, ...gridTemplates, ...style }}
         {...rest}
         ref={ref}>
         {children}
@@ -67,19 +50,21 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(
 
 export const G = Grid
 
-export const GridCenter: FC<GridProps> = memo(({ children, center, ...rest }) => {
-  return (
-    <Grid center={true} {...rest}>
-      {children}
-    </Grid>
-  )
-})
-
-export const C = GridCenter
-
 const cls = classes(css`
   width: 100%;
   height: 100%;
   position: relative;
   display: grid;
+  &-c {
+    place-content: center;
+    place-items: center;
+  }
+  &-h-c {
+    align-content: center;
+    align-items: center;
+  }
+  &-v-c {
+    justify-content: center;
+    justify-items: center;
+  }
 `)

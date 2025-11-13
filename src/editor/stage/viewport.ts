@@ -5,11 +5,11 @@ import hotkeys from 'hotkeys-js'
 import { Surface } from 'src/editor/stage/render/surface'
 
 const createInitBound = () => ({
-  left: 284,
+  left: 240,
   top: 48,
   right: 240,
   bottom: 0,
-  width: window.innerWidth - 284 - 240,
+  width: window.innerWidth - 240 - 240,
   height: window.innerHeight - 48 - 0,
 })
 

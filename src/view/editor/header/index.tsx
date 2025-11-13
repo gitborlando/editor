@@ -6,6 +6,7 @@ import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { Button } from 'src/view/component/button'
 
 import { CooperateComp } from 'src/view/editor/header/cooperate'
+import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
 
 export const HeaderComp: FC<{}> = observer(({}) => {
   const navigate = useNavigate()
@@ -32,8 +33,9 @@ export const HeaderComp: FC<{}> = observer(({}) => {
         </G>
         <ZoomComp />
       </G>
-      <G center horizontal className={cls('rightGroup')}>
+      <G center horizontal gap={8} className={cls('rightGroup')}>
         <CooperateComp />
+        <EditorHeaderSettingComp />
       </G>
     </G>
   )
@@ -92,7 +94,7 @@ const ZoomComp = observer(({}) => {
 
 const cls = classes(css`
   height: 48px;
-  padding-inline: 4px;
+  padding-inline: 8px;
   border-bottom: 1px solid var(--gray-border);
 
   &-centerGroup {

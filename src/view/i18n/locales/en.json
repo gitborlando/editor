@@ -15,7 +15,8 @@
     "success": "Success",
     "error": "Error",
     "warning": "Warning",
-    "info": "Info"
+    "info": "Info",
+    "setting": "Settings"
   },
   "editor": {
     "title": "Editor",

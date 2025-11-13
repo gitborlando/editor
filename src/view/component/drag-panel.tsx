@@ -14,6 +14,7 @@ type DragPanelProps = {
   headerSlot?: ReactNode
   width?: number
   height?: number
+  center?: boolean
   className?: string
   closeFunc: () => void
   clickAwayClose?: () => boolean
@@ -32,6 +33,7 @@ export const DragPanel: FC<DragPanelProps> = ({
   headerSlot,
   width,
   height,
+  center,
   className,
   onMove,
 }) => {
@@ -44,6 +46,14 @@ export const DragPanel: FC<DragPanelProps> = ({
     const bound = ref.current!.getBoundingClientRect()
     setPosition(XY.of(xy.x, min(xy.y, innerHeight - bound.height - 12)))
   }, [xy])
+
+  useEffect(() => {
+    if (!center) return
+    const bound = ref.current!.getBoundingClientRect()
+    setPosition(
+      XY.of(innerWidth / 2 - bound.width / 2, innerHeight / 2 - bound.height / 2),
+    )
+  }, [center])
 
   useEffect(() => {
     panelCount++
@@ -92,7 +102,7 @@ export const DragPanel: FC<DragPanelProps> = ({
           onMouseDown={stopPropagation()}
           onClick={closeFunc}></IconButton>
       </G>
-      <G>{children}</G>
+      <G className={cls('content')}>{children}</G>
     </G>,
     document.querySelector('#drag-panel-portal')!,
   )
@@ -115,5 +125,8 @@ const cls = classes(css`
       padding-left: 4px;
       align-items: center;
     }
+  }
+  &-content {
+    height: fit-content;
   }
 `)
