@@ -90,6 +90,14 @@
     "linear": "linear",
     "image": "image",
     "linearGradient": "linearGradient",
-    "fill": "fill"
+    "fill": "fill",
+    "dev": "development",
+    "language": "language",
+    "offset": "offset",
+    "zoom": "zoom"
+  },
+  "adj": {
+    "general": "general",
+    "fixed": "fixed"
   }
 }

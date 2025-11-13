@@ -90,6 +90,14 @@
     "linear": "线性",
     "image": "图片",
     "linearGradient": "线性渐变",
-    "fill": "填充"
+    "fill": "填充",
+    "dev": "开发",
+    "language": "语言",
+    "offset": "偏移",
+    "zoom": "缩放"
+  },
+  "adj": {
+    "general": "普通",
+    "fixed": "固定"
   }
 }

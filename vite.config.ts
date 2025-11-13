@@ -51,6 +51,7 @@ const autoImport = () =>
         'src/view/styles/styles': ['styles'],
         'src/view/styles/classes': ['classes'],
         'src/utils/disposer': ['Disposer'],
+        'src/view/i18n/config': ['t', 'sentence'],
       },
       {
         from: 'react',

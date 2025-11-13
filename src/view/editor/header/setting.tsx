@@ -1,12 +1,15 @@
+import { InputNumber, Radio } from '@arco-design/web-react'
 import { Settings } from 'lucide-react'
-import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
+import { getEditorSetting } from 'src/editor/editor/setting'
 import { IconButton } from 'src/view/component/button'
 import { DragPanel } from 'src/view/component/drag-panel'
+import { SpaceBetweenItem } from 'src/view/component/item'
 import { Text } from 'src/view/component/text'
+import { getLanguage, sentence, setLanguage } from 'src/view/i18n/config'
 
 export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
-  const { t } = useTranslation()
-  const [showSetting, setShowSetting] = useState(false)
+  const [showSetting, setShowSetting] = useState(true)
+  const [settingType, setSettingType] = useState<'common' | 'dev'>('common')
   return (
     <>
       <IconButton
@@ -18,13 +21,25 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
         x-if={showSetting}
         title={t('common.setting')}
         closeFunc={() => setShowSetting(false)}>
-        <SettingComp />
+        <G className={editorSettingCls()} gap={8}>
+          <Radio.Group
+            type='button'
+            size='small'
+            value={settingType}
+            onChange={(value) => setSettingType(value as 'common' | 'dev')}>
+            <Radio value='common'>{t('adj.general')}</Radio>
+            <Radio value='dev'>{t('noun.dev')}</Radio>
+          </Radio.Group>
+          <CommonSettingComp x-if={settingType === 'common'} />
+          <DevSettingComp x-if={settingType === 'dev'} />
+        </G>
       </DragPanel>
     </>
   )
 })
 
-export const SettingComp: FC<{}> = observer(({}) => {
+export const CommonSettingComp: FC<{}> = observer(({}) => {
+  const setting = getEditorSetting()
   const {
     autosave,
     mockMode,
@@ -34,54 +49,107 @@ export const SettingComp: FC<{}> = observer(({}) => {
     menuShowTopTab,
     needSliceRender,
     showDirtyRect,
-  } = getEditorSetting()
-
-  const toggle = (key: keyof typeof EditorSetting.setting) => {
-    return (value: boolean) => (EditorSetting.setting[key] = value)
-  }
+  } = setting
 
   return (
-    <G className={editorSettingCls()}>
+    <G gap={8}>
+      <SpaceBetweenItem label={t('noun.language')}>
+        <Radio.Group
+          type='button'
+          size='small'
+          value={getLanguage()}
+          onChange={(value) => setLanguage(value as 'zh' | 'en')}>
+          <Radio value='en'>English</Radio>
+          <Radio value='zh'>中文</Radio>
+        </Radio.Group>
+      </SpaceBetweenItem>
       <BooleanSettingComp
         label='mock模式'
         value={mockMode}
-        onChange={toggle('mockMode')}
+        onChange={(value) => (setting.mockMode = value)}
       />
       <BooleanSettingComp
         label='自动保存'
         value={autosave}
-        onChange={toggle('autosave')}
+        onChange={(value) => (setting.autosave = value)}
       />
       <BooleanSettingComp
         label='开发模式'
         value={devMode}
-        onChange={toggle('devMode')}
+        onChange={(value) => (setting.devMode = value)}
       />
       <BooleanSettingComp
         label='显示渲染脏矩形'
         value={showDirtyRect}
-        onChange={toggle('showDirtyRect')}
+        onChange={(value) => (setting.showDirtyRect = value)}
       />
       <BooleanSettingComp
         label='不渲染不可辨认的节点'
         value={ignoreUnVisible}
-        onChange={toggle('ignoreUnVisible')}
+        onChange={(value) => (setting.ignoreUnVisible = value)}
       />
       <BooleanSettingComp
         label='缩放时进行分片渲染优化'
         value={needSliceRender}
-        onChange={toggle('needSliceRender')}
+        onChange={(value) => (setting.needSliceRender = value)}
       />
       <BooleanSettingComp
         label='菜单显示工具栏'
         value={menuShowTopTab}
-        onChange={toggle('menuShowTopTab')}
+        onChange={(value) => (setting.menuShowTopTab = value)}
       />
       <BooleanSettingComp
         label='显示 FPS'
         value={showFPS}
-        onChange={toggle('showFPS')}
+        onChange={(value) => (setting.showFPS = value)}
       />
+    </G>
+  )
+})
+
+const DevSettingComp: FC<{}> = observer(({}) => {
+  const setting = getEditorSetting()
+  const { solidZoomAndOffset, zoom, offset } = setting.dev
+  return (
+    <G gap={8}>
+      <BooleanSettingComp
+        label={sentence(t('adj.fixed'), t('noun.zoom'), t('noun.offset'))}
+        value={solidZoomAndOffset}
+        onChange={(value) => (setting.dev.solidZoomAndOffset = value)}
+      />
+      <SpaceBetweenItem label={t('noun.zoom')} x-if={solidZoomAndOffset}>
+        <InputNumber
+          style={{ width: 80 }}
+          hideControl
+          suffix='%'
+          min={1}
+          max={25600}
+          value={zoom}
+          onChange={(value) => (setting.dev.zoom = value)}
+        />
+      </SpaceBetweenItem>
+      <SpaceBetweenItem label={t('noun.offset')} x-if={solidZoomAndOffset}>
+        <G horizontal='auto auto' gap={8}>
+          <InputNumber
+            style={{ width: 80 }}
+            hideControl
+            prefix='x'
+            min={1}
+            max={25600}
+            value={offset.x}
+            onChange={(value) => (setting.dev.offset.x = value)}
+          />
+          <InputNumber
+            style={{ width: 80 }}
+            hideControl
+            prefix='y'
+            min={1}
+            max={25600}
+            value={offset.y}
+            onChange={(value) => (setting.dev.offset.y = value)}
+          />
+        </G>
+      </SpaceBetweenItem>
     </G>
   )
 })
@@ -92,7 +160,7 @@ const BooleanSettingComp: FC<{
   onChange: (value: boolean) => void
 }> = ({ label, value, onChange }) => {
   return (
-    <G className={booleanSettingCls()} horizontal='auto auto'>
+    <G className={booleanSettingCls()} horizontal='auto auto' center>
       <Text>{label}</Text>
       <SwitchComp value={value} onChange={onChange} />
     </G>

@@ -3,13 +3,11 @@ import { Icon } from '@gitborlando/widget'
 import { Github, LucideLanguages } from 'lucide-react'
 import { UserService } from 'src/global/service/user'
 import { IconButton } from 'src/view/component/button'
-import i18n from 'src/view/i18n/config'
+import { getLanguage, setLanguage } from 'src/view/i18n/config'
 
 export const HomeHeaderComp: FC<{}> = observer(({}) => {
-  const { t } = useTranslation()
-
   const handleLanguageChange = () => {
-    i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh')
+    setLanguage(getLanguage() === 'zh' ? 'en' : 'zh')
   }
   return (
     <G className={cls()} horizontal='auto auto 1fr' center gap={16}>

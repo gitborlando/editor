@@ -1,7 +1,3 @@
-import camelCase from 'camelcase'
-
-export { camelCase }
-
 export {
   clone,
   debounce,
@@ -33,23 +29,6 @@ export type IRect = IXY & { width: number; height: number }
 
 export function isNumberEqual(a: number, b: number) {
   return Math.abs(a - b) < 0.00001
-}
-
-export function cx(...args: (string | undefined)[]): string
-export function cx(...args: ([boolean, string] | [string])[]): string
-export function cx(
-  ...args: ((string | undefined) | [boolean, string] | [string])[]
-) {
-  const array = args.filter(Boolean) as (string | [boolean, string] | [string])[]
-
-  if (typeof array[0] === 'string') return array.join(' ')
-
-  let res = ''
-  for (const [condition, className] of array) {
-    if (className === undefined) res += condition + ' '
-    if (condition === true) return (res += className !== '' ? `${className} ` : '')
-  }
-  return res.trim()
 }
 
 export function timeOf(

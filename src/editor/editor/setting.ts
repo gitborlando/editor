@@ -11,6 +11,11 @@ const initSetting = () => {
     needSliceRender: true,
     mockMode: false,
     showDirtyRect: false,
+    dev: {
+      solidZoomAndOffset: true,
+      zoom: 1,
+      offset: XY._(0, 0),
+    },
   }
 }
 
