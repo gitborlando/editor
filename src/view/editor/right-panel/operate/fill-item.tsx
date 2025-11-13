@@ -13,6 +13,7 @@ import {
 import { NumberInput } from 'src/view/component/number-input'
 import { suspense } from 'src/view/component/suspense'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
+import i18n from 'src/view/i18n/config'
 import { suspend } from 'suspend-react'
 
 export const EditorRPOperateFillItemComp: FC<{
@@ -70,6 +71,7 @@ const HexInputComp: FC<{
   fill: V1.Fill
   index: number
 }> = observer(({ fill, index }) => {
+  const { t } = useTranslation()
   const isSolidFill = fill.type === 'color'
   const setColor = (color: string) => {
     if (!isSolidFill) return
@@ -83,9 +85,9 @@ const HexInputComp: FC<{
       case 'color':
         return colorConvert.rgb.hex(...rgbTuple(T<V1.FillColor>(fill).color))
       case 'linearGradient':
-        return '线性渐变'
+        return i18n.language === 'en' ? 'linear' : t('noun.linearGradient')
       case 'image':
-        return '图片填充'
+        return `${t('noun.image')} ${t('noun.fill')}`
     }
   })
 

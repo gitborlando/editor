@@ -83,5 +83,13 @@
     "recent": "最近文件",
     "untitled": "未命名",
     "export": "导出"
+  },
+  "noun": {
+    "colorPicker": "颜色",
+    "solidColor": "纯色",
+    "linear": "线性",
+    "image": "图片",
+    "linearGradient": "线性渐变",
+    "fill": "填充"
   }
 }

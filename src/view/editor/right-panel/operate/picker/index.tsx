@@ -20,6 +20,8 @@ const createFillCache = (type: V1.Fill['type']) =>
 const fillCache = createCache<V1.Fill['type'], V1.Fill>()
 
 export const FillPickerComp: FC<{}> = observer(({}) => {
+  const { t } = useTranslation()
+
   const { fillIndex, fillType, pickerPos, changeFill } = FillPickerState
   const fill = OperateFill.fills[fillIndex]
 
@@ -44,7 +46,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
 
   return (
     <DragPanel
-      title='颜色'
+      title={t('noun.colorPicker')}
       closeFunc={() => FillPickerState.hidePicker()}
       clickAwayClose={() => FillPickerState.isShowPicker}
       xy={pickerPos}
@@ -55,9 +57,9 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
           value={fillType}
           size='mini'
           onChange={handleChangeFill}>
-          <Radio value='color'>纯色</Radio>
-          <Radio value='linearGradient'>线性</Radio>
-          <Radio value='image'>图片</Radio>
+          <Radio value='color'>{t('noun.solidColor')}</Radio>
+          <Radio value='linearGradient'>{t('noun.linear')}</Radio>
+          <Radio value='image'>{t('noun.image')}</Radio>
         </Radio.Group>
         {fill.type === 'color' && (
           <PickerSolidComp fill={fill as V1.FillColor} index={fillIndex} />

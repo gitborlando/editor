@@ -58,21 +58,24 @@ const StopsBar: FC<{
   }
 
   return (
-    <G horizontal center className={cls('stopBar')} ref={stopBarRef}>
+    <G horizontal center className={cls('stopBar')}>
       <G
-        className={cls('stopBar-track')}
-        style={{ background: makeLinearGradientCss(fill) }}></G>
-      {fill.stops.map((stop, index) => (
-        <G
-          key={index}
-          className={cls('stopBar-stop')}
-          style={{
-            backgroundColor: `${stop.color}`,
-            left: `calc(${stop.offset * 100}% - 7px)`,
-            ...(stopIndex === index && { outline: '2px solid var(--color)' }),
-          }}
-          onMouseDown={(e) => handleMove(e, index)}></G>
-      ))}
+        className={cls('stopBar-background')}
+        style={{ background: makeLinearGradientCss(fill) }}>
+        <G horizontal center className={cls('stopBar-track')} ref={stopBarRef}>
+          {fill.stops.map((stop, index) => (
+            <G
+              key={index}
+              className={cls('stopBar-stop')}
+              style={{
+                backgroundColor: `${stop.color}`,
+                left: `${stop.offset * 100}%`,
+                ...(stopIndex === index && { outline: '2px solid var(--color)' }),
+              }}
+              onMouseDown={(e) => handleMove(e, index)}></G>
+          ))}
+        </G>
+      </G>
     </G>
   )
 }
@@ -84,9 +87,13 @@ const cls = classes(css`
     height: 20px;
     border-radius: 99px;
     position: relative;
-    &-track {
+    &-background {
       height: 8px;
       border-radius: 99px;
+    }
+    &-track {
+      height: 8px;
+      width: calc(100% - 14px);
     }
     &-stop {
       width: 14px;

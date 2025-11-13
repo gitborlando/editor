@@ -5,7 +5,6 @@ import { iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { IconButton } from 'src/view/ui-utility/widget/button/icon-button'
 import { Divide } from 'src/view/ui-utility/widget/divide'
-import { PickerOpener } from './picker/picker-opener'
 
 type IShadowComp = {}
 
@@ -55,7 +54,7 @@ export const ShadowComp: FC<IShadowComp> = ({}) => {
     return (
       <Flex layout='v' className='wh-100%-fit'>
         <Flex className='wh-100%-28 mb-4'>
-          <PickerOpener fill={shadow.fill} index={index} impact='shadow' />
+          {/* <PickerOpener fill={shadow.fill} index={index} impact='shadow' /> */}
           <IconButton
             size={16}
             style={{ marginLeft: 'auto' }}

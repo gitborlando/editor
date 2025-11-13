@@ -83,5 +83,13 @@
     "recent": "Recent Files",
     "untitled": "Untitled",
     "export": "Export"
+  },
+  "noun": {
+    "colorPicker": "ColorPicker",
+    "solidColor": "solid",
+    "linear": "linear",
+    "image": "image",
+    "linearGradient": "linearGradient",
+    "fill": "fill"
   }
 }
