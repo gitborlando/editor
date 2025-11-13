@@ -41,13 +41,13 @@ export const DragPanel: FC<DragPanelProps> = ({
   const [position, setPosition] = useState(xy || XY._(480, 240))
   const [zIndex, setZIndex] = useState(0)
 
-  useEffect(() => {
-    xy ||= XY._(480, 240)
+  useLayoutEffect(() => {
+    if (!xy) return
     const bound = ref.current!.getBoundingClientRect()
     setPosition(XY.of(xy.x, min(xy.y, innerHeight - bound.height - 12)))
   }, [xy])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!center) return
     const bound = ref.current!.getBoundingClientRect()
     setPosition(

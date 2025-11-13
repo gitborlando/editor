@@ -1,9 +1,11 @@
-import { InputNumber, Radio } from '@arco-design/web-react'
+import { Radio } from '@arco-design/web-react'
 import { Settings } from 'lucide-react'
 import { getEditorSetting } from 'src/editor/editor/setting'
+import { InputNumber } from 'src/view/component/arco/input-number'
 import { IconButton } from 'src/view/component/button'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { SpaceBetweenItem } from 'src/view/component/item'
+import { SwitchBar } from 'src/view/component/switch-bar'
 import { Text } from 'src/view/component/text'
 import { getLanguage, sentence, setLanguage } from 'src/view/i18n/config'
 
@@ -21,15 +23,15 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
         x-if={showSetting}
         title={t('common.setting')}
         closeFunc={() => setShowSetting(false)}>
+        <SwitchBar
+          options={[
+            { label: t('adj.general'), value: 'common' },
+            { label: t('noun.dev'), value: 'dev' },
+          ]}
+          value={settingType}
+          onChange={(value) => setSettingType(value as 'common' | 'dev')}
+        />
         <G className={editorSettingCls()} gap={8}>
-          <Radio.Group
-            type='button'
-            size='small'
-            value={settingType}
-            onChange={(value) => setSettingType(value as 'common' | 'dev')}>
-            <Radio value='common'>{t('adj.general')}</Radio>
-            <Radio value='dev'>{t('noun.dev')}</Radio>
-          </Radio.Group>
           <CommonSettingComp x-if={settingType === 'common'} />
           <DevSettingComp x-if={settingType === 'dev'} />
         </G>
@@ -56,7 +58,7 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
       <SpaceBetweenItem label={t('noun.language')}>
         <Radio.Group
           type='button'
-          size='small'
+          size='mini'
           value={getLanguage()}
           onChange={(value) => setLanguage(value as 'zh' | 'en')}>
           <Radio value='en'>English</Radio>
@@ -119,6 +121,7 @@ const DevSettingComp: FC<{}> = observer(({}) => {
       />
       <SpaceBetweenItem label={t('noun.zoom')} x-if={solidZoomAndOffset}>
         <InputNumber
+          size='small'
           style={{ width: 80 }}
           hideControl
           suffix='%'
@@ -131,6 +134,7 @@ const DevSettingComp: FC<{}> = observer(({}) => {
       <SpaceBetweenItem label={t('noun.offset')} x-if={solidZoomAndOffset}>
         <G horizontal='auto auto' gap={8}>
           <InputNumber
+            size='small'
             style={{ width: 80 }}
             hideControl
             prefix='x'
@@ -140,6 +144,7 @@ const DevSettingComp: FC<{}> = observer(({}) => {
             onChange={(value) => (setting.dev.offset.x = value)}
           />
           <InputNumber
+            size='small'
             style={{ width: 80 }}
             hideControl
             prefix='y'
@@ -195,17 +200,17 @@ export const switchCls = classes(css`
   padding: 3px;
   cursor: pointer;
   outline: 1px solid var(--gray-bg);
-  transition: all 0.3s ease;
 
   &-inner {
     width: 12px;
     height: 12px;
     border-radius: 99px;
     background-color: var(--gray-bg);
+    transition: all 0.3s ease;
 
     &-checked {
       background-color: hsl(var(--hue), 100%, 60%);
-      justify-self: end;
+      transform: translateX(calc(100% + 6px));
     }
   }
 `)
