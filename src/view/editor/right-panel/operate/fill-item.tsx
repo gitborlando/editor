@@ -74,14 +74,14 @@ const HexInputComp: FC<{
   const setColor = (color: string) => {
     if (!isSolidFill) return
     OperateFill.setFill(index, (fill) => {
-      t<V1.FillColor>(fill).color = color
+      T<V1.FillColor>(fill).color = color
     })
   }
 
   const value = iife(() => {
     switch (fill.type) {
       case 'color':
-        return colorConvert.rgb.hex(...rgbTuple(t<V1.FillColor>(fill).color))
+        return colorConvert.rgb.hex(...rgbTuple(T<V1.FillColor>(fill).color))
       case 'linearGradient':
         return '线性渐变'
       case 'image':

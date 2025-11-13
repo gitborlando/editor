@@ -69,9 +69,9 @@ class OperateGeometryService {
     cleanObject(this.activeGeometry)
     selectedNodes.forEach((node, i) => {
       this.activeKeys.forEach((key) => {
-        if (i === 0) this.activeGeometry[key] = t<any>(node)[key]
-        else if (this.activeGeometry[key] !== t<any>(node)[key])
-          t<any>(this.activeGeometry)[key] = MULTI_VALUE
+        if (i === 0) this.activeGeometry[key] = T<any>(node)[key]
+        else if (this.activeGeometry[key] !== T<any>(node)[key])
+          T<any>(this.activeGeometry)[key] = MULTI_VALUE
       })
     })
   }
@@ -119,10 +119,10 @@ class OperateGeometryService {
   private delta(key: keyof AllGeometry, node: V1.Node) {
     const rawDelta = iife(() => {
       if (this.deltaKeys.has(key)) return this.activeGeometry[key]
-      return this.activeGeometry[key] - t<any>(node)[key]
+      return this.activeGeometry[key] - T<any>(node)[key]
     })
     if (['width', 'height'].includes(key)) {
-      if (t<any>(node)[key] + rawDelta < 1) return t<any>(node)[key] - 1
+      if (T<any>(node)[key] + rawDelta < 1) return T<any>(node)[key] - 1
       return rawDelta
     }
     return rawDelta
@@ -150,7 +150,7 @@ class OperateGeometryService {
         if (depth !== 0) return
         return YState.set(
           `${node.id}.radius`,
-          max(0, t<any>(node).radius + this.delta(key, node)),
+          max(0, T<any>(node).radius + this.delta(key, node)),
         )
       }
       if (key === 'rotation') {
@@ -174,7 +174,7 @@ class OperateGeometryService {
           createStarPolygon(width, height, pointCount, innerRate),
         )
       }
-      YState.set(`${node.id}.${key}`, t<any>(node)[key] + this.delta(key, node))
+      YState.set(`${node.id}.${key}`, T<any>(node)[key] + this.delta(key, node))
     })
   }
 

@@ -39,6 +39,7 @@
     "IRGB",
     "IRGBA",
     "Konva",
+    "languagedetector",
     "lftp",
     "linaria",
     "localforage",
@@ -75,5 +76,7 @@
     "vnode",
     "vshow",
     "zattoo"
-  ]
+  ],
+  "i18n-ally.localesPaths": ["src/view/i18n", "src/view/i18n/locales"],
+  "i18n-ally.keystyle": "nested"
 }

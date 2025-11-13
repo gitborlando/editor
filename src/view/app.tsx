@@ -7,6 +7,7 @@ import { preventDefault } from 'src/shared/utils/event'
 import { ContextMenuComp } from 'src/view/component/context-menu'
 import { UploaderComp } from 'src/view/component/uploader'
 import router from 'src/view/router'
+import './i18n/config'
 
 export const App = observer(() => {
   return (

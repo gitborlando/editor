@@ -11,7 +11,7 @@ import { UndoComp } from 'src/view/editor/left-panel/panels/undo'
 export const EditorLeftPanelIds = ['layer', 'undo', 'images', 'setting'] as const
 
 export const EditorLeftPanelState = observable({
-  currentTabId: t<(typeof EditorLeftPanelIds)[number]>('layer'),
+  currentTabId: T<(typeof EditorLeftPanelIds)[number]>('layer'),
 })
 
 export const LeftPanelComp: FC<{}> = observer(({}) => {

@@ -33,6 +33,7 @@ const autoImport = () =>
       'react-router',
       'mobx',
       'mobx-react-lite',
+      'react-i18next',
       {
         color: [['default', 'Color']],
         'auto-bind': [['default', 'autoBind']],
@@ -45,7 +46,7 @@ const autoImport = () =>
         'src/editor/y-state/y-state': ['YState'],
         'src/editor/y-state/y-clients': ['YClients'],
         'src/editor/y-state/y-undo': ['YUndo'],
-        'src/utils/global': ['t'],
+        'src/utils/global': ['T'],
         'src/utils/color': ['COLOR', 'colorConvert'],
         'src/view/styles/styles': ['styles'],
         'src/view/styles/classes': ['classes'],

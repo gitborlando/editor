@@ -92,7 +92,7 @@ const GeometryItemComp: FC<{
 }> = observer(({ label, operateKey, value, slideRate = 1 }) => {
   const { setActiveGeometry } = OperateGeometry
 
-  const isMultiValue = t<any>(value) === MULTI_VALUE
+  const isMultiValue = T<any>(value) === MULTI_VALUE
   const inputValue = useRef(0)
 
   const correctedValue = useMemo(() => {
@@ -110,7 +110,7 @@ const GeometryItemComp: FC<{
   }
 
   const handleOnBlur = () => {
-    if (t<any>(inputValue.current) === MULTI_VALUE) return
+    if (T<any>(inputValue.current) === MULTI_VALUE) return
     if (inputValue.current === correctedValue) return
     if (operateKey === 'x' || operateKey === 'y') {
       const datum = HandleNode.datumXY[operateKey]

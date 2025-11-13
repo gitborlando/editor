@@ -99,7 +99,7 @@ export class SchemaHelper {
         if (node === undefined) return
 
         const childIds = 'childIds' in node ? node.childIds : undefined
-        const parent = t<V1.NodeParent>(
+        const parent = T<V1.NodeParent>(
           upLevelRef?.node || YState.find<V1.NodeParent>(node.parentId),
         )
         const ancestors = upLevelRef ? [...upLevelRef.ancestors, upLevelRef.id] : []

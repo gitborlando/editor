@@ -1,18 +1,31 @@
 import { Button, Typography } from '@arco-design/web-react'
 import { Icon } from '@gitborlando/widget'
+import { Github, LucideLanguages } from 'lucide-react'
 import { UserService } from 'src/global/service/user'
+import { IconButton } from 'src/view/component/button'
+import i18n from 'src/view/i18n/config'
 
 export const HomeHeaderComp: FC<{}> = observer(({}) => {
+  const { t } = useTranslation()
+
+  const handleLanguageChange = () => {
+    i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh')
+  }
   return (
-    <G className={cls()} horizontal center>
-      <G horizontal gap={8} className={cls('title')}>
+    <G className={cls()} horizontal='auto auto 1fr' center gap={16}>
+      <G horizontal center gap={8} className={cls('title')}>
         <Icon url={Assets.favIcon.sigma2} className={cls('title-icon')} />
         <h4>Sigma Editor</h4>
       </G>
-      <G horizontal center gap={16}>
-        <Button type='primary' style={{ marginLeft: 'auto' }}>
-          新建文件
-        </Button>
+      <G horizontal center gap={8}>
+        <IconButton icon={<Lucide icon={Github} size={20} />} />
+        <IconButton
+          icon={<Lucide icon={LucideLanguages} size={20} />}
+          onClick={handleLanguageChange}
+        />
+      </G>
+      <G className={cls('right')} horizontal='auto auto auto' center gap={16}>
+        <Button type='primary'>{t('file.new')}</Button>
         <G
           dangerouslySetInnerHTML={{ __html: UserService.avatar }}
           style={{ width: '32px', height: '32px' }}></G>
@@ -30,8 +43,6 @@ const cls = classes(css`
   justify-content: space-between;
   ${styles.borderBottom}
   &-title {
-    align-content: end;
-    align-items: 'end';
     font-weight: 600;
     font-size: 18px;
     color: var(--color);
@@ -39,5 +50,8 @@ const cls = classes(css`
       width: 24px;
       height: 24px;
     }
+  }
+  &-right {
+    justify-content: flex-end;
   }
 `)

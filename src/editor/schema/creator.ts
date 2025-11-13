@@ -179,7 +179,7 @@ class SchemaCreatorService {
   text(option?: NestPartial<V1.Text>): V1.Text {
     const name = this.createNodeName('text')
     const nodeBase = this.createNodeBase()
-    return t<V1.Text>(
+    return T<V1.Text>(
       defuOverrideArray(
         {
           ...nodeBase,

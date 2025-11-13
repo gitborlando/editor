@@ -68,7 +68,7 @@ const cls = classes(css`
     border: none;
     &:hover {
       outline: 2px solid var(--color);
-      outline-offset: 2px;
+      outline-offset: 1px;
     }
     &-cover {
       width: 100%;
