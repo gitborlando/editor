@@ -8,7 +8,6 @@ import { useDownUpTracker } from 'src/shared/utils/event'
 import { iife } from 'src/shared/utils/normal'
 import { useMatchPatch, useMemoComp } from 'src/shared/utils/react'
 import { DraggableComp } from 'src/view/component/drag-panel'
-import { Dropdown } from 'src/view/ui-utility/widget/dropdown'
 
 export const TextComp: FC<{}> = ({}) => {
   const {
@@ -82,12 +81,12 @@ export const TextComp: FC<{}> = ({}) => {
           onNewValueApply={(value) => setTextStyle('fontSize', Number(value))}
           afterOperate={() => afterOperate.dispatch()}
         /> */}
-        <Dropdown
+        {/* <Dropdown
           className='w-69' //@ts-ignore
           selected={fontWeight}
           options={textStyleOptions.fontWeight}
           onSelected={(value) => toggleTextStyle('fontWeight', value)}
-        />
+        /> */}
       </Flex>
     )
   })

@@ -11,11 +11,11 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "src/view/shadcn",
-    "utils": "src/view/shadcn/lib/utils",
-    "ui": "src/view/shadcn/ui",
-    "lib": "src/view/shadcn/lib",
-    "hooks": "src/view/shadcn/hooks"
+    "components": "src/view/component/shadcn",
+    "utils": "src/view/component/shadcn/lib/utils",
+    "ui": "src/view/component/shadcn/ui",
+    "lib": "src/view/component/shadcn/lib",
+    "hooks": "src/view/component/shadcn/hooks"
   },
   "registries": {
     "@magicui": "https://magicui.design/r/{name}.json"

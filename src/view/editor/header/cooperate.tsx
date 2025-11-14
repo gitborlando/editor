@@ -1,7 +1,7 @@
 import { entries } from 'mobx'
 import { Popover } from 'react-tiny-popover'
+import { AvatarCircles } from 'src/view/component/shadcn/ui/avatar-circles'
 import { Text } from 'src/view/component/text'
-import { AvatarCircles } from 'src/view/shadcn/ui/avatar-circles'
 
 type CooperateInfo = {
   clientId: number
