@@ -78,20 +78,21 @@ export class Elem {
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
+    const canvasType = this.type === 'widgetElem' ? 'mainCanvas' : 'mainCanvas'
     Surface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
 
-      Surface.ctxSaveRestore(() => ElemDrawer.draw(this, ctx, path2d))
-      if (!this.children.length) return
+      Surface.ctxSaveRestore(() => ElemDrawer.draw(this, ctx, path2d), canvasType)
 
-      if (this.clip) {
-        Surface.setMatrix(this.obb)
-        ctx.clip(path2d)
-        Surface.setMatrix(this.obb, true)
+      if (this.children.length) {
+        if (this.clip) {
+          Surface.setMatrix(this.obb, false, canvasType)
+          ctx.clip(path2d)
+          Surface.setMatrix(this.obb, true, canvasType)
+        }
+        this.children.forEach((child) => child.traverseDraw())
       }
-
-      this.children.forEach((child) => child.traverseDraw())
-    })
+    }, canvasType)
   }
 
   parent!: Elem

@@ -29,7 +29,11 @@ class ElemDrawerService {
     this.path2d = path2d
     this.dirtyRects = [elem.aabb]
 
-    Surface.setMatrix(this.elem.obb)
+    Surface.setMatrix(
+      this.elem.obb,
+      false,
+      elem.type === 'widgetElem' ? 'topCanvas' : 'mainCanvas',
+    )
 
     this.drawShapePath()
 
