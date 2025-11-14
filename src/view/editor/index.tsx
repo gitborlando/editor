@@ -1,5 +1,5 @@
 import { Editor } from 'src/editor/editor/editor'
-import { Surface } from 'src/editor/stage/render/surface'
+import { Surface } from 'src/editor/render/surface'
 import { Loading } from 'src/view/component/loading'
 import { suspense } from 'src/view/component/suspense'
 import { LeftPanelComp } from 'src/view/editor/left-panel'

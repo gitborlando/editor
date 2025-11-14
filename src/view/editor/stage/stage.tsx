@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react'
-import { renderElem } from 'src/editor/stage/render/react/reconciler'
-import { StageScene } from 'src/editor/stage/render/scene'
+import { renderElem } from 'src/editor/render/react/reconciler'
+import { StageScene } from 'src/editor/render/scene'
 import { EditorStageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
 import { EditorStageMarqueeComp } from 'src/view/editor/stage/marquee'

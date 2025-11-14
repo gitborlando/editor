@@ -3,11 +3,11 @@ import { reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import autoBind from 'class-autobind-decorator'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { StageScene } from 'src/editor/stage/render/scene'
+import { StageScene } from 'src/editor/render/scene'
 import {
   TextBreaker,
   createTextBreaker,
-} from 'src/editor/stage/render/text-break/text-breaker'
+} from 'src/editor/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { INoopFunc, IXY, Raf, getTime } from 'src/shared/utils/normal'
 import { rgba } from 'src/utils/color'

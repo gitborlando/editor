@@ -1,7 +1,7 @@
 import { objKeys } from '@gitborlando/utils'
 import { ReactNode } from 'react'
 import Reconciler, { HostConfig } from 'react-reconciler'
-import { Elem, ElemProps } from 'src/editor/stage/render/elem'
+import { Elem, ElemProps } from 'src/editor/render/elem'
 
 function applyProps(elem: Elem, props: ElemProps, oldProps?: ElemProps) {
   const oldEvents = oldProps?.events || {}

@@ -2,7 +2,7 @@ import { IRect, IXY, max, XY } from '@gitborlando/geo'
 import { WheelUtil } from '@gitborlando/utils/browser'
 import hotkeys from 'hotkeys-js'
 import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
-import { Surface } from 'src/editor/stage/render/surface'
+import { Surface } from 'src/editor/render/surface'
 
 const createInitBound = () => ({
   left: 240,

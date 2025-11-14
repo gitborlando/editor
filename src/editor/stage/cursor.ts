@@ -1,7 +1,7 @@
 import { createObjCache } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { floor } from 'src/editor/math/base'
-import { Surface } from 'src/editor/stage/render/surface'
+import { Surface } from 'src/editor/render/surface'
 import { listen, listenOnce } from 'src/shared/utils/event'
 
 export type IStageCursorType =

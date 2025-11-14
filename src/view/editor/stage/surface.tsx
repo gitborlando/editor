@@ -1,4 +1,4 @@
-import { Surface } from 'src/editor/stage/render/surface'
+import { Surface } from 'src/editor/render/surface'
 
 export const EditorStageSurfaceComp: FC<{}> = observer(({}) => {
   useLayoutEffect(() => {

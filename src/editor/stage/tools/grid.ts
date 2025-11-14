@@ -1,6 +1,6 @@
 import { IXY } from '@gitborlando/geo'
 import { nearestPixel } from 'src/editor/math/base'
-import { Surface } from 'src/editor/stage/render/surface'
+import { Surface } from 'src/editor/render/surface'
 import { StageViewport } from 'src/editor/stage/viewport'
 
 class StageToolGridService {

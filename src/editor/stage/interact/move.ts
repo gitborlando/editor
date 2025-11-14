@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
 import { StageCursor } from 'src/editor/stage/cursor'
-import { Surface } from 'src/editor/stage/render/surface'
+import { Surface } from 'src/editor/render/surface'
 import { Drag } from 'src/global/event/drag'
 import { StageViewport } from '../viewport'
 
