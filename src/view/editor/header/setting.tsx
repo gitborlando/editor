@@ -1,7 +1,7 @@
 import { Radio } from '@arco-design/web-react'
-import { Settings } from 'lucide-react'
+import { Lock, Settings, Unlock } from 'lucide-react'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { InputNumber } from 'src/view/component/arco/input-number'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { IconButton } from 'src/view/component/button'
 import { DragPanel } from 'src/view/component/drag-panel'
 import { SpaceBetweenItem } from 'src/view/component/item'
@@ -10,7 +10,7 @@ import { Text } from 'src/view/component/text'
 import { getLanguage, sentence, setLanguage } from 'src/view/i18n/config'
 
 export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
-  const [showSetting, setShowSetting] = useState(true)
+  const [showSetting, setShowSetting] = useState(false)
   const [settingType, setSettingType] = useState<'common' | 'dev'>('common')
   return (
     <>
@@ -25,8 +25,8 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
         closeFunc={() => setShowSetting(false)}>
         <SwitchBar
           options={[
-            { label: t('adj.general'), value: 'common' },
-            { label: t('noun.dev'), value: 'dev' },
+            { label: t('special.generalSetting'), value: 'common' },
+            { label: t('special.devSetting'), value: 'dev' },
           ]}
           value={settingType}
           onChange={(value) => setSettingType(value as 'common' | 'dev')}
@@ -111,47 +111,27 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
 
 const DevSettingComp: FC<{}> = observer(({}) => {
   const setting = getEditorSetting()
-  const { solidZoomAndOffset, zoom, offset } = setting.dev
+  const { solidZoomAndOffset } = setting.dev
+
+  const handelFixZoomAndOffset = () => {
+    setting.dev.solidZoomAndOffset = !solidZoomAndOffset
+    if (!solidZoomAndOffset) {
+      const { zoom, offset } = StageViewport
+      setting.dev.zoom = zoom
+      setting.dev.offset = offset
+    }
+  }
+
   return (
     <G gap={8}>
-      <BooleanSettingComp
-        label={sentence(t('adj.fixed'), t('noun.zoom'), t('noun.offset'))}
-        value={solidZoomAndOffset}
-        onChange={(value) => (setting.dev.solidZoomAndOffset = value)}
-      />
-      <SpaceBetweenItem label={t('noun.zoom')} x-if={solidZoomAndOffset}>
-        <InputNumber
-          size='small'
-          style={{ width: 80 }}
-          hideControl
-          suffix='%'
-          min={1}
-          max={25600}
-          value={zoom}
-          onChange={(value) => (setting.dev.zoom = value)}
-        />
-      </SpaceBetweenItem>
-      <SpaceBetweenItem label={t('noun.offset')} x-if={solidZoomAndOffset}>
-        <G horizontal='auto auto' gap={8}>
-          <InputNumber
-            size='small'
-            style={{ width: 80 }}
-            hideControl
-            prefix='x'
-            min={1}
-            max={25600}
-            value={offset.x}
-            onChange={(value) => (setting.dev.offset.x = value)}
-          />
-          <InputNumber
-            size='small'
-            style={{ width: 80 }}
-            hideControl
-            prefix='y'
-            min={1}
-            max={25600}
-            value={offset.y}
-            onChange={(value) => (setting.dev.offset.y = value)}
+      <SpaceBetweenItem
+        label={sentence(t('verb.lock'), t('noun.zoom'), t('noun.offset'))}>
+        <G horizontal center gap={8}>
+          <Lucide
+            icon={solidZoomAndOffset ? Lock : Unlock}
+            size={16}
+            active={solidZoomAndOffset}
+            onClick={handelFixZoomAndOffset}
           />
         </G>
       </SpaceBetweenItem>
@@ -185,6 +165,7 @@ const SwitchComp: FC<{
 
 export const editorSettingCls = classes(css`
   padding: 12px;
+  padding-top: 0;
   height: fit-content;
 `)
 
@@ -205,7 +186,7 @@ export const switchCls = classes(css`
     width: 12px;
     height: 12px;
     border-radius: 99px;
-    background-color: var(--gray-bg);
+    background-color: #b8b8b8;
     transition: all 0.3s ease;
 
     &-checked {

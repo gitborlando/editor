@@ -99,5 +99,12 @@
   "adj": {
     "general": "普通",
     "fixed": "固定"
+  },
+  "special": {
+    "generalSetting": "一般设置",
+    "devSetting": "开发设置"
+  },
+  "verb": {
+    "lock": "锁定"
   }
 }

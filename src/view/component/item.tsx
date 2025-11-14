@@ -22,6 +22,7 @@ export const SpaceBetweenItem = forwardRef<
 
 const cls = classes(css`
   &-space-between {
+    height: 32px;
     justify-content: space-between;
   }
 `)

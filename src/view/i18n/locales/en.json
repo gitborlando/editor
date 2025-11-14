@@ -99,5 +99,12 @@
   "adj": {
     "general": "general",
     "fixed": "fixed"
+  },
+  "special": {
+    "generalSetting": "general",
+    "devSetting": "develop"
+  },
+  "verb": {
+    "lock": "lock"
   }
 }

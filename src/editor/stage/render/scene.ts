@@ -43,7 +43,7 @@ class StageSceneService {
   }
 
   private hookRenderNode() {
-    Signal.merge(YState.inited$, Surface.inited$).hook(() => {
+    Signal.merge(YState.inited$, Surface.inited).hook(() => {
       autorun(() => {
         const pageId = YClients.client.selectPageId
         if (pageId) this.firstRenderPage()

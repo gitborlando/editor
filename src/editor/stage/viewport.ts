@@ -1,7 +1,7 @@
 import { IRect, IXY, max, XY } from '@gitborlando/geo'
 import { WheelUtil } from '@gitborlando/utils/browser'
-import autobind from 'class-autobind-decorator'
 import hotkeys from 'hotkeys-js'
+import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { Surface } from 'src/editor/stage/render/surface'
 
 const createInitBound = () => ({
@@ -24,7 +24,6 @@ const stepByZoom = [
   [5, 1.6],
 ]
 
-@autobind
 class StageViewportService {
   @observable zoom = 1
   @observable offset = XY._(0, 0)
@@ -32,11 +31,19 @@ class StageViewportService {
 
   private wheeler = new WheelUtil()
 
+  subscribe() {
+    return Disposer.collect(
+      Surface.inited.hook(() => {
+        this.onWheelZoom()
+      }),
+      EditorSetting.inited.hook(() => {
+        this.devSolidZoomAndOffset()
+      }),
+    )
+  }
+
   init() {
     this.onResizeBound()
-    Surface.inited$.hook(() => {
-      this.onWheelZoom()
-    })
     this.onObserving()
   }
 
@@ -137,8 +144,17 @@ class StageViewportService {
       this.offset = client.offset
     })
   }
+
+  @action
+  private devSolidZoomAndOffset() {
+    const { solidZoomAndOffset, zoom, offset } = getEditorSetting().dev
+    if (solidZoomAndOffset) {
+      this.zoom = zoom
+      this.offset = offset
+    }
+  }
 }
 
-export const StageViewport = makeObservable(new StageViewportService())
+export const StageViewport = autoBind(makeObservable(new StageViewportService()))
 
 export const getZoom = () => StageViewport.zoom

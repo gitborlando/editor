@@ -18,7 +18,7 @@ const dpr = devicePixelRatio
 
 @autoBind
 export class StageSurface {
-  inited$ = Signal.create(false)
+  inited = Signal.create(false)
 
   private canvas!: HTMLCanvasElement
   private ctx!: CanvasRenderingContext2D
@@ -36,7 +36,7 @@ export class StageSurface {
   }
 
   setCanvas = (canvas: HTMLCanvasElement) => {
-    if (this.inited$.value) return
+    if (this.inited.value) return
 
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')!
@@ -45,7 +45,7 @@ export class StageSurface {
     this.onZoomMove()
     this.onPointerEvents()
 
-    this.inited$.dispatch(true)
+    this.inited.dispatch(true)
   }
 
   setCursor = (cursor: string) => {
@@ -330,10 +330,10 @@ export class StageSurface {
     listener: (this: HTMLCanvasElement, ev: HTMLElementEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions,
   ) => {
-    if (this.inited$.value) {
+    if (this.inited.value) {
       this.canvas.addEventListener(type, listener, options)
     } else {
-      this.inited$.hook(() => this.canvas.addEventListener(type, listener, options))
+      this.inited.hook(() => this.canvas.addEventListener(type, listener, options))
     }
     return () => {
       this.canvas.removeEventListener(type, listener, options)

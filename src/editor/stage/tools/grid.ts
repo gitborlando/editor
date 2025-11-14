@@ -7,7 +7,7 @@ class StageToolGridService {
   private ctx!: CanvasRenderingContext2D
 
   init() {
-    Surface.inited$.hook(() => {
+    Surface.inited.hook(() => {
       autorun(() => {
         // this.draw()
       })

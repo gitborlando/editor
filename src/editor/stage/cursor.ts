@@ -21,7 +21,7 @@ class StageCursorService {
   private locked = false
 
   initHook() {
-    Surface.inited$.hook(() => this.setCursor('select'))
+    Surface.inited.hook(() => this.setCursor('select'))
     listen('mouseup', () => (this.locked = false))
   }
 

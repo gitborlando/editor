@@ -22,7 +22,6 @@ export const SwitchBar = forwardRef<
 })
 
 const cls = classes(css`
-  height: 36px;
   padding: 12px;
   justify-content: start;
   gap: 16px;

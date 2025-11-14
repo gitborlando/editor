@@ -1,5 +1,4 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import { defuOverrideArray } from 'src/utils/defu'
 
 const initSetting = () => {
@@ -20,17 +19,14 @@ const initSetting = () => {
   }
 }
 
-@autobind
 class EditorSettingService {
+  inited = Signal.create(false)
   @observable setting = initSetting()
-
-  constructor() {
-    makeObservable(this)
-  }
 
   init() {
     this.loadSetting()
     this.autoSaveSetting()
+    this.inited.dispatch(true)
   }
 
   private loadSetting() {
@@ -46,7 +42,7 @@ class EditorSettingService {
   }
 }
 
-export const EditorSetting = new EditorSettingService()
+export const EditorSetting = autoBind(makeObservable(new EditorSettingService()))
 
 export function getEditorSetting() {
   return EditorSetting.setting

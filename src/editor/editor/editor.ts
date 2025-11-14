@@ -26,8 +26,12 @@ const jsZip = new JSZip()
 
 @autobind
 export class EditorService {
-  inited$ = Signal.create(false)
+  inited = Signal.create(false)
   private disposer = new Disposer()
+
+  private subscribe() {
+    return Disposer.collect(StageViewport.subscribe())
+  }
 
   private initHooks() {
     EditorSetting.init()
@@ -43,16 +47,14 @@ export class EditorService {
     OperateText.initHook()
 
     StageScene.initHook()
-    // StageViewport.init()
     StageInteract.init()
     StageDrop.initHook()
     StageCursor.initHook()
     StageToolGrid.init()
-    // UIPickerCopy.initHook()
   }
 
   dispose() {
-    Editor.inited$.value = false
+    Editor.inited.value = false
     YState.inited$.value = false
 
     StageInteract.dispose()
@@ -88,16 +90,14 @@ export class EditorService {
         StageViewport.init()
       }
     }
-
-    // UILeftPanelLayer.initHook()
-    // UILeftPanelLayer.init()
   }
 
   initEditor = async () => {
-    if (this.inited$.value) return
+    if (this.inited.value) return
 
+    this.disposer.add(this.subscribe())
     this.initHooks()
-    this.inited$.dispatch(true)
+    this.inited.dispatch(true)
   }
 }
 

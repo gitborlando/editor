@@ -12,7 +12,7 @@ import { useUnmount } from 'src/view/hooks/common'
 
 export const StageComp: FC<{}> = observer(({}) => {
   useUnmount(() => {
-    Surface.inited$.value = false
+    Surface.inited.value = false
   })
 
   useEffect(() => {
