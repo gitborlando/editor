@@ -41,7 +41,9 @@ export const InputNumber = observer(
 )
 
 const cls = classes(css`
-  width: 80px;
+  & .arco-input-inner-wrapper input {
+    ${styles.textCommon}
+  }
   &-no-hover-focus-style {
     & .arco-input-inner-wrapper {
       border: none;

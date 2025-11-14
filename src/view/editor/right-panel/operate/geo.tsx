@@ -24,25 +24,29 @@ export const EditorRightOperateGeo: FC<{}> = observer(({}) => {
         operateKey='x'
         value={activeGeometry.x}
       />
-      <GeometryItemComp label='纵轴' operateKey='y' value={activeGeometry.y} />
       <GeometryItemComp
-        label='宽度'
+        label={<Icon url={Assets.editor.RP.operate.geo.y} />}
+        operateKey='y'
+        value={activeGeometry.y}
+      />
+      <GeometryItemComp
+        label={<Icon url={Assets.editor.RP.operate.geo.w} />}
         operateKey='width'
         value={activeGeometry.width}
       />
       <GeometryItemComp
-        label='高度'
+        label={<Icon url={Assets.editor.RP.operate.geo.h} />}
         operateKey='height'
         value={activeGeometry.height}
       />
       <GeometryItemComp
-        label='旋转'
+        label={<Icon url={Assets.editor.RP.operate.geo.rotate} />}
         operateKey='rotation'
         value={activeGeometry.rotation}
       />
       <GeometryItemComp
         x-if={activeKeys.has('radius')}
-        label='圆角'
+        label={<Icon url={Assets.editor.RP.operate.geo.radius} />}
         operateKey='radius'
         slideRate={1 / getZoom()}
         value={activeGeometry.radius}

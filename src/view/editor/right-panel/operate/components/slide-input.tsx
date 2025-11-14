@@ -1,5 +1,6 @@
-import { InputNumber, InputNumberProps } from '@arco-design/web-react'
+import { InputNumberProps } from '@arco-design/web-react'
 import { Drag } from 'src/global/event/drag'
+import { InputNumber } from 'src/view/component/arco/input-number'
 
 interface SlideInputProps {
   prefix?: ReactNode
