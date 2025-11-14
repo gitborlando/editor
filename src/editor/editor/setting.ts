@@ -1,5 +1,6 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
+import { defuOverrideArray } from 'src/utils/defu'
 
 const initSetting = () => {
   return {
@@ -13,8 +14,8 @@ const initSetting = () => {
     showDirtyRect: false,
     dev: {
       solidZoomAndOffset: true,
-      zoom: 1,
-      offset: XY._(0, 0),
+      zoom: 100,
+      offset: XY._(100, 100),
     },
   }
 }
@@ -34,7 +35,7 @@ class EditorSettingService {
 
   private loadSetting() {
     const savedSetting = jsonParse(localStorage.getItem('editor.setting'))
-    this.setting = savedSetting || initSetting()
+    this.setting = defuOverrideArray(savedSetting, initSetting())
   }
 
   private autoSaveSetting() {
