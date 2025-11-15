@@ -1,15 +1,11 @@
 import { twoDecimal } from '@gitborlando/geo'
-import { iife } from '@gitborlando/utils'
+import { iife, matchCase } from '@gitborlando/utils'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { Eye, EyeOff } from 'lucide-react'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { OperateFill } from 'src/editor/operate/fill'
-import {
-  colorConvert,
-  makeLinearGradientCss,
-  rgbToRgba,
-  rgbTuple,
-} from 'src/utils/color'
+import { makeLinearGradientCss, rgbToRgba } from 'src/utils/color'
+import { Input } from 'src/view/component/arco/input'
 import { NumberInput } from 'src/view/component/number-input'
 import { suspense } from 'src/view/component/suspense'
 import { FillPickerState } from 'src/view/editor/right-panel/operate/picker/state'
@@ -71,32 +67,40 @@ const HexInputComp: FC<{
   fill: V1.Fill
   index: number
 }> = observer(({ fill, index }) => {
-  const { t } = useTranslation()
   const isSolidFill = fill.type === 'color'
+
+  const validateColor = (value: string) => {
+    try {
+      Color(`#${value}`)
+      return true
+    } catch (error) {}
+    return false
+  }
+
   const setColor = (color: string) => {
-    if (!isSolidFill) return
+    if (!isSolidFill) {
+      return
+    }
     OperateFill.setFill(index, (fill) => {
-      T<V1.FillColor>(fill).color = color
+      T<V1.FillColor>(fill).color = Color(`#${color}`).toString()
     })
   }
 
-  const value = iife(() => {
-    switch (fill.type) {
-      case 'color':
-        return colorConvert.rgb.hex(...rgbTuple(T<V1.FillColor>(fill).color))
-      case 'linearGradient':
-        return i18n.language === 'en' ? 'linear' : t('noun.linearGradient')
-      case 'image':
-        return `${t('noun.image')} ${t('noun.fill')}`
-    }
+  const value = matchCase(fill.type, {
+    color: Color(T<V1.FillColor>(fill).color).hex().slice(1),
+    linearGradient: i18n.language === 'en' ? 'linear' : t('noun.linearGradient'),
+    image: `${t('noun.image')} ${t('noun.fill')}`,
   })
 
   return (
-    <input
+    <Input
       className={cls('hex')}
+      noHoverFocusStyle
+      readOnly={!isSolidFill}
       value={value}
-      // onChange={(e) => setColor(e.target.value)}
+      onEnd={(value) => setColor(value)}
       onFocus={(e) => isSolidFill && e.target.select()}
+      validate={validateColor}
     />
   )
 })
