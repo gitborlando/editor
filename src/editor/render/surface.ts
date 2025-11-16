@@ -27,9 +27,6 @@ export class StageSurface {
   private canvas!: HTMLCanvasElement
   private ctx!: CanvasRenderingContext2D
 
-  private topCanvas!: HTMLCanvasElement
-  private topCtx!: CanvasRenderingContext2D
-
   private bufferCanvas = new OffscreenCanvas(0, 0)
   private bufferCtx = this.bufferCanvas.getContext('2d')!
 
@@ -61,47 +58,28 @@ export class StageSurface {
     this.ctx = canvas.getContext('2d')!
   }
 
-  setTopCanvas = (canvas: HTMLCanvasElement) => {
-    if (this.topCanvas) return
-    this.topCanvas = canvas
-    this.topCtx = canvas.getContext('2d')!
-  }
-
   setCursor = (cursor: string) => {
     this.container.style.cursor = cursor
   }
 
-  clearSurface = (witch: SurfaceCanvasType = 'mainCanvas') => {
-    if (witch === 'mainCanvas') {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    } else if (witch === 'topCanvas') {
-      this.topCtx.clearRect(0, 0, this.topCanvas.width, this.topCanvas.height)
-    }
+  clearSurface = () => {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
-  ctxSaveRestore(
-    func: (ctx: CanvasRenderingContext2D) => any,
-    witch: SurfaceCanvasType = 'mainCanvas',
-  ) {
-    const ctx = witch === 'mainCanvas' ? this.ctx : this.topCtx
-    ctx.save()
-    func(ctx)
-    ctx.restore()
+  ctxSaveRestore = (func: (ctx: CanvasRenderingContext2D) => any) => {
+    this.ctx.save()
+    func(this.ctx)
+    this.ctx.restore()
   }
 
-  setMatrix = (
-    obb: OBB,
-    inverse = false,
-    type: SurfaceCanvasType = 'mainCanvas',
-  ) => {
+  setMatrix = (obb: OBB, inverse = false) => {
     const { x, y, rotation } = obb
-    const ctx = type === 'mainCanvas' ? this.ctx : this.topCtx
     if (!inverse) {
-      ctx.translate(x, y)
-      ctx.rotate(Angle.radianFy(rotation))
+      this.ctx.translate(x, y)
+      this.ctx.rotate(Angle.radianFy(rotation))
     } else {
-      ctx.rotate(-Angle.radianFy(rotation))
-      ctx.translate(-x, -y)
+      this.ctx.rotate(-Angle.radianFy(rotation))
+      this.ctx.translate(-x, -y)
     }
   }
 
@@ -306,8 +284,6 @@ export class StageSurface {
   transformMatrix = () => {
     this.ctx.transform(...this.dprMatrix)
     this.ctx.transform(...this.viewportMatrix)
-    this.topCtx.transform(...this.dprMatrix)
-    this.topCtx.transform(...this.viewportMatrix)
   }
 
   private onZoomMove = () => {
@@ -339,13 +315,11 @@ export class StageSurface {
         const canvasWidth = width * dpr
         const canvasHeight = height * dpr
         this.canvas.width = canvasWidth
-        this.topCanvas.width = canvasWidth
         this.bufferCanvas.width = canvasWidth
         this.canvas.height = canvasHeight
-        this.topCanvas.height = canvasHeight
         this.bufferCanvas.height = canvasHeight
-        this.canvas.style.width = this.topCanvas.style.width = `${width}px`
-        this.canvas.style.height = this.topCanvas.style.height = `${height}px`
+        this.canvas.style.width = `${width}px`
+        this.canvas.style.height = `${height}px`
         this.boundAABB = new AABB(0, 0, width, height)
       },
       { fireImmediately: true },

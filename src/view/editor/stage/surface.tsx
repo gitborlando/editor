@@ -8,7 +8,6 @@ export const EditorStageSurfaceComp: FC<{}> = observer(({}) => {
   return (
     <G className={cls()} ref={Surface.setContainer}>
       <canvas ref={Surface.setCanvas} />
-      <canvas className={cls('topCanvas')} ref={Surface.setTopCanvas} />
     </G>
   )
 })
@@ -16,8 +15,4 @@ export const EditorStageSurfaceComp: FC<{}> = observer(({}) => {
 const cls = classes(css`
   /* background-color: #f7f8fa; */
   background-color: var(--gray-bg);
-  &-topCanvas {
-    position: absolute;
-    background-color: transparent;
-  }
 `)
