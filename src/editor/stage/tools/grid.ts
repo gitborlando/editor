@@ -1,25 +1,23 @@
-import { IXY } from '@gitborlando/geo'
-import { nearestPixel } from 'src/editor/math/base'
+import { expandOneStep, snapHalfPixel } from 'src/editor/math/base'
 import { Surface } from 'src/editor/render/surface'
-import { StageViewport } from 'src/editor/stage/viewport'
+import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 
 class StageToolGridService {
   private ctx!: CanvasRenderingContext2D
 
-  init() {
-    Surface.inited.hook(() => {
-      autorun(() => {
-        // this.draw()
-      })
-    })
+  subscribe() {
+    return Disposer.collect(Surface.onRenderTopCanvas.hook(this.draw))
   }
 
-  draw() {
+  private draw() {
+    const zoom = getZoom()
+    if (zoom < 10.96) return
+
     Surface.ctxSaveRestore((ctx) => {
-      Surface.transformMatrix()
+      ctx.transform(...StageViewport.sceneMatrix.invert().tuple())
+      ctx.strokeStyle = '#cccccc55'
+      ctx.lineWidth = 1
       this.ctx = ctx
-      ctx.strokeStyle = COLOR.gray
-      ctx.lineWidth = 0.6
       this.getTicks().forEach(({ x, y, length }) => {
         this.drawLine('horizontal', { x, y }, length)
         this.drawLine('vertical', { x, y }, length)
@@ -27,50 +25,42 @@ class StageToolGridService {
     })
   }
 
-  drawLine(type: 'horizontal' | 'vertical', start: IXY, length: number) {
+  private drawLine(type: 'horizontal' | 'vertical', start: IXY, length: number) {
+    start = StageViewport.sceneMatrix.applyXY(start)
+    length = length * getZoom()
+    const startX = snapHalfPixel(start.x)
+    const startY = snapHalfPixel(start.y)
+
     const path2d = new Path2D()
-    path2d.moveTo(nearestPixel(start.x), nearestPixel(start.y))
+    path2d.moveTo(startX, startY)
     if (type === 'horizontal') {
-      path2d.lineTo(nearestPixel(start.x + length), nearestPixel(start.y))
+      path2d.lineTo(start.x + length, startY)
     } else {
-      path2d.lineTo(nearestPixel(start.x), nearestPixel(start.y + length))
+      path2d.lineTo(startX, start.y + length)
     }
+
     this.ctx.stroke(path2d)
   }
 
-  getTicks = () => {
-    const { bound, zoom } = StageViewport
-
+  private getTicks = () => {
     const ticks: { x: number; y: number; length: number }[] = []
-    const offset = XY.from(StageViewport.offset).divide(zoom)
-    const sceneWidth = bound.width / zoom
-    const sceneHeight = bound.height / zoom
-    const step = getStepByZoom(zoom)
-    const hStart = getNearestIntMultiple(-offset.x, step)
-    const hEnd = getNearestIntMultiple(sceneWidth - offset.x, step)
-    const vStart = getNearestIntMultiple(-offset.y, step)
-    const vEnd = getNearestIntMultiple(sceneHeight - offset.y, step)
-    for (let i = hStart - step; i <= hEnd + step; i += step) {
-      ticks.push({ x: i, y: vStart, length: sceneHeight })
+
+    const { minX, minY, maxX, maxY } = StageViewport.sceneAABB
+
+    const hStart = expandOneStep(minX, 1, 'left')
+    const hEnd = expandOneStep(maxX, 1, 'right')
+    const vStart = expandOneStep(minY, 1, 'left')
+    const vEnd = expandOneStep(maxY, 1, 'right')
+
+    for (let i = hStart; i <= hEnd; i += 1) {
+      ticks.push({ x: i, y: vStart, length: vEnd - vStart })
     }
-    for (let i = vStart - step; i <= vEnd + step; i += step) {
-      ticks.push({ x: hStart, y: i, length: sceneWidth })
+    for (let i = vStart; i <= vEnd; i += 1) {
+      ticks.push({ x: hStart, y: i, length: hEnd - hStart })
     }
+
     return ticks
   }
 }
 
 export const StageToolGrid = autoBind(makeObservable(new StageToolGridService()))
-
-const getStepByZoom = (zoom: number) => {
-  const steps = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
-  const base = 50 / zoom
-  return steps.find((i) => i >= base) || steps[0]
-}
-
-const getNearestIntMultiple = (number: number, rate: number = 1) => {
-  const n = (number / rate) | 0
-  const left = rate * n
-  const right = rate * (n + 1)
-  return number - left <= right - number ? left : right
-}

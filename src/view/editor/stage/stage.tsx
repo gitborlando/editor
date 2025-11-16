@@ -13,7 +13,6 @@ export const StageComp: FC<{}> = observer(({}) => {
   useEffect(() => {
     return renderElem(
       <>
-        {/* <EditorStageGridComp /> */}
         <EditorStageOutlineComp />
         <EditorStageTransformComp />
         <EditorStageMarqueeComp />

@@ -1,12 +1,6 @@
 import { HandleNode } from 'src/editor/handle/node'
 import { StageViewport } from 'src/editor/stage/viewport'
 
-const getStepByZoom = (zoom: number) => {
-  const steps = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
-  const base = 50 / zoom
-  return steps.find((i) => i >= base) || steps[0]
-}
-
 const getNearestIntMultiple = (number: number, rate: number) => {
   const n = Math.floor(number / rate)
   const left = rate * n
@@ -19,7 +13,7 @@ export const RulerComp: FC<{}> = observer(({}) => {
     <G className={cls()}>
       <Ruler type='horizontal' />
       <Ruler type='vertical' />
-      <G center className={cls('corner')}></G>
+      {/* <G center className={cls('corner')}></G> */}
     </G>
   )
 })
@@ -37,7 +31,7 @@ export const Ruler: FC<{
     const offset =
       (type === 'horizontal' ? offsetXY.x + datumXY.x : offsetXY.y + datumXY.y) /
       zoom
-    const step = getStepByZoom(zoom)
+    const step = StageViewport.getStepByZoom(zoom)
     const start = getNearestIntMultiple(-offset, step)
     const end = getNearestIntMultiple(length - offset, step)
     for (let i = start; i <= end; i += step) {

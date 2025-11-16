@@ -78,38 +78,43 @@ export class Elem {
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
+    const resetCtx = Surface.setCurrentCtxType(
+      this.type === 'widgetElem' ? 'topCanvas' : 'mainCanvas',
+    )
+
     Surface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
 
-      Surface.ctxSaveRestore(() => ElemDrawer.draw(this, ctx, path2d))
+      Surface.ctxSaveRestore(() => {
+        this.node && ElemDrawer.draw(this, ctx, path2d)
+      })
 
       if (this.children.length) {
         if (this.clip) {
-          Surface.setMatrix(this.obb)
+          Surface.setOBBMatrix(this.obb, false)
           ctx.clip(path2d)
-          Surface.setMatrix(this.obb, true)
+          Surface.setOBBMatrix(this.obb, true)
         }
         this.children.forEach((child) => child.traverseDraw())
       }
     })
+
+    resetCtx()
   }
 
   parent!: Elem
   children: Elem[] = []
 
-  addChild(elem: Elem) {
+  addChild(elem: Elem, index?: number) {
+    if (elem.parent === this) return
+
     elem.parent = this
-    this.children.push(elem)
+    this.children.splice(index ?? this.children.length, 0, elem)
   }
 
   insertBefore(elem: Elem, beforeElem: Elem) {
     const index = this.children.indexOf(beforeElem)
-    if (index !== -1) {
-      this.children.splice(index, 0, elem)
-      elem.parent = this
-    } else {
-      this.addChild(elem)
-    }
+    this.addChild(elem, index === -1 ? this.children.length : index)
   }
 
   removeChild(elem: Elem) {

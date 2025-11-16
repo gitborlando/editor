@@ -17,7 +17,16 @@ export type NeedUndoClientState = {
 class YClientsService {
   clientId!: number
 
-  @observable client!: V1.Client
+  @observable client: V1.Client = {
+    selectIdMap: {},
+    selectPageId: '',
+    cursor: new XY(0, 0),
+    color: COLOR.random(),
+    sceneMatrix: StageViewport.sceneMatrix.tuple(),
+    userId: '',
+    userName: '',
+    userAvatar: '',
+  }
   @observable others: V1.Clients = {}
   @observable observingClientId?: number
 
@@ -41,16 +50,12 @@ class YClientsService {
   afterSelect = Signal.create<void>()
 
   init() {
-    this.client = {
-      selectIdMap: {},
-      selectPageId: YState.state.meta.pageIds[0],
-      cursor: new XY(0, 0),
-      color: COLOR.random(),
-      viewportMatrix: StageViewport.matrix.tuple(),
-      userId: UserService.userId,
-      userName: UserService.userName,
-      userAvatar: UserService.avatar,
-    }
+    runInAction(() => {
+      this.client.selectPageId = YState.state.meta.pageIds[0]
+      this.client.userId = UserService.userId
+      this.client.userName = UserService.userName
+      this.client.userAvatar = UserService.avatar
+    })
     YUndo.initClientUndo()
     return Disposer.collect(this.onMouseMove())
   }

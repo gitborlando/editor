@@ -1,3 +1,4 @@
+import { iife } from '@gitborlando/utils'
 import { entries } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
@@ -18,7 +19,7 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
   const others = YClients.others
   const client = YClients.client
 
-  const outlineInfoLMap = useMemo(() => {
+  const outlineInfoLMap = iife(() => {
     const map: Record<string, OutlineInfo> = {}
     for (const [_, client] of entries(others)) {
       for (const id of Object.keys(client.selectIdMap || {})) {
@@ -36,7 +37,7 @@ export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
       map[id] = { hovered: hoverId === id, selected: selected as boolean }
     }
     return map
-  }, [others, client, hoverId])
+  })
 
   return (
     <>

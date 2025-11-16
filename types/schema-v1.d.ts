@@ -28,7 +28,7 @@ namespace V1 {
     selectPageId: string
     cursor: IXY
     color: string
-    viewportMatrix: import('src/editor/math/matrix').IMatrixTuple
+    sceneMatrix: import('src/editor/math/matrix').IMatrixTuple
   }
 
   type Clients = {

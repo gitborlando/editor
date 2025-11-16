@@ -35,6 +35,7 @@ export class EditorService {
       HandleNode.subscribe(),
       Surface.subscribe(),
       StageViewport.subscribe(),
+      StageToolGrid.subscribe(),
     )
   }
 
@@ -53,7 +54,6 @@ export class EditorService {
     StageInteract.init()
     StageDrop.initHook()
     StageCursor.initHook()
-    StageToolGrid.init()
   }
 
   dispose() {

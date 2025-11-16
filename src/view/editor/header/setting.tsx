@@ -111,12 +111,12 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
 
 const DevSettingComp: FC<{}> = observer(({}) => {
   const setting = getEditorSetting()
-  const { solidZoomAndOffset } = setting.dev
+  const { fixedSceneMatrix: solidZoomAndOffset } = setting.dev
 
   const handelFixZoomAndOffset = () => {
-    setting.dev.solidZoomAndOffset = !solidZoomAndOffset
+    setting.dev.fixedSceneMatrix = !solidZoomAndOffset
     if (!solidZoomAndOffset) {
-      setting.dev.matrix = StageViewport.matrix.tuple()
+      setting.dev.sceneMatrix = StageViewport.sceneMatrix.tuple()
     }
   }
 

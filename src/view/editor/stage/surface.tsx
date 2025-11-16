@@ -8,6 +8,7 @@ export const EditorStageSurfaceComp: FC<{}> = observer(({}) => {
   return (
     <G className={cls()} ref={Surface.setContainer}>
       <canvas ref={Surface.setCanvas} />
+      <canvas style={{ position: 'absolute' }} ref={Surface.setTopCanvas} />
     </G>
   )
 })

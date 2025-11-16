@@ -1,7 +1,6 @@
 import { AABB, Angle, OBB, abs, max, round } from '@gitborlando/geo'
-import { reverseFor } from '@gitborlando/utils'
+import { NoopFunc, reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
-import autoBind from 'class-autobind-decorator'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { Matrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
@@ -10,7 +9,7 @@ import {
   createTextBreaker,
 } from 'src/editor/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
-import { INoopFunc, IXY, Raf, getTime } from 'src/shared/utils/normal'
+import { Raf, getTime } from 'src/shared/utils/normal'
 import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
 import { Elem } from './elem'
@@ -24,7 +23,6 @@ export type SurfaceRenderType =
   | 'nextFullRender'
   | 'partialRender'
 
-@autoBind
 export class StageSurface {
   inited = Signal.create(false)
 
@@ -32,6 +30,9 @@ export class StageSurface {
 
   private canvas!: HTMLCanvasElement
   private ctx!: CanvasRenderingContext2D
+
+  private topCanvas!: HTMLCanvasElement
+  private topCtx!: CanvasRenderingContext2D
 
   private bufferCanvas = new OffscreenCanvas(0, 0)
   private bufferCtx = this.bufferCanvas.getContext('2d')!
@@ -48,7 +49,9 @@ export class StageSurface {
         this.onResize()
         this.onZoomMove()
         this.onPointerEvents()
+        this.requestRenderTopCanvas()
       }),
+      this.devShowDirtyRect(),
       () => (this.inited.value = false),
     )
   }
@@ -62,6 +65,13 @@ export class StageSurface {
     if (this.canvas) return
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')!
+    this.currentCtx = this.ctx
+  }
+
+  setTopCanvas = (canvas: HTMLCanvasElement) => {
+    if (this.topCanvas) return
+    this.topCanvas = canvas
+    this.topCtx = canvas.getContext('2d')!
   }
 
   setCursor = (cursor: string) => {
@@ -69,28 +79,38 @@ export class StageSurface {
   }
 
   clearSurface = () => {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.currentCtx.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
-  ctxSaveRestore = (func: (ctx: CanvasRenderingContext2D) => any) => {
-    this.ctx.save()
-    func(this.ctx)
-    this.ctx.restore()
+  ctxSaveRestore(func: (ctx: CanvasRenderingContext2D) => any) {
+    this.currentCtx.save()
+    func(this.currentCtx)
+    this.currentCtx.restore()
   }
 
-  setMatrix = (obb: OBB, inverse = false) => {
+  private currentCtx = this.ctx
+
+  setCurrentCtxType = (type: SurfaceCanvasType) => {
+    let lastCtx = this.currentCtx
+    this.currentCtx = type === 'mainCanvas' ? this.ctx : this.topCtx
+    return () => {
+      this.currentCtx = lastCtx
+    }
+  }
+
+  setOBBMatrix = (obb: OBB, inverse = false) => {
     const { x, y, rotation } = obb
     if (!inverse) {
-      this.ctx.translate(x, y)
-      this.ctx.rotate(Angle.radianFy(rotation))
+      this.currentCtx.translate(x, y)
+      this.currentCtx.rotate(Angle.radianFy(rotation))
     } else {
-      this.ctx.rotate(-Angle.radianFy(rotation))
-      this.ctx.translate(-x, -y)
+      this.currentCtx.rotate(-Angle.radianFy(rotation))
+      this.currentCtx.translate(-x, -y)
     }
   }
 
   private renderType?: SurfaceRenderType
-  private renderTasks: INoopFunc[] = []
+  private renderTasks: NoopFunc[] = []
   private raf = new Raf()
 
   private requestRender = (type: SurfaceRenderType) => {
@@ -112,6 +132,28 @@ export class StageSurface {
       this.ctxSaveRestore(() => this.renderTasks.pop()?.())
       this.renderType = undefined
       this.renderTasks.length && next()
+    })
+  }
+
+  onRenderTopCanvas = Signal.create()
+
+  private hasRequestedRenderTopCanvas = false
+
+  private requestRenderTopCanvas = () => {
+    if (this.hasRequestedRenderTopCanvas) return
+    this.hasRequestedRenderTopCanvas = true
+
+    requestAnimationFrame(() => {
+      this.hasRequestedRenderTopCanvas = false
+
+      const resetCtx = this.setCurrentCtxType('topCanvas')
+      this.clearSurface()
+      this.ctxSaveRestore(() => {
+        this.transformTopCanvas()
+        this.onRenderTopCanvas.dispatch(this.topCtx)
+        StageScene.widgetRoot.children.forEach((elem) => elem.traverseDraw())
+      })
+      resetCtx()
     })
   }
 
@@ -144,12 +186,10 @@ export class StageSurface {
   }
 
   private fullRender = () => {
-    this.transformMatrix()
+    this.transformCanvas()
 
     if (!getEditorSetting().needSliceRender || getEditorSetting().showDirtyRect) {
-      StageScene.rootElems.forEach((elem) =>
-        elem.children.forEach((elem) => elem.traverseDraw()),
-      )
+      StageScene.sceneRoot.children.forEach((elem) => elem.traverseDraw())
       return
     }
 
@@ -165,12 +205,10 @@ export class StageSurface {
   }
 
   private patchRender = (reRenderElems: Set<Elem>) => {
-    this.transformMatrix()
+    this.transformCanvas()
 
-    StageScene.rootElems.forEach((elem) => {
-      elem.children.forEach((elem) => {
-        reRenderElems.has(elem) && elem.traverseDraw()
-      })
+    StageScene.sceneRoot.children.forEach((elem) => {
+      reRenderElems.has(elem) && elem.traverseDraw()
     })
   }
 
@@ -186,7 +224,7 @@ export class StageSurface {
 
     const traverse = (elem: Elem) => {
       if (!elem.visible) return
-      if (AABB.include(StageViewport.prevAABB, elem.aabb) === 1) return
+      if (AABB.include(StageViewport.prevSceneAABB, elem.aabb) === 1) return
       reRenderElems.add(elem)
     }
 
@@ -215,7 +253,7 @@ export class StageSurface {
     this.ctx.clearRect(0, 0, width, height)
     this.ctx.drawImage(this.bufferCanvas, 0, 0, width, height, 0, 0, width, height)
 
-    StageScene.rootElems.forEach((elem) => elem.children.forEach(traverse))
+    StageScene.sceneRoot.children.forEach(traverse)
     this.ctxSaveRestore(() => this.patchRender(reRenderElems))
   }
 
@@ -225,7 +263,11 @@ export class StageSurface {
     const dirtyRect = elem.getDirtyRect()
     if (dirtyRect) {
       this.dirtyRects.add(dirtyRect)
-      this.requestRender('partialRender')
+      if (elem.type === 'widgetElem') {
+        this.requestRenderTopCanvas()
+      } else {
+        this.requestRender('partialRender')
+      }
     }
   }
 
@@ -253,52 +295,62 @@ export class StageSurface {
     }
 
     this.ctxSaveRestore(() => {
-      this.transformMatrix()
+      this.transformCanvas()
       const { minX, minY, maxX, maxY } = dirtyArea
       this.ctx.clearRect(minX, minY, maxX - minX, maxY - minY)
       this.dirtyRects.clear()
+      this.devDirtyArea = dirtyArea
     })
-
-    if (getEditorSetting().showDirtyRect) {
-      this.devShowDirtyRect(dirtyArea)
-    } else {
-      this.patchRender(reRenderElems)
-    }
-  }
-
-  private devShowDirtyRect(dirtyArea: AABB) {
-    this.clearSurface()
 
     this.ctxSaveRestore(() => {
-      this.fullRender()
+      this.patchRender(reRenderElems)
     })
+  }
 
-    this.ctxSaveRestore((ctx) => {
-      this.transformMatrix()
+  private devDirtyArea?: AABB
 
-      const path2d = new Path2D()
-      const { minX, minY, maxX, maxY } = dirtyArea
-      path2d.rect(minX, minY, maxX - minX, maxY - minY)
-      ctx.strokeStyle = rgba(0, 255, 100, 1)
-      ctx.stroke(path2d)
+  private devShowDirtyRect() {
+    return this.onRenderTopCanvas.hook(() => {
+      if (!getEditorSetting().showDirtyRect) return
+
+      this.ctxSaveRestore((ctx) => {
+        if (!this.devDirtyArea) return
+
+        const path2d = new Path2D()
+        const { minX, minY, maxX, maxY } = this.devDirtyArea
+        path2d.rect(minX, minY, maxX - minX, maxY - minY)
+        ctx.strokeStyle = rgba(0, 255, 100, 1)
+        ctx.stroke(path2d)
+      })
     })
   }
 
   private dprMatrix = Matrix.of(dpr, 0, 0, dpr, 0, 0)
 
-  transformMatrix = () => {
+  transformCanvas = () => {
     this.ctx.transform(...this.dprMatrix.tuple())
-    this.ctx.transform(...StageViewport.matrix.tuple())
+    this.ctx.transform(...StageViewport.sceneMatrix.tuple())
+  }
+
+  transformTopCanvas = () => {
+    this.topCtx.transform(...this.dprMatrix.tuple())
+    this.topCtx.transform(...StageViewport.sceneMatrix.tuple())
   }
 
   private onZoomMove = () => {
     reaction(
       () => StageViewport.zoom,
-      () => this.requestRender('firstFullRender'),
+      () => {
+        this.requestRender('firstFullRender')
+        this.requestRenderTopCanvas()
+      },
     )
     reaction(
       () => XY.from(StageViewport.offset),
-      (offset, prevOffset) => this.translate(offset, prevOffset),
+      (offset, prevOffset) => {
+        this.translate(offset, prevOffset)
+        this.requestRenderTopCanvas()
+      },
     )
   }
 
@@ -306,14 +358,14 @@ export class StageSurface {
     reaction(
       () => ({ ...StageViewport.bound }),
       ({ width, height }) => {
-        const canvasWidth = width * dpr
-        const canvasHeight = height * dpr
-        this.canvas.width = canvasWidth
-        this.bufferCanvas.width = canvasWidth
-        this.canvas.height = canvasHeight
-        this.bufferCanvas.height = canvasHeight
-        this.canvas.style.width = `${width}px`
-        this.canvas.style.height = `${height}px`
+        ;[this.canvas, this.topCanvas, this.bufferCanvas].forEach((canvas) => {
+          canvas.width = width * dpr
+          canvas.height = height * dpr
+          if (!(canvas instanceof OffscreenCanvas)) {
+            canvas.style.width = `${width}px`
+            canvas.style.height = `${height}px`
+          }
+        })
       },
       { fireImmediately: true },
     )
@@ -324,7 +376,7 @@ export class StageSurface {
   }
 
   testVisible = (aabb: AABB) => {
-    return AABB.collide(aabb, StageViewport.AABB)
+    return AABB.collide(aabb, StageViewport.sceneAABB)
   }
 
   getVisualSize = (aabb: AABB) => {
@@ -351,7 +403,7 @@ export class StageSurface {
 
   private getEventXY = (xy: IXY) => {
     xy = StageViewport.toCanvasXY(xy)
-    this.eventXY = StageViewport.matrix.invertXY(xy)
+    this.eventXY = StageViewport.sceneMatrix.invertXY(xy)
     this.elemsFromPoint = []
   }
 
@@ -360,7 +412,7 @@ export class StageSurface {
       elem: Elem,
       capture: boolean,
       stopped: boolean,
-      stopPropagation: INoopFunc,
+      stopPropagation: NoopFunc,
       hitList?: Elem[],
       xy?: IXY,
     ) => any,
@@ -445,4 +497,4 @@ export class StageSurface {
   }
 }
 
-export const Surface = new StageSurface()
+export const Surface = autoBind(new StageSurface())

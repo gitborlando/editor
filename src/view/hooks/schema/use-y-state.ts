@@ -14,5 +14,5 @@ export function useSelectPage() {
 }
 
 export function useSchema<T>(selector: (state: V1.Schema) => T): T {
-  return useSyncExternalStore(YState.immut.subscribe, () => selector(YState.state))
+  return useSyncExternalStore(YState.subscribe, () => selector(YState.state))
 }

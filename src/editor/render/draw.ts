@@ -29,7 +29,7 @@ class ElemDrawerService {
     this.path2d = path2d
     this.dirtyRects = [elem.aabb]
 
-    Surface.setMatrix(this.elem.obb, false)
+    Surface.setOBBMatrix(this.elem.obb, false)
 
     this.drawShapePath()
 
@@ -66,10 +66,14 @@ class ElemDrawerService {
         this.drawEllipse()
         break
 
+      // case 'line':
+      //   this.drawLine(node.points)
+      //   break
+
       case 'polygon':
       case 'star':
-      case 'line':
       case 'irregular':
+      case 'line':
         this.drawPath(node.points)
         break
 
@@ -138,6 +142,17 @@ class ElemDrawerService {
       }
     }
     this.path2d.closePath()
+  }
+
+  private drawLine = (points: V1.Point[]) => {
+    // console.log('points: ', points)
+    // const startX = nearestPixel(points[0].x)
+    // const startY = nearestPixel(points[0].y)
+    // const endX = nearestPixel(points[1].x)
+    // const endY = nearestPixel(points[1].y)
+    // this.path2d.moveTo(startX, startY)
+    // this.path2d.lineTo(endX, endY)
+    // this.path2d.closePath()
   }
 
   private drawPath(points: V1.Point[]) {

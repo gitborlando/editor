@@ -13,8 +13,8 @@ const initSetting = () => {
     mockMode: false,
     showDirtyRect: false,
     dev: {
-      solidZoomAndOffset: true,
-      matrix: Matrix.identity().tuple(),
+      fixedSceneMatrix: true,
+      sceneMatrix: Matrix.identity().tuple(),
     },
   }
 }

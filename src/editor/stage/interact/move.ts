@@ -23,7 +23,7 @@ class StageMoveService {
   private onMoveStage() {
     Drag.onStart(() => StageCursor.unlock().setCursor('grab').lock())
       .onMove(({ delta }) => {
-        StageViewport.matrix = StageViewport.matrix
+        StageViewport.sceneMatrix = StageViewport.sceneMatrix
           .clone()
           .translate(delta.x, delta.y)
       })

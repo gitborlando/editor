@@ -30,22 +30,6 @@ export function radianfy(degrees: number) {
   return degrees * (Math.PI / 180)
 }
 
-export function minToMax(...numbers: number[]) {
-  numbers.sort((a, b) => a - b)
-  return numbers
-}
-export function maxToMin(...numbers: number[]) {
-  numbers.sort((a, b) => b - a)
-  return numbers
-}
-
-export function numberHalfFix(number: number) {
-  const integerPart = ~~number
-  const floatPart = number - integerPart
-  const halfFixed = floatPart >= 0.75 ? 1 : floatPart >= 0.25 ? 0.5 : 0
-  return integerPart + halfFixed
-}
-
 export function rotatePoint(
   ax: number,
   ay: number,
@@ -64,12 +48,19 @@ export function normalAngle(angle: number) {
   return (angle + 360) % 360
 }
 
-export const nearestPixel = (n: number) => {
-  const left = Math.floor(n)
-  const right = Math.ceil(n)
-  return (n - left < right - n ? left : right) + 0.5
+export const snapHalfPixel = (n: number) => {
+  return Math.round(n - 0.5) + 0.5
 }
 
 export function minMax(min: number, max: number, value: number) {
   return Math.min(Math.max(min, value), max)
+}
+
+export const expandOneStep = (
+  number: number,
+  step: number,
+  direction: 'left' | 'right',
+) => {
+  const n = (number / step) | 0
+  return direction === 'left' ? (n - 1) * step : (n + 1) * step
 }
