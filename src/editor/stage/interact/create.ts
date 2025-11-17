@@ -1,19 +1,15 @@
+import { Angle } from '@gitborlando/geo'
 import { DragData } from '@gitborlando/utils/browser'
-import autobind from 'class-autobind-decorator'
-import { max, ratan2 } from 'src/editor/math/base'
-import { xy_distance } from 'src/editor/math/xy'
+import { HandleNode } from 'src/editor/handle/node'
+import { max } from 'src/editor/math/base'
 import { OperateGeometry } from 'src/editor/operate/geometry'
-import { OperateNode } from 'src/editor/operate/node'
-import { OperatePage } from 'src/editor/operate/page'
-import { SchemaCreator } from 'src/editor/schema/creator'
-import { Schema } from 'src/editor/schema/schema'
-import { StageCursor } from 'src/editor/stage/cursor'
 import { StageScene } from 'src/editor/render/scene'
 import { Surface } from 'src/editor/render/surface'
+import { SchemaCreator } from 'src/editor/schema/creator'
+import { StageCursor } from 'src/editor/stage/cursor'
 import { Drag } from 'src/global/event/drag'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { collectDisposer } from 'src/utils/disposer'
 import { StageViewport } from '../viewport'
 import { StageInteract } from './interact'
 import { StageSelect } from './select'
@@ -29,14 +25,13 @@ const createTypes = [
 ] as const
 export type IStageCreateType = (typeof createTypes)[number]
 
-@autobind
 class StageCreateService {
   createTypes = createTypes
-  currentType = Signal.create<IStageCreateType>('frame')
+  @observable currentType: IStageCreateType = 'frame'
   private createId = ''
 
   startInteract() {
-    const disposer = collectDisposer(
+    const disposer = Disposer.collect(
       StageScene.sceneRoot.addEvent('mousedown', this.create, { capture: true }),
     )
     StageCursor.setCursor('add').lock()
@@ -48,7 +43,7 @@ class StageCreateService {
   }
 
   private create() {
-    Drag.onDown(this.onCreateStart)
+    Drag.onStart(this.onCreateStart)
       .onMove(this.onCreateMove)
       .onDestroy(this.onCreateEnd)
   }
@@ -56,8 +51,8 @@ class StageCreateService {
   private onCreateStart({ start }: DragData) {
     const node = this.createNode(start)
 
-    OperateNode.addNodes([node])
-    OperateNode.insertAt(this.findParent(), node)
+    HandleNode.addNodes([node])
+    HandleNode.insertChildAt(this.findParent(), node)
     StageSelect.onCreateSelect(this.createId)
 
     if (node.type === 'line') {
@@ -67,43 +62,44 @@ class StageCreateService {
   }
 
   private onCreateMove({ marquee, current, start }: DragData) {
-    const node = Schema.find(this.createId)
+    const node = YState.find(this.createId)
 
     if (node.type === 'line') {
       current = StageViewport.toSceneXY(current)
       start = StageViewport.toSceneXY(start)
-      const rotation = ratan2(current.y - start.y, current.x - start.x)
-      OperateGeometry.setActiveGeometry('x', start.x)
-      OperateGeometry.setActiveGeometry('y', start.y)
-      OperateGeometry.setActiveGeometry('width', max(1, xy_distance(current, start)))
-      OperateGeometry.setActiveGeometry('rotation', rotation)
+      const rotation = Angle.atan2(current.y - start.y, current.x - start.x)
+      const width = max(1, XY.from(current).getDistance(start))
+      OperateGeometry.setActiveGeometries(
+        { x: start.x, y: start.y, width, rotation },
+        false,
+      )
     } else {
       const { x, y, width, height } = StageViewport.toSceneMarquee(marquee)
-      OperateGeometry.setActiveGeometry('x', x)
-      OperateGeometry.setActiveGeometry('y', y)
-      OperateGeometry.setActiveGeometry('width', max(1, width))
-      OperateGeometry.setActiveGeometry('height', max(1, height))
+      OperateGeometry.setActiveGeometries(
+        { x, y, width: max(1, width), height: max(1, height) },
+        false,
+      )
     }
   }
 
   private onCreateEnd() {
-    const node = Schema.find<INode>(this.createId)
+    const node = YState.find<V1.Node>(this.createId)
 
     if (node.width === 1) {
-      Schema.itemReset(node, ['width'], 100)
+      YState.set(`${node.id}.width`, 100)
       if (node.type !== 'line') {
-        Schema.itemReset(node, ['height'], 100)
+        YState.set(`${node.id}.height`, 100)
       }
     }
 
-    Schema.finalOperation('创建节点 ' + node.name)
+    YUndo.track({ type: 'all', description: `创建节点 ${node.name}` })
     StageInteract.interaction = 'select'
   }
 
   private createNode(start: IXY) {
     const { x, y } = StageViewport.toSceneXY(start)
 
-    const node = SchemaCreator[this.currentType.value]({ x, y, width: 1, height: 1 })
+    const node = SchemaCreator[this.currentType]({ x, y, width: 1, height: 1 })
     this.createId = node.id
 
     return node
@@ -113,10 +109,9 @@ class StageCreateService {
     const frame = StageScene.elemsFromPoint().find((elem) =>
       SchemaUtil.isById(elem.id, 'frame'),
     )
-
-    if (frame) return Schema.find<INodeParent>(frame.id)
-    return OperatePage.currentPage
+    if (frame) return YState.find<V1.NodeParent>(frame.id)
+    return YState.find<V1.Page>(YClients.client.selectPageId)
   }
 }
 
-export const StageCreate = new StageCreateService()
+export const StageCreate = autoBind(makeObservable(new StageCreateService()))

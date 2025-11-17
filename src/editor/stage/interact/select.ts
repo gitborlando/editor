@@ -7,11 +7,11 @@ import { observable } from 'mobx'
 import { EditorCommand } from 'src/editor/editor/command'
 import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
-import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
-import { Schema } from 'src/editor/schema/schema'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
 import { Surface } from 'src/editor/render/surface'
+import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
+import { Schema } from 'src/editor/schema/schema'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
@@ -109,10 +109,9 @@ class StageSelectService {
 
   onCreateSelect(id: string) {
     this.clearSelect()
-    OperateNode.select(id)
+    YClients.select(id)
     // UILeftPanelLayer.expandAncestor(id)
     YClients.afterSelect.dispatch()
-    OperateNode.commitSelect()
   }
 
   private onMousedownSelect() {

@@ -58,16 +58,16 @@ const StageOperateIcon: FC<{ type: 'select' | 'move' }> = observer(({ type }) =>
 
 const CreateShapeIcon: FC<{ type: IStageCreateType }> = observer(({ type }) => {
   const isActive =
-    StageInteract.interaction === 'create' && StageCreate.currentType.value === type
+    StageInteract.interaction === 'create' && StageCreate.currentType === type
   const iconUrl = Assets.editor.node[type as keyof typeof Assets.editor.node]
   return (
     <Button
       active={isActive}
       icon={<Icon url={iconUrl} className={cls('centerGroup-icon')} />}
-      onClick={(e) => {
+      onClick={action(() => {
         StageInteract.interaction = 'create'
-        StageCreate.currentType.dispatch(type)
-      }}></Button>
+        StageCreate.currentType = type
+      })}></Button>
   )
 })
 
