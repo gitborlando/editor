@@ -82,6 +82,7 @@ export default class Immut<T extends AnyObject = AnyObject> {
     this.traverse(this.state, this.changeMap)
     this.listeners.forEach((callback) => callback(this.patches))
 
+    this.accumulatePatches.push(...this.patches)
     this.patches = []
     this.changeMap = {}
   }
@@ -89,6 +90,23 @@ export default class Immut<T extends AnyObject = AnyObject> {
   subscribe = (callback: (patches: ImmutPatch[]) => void) => {
     this.listeners.add(callback)
     return () => this.listeners.delete(callback)
+  }
+
+  private accumulatePatches: ImmutPatch[] = []
+
+  getPatches = () => {
+    const keyPatchMap = new Map<string, ImmutPatch>()
+    this.accumulatePatches.forEach((patch) => {
+      const keyPath = patch.keys.join('.')
+      if (keyPatchMap.has(keyPath)) {
+        const existingPatch = keyPatchMap.get(keyPath)!
+        existingPatch.value = patch.value
+      } else {
+        keyPatchMap.set(keyPath, patch)
+      }
+    })
+    this.accumulatePatches = []
+    return this.deepClone([...keyPatchMap.values()])
   }
 
   applyImmerPatches = (patches: Patch[], prefix: string) => {

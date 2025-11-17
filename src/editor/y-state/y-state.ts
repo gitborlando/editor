@@ -2,7 +2,6 @@ import autobind from 'class-autobind-decorator'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import Immut, { ImmutPatch } from 'src/utils/immut/immut'
 import { bind } from 'src/utils/immut/immut-y'
-import { IndexeddbPersistence } from 'y-indexeddb'
 import * as Y from 'yjs'
 
 @autobind
@@ -13,7 +12,6 @@ class YStateService {
   inited$ = Signal.create(false)
   flushPatch$ = Signal.create<ImmutPatch>()
 
-  private yIndexDB!: IndexeddbPersistence
   private unSub?: () => void
 
   get state() {
@@ -28,14 +26,14 @@ class YStateService {
   get delete() {
     return this.immut.delete
   }
-  get track() {
-    return this.immut.track
-  }
   get next() {
     return this.immut.next
   }
   get subscribe() {
     return this.immut.subscribe
+  }
+  get getPatches() {
+    return this.immut.getPatches
   }
   get applyImmerPatches() {
     return this.immut.applyImmerPatches
@@ -47,8 +45,6 @@ class YStateService {
 
   async initSchema(fileId: string, mockSchema?: V1.Schema) {
     this.doc = new Y.Doc()
-    // this.yIndexDB = new IndexeddbPersistence(fileId, this.doc)
-    // await this.yIndexDB.whenSynced
 
     this.immut.state = mockSchema!
     bind(this.immut, this.doc.getMap('schema'))

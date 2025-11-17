@@ -1,12 +1,14 @@
 import { clone } from '@gitborlando/utils'
 import { computed, observable } from 'mobx'
 import { NeedUndoClientState, YClients } from 'src/editor/y-state/y-clients'
+import { ImmutPatch } from 'src/utils/immut/immut'
 import * as Y from 'yjs'
 
-type YUndoInfo = {
+export type YUndoInfo = {
   type: 'state' | 'client' | 'all'
   description: string
   clientState?: NeedUndoClientState
+  statePatches?: ImmutPatch[]
 }
 
 class YUndoService {
@@ -78,6 +80,7 @@ class YUndoService {
 
     if (type === 'state' || type === 'all') {
       this.stateUndo.stopCapturing()
+      info.statePatches = YState.getPatches()
     }
     if (type === 'client' || type === 'all') {
       info.clientState = this.getClientState()

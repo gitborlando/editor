@@ -16,7 +16,8 @@
     "error": "错误",
     "warning": "警告",
     "info": "提示",
-    "setting": "设置"
+    "setting": "设置",
+    "history": "历史记录"
   },
   "editor": {
     "title": "编辑器",

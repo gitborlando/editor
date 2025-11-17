@@ -16,7 +16,8 @@
     "error": "Error",
     "warning": "Warning",
     "info": "Info",
-    "setting": "Settings"
+    "setting": "Settings",
+    "history": "History"
   },
   "editor": {
     "title": "Editor",

@@ -78,6 +78,7 @@ export const DragPanel: FC<DragPanelProps> = ({
 
   return createPortal(
     <G
+      vertical='auto 1fr'
       className={cx(cls(), className)}
       ref={ref}
       style={{
@@ -117,6 +118,7 @@ const cls = classes(css`
   overflow: hidden;
   ${styles.shadow}
   &-header {
+    gap: 8px;
     height: 36px;
     padding-inline: 6px;
     ${styles.textHead}
@@ -125,8 +127,11 @@ const cls = classes(css`
       padding-left: 4px;
       align-items: center;
     }
+    &-slot {
+      justify-content: end;
+    }
   }
   &-content {
-    height: fit-content;
+    height: 100%;
   }
 `)

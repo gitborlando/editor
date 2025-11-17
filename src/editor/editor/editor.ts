@@ -6,8 +6,9 @@ import { mockCollide } from 'src/editor/editor/mock/collide'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { OperateGeometry } from 'src/editor/operate/geometry'
-import { StageCursor } from 'src/editor/stage/cursor'
+import { StageScene } from 'src/editor/render/scene'
 import { Surface } from 'src/editor/render/surface'
+import { StageCursor } from 'src/editor/stage/cursor'
 import { StageToolGrid } from 'src/editor/stage/tools/grid'
 import { YSync } from 'src/editor/y-state/y-sync'
 import { FileService } from 'src/global/service/file'
@@ -20,7 +21,6 @@ import { OperateText } from '../operate/text'
 import { Schema } from '../schema/schema'
 import { StageDrop } from '../stage/drop'
 import { StageInteract } from '../stage/interact/interact'
-import { StageScene } from 'src/editor/render/scene'
 import { StageViewport } from '../stage/viewport'
 
 const jsZip = new JSZip()
@@ -31,14 +31,16 @@ export class EditorService {
   private disposer = new Disposer()
 
   private subscribe() {
-    return Disposer.collect(Surface.subscribe(), StageViewport.subscribe())
+    return Disposer.collect(
+      HandleNode.subscribe(),
+      Surface.subscribe(),
+      StageViewport.subscribe(),
+    )
   }
 
   private initHooks() {
     EditorSetting.init()
     EditorCommand.init()
-
-    HandleNode.init()
 
     OperateAlign.initHook()
     OperateGeometry.initHook()

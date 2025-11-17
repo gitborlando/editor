@@ -1,63 +1,59 @@
 import { firstOne, iife, stableIndex } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import { AABB, OBB } from 'src/editor/math/obb'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import { collectDisposer } from 'src/utils/disposer'
-import { xy_ } from '../math/xy'
 import { SchemaCreator } from '../schema/creator'
 import { Schema } from '../schema/schema'
-import { ID, INode, INodeParent } from '../schema/type'
 
-@autobind
 class HandleNodeService {
   datumId = ''
-  @observable.ref datumXY = xy_(0, 0)
+  @observable.ref datumXY = XY._(0, 0)
   copiedIds = <ID[]>[]
 
-  init() {
+  subscribe() {
     return collectDisposer(YClients.afterSelect.hook(() => this.getDatum()))
   }
 
-  addNodes(nodes: INode[]) {
+  addNodes(nodes: V1.Node[]) {
     nodes.forEach((node) => YState.set(`${node.id}`, node))
   }
 
-  removeNodes(nodes: INode[]) {
+  removeNodes(nodes: V1.Node[]) {
     nodes.forEach((node) => YState.delete(`${node.id}`))
   }
 
-  insertChildAt(parent: INodeParent, node: INode, index?: number) {
+  insertChildAt(parent: V1.NodeParent, node: V1.Node, index?: number) {
     index ??= parent.childIds.length
     YState.insert(`${parent.id}.childIds.${index}`, node.id)
     YState.set(`${node.id}.parentId`, parent.id)
   }
 
-  removeChild(parent: INodeParent, node: INode) {
+  removeChild(parent: V1.NodeParent, node: V1.Node) {
     const index = parent.childIds.indexOf(node.id)
     YState.delete(`${parent.id}.childIds.${index}`)
     YState.set(`${node.id}.parentId`, '')
   }
 
-  deleteChild(parent: INodeParent, node: INode) {
+  deleteChild(parent: V1.NodeParent, node: V1.Node) {
     const index = parent.childIds.indexOf(node.id)
     YState.delete(`${parent.id}.childIds.${index}`)
     YState.delete(`${node.id}`)
   }
 
-  reHierarchy(parent: INodeParent, node: INode, index: number) {
+  reHierarchy(parent: V1.NodeParent, node: V1.Node, index: number) {
     index = stableIndex(parent.childIds, index)
     const oldIndex = parent.childIds.indexOf(node.id)
     YState.delete(`${parent.id}.childIds.${oldIndex}`)
     YState.insert(`${parent.id}.childIds.${index}`, node.id)
   }
 
-  getNodesMergedOBB(nodes: INode[]) {
+  getNodesMergedOBB(nodes: V1.Node[]) {
     const aabbList = nodes.map((node) => OBB.FromRect(node, node.rotation).aabb)
     return OBB.FromAABB(AABB.Merge(aabbList))
   }
 
-  getNodeCenterXY(node: INode) {
+  getNodeCenterXY(node: V1.Node) {
     return OBB.FromRect(node, node.rotation).center
   }
 
@@ -105,10 +101,10 @@ class HandleNodeService {
   }
 
   reHierarchySelectedNode(type: 'up' | 'down' | 'top' | 'bottom') {
-    const selected = getSelectIdList().map(YState.find<INode>)
+    const selected = getSelectIdList().map(YState.find<V1.Node>)
 
     selected.forEach((node) => {
-      const parent = YState.find<INodeParent>(node.parentId)
+      const parent = YState.find<V1.NodeParent>(node.parentId)
       let index = parent.childIds.indexOf(node.id)
       index = iife(() => {
         if (type === 'up') return index - 1
@@ -124,12 +120,12 @@ class HandleNodeService {
   }
 
   wrapInFrame() {
-    const selected = getSelectIdList().map(YState.find<INode>)
+    const selected = getSelectIdList().map(YState.find<V1.Node>)
     if (selected.length === 0) return
 
     const frameOBB = this.getNodesMergedOBB(selected)
     const frameNode = SchemaCreator.frame({ ...frameOBB })
-    const oldParent = YState.find<INodeParent>(selected[0].parentId)
+    const oldParent = YState.find<V1.NodeParent>(selected[0].parentId)
     const index = oldParent.childIds.indexOf(selected[0].id)
 
     this.addNodes([frameNode])
@@ -154,11 +150,11 @@ class HandleNodeService {
       this.datumId = ''
     }
     if (selectIds.length === 1) {
-      this.datumId = Schema.find<INode>(firstOne(selectIds)!).parentId
+      this.datumId = Schema.find<V1.Node>(firstOne(selectIds)!).parentId
     }
     if (selectIds.length > 1) {
       const parentIds = new Set<string>()
-      selectIds.forEach((id) => parentIds.add(Schema.find<INode>(id).parentId))
+      selectIds.forEach((id) => parentIds.add(Schema.find<V1.Node>(id).parentId))
       if (parentIds.size === 1) this.datumId = firstOne(parentIds)!
       if (parentIds.size > 1) this.datumId = ''
     }
@@ -173,4 +169,4 @@ class HandleNodeService {
   }
 }
 
-export const HandleNode = makeObservable(new HandleNodeService())
+export const HandleNode = autoBind(makeObservable(new HandleNodeService()))
