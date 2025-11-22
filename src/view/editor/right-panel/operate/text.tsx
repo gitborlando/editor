@@ -44,7 +44,7 @@ export const TextComp: FC<{}> = ({}) => {
     const textNode = Schema.find<IText>(intoEditing.value)
     const xy = iife(() => {
       const { x, y, width } = textNode
-      return StageViewport.sceneStageToClientXY({ x: x + width, y })
+      return StageViewport.sceneXYToClientXY({ x: x + width, y })
     })
     useMatchPatch(`/${textNode.id}/content`)
 

@@ -89,7 +89,7 @@ export class EditorService {
 
         YState.initSchema(fileId, schema as unknown as V1.Schema)
         this.disposer.add(YClients.init())
-        this.disposer.add(YSync.init(fileId, YState.doc))
+        // this.disposer.add(YSync.init(fileId, YState.doc))
         StageViewport.init()
       }
     }

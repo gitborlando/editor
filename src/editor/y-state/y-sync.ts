@@ -10,7 +10,7 @@ class YSyncService {
 
   init(fileId: string, document: Y.Doc) {
     this.provider = new HocuspocusProvider({
-      url: 'ws://localhost:1234', // 'ws://8.134.131.253:1234',
+      url: 'ws://8.134.131.253:1234', //'ws://localhost:1234',
       name: fileId,
       document,
     })

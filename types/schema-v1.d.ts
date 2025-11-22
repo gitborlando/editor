@@ -28,8 +28,7 @@ namespace V1 {
     selectPageId: string
     cursor: IXY
     color: string
-    zoom: number
-    offset: IXY
+    viewportMatrix: import('src/editor/math/matrix').IMatrixTuple
   }
 
   type Clients = {

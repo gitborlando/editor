@@ -1,4 +1,5 @@
 import { jsonFy, jsonParse } from '@gitborlando/utils'
+import { Matrix } from 'src/editor/math/matrix'
 import { defuOverrideArray } from 'src/utils/defu'
 
 const initSetting = () => {
@@ -13,8 +14,7 @@ const initSetting = () => {
     showDirtyRect: false,
     dev: {
       solidZoomAndOffset: true,
-      zoom: 100,
-      offset: XY._(100, 100),
+      matrix: Matrix.identity().tuple(),
     },
   }
 }

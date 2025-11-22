@@ -1,8 +1,9 @@
-import { AABB, Angle, IMatrix, Matrix, OBB, abs, max, round } from '@gitborlando/geo'
+import { AABB, Angle, OBB, abs, max, round } from '@gitborlando/geo'
 import { reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import autoBind from 'class-autobind-decorator'
 import { getEditorSetting } from 'src/editor/editor/setting'
+import { Matrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import {
   TextBreaker,
@@ -17,6 +18,11 @@ import { Elem } from './elem'
 const dpr = devicePixelRatio
 
 export type SurfaceCanvasType = 'mainCanvas' | 'topCanvas'
+
+export type SurfaceRenderType =
+  | 'firstFullRender'
+  | 'nextFullRender'
+  | 'partialRender'
 
 @autoBind
 export class StageSurface {
@@ -83,12 +89,14 @@ export class StageSurface {
     }
   }
 
+  private renderType?: SurfaceRenderType
   private renderTasks: INoopFunc[] = []
   private raf = new Raf()
 
-  private requestRender = (
-    type: 'firstFullRender' | 'nextFullRender' | 'partialRender',
-  ) => {
+  private requestRender = (type: SurfaceRenderType) => {
+    if (this.renderType === type) return
+    this.renderType = type
+
     if (type === 'partialRender' && this.renderTasks.length) return
 
     if (type === 'firstFullRender') this.calcFullRenderElemsMinHeap()
@@ -102,6 +110,7 @@ export class StageSurface {
 
     this.raf.cancelAll().request((next) => {
       this.ctxSaveRestore(() => this.renderTasks.pop()?.())
+      this.renderType = undefined
       this.renderTasks.length && next()
     })
   }
@@ -127,12 +136,11 @@ export class StageSurface {
       // return aDistance - bDistance
       // return a.selfIndex - b.selfIndex
     })
-    StageScene.rootElems.forEach((elem, layerIndex) =>
-      elem.children.forEach((elem, selfIndex) => {
-        if (!elem.visible) return
-        this.fullRenderElemsMinHeap.push({ elem, selfIndex, layerIndex })
-      }),
-    )
+
+    StageScene.sceneRoot.children.forEach((elem, selfIndex) => {
+      if (!elem.visible) return
+      this.fullRenderElemsMinHeap.push({ elem, selfIndex, layerIndex: 0 })
+    })
   }
 
   private fullRender = () => {
@@ -170,13 +178,15 @@ export class StageSurface {
   private accumulatedErrorY = 0
 
   private translate = (cur: IXY, prev: IXY) => {
+    if (this.renderType) return
+
     const { width, height } = this.canvas
     const delta = XY.from(cur).minus(prev)
     const reRenderElems = new Set<Elem>()
 
     const traverse = (elem: Elem) => {
       if (!elem.visible) return
-      if (AABB.include(this.prevViewportAABB, elem.aabb) === 1) return
+      if (AABB.include(StageViewport.prevAABB, elem.aabb) === 1) return
       reRenderElems.add(elem)
     }
 
@@ -274,30 +284,14 @@ export class StageSurface {
     })
   }
 
-  private dprMatrix: IMatrix = [dpr, 0, 0, dpr, 0, 0]
-  private boundAABB!: AABB
-  private viewportMatrix!: IMatrix
-  private prevViewportMatrix!: IMatrix
-  viewportAABB!: AABB
-  private prevViewportAABB!: AABB
+  private dprMatrix = Matrix.of(dpr, 0, 0, dpr, 0, 0)
 
   transformMatrix = () => {
-    this.ctx.transform(...this.dprMatrix)
-    this.ctx.transform(...this.viewportMatrix)
+    this.ctx.transform(...this.dprMatrix.tuple())
+    this.ctx.transform(...StageViewport.matrix.tuple())
   }
 
   private onZoomMove = () => {
-    autorun(() => {
-      const { zoom, offset } = StageViewport
-      const matrix: IMatrix = [zoom, 0, 0, zoom, offset.x, offset.y]
-      this.prevViewportMatrix = this.viewportMatrix || matrix
-      this.viewportMatrix = matrix
-      this.prevViewportAABB = Matrix.invertAABB(
-        this.boundAABB,
-        this.prevViewportMatrix,
-      )
-      this.viewportAABB = Matrix.invertAABB(this.boundAABB, this.viewportMatrix)
-    })
     reaction(
       () => StageViewport.zoom,
       () => this.requestRender('firstFullRender'),
@@ -320,7 +314,6 @@ export class StageSurface {
         this.bufferCanvas.height = canvasHeight
         this.canvas.style.width = `${width}px`
         this.canvas.style.height = `${height}px`
-        this.boundAABB = new AABB(0, 0, width, height)
       },
       { fireImmediately: true },
     )
@@ -331,7 +324,7 @@ export class StageSurface {
   }
 
   testVisible = (aabb: AABB) => {
-    return AABB.collide(aabb, this.viewportAABB)
+    return AABB.collide(aabb, StageViewport.AABB)
   }
 
   getVisualSize = (aabb: AABB) => {
@@ -358,7 +351,7 @@ export class StageSurface {
 
   private getEventXY = (xy: IXY) => {
     xy = StageViewport.toCanvasXY(xy)
-    this.eventXY = Matrix.invertPoint(xy, this.viewportMatrix)
+    this.eventXY = StageViewport.matrix.invertXY(xy)
     this.elemsFromPoint = []
   }
 

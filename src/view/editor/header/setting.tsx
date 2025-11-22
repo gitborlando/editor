@@ -116,9 +116,7 @@ const DevSettingComp: FC<{}> = observer(({}) => {
   const handelFixZoomAndOffset = () => {
     setting.dev.solidZoomAndOffset = !solidZoomAndOffset
     if (!solidZoomAndOffset) {
-      const { zoom, offset } = StageViewport
-      setting.dev.zoom = zoom
-      setting.dev.offset = offset
+      setting.dev.matrix = StageViewport.matrix.tuple()
     }
   }
 

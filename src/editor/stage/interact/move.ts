@@ -1,6 +1,6 @@
 import autobind from 'class-autobind-decorator'
-import { StageCursor } from 'src/editor/stage/cursor'
 import { Surface } from 'src/editor/render/surface'
+import { StageCursor } from 'src/editor/stage/cursor'
 import { Drag } from 'src/global/event/drag'
 import { StageViewport } from '../viewport'
 
@@ -23,8 +23,9 @@ class StageMoveService {
   private onMoveStage() {
     Drag.onStart(() => StageCursor.unlock().setCursor('grab').lock())
       .onMove(({ delta }) => {
-        const offset = XY.from(StageViewport.offset)
-        StageViewport.offset = offset.plus(delta)
+        StageViewport.matrix = StageViewport.matrix
+          .clone()
+          .translate(delta.x, delta.y)
       })
       .onDestroy(() => StageCursor.unlock().setCursor('hand').lock())
   }

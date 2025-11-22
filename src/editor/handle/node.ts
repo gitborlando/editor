@@ -2,7 +2,6 @@ import { firstOne, iife, stableIndex } from '@gitborlando/utils'
 import { AABB, OBB } from 'src/editor/math/obb'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
-import { collectDisposer } from 'src/utils/disposer'
 import { SchemaCreator } from '../schema/creator'
 import { Schema } from '../schema/schema'
 
@@ -12,7 +11,7 @@ class HandleNodeService {
   copiedIds = <ID[]>[]
 
   subscribe() {
-    return collectDisposer(YClients.afterSelect.hook(() => this.getDatum()))
+    return Disposer.collect(YClients.afterSelect.hook(() => this.getDatum()))
   }
 
   addNodes(nodes: V1.Node[]) {
