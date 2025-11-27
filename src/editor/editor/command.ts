@@ -2,8 +2,8 @@ import hotkeys from 'hotkeys-js'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
-import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageScene } from 'src/editor/render/scene'
+import { StageInteract } from 'src/editor/stage/interact/interact'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import { Command, ContextMenu } from 'src/global/context-menu'
 import { listen } from 'src/shared/utils/event'
@@ -16,13 +16,13 @@ class EditorCommandManager {
   get copyPasteGroup(): Command[] {
     return [
       {
-        name: '复制',
+        name: t('verb.copy'),
         shortcut: 'ctrl+c',
         disabled: () => !getSelectIdList().length,
         callback: () => HandleNode.copySelectedNodes(),
       },
       {
-        name: '黏贴',
+        name: t('verb.paste'),
         shortcut: 'ctrl+v',
         disabled: () => !HandleNode.copiedIds.length,
         callback: () => HandleNode.pasteNodes(),
@@ -33,12 +33,12 @@ class EditorCommandManager {
   get undoRedoGroup(): Command[] {
     return [
       {
-        name: '撤销',
+        name: t('verb.undo'),
         shortcut: 'ctrl+z',
         callback: () => YUndo.undo(),
       },
       {
-        name: '重做',
+        name: t('verb.redo'),
         shortcut: 'ctrl+shift+z',
         callback: () => YUndo.redo(),
       },
@@ -48,7 +48,7 @@ class EditorCommandManager {
   get pageGroup(): Command[] {
     const commands = [
       {
-        name: '删除页面',
+        name: sentence(t('verb.delete'), t('noun.page')),
         callback: ({ id }: { id: ID }) => {
           HandlePage.removePage(YState.find<V1.Page>(id))
         },
@@ -57,7 +57,7 @@ class EditorCommandManager {
 
     if (getEditorSetting().devMode) {
       commands.push({
-        name: '打印 schema',
+        name: sentence(t('verb.print'), 'schema'),
         callback: ({ id }: { id: ID }) => {
           HandlePage.devLogPageSchema(id)
         },
@@ -70,18 +70,18 @@ class EditorCommandManager {
   get nodeGroup(): Command[] {
     const commands = [
       {
-        name: '重命名',
+        name: t('verb.rename'),
         callback: () => {
           const { id } = ContextMenu.context
           // UILeftPanelLayer.enterReName.dispatch(id)
         },
       },
       {
-        name: '创建画板',
+        name: sentence(t('verb.create'), t('noun.frame')),
         callback: () => HandleNode.wrapInFrame(),
       },
       {
-        name: '删除',
+        name: t('verb.delete'),
         shortcut: 'del',
         callback: () => HandleNode.deleteSelectedNodes(),
       },
@@ -90,7 +90,7 @@ class EditorCommandManager {
     if (getEditorSetting().devMode) {
       commands.push(
         {
-          name: '打印 schema',
+          name: sentence(t('verb.print'), 'schema'),
           callback: () => {
             getSelectIdList().forEach((id) => {
               const node = YState.find<V1.SchemaItem>(id)
@@ -99,7 +99,7 @@ class EditorCommandManager {
           },
         },
         {
-          name: '打印 elem',
+          name: sentence(t('verb.print'), 'elem'),
           callback: () => {
             getSelectIdList().forEach((id) => {
               const elem = StageScene.findElem(id)
@@ -116,22 +116,22 @@ class EditorCommandManager {
   get nodeReHierarchyGroup(): Command[] {
     return [
       {
-        name: '上移',
+        name: sentence(t('verb.moveTo'), 'up'),
         shortcut: 'ctrl+]',
         callback: () => HandleNode.reHierarchySelectedNode('up'),
       },
       {
-        name: '下移',
+        name: sentence(t('verb.moveTo'), 'down'),
         shortcut: 'ctrl+[',
         callback: () => HandleNode.reHierarchySelectedNode('down'),
       },
       {
-        name: '移至顶部',
+        name: sentence(t('verb.moveTo'), 'top'),
         shortcut: 'ctrl+alt+]',
         callback: () => HandleNode.reHierarchySelectedNode('top'),
       },
       {
-        name: '移至底部',
+        name: sentence(t('verb.moveTo'), 'bottom'),
         shortcut: 'ctrl+alt+[',
         callback: () => HandleNode.reHierarchySelectedNode('bottom'),
       },
@@ -141,12 +141,12 @@ class EditorCommandManager {
   get createShapeGroup(): Command[] {
     return [
       {
-        name: '选择',
+        name: t('verb.select'),
         shortcut: 'v',
         callback: () => (StageInteract.interaction = 'select'),
       },
       {
-        name: '移动',
+        name: t('verb.move'),
         shortcut: 'h',
         callback: () => (StageInteract.interaction = 'move'),
       },
@@ -156,13 +156,13 @@ class EditorCommandManager {
   get fileGroup(): Command[] {
     return [
       {
-        name: '删除文件',
+        name: sentence(t('verb.delete'), t('noun.file')),
         callback: () => {
           const { id } = ContextMenu.context
         },
       },
       {
-        name: '导出文件',
+        name: sentence(t('verb.export'), t('noun.file')),
         callback: () => {
           const { id } = ContextMenu.context
         },

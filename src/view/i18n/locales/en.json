@@ -95,7 +95,9 @@
     "zoom": "zoom",
     "node": "node",
     "geometry": "geometry",
-    "property": "property"
+    "property": "property",
+    "multiValue": "multi",
+    "file": "file"
   },
   "adj": {
     "general": "general",
@@ -117,6 +119,13 @@
     "rotate": "rotate",
     "select": "select",
     "unselect": "unselect",
-    "modify": "modify"
+    "modify": "modify",
+    "copy": "copy",
+    "undo": "undo",
+    "redo": "redo",
+    "print": "print",
+    "rename": "rename",
+    "moveTo": "move to",
+    "export": "export"
   }
 }

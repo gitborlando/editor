@@ -158,7 +158,7 @@ const GeometryItemComp: FC<{
       afterSlide={handleAfterSlide}
       onChange={(v) => (inputValue.current = correctSetValue(v))}
       onBlur={handleOnBlur}
-      {...(isMultiValue ? { placeholder: MULTI_VALUE } : {})}
+      {...(isMultiValue ? { placeholder: t('noun.multiValue') } : {})}
     />
   )
 })

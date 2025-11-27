@@ -1,4 +1,5 @@
 import { Minus, Plus } from 'lucide-react'
+import { pascalCase } from 'nano-string-utils'
 import { OperateFill } from 'src/editor/operate/fill'
 import { IconButton } from 'src/view/component/button'
 import {
@@ -26,7 +27,7 @@ export const EditorRPOperateFillComp: FC<{}> = observer(({}) => {
   return (
     <OpFieldComp>
       <OpFieldHeaderComp
-        title='填充'
+        title={pascalCase(t('noun.fill'))}
         headerSlot={<IconButton icon={<Lucide icon={Plus} />} onClick={addFill} />}
       />
       <OpFieldContentComp x-if={fills.length > 0}>
