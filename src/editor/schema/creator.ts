@@ -5,7 +5,6 @@ import {
   createRegularPolygon,
   createStarPolygon,
 } from 'src/editor/math/point'
-import { rgb } from 'src/utils/color'
 import { defuOverrideArray } from 'src/utils/defu'
 import { themeColor } from 'src/view/styles/color'
 
@@ -306,7 +305,7 @@ class SchemaCreatorService {
       rotation: 0,
       hFlip: false,
       vFlip: false,
-      fills: [this.fillColor(rgb(204, 204, 204), 1)],
+      fills: [this.fillColor()],
       strokes: [],
       blurs: [],
       shadows: [],

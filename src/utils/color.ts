@@ -1,6 +1,4 @@
-import colorConvert from 'color-convert'
 import { atan, degreefy } from 'src/editor/math/base'
-export { colorConvert }
 
 export const HUE_MAP = {
   red: 0,
@@ -16,7 +14,7 @@ export const COLOR = {
   random: () => hslRgb(Math.random() * 360, 100, 50),
   white: hslRgb(0, 0, 100),
   black: hslRgb(0, 0, 0),
-  gray: rgb(216, 216, 216),
+  gray: rgb(217, 217, 217),
   blue: hslRgb(220, 100, 50),
   pinkRed: hslRgb(280, 100, 50),
 }
@@ -47,7 +45,7 @@ export function isHexColor(hex: string) {
   return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex)
 }
 export function hslRgb(h: number, s: number, l: number) {
-  return rgbFromTuple(colorConvert.hsl.rgb(h, s, l))
+  return Color.hsl(h, s, l).rgb().string()
 }
 
 export function hslColor(h: number, s: number, l: number) {
