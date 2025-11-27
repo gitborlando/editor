@@ -82,6 +82,7 @@ class HandleNodeService {
         const { node, parent, upLevelRef, depth } = props
         const newParent = upLevelRef?.newNode || parent
         const newNode = SchemaCreator.clone(node)
+        newNode.name = SchemaCreator.createNodeName(node.type)
         this.addNodes([newNode])
         this.insertChildAt(newParent, newNode)
         props.newNode = newNode

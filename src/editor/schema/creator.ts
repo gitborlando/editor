@@ -1,5 +1,5 @@
 import { IXY } from '@gitborlando/geo'
-import { clone, miniId } from '@gitborlando/utils'
+import { clone, createCache, miniId } from '@gitborlando/utils'
 import {
   createLine,
   createRegularPolygon,
@@ -24,7 +24,7 @@ class SchemaCreatorService {
       type: 'meta',
       id: 'meta',
       fileId: '',
-      name: '无标题',
+      name: t('special.untitled'),
       version: 'v0',
       pageIds: [],
       userId: '',
@@ -36,7 +36,7 @@ class SchemaCreatorService {
       type: 'page',
       id: `page_${miniId()}`,
       childIds: [],
-      ...this.createNodeName('page'),
+      name: this.createNodeName('page'),
     }
   }
 
@@ -52,46 +52,39 @@ class SchemaCreatorService {
   }
 
   frame(option?: Partial<V1.Frame>): V1.Frame {
-    const name = this.createNodeName('frame')
     const nodeBase = this.createNodeBase()
     return {
       type: 'frame',
       radius: 0,
       childIds: [],
       ...nodeBase,
-      ...name,
       fills: [this.fillColor(COLOR.white)],
       ...option,
     }
   }
 
   group(option?: Partial<V1.Group>): V1.Group {
-    const name = this.createNodeName('group')
     const nodeBase = this.createNodeBase()
     return {
       type: 'group',
       childIds: [],
       ...nodeBase,
-      ...name,
       ...option,
     }
   }
 
   rect(option?: Partial<V1.Rectangle>): V1.Rectangle {
-    const name = this.createNodeName('rect')
     const nodeBase = this.createNodeBase()
     return {
       type: 'rect',
       points: [],
       radius: 0,
       ...nodeBase,
-      ...name,
       ...option,
     }
   }
 
   ellipse(option?: Partial<V1.Ellipse>): V1.Ellipse {
-    const name = this.createNodeName('ellipse')
     const nodeBase = this.createNodeBase()
     return {
       type: 'ellipse',
@@ -100,13 +93,11 @@ class SchemaCreatorService {
       startAngle: 0,
       endAngle: 360,
       ...nodeBase,
-      ...name,
       ...option,
     }
   }
 
   polygon(option?: Partial<V1.Polygon>): V1.Polygon {
-    const name = this.createNodeName('polygon')
     const nodeBase = this.createNodeBase()
     const { width, height } = option || nodeBase
     const points = createRegularPolygon(width!, height!, option?.sides || 3)
@@ -116,13 +107,11 @@ class SchemaCreatorService {
       radius: 0,
       points,
       ...nodeBase,
-      ...name,
       ...option,
     }
   }
 
   star(option?: Partial<V1.Star>): V1.Star {
-    const name = this.createNodeName('star')
     const nodeBase = this.createNodeBase()
     const { width, height } = option || nodeBase
     const points = createStarPolygon(width!, height!, 5, 0.382)
@@ -133,13 +122,11 @@ class SchemaCreatorService {
       innerRate: 0.382,
       points,
       ...nodeBase,
-      ...name,
       ...option,
     }
   }
 
   line(option?: Partial<V1.Line>): V1.Line {
-    const name = this.createNodeName('line')
     const nodeBase = this.createNodeBase()
     const start = XY._(nodeBase.x, nodeBase.y)
     const length = option?.width || nodeBase.width
@@ -149,7 +136,6 @@ class SchemaCreatorService {
       type: 'line',
       points,
       ...nodeBase,
-      ...name,
       fills: [this.fillColor(COLOR.black, 1)],
       strokes: [this.stroke()],
       ...option,
@@ -158,13 +144,11 @@ class SchemaCreatorService {
   }
 
   irregular(option?: Partial<V1.Path>): V1.Path {
-    const name = this.createNodeName('irregular')
     const nodeBase = this.createNodeBase()
     return {
       type: 'irregular',
       points: [],
       ...nodeBase,
-      ...name,
       ...option,
     }
   }
@@ -176,13 +160,11 @@ class SchemaCreatorService {
   }
 
   text(option?: NestPartial<V1.Text>): V1.Text {
-    const name = this.createNodeName('text')
     const nodeBase = this.createNodeBase()
     return T<V1.Text>(
       defuOverrideArray(
         {
           ...nodeBase,
-          ...name,
           ...option,
         },
         {
@@ -312,25 +294,12 @@ class SchemaCreatorService {
     }
   }
 
-  private allNodeCount = 0
+  private nodeNameCache = createCache<string, number>()
 
   createNodeName(type: string) {
-    const map = {
-      page: ['页面', 1],
-      frame: ['画板', 1],
-      group: ['分组', 1],
-      rect: ['矩形', 1],
-      ellipse: ['椭圆', 1],
-      polygon: ['多边形', 1],
-      star: ['星形', 1],
-      irregular: ['矢量图形', 1],
-      line: ['线段', 1],
-      text: ['文本', 1],
-      image: ['图片', 1],
-    }
-    const [name] = map[type as keyof typeof map]
-
-    return { name: `${name} ${++this.allNodeCount}` }
+    const index = this.nodeNameCache.getSet(type, () => 0)
+    this.nodeNameCache.set(type, index + 1)
+    return `${t(`noun.${type}`)} ${index + 1}`
   }
 
   addToSchema(schema: V1.Schema, item: V1.SchemaItem) {
@@ -345,7 +314,6 @@ class SchemaCreatorService {
   clone<T extends V1.SchemaItem>(item: T, option?: Partial<T>) {
     const newItem = clone(item)
     newItem.id = miniId()
-    newItem.name = this.createNodeName(newItem.type).name
     if ('childIds' in newItem) newItem.childIds = []
     return defuOverrideArray(option || {}, newItem) as T
   }

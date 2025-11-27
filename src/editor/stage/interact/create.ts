@@ -100,6 +100,7 @@ class StageCreateService {
     const { x, y } = StageViewport.toSceneXY(start)
 
     const node = SchemaCreator[this.currentType]({ x, y, width: 1, height: 1 })
+    node.name = SchemaCreator.createNodeName(this.currentType)
     this.createId = node.id
 
     return node

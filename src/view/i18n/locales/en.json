@@ -39,19 +39,6 @@
     "show": "Show",
     "hide": "Hide"
   },
-  "layer": {
-    "title": "Layer",
-    "page": "Page",
-    "frame": "Frame",
-    "group": "Group",
-    "rectangle": "Rectangle",
-    "ellipse": "Ellipse",
-    "polygon": "Polygon",
-    "star": "Star",
-    "line": "Line",
-    "text": "Text",
-    "image": "Image"
-  },
   "property": {
     "fill": "Fill",
     "stroke": "Stroke",
@@ -86,6 +73,16 @@
     "export": "Export"
   },
   "noun": {
+    "page": "page",
+    "frame": "frame",
+    "group": "group",
+    "rect": "rectangle",
+    "ellipse": "ellipse",
+    "polygon": "polygon",
+    "star": "star",
+    "line": "line",
+    "text": "text",
+    "path": "path",
     "colorPicker": "ColorPicker",
     "solidColor": "solid",
     "linear": "linear",
@@ -103,7 +100,8 @@
   },
   "special": {
     "generalSetting": "general",
-    "devSetting": "develop"
+    "devSetting": "develop",
+    "untitled": "untitled"
   },
   "verb": {
     "lock": "lock"
