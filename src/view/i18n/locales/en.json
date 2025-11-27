@@ -92,7 +92,10 @@
     "dev": "development",
     "language": "language",
     "offset": "offset",
-    "zoom": "zoom"
+    "zoom": "zoom",
+    "node": "node",
+    "geometry": "geometry",
+    "property": "property"
   },
   "adj": {
     "general": "general",
@@ -104,6 +107,16 @@
     "untitled": "untitled"
   },
   "verb": {
-    "lock": "lock"
+    "lock": "lock",
+    "create": "create",
+    "delete": "delete",
+    "paste": "paste",
+    "reorder": "reorder",
+    "move": "move",
+    "scale": "scale",
+    "rotate": "rotate",
+    "select": "select",
+    "unselect": "unselect",
+    "modify": "modify"
   }
 }

@@ -34,7 +34,10 @@ export const moveTransformer = (e: ElemMouseEvent) => {
         // OperateGeometry.operateKeys.clear()
         // Schema.finalOperation('alt 复制节点')
       }
-      YUndo.track({ type: 'state', description: '移动节点' })
+      YUndo.track({
+        type: 'state',
+        description: sentence(t('verb.move'), t('noun.node')),
+      })
     })
 }
 
@@ -184,7 +187,10 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
         })
         .onDestroy(({ moved }) => {
           if (!moved) return
-          YUndo.track({ type: 'state', description: '缩放选中形状' })
+          YUndo.track({
+            type: 'state',
+            description: sentence(t('verb.scale'), t('noun.node')),
+          })
         })
     }
 
@@ -359,7 +365,10 @@ const VertexComp: FC<{
       })
       .onDestroy(({ moved }) => {
         if (!moved) return
-        YUndo.track({ type: 'state', description: '缩放选中形状' })
+        YUndo.track({
+          type: 'state',
+          description: sentence(t('verb.scale'), t('noun.node')),
+        })
       })
   }
 
@@ -379,7 +388,10 @@ const VertexComp: FC<{
       })
       .onDestroy(({ moved }) => {
         if (!moved) return
-        YUndo.track({ type: 'state', description: '旋转选中形状' })
+        YUndo.track({
+          type: 'state',
+          description: sentence(t('verb.rotate'), t('noun.node')),
+        })
       })
   }
 

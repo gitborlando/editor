@@ -92,7 +92,10 @@ class StageCreateService {
       }
     }
 
-    YUndo.track({ type: 'all', description: `创建节点 ${node.name}` })
+    YUndo.track({
+      type: 'all',
+      description: sentence(t('verb.create'), t('noun.node'), ': ', node.name),
+    })
     StageInteract.interaction = 'select'
   }
 

@@ -65,7 +65,10 @@ class YClientsService {
     this.client.selectIdMap[id] = true
 
     const name = YState.state[id].name
-    YUndo.track({ type: 'client', description: `选中节点 ${name}` })
+    YUndo.track({
+      type: 'client',
+      description: sentence(t('verb.select'), t('noun.node'), ': ', name),
+    })
   }
 
   unSelect(id: string) {
@@ -73,7 +76,10 @@ class YClientsService {
     delete this.client.selectIdMap[id]
 
     const name = YState.state[id].name
-    YUndo.track({ type: 'client', description: `取消选中节点 ${name}` })
+    YUndo.track({
+      type: 'client',
+      description: sentence(t('verb.unselect'), t('noun.node'), ': ', name),
+    })
   }
 
   clearSelect() {
@@ -85,7 +91,12 @@ class YClientsService {
     this.client.selectPageId = id
     YUndo.track({
       type: 'client',
-      description: `选择页面 ${YState.state[id].name}`,
+      description: sentence(
+        t('verb.select'),
+        t('noun.page'),
+        ': ',
+        YState.state[id].name,
+      ),
     })
   }
 

@@ -66,7 +66,10 @@ class HandleNodeService {
     YClients.afterSelect.dispatch()
 
     YState.next()
-    YUndo.track({ type: 'all', description: '删除节点' })
+    YUndo.track({
+      type: 'all',
+      description: sentence(t('verb.delete'), t('noun.node')),
+    })
   }
 
   copySelectedNodes() {
@@ -96,7 +99,12 @@ class HandleNodeService {
     YUndo.untrack(() => newSelectIds.forEach((id) => YClients.select(id)))
     YUndo.track({
       type: 'all',
-      description: `粘贴 ${newSelectIds.length} 个节点`,
+      description: sentence(
+        t('verb.paste'),
+        t('noun.node'),
+        ': ',
+        newSelectIds.length.toString(),
+      ),
     })
   }
 
@@ -116,7 +124,10 @@ class HandleNodeService {
     })
 
     YState.next()
-    YUndo.track({ type: 'all', description: '重新排序' })
+    YUndo.track({
+      type: 'all',
+      description: sentence(t('verb.reorder'), t('noun.node')),
+    })
   }
 
   wrapInFrame() {
@@ -140,7 +151,10 @@ class HandleNodeService {
         YClients.select(frameNode.id)
       }),
     )
-    YUndo.track({ type: 'all', description: '将节点包裹在画板中' })
+    YUndo.track({
+      type: 'all',
+      description: sentence(t('verb.create'), t('noun.frame')),
+    })
   }
 
   private getDatum() {

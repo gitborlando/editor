@@ -123,11 +123,29 @@ const GeometryItemComp: FC<{
     } else {
       setActiveGeometry(operateKey, inputValue.current, false)
     }
-    YUndo.track({ type: 'state', description: `修改几何属性: ${operateKey}` })
+    YUndo.track({
+      type: 'state',
+      description: sentence(
+        t('verb.modify'),
+        t('noun.geometry'),
+        t('noun.property'),
+        ': ',
+        operateKey,
+      ),
+    })
   }
 
   const handleAfterSlide = () => {
-    YUndo.track({ type: 'state', description: `修改几何属性: ${label}` })
+    YUndo.track({
+      type: 'state',
+      description: sentence(
+        t('verb.modify'),
+        t('noun.geometry'),
+        t('noun.property'),
+        ': ',
+        operateKey,
+      ),
+    })
   }
 
   return (
