@@ -11,7 +11,8 @@
     "re-i": "rm -rf node_modules pnpm-lock.yaml && pnpm i",
     "gen:supabase-types": "npx supabase gen types typescript --project-id sucnlytjgnhjgvwykfbg > types/supabase.ts",
     "gen:assets": "tsx scripts/gen-assets.ts",
-    "prepare": "npx simple-git-hooks"
+    "prepare": "npx simple-git-hooks",
+    "re-base:main": "git fetch origin main && git rebase origin/main"
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.6",
