@@ -31,6 +31,7 @@
     "@tanstack/react-virtual": "^3.13.12",
     "auto-bind": "^5.0.1",
     "axios": "1.10.0",
+    "canvaskit-wasm": "^0.40.0",
     "class-autobind-decorator": "^3.0.1",
     "color": "^5.0.2",
     "cos-js-sdk-v5": "^1.10.1",
