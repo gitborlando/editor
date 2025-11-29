@@ -5,11 +5,28 @@ export type GridProps = {
   vertical?: string | true
   center?: boolean
   gap?: number
+  jc?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'
+  ji?: 'start' | 'center' | 'end'
+  ac?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly'
+  ai?: 'start' | 'center' | 'end'
 } & ComponentPropsWithRef<'div'>
 
 export const Grid = forwardRef<HTMLDivElement, GridProps>(
   (
-    { children, style, className, horizontal, vertical, gap, center, ...rest },
+    {
+      children,
+      style,
+      className,
+      horizontal,
+      vertical,
+      gap,
+      center,
+      jc,
+      ji,
+      ac,
+      ai,
+      ...rest
+    },
     ref,
   ) => {
     const gridTemplates = useMemo(() => {
@@ -36,10 +53,22 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(
       return ''
     }, [horizontal, vertical, center])
 
+    const placeStyles = {
+      '--jc': jc,
+      '--ji': ji,
+      '--ac': ac,
+      '--ai': ai,
+    } as any
+
     return (
       <div
         className={cx(cls(), layoutCss, className)}
-        style={{ gap: gap, ...gridTemplates, ...style }}
+        style={{
+          gap: gap,
+          ...gridTemplates,
+          ...placeStyles,
+          ...style,
+        }}
         {...rest}
         ref={ref}>
         {children}
@@ -66,5 +95,17 @@ const cls = classes(css`
   &-v-c {
     justify-content: center;
     justify-items: center;
+  }
+  &-jc {
+    justify-content: var(--jc);
+  }
+  &-ji {
+    justify-items: var(--ji);
+  }
+  &-ac {
+    align-content: var(--ac);
+  }
+  &-ai {
+    align-items: var(--ai);
   }
 `)
