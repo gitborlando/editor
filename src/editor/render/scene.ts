@@ -4,7 +4,7 @@ import { macroMatch } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
 import { ImmutPatch } from 'src/utils/immut/immut'
 import { Elem } from './elem'
-import { Surface } from './surface'
+import { StageSurface } from './surface'
 
 @autobind
 class StageSceneService {
@@ -31,7 +31,9 @@ class StageSceneService {
   }
 
   elemsFromPoint(xy?: IXY) {
-    return Surface.getElemsFromPoint(xy).filter((elem) => elem.type === 'sceneElem')
+    return StageSurface.getElemsFromPoint(xy).filter(
+      (elem) => elem.type === 'sceneElem',
+    )
   }
 
   private setupRootElems() {
@@ -43,7 +45,7 @@ class StageSceneService {
   }
 
   private hookRenderNode() {
-    Signal.merge(YState.inited$, Surface.inited).hook(() => {
+    Signal.merge(YState.inited$, StageSurface.inited).hook(() => {
       autorun(() => {
         const pageId = YClients.client.selectPageId
         if (pageId) this.firstRenderPage()
@@ -53,7 +55,7 @@ class StageSceneService {
   }
 
   private firstRenderPage() {
-    Surface.clearSurface()
+    StageSurface.clearSurface()
     this.sceneRoot.children = []
 
     const traverse = (id: ID) => {
@@ -140,7 +142,7 @@ class StageSceneService {
     }
 
     if (parent !== this.sceneRoot) {
-      Surface.collectDirty(parent)
+      StageSurface.collectDirty(parent)
     }
   }
 }

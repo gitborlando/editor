@@ -3,7 +3,7 @@ import { HandleNode } from 'src/editor/handle/node'
 import { max } from 'src/editor/math/base'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageScene } from 'src/editor/render/scene'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { Drag } from 'src/global/event/drag'
@@ -57,7 +57,7 @@ class StageCreateService {
     if (node.type === 'line') {
       StageCursor.setCursor('move').lock().upReset()
     }
-    Surface.disablePointEvent()
+    StageSurface.disablePointEvent()
   }
 
   private onCreateMove({ marquee, current, start }: DragData) {

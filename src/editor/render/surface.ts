@@ -1,5 +1,6 @@
 import { NoopFunc, reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
+import CanvasKitInit, { Canvas, CanvasKit } from 'canvaskit-wasm'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { AABB, OBB } from 'src/editor/math'
 import { abs, round } from 'src/editor/math/base'
@@ -24,12 +25,15 @@ export type SurfaceRenderType =
   | 'nextFullRender'
   | 'partialRender'
 
-export class StageSurface {
+export class StageSurfaceService {
   inited = Signal.create(false)
+
+  canvasKit!: CanvasKit
+  ktx!: Canvas
 
   private container!: HTMLDivElement
 
-  private canvas!: HTMLCanvasElement
+  canvas!: HTMLCanvasElement
   private ctx!: CanvasRenderingContext2D
 
   private topCanvas!: HTMLCanvasElement
@@ -42,6 +46,20 @@ export class StageSurface {
 
   async initTextBreaker() {
     this.textBreaker = await createTextBreaker()
+  }
+
+  async initCanvasKit() {
+    this.canvasKit = await CanvasKitInit({
+      locateFile: (file) => '/node_modules/canvaskit-wasm/bin/' + file,
+    })
+
+    const canvas = document.getElementsByTagName('canvas')[0]
+    console.log(canvas)
+    const surface = this.canvasKit.MakeWebGLCanvasSurface(canvas)!
+    console.log(surface.getCanvas().clear)
+
+    // this.ktx = surface.getCanvas()
+    // this.inited.dispatch(true)
   }
 
   subscribe() {
@@ -498,4 +516,4 @@ export class StageSurface {
   }
 }
 
-export const Surface = autoBind(new StageSurface())
+export const StageSurface = autoBind(new StageSurfaceService())

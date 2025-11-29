@@ -7,7 +7,7 @@ import { EditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageScene } from 'src/editor/render/scene'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageToolGrid } from 'src/editor/stage/tools/grid'
 import { YSync } from 'src/editor/y-state/y-sync'
@@ -33,7 +33,7 @@ export class EditorService {
   private subscribe() {
     return Disposer.collect(
       HandleNode.subscribe(),
-      Surface.subscribe(),
+      StageSurface.subscribe(),
       StageViewport.subscribe(),
       StageToolGrid.subscribe(),
     )

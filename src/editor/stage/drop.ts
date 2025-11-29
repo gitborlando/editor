@@ -1,7 +1,7 @@
 import autobind from 'class-autobind-decorator'
 import { fileTypeFromBuffer } from 'file-type'
 import { StageScene } from 'src/editor/render/scene'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { Uploader } from 'src/global/upload'
 import { IClientXY, preventDefault } from 'src/shared/utils/event'
@@ -22,8 +22,8 @@ export class StageDropService {
   private node!: V1.Node
 
   initHook() {
-    Surface.addEvent('dragover', preventDefault())
-    Surface.addEvent('drop', preventDefault(this.onDrop))
+    StageSurface.addEvent('dragover', preventDefault())
+    StageSurface.addEvent('drop', preventDefault(this.onDrop))
   }
 
   private async onDrop(e: DragEvent) {

@@ -1,7 +1,7 @@
 import { isLeftMouse, isRightMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
@@ -60,7 +60,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 
   const mousedown = (e: ElemMouseEvent) => {
     if (StageInteract.interaction !== 'select') return
-    Surface.disablePointEvent(true)
+    StageSurface.disablePointEvent(true)
 
     if (isLeftMouse(e.hostEvent)) {
       e.stopPropagation()

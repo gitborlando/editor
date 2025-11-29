@@ -1,5 +1,5 @@
 import { Editor } from 'src/editor/editor/editor'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { Loading } from 'src/view/component/loading'
 import { suspense } from 'src/view/component/suspense'
 import { LeftPanelComp } from 'src/view/editor/left-panel'
@@ -15,7 +15,7 @@ export const EditorComp: FC<{}> = suspense(
 
     useMemo(() => Editor.initEditor(), [])
     suspend(() => Editor.initSchema(fileId!), [fileId])
-    suspend(() => Surface.initTextBreaker(), ['initTextBreaker'])
+    suspend(() => StageSurface.initTextBreaker(), ['initTextBreaker'])
 
     useUnmount(() => {
       Editor.dispose()

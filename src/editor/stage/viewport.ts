@@ -3,7 +3,7 @@ import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { IRect } from 'src/editor/math'
 import { minMax } from 'src/editor/math/base'
 import { Matrix } from 'src/editor/math/matrix'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 
 const createInitBound = () => ({
   left: 240,
@@ -33,7 +33,7 @@ class StageViewportService {
     return Disposer.collect(
       this.onBoundChange(),
       this.onMatrixChange(),
-      Surface.inited.hook(this.onWheelZoom),
+      StageSurface.inited.hook(this.onWheelZoom),
       EditorSetting.inited.hook(this.devSolidZoomAndOffset),
       this.disposer.dispose,
     )
@@ -120,7 +120,7 @@ class StageViewportService {
       this.wheeler.beforeWheel.hook(({ e }) => e.ctrlKey && e.preventDefault()),
       this.wheeler.duringWheel.hook(({ e }) => this.handleWheelZoom(e)),
       this.wheeler.afterWheel.hook(({ e }) => e.ctrlKey && e.preventDefault()),
-      Surface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent)),
+      StageSurface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent)),
       listen('wheel', { passive: false }, (e) => e.ctrlKey && e.preventDefault()),
     )
   }

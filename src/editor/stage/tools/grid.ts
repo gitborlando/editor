@@ -1,4 +1,4 @@
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { expandOneStep, snapHalfPixel } from 'src/utils/common'
 
@@ -6,14 +6,14 @@ class StageToolGridService {
   private ctx!: CanvasRenderingContext2D
 
   subscribe() {
-    return Disposer.collect(Surface.onRenderTopCanvas.hook(this.draw))
+    return Disposer.collect(StageSurface.onRenderTopCanvas.hook(this.draw))
   }
 
   private draw() {
     const zoom = getZoom()
     if (zoom < 10.96) return
 
-    Surface.ctxSaveRestore((ctx) => {
+    StageSurface.ctxSaveRestore((ctx) => {
       ctx.transform(...StageViewport.sceneMatrix.invert().tuple())
       ctx.strokeStyle = '#cccccc55'
       ctx.lineWidth = 1
