@@ -1,11 +1,11 @@
-import { AABB } from '@gitborlando/geo'
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { EditorSetting } from 'src/editor/editor/setting'
-import { max, radianfy } from 'src/editor/math/base'
+import { AABB } from 'src/editor/math'
+import { max } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
-import { xy_, xy_from } from 'src/editor/math/xy'
+import { xy_from } from 'src/editor/math/xy'
 import { Surface } from 'src/editor/render/surface'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
@@ -103,8 +103,8 @@ class ElemDrawerService {
     const { width, height, startAngle, endAngle, innerRate } = this
       .node as V1.Ellipse
     const [cx, cy] = [width / 2, height / 2]
-    const startRadian = radianfy(startAngle)
-    const endRadian = radianfy(endAngle)
+    const startRadian = Angle.radianFy(startAngle)
+    const endRadian = Angle.radianFy(endAngle)
 
     if (innerRate === 0) {
       if (startAngle === 0 && endAngle === 360) {
@@ -235,11 +235,11 @@ class ElemDrawerService {
         break
 
       case 'linearGradient':
-        const start = xy_(
+        const start = XY._(
           fill.start.x * this.node.width,
           fill.start.y * this.node.height,
         )
-        const end = xy_(fill.end.x * this.node.width, fill.end.y * this.node.height)
+        const end = XY._(fill.end.x * this.node.width, fill.end.y * this.node.height)
 
         const gradient = this.ctx.createLinearGradient(
           start.x,
@@ -459,7 +459,7 @@ class ElemDrawerService {
 
     this.splitTexts.forEach(({ start, width }, i) => {
       const y = i * lineHeight + fontSize / 2
-      collideXys.push(xy_(start, y), xy_(start + width, y))
+      collideXys.push(XY._(start, y), XY._(start + width, y))
     })
 
     return collideXys

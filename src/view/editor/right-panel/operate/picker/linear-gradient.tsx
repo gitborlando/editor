@@ -1,4 +1,3 @@
-import { max, min } from '@gitborlando/geo'
 import { OperateFill } from 'src/editor/operate/fill'
 import { Drag } from 'src/global/event/drag'
 import { makeLinearGradientCss, rgbaFromObject } from 'src/utils/color'

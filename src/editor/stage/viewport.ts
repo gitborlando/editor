@@ -1,6 +1,6 @@
-import { IRect, IXY, XY } from '@gitborlando/geo'
 import { listen, WheelUtil } from '@gitborlando/utils/browser'
 import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
+import { IRect } from 'src/editor/math'
 import { minMax } from 'src/editor/math/base'
 import { Matrix } from 'src/editor/math/matrix'
 import { Surface } from 'src/editor/render/surface'

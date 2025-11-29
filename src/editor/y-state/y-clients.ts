@@ -1,4 +1,3 @@
-import { XY } from '@gitborlando/geo'
 import { Is } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'

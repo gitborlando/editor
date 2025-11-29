@@ -1,9 +1,9 @@
-import { twoDecimal } from '@gitborlando/geo'
 import { Icon } from '@gitborlando/widget'
 import { HandleNode } from 'src/editor/handle/node'
 import { AllGeometry, OperateGeometry } from 'src/editor/operate/geometry'
 import { getZoom } from 'src/editor/stage/viewport'
 import { MULTI_VALUE } from 'src/global/constant'
+import { twoDecimal } from 'src/utils/common'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { SlideInput } from './components/slide-input'
 

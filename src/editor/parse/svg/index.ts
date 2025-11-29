@@ -1,6 +1,6 @@
 import { loopFor } from '@gitborlando/utils'
 import { camelCase } from 'nano-string-utils'
-import { xy_, xy_symmetric } from 'src/editor/math/xy'
+import { xy_symmetric } from 'src/editor/math/xy'
 import { OperateNode } from 'src/editor/operate/node'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { normalizeColor } from 'src/shared/utils/color'
@@ -73,7 +73,7 @@ export class SvgParser {
           else viewBoxArr = [0, 0, width!, height!]
           node = SchemaCreator.frame({ width, height })
         }
-        this.ratio = xy_(
+        this.ratio = XY._(
           properties.width! / viewBoxArr[2],
           properties.height! / viewBoxArr[3],
         )
@@ -109,7 +109,7 @@ export class SvgParser {
           height: height * this.ratio.y,
         })
         node.points = this.parseSvgPathToPoints(d)
-        const shift = xy_(
+        const shift = XY._(
           (parentNode as any)!.x - node.x - this.xy.x,
           (parentNode as any)!.y - node.y - this.xy.y,
         )

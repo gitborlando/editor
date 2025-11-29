@@ -1,5 +1,4 @@
 import autobind from 'class-autobind-decorator'
-import { xy_ } from 'src/editor/math/xy'
 import { IFill, IFillKeys } from 'src/editor/schema/type'
 import Immui, { ImmuiPatch } from 'src/shared/immui/immui'
 import { IXY } from 'src/shared/utils/normal'
@@ -11,7 +10,7 @@ class UIPickerService {
   fill!: IFill
   show = Signal.create(false)
   type = Signal.create(<'color' | 'linearGradient' | 'image'>'color')
-  xy = Signal.create(<IXY>xy_(0, 0))
+  xy = Signal.create(<IXY>XY._(0, 0))
   beforeOperate = Signal.create(<{ type: IOperateType }>{})
   afterOperate = Signal.create(<{ type: IOperateType; value?: any }>{})
   loadingWebImageUrl = Signal.create('')

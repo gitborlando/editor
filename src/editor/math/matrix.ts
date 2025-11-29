@@ -1,5 +1,4 @@
-import { AABB } from '@gitborlando/geo'
-import { xy_ } from './xy'
+import { AABB } from 'src/editor/math/aabb'
 
 export type IMatrix = {
   a: number
@@ -111,15 +110,15 @@ export class Matrix {
   applyXY = (xy: IXY, isInvert?: 'invert') => {
     const { x, y } = xy
     const { a, b, c, d, tx, ty } = isInvert ? this.invert() : this
-    return xy_(a * x + c * y + tx, b * x + d * y + ty)
+    return XY._(a * x + c * y + tx, b * x + d * y + ty)
   }
 
   applyAABB = (aabb: AABB, isInvert?: 'invert') => {
     const { minX, minY, maxX, maxY } = aabb
-    const xy1 = this.applyXY(xy_(minX, minY), isInvert)
-    const xy2 = this.applyXY(xy_(maxX, minY), isInvert)
-    const xy3 = this.applyXY(xy_(maxX, maxY), isInvert)
-    const xy4 = this.applyXY(xy_(minX, maxY), isInvert)
+    const xy1 = this.applyXY(XY._(minX, minY), isInvert)
+    const xy2 = this.applyXY(XY._(maxX, minY), isInvert)
+    const xy3 = this.applyXY(XY._(maxX, maxY), isInvert)
+    const xy4 = this.applyXY(XY._(minX, maxY), isInvert)
     return {
       minX: min(xy1.x, xy2.x, xy3.x, xy4.x),
       minY: min(xy1.y, xy2.y, xy3.y, xy4.y),

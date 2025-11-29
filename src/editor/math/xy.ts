@@ -1,4 +1,4 @@
-import { degreefy, rcos, rotatePoint, rsin, sqrt } from './base'
+import { sqrt } from 'src/editor/math/base'
 
 export function xy_(x: number = 0, y: number = 0) {
   return { x, y }
@@ -55,13 +55,13 @@ export function xy_divide(self: IXY, ...numbers: number[]) {
   return { x: self.x / n, y: self.y / n }
 }
 
-export function xy_distance(self: IXY, another: IXY = xy_(0, 0)) {
+export function xy_distance(self: IXY, another: IXY = XY._(0, 0)) {
   return Math.sqrt((self.x - another.x) ** 2 + (self.y - another.y) ** 2)
 }
 
 export function xy_rotate(self: IXY, origin: IXY, rotation: number) {
   if (rotation === 0) return self
-  return rotatePoint(self.x, self.y, origin.x, origin.y, rotation)
+  return Angle.rotatePoint(self.x, self.y, origin.x, origin.y, rotation)
 }
 
 export function xy_dot(self: IXY, another: IXY) {
@@ -77,7 +77,7 @@ export function xy_opposite(self: IXY) {
 }
 
 export function xy_getRotation(self: IXY, another: IXY, origin: IXY) {
-  return degreefy(
+  return Angle.angleFy(
     Math.atan2(self.y - origin.y, self.x - origin.x) -
       Math.atan2(another.y - origin.y, another.x - origin.x),
   )
@@ -88,16 +88,11 @@ export function xy_toArray(self: IXY) {
 }
 
 export function xy_xAxis(rotation: number) {
-  return { x: rcos(rotation), y: rsin(rotation) }
+  return { x: Angle.cos(rotation), y: Angle.sin(rotation) }
 }
 
 export function xy_yAxis(rotation: number) {
-  return { x: -rsin(rotation), y: rcos(rotation) }
-}
-
-export type IXY = {
-  x: number
-  y: number
+  return { x: -Angle.sin(rotation), y: Angle.cos(rotation) }
 }
 
 export class XY {
@@ -105,65 +100,100 @@ export class XY {
     public x: number,
     public y: number,
   ) {}
-
-  from(xy: IXY) {
-    this.x = xy.x
-    this.y = xy.y
-    return this
+  plain() {
+    return { x: this.x, y: this.y }
   }
 
-  client(e: { clientX: number; clientY: number }) {
-    this.x = e.clientX
-    this.y = e.clientY
-    return this
+  tuple() {
+    return [this.x, this.y] as const
   }
 
-  center(xy: { centerX: number; centerY: number }) {
-    this.x = xy.centerX
-    this.y = xy.centerY
-    return this
+  plus(...others: IXY[]) {
+    const x = others.reduce((sum, cur) => sum + cur.x, this.x)
+    const y = others.reduce((sum, cur) => sum + cur.y, this.y)
+    return XY.of(x, y)
   }
 
-  plus(another: IXY) {
-    this.x = this.x + another.x
-    this.y = this.y + another.y
-    return this
-  }
-
-  minus(another: IXY) {
-    this.x = this.x - another.x
-    this.y = this.y - another.y
-    return this
+  minus(...others: IXY[]) {
+    const x = others.reduce((sum, cur) => sum - cur.x, this.x)
+    const y = others.reduce((sum, cur) => sum - cur.y, this.y)
+    return XY.of(x, y)
   }
 
   multiply(...numbers: number[]) {
     const n = numbers.reduce((a, b) => a * b, 1)
-    this.x = this.x * n
-    this.y = this.y * n
-    return this
+    return XY.of(this.x * n, this.y * n)
   }
 
   divide(...numbers: number[]) {
     const n = numbers.reduce((a, b) => a * b, 1)
-    this.x = this.x / n
-    this.y = this.y / n
-    return this
-  }
-
-  distance(another: IXY) {
-    return sqrt((this.x - another.x) ** 2 + (this.y - another.y) ** 2)
+    return XY.of(this.x / n, this.y / n)
   }
 
   rotate(origin: IXY, rotation: number) {
-    if (rotation === 0) return this
-    return rotatePoint(this.x, this.y, origin.x, origin.y, rotation)
+    if (rotation === 0) return XY.from(this)
+    return XY.from(Angle.rotatePoint(this.x, this.y, origin.x, origin.y, rotation))
   }
 
-  static From(xy: IXY) {
-    return new XY(xy.x, xy.y)
+  symmetric(origin: IXY) {
+    return XY.of(2 * origin.x - this.x, 2 * origin.y - this.y)
   }
 
-  static FromArray(arr: [number, number]) {
-    return new XY(arr[0], arr[1])
+  ratio(another: IXY, t: number) {
+    const x = this.x + (another.x - this.x) * t
+    const y = this.y + (another.y - this.y) * t
+    return XY.of(x, y)
+  }
+
+  getDot(another: IXY) {
+    return this.x * another.x + this.y * another.y
+  }
+
+  getDistance(another: IXY) {
+    return sqrt((this.x - another.x) ** 2 + (this.y - another.y) ** 2)
+  }
+
+  getAngle(another: IXY, origin: IXY) {
+    return Angle.angleFy(
+      Math.atan2(this.y - origin.y, this.x - origin.x) -
+        Math.atan2(another.y - origin.y, another.x - origin.x),
+    )
+  }
+
+  static _(x: number = 0, y: number = 0) {
+    return { x, y }
+  }
+
+  static of(x: number, y: number) {
+    return new XY(x, y)
+  }
+
+  static from(xy: IXY) {
+    if (xy instanceof XY) return xy
+    return XY.of(xy.x, xy.y)
+  }
+
+  static center(xy: { centerX: number; centerY: number }) {
+    return XY.of(xy.centerX, xy.centerY)
+  }
+
+  static leftTop(e: { left: number; top: number }) {
+    return XY.of(e.left, e.top)
+  }
+
+  static client(e: { clientX: number; clientY: number }) {
+    return XY.of(e.clientX, e.clientY)
+  }
+
+  static tuple(arr: [number, number]) {
+    return XY.of(arr[0], arr[1])
+  }
+
+  static xAxis(rotation: number) {
+    return XY.of(Angle.cos(rotation), Angle.sin(rotation))
+  }
+
+  static yAxis(rotation: number) {
+    return XY.of(-Angle.sin(rotation), Angle.cos(rotation))
   }
 }

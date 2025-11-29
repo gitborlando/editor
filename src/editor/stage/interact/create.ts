@@ -1,4 +1,3 @@
-import { Angle } from '@gitborlando/geo'
 import { DragData } from '@gitborlando/utils/browser'
 import { HandleNode } from 'src/editor/handle/node'
 import { max } from 'src/editor/math/base'

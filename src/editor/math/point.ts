@@ -1,7 +1,5 @@
-import { Angle } from '@gitborlando/geo'
 import { firstOne, lastOne, optionalSet, range } from '@gitborlando/utils'
-import { divide, max, rcos, rsin } from 'src/editor/math/base'
-import { IXY, xy_ } from 'src/editor/math/xy'
+import { divide, max } from 'src/editor/math/base'
 
 export type IPoint = {
   type: 'point'
@@ -42,18 +40,18 @@ export function createRegularPolygon(
   sideCount: number,
 ) {
   sideCount = Math.max(sideCount | 0, 3)
-  const center = xy_(width / 2, height / 2)
+  const center = XY._(width / 2, height / 2)
   const radius = max(width, height) / 2
   const delta = 360 / sideCount
   const points = range(sideCount).map((i) => {
     const angle = i * delta - 90
     if (width > height) {
-      const x = center.x + rcos(angle) * radius
-      const y = center.y + rsin(angle) * radius * divide(height, width)
+      const x = center.x + Angle.cos(angle) * radius
+      const y = center.y + Angle.sin(angle) * radius * divide(height, width)
       return point({ x, y })
     } else {
-      const x = center.x + rcos(angle) * radius * divide(width, height)
-      const y = center.y + rsin(angle) * radius
+      const x = center.x + Angle.cos(angle) * radius * divide(width, height)
+      const y = center.y + Angle.sin(angle) * radius
       return point({ x, y })
     }
   })
@@ -69,7 +67,7 @@ export function createStarPolygon(
   innerRate: number,
 ) {
   pointCount = max(pointCount | 0, 3)
-  const center = xy_(width / 2, height / 2)
+  const center = XY._(width / 2, height / 2)
   const outerRadius = max(width, height) / 2
   const innerRadius = innerRate * outerRadius
   const delta = 360 / pointCount / 2
@@ -77,12 +75,12 @@ export function createStarPolygon(
     const radius = (-1) ** i === 1 ? outerRadius : innerRadius
     const angle = i * delta - 90
     if (width > height) {
-      const x = center.x + rcos(angle) * radius
-      const y = center.y + rsin(angle) * radius * (height / width)
+      const x = center.x + Angle.cos(angle) * radius
+      const y = center.y + Angle.sin(angle) * radius * (height / width)
       return point({ x, y })
     } else {
-      const x = center.x + rcos(angle) * radius * (width / height)
-      const y = center.y + rsin(angle) * radius
+      const x = center.x + Angle.cos(angle) * radius * (width / height)
+      const y = center.y + Angle.sin(angle) * radius
       return point({ x, y })
     }
   })

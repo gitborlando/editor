@@ -1,7 +1,6 @@
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { atan2, degreefy, normalAngle } from 'src/editor/math/base'
-import { xy_, xy_distance, xy_minus } from 'src/editor/math/xy'
+import { xy_distance, xy_minus } from 'src/editor/math/xy'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { Surface } from 'src/editor/render/surface'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
@@ -278,12 +277,12 @@ export class HitTest {
         return inRect
       } else {
         if (!inRect) return false
-        if (xy_distance(xy, xy_(r, r)) > r && xy.x < r && xy.y < r) return false
-        if (xy_distance(xy, xy_(w - r, r)) > r && xy.x > w - r && xy.y < r)
+        if (xy_distance(xy, XY._(r, r)) > r && xy.x < r && xy.y < r) return false
+        if (xy_distance(xy, XY._(w - r, r)) > r && xy.x > w - r && xy.y < r)
           return false
-        if (xy_distance(xy, xy_(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r)
+        if (xy_distance(xy, XY._(w - r, h - r)) > r && xy.x > w - r && xy.y > h - r)
           return false
-        if (xy_distance(xy, xy_(r, h - r)) > r && xy.x < r && xy.y > h - r)
+        if (xy_distance(xy, XY._(r, h - r)) > r && xy.x < r && xy.y > h - r)
           return false
         return true
       }
@@ -333,12 +332,12 @@ export class HitTest {
         if (hitInner) return false
       }
 
-      startAngle = normalAngle(startAngle)
-      endAngle = normalAngle(endAngle)
+      startAngle = Angle.normal(startAngle)
+      endAngle = Angle.normal(endAngle)
 
       if (startAngle === 0 && endAngle === 0) return true
 
-      const angle = normalAngle(degreefy(atan2(dy, dx)))
+      const angle = Angle.getAngle(xy, XY._(cx, cy))
 
       if (startAngle <= endAngle) {
         return angle >= startAngle && angle <= endAngle
@@ -382,10 +381,10 @@ export class HitTest {
     const radian = Math.atan2(dy, dx)
     const xShift = spread * Math.sin(radian)
     const yShift = spread * Math.cos(radian)
-    const TL = xy_(p1.x - xShift, p1.y + yShift)
-    const TR = xy_(p2.x - xShift, p2.y + yShift)
-    const BR = xy_(p2.x + xShift, p2.y - yShift)
-    const BL = xy_(p1.x + xShift, p1.y - yShift)
+    const TL = XY._(p1.x - xShift, p1.y + yShift)
+    const TR = XY._(p2.x - xShift, p2.y + yShift)
+    const BR = XY._(p2.x + xShift, p2.y - yShift)
+    const BL = XY._(p1.x + xShift, p1.y - yShift)
     return [TL, TR, BR, BL]
   }
 }

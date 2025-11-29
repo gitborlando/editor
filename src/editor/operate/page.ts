@@ -1,6 +1,5 @@
 import { createObjCache } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
-import { xy_ } from 'src/editor/math/xy'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaCreator } from '../schema/creator'
 import { Schema } from '../schema/schema'
@@ -23,7 +22,7 @@ class OperatePageService {
   addPage(page = SchemaCreator.page()) {
     Schema.addItem(page)
     Schema.itemAdd(Schema.meta, ['pageIds', Schema.meta.pageIds.length], page.id)
-    Schema.itemAdd(Schema.client, ['viewport', page.id], { zoom: 1, xy: xy_(0, 0) })
+    Schema.itemAdd(Schema.client, ['viewport', page.id], { zoom: 1, xy: XY._(0, 0) })
     this.selectPage(page.id)
     Schema.finalOperation('添加页面')
   }
@@ -40,7 +39,7 @@ class OperatePageService {
   getCurrentViewport() {
     return this.pageViewport.getSet(this.currentPage.id, () => ({
       zoom: 1,
-      offset: xy_(),
+      offset: XY._(),
     }))
   }
 

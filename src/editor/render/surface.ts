@@ -1,7 +1,8 @@
-import { AABB, Angle, OBB, abs, max, round } from '@gitborlando/geo'
 import { NoopFunc, reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
 import { getEditorSetting } from 'src/editor/editor/setting'
+import { AABB, OBB } from 'src/editor/math'
+import { abs, round } from 'src/editor/math/base'
 import { Matrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import {
@@ -273,7 +274,7 @@ export class StageSurface {
 
   private partialRender = () => {
     const reRenderElems = new Set<Elem>()
-    let dirtyArea = AABB.merge(...this.dirtyRects)
+    let dirtyArea = AABB.merge(this.dirtyRects)
     let needReTest = true
 
     const traverse = (elem: Elem) => {
@@ -281,7 +282,7 @@ export class StageSurface {
       if (!AABB.collide(dirtyArea, elem.aabb)) return
 
       if (AABB.include(dirtyArea, elem.aabb) !== 1) {
-        dirtyArea = AABB.merge(dirtyArea, elem.aabb)
+        dirtyArea = AABB.merge([dirtyArea, elem.aabb])
         needReTest = true
       }
       reRenderElems.add(elem)

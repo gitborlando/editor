@@ -1,4 +1,3 @@
-import { twoDecimal } from '@gitborlando/geo'
 import { iife, matchCase } from '@gitborlando/utils'
 import { stopPropagation } from '@gitborlando/utils/browser'
 import { Eye, EyeOff } from 'lucide-react'
@@ -114,7 +113,7 @@ const AlphaInputComp: FC<{ fill: V1.Fill; index: number }> = observer(
     }
     return (
       <NumberInput
-        value={twoDecimal(fill.alpha) * 100}
+        value={fill.alpha * 100}
         onChange={(value) => setAlpha(value ?? 0)}
         className={cls('alpha')}
         onFocus={(e) => e.target.select()}

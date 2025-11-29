@@ -1,5 +1,3 @@
-import { max, min } from '@gitborlando/geo'
-import Color from 'color'
 import equal from 'fast-deep-equal'
 import { PipetteIcon } from 'lucide-react'
 import { createContext, RefObject } from 'react'

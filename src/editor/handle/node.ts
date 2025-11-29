@@ -1,5 +1,4 @@
 import { firstOne, iife, stableIndex } from '@gitborlando/utils'
-import { AABB, OBB } from 'src/editor/math/obb'
 import { SchemaHelper } from 'src/editor/schema/helper'
 import { getSelectIdList } from 'src/editor/y-state/y-clients'
 import { SchemaCreator } from '../schema/creator'
@@ -48,12 +47,12 @@ class HandleNodeService {
   }
 
   getNodesMergedOBB(nodes: V1.Node[]) {
-    const aabbList = nodes.map((node) => OBB.FromRect(node, node.rotation).aabb)
-    return OBB.FromAABB(AABB.Merge(aabbList))
+    const aabbList = nodes.map((node) => OBB.fromRect(node, node.rotation).aabb)
+    return OBB.fromAABB(AABB.merge(aabbList))
   }
 
   getNodeCenterXY(node: V1.Node) {
-    return OBB.FromRect(node, node.rotation).center
+    return OBB.fromRect(node, node.rotation).center
   }
 
   deleteSelectedNodes() {
@@ -175,7 +174,7 @@ class HandleNodeService {
 
     const datum = YState.find<V1.Node>(this.datumId)
     if (datum && !SchemaHelper.isPageById(datum.id)) {
-      const aabb = OBB.FromRect(datum, datum.rotation).aabb
+      const aabb = OBB.fromRect(datum, datum.rotation).aabb
       this.datumXY = XY._(aabb.minX, aabb.minY)
     } else {
       this.datumXY = XY._(0, 0)

@@ -1,11 +1,10 @@
 import { firstOne, reverseFor, stableIndex } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { nanoid } from 'nanoid'
-import { AABB, OBB } from 'src/editor/math/obb'
 import { StageScene } from 'src/editor/render/scene'
 import { clone } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { xy_, xy_rotate } from '../math/xy'
+import { xy_rotate } from '../math/xy'
 import { SchemaCreator } from '../schema/creator'
 import { SchemaHistory } from '../schema/history'
 import { Schema } from '../schema/schema'
@@ -14,7 +13,7 @@ import { ID, INode, INodeParent } from '../schema/type'
 @autobind
 class OperateNodeService {
   datumId = Signal.create('')
-  datumXY = xy_(0, 0)
+  datumXY = XY._(0, 0)
   selectIds = Signal.create(new Set<ID>())
   afterRemoveNodes = Signal.create<ID[]>()
   selectedNodes = Signal.create(<INode[]>[])
@@ -191,12 +190,12 @@ class OperateNodeService {
 
   getSomeNodesMergedOBB(nodes: INode[]) {
     const aabbList = nodes.map((node) => StageScene.findElem(node.id).aabb)
-    return OBB.FromAABB(AABB.Merge(aabbList))
+    return OBB.fromAABB(AABB.merge(aabbList))
   }
 
   getNodeCenterXY(node: INode) {
-    const center = xy_(node.x + node.width / 2, node.y + node.height / 2)
-    return xy_rotate(center, xy_(node.x, node.y), node.rotation)
+    const center = XY._(node.x + node.width / 2, node.y + node.height / 2)
+    return xy_rotate(center, XY._(node.x, node.y), node.rotation)
   }
 
   private autoGetDatumId(selectIds: Set<string>) {
@@ -213,8 +212,8 @@ class OperateNodeService {
       if (parentIds.size > 1) this.datumId.dispatch('')
     }
     const elem = StageScene.findElem(this.datumId.value)
-    if (!elem) return (this.datumXY = xy_(0, 0))
-    this.datumXY = xy_(elem.obb.aabb.minX, elem.obb.aabb.minY)
+    if (!elem) return (this.datumXY = XY._(0, 0))
+    this.datumXY = XY._(elem.obb.aabb.minX, elem.obb.aabb.minY)
   }
 }
 

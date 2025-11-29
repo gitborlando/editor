@@ -1,4 +1,3 @@
-import { Angle } from '@gitborlando/geo'
 import { objKeys } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import { HandleNode } from 'src/editor/handle/node'

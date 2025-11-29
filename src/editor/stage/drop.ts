@@ -1,12 +1,12 @@
 import autobind from 'class-autobind-decorator'
 import { fileTypeFromBuffer } from 'file-type'
-import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageScene } from 'src/editor/render/scene'
 import { Surface } from 'src/editor/render/surface'
+import { StageSelect } from 'src/editor/stage/interact/select'
 import { Uploader } from 'src/global/upload'
 import { IClientXY, preventDefault } from 'src/shared/utils/event'
 import { ImgManager } from '../editor/img-manager'
-import { xy_, xy_client } from '../math/xy'
+import { xy_client } from '../math/xy'
 import { OperateNode } from '../operate/node'
 import { OperatePage } from '../operate/page'
 import { SvgParser } from '../parse/svg'
@@ -17,7 +17,7 @@ import { StageViewport } from './viewport'
 
 @autobind
 export class StageDropService {
-  private sceneXY = xy_(0, 0)
+  private sceneXY = XY._(0, 0)
   private containerNode!: V1.NodeParent
   private node!: V1.Node
 

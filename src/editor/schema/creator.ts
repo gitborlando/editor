@@ -1,4 +1,3 @@
-import { IXY } from '@gitborlando/geo'
 import { clone, createCache, miniId } from '@gitborlando/utils'
 import {
   createLine,

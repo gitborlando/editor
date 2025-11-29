@@ -1,4 +1,3 @@
-import { min } from '@gitborlando/geo'
 import { listen } from '@gitborlando/utils/browser'
 import { X } from 'lucide-react'
 import { createPortal } from 'react-dom'

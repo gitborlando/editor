@@ -1,4 +1,3 @@
-import { Angle, IXY, XY } from '@gitborlando/geo'
 import { isLeftMouse, isRightMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
@@ -49,9 +48,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     if (selectNodes.length === 1)
       return OBB.fromRect(selectNodes[0], selectNodes[0].rotation)
     return OBB.fromAABB(
-      AABB.merge(
-        ...selectNodes.map((node) => OBB.fromRect(node, node.rotation).aabb),
-      ),
+      AABB.merge(selectNodes.map((node) => OBB.fromRect(node, node.rotation).aabb)),
     )
   }, [selectNodes])
 

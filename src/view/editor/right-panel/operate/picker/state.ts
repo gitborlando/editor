@@ -1,5 +1,3 @@
-import { type IXY } from '@gitborlando/geo'
-import autoBind from 'auto-bind'
 import { OperateFill } from 'src/editor/operate/fill'
 
 class FillPickerStateService {

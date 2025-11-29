@@ -1,5 +1,3 @@
-import { xy_ } from 'src/editor/math/xy'
-
 const polygonCount = 10000
 const polygonEdgeCount = 4
 
@@ -12,14 +10,14 @@ const polygons = Array.from({ length: polygonCount }, (_, i) => {
 })
 
 const rects = Array.from({ length: polygonCount }, (_, i) => {
-  const xy = xy_(Math.random() * 10000, Math.random() * 10000)
+  const xy = XY._(Math.random() * 10000, Math.random() * 10000)
   const width = Math.random() * 100
   const height = Math.random() * 100
   return { ...xy, width, height }
 })
 
 const circles = Array.from({ length: polygonCount }, (_, i) => {
-  const xy = xy_(Math.random() * 10000, Math.random() * 10000)
+  const xy = XY._(Math.random() * 10000, Math.random() * 10000)
   return { ...xy, r: Math.random() * 100 }
 })
 
@@ -49,7 +47,7 @@ let testCount = 100
 
 for (let j = 0; j < testCount; j++) {
   let start = performance.now()
-  const xy = xy_(Math.random() * 10000, Math.random() * 10000)
+  const xy = XY._(Math.random() * 10000, Math.random() * 10000)
   for (let i = 0; i < polygonCount; i++) {
     // inPolygon(polygons[i], xy)
     // aver: 0.5ms

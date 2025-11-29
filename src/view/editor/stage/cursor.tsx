@@ -1,4 +1,3 @@
-import { IXY } from '@gitborlando/geo'
 import { values } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageViewport } from 'src/editor/stage/viewport'
