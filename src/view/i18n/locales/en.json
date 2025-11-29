@@ -127,5 +127,19 @@
     "rename": "rename",
     "moveTo": "move to",
     "export": "export"
-  }
+  },
+  "selected nodes via marquee": "selected nodes via marquee",
+  "selected nodes via mousedown": "selected nodes via mousedown",
+  "selected nodes via panel": "selected nodes via panel",
+  "file list": "file list",
+  "search layer": "search layer",
+  "auto save": "auto save",
+  "dev mode": "dev mode",
+  "show dirty rect": "show dirty rect",
+  "skip render unrecognizable node": "skip render unrecognizable node",
+  "slice render optimization when zoom": "slice render optimization when zoom",
+  "show FPS": "show FPS",
+  "change fill type": "change fill type",
+  "adjust color": "adjust color",
+  "move gradient point": "move gradient point"
 }

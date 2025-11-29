@@ -19,6 +19,7 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
         onClick={() => setShowSetting(!showSetting)}
       />
       <DragPanel
+        width={400}
         center
         x-if={showSetting}
         title={t('common.setting')}
@@ -44,11 +45,9 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
   const setting = getEditorSetting()
   const {
     autosave,
-    mockMode,
     showFPS,
     devMode,
     ignoreUnVisible,
-    menuShowTopTab,
     needSliceRender,
     showDirtyRect,
   } = setting
@@ -66,42 +65,32 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
         </Radio.Group>
       </SpaceBetweenItem>
       <BooleanSettingComp
-        label='mock模式'
-        value={mockMode}
-        onChange={(value) => (setting.mockMode = value)}
-      />
-      <BooleanSettingComp
-        label='自动保存'
+        label={t('auto save')}
         value={autosave}
         onChange={(value) => (setting.autosave = value)}
       />
       <BooleanSettingComp
-        label='开发模式'
+        label={t('dev mode')}
         value={devMode}
         onChange={(value) => (setting.devMode = value)}
       />
       <BooleanSettingComp
-        label='显示渲染脏矩形'
+        label={t('show dirty rect')}
         value={showDirtyRect}
         onChange={(value) => (setting.showDirtyRect = value)}
       />
       <BooleanSettingComp
-        label='不渲染不可辨认的节点'
+        label={t('skip render unrecognizable node')}
         value={ignoreUnVisible}
         onChange={(value) => (setting.ignoreUnVisible = value)}
       />
       <BooleanSettingComp
-        label='缩放时进行分片渲染优化'
+        label={t('slice render optimization when zoom')}
         value={needSliceRender}
         onChange={(value) => (setting.needSliceRender = value)}
       />
       <BooleanSettingComp
-        label='菜单显示工具栏'
-        value={menuShowTopTab}
-        onChange={(value) => (setting.menuShowTopTab = value)}
-      />
-      <BooleanSettingComp
-        label='显示 FPS'
+        label={t('show FPS')}
         value={showFPS}
         onChange={(value) => (setting.showFPS = value)}
       />

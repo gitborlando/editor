@@ -126,5 +126,19 @@
     "rename": "重命名",
     "moveTo": "移至",
     "export": "导出"
-  }
+  },
+  "selected nodes via marquee": "通过 Marquee 选择节点",
+  "selected nodes via mousedown": "通过鼠标点击选择节点",
+  "selected nodes via panel": "通过面板选定的节点",
+  "file list": "文件列表",
+  "search layer": "搜索图层",
+  "show FPS": "显示 FPS",
+  "auto save": "自动保存",
+  "dev mode": "开发模式",
+  "show dirty rect": "显示脏矩形",
+  "skip render unrecognizable node": "跳过渲染不可辨认节点",
+  "slice render optimization when zoom": "缩放时分片渲染优化",
+  "change fill type": "更改填充类型",
+  "adjust color": "调整颜色",
+  "move gradient point": "移动渐变点"
 }

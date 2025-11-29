@@ -9,6 +9,7 @@
     padding: 0;
     box-sizing: border-box;
     user-select: none;
+    font-family: 'Lobster2' !important;
   }
   *::selection {
     background-color: var(--color);
@@ -24,9 +25,14 @@
 }
 
 body {
-  font-family: initial;
+  font-family: 'Lobster2';
   --gray-border: rgba(138, 138, 138, 0.15);
   --gray-bg: rgba(242, 243, 244, 1);
   --border-radius: 2px;
   --shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+@font-face {
+  font-family: 'Lobster2';
+  src: url('./fonts/Lobster2.ttf') format('truetype');
 }

@@ -27,7 +27,7 @@ export const EditorLeftPanelLayerNodeHeaderComp: FC<{}> = observer(({}) => {
         type='text'
         // value={searchSlice.value}
         // onChange={handleSearchChange}
-        placeholder='搜索图层...'
+        placeholder={t('search layer')}
         className={cls('search-input')}
       />
       <IconButton onClick={handleToggleExpand} className={cls('expand-button')}>

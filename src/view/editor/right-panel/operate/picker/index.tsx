@@ -41,7 +41,7 @@ export const FillPickerComp: FC<{}> = observer(({}) => {
   const handleChangeFill = (value: V1.Fill['type']) => {
     FillPickerState.fillType = value
     changeFill(fillCache.getSet(value, () => createFillCache(value)))
-    YUndo.track({ type: 'state', description: '改变填充类型' })
+    YUndo.track({ type: 'state', description: t('change fill type') })
   }
 
   return (

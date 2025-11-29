@@ -1,5 +1,5 @@
 import { OBB } from '@gitborlando/geo'
-import { firstOne, objKeys } from '@gitborlando/utils'
+import { firstOne } from '@gitborlando/utils'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
@@ -103,7 +103,10 @@ class StageSelectService {
 
     this.clearSelect()
     YUndo.untrack(() => YClients.select(id))
-    YUndo.track({ type: 'client', description: `通过面板选中节点 ${id}` })
+    YUndo.track({
+      type: 'client',
+      description: t('selected nodes via panel'),
+    })
     YClients.afterSelect.dispatch()
   }
 
@@ -129,7 +132,7 @@ class StageSelectService {
     if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
       YUndo.track({
         type: 'client',
-        description: `选中 ${Object.keys(getSelectIdMap()).length} 个节点`,
+        description: t('selected nodes via mousedown'),
       })
       // UILeftPanelLayer.expandAncestor(id)
     }
@@ -190,7 +193,7 @@ class StageSelectService {
         if (!equal(getSelectIdMap(), this.lastSelectIdMap)) {
           YUndo.track({
             type: 'client',
-            description: `选中 ${objKeys(getSelectIdMap()).length} 个节点`,
+            description: t('selected nodes via marquee'),
           })
         }
       })

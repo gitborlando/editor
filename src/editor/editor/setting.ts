@@ -8,9 +8,7 @@ const initSetting = () => {
     showFPS: true,
     devMode: false,
     ignoreUnVisible: true,
-    menuShowTopTab: true,
     needSliceRender: true,
-    mockMode: false,
     showDirtyRect: false,
     dev: {
       fixedSceneMatrix: true,

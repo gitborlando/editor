@@ -5,6 +5,14 @@
     "source.organizeImports": "explicit"
   },
   "typescript.preferences.importModuleSpecifier": "non-relative",
+  "i18n-ally.localesPaths": ["src/view/i18n/locales"],
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.translate.engines": ["libretranslate"],
+  "i18n-ally.annotations": false,
+  "i18n-ally.annotationInPlace": false,
+  "i18n-ally.fullReloadOnChanged": true,
+  "i18n-ally.translate.libre.apiRoot": "http://8.134.131.253:5000",
+  "i18n-ally.translate.fallbackToKey": true,
   "cSpell.words": [
     "aabb",
     "AABB",
@@ -77,7 +85,5 @@
     "vnode",
     "vshow",
     "zattoo"
-  ],
-  "i18n-ally.localesPaths": ["src/view/i18n", "src/view/i18n/locales"],
-  "i18n-ally.keystyle": "nested"
+  ]
 }

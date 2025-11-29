@@ -19,7 +19,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
       className={cls()}
       style={{ height: StageViewport.bound.top }}>
       <Button onClick={() => navigate('/')} icon={<Lucide icon={ChevronLeft} />}>
-        文件列表
+        {t('file list')}
       </Button>
       <G center horizontal gap={0} className={cls('centerGroup')}>
         <UndoGroup />

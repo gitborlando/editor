@@ -53,7 +53,7 @@ const StopsBar: FC<{
       })
       .onDestroy(({ moved }) => {
         if (!moved) return
-        YUndo.track({ type: 'state', description: '移动渐变点' })
+        YUndo.track({ type: 'state', description: t('move gradient point') })
       })
   }
 

@@ -108,7 +108,7 @@ const SquareComp: FC<{}> = observer(({}) => {
         if (equal(lastXY, current)) return
         lastXY.x = current.x
         lastXY.y = current.y
-        YUndo.track({ type: 'state', description: '选取颜色' })
+        YUndo.track({ type: 'state', description: t('adjust color') })
       })
   }
 
@@ -158,7 +158,7 @@ function useSlider(
       .onDestroy(({ current }) => {
         if (lastValue.current === current.x) return
         lastValue.current = current.x
-        YUndo.track({ type: 'state', description: '调整颜色' })
+        YUndo.track({ type: 'state', description: t('adjust color') })
       })
   }
 
