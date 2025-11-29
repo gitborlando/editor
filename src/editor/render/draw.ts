@@ -1,4 +1,5 @@
 import { createObjCache, loopFor } from '@gitborlando/utils'
+import { Canvas, Font, Paint, Path } from 'canvaskit-wasm'
 import autoBind from 'class-autobind-decorator'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { EditorSetting } from 'src/editor/editor/setting'
@@ -10,7 +11,6 @@ import { StageSurface } from 'src/editor/render/surface'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
 import { iife, IXY } from 'src/shared/utils/normal'
-import { rgba } from 'src/utils/color'
 import { themeColor } from 'src/view/styles/color'
 import { Elem, HitTest } from './elem'
 
@@ -18,18 +18,19 @@ import { Elem, HitTest } from './elem'
 class ElemDrawerService {
   private node!: V1.Node
   private elem!: Elem
-  private ctx!: CanvasRenderingContext2D
-  private path2d!: Path2D
+  private ctx!: Canvas
+  private path!: Path
   private dirtyRects: AABB[] = []
+  private font?: Font
 
-  draw = (elem: Elem, ctx: CanvasRenderingContext2D, path2d: Path2D) => {
+  draw = (elem: Elem, ctx: Canvas, path: Path) => {
     this.node = elem.node
     this.elem = elem
     this.ctx = ctx
-    this.path2d = path2d
+    this.path = path
     this.dirtyRects = [elem.aabb]
 
-    StageSurface.setOBBMatrix(this.elem.obb, false)
+    StageSurface.setOBBMatrix(this.elem.obb)
 
     this.drawShapePath()
 
@@ -92,10 +93,12 @@ class ElemDrawerService {
   }
 
   private drawRoundRect = (width: number, height: number, radius: number) => {
+    const ck = StageSurface.ck
     if (radius === 0) {
-      this.path2d.rect(0, 0, width, height)
+      this.path.addRect(ck.XYWHRect(0, 0, width, height))
     } else {
-      this.path2d.roundRect(0, 0, width, height, radius)
+      const rrect = ck.RRectXY(ck.XYWHRect(0, 0, width, height), radius, radius)
+      this.path.addRRect(rrect)
     }
   }
 
@@ -105,43 +108,49 @@ class ElemDrawerService {
     const [cx, cy] = [width / 2, height / 2]
     const startRadian = Angle.radianFy(startAngle)
     const endRadian = Angle.radianFy(endAngle)
+    const ck = StageSurface.ck
 
     if (innerRate === 0) {
       if (startAngle === 0 && endAngle === 360) {
-        this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
+        this.path.addOval(ck.XYWHRect(0, 0, width, height))
       } else {
-        this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
-        this.path2d.lineTo(cx, cy)
+        this.path.addArc(
+          ck.XYWHRect(0, 0, width, height),
+          startAngle,
+          endAngle - startAngle,
+        )
+        this.path.lineTo(cx, cy)
       }
     } else {
       if (startAngle === 0 && endAngle === 360) {
-        this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
-        this.path2d.moveTo(cx * (1 + innerRate), cy)
-        this.path2d.ellipse(
-          cx,
-          cy,
-          cx * innerRate,
-          cy * innerRate,
-          0,
-          startRadian,
-          endRadian,
-          true,
+        this.path.addOval(ck.XYWHRect(0, 0, width, height))
+        const innerWidth = width * innerRate
+        const innerHeight = height * innerRate
+        const innerRect = ck.XYWHRect(
+          cx - innerWidth / 2,
+          cy - innerHeight / 2,
+          innerWidth,
+          innerHeight,
         )
+        this.path.addOval(innerRect, false)
       } else {
-        this.path2d.ellipse(cx, cy, cx, cy, 0, startRadian, endRadian)
-        this.path2d.ellipse(
-          cx,
-          cy,
-          cx * innerRate,
-          cy * innerRate,
-          0,
-          endRadian,
-          startRadian,
-          true,
+        this.path.addArc(
+          ck.XYWHRect(0, 0, width, height),
+          startAngle,
+          endAngle - startAngle,
         )
+        const innerWidth = width * innerRate
+        const innerHeight = height * innerRate
+        const innerRect = ck.XYWHRect(
+          cx - innerWidth / 2,
+          cy - innerHeight / 2,
+          innerWidth,
+          innerHeight,
+        )
+        this.path.addArc(innerRect, endAngle, startAngle - endAngle)
       }
     }
-    this.path2d.closePath()
+    this.path.close()
   }
 
   private drawLine = (points: V1.Point[]) => {
@@ -158,20 +167,21 @@ class ElemDrawerService {
   private drawPath(points: V1.Point[]) {
     loopFor(points, (cur, next, last, i) => {
       if (i === points.length - 1 && cur.endPath) {
-        return this.path2d.closePath()
+        this.path.close()
+        return
       }
       if (cur.startPath) {
-        this.path2d.moveTo(cur.x, cur.y)
+        this.path.moveTo(cur.x, cur.y)
       }
       if (cur.handleR && next.handleL) {
         const [cp2, cp1] = [next.handleL, cur.handleR]
-        this.path2d.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, next.x, next.y)
+        this.path.cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, next.x, next.y)
       } else if (cur.handleR) {
-        this.path2d.quadraticCurveTo(cur.handleR.x, cur.handleR.y, next.x, next.y)
+        this.path.quadTo(cur.handleR.x, cur.handleR.y, next.x, next.y)
       } else if (next.handleL) {
-        this.path2d.quadraticCurveTo(next.handleL.x, next.handleL.y, cur.x, cur.y)
+        this.path.quadTo(next.handleL.x, next.handleL.y, cur.x, cur.y)
       } else if (!next.startPath) {
-        this.path2d.lineTo(next.x, next.y)
+        this.path.lineTo(next.x, next.y)
       }
     })
   }
@@ -183,9 +193,9 @@ class ElemDrawerService {
     const { content, style, width } = this.node as V1.Text
     const { fontWeight, fontSize, fontFamily, letterSpacing } = style
 
-    this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`
-    this.ctx.textBaseline = 'top'
-    this.ctx.letterSpacing = `${letterSpacing}px`
+    // 使用 CanvasKit Font
+    // TODO: 根据 fontWeight, fontSize, fontFamily 创建 Font 对象
+    // 暂时保留文本分割逻辑
 
     this.splitTexts = this.splitTextsCache.getSet(
       this.node.id,
@@ -194,43 +204,66 @@ class ElemDrawerService {
     )
   }
 
-  private fillOrStrokeText = (op: 'fillText' | 'strokeText') => {
+  private fillOrStrokeText = (paint: Paint) => {
     const { style } = this.node as V1.Text
-    const { lineHeight } = style
+    const { lineHeight, fontSize } = style
+    const ck = StageSurface.ck
 
     this.splitTexts.forEach(({ text, start, width }, i) => {
       if (EditorSetting.setting.ignoreUnVisible) {
         const visualWidth = width * getZoom()
         const visualHeight = lineHeight * getZoom()
         if (visualWidth / text.length < 2.5 || visualHeight < 2.5) {
-          this.ctx.fillRect(start, i * lineHeight, width, lineHeight * 0.2)
+          const rectPaint = new ck.Paint()
+          rectPaint.setStyle(ck.PaintStyle.Fill)
+          rectPaint.setColor(paint.getColor())
+          this.ctx.drawRect(
+            ck.XYWHRect(start, i * lineHeight, width, lineHeight * 0.2),
+            rectPaint,
+          )
+          rectPaint.delete()
           return
         }
       }
 
-      this.ctx[op](text, start, i * lineHeight)
+      // 使用 CanvasKit 文本 API
+      if (this.font) {
+        const textBlob = ck.TextBlob.MakeFromText(text, this.font)
+        if (textBlob) {
+          this.ctx.drawTextBlob(textBlob, start, i * lineHeight + fontSize, paint)
+          textBlob.delete()
+        }
+      }
     })
   }
 
   private drawFill = (fill: V1.Fill) => {
+    const ck = StageSurface.ck
+    const paint = new ck.Paint()
+    paint.setStyle(ck.PaintStyle.Fill)
+    paint.setAntiAlias(true)
+
     if (!fill.visible) {
-      this.ctx.fillStyle = rgba(0, 0, 0, 0.0001)
-      return this.ctx.fill(this.path2d)
+      paint.setColor(ck.Color(0, 0, 0, 0.0001))
+      this.ctx.drawPath(this.path, paint)
+      paint.delete()
+      return
     }
 
-    this.ctx.globalAlpha = fill.alpha
+    paint.setAlphaf(fill.alpha)
 
     const makeFill = () => {
       if (this.node.type === 'text') {
-        this.fillOrStrokeText('fillText')
+        this.fillOrStrokeText(paint)
       } else {
-        this.ctx.fill(this.path2d, 'evenodd')
+        this.ctx.drawPath(this.path, paint)
       }
     }
 
     switch (fill.type) {
       case 'color':
-        this.ctx.fillStyle = fill.color
+        const color = this.parseColor(fill.color)
+        paint.setColor(color)
         makeFill()
         break
 
@@ -241,18 +274,20 @@ class ElemDrawerService {
         )
         const end = XY._(fill.end.x * this.node.width, fill.end.y * this.node.height)
 
-        const gradient = this.ctx.createLinearGradient(
-          start.x,
-          start.y,
-          end.x,
-          end.y,
-        )
-        fill.stops.forEach(({ offset, color }) =>
-          gradient.addColorStop(offset, color),
+        const colors = fill.stops.map((s) => this.parseColor(s.color))
+        const positions = fill.stops.map((s) => s.offset)
+
+        const shader = ck.Shader.MakeLinearGradient(
+          [start.x, start.y],
+          [end.x, end.y],
+          colors,
+          positions,
+          ck.TileMode.Clamp,
         )
 
-        this.ctx.fillStyle = gradient
+        paint.setShader(shader)
         makeFill()
+        shader.delete()
         break
 
       case 'image':
@@ -269,42 +304,95 @@ class ElemDrawerService {
             const rateH = height / image.height
             return Math.max(rateW, rateH)
           })
-          const path2d = new Path2D(this.path2d)
-          this.ctx.clip(path2d)
-          this.ctx.drawImage(
-            image.image,
-            0,
-            0,
-            width / rate,
-            height / rate,
-            0,
-            0,
-            width,
-            height,
-          )
+
+          // 使用 CanvasKit 裁剪和绘制图像
+          this.ctx.save()
+          this.ctx.clipPath(this.path, ck.ClipOp.Intersect, true)
+
+          // 将 HTMLImageElement 转换为 CanvasKit Image
+          const skImage = ck.MakeImageFromCanvasImageSource(image.image)
+          if (skImage) {
+            const srcRect = ck.XYWHRect(0, 0, width / rate, height / rate)
+            const dstRect = ck.XYWHRect(0, 0, width, height)
+            this.ctx.drawImageRect(skImage, srcRect, dstRect, paint)
+            skImage.delete()
+          }
+
+          this.ctx.restore()
         }
         break
     }
+
+    paint.delete()
+  }
+
+  private parseColor(cssColor: string): Float32Array {
+    const ck = StageSurface.ck
+    // 简单的 CSS 颜色解析
+    if (cssColor.startsWith('rgba')) {
+      const match = cssColor.match(
+        /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/,
+      )
+      if (match) {
+        const [, r, g, b, a = '1'] = match
+        return ck.Color(parseInt(r), parseInt(g), parseInt(b), parseFloat(a))
+      }
+    } else if (cssColor.startsWith('rgb')) {
+      const match = cssColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
+      if (match) {
+        const [, r, g, b] = match
+        return ck.Color(parseInt(r), parseInt(g), parseInt(b), 1)
+      }
+    } else if (cssColor.startsWith('#')) {
+      const hex = cssColor.slice(1)
+      const r = parseInt(hex.slice(0, 2), 16)
+      const g = parseInt(hex.slice(2, 4), 16)
+      const b = parseInt(hex.slice(4, 6), 16)
+      const a = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1
+      return ck.Color(r, g, b, a)
+    }
+    // 默认黑色
+    return ck.Color(0, 0, 0, 1)
   }
 
   private drawStroke = (stroke: V1.Stroke) => {
     if (!stroke.visible) return
 
-    this.ctx.lineWidth = stroke.width
-    this.ctx.lineCap = stroke.cap
-    this.ctx.lineJoin = stroke.join
+    const ck = StageSurface.ck
+    const paint = new ck.Paint()
+    paint.setStyle(ck.PaintStyle.Stroke)
+    paint.setStrokeWidth(stroke.width)
 
-    this.ctx.globalAlpha = stroke.fill.alpha
+    // 设置线帽样式
+    const capMap: Record<string, any> = {
+      butt: ck.StrokeCap.Butt,
+      round: ck.StrokeCap.Round,
+      square: ck.StrokeCap.Square,
+    }
+    paint.setStrokeCap(capMap[stroke.cap] || ck.StrokeCap.Butt)
+
+    // 设置线连接样式
+    const joinMap: Record<string, any> = {
+      miter: ck.StrokeJoin.Miter,
+      round: ck.StrokeJoin.Round,
+      bevel: ck.StrokeJoin.Bevel,
+    }
+    paint.setStrokeJoin(joinMap[stroke.join] || ck.StrokeJoin.Miter)
+    paint.setAntiAlias(true)
+    paint.setAlphaf(stroke.fill.alpha)
 
     switch (stroke.fill.type) {
       case 'color':
-        this.ctx.strokeStyle = stroke.fill.color
-        this.ctx.stroke(this.path2d)
+        const color = this.parseColor(stroke.fill.color)
+        paint.setColor(color)
+        this.ctx.drawPath(this.path, paint)
         break
 
       default:
         break
     }
+
+    paint.delete()
 
     switch (stroke.align) {
       case 'center':
@@ -323,10 +411,23 @@ class ElemDrawerService {
     offsetY = offsetY * getZoom()
     blur = blur * getZoom()
 
-    this.ctx.shadowColor = (fill as V1.FillColor).color
-    this.ctx.shadowBlur = blur
-    this.ctx.shadowOffsetX = offsetX
-    this.ctx.shadowOffsetY = offsetY
+    const ck = StageSurface.ck
+    const color = this.parseColor((fill as V1.FillColor).color)
+
+    // 使用 CanvasKit 的 MaskFilter 创建阴影效果
+    const shadowPaint = new ck.Paint()
+    shadowPaint.setColor(color)
+    shadowPaint.setMaskFilter(
+      ck.MaskFilter.MakeBlur(ck.BlurStyle.Normal, blur / 2, true),
+    )
+
+    // 绘制偏移的阴影
+    this.ctx.save()
+    this.ctx.translate(offsetX, offsetY)
+    this.ctx.drawPath(this.path, shadowPaint)
+    this.ctx.restore()
+
+    shadowPaint.delete()
 
     this.dirtyRects.push(
       AABB.extend(
@@ -345,10 +446,19 @@ class ElemDrawerService {
     const { width, color } = this.node.outline
     if (width <= 0) return
 
+    const ck = StageSurface.ck
+
     StageSurface.ctxSaveRestore(() => {
-      this.ctx.lineWidth = width
-      this.ctx.strokeStyle = color || themeColor()
-      this.ctx.stroke(new Path2D(this.path2d))
+      const paint = new ck.Paint()
+      paint.setStyle(ck.PaintStyle.Stroke)
+      paint.setStrokeWidth(width)
+      paint.setAntiAlias(true)
+
+      const strokeColor = this.parseColor(color || themeColor())
+      paint.setColor(strokeColor)
+
+      this.ctx.drawPath(this.path, paint)
+      paint.delete()
     })
   }
 
@@ -359,21 +469,32 @@ class ElemDrawerService {
     const { style, color, width } = this.node.style.decoration
     if (!style || style === 'none' || width <= 0) return
 
+    const ck = StageSurface.ck
     const collideXys = this.getTextCollideXys()
     const { fontSize } = (this.node as V1.Text).style
 
+    const decorationPath = new ck.Path()
     for (let i = 0; i < collideXys.length; i += 2) {
       const p1 = collideXys[i]
       const p2 = collideXys[i + 1]
-      this.path2d.moveTo(p1.x, p1.y + fontSize / 2)
-      this.path2d.lineTo(p2.x, p2.y + fontSize / 2)
+      decorationPath.moveTo(p1.x, p1.y + fontSize / 2)
+      decorationPath.lineTo(p2.x, p2.y + fontSize / 2)
     }
 
     StageSurface.ctxSaveRestore(() => {
-      this.ctx.lineWidth = width
-      this.ctx.strokeStyle = color || themeColor()
-      this.ctx.stroke(new Path2D(this.path2d))
+      const paint = new ck.Paint()
+      paint.setStyle(ck.PaintStyle.Stroke)
+      paint.setStrokeWidth(width)
+      paint.setAntiAlias(true)
+
+      const strokeColor = this.parseColor(color || themeColor())
+      paint.setColor(strokeColor)
+
+      this.ctx.drawPath(decorationPath, paint)
+      paint.delete()
     })
+
+    decorationPath.delete()
   }
 
   private updateHitTest = () => {

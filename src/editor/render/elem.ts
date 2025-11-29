@@ -98,28 +98,31 @@ export class Elem {
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
-    const resetCtx = StageSurface.setCurrentCtxType(
+    const resetCurrentCtx = StageSurface.setCurrentCtxType(
       this.type === 'widgetElem' ? 'topCanvas' : 'mainCanvas',
     )
 
     StageSurface.ctxSaveRestore((ctx) => {
-      const path2d = new Path2D()
+      const path = new StageSurface.ck.Path()
 
       StageSurface.ctxSaveRestore(() => {
-        this.node && ElemDrawer.draw(this, ctx, path2d)
+        this.node && ElemDrawer.draw(this, ctx, path)
       })
 
       if (this.children.length) {
         if (this.clip) {
-          StageSurface.setOBBMatrix(this.obb, false)
-          ctx.clip(path2d)
-          StageSurface.setOBBMatrix(this.obb, true)
+          StageSurface.ctxSaveRestore(() => {
+            StageSurface.setOBBMatrix(this.obb)
+            ctx.clipPath(path, StageSurface.ck.ClipOp.Intersect, true)
+          })
         }
         this.children.forEach((child) => child.traverseDraw())
       }
+
+      path.delete()
     })
 
-    resetCtx()
+    resetCurrentCtx()
   }
 
   parent!: Elem

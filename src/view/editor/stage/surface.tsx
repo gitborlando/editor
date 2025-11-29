@@ -1,14 +1,14 @@
 import { StageSurface } from 'src/editor/render/surface'
 
 export const EditorStageSurfaceComp: FC<{}> = observer(({}) => {
-  useLayoutEffect(() => {
-    return StageSurface.inited.dispatch(true)
-  }, [])
+  useEffect(() => {
+    StageSurface.initCanvasKit()
+  })
 
   return (
     <G className={cls()} ref={StageSurface.setContainer}>
-      <canvas ref={StageSurface.setCanvas} />
-      <canvas style={{ position: 'absolute' }} ref={StageSurface.setTopCanvas} />
+      <canvas id='mainCanvas' />
+      <canvas id='topCanvas' style={{ position: 'absolute' }} />
     </G>
   )
 })

@@ -25,6 +25,7 @@
     "bezier",
     "boundfy",
     "camelcase",
+    "canvaskit",
     "classix",
     "cnpm",
     "defu",
@@ -84,6 +85,7 @@
     "valtio",
     "vnode",
     "vshow",
+    "XYWH",
     "zattoo"
   ]
 }

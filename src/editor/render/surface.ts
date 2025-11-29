@@ -1,9 +1,9 @@
 import { NoopFunc, reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
+import CanvasKitInit, { Canvas, CanvasKit, Paint, Surface } from 'canvaskit-wasm'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { AABB, OBB } from 'src/editor/math'
 import { abs, round } from 'src/editor/math/base'
-import { Matrix } from 'src/editor/math/matrix'
 import { StageScene } from 'src/editor/render/scene'
 import {
   TextBreaker,
@@ -11,7 +11,6 @@ import {
 } from 'src/editor/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { Raf, getTime } from 'src/shared/utils/normal'
-import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
 import { Elem } from './elem'
 
@@ -27,21 +26,52 @@ export type SurfaceRenderType =
 export class StageSurfaceService {
   inited = Signal.create(false)
 
+  ck!: CanvasKit
+
+  surface!: Surface
+  topSurface!: Surface
+  bufferSurface: Surface | null = null
+
+  ktx!: Canvas
+  topKtx!: Canvas
+  bufferKtx!: Canvas
+
   private container!: HTMLDivElement
 
   private canvas!: HTMLCanvasElement
-  private ctx!: CanvasRenderingContext2D
+  private ctx!: Canvas
 
   private topCanvas!: HTMLCanvasElement
-  private topCtx!: CanvasRenderingContext2D
+  private topCtx!: Canvas
 
   private bufferCanvas = new OffscreenCanvas(0, 0)
-  private bufferCtx = this.bufferCanvas.getContext('2d')!
+  private bufferCtx?: Canvas
+
+  // CanvasKit Paint objects
+  private strokePaint!: Paint
+  private fillPaint!: Paint
 
   textBreaker!: TextBreaker
 
   async initTextBreaker() {
     this.textBreaker = await createTextBreaker()
+  }
+
+  async initCanvasKit() {
+    this.ck = await CanvasKitInit({
+      locateFile: (file) => '/node_modules/canvaskit-wasm/bin/' + file,
+    })
+    this.canvas = document.getElementById('mainCanvas') as HTMLCanvasElement
+    this.topCanvas = document.getElementById('topCanvas') as HTMLCanvasElement
+    this.surface = this.ck.MakeWebGLCanvasSurface(this.canvas)!
+    this.topSurface = this.ck.MakeWebGLCanvasSurface(this.topCanvas)!
+    this.bufferSurface = this.ck.MakeSurface(1, 1)!
+    this.ctx = this.surface.getCanvas()
+    this.topCtx = this.topSurface.getCanvas()
+    this.bufferCtx = this.bufferSurface.getCanvas()
+    this.currentCtx = this.ctx
+
+    this.inited.dispatch(true)
   }
 
   subscribe() {
@@ -53,8 +83,26 @@ export class StageSurfaceService {
         this.requestRenderTopCanvas()
       }),
       this.devShowDirtyRect(),
-      () => (this.inited.value = false),
+      () => {
+        this.dispose()
+        this.inited.value = false
+      },
     )
+  }
+
+  private dispose() {
+    // 清理 Paint 对象
+    if (this.strokePaint) {
+      this.strokePaint.delete()
+    }
+    if (this.fillPaint) {
+      this.fillPaint.delete()
+    }
+
+    // 清理 Surface 对象
+    // if (this.bufferSurface) {
+    //   this.bufferSurface.delete()
+    // }
   }
 
   setContainer = (container: HTMLDivElement) => {
@@ -62,28 +110,20 @@ export class StageSurfaceService {
     this.container = container
   }
 
-  setCanvas = (canvas: HTMLCanvasElement) => {
-    if (this.canvas) return
-    this.canvas = canvas
-    this.ctx = canvas.getContext('2d')!
-    this.currentCtx = this.ctx
-  }
-
-  setTopCanvas = (canvas: HTMLCanvasElement) => {
-    if (this.topCanvas) return
-    this.topCanvas = canvas
-    this.topCtx = canvas.getContext('2d')!
-  }
-
   setCursor = (cursor: string) => {
     this.container.style.cursor = cursor
   }
 
   clearSurface = () => {
-    this.currentCtx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.currentCtx.clipRect(
+      this.ck.XYWHRect(0, 0, this.canvas.width, this.canvas.height),
+      this.ck.ClipOp.Intersect,
+      true,
+    )
+    this.currentCtx.clear(this.ck.TRANSPARENT)
   }
 
-  ctxSaveRestore(func: (ctx: CanvasRenderingContext2D) => any) {
+  ctxSaveRestore(func: (ctx: Canvas) => any) {
     this.currentCtx.save()
     func(this.currentCtx)
     this.currentCtx.restore()
@@ -99,15 +139,10 @@ export class StageSurfaceService {
     }
   }
 
-  setOBBMatrix = (obb: OBB, inverse = false) => {
+  setOBBMatrix = (obb: OBB) => {
     const { x, y, rotation } = obb
-    if (!inverse) {
-      this.currentCtx.translate(x, y)
-      this.currentCtx.rotate(Angle.radianFy(rotation))
-    } else {
-      this.currentCtx.rotate(-Angle.radianFy(rotation))
-      this.currentCtx.translate(-x, -y)
-    }
+    this.currentCtx.translate(x, y)
+    this.currentCtx.rotate(rotation, 0, 0)
   }
 
   private renderType?: SurfaceRenderType
@@ -129,11 +164,14 @@ export class StageSurfaceService {
       else this.fullRender()
     })
 
-    this.raf.cancelAll().request((next) => {
+    const render = () => {
+      const resetCtx = this.setCurrentCtxType('mainCanvas')
       this.ctxSaveRestore(() => this.renderTasks.pop()?.())
+      resetCtx()
       this.renderType = undefined
-      this.renderTasks.length && next()
-    })
+      this.renderTasks.length && this.surface.requestAnimationFrame(render)
+    }
+    this.surface.requestAnimationFrame(render)
   }
 
   onRenderTopCanvas = Signal.create()
@@ -144,13 +182,13 @@ export class StageSurfaceService {
     if (this.hasRequestedRenderTopCanvas) return
     this.hasRequestedRenderTopCanvas = true
 
-    requestAnimationFrame(() => {
+    this.topSurface.requestAnimationFrame(() => {
       this.hasRequestedRenderTopCanvas = false
 
       const resetCtx = this.setCurrentCtxType('topCanvas')
       this.clearSurface()
       this.ctxSaveRestore(() => {
-        this.transformTopCanvas()
+        this.transformMatrix()
         this.onRenderTopCanvas.dispatch(this.topCtx)
         StageScene.widgetRoot.children.forEach((elem) => elem.traverseDraw())
       })
@@ -187,7 +225,7 @@ export class StageSurfaceService {
   }
 
   private fullRender = () => {
-    this.transformCanvas()
+    this.transformMatrix()
 
     if (!getEditorSetting().needSliceRender || getEditorSetting().showDirtyRect) {
       StageScene.sceneRoot.children.forEach((elem) => elem.traverseDraw())
@@ -206,7 +244,7 @@ export class StageSurfaceService {
   }
 
   private patchRender = (reRenderElems: Set<Elem>) => {
-    this.transformCanvas()
+    this.transformMatrix()
 
     StageScene.sceneRoot.children.forEach((elem) => {
       reRenderElems.has(elem) && elem.traverseDraw()
@@ -219,7 +257,6 @@ export class StageSurfaceService {
   private translate = (cur: IXY, prev: IXY) => {
     if (this.renderType) return
 
-    const { width, height } = this.canvas
     const delta = XY.from(cur).minus(prev)
     const reRenderElems = new Set<Elem>()
 
@@ -238,21 +275,28 @@ export class StageSurfaceService {
     this.accumulatedErrorX = idealX - actualX
     this.accumulatedErrorY = idealY - actualY
 
-    this.bufferCtx.clearRect(0, 0, width, height)
-    this.bufferCtx.drawImage(
-      this.canvas,
-      0,
-      0,
-      width,
-      height,
-      actualX,
-      actualY,
-      width,
-      height,
-    )
+    // 使用 CanvasKit 进行缓冲绘制
+    this.bufferCtx?.clear(this.ck.TRANSPARENT)
 
-    this.ctx.clearRect(0, 0, width, height)
-    this.ctx.drawImage(this.bufferCanvas, 0, 0, width, height, 0, 0, width, height)
+    // 创建主画布的快照
+    const snapshot = this.surface.makeImageSnapshot()
+    if (snapshot) {
+      // 在缓冲区绘制偏移后的图像
+      this.bufferCtx?.save()
+      this.bufferCtx?.translate(actualX, actualY)
+      this.bufferCtx?.drawImage(snapshot, 0, 0, null)
+      this.bufferCtx?.restore()
+      snapshot.delete()
+    }
+
+    // 清除主画布并绘制缓冲内容
+    console.log(this.bufferSurface)
+    this.ctx.clear(this.ck.TRANSPARENT)
+    const bufferSnapshot = this.bufferSurface?.makeImageSnapshot()
+    if (bufferSnapshot) {
+      this.ctx.drawImage(bufferSnapshot, 0, 0, null)
+      bufferSnapshot.delete()
+    }
 
     StageScene.sceneRoot.children.forEach(traverse)
     this.ctxSaveRestore(() => this.patchRender(reRenderElems))
@@ -295,10 +339,18 @@ export class StageSurfaceService {
       StageScene.rootElems.forEach((elem) => elem.children.forEach(traverse))
     }
 
-    this.ctxSaveRestore(() => {
-      this.transformCanvas()
+    this.ctxSaveRestore((ctx) => {
+      // this.transformMatrix()
       const { minX, minY, maxX, maxY } = dirtyArea
-      this.ctx.clearRect(minX, minY, maxX - minX, maxY - minY)
+      // 使用 CanvasKit 裁剪和清除
+      ctx.save()
+      ctx.clipRect(
+        this.ck.XYWHRect(minX, minY, maxX - minX, maxY - minY),
+        this.ck.ClipOp.Intersect,
+        true,
+      )
+      ctx.clear(this.ck.TRANSPARENT)
+      ctx.restore()
       this.dirtyRects.clear()
       this.devDirtyArea = dirtyArea
     })
@@ -306,6 +358,8 @@ export class StageSurfaceService {
     this.ctxSaveRestore(() => {
       this.patchRender(reRenderElems)
     })
+
+    this.surface.flush()
   }
 
   private devDirtyArea?: AABB
@@ -317,25 +371,27 @@ export class StageSurfaceService {
       this.ctxSaveRestore((ctx) => {
         if (!this.devDirtyArea) return
 
-        const path2d = new Path2D()
+        const path = new this.ck.Path()
         const { minX, minY, maxX, maxY } = this.devDirtyArea
-        path2d.rect(minX, minY, maxX - minX, maxY - minY)
-        ctx.strokeStyle = rgba(0, 255, 100, 1)
-        ctx.stroke(path2d)
+        path.addRect(this.ck.XYWHRect(minX, minY, maxX - minX, maxY - minY))
+
+        const paint = new this.ck.Paint()
+        paint.setStyle(this.ck.PaintStyle.Stroke)
+        paint.setColor(this.ck.Color(0, 255, 100, 1))
+
+        ctx.drawPath(path, paint)
+
+        path.delete()
+        paint.delete()
       })
     })
   }
 
-  private dprMatrix = Matrix.of(dpr, 0, 0, dpr, 0, 0)
-
-  transformCanvas = () => {
-    this.ctx.transform(...this.dprMatrix.tuple())
-    this.ctx.transform(...StageViewport.sceneMatrix.tuple())
-  }
-
-  transformTopCanvas = () => {
-    this.topCtx.transform(...this.dprMatrix.tuple())
-    this.topCtx.transform(...StageViewport.sceneMatrix.tuple())
+  transformMatrix = () => {
+    const { a, tx, ty } = StageViewport.sceneMatrix
+    this.currentCtx.scale(dpr, dpr)
+    this.currentCtx.translate(tx, ty)
+    this.currentCtx.scale(a, a)
   }
 
   private onZoomMove = () => {
@@ -359,14 +415,33 @@ export class StageSurfaceService {
     reaction(
       () => ({ ...StageViewport.bound }),
       ({ width, height }) => {
-        ;[this.canvas, this.topCanvas, this.bufferCanvas].forEach((canvas) => {
-          canvas.width = width * dpr
-          canvas.height = height * dpr
-          if (!(canvas instanceof OffscreenCanvas)) {
-            canvas.style.width = `${width}px`
-            canvas.style.height = `${height}px`
-          }
+        const w = width * dpr
+        const h = height * dpr
+
+        ;[this.canvas, this.topCanvas].forEach((canvas) => {
+          canvas.width = w
+          canvas.height = h
+          canvas.style.width = `${width}px`
+          canvas.style.height = `${height}px`
         })
+        this.bufferCanvas.width = w
+        this.bufferCanvas.height = h
+
+        this.surface = this.ck.MakeWebGLCanvasSurface(this.canvas)!
+        this.topSurface = this.ck.MakeWebGLCanvasSurface(this.topCanvas)!
+        this.bufferSurface = this.ck.MakeSurface(w, h)!
+        this.ctx = this.surface.getCanvas()
+        this.topCtx = this.topSurface.getCanvas()
+        this.bufferCtx = this.bufferSurface.getCanvas()
+        this.currentCtx = this.ctx
+
+        // if (this.bufferSurface) {
+        //   this.bufferSurface.delete()
+        // }
+        // this.bufferSurface = this.ck.MakeSurface(w, h)
+        // this.bufferCtx = this.bufferSurface?.getCanvas()
+        this.surface.flush()
+        this.topSurface.flush()
       },
       { fireImmediately: true },
     )
