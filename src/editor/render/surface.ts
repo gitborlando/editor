@@ -1,6 +1,6 @@
 import { NoopFunc, reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
-import CanvasKitInit, { Canvas, CanvasKit } from 'canvaskit-wasm'
+import CanvasKitInit, { Canvas, CanvasKit, Surface } from 'canvaskit-wasm'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { AABB, OBB } from 'src/editor/math'
 import { abs, round } from 'src/editor/math/base'
@@ -28,19 +28,26 @@ export type SurfaceRenderType =
 export class StageSurfaceService {
   inited = Signal.create(false)
 
-  canvasKit!: CanvasKit
+  ck!: CanvasKit
+
+  surface!: Surface
+  topSurface!: Surface
+  bufferSurface!: Surface
+
   ktx!: Canvas
+  topKtx!: Canvas
+  bufferKtx!: Canvas
 
   private container!: HTMLDivElement
 
-  canvas!: HTMLCanvasElement
-  private ctx!: CanvasRenderingContext2D
+  private canvas!: HTMLCanvasElement
+  private ctx!: Canvas
 
   private topCanvas!: HTMLCanvasElement
-  private topCtx!: CanvasRenderingContext2D
+  private topCtx!: Canvas
 
   private bufferCanvas = new OffscreenCanvas(0, 0)
-  private bufferCtx = this.bufferCanvas.getContext('2d')!
+  private bufferCtx!: Canvas
 
   textBreaker!: TextBreaker
 
@@ -49,17 +56,18 @@ export class StageSurfaceService {
   }
 
   async initCanvasKit() {
-    this.canvasKit = await CanvasKitInit({
+    this.ck = await CanvasKitInit({
       locateFile: (file) => '/node_modules/canvaskit-wasm/bin/' + file,
     })
-
-    const canvas = document.getElementsByTagName('canvas')[0]
-    console.log(canvas)
-    const surface = this.canvasKit.MakeWebGLCanvasSurface(canvas)!
-    console.log(surface.getCanvas().clear)
-
-    // this.ktx = surface.getCanvas()
-    // this.inited.dispatch(true)
+    this.canvas = document.getElementById('mainCanvas') as HTMLCanvasElement
+    this.topCanvas = document.getElementById('topCanvas') as HTMLCanvasElement
+    this.surface = this.ck.MakeWebGLCanvasSurface(this.canvas)!
+    this.topSurface = this.ck.MakeWebGLCanvasSurface(this.topCanvas)!
+    this.bufferSurface = this.ck.MakeSurface(1, 1)!
+    this.ctx = this.surface.getCanvas()
+    this.topCtx = this.topSurface.getCanvas()
+    this.bufferCtx = this.bufferSurface.getCanvas()
+    this.inited.dispatch(true)
   }
 
   subscribe() {
@@ -83,14 +91,14 @@ export class StageSurfaceService {
   setCanvas = (canvas: HTMLCanvasElement) => {
     if (this.canvas) return
     this.canvas = canvas
-    this.ctx = canvas.getContext('2d')!
+    // this.ctx = canvas.getContext('2d')!
     this.currentCtx = this.ctx
   }
 
   setTopCanvas = (canvas: HTMLCanvasElement) => {
     if (this.topCanvas) return
     this.topCanvas = canvas
-    this.topCtx = canvas.getContext('2d')!
+    // this.topCtx = canvas.getContext('2d')!
   }
 
   setCursor = (cursor: string) => {
@@ -98,10 +106,15 @@ export class StageSurfaceService {
   }
 
   clearSurface = () => {
-    this.currentCtx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.currentCtx.clipRect(
+      this.ck.XYWHRect(0, 0, this.canvas.width, this.canvas.height),
+      this.ck.ClipOp.Intersect,
+      true,
+    )
+    this.currentCtx.clear(this.ck.TRANSPARENT)
   }
 
-  ctxSaveRestore(func: (ctx: CanvasRenderingContext2D) => any) {
+  ctxSaveRestore(func: (ctx: Canvas) => any) {
     this.currentCtx.save()
     func(this.currentCtx)
     this.currentCtx.restore()
@@ -119,13 +132,12 @@ export class StageSurfaceService {
 
   setOBBMatrix = (obb: OBB, inverse = false) => {
     const { x, y, rotation } = obb
-    if (!inverse) {
-      this.currentCtx.translate(x, y)
-      this.currentCtx.rotate(Angle.radianFy(rotation))
-    } else {
-      this.currentCtx.rotate(-Angle.radianFy(rotation))
-      this.currentCtx.translate(-x, -y)
-    }
+    const matrix = this.ck.Matrix.multiply(
+      this.ck.Matrix.translated(x, y),
+      this.ck.Matrix.rotated(rotation),
+    )
+    // if (inverse) this.currentCtx.
+    this.currentCtx.concat(matrix)
   }
 
   private renderType?: SurfaceRenderType
@@ -313,10 +325,10 @@ export class StageSurfaceService {
       StageScene.rootElems.forEach((elem) => elem.children.forEach(traverse))
     }
 
-    this.ctxSaveRestore(() => {
+    this.ctxSaveRestore((ctx) => {
       this.transformCanvas()
       const { minX, minY, maxX, maxY } = dirtyArea
-      this.ctx.clearRect(minX, minY, maxX - minX, maxY - minY)
+      ctx.clearRect(minX, minY, maxX - minX, maxY - minY)
       this.dirtyRects.clear()
       this.devDirtyArea = dirtyArea
     })
