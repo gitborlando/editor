@@ -1,6 +1,7 @@
 import { createObjCache, loopFor } from '@gitborlando/utils'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { xy_distance, xy_minus } from 'src/editor/math/xy'
+import { ElemDrawer } from 'src/editor/render/draw'
 import { StageSurface } from 'src/editor/render/surface'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
 
@@ -81,20 +82,22 @@ export class Elem {
     )
 
     StageSurface.ctxSaveRestore((ctx) => {
-      const path2d = new Path2D()
+      const path = new StageSurface.ck.Path()
 
       StageSurface.ctxSaveRestore(() => {
-        // this.node && ElemDrawer.draw(this, ctx, path2d)
+        this.node && ElemDrawer.draw(this, ctx, path)
       })
 
       if (this.children.length) {
         if (this.clip) {
           StageSurface.setOBBMatrix(this.obb, false)
-          // ctx.clip(path2d)
+          ctx.clipPath(path, StageSurface.ck.ClipOp.Intersect, true)
           StageSurface.setOBBMatrix(this.obb, true)
         }
         this.children.forEach((child) => child.traverseDraw())
       }
+
+      path.delete()
     })
 
     resetCtx()

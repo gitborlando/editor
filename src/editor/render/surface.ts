@@ -1,6 +1,6 @@
 import { NoopFunc, reverseFor } from '@gitborlando/utils'
 import { listen } from '@gitborlando/utils/browser'
-import CanvasKitInit, { Canvas, CanvasKit, Surface } from 'canvaskit-wasm'
+import CanvasKitInit, { Canvas, CanvasKit, Paint, Surface } from 'canvaskit-wasm'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { AABB, OBB } from 'src/editor/math'
 import { abs, round } from 'src/editor/math/base'
@@ -12,7 +12,6 @@ import {
 } from 'src/editor/render/text-break/text-breaker'
 import { StageViewport, getZoom } from 'src/editor/stage/viewport'
 import { Raf, getTime } from 'src/shared/utils/normal'
-import { rgba } from 'src/utils/color'
 import TinyQueue from 'tinyqueue'
 import { Elem } from './elem'
 
@@ -49,6 +48,10 @@ export class StageSurfaceService {
   private bufferCanvas = new OffscreenCanvas(0, 0)
   private bufferCtx!: Canvas
 
+  // CanvasKit Paint objects
+  private strokePaint!: Paint
+  private fillPaint!: Paint
+
   textBreaker!: TextBreaker
 
   async initTextBreaker() {
@@ -67,38 +70,78 @@ export class StageSurfaceService {
     this.ctx = this.surface.getCanvas()
     this.topCtx = this.topSurface.getCanvas()
     this.bufferCtx = this.bufferSurface.getCanvas()
+    this.currentCtx = this.ctx
+
+    // 初始化 Paint 对象
+    this.strokePaint = new this.ck.Paint()
+    this.strokePaint.setStyle(this.ck.PaintStyle.Stroke)
+    this.strokePaint.setAntiAlias(true)
+
+    this.fillPaint = new this.ck.Paint()
+    this.fillPaint.setStyle(this.ck.PaintStyle.Fill)
+    this.fillPaint.setAntiAlias(true)
+
     this.inited.dispatch(true)
   }
 
   subscribe() {
     return Disposer.collect(
       this.inited.hook(() => {
-        this.onResize()
-        this.onZoomMove()
-        this.onPointerEvents()
-        this.requestRenderTopCanvas()
+        // this.onResize()
+        // this.onZoomMove()
+        // this.onPointerEvents()
+        // this.requestRenderTopCanvas()
+        this.setCurrentCtxType('topCanvas')
+        this.ctxSaveRestore((ctx) => {
+          this.topCanvas.width = 1000 * dpr
+          this.topCanvas.height = 1000 * dpr
+          this.topCanvas.style.width = '1000px'
+          this.topCanvas.style.height = '1000px'
+          this.topCtx.scale(dpr, dpr)
+          // ctx.scale(dpr, dpr)
+          const path = new this.ck.Path()
+          // path.addRect(this.ck.XYWHRect(minX, minY, maxX - minX, maxY - minY))
+          path.addRRect(this.ck.RRectXY(this.ck.XYWHRect(100, 100, 500, 24), 6, 6))
+          path.close()
+
+          const paint = new this.ck.Paint()
+          paint.setStyle(this.ck.PaintStyle.Stroke)
+          paint.setStrokeWidth(3 / dpr)
+          paint.setColor(this.ck.Color(100, 255, 1))
+
+          ctx.drawPath(path, paint)
+
+          this.topSurface.flush()
+          path.delete()
+          paint.delete()
+        })
       }),
-      this.devShowDirtyRect(),
-      () => (this.inited.value = false),
+      // this.devShowDirtyRect(),
+      () => {
+        this.dispose()
+        this.inited.value = false
+      },
     )
+  }
+
+  private dispose() {
+    // 清理 Paint 对象
+    if (this.strokePaint) {
+      this.strokePaint.delete()
+    }
+    if (this.fillPaint) {
+      this.fillPaint.delete()
+    }
+
+    // 清理 Surface 对象
+    if (this.bufferSurface) {
+      this.bufferSurface.delete()
+    }
   }
 
   setContainer = (container: HTMLDivElement) => {
     if (this.container) return
     this.container = container
-  }
-
-  setCanvas = (canvas: HTMLCanvasElement) => {
-    if (this.canvas) return
-    this.canvas = canvas
-    // this.ctx = canvas.getContext('2d')!
-    this.currentCtx = this.ctx
-  }
-
-  setTopCanvas = (canvas: HTMLCanvasElement) => {
-    if (this.topCanvas) return
-    this.topCanvas = canvas
-    // this.topCtx = canvas.getContext('2d')!
   }
 
   setCursor = (cursor: string) => {
@@ -131,6 +174,7 @@ export class StageSurfaceService {
   }
 
   setOBBMatrix = (obb: OBB, inverse = false) => {
+    return
     const { x, y, rotation } = obb
     const matrix = this.ck.Matrix.multiply(
       this.ck.Matrix.translated(x, y),
@@ -174,15 +218,15 @@ export class StageSurfaceService {
     if (this.hasRequestedRenderTopCanvas) return
     this.hasRequestedRenderTopCanvas = true
 
-    requestAnimationFrame(() => {
+    this.topSurface.requestAnimationFrame(() => {
       this.hasRequestedRenderTopCanvas = false
 
       const resetCtx = this.setCurrentCtxType('topCanvas')
-      this.clearSurface()
+      // this.clearSurface()
       this.ctxSaveRestore(() => {
-        this.transformTopCanvas()
+        // this.transformTopCanvas()
         this.onRenderTopCanvas.dispatch(this.topCtx)
-        StageScene.widgetRoot.children.forEach((elem) => elem.traverseDraw())
+        // StageScene.widgetRoot.children.forEach((elem) => elem.traverseDraw())
       })
       resetCtx()
     })
@@ -268,21 +312,27 @@ export class StageSurfaceService {
     this.accumulatedErrorX = idealX - actualX
     this.accumulatedErrorY = idealY - actualY
 
-    this.bufferCtx.clearRect(0, 0, width, height)
-    this.bufferCtx.drawImage(
-      this.canvas,
-      0,
-      0,
-      width,
-      height,
-      actualX,
-      actualY,
-      width,
-      height,
-    )
+    // 使用 CanvasKit 进行缓冲绘制
+    this.bufferCtx.clear(this.ck.TRANSPARENT)
 
-    this.ctx.clearRect(0, 0, width, height)
-    this.ctx.drawImage(this.bufferCanvas, 0, 0, width, height, 0, 0, width, height)
+    // 创建主画布的快照
+    const snapshot = this.surface.makeImageSnapshot()
+    if (snapshot) {
+      // 在缓冲区绘制偏移后的图像
+      this.bufferCtx.save()
+      this.bufferCtx.translate(actualX, actualY)
+      this.bufferCtx.drawImage(snapshot, 0, 0, null)
+      this.bufferCtx.restore()
+      snapshot.delete()
+    }
+
+    // 清除主画布并绘制缓冲内容
+    this.ctx.clear(this.ck.TRANSPARENT)
+    const bufferSnapshot = this.bufferSurface.makeImageSnapshot()
+    if (bufferSnapshot) {
+      this.ctx.drawImage(bufferSnapshot, 0, 0, null)
+      bufferSnapshot.delete()
+    }
 
     StageScene.sceneRoot.children.forEach(traverse)
     this.ctxSaveRestore(() => this.patchRender(reRenderElems))
@@ -328,7 +378,15 @@ export class StageSurfaceService {
     this.ctxSaveRestore((ctx) => {
       this.transformCanvas()
       const { minX, minY, maxX, maxY } = dirtyArea
-      ctx.clearRect(minX, minY, maxX - minX, maxY - minY)
+      // 使用 CanvasKit 裁剪和清除
+      ctx.save()
+      ctx.clipRect(
+        this.ck.XYWHRect(minX, minY, maxX - minX, maxY - minY),
+        this.ck.ClipOp.Intersect,
+        true,
+      )
+      ctx.clear(this.ck.TRANSPARENT)
+      ctx.restore()
       this.dirtyRects.clear()
       this.devDirtyArea = dirtyArea
     })
@@ -347,25 +405,42 @@ export class StageSurfaceService {
       this.ctxSaveRestore((ctx) => {
         if (!this.devDirtyArea) return
 
-        const path2d = new Path2D()
+        const path = new this.ck.Path()
         const { minX, minY, maxX, maxY } = this.devDirtyArea
-        path2d.rect(minX, minY, maxX - minX, maxY - minY)
-        ctx.strokeStyle = rgba(0, 255, 100, 1)
-        ctx.stroke(path2d)
+        // path.addRect(this.ck.XYWHRect(minX, minY, maxX - minX, maxY - minY))
+        path.addRect(this.ck.XYWHRect(100, 100, 300, 200))
+
+        const paint = new this.ck.Paint()
+        paint.setStyle(this.ck.PaintStyle.Stroke)
+        paint.setColor(this.ck.Color(0, 255, 100, 1))
+        paint.setAntiAlias(true)
+
+        ctx.drawPath(path, paint)
+
+        path.delete()
+        paint.delete()
       })
     })
   }
 
-  private dprMatrix = Matrix.of(dpr, 0, 0, dpr, 0, 0)
-
   transformCanvas = () => {
-    this.ctx.transform(...this.dprMatrix.tuple())
-    this.ctx.transform(...StageViewport.sceneMatrix.tuple())
+    const dprCkMatrix = this.matrixToCkMatrix(Matrix.of(dpr, 0, 0, dpr, 0, 0))
+    const sceneCkMatrix = this.matrixToCkMatrix(StageViewport.sceneMatrix)
+    this.ctx.concat(this.ck.Matrix.multiply(dprCkMatrix, sceneCkMatrix))
   }
 
   transformTopCanvas = () => {
-    this.topCtx.transform(...this.dprMatrix.tuple())
-    this.topCtx.transform(...StageViewport.sceneMatrix.tuple())
+    const dprCkMatrix = this.matrixToCkMatrix(Matrix.of(dpr, 0, 0, dpr, 0, 0))
+    const sceneCkMatrix = this.matrixToCkMatrix(StageViewport.sceneMatrix)
+    this.topCtx.concat(this.ck.Matrix.multiply(dprCkMatrix, sceneCkMatrix))
+  }
+
+  private matrixToCkMatrix = (matrix: Matrix) => {
+    const { a, tx, ty } = matrix
+    return this.ck.Matrix.multiply(
+      this.ck.Matrix.scaled(a, a),
+      this.ck.Matrix.translated(tx, ty),
+    )
   }
 
   private onZoomMove = () => {
@@ -389,14 +464,31 @@ export class StageSurfaceService {
     reaction(
       () => ({ ...StageViewport.bound }),
       ({ width, height }) => {
-        ;[this.canvas, this.topCanvas, this.bufferCanvas].forEach((canvas) => {
-          canvas.width = width * dpr
-          canvas.height = height * dpr
-          if (!(canvas instanceof OffscreenCanvas)) {
-            canvas.style.width = `${width}px`
-            canvas.style.height = `${height}px`
-          }
+        const w = width * dpr
+        const h = height * dpr
+
+        // 更新 canvas 元素尺寸
+        ;[this.canvas, this.topCanvas].forEach((canvas) => {
+          canvas.width = w
+          canvas.height = h
+          canvas.style.width = `${width}px`
+          canvas.style.height = `${height}px`
         })
+
+        // 更新 OffscreenCanvas 尺寸
+        this.bufferCanvas.width = w
+        this.bufferCanvas.height = h
+
+        // 重新创建缓冲 surface
+        if (this.bufferSurface) {
+          this.bufferSurface.delete()
+        }
+        this.bufferSurface = this.ck.MakeSurface(w, h)!
+        this.bufferCtx = this.bufferSurface.getCanvas()
+
+        // 刷新 surface
+        this.surface.flush()
+        this.topSurface.flush()
       },
       { fireImmediately: true },
     )
