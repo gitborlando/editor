@@ -77,7 +77,7 @@ export class Elem {
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
-    const resetCtx = StageSurface.setCurrentCtxType(
+    const resetCurrentCtx = StageSurface.setCurrentCtxType(
       this.type === 'widgetElem' ? 'topCanvas' : 'mainCanvas',
     )
 
@@ -90,9 +90,10 @@ export class Elem {
 
       if (this.children.length) {
         if (this.clip) {
-          StageSurface.setOBBMatrix(this.obb, false)
-          ctx.clipPath(path, StageSurface.ck.ClipOp.Intersect, true)
-          StageSurface.setOBBMatrix(this.obb, true)
+          StageSurface.ctxSaveRestore(() => {
+            StageSurface.setOBBMatrix(this.obb)
+            ctx.clipPath(path, StageSurface.ck.ClipOp.Intersect, true)
+          })
         }
         this.children.forEach((child) => child.traverseDraw())
       }
@@ -100,7 +101,7 @@ export class Elem {
       path.delete()
     })
 
-    resetCtx()
+    resetCurrentCtx()
   }
 
   parent!: Elem

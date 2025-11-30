@@ -30,7 +30,7 @@ class ElemDrawerService {
     this.path = path
     this.dirtyRects = [elem.aabb]
 
-    StageSurface.setOBBMatrix(this.elem.obb, false)
+    StageSurface.setOBBMatrix(this.elem.obb)
 
     this.drawShapePath()
 
@@ -361,7 +361,6 @@ class ElemDrawerService {
     const ck = StageSurface.ck
     const paint = new ck.Paint()
     paint.setStyle(ck.PaintStyle.Stroke)
-    paint.setAntiAlias(true)
     paint.setStrokeWidth(stroke.width)
 
     // 设置线帽样式
