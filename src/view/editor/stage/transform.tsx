@@ -1,6 +1,7 @@
 import { isLeftMouse, isRightMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
+import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
@@ -22,7 +23,6 @@ export const moveTransformer = (e: ElemMouseEvent) => {
     }
   })
     .onMove(({ delta }) => {
-      StageSurface.disablePointEvent(true)
       delta = StageViewport.toSceneShift(delta)
       OperateGeometry.setActiveGeometries({ x: delta.x, y: delta.y })
     })
@@ -49,7 +49,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
     if (selectNodes.length === 1)
       return OBB.fromRect(selectNodes[0], selectNodes[0].rotation)
     return OBB.fromAABB(
-      AABB.merge(selectNodes.map((node) => OBB.fromRect(node, node.rotation).aabb)),
+      AABB.merge(selectNodes.map((node) => StageScene.findElem(node.id).obb.aabb)),
     )
   }, [selectNodes])
 

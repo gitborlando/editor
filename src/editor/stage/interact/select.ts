@@ -1,4 +1,5 @@
 import { firstOne } from '@gitborlando/utils'
+import { listen } from '@gitborlando/utils/browser'
 import autobind from 'class-autobind-decorator'
 import equal from 'fast-deep-equal'
 import hotkeys from 'hotkeys-js'
@@ -26,6 +27,7 @@ class StageSelectService {
   @observable hoverId?: string
 
   private lastSelectIdMap = <Record<string, boolean>>{}
+  private isPointerDown = false
 
   startInteract() {
     return Disposer.collect(
@@ -33,10 +35,13 @@ class StageSelectService {
       StageSurface.addEvent('dblclick', this.onDoubleClick),
       StageSurface.addEvent('mousemove', this.onHover),
       StageSurface.addEvent('contextmenu', this.onContextMenu),
+      listen('pointerdown', () => (this.isPointerDown = true)),
+      listen('pointerup', () => (this.isPointerDown = false)),
     )
   }
 
   private onHover(e: MouseEvent) {
+    if (this.isPointerDown) return
     const hovered = firstOne(StageScene.elemsFromPoint(XY.client(e)))
     this.hoverId = hovered?.id
   }
