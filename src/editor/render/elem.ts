@@ -4,6 +4,7 @@ import { xy_distance, xy_minus } from 'src/editor/math/xy'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { Surface } from 'src/editor/render/surface'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
+import { memorized } from 'src/utils/common'
 
 declare module 'react' {
   namespace JSX {
@@ -39,9 +40,19 @@ export class Elem {
     Surface.collectDirty(this)
   }
 
+  private _obb = OBB.identityOBB()
+  private memoObb = memorized(() => {
+    return this._obb.updateFromRect(this.node, this.node.rotation)
+  })
   get obb() {
-    if (!this._node) return OBB.identityOBB()
-    return OBB.fromRect(this.node, this.node.rotation)
+    if (!this.node) return this._obb
+    return this.memoObb([
+      this.node.x,
+      this.node.y,
+      this.node.width,
+      this.node.height,
+      this.node.rotation,
+    ])
   }
 
   get aabb() {
@@ -65,6 +76,8 @@ export class Elem {
     )
     const outlineWidth = this.node.outline?.width || 0
     const extend = max(strokeWidth, outlineWidth)
+
+    if (!extend) return this.obb.aabb
     return OBB.fromCenter(center, width + extend * 2, height + extend * 2, rotation)
       .aabb
   }

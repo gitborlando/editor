@@ -41,6 +41,29 @@ export class OBB {
     return (this.axis = { widthAxis, heightAxis })
   }
 
+  update = (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    rotation: number,
+  ) => {
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+    this.rotation = rotation
+    this.center = this.#calcCenter()
+    this.axis = this.#calcAxis()
+    this.vertexes = this.calcVertexXY()
+    this.aabb = AABB.updateFromOBB(this.aabb, this)
+    return this
+  }
+
+  updateFromRect = (rect: IRect, rotation: number) => {
+    return this.update(rect.x, rect.y, rect.width, rect.height, rotation)
+  }
+
   calcVertexXY = () => {
     const cos = Angle.cos(this.rotation)
     const sin = Angle.sin(this.rotation)

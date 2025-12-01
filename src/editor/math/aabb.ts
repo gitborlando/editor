@@ -94,4 +94,14 @@ export class AABB {
       obb.center.y + height / 2,
     )
   }
+
+  static updateFromOBB(aabb: AABB, obb: OBB) {
+    const width = obb.projectionLengthAt(XY._(1, 0))
+    const height = obb.projectionLengthAt(XY._(0, 1))
+    aabb.minX = obb.center.x - width / 2
+    aabb.minY = obb.center.y - height / 2
+    aabb.maxX = obb.center.x + width / 2
+    aabb.maxY = obb.center.y + height / 2
+    return aabb
+  }
 }
