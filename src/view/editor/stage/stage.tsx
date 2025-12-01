@@ -4,7 +4,6 @@ import { StageScene } from 'src/editor/render/scene'
 import { EditorStageCursorsComp } from 'src/view/editor/stage/cursor'
 import { FPSComp } from 'src/view/editor/stage/fps'
 import { EditorStageMarqueeComp } from 'src/view/editor/stage/marquee'
-import { EditorStageOutlineComp } from 'src/view/editor/stage/outline'
 import { RulerComp } from 'src/view/editor/stage/ruler'
 import { EditorStageSurfaceComp } from 'src/view/editor/stage/surface'
 import { EditorStageTransformComp } from 'src/view/editor/stage/transform'
@@ -13,7 +12,7 @@ export const StageComp: FC<{}> = observer(({}) => {
   useEffect(() => {
     return renderElem(
       <>
-        <EditorStageOutlineComp />
+        {/* <EditorStageOutlineComp /> */}
         <EditorStageTransformComp />
         <EditorStageMarqueeComp />
         <EditorStageCursorsComp />

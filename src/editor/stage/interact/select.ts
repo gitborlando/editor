@@ -9,7 +9,7 @@ import { OperateNode } from 'src/editor/operate/node'
 import { OperateText } from 'src/editor/operate/text'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
 import { Schema } from 'src/editor/schema/schema'
 import { StageViewport } from 'src/editor/stage/viewport'
@@ -30,9 +30,9 @@ class StageSelectService {
   startInteract() {
     return Disposer.collect(
       StageScene.sceneRoot.addEvent('mousedown', this.onSceneRootMouseDown),
-      Surface.addEvent('dblclick', this.onDoubleClick),
-      Surface.addEvent('mousemove', this.onHover),
-      Surface.addEvent('contextmenu', this.onContextMenu),
+      StageSurface.addEvent('dblclick', this.onDoubleClick),
+      StageSurface.addEvent('mousemove', this.onHover),
+      StageSurface.addEvent('contextmenu', this.onContextMenu),
     )
   }
 
@@ -177,7 +177,7 @@ class StageSelectService {
       callback: traverseTest,
     })
 
-    Surface.disablePointEvent()
+    StageSurface.disablePointEvent()
 
     Drag.onStart()
       .onMove(({ marquee }) => {

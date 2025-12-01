@@ -24,7 +24,7 @@ export type SurfaceRenderType =
   | 'nextFullRender'
   | 'partialRender'
 
-export class StageSurface {
+export class StageSurfaceService {
   inited = Signal.create(false)
 
   private container!: HTMLDivElement
@@ -498,4 +498,4 @@ export class StageSurface {
   }
 }
 
-export const Surface = autoBind(new StageSurface())
+export const StageSurface = autoBind(new StageSurfaceService())

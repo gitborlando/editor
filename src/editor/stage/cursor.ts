@@ -1,7 +1,7 @@
 import { createObjCache } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { floor } from 'src/editor/math/base'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { listen, listenOnce } from 'src/shared/utils/event'
 
 export type IStageCursorType =
@@ -21,7 +21,7 @@ class StageCursorService {
   private locked = false
 
   initHook() {
-    Surface.inited.hook(() => this.setCursor('select'))
+    StageSurface.inited.hook(() => this.setCursor('select'))
     listen('mouseup', () => (this.locked = false))
   }
 
@@ -30,7 +30,7 @@ class StageCursorService {
 
     this.type = type
     this.rotation = floor(rotation)
-    Surface.setCursor(this.getSvgUrl())
+    StageSurface.setCursor(this.getSvgUrl())
     return this
   }
 

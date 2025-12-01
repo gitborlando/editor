@@ -1,5 +1,5 @@
 import autobind from 'class-autobind-decorator'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { Drag } from 'src/global/event/drag'
 import { StageViewport } from '../viewport'
@@ -8,14 +8,14 @@ import { StageViewport } from '../viewport'
 class StageMoveService {
   startInteract() {
     const disposer = Disposer.collect(
-      Surface.addEvent('mousedown', this.onMoveStage),
+      StageSurface.addEvent('mousedown', this.onMoveStage),
     )
-    Surface.disablePointEvent(false)
+    StageSurface.disablePointEvent(false)
     StageCursor.setCursor('hand').lock()
 
     return () => {
       disposer()
-      Surface.enablePointEvent()
+      StageSurface.enablePointEvent()
       StageCursor.unlock().setCursor('select', 0)
     }
   }

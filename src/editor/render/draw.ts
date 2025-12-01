@@ -6,7 +6,7 @@ import { AABB } from 'src/editor/math'
 import { max } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
 import { xy_from } from 'src/editor/math/xy'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { ISplitText } from 'src/editor/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
 import { iife, IXY } from 'src/shared/utils/normal'
@@ -29,19 +29,19 @@ class ElemDrawerService {
     this.path2d = path2d
     this.dirtyRects = [elem.aabb]
 
-    Surface.setOBBMatrix(this.elem.obb, false)
+    StageSurface.setOBBMatrix(this.elem.obb, false)
 
     this.drawShapePath()
 
     this.node.fills.forEach((fill, i) => {
-      Surface.ctxSaveRestore(() => {
+      StageSurface.ctxSaveRestore(() => {
         this.drawShadow(this.node.shadows[i])
         this.drawFill(fill)
       })
     })
 
     this.node.strokes.forEach((stroke, i) => {
-      Surface.ctxSaveRestore(() => {
+      StageSurface.ctxSaveRestore(() => {
         this.drawShadow(this.node.shadows[i])
         this.drawStroke(stroke)
       })
@@ -189,7 +189,7 @@ class ElemDrawerService {
 
     this.splitTexts = this.splitTextsCache.getSet(
       this.node.id,
-      () => Surface.textBreaker.breakText(content, width, style, letterSpacing),
+      () => StageSurface.textBreaker.breakText(content, width, style, letterSpacing),
       [content, width, style],
     )
   }
@@ -259,7 +259,7 @@ class ElemDrawerService {
         const image = ImgManager.getImage(fill.url)
         if (!image) {
           ImgManager.getImageAsync(fill.url).then(() => {
-            Surface.collectDirty(this.elem)
+            StageSurface.collectDirty(this.elem)
           })
         } else {
           const { width, height } = this.node
@@ -345,7 +345,7 @@ class ElemDrawerService {
     const { width, color } = this.node.outline
     if (width <= 0) return
 
-    Surface.ctxSaveRestore(() => {
+    StageSurface.ctxSaveRestore(() => {
       this.ctx.lineWidth = width
       this.ctx.strokeStyle = color || themeColor()
       this.ctx.stroke(new Path2D(this.path2d))
@@ -369,7 +369,7 @@ class ElemDrawerService {
       this.path2d.lineTo(p2.x, p2.y + fontSize / 2)
     }
 
-    Surface.ctxSaveRestore(() => {
+    StageSurface.ctxSaveRestore(() => {
       this.ctx.lineWidth = width
       this.ctx.strokeStyle = color || themeColor()
       this.ctx.stroke(new Path2D(this.path2d))

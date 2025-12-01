@@ -2,7 +2,7 @@ import { createObjCache, loopFor } from '@gitborlando/utils'
 import { getEditorSetting } from 'src/editor/editor/setting'
 import { xy_distance, xy_minus } from 'src/editor/math/xy'
 import { ElemDrawer } from 'src/editor/render/draw'
-import { Surface } from 'src/editor/render/surface'
+import { StageSurface } from 'src/editor/render/surface'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
 import { memorized } from 'src/utils/common'
 
@@ -35,9 +35,9 @@ export class Elem {
     return this._node
   }
   set node(node: V1.Node) {
-    Surface.collectDirty(this)
+    StageSurface.collectDirty(this)
     this._node = node
-    Surface.collectDirty(this)
+    StageSurface.collectDirty(this)
   }
 
   private _obb = OBB.identityOBB()
@@ -63,7 +63,7 @@ export class Elem {
     if (this.hidden) return false
     if (this.id === 'sceneRoot') return true
     if (this.type === 'widgetElem') return true
-    return Surface.testVisible(this.aabb)
+    return StageSurface.testVisible(this.aabb)
   }
 
   getDirtyRect() {
@@ -86,26 +86,26 @@ export class Elem {
     if (!this.visible) return
 
     if (getEditorSetting().ignoreUnVisible && this.optimize) {
-      const visualSize = Surface.getVisualSize(this.aabb)
+      const visualSize = StageSurface.getVisualSize(this.aabb)
       if (visualSize.x < 2 && visualSize.y < 2) return
     }
 
-    const resetCtx = Surface.setCurrentCtxType(
+    const resetCtx = StageSurface.setCurrentCtxType(
       this.type === 'widgetElem' ? 'topCanvas' : 'mainCanvas',
     )
 
-    Surface.ctxSaveRestore((ctx) => {
+    StageSurface.ctxSaveRestore((ctx) => {
       const path2d = new Path2D()
 
-      Surface.ctxSaveRestore(() => {
+      StageSurface.ctxSaveRestore(() => {
         this.node && ElemDrawer.draw(this, ctx, path2d)
       })
 
       if (this.children.length) {
         if (this.clip) {
-          Surface.setOBBMatrix(this.obb, false)
+          StageSurface.setOBBMatrix(this.obb, false)
           ctx.clip(path2d)
-          Surface.setOBBMatrix(this.obb, true)
+          StageSurface.setOBBMatrix(this.obb, true)
         }
         this.children.forEach((child) => child.traverseDraw())
       }
@@ -162,7 +162,7 @@ export class Elem {
   destroy() {
     this.eventHandle.dispose()
     this.parent?.removeChild(this)
-    Surface.collectDirty(this)
+    StageSurface.collectDirty(this)
   }
 }
 
