@@ -467,7 +467,8 @@ export class StageSurfaceService {
   private onPointerEvents = () => {
     const onMouseEvent = (e: MouseEvent) => {
       if (this.isPointerEventNone) return
-      if (this.fullRenderElemsMinHeap.length) return
+      if (getEditorSetting().needSliceRender && this.fullRenderElemsMinHeap.length)
+        return
 
       this.getEventXY(e)
       this.traverseLayerList(
