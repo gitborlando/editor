@@ -44,15 +44,16 @@ export class StageSurfaceService {
     this.textBreaker = await createTextBreaker()
   }
 
+  private disposer = new Disposer()
+
   subscribe() {
     return Disposer.collect(
       this.inited.hook(() => {
-        this.onResize()
-        this.onZoomMove()
-        this.onPointerEvents()
+        this.disposer.add(this.onResize(), this.onZoomMove(), this.onPointerEvents())
         this.requestRenderTopCanvas()
       }),
       this.devShowDirtyRect(),
+      this.disposer.dispose,
       () => (this.inited.value = false),
     )
   }
@@ -94,9 +95,7 @@ export class StageSurfaceService {
   setCurrentCtxType = (type: SurfaceCanvasType) => {
     let lastCtx = this.currentCtx
     this.currentCtx = type === 'mainCanvas' ? this.ctx : this.topCtx
-    return () => {
-      this.currentCtx = lastCtx
-    }
+    return () => (this.currentCtx = lastCtx)
   }
 
   setOBBMatrix = (obb: OBB, inverse = false) => {
@@ -339,40 +338,44 @@ export class StageSurfaceService {
   }
 
   private onZoomMove = () => {
-    reaction(
-      () => StageViewport.zoom,
-      () => {
-        this.requestRender('firstFullRender')
-        this.requestRenderTopCanvas()
-      },
-    )
-    reaction(
-      () => XY.from(StageViewport.offset),
-      (offset, prevOffset) => {
-        this.translate(offset, prevOffset)
-        this.requestRenderTopCanvas()
-      },
+    return Disposer.collect(
+      reaction(
+        () => StageViewport.zoom,
+        () => {
+          this.requestRender('firstFullRender')
+          this.requestRenderTopCanvas()
+        },
+      ),
+      reaction(
+        () => XY.from(StageViewport.offset),
+        (offset, prevOffset) => {
+          this.translate(offset, prevOffset)
+          this.requestRenderTopCanvas()
+        },
+      ),
     )
   }
 
   private onResize() {
-    reaction(
-      () => ({ ...StageViewport.bound }),
-      ({ width, height }) => {
-        ;[this.canvas, this.topCanvas, this.bufferCanvas].forEach((canvas) => {
-          canvas.width = width * dpr
-          canvas.height = height * dpr
-          if (!(canvas instanceof OffscreenCanvas)) {
-            canvas.style.width = `${width}px`
-            canvas.style.height = `${height}px`
-          }
-        })
-      },
-      { fireImmediately: true },
-    )
-    reaction(
-      () => ({ ...StageViewport.bound }),
-      () => this.requestRender('firstFullRender'),
+    return Disposer.collect(
+      reaction(
+        () => ({ ...StageViewport.bound }),
+        ({ width, height }) => {
+          ;[this.canvas, this.topCanvas, this.bufferCanvas].forEach((canvas) => {
+            canvas.width = width * dpr
+            canvas.height = height * dpr
+            if (!(canvas instanceof OffscreenCanvas)) {
+              canvas.style.width = `${width}px`
+              canvas.style.height = `${height}px`
+            }
+          })
+        },
+        { fireImmediately: true },
+      ),
+      reaction(
+        () => ({ ...StageViewport.bound }),
+        () => this.requestRender('firstFullRender'),
+      ),
     )
   }
 
@@ -481,8 +484,10 @@ export class StageSurfaceService {
       )
     }
 
-    this.addEvent('mousedown', onMouseEvent, { capture: true })
-    this.addEvent('mousemove', onMouseEvent, { capture: true })
+    return Disposer.collect(
+      this.addEvent('mousedown', onMouseEvent, { capture: true }),
+      this.addEvent('mousemove', onMouseEvent, { capture: true }),
+    )
   }
 
   private isPointerEventNone = false
