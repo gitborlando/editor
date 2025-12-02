@@ -15,15 +15,21 @@ class StageSceneService {
 
   rootElems: Elem[] = []
 
-  initHook() {
-    this.setupRootElems()
-    this.hookRenderNode()
+  private disposer = new Disposer()
+
+  subscribe() {
+    return Disposer.collect(this.hookRenderNode(), this.dispose)
   }
 
-  dispose() {
+  init() {
+    this.setupRootElems()
+  }
+
+  private dispose() {
     this.elements.clear()
     this.rootElems.forEach((elem) => elem.destroy())
     this.rootElems.length = 0
+    this.disposer.dispose()
   }
 
   findElem(id: string) {
@@ -45,12 +51,14 @@ class StageSceneService {
   }
 
   private hookRenderNode() {
-    Signal.merge(YState.inited$, StageSurface.inited).hook(() => {
-      autorun(() => {
-        const pageId = YClients.client.selectPageId
-        if (pageId) this.firstRenderPage()
-      })
-      this.hookPatchRender()
+    return Signal.merge(YState.inited$, StageSurface.inited).hook(() => {
+      this.disposer.add(
+        autorun(() => {
+          const pageId = YClients.client.selectPageId
+          if (pageId) this.firstRenderPage()
+        }),
+        this.hookPatchRender(),
+      )
     })
   }
 
@@ -69,7 +77,7 @@ class StageSceneService {
   }
 
   private hookPatchRender() {
-    YState.flushPatch$.hook((op) => {
+    return YState.flushPatch$.hook((op) => {
       const { type, keys } = op
       if (keys[1] === 'childIds') this.reHierarchy(op)
       else this.render(type, keys as string[])

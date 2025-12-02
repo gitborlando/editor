@@ -3,6 +3,7 @@ import { getEditorSetting } from 'src/editor/editor/setting'
 import { xy_distance, xy_minus } from 'src/editor/math/xy'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { StageSurface } from 'src/editor/render/surface'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
 import { memorized } from 'src/utils/common'
 
@@ -71,6 +72,7 @@ export class Elem {
       this.aabb.minY,
       this.aabb.maxX,
       this.aabb.maxY,
+      StageViewport.sceneAABB,
     ])
   }
 
