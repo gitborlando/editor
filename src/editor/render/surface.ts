@@ -39,7 +39,6 @@ export class StageSurfaceService {
   private bufferCtx = this.bufferCanvas.getContext('2d')!
 
   textBreaker!: TextBreaker
-
   async initTextBreaker() {
     this.textBreaker = await createTextBreaker()
   }
@@ -53,9 +52,16 @@ export class StageSurfaceService {
         this.requestRenderTopCanvas()
       }),
       this.devShowDirtyRect(),
-      this.disposer.dispose,
-      () => (this.inited.value = false),
+      this.dispose,
     )
+  }
+
+  private dispose() {
+    this.inited.value = false
+    this.container = undefined as any
+    this.canvas = undefined as any
+    this.topCanvas = undefined as any
+    this.disposer.dispose()
   }
 
   setContainer = (container: HTMLDivElement) => {
@@ -400,7 +406,7 @@ export class StageSurfaceService {
         this.container.addEventListener(type, listener, options),
       )
     }
-    return () => this.container.removeEventListener(type, listener, options)
+    return () => this.container?.removeEventListener(type, listener, options)
   }
 
   private eventXY!: IXY
