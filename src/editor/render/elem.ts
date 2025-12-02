@@ -59,11 +59,19 @@ export class Elem {
     return this.obb.aabb
   }
 
+  private memoVisible = memorized(() => {
+    return StageSurface.testVisible(this.aabb)
+  })
   get visible() {
     if (this.hidden) return false
     if (this.id === 'sceneRoot') return true
     if (this.type === 'widgetElem') return true
-    return StageSurface.testVisible(this.aabb)
+    return this.memoVisible([
+      this.aabb.minX,
+      this.aabb.minY,
+      this.aabb.maxX,
+      this.aabb.maxY,
+    ])
   }
 
   getDirtyRect() {
@@ -77,7 +85,7 @@ export class Elem {
     const outlineWidth = this.node.outline?.width || 0
     const extend = max(strokeWidth, outlineWidth)
 
-    if (!extend) return this.obb.aabb
+    if (!extend) return this.aabb
     return OBB.fromCenter(center, width + extend * 2, height + extend * 2, rotation)
       .aabb
   }
