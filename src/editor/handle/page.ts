@@ -1,8 +1,16 @@
-import autobind from 'class-autobind-decorator'
+import { createCache } from '@gitborlando/utils'
+import { IMatrixTuple } from 'src/editor/math'
+import { StageViewport } from 'src/editor/stage/viewport'
+import { getSelectPageId } from 'src/editor/y-state/y-clients'
 import { SchemaCreator } from '../schema/creator'
 
-@autobind
 class HandlePageService {
+  pageSceneMatrix = createCache<ID, IMatrixTuple>()
+
+  subscribe() {
+    return Disposer.collect(this.memoPageSceneMatrix(), this.onSwitchPage())
+  }
+
   addPage(page = SchemaCreator.page()) {
     YState.set(`${page.id}`, page)
     YState.insert('meta.pageIds', page.id)
@@ -23,7 +31,28 @@ class HandlePageService {
     YUndo.track({ type: 'all', description: '删除页面' })
   }
 
-  devLogPageSchema(id: ID) {
+  private onSwitchPage() {
+    return reaction(
+      () => YClients.client.selectPageId,
+      (pageId) => {
+        const matrix = this.pageSceneMatrix.getSet(pageId, () =>
+          Matrix.identity().tuple(),
+        )
+        StageViewport.sceneMatrix = Matrix.of(...matrix)
+      },
+    )
+  }
+
+  private memoPageSceneMatrix() {
+    return reaction(
+      () => StageViewport.sceneMatrix,
+      (matrix) => {
+        this.pageSceneMatrix.set(getSelectPageId(), matrix.tuple())
+      },
+    )
+  }
+
+  DEV_logPageSchema(id: ID) {
     const curPage = YState.find<V1.Page>(id)
     const nodes: Record<ID, V1.SchemaItem> = {}
     const findNodes = (id: string) => {
@@ -43,4 +72,4 @@ class HandlePageService {
   }
 }
 
-export const HandlePage = new HandlePageService()
+export const HandlePage = autoBind(new HandlePageService())

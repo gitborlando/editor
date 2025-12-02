@@ -5,6 +5,7 @@ import { EditorCommand } from 'src/editor/editor/command'
 import { mockCollide } from 'src/editor/editor/mock/collide'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
+import { HandlePage } from 'src/editor/handle/page'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
@@ -33,6 +34,8 @@ export class EditorService {
   private subscribe() {
     return Disposer.collect(
       HandleNode.subscribe(),
+      HandlePage.subscribe(),
+
       StageSurface.subscribe(),
       StageScene.subscribe(),
       StageViewport.subscribe(),

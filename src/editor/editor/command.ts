@@ -59,7 +59,7 @@ class EditorCommandManager {
       commands.push({
         name: sentence(t('verb.print'), 'schema'),
         callback: ({ id }: { id: ID }) => {
-          HandlePage.devLogPageSchema(id)
+          HandlePage.DEV_logPageSchema(id)
         },
       })
     }
