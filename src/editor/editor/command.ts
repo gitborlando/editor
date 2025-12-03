@@ -18,13 +18,13 @@ class EditorCommandManager {
       {
         name: t('verb.copy'),
         shortcut: 'ctrl+c',
-        disabled: () => !getSelectIdList().length,
+        when: () => !!getSelectIdList().length,
         callback: () => HandleNode.copySelectedNodes(),
       },
       {
         name: t('verb.paste'),
         shortcut: 'ctrl+v',
-        disabled: () => !HandleNode.copiedIds.length,
+        when: () => !!HandleNode.copiedIds.length,
         callback: () => HandleNode.pasteNodes(),
       },
     ]

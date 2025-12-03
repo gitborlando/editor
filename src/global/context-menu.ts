@@ -6,7 +6,7 @@ export type Command = {
   name: string
   callback: (context: any) => any
   shortcut?: string
-  disabled?: () => boolean
+  when?: () => boolean
 }
 
 export type MenuItem = Command & {
