@@ -1,4 +1,5 @@
-import { isLeftMouse, isRightMouse } from '@gitborlando/utils/browser'
+import { iife, matchCase } from '@gitborlando/utils'
+import { isLeftMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
 import { StageScene } from 'src/editor/render/scene'
@@ -212,6 +213,24 @@ const VertexComp: FC<{
     radius: 2 / getZoom(),
   })
 
+  const rotatePointOBB = iife(() => {
+    const offset = matchCase(type, {
+      topLeft: XY._(-size, -size),
+      topRight: XY._(size, -size),
+      bottomRight: XY._(size, size),
+      bottomLeft: XY._(-size, size),
+    })
+    const newXY = XY.from(xy).plus(offset).rotate(xy, transformOBB.rotation)
+    return OBB.fromCenter(newXY, size, size, 0)
+  })
+
+  const rotatePoint = SchemaCreator.rect({
+    id: `transform-rotatePoint-${type}`,
+    ...rotatePointOBB,
+    fills: [SchemaCreator.fillColor(COLOR.transparent)],
+    radius: 2 / getZoom(),
+  })
+
   const mouseenter = (e: ElemMouseEvent) => {
     if (!e.hovered) return StageCursor.setCursor('select')
 
@@ -370,7 +389,19 @@ const VertexComp: FC<{
       })
   }
 
-  const rotate = () => {
+  const mousedown = (e: ElemMouseEvent) => {
+    e.stopPropagation()
+    moveVertex(e)
+  }
+
+  const handleRotatePointerHover = (e: ElemMouseEvent) => {
+    if (!e.hovered) return StageCursor.setCursor('select')
+    StageCursor.setCursor('rotate')
+  }
+
+  const handleRotatePointerMouseDown = (e: ElemMouseEvent) => {
+    e.stopPropagation()
+
     StageCursor.setCursor('rotate').lock().upReset()
 
     const { center } = transformOBB
@@ -393,20 +424,24 @@ const VertexComp: FC<{
       })
   }
 
-  const mousedown = (e: ElemMouseEvent) => {
-    e.stopPropagation()
-    if (isLeftMouse(e.hostEvent)) return moveVertex(e)
-    if (isRightMouse(e.hostEvent)) rotate()
-  }
-
   return (
-    <elem
-      node={rect}
-      events={{
-        hover: mouseenter,
-        mousemove: (e) => e.stopPropagation(),
-        mousedown,
-      }}
-    />
+    <>
+      <elem
+        node={rect}
+        events={{
+          hover: mouseenter,
+          mousemove: (e) => e.stopPropagation(),
+          mousedown,
+        }}
+      />
+      <elem
+        node={rotatePoint}
+        events={{
+          hover: handleRotatePointerHover,
+          mousedown: handleRotatePointerMouseDown,
+          mousemove: (e) => e.stopPropagation(),
+        }}
+      />
+    </>
   )
 })
