@@ -45,6 +45,12 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
     ContextMenu.menus = [EditorCommand.nodeGroup, EditorCommand.copyPasteGroup]
     ContextMenu.openMenu(e)
   }
+  const handleMouseEnter = () => {
+    StageSelect.hoverId = id
+  }
+  const handleMouseLeave = () => {
+    StageSelect.hoverId = undefined
+  }
 
   return (
     <G
@@ -60,13 +66,16 @@ export const EditorLeftPanelLayerNodeItemComp: FC<{
       {...listeners}
       horizontal='auto auto 1fr auto'
       center
+      data-hover={StageSelect.hoverId === id}
       data-selected={selected}
       data-sub-selected={subSelected}
       data-dragging={isDragging}
       className={cls()}
       onMouseDown={handleSelect}
       onDoubleClick={handleDoubleClick}
-      onContextMenu={handleContextMenu}>
+      onContextMenu={handleContextMenu}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}>
       <Lucide
         size={14}
         icon={ChevronRight}
@@ -95,6 +104,9 @@ const cls = classes(css`
   ${styles.needBorder}
   ${styles.textLabel}
   ${styles.borderHoverPrimary}
+  &[data-hover='true'] {
+    ${styles.borderPrimary}
+  }
   &[data-selected='true'] {
     ${styles.bgPrimary}
   }

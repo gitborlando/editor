@@ -13,6 +13,7 @@ export const styles = {
   borderRight: 'border-right: 1px solid var(--gray-border);',
   borderBottom: 'border-bottom: 1px solid var(--gray-border);',
   borderTop: 'border-top: 1px solid var(--gray-border);',
+  borderPrimary: `border: 1px solid var(--color);`,
   borderHoverPrimary: `&:hover {border: 1px solid var(--color);}`,
 
   bgPrimary: `background-color: var(--color-bg);&:hover {background-color: var(--color-bg);}`,
