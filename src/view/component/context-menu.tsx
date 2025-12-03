@@ -16,7 +16,10 @@ export const ContextMenuComp: FC<{}> = observer(({}) => {
             group.forEach((item) => {
               list.push(
                 <ArcoMenu.Item
-                  className={cx(cls('item'), !item.when?.() && cls('item-disabled'))}
+                  className={cx(
+                    cls('item'),
+                    item.when && !item.when() && cls('item-disabled'),
+                  )}
                   key={item.name}
                   onClick={() => item.callback(ContextMenu.context)}>
                   <G horizontal center>

@@ -17,15 +17,15 @@ export function mockCollide() {
   SchemaCreator.addToSchema(schema, frame)
   SchemaCreator.addChild(page, frame)
 
-  for (let i = 0; i < 3; i++) {
-    const rect = SchemaCreator.rect()
-    rect.x = 100 + i * 50
-    rect.y = 100 + i * 50
-    rect.width = 100
-    rect.height = 100
-    SchemaCreator.addToSchema(schema, rect)
-    SchemaCreator.addChild(frame, rect)
-  }
+  // for (let i = 0; i < 3; i++) {
+  //   const rect = SchemaCreator.rect()
+  //   rect.x = 100 + i * 50
+  //   rect.y = 100 + i * 50
+  //   rect.width = 100
+  //   rect.height = 100
+  //   SchemaCreator.addToSchema(schema, rect)
+  //   SchemaCreator.addChild(frame, rect)
+  // }
 
   const line = SchemaCreator.line({
     x: 300,
@@ -35,15 +35,15 @@ export function mockCollide() {
   SchemaCreator.addToSchema(schema, line)
   SchemaCreator.addChild(frame, line)
 
-  const polygon = SchemaCreator.polygon({
-    x: 300,
-    y: 300,
-    width: 100,
-    height: 100,
-    sides: 8,
-  })
-  SchemaCreator.addToSchema(schema, polygon)
-  SchemaCreator.addChild(frame, polygon)
+  // const polygon = SchemaCreator.polygon({
+  //   x: 300,
+  //   y: 300,
+  //   width: 100,
+  //   height: 100,
+  //   sides: 8,
+  // })
+  // SchemaCreator.addToSchema(schema, polygon)
+  // SchemaCreator.addChild(frame, polygon)
 
   return schema
 }

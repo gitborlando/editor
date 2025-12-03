@@ -1,5 +1,4 @@
 import { objKeys } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import { HandleNode } from 'src/editor/handle/node'
 import { divide, floor, max, min } from 'src/editor/math/base'
 import { createRegularPolygon, createStarPolygon } from 'src/editor/math/point'
@@ -36,14 +35,13 @@ function createActiveKeys(
 
 export type AllGeometry = ReturnType<typeof createAllGeometry>
 
-@autobind
 class OperateGeometryService {
   activeGeometry = createAllGeometry()
   activeKeys = createActiveKeys(new Set())
   operateKeys = createActiveKeys(new Set())
   deltaKeys = createActiveKeys(new Set())
 
-  initHook() {}
+  skipExtraOperationWhenSetRotation = false
 
   setupActiveKeys(selectedNodes: V1.Node[]) {
     createActiveKeys(this.activeKeys, ['x', 'y', 'width', 'height', 'rotation'])
@@ -153,6 +151,12 @@ class OperateGeometryService {
         )
       }
       if (key === 'rotation') {
+        if (this.skipExtraOperationWhenSetRotation) {
+          return YState.set(
+            `${node.id}.rotation`,
+            Angle.normal(node.rotation + this.delta('rotation', node)),
+          )
+        }
         return this.applyRotationToNode(traverseData, node, depth)
       }
       if (key === 'sides') {
@@ -246,4 +250,4 @@ class OperateGeometryService {
   }
 }
 
-export const OperateGeometry = new OperateGeometryService()
+export const OperateGeometry = autoBind(new OperateGeometryService())

@@ -13,13 +13,13 @@ import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaHelper, SchemaUtilTraverseData } from 'src/editor/schema/helper'
 import { Schema } from 'src/editor/schema/schema'
+import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { getSelectIdMap, YClients } from 'src/editor/y-state/y-clients'
 import { ContextMenu } from 'src/global/context-menu'
 import { Drag } from 'src/global/event/drag'
 import { macroMatch, type IRect } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
-import { moveTransformer } from 'src/view/editor/stage/transform'
 
 @autobind
 class StageSelectService {
@@ -78,7 +78,7 @@ class StageSelectService {
     }
 
     this.onMousedownSelect()
-    moveTransformer(e)
+    StageTransformer.move(e.hostEvent)
   }
 
   private onContextMenu(e: MouseEvent) {

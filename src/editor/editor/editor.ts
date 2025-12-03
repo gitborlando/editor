@@ -6,7 +6,6 @@ import { mockCollide } from 'src/editor/editor/mock/collide'
 import { EditorSetting } from 'src/editor/editor/setting'
 import { HandleNode } from 'src/editor/handle/node'
 import { HandlePage } from 'src/editor/handle/page'
-import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageCursor } from 'src/editor/stage/cursor'
@@ -48,7 +47,6 @@ export class EditorService {
     EditorCommand.init()
 
     OperateAlign.initHook()
-    OperateGeometry.initHook()
     OperateFill.init()
     OperateStroke.initHook()
     OperateShadow.initHook()

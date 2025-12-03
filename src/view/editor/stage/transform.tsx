@@ -2,62 +2,31 @@ import { iife, matchCase } from '@gitborlando/utils'
 import { isLeftMouse } from '@gitborlando/utils/browser'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { ElemMouseEvent } from 'src/editor/render/elem'
-import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
+import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
-import { COLOR } from 'src/utils/color'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
 let transformOBB = OBB.identityOBB()
-
-export const moveTransformer = (e: ElemMouseEvent) => {
-  Drag.onStart(() => {
-    if (e?.hostEvent.altKey) {
-      StageCursor.setCursor('copy')
-      // OperateNode.copySelectNodes()
-      // OperateNode.pasteNodes()
-    }
-  })
-    .onMove(({ delta }) => {
-      delta = StageViewport.toSceneShift(delta)
-      OperateGeometry.setActiveGeometries({ x: delta.x, y: delta.y })
-    })
-    .onDestroy(({ moved }) => {
-      if (!moved) return
-
-      if (e?.hostEvent.altKey) {
-        // StageCursor.setCursor('select')
-        // OperateGeometry.operateKeys.clear()
-        // Schema.finalOperation('alt 复制节点')
-      }
-      YUndo.track({
-        type: 'state',
-        description: sentence(t('verb.move'), t('noun.node')),
-      })
-    })
-}
+let isSelectOnlyLine = false
 
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const selectNodes = useSelectNodes()
 
-  transformOBB = useMemo(() => {
-    if (selectNodes.length === 0) return OBB.identityOBB()
-    if (selectNodes.length === 1)
-      return OBB.fromRect(selectNodes[0], selectNodes[0].rotation)
-    return OBB.fromAABB(
-      AABB.merge(selectNodes.map((node) => StageScene.findElem(node.id).obb.aabb)),
-    )
-  }, [selectNodes])
+  isSelectOnlyLine = selectNodes.length === 1 && selectNodes[0].type === 'line'
+  StageTransformer.isSelectOnlyLine = isSelectOnlyLine
+
+  transformOBB = useMemo(() => StageTransformer.calcOBB(selectNodes), [selectNodes])
 
   const node = SchemaCreator.rect({
     id: 'transform',
-    ...transformOBB,
     fills: [],
+    ...transformOBB,
   })
 
   const mousedown = (e: ElemMouseEvent) => {
@@ -66,7 +35,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 
     if (isLeftMouse(e.hostEvent)) {
       e.stopPropagation()
-      moveTransformer(e)
+      StageTransformer.move(e.hostEvent)
     }
   }
 
@@ -88,8 +57,6 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
 
 const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY }> =
   observer(({ type, p1, p2 }) => {
-    const { setActiveGeometry, setActiveGeometries } = OperateGeometry
-    const selectedNodes = useSelectNodes()
     const line = SchemaCreator.line({
       id: `transform-line-${type}`,
       points: [
@@ -102,7 +69,7 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
     const mouseover = (e: ElemMouseEvent) => {
       if (!e.hovered) return StageCursor.setCursor('select')
 
-      if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
+      if (isSelectOnlyLine) {
         return StageCursor.setCursor('select')
       }
 
@@ -119,78 +86,7 @@ const LineComp: FC<{ type: 'top' | 'bottom' | 'left' | 'right'; p1: IXY; p2: IXY
     const mousedown = (e: ElemMouseEvent) => {
       StageCursor.lock()
       e.stopPropagation()
-
-      const { rotation } = OperateGeometry.activeGeometry
-
-      Drag.onStart()
-        .onMove(({ delta }) => {
-          delta = StageViewport.toSceneShift(delta)
-          const deltaX = XY.from(delta).getDot(XY.xAxis(rotation))
-          const deltaY = XY.from(delta).getDot(XY.yAxis(rotation))
-
-          if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
-            setActiveGeometry('x', XY.from(delta).getDot(XY.xAxis(0)))
-            setActiveGeometry('y', XY.from(delta).getDot(XY.yAxis(0)))
-            return
-          }
-
-          if (e.hostEvent.shiftKey) {
-            switch (type) {
-              case 'top':
-                setActiveGeometry('x', -(deltaY / 2) * Angle.sin(rotation))
-                setActiveGeometry('y', (deltaY / 2) * Angle.cos(rotation))
-                setActiveGeometry('height', -deltaY)
-                setActiveGeometry('height', -deltaY)
-                break
-              case 'right':
-                setActiveGeometry('width', deltaX)
-                setActiveGeometry('x', (-deltaX / 2) * Angle.cos(rotation))
-                setActiveGeometry('y', (-deltaX / 2) * Angle.sin(rotation))
-                setActiveGeometry('width', -deltaX)
-                break
-              case 'bottom':
-                setActiveGeometry('height', +deltaY)
-                setActiveGeometry('x', (-deltaY / 2) * Angle.sin(rotation))
-                setActiveGeometry('y', (-deltaY / 2) * Angle.cos(rotation))
-                setActiveGeometry('height', -(-deltaY))
-                break
-              case 'left':
-                setActiveGeometry('x', (deltaX / 2) * Angle.cos(rotation))
-                setActiveGeometry('y', (deltaX / 2) * Angle.sin(rotation))
-                setActiveGeometry('width', deltaX)
-                setActiveGeometry('width', -deltaX)
-                break
-            }
-          } else {
-            switch (type) {
-              case 'top':
-                setActiveGeometry('x', -deltaY * Angle.sin(rotation))
-                setActiveGeometry('y', deltaY * Angle.cos(rotation))
-                setActiveGeometry('height', -deltaY)
-                break
-              case 'right':
-                setActiveGeometry('width', deltaX)
-                break
-              case 'bottom':
-                setActiveGeometry('height', deltaY)
-                break
-              case 'left':
-                setActiveGeometries({
-                  x: deltaX * Angle.cos(rotation),
-                  y: deltaX * Angle.sin(rotation),
-                  width: -deltaX,
-                })
-                break
-            }
-          }
-        })
-        .onDestroy(({ moved }) => {
-          if (!moved) return
-          YUndo.track({
-            type: 'state',
-            description: sentence(t('verb.scale'), t('noun.node')),
-          })
-        })
+      StageTransformer.onDragLine(type, e.hostEvent)
     }
 
     return <elem node={line} events={{ hover: mouseover, mousedown }} />
@@ -234,7 +130,7 @@ const VertexComp: FC<{
   const mouseenter = (e: ElemMouseEvent) => {
     if (!e.hovered) return StageCursor.setCursor('select')
 
-    if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
+    if (isSelectOnlyLine) {
       return StageCursor.setCursor('resize', transformOBB.rotation)
     }
 
@@ -251,7 +147,6 @@ const VertexComp: FC<{
   const moveVertex = (e: ElemMouseEvent) => {
     StageCursor.lock()
     const { rotation } = OperateGeometry.activeGeometry
-    console.log(type)
 
     Drag.onStart()
       .onMove(({ delta, current }) => {
@@ -259,26 +154,23 @@ const VertexComp: FC<{
         const deltaX = XY.from(delta).getDot(XY.xAxis(rotation))
         const deltaY = XY.from(delta).getDot(XY.yAxis(rotation))
 
-        if (selectedNodes.length === 1 && selectedNodes[0].type === 'line') {
-          // setActiveGeometry('width', deltaX)
-          // setActiveGeometry('height', deltaY)
-          // return
+        if (isSelectOnlyLine) {
           current = StageViewport.toSceneXY(current)
           const line = selectedNodes[0] as V1.Line
+
+          OperateGeometry.skipExtraOperationWhenSetRotation = true
 
           switch (type) {
             case 'topLeft':
             case 'bottomLeft': {
               const start = XY.from(line)
-              const end = XY.of(line.width, 0).rotate(start, rotation).plus(start)
+              const end = XY.of(line.width, 0).rotate(XY._(), rotation).plus(start)
               setActiveGeometries(
                 {
                   x: current.x,
                   y: current.y,
-                  width: XY.from(current).getDistance(end),
-                  rotation: Angle.normal(
-                    Angle.atan2(end.y - current.y, end.x - current.x),
-                  ),
+                  width: XY.distanceOf(current, end),
+                  rotation: Angle.fromTwoVector(end, current),
                 },
                 false,
               )
@@ -289,15 +181,16 @@ const VertexComp: FC<{
               const start = XY.from(line)
               setActiveGeometries(
                 {
-                  width: XY.from(current).getDistance(start),
-                  rotation: Angle.normal(
-                    Angle.atan2(current.y - start.y, current.x - start.x),
-                  ),
+                  width: XY.distanceOf(current, start),
+                  rotation: Angle.fromTwoVector(current, start),
                 },
                 false,
               )
               break
           }
+
+          OperateGeometry.skipExtraOperationWhenSetRotation = false
+
           return
         }
 
@@ -435,6 +328,7 @@ const VertexComp: FC<{
         }}
       />
       <elem
+        x-if={!isSelectOnlyLine}
         node={rotatePoint}
         events={{
           hover: handleRotatePointerHover,

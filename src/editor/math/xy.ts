@@ -196,4 +196,8 @@ export class XY {
   static yAxis(rotation: number) {
     return XY.of(-Angle.sin(rotation), Angle.cos(rotation))
   }
+
+  static distanceOf(self: IXY, another: IXY) {
+    return sqrt((self.x - another.x) ** 2 + (self.y - another.y) ** 2)
+  }
 }

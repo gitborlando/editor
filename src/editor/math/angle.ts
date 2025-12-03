@@ -45,7 +45,7 @@ export class Angle {
     return Angle.normal(Math.round(angle / step) * step)
   }
 
-  static getAngle(xy: IXY, origin: IXY) {
+  static fromTwoVector(xy: IXY, origin: IXY) {
     return Angle.atan2(xy.y - origin.y, xy.x - origin.x)
   }
 

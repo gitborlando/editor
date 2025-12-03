@@ -90,6 +90,23 @@ class YUndoService {
     this.next = this.stack.length
   }
 
+  track2(type: YUndoInfo['type'], description: string) {
+    if (!this.shouldTrack) return
+
+    const info: YUndoInfo = { type, description }
+
+    if (type === 'state' || type === 'all') {
+      this.stateUndo.stopCapturing()
+      info.statePatches = YState.getPatches()
+    }
+    if (type === 'client' || type === 'all') {
+      info.clientState = this.getClientState()
+    }
+
+    this.stack.splice(this.next, this.stack.length - this.next, info)
+    this.next = this.stack.length
+  }
+
   untrack(callback: () => void) {
     this.shouldTrack = false
     runInAction(() => callback())

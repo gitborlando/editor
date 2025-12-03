@@ -66,14 +66,13 @@ class ElemDrawerService {
         this.drawEllipse()
         break
 
-      // case 'line':
-      //   this.drawLine(node.points)
-      //   break
+      case 'line':
+        this.drawLine(node.points)
+        break
 
       case 'polygon':
       case 'star':
       case 'irregular':
-      case 'line':
         this.drawPath(node.points)
         break
 
@@ -145,14 +144,9 @@ class ElemDrawerService {
   }
 
   private drawLine = (points: V1.Point[]) => {
-    // console.log('points: ', points)
-    // const startX = nearestPixel(points[0].x)
-    // const startY = nearestPixel(points[0].y)
-    // const endX = nearestPixel(points[1].x)
-    // const endY = nearestPixel(points[1].y)
-    // this.path2d.moveTo(startX, startY)
-    // this.path2d.lineTo(endX, endY)
-    // this.path2d.closePath()
+    this.path2d.moveTo(points[0].x, points[0].y)
+    this.path2d.lineTo(points[1].x, points[1].y)
+    this.path2d.closePath()
   }
 
   private drawPath(points: V1.Point[]) {
