@@ -1,4 +1,0 @@
-# 样式
-- 样式用 linaria 写
-- 样式用 'cls = classes(css(``))' 格式
-- 尽量用mixin, 放在'src/view/style/style.ts'里
