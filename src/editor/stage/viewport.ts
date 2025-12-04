@@ -20,6 +20,7 @@ class StageViewportService {
 
   @observable zoom = 1
   @observable offset = XY._(0, 0)
+  @observable isZooming = false
 
   sceneAABB = new AABB(0, 0, 0, 0)
   prevSceneAABB = new AABB(0, 0, 0, 0)
@@ -117,11 +118,23 @@ class StageViewportService {
 
   private onWheelZoom() {
     this.disposer.add(
-      this.wheeler.beforeWheel.hook(({ e }) => e.ctrlKey && e.preventDefault()),
-      this.wheeler.duringWheel.hook(({ e }) => this.handleWheelZoom(e)),
-      this.wheeler.afterWheel.hook(({ e }) => e.ctrlKey && e.preventDefault()),
-      StageSurface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent)),
-      listen('wheel', { passive: false }, (e) => e.ctrlKey && e.preventDefault()),
+      this.wheeler.beforeWheel.hook(({ e }) => {
+        e.ctrlKey && e.preventDefault()
+        this.isZooming = true
+      }),
+      this.wheeler.duringWheel.hook(({ e }) => {
+        this.handleWheelZoom(e)
+      }),
+      this.wheeler.afterWheel.hook(({ e }) => {
+        e.ctrlKey && e.preventDefault()
+        this.isZooming = false
+      }),
+      StageSurface.addEvent('wheel', (e) => {
+        this.wheeler.onWheel(e as WheelEvent)
+      }),
+      listen('wheel', { passive: false }, (e) => {
+        e.ctrlKey && e.preventDefault()
+      }),
     )
   }
 

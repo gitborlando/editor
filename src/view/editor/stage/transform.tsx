@@ -17,6 +17,8 @@ let isSelectOnlyLine = false
 
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const selectNodes = useSelectNodes()
+  const { isMoving } = StageTransformer
+  const shouldHidden = isMoving || StageViewport.isZooming
 
   isSelectOnlyLine = selectNodes.length === 1 && selectNodes[0].type === 'line'
   StageTransformer.isSelectOnlyLine = isSelectOnlyLine
@@ -42,7 +44,11 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const [p0, p1, p2, p3] = transformOBB.vertexes
 
   return (
-    <elem x-if={selectNodes.length > 0} node={node} events={{ mousedown }}>
+    <elem
+      x-if={selectNodes.length > 0}
+      hidden={shouldHidden}
+      node={node}
+      events={{ mousedown }}>
       <LineComp type='top' p1={p0} p2={p1} />
       <LineComp type='bottom' p1={p2} p2={p3} />
       <LineComp type='left' p1={p0} p2={p3} />

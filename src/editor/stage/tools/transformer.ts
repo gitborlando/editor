@@ -32,10 +32,13 @@ class StageTransformerService {
       }
     })
       .onMove(({ delta }) => {
+        this.isMoving = true
         delta = StageViewport.toSceneShift(delta)
         OperateGeometry.setActiveGeometries({ x: delta.x, y: delta.y })
       })
       .onDestroy(({ moved }) => {
+        this.isMoving = false
+
         if (!moved) return
 
         if (e.altKey) {
