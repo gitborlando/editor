@@ -80,6 +80,20 @@ class StageViewportService {
     return steps.find((i) => i >= base) || steps[0]
   }
 
+  updateZoom(newZoom: number, center?: IXY) {
+    const { width, height } = this.bound
+    center ||= XY.of(width / 2, height / 2)
+
+    newZoom = minMax(0.015625, 256, newZoom)
+    const deltaZoom = newZoom / this.zoom
+
+    this.sceneMatrix = this.sceneMatrix
+      .clone()
+      .translate(-center.x, -center.y)
+      .scale(deltaZoom, deltaZoom)
+      .translate(center.x, center.y)
+  }
+
   private deltaYToZoomStep(deltaY: number) {
     return Math.max(0.05, 0.12937973 * Math.log(Math.abs(deltaY)) - 0.33227472)
   }
@@ -100,39 +114,26 @@ class StageViewportService {
 
     const sign = Math.sign(e.deltaY)
     const step = this.deltaYToZoomStep(e.deltaY)
+    const newZoom = minMax(0.015625, 256, this.zoom / (1 + step) ** sign)
 
-    const newZoom = minMax(
-      0.015625,
-      256,
-      sign < 0 ? this.zoom * (1 + step) : this.zoom / (1 + step),
-    )
-    const deltaZoom = newZoom / this.zoom
-
-    const canvasXY = this.toCanvasXY(XY.client(e))
-    this.sceneMatrix = this.sceneMatrix
-      .clone()
-      .translate(-canvasXY.x, -canvasXY.y)
-      .scale(deltaZoom, deltaZoom)
-      .translate(canvasXY.x, canvasXY.y)
+    this.updateZoom(newZoom, this.toCanvasXY(XY.client(e)))
   }
 
   private onWheelZoom() {
     this.disposer.add(
       this.wheeler.beforeWheel.hook(({ e }) => {
-        e.ctrlKey && e.preventDefault()
         this.isZooming = true
       }),
       this.wheeler.duringWheel.hook(({ e }) => {
         this.handleWheelZoom(e)
       }),
       this.wheeler.afterWheel.hook(({ e }) => {
-        e.ctrlKey && e.preventDefault()
         this.isZooming = false
       }),
       StageSurface.addEvent('wheel', (e) => {
         this.wheeler.onWheel(e as WheelEvent)
       }),
-      listen('wheel', { passive: false }, (e) => {
+      listen('wheel', { passive: false, capture: true }, (e) => {
         e.ctrlKey && e.preventDefault()
       }),
     )
@@ -178,9 +179,8 @@ class StageViewportService {
 
   @action
   private devSolidZoomAndOffset() {
-    const { fixedSceneMatrix: solidZoomAndOffset, sceneMatrix: matrix } =
-      getEditorSetting().dev
-    if (solidZoomAndOffset) this.sceneMatrix = Matrix.of(...matrix)
+    const { fixedSceneMatrix, sceneMatrix } = getEditorSetting().dev
+    if (fixedSceneMatrix) this.sceneMatrix = Matrix.of(...sceneMatrix)
   }
 }
 

@@ -24,4 +24,6 @@ export const styles = {
   shadow: `box-shadow: var(--shadow);`,
 
   focus: `&:has(input:focus) { background-color: white;outline: 1px solid var(--color);}`,
+
+  divideY: `&>*+* { border-top: 1px solid var(--gray-border); }`,
 }

@@ -36,3 +36,20 @@ body {
   font-family: 'GoogleSansCode';
   src: url('./fonts/GoogleSansCode-Regular.ttf') format('truetype');
 }
+
+.slide-down {
+  will-change: transform, opacity;
+  transform-origin: top;
+  animation: slideDown 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slideDown {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}

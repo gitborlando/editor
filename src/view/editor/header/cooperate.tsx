@@ -1,5 +1,6 @@
 import { entries } from 'mobx'
 import { Popover } from 'react-tiny-popover'
+import { PopoverCard } from 'src/view/component/popover-card'
 import { AvatarCircles } from 'src/view/component/shadcn/ui/avatar-circles'
 import { Text } from 'src/view/component/text'
 
@@ -27,6 +28,7 @@ export const CooperateComp: FC<{}> = observer(({}) => {
       <Popover
         isOpen={show}
         positions={['bottom']}
+        onClickOutside={() => setShow(false)}
         content={<CooperatePopup cooperates={cooperates} />}>
         <AvatarCircles
           avatarUrls={cooperates.map((cooperate) => ({
@@ -44,44 +46,37 @@ export const CooperateComp: FC<{}> = observer(({}) => {
 const CooperatePopup: FC<{ cooperates: CooperateInfo[] }> = observer(
   ({ cooperates }) => {
     return (
-      <G className={cls('popup')} vertical='auto 1fr'>
-        <G horizontal center className={cls('popup-header')}>
-          <Text>当前协作人员(点击进入观察)</Text>
+      <PopoverCard>
+        <G vertical='auto 1fr'>
+          <G horizontal center className={cls('popup-header')}>
+            <Text>当前协作人员(点击进入观察)</Text>
+          </G>
+          <G className={cls('popup-list')}>
+            {cooperates.map((cooperate) => (
+              <G
+                horizontal='auto 1fr'
+                center
+                className={cls('popup-item')}
+                onClick={() => {
+                  YClients.observingClientId = cooperate.clientId
+                }}>
+                <img src={cooperate.avatar} />
+                <Text style={{ alignSelf: 'center' }}>{cooperate.name}</Text>
+              </G>
+            ))}
+          </G>
         </G>
-        <G className={cls('popup-list')}>
-          {cooperates.map((cooperate) => (
-            <G
-              horizontal='auto 1fr'
-              center
-              className={cls('popup-item')}
-              onClick={() => {
-                YClients.observingClientId = cooperate.clientId
-              }}>
-              <img src={cooperate.avatar} />
-              <Text style={{ alignSelf: 'center' }}>{cooperate.name}</Text>
-            </G>
-          ))}
-        </G>
-      </G>
+      </PopoverCard>
     )
   },
 )
 
 const cls = classes(css`
   &-popup {
-    width: 200px;
-    height: fit-content;
-    background-color: white;
-    padding: 12px;
-    ${styles.shadow}
-    ${styles.borderRadius}
-    margin-top: 12px;
     &-header {
       height: fit-content;
       margin-bottom: 8px;
       ${styles.textHead}
-    }
-    &-list {
     }
     &-item {
       gap: 8px;

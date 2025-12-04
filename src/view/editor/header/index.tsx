@@ -2,12 +2,12 @@ import { Icon } from '@gitborlando/widget'
 import { ChevronLeft, Redo, Undo } from 'lucide-react'
 import { IStageCreateType, StageCreate } from 'src/editor/stage/interact/create'
 import { StageInteract } from 'src/editor/stage/interact/interact'
-import { getZoom, StageViewport } from 'src/editor/stage/viewport'
+import { StageViewport } from 'src/editor/stage/viewport'
 import { Button } from 'src/view/component/button'
-
 import { CooperateComp } from 'src/view/editor/header/cooperate'
 import { EditorHeaderHistoryComp } from 'src/view/editor/header/history'
 import { EditorHeaderSettingComp } from 'src/view/editor/header/setting'
+import { EditorHeaderZoomComp } from 'src/view/editor/header/zoom'
 
 export const HeaderComp: FC<{}> = observer(({}) => {
   const navigate = useNavigate()
@@ -32,7 +32,7 @@ export const HeaderComp: FC<{}> = observer(({}) => {
             <CreateShapeIcon key={type} type={type} />
           ))}
         </G>
-        <ZoomComp />
+        <EditorHeaderZoomComp />
       </G>
       <G center horizontal gap={8} className={cls('rightGroup')}>
         <CooperateComp />
@@ -88,10 +88,6 @@ const UndoGroup: FC<{}> = observer(() => {
       />
     </G>
   )
-})
-
-const ZoomComp = observer(({}) => {
-  return <Button style={{ width: 60 }}>{~~((getZoom() || 0) * 100)}%</Button>
 })
 
 const cls = classes(css`

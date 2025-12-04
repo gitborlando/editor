@@ -3,9 +3,10 @@ import { Text } from 'src/view/component/text'
 export const SpaceBetweenItem = forwardRef<
   HTMLDivElement,
   ComponentPropsWithRef<'div'> & {
-    label: string
+    left: ReactNode
+    right: ReactNode
   }
->(({ className, children, label, ...rest }, ref) => {
+>(({ className, children, left, right, ...rest }, ref) => {
   return (
     <G
       horizontal='auto auto'
@@ -14,8 +15,8 @@ export const SpaceBetweenItem = forwardRef<
       className={cx(cls('space-between'), className)}
       {...rest}
       ref={ref}>
-      <Text x-if={label}>{label}</Text>
-      {children}
+      {left}
+      {right}
     </G>
   )
 })
@@ -26,3 +27,32 @@ const cls = classes(css`
     justify-content: space-between;
   }
 `)
+
+export const CommonSpaceBetweenItem = forwardRef<
+  HTMLDivElement,
+  ComponentPropsWithRef<'div'> & {
+    label: string
+    icon?: ReactNode
+  }
+>(({ className, label, icon, children, ...rest }, ref) => {
+  const cls = classes(css`
+    &-icon {
+      width: 16px;
+    }
+  `)
+
+  return (
+    <SpaceBetweenItem
+      className={cls()}
+      {...rest}
+      ref={ref}
+      left={
+        <G horizontal='auto 1fr' center gap={2}>
+          <G className={cls('icon')}>{icon}</G>
+          <Text>{label}</Text>
+        </G>
+      }
+      right={children}
+    />
+  )
+})
