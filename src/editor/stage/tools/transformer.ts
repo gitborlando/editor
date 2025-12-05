@@ -1,7 +1,9 @@
+import { AABB, OBB } from 'src/editor/math'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageScene } from 'src/editor/render/scene'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageViewport } from 'src/editor/stage/viewport'
+import { snapGridRound } from 'src/editor/utils'
 import { Drag } from 'src/global/event/drag'
 
 class StageTransformerService {
@@ -24,17 +26,36 @@ class StageTransformerService {
   }
 
   move(e: MouseEvent) {
-    Drag.onStart(() => {
+    const offsetXY = XY._()
+
+    Drag.onStart(({ start }) => {
+      start = StageViewport.toSceneXY(start)
+
+      offsetXY.x = this.obb.x - start.x
+      offsetXY.y = this.obb.y - start.y
+
       if (e.altKey) {
         StageCursor.setCursor('copy')
         // OperateNode.copySelectNodes()
         // OperateNode.pasteNodes()
       }
     })
-      .onMove(({ delta }) => {
+      .onMove(({ current }) => {
         this.isMoving = true
-        delta = StageViewport.toSceneShift(delta)
-        OperateGeometry.setActiveGeometries({ x: delta.x, y: delta.y })
+
+        current = StageViewport.toSceneXY(current)
+        const newObbXY = XY.from(current).plus(offsetXY)
+        const newObb = this.obb.clone().shift(newObbXY.minus(this.obb))
+
+        const aabb = AABB.fromOBB(newObb)
+        const snapDelta = XY._(
+          snapGridRound(aabb.minX) - aabb.minX,
+          snapGridRound(aabb.minY) - aabb.minY,
+        )
+        newObb.shift(snapDelta)
+
+        const finalDeltaXY = XY.from(newObb).minus(this.obb)
+        OperateGeometry.setActiveGeometries(finalDeltaXY)
       })
       .onDestroy(({ moved }) => {
         this.isMoving = false

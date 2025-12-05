@@ -41,6 +41,16 @@ export class OBB {
     return (this.axis = { widthAxis, heightAxis })
   }
 
+  shift = (delta: IXY) => {
+    return this.update(
+      this.x + delta.x,
+      this.y + delta.y,
+      this.width,
+      this.height,
+      this.rotation,
+    )
+  }
+
   update = (
     x: number,
     y: number,

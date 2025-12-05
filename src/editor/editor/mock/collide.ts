@@ -9,13 +9,13 @@ export function mockCollide() {
   SchemaCreator.addToSchema(schema, page)
   meta.pageIds.push(page.id)
 
-  const frame = SchemaCreator.frame()
-  frame.x = 100
-  frame.y = 100
-  frame.width = 500
-  frame.height = 500
-  SchemaCreator.addToSchema(schema, frame)
-  SchemaCreator.addChild(page, frame)
+  // const frame = SchemaCreator.frame()
+  // frame.x = 100
+  // frame.y = 100
+  // frame.width = 500
+  // frame.height = 500
+  // SchemaCreator.addToSchema(schema, frame)
+  // SchemaCreator.addChild(page, frame)
 
   // for (let i = 0; i < 3; i++) {
   //   const rect = SchemaCreator.rect()
@@ -27,13 +27,23 @@ export function mockCollide() {
   //   SchemaCreator.addChild(frame, rect)
   // }
 
-  const line = SchemaCreator.line({
-    x: 300,
-    y: 300,
-    rotation: 45,
+  // const line = SchemaCreator.line({
+  //   x: 300,
+  //   y: 300,
+  //   rotation: 45,
+  // })
+  // SchemaCreator.addToSchema(schema, line)
+  // SchemaCreator.addChild(frame, line)
+
+  const rect = SchemaCreator.rect({
+    // x: 0.5,
+    // y: -0.15,
+    width: 6,
+    height: 4,
+    // rotation: 33,
   })
-  SchemaCreator.addToSchema(schema, line)
-  SchemaCreator.addChild(frame, line)
+  SchemaCreator.addToSchema(schema, rect)
+  SchemaCreator.addChild(page, rect)
 
   // const polygon = SchemaCreator.polygon({
   //   x: 300,
