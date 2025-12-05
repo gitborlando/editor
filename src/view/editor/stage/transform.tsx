@@ -164,8 +164,6 @@ const VertexComp: FC<{
           current = StageViewport.toSceneXY(current)
           const line = selectedNodes[0] as V1.Line
 
-          OperateGeometry.skipExtraOperationWhenSetRotation = true
-
           switch (type) {
             case 'topLeft':
             case 'bottomLeft': {
@@ -194,8 +192,6 @@ const VertexComp: FC<{
               )
               break
           }
-
-          OperateGeometry.skipExtraOperationWhenSetRotation = false
 
           return
         }

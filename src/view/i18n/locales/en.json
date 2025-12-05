@@ -145,5 +145,6 @@
   "zoom to 100": "zoom to 100%",
   "save current zoom and offset": "save zoom and offset",
   "add and select page": "add and select page",
-  "delete page": "delete page"
+  "delete page": "delete page",
+  "created node": "created node"
 }

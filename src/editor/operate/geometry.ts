@@ -41,8 +41,6 @@ class OperateGeometryService {
   operateKeys = createActiveKeys(new Set())
   deltaKeys = createActiveKeys(new Set())
 
-  skipExtraOperationWhenSetRotation = false
-
   setupActiveKeys(selectedNodes: V1.Node[]) {
     createActiveKeys(this.activeKeys, ['x', 'y', 'width', 'height', 'rotation'])
 
@@ -73,8 +71,6 @@ class OperateGeometryService {
     })
   }
 
-  private hasStartApply = false
-
   setActiveGeometries(
     geometries: Partial<Record<keyof AllGeometry, number>>,
     delta: boolean = true,
@@ -99,16 +95,12 @@ class OperateGeometryService {
     this.operateKeys.add(key)
     this.activeGeometry[key] = value
 
-    if (this.hasStartApply) return
-    this.hasStartApply = true
-
     const traverse = SchemaHelper.createTraverse({
       callback: this.applyChangeToNode,
     })
     traverse(getSelectIdList())
     YState.next()
 
-    this.hasStartApply = false
     this.operateKeys.clear()
     this.deltaKeys.clear()
   }
@@ -118,10 +110,10 @@ class OperateGeometryService {
       if (this.deltaKeys.has(key)) return this.activeGeometry[key]
       return this.activeGeometry[key] - T<any>(node)[key]
     })
-    if (['width', 'height'].includes(key)) {
-      if (T<any>(node)[key] + rawDelta < 1) return T<any>(node)[key] - 1
-      return rawDelta
-    }
+    // if (['width', 'height'].includes(key)) {
+    //   if (T<any>(node)[key] + rawDelta < 1) return T<any>(node)[key] - 1
+    //   return rawDelta
+    // }
     return rawDelta
   }
 
@@ -151,13 +143,13 @@ class OperateGeometryService {
         )
       }
       if (key === 'rotation') {
-        if (this.skipExtraOperationWhenSetRotation) {
-          return YState.set(
-            `${node.id}.rotation`,
-            Angle.normal(node.rotation + this.delta('rotation', node)),
-          )
+        if (this.operateKeys.size === 1) {
+          return this.applyRotationToNode(traverseData, node, depth)
         }
-        return this.applyRotationToNode(traverseData, node, depth)
+        return YState.set(
+          `${node.id}.rotation`,
+          Angle.normal(node.rotation + this.delta('rotation', node)),
+        )
       }
       if (key === 'sides') {
         let { width, height, sides } = node as V1.Polygon
