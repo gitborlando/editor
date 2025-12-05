@@ -14,6 +14,7 @@ const initSetting = () => {
       fixedSceneMatrix: true,
       sceneMatrix: Matrix.identity().tuple(),
     },
+    snapToGrid: false,
   }
 }
 

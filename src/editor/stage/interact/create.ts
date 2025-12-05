@@ -1,11 +1,11 @@
 import { DragData } from '@gitborlando/utils/browser'
 import { HandleNode } from 'src/editor/handle/node'
-import { max } from 'src/editor/math/base'
 import { OperateGeometry } from 'src/editor/operate/geometry'
 import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
+import { snapGridRound, snapGridRoundXY } from 'src/editor/utils'
 import { Drag } from 'src/global/event/drag'
 import { IXY } from 'src/shared/utils/normal'
 import { SchemaUtil } from 'src/shared/utils/schema'
@@ -56,6 +56,7 @@ class StageCreateService {
 
     StageSelect.onCreateSelect(this.node.id)
     StageSurface.disablePointEvent()
+
     if (this.node.type === 'line') {
       StageCursor.setCursor('move').lock().upReset()
     }
@@ -63,15 +64,23 @@ class StageCreateService {
 
   private onCreateMove({ marquee, current, start }: DragData) {
     if (this.node.type === 'line') {
-      current = StageViewport.toSceneXY(current)
-      start = StageViewport.toSceneXY(start)
+      current = snapGridRoundXY(StageViewport.toSceneXY(current))
+      start = snapGridRoundXY(StageViewport.toSceneXY(start))
+
       const rotation = Angle.fromTwoVector(current, start)
       const width = XY.distanceOf(current, start)
+
       OperateGeometry.setActiveGeometries({ ...start, width, rotation }, false)
     } else {
       const { x, y, width, height } = StageViewport.toSceneMarquee(marquee)
+
       OperateGeometry.setActiveGeometries(
-        { x, y, width: max(width), height: max(height) },
+        {
+          x: snapGridRound(x),
+          y: snapGridRound(y),
+          width: snapGridRound(width),
+          height: snapGridRound(height),
+        },
         false,
       )
     }

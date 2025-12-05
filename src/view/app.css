@@ -9,7 +9,7 @@
     padding: 0;
     box-sizing: border-box;
     user-select: none;
-    font-family: 'GoogleSansCode' !important;
+    font-family: 'GoogleSansCode' initial !important;
   }
   *::selection {
     background-color: var(--color);

@@ -74,6 +74,11 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
     }
   }
 
+  const handleSnapToGrid = (value: boolean) => {
+    const setting = getEditorSetting()
+    setting.snapToGrid = value
+  }
+
   return (
     <ArcoMenu className={cls('options')}>
       <MenuItem key='100%'>
@@ -87,6 +92,13 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
           label={t('save current zoom and offset')}
           checked={getEditorSetting().dev.fixedSceneMatrix}
           onChecked={handelSaveSceneMatrix}
+        />
+      </MenuItem>
+      <MenuItem key='snapToGrid'>
+        <CheckableBalanceItem
+          label={t('snap to grid')}
+          checked={getEditorSetting().snapToGrid}
+          onChecked={handleSnapToGrid}
         />
       </MenuItem>
     </ArcoMenu>

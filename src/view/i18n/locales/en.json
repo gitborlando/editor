@@ -146,5 +146,6 @@
   "save current zoom and offset": "save zoom and offset",
   "add and select page": "add and select page",
   "delete page": "delete page",
-  "created node": "created node"
+  "created node": "created node",
+  "snap to grid": "snap to grid"
 }

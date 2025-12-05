@@ -145,5 +145,6 @@
   "save current zoom and offset": "储存当前缩放和偏移",
   "add and select page": "添加并选择页面",
   "delete page": "删除页面",
-  "created node": "创建节点"
+  "created node": "创建节点",
+  "snap to grid": "吸附到网格"
 }
