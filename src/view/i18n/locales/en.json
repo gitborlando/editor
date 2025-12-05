@@ -141,5 +141,9 @@
   "show FPS": "show FPS",
   "change fill type": "change fill type",
   "adjust color": "adjust color",
-  "move gradient point": "move gradient point"
+  "move gradient point": "move gradient point",
+  "zoom to 100": "zoom to 100%",
+  "save current zoom and offset": "save zoom and offset",
+  "add and select page": "add and select page",
+  "delete page": "delete page"
 }

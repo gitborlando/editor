@@ -1,5 +1,6 @@
 import { listen, WheelUtil } from '@gitborlando/utils/browser'
 import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
+import { HandlePage } from 'src/editor/handle/page'
 import { IRect } from 'src/editor/math'
 import { minMax } from 'src/editor/math/base'
 import { Matrix } from 'src/editor/math/matrix'
@@ -34,8 +35,9 @@ class StageViewportService {
     return Disposer.collect(
       this.onBoundChange(),
       this.onMatrixChange(),
+      this.onCurrentPageChange(),
       StageSurface.inited.hook(this.onWheelZoom),
-      EditorSetting.inited.hook(this.devSolidZoomAndOffset),
+      EditorSetting.inited.hook(this.DEV_loadSceneMatrix),
       this.disposer.dispose,
     )
   }
@@ -177,8 +179,20 @@ class StageViewportService {
     )
   }
 
+  private onCurrentPageChange() {
+    return reaction(
+      () => YClients.client.selectPageId,
+      (pageId) => {
+        const getMatrix = () =>
+          getEditorSetting().dev.sceneMatrix || Matrix.identity().tuple()
+        const matrix = HandlePage.pageSceneMatrix.getSet(pageId, getMatrix)
+        StageViewport.sceneMatrix = Matrix.of(...matrix)
+      },
+    )
+  }
+
   @action
-  private devSolidZoomAndOffset() {
+  private DEV_loadSceneMatrix() {
     const { fixedSceneMatrix, sceneMatrix } = getEditorSetting().dev
     if (fixedSceneMatrix) this.sceneMatrix = Matrix.of(...sceneMatrix)
   }

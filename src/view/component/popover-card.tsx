@@ -6,7 +6,7 @@ export const PopoverCard = forwardRef<
 })
 
 const cls = classes(css`
-  width: 200px;
+  width: fit-content;
   height: fit-content;
   background-color: white;
   padding: 12px;

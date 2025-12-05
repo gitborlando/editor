@@ -1,13 +1,10 @@
 import { Radio } from '@arco-design/web-react'
-import { Lock, Settings, Unlock } from 'lucide-react'
+import { Settings } from 'lucide-react'
 import { getEditorSetting } from 'src/editor/editor/setting'
-import { StageViewport } from 'src/editor/stage/viewport'
 import { IconButton } from 'src/view/component/button'
 import { DragPanel } from 'src/view/component/drag-panel'
-import { SpaceBetweenItem } from 'src/view/component/item'
-import { SwitchBar } from 'src/view/component/switch-bar'
-import { Text } from 'src/view/component/text'
-import { getLanguage, sentence, setLanguage } from 'src/view/i18n/config'
+import { CommonBalanceItem } from 'src/view/component/item'
+import { getLanguage, setLanguage } from 'src/view/i18n/config'
 
 export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
   const [showSetting, setShowSetting] = useState(false)
@@ -24,17 +21,16 @@ export const EditorHeaderSettingComp: FC<{}> = observer(({}) => {
         x-if={showSetting}
         title={t('common.setting')}
         closeFunc={() => setShowSetting(false)}>
-        <SwitchBar
+        {/* <SwitchBar
           options={[
             { label: t('special.generalSetting'), value: 'common' },
             { label: t('special.devSetting'), value: 'dev' },
           ]}
           value={settingType}
           onChange={(value) => setSettingType(value as 'common' | 'dev')}
-        />
+        /> */}
         <G className={editorSettingCls()} gap={8}>
           <CommonSettingComp x-if={settingType === 'common'} />
-          <DevSettingComp x-if={settingType === 'dev'} />
         </G>
       </DragPanel>
     </>
@@ -54,7 +50,7 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
 
   return (
     <G gap={8}>
-      <SpaceBetweenItem label={t('noun.language')}>
+      <CommonBalanceItem label={t('noun.language')}>
         <Radio.Group
           type='button'
           size='mini'
@@ -63,7 +59,7 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
           <Radio value='en'>English</Radio>
           <Radio value='zh'>中文</Radio>
         </Radio.Group>
-      </SpaceBetweenItem>
+      </CommonBalanceItem>
       <BooleanSettingComp
         label={t('auto save')}
         value={autosave}
@@ -98,44 +94,15 @@ export const CommonSettingComp: FC<{}> = observer(({}) => {
   )
 })
 
-const DevSettingComp: FC<{}> = observer(({}) => {
-  const setting = getEditorSetting()
-  const { fixedSceneMatrix: solidZoomAndOffset } = setting.dev
-
-  const handelFixZoomAndOffset = () => {
-    setting.dev.fixedSceneMatrix = !solidZoomAndOffset
-    if (!solidZoomAndOffset) {
-      setting.dev.sceneMatrix = StageViewport.sceneMatrix.tuple()
-    }
-  }
-
-  return (
-    <G gap={8}>
-      <SpaceBetweenItem
-        label={sentence(t('verb.lock'), t('noun.zoom'), t('noun.offset'))}>
-        <G horizontal center gap={8}>
-          <Lucide
-            icon={solidZoomAndOffset ? Lock : Unlock}
-            size={16}
-            active={solidZoomAndOffset}
-            onClick={handelFixZoomAndOffset}
-          />
-        </G>
-      </SpaceBetweenItem>
-    </G>
-  )
-})
-
 const BooleanSettingComp: FC<{
   label: string
   value: boolean
   onChange: (value: boolean) => void
 }> = ({ label, value, onChange }) => {
   return (
-    <G className={booleanSettingCls()} horizontal='auto auto' center>
-      <Text>{label}</Text>
+    <CommonBalanceItem label={label}>
       <SwitchComp value={value} onChange={onChange} />
-    </G>
+    </CommonBalanceItem>
   )
 }
 
@@ -154,11 +121,6 @@ export const editorSettingCls = classes(css`
   padding: 12px;
   padding-top: 0;
   height: fit-content;
-`)
-
-export const booleanSettingCls = classes(css`
-  height: 32px;
-  justify-content: space-between;
 `)
 
 export const switchCls = classes(css`

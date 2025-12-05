@@ -140,5 +140,9 @@
   "slice render optimization when zoom": "缩放时分片渲染优化",
   "change fill type": "更改填充类型",
   "adjust color": "调整颜色",
-  "move gradient point": "移动渐变点"
+  "move gradient point": "移动渐变点",
+  "zoom to 100": "缩放至100%",
+  "save current zoom and offset": "储存当前缩放和偏移",
+  "add and select page": "添加并选择页面",
+  "delete page": "删除页面"
 }

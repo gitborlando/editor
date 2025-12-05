@@ -2,13 +2,14 @@ import { createCache } from '@gitborlando/utils'
 import { IMatrixTuple } from 'src/editor/math'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { getSelectPageId } from 'src/editor/y-state/y-clients'
+import { ProdLog } from 'src/utils/global'
 import { SchemaCreator } from '../schema/creator'
 
 class HandlePageService {
   pageSceneMatrix = createCache<ID, IMatrixTuple>()
 
   subscribe() {
-    return Disposer.collect(this.memoPageSceneMatrix(), this.onSwitchPage())
+    return Disposer.collect(this.memoPageSceneMatrix())
   }
 
   addPage(page = SchemaCreator.page()) {
@@ -17,7 +18,7 @@ class HandlePageService {
     YState.next()
 
     YUndo.untrack(() => YClients.selectPage(page.id))
-    YUndo.track({ type: 'all', description: '添加并选中页面' })
+    YUndo.track2('all', t('add and select page'))
   }
 
   removePage(page: V1.Page) {
@@ -28,19 +29,7 @@ class HandlePageService {
     YState.next()
 
     YUndo.untrack(() => YClients.selectPage(YState.state.meta.pageIds[0]))
-    YUndo.track({ type: 'all', description: '删除页面' })
-  }
-
-  private onSwitchPage() {
-    return reaction(
-      () => YClients.client.selectPageId,
-      (pageId) => {
-        const matrix = this.pageSceneMatrix.getSet(pageId, () =>
-          Matrix.identity().tuple(),
-        )
-        StageViewport.sceneMatrix = Matrix.of(...matrix)
-      },
-    )
+    YUndo.track2('all', t('delete page'))
   }
 
   private memoPageSceneMatrix() {
@@ -64,7 +53,7 @@ class HandlePageService {
     }
     curPage.childIds.forEach(findNodes)
 
-    console.log({
+    ProdLog({
       meta: YState.state.meta,
       page: curPage,
       ...nodes,
