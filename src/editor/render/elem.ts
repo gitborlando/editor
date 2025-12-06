@@ -3,9 +3,10 @@ import { getEditorSetting } from 'src/editor/editor/setting'
 import { xy_distance, xy_minus } from 'src/editor/math/xy'
 import { ElemDrawer } from 'src/editor/render/draw'
 import { StageSurface } from 'src/editor/render/surface'
+import { SplitTextInfo } from 'src/editor/render/text-break/text-breaker'
 import { StageViewport } from 'src/editor/stage/viewport'
 import { INoopFunc, IXY } from 'src/shared/utils/normal'
-import { memorized } from 'src/utils/common'
+import { createMemo, memorized } from 'src/utils/common'
 
 declare module 'react' {
   namespace JSX {
@@ -91,6 +92,26 @@ export class Elem {
     return OBB.fromCenter(center, width + extend * 2, height + extend * 2, rotation)
       .aabb
   }
+
+  splitTexts!: SplitTextInfo[]
+  memoSplitTexts = createMemo()
+
+  get textActualBounds() {
+    return this.getTextActualBounds([this.splitTexts])
+  }
+  private getTextActualBounds = memorized(() => {
+    let minX = Infinity
+    let maxX = -Infinity
+
+    this.splitTexts.forEach(({ start, width }) => {
+      minX = Math.min(minX, start)
+      maxX = Math.max(maxX, start + width)
+    })
+
+    const width = maxX - minX
+    const height = T<V1.Text>(this.node).style.lineHeight * this.splitTexts.length
+    return { width, height }
+  })
 
   traverseDraw() {
     if (!this.visible) return

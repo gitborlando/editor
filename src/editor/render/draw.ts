@@ -1,4 +1,4 @@
-import { createObjCache, loopFor } from '@gitborlando/utils'
+import { loopFor } from '@gitborlando/utils'
 import autoBind from 'class-autobind-decorator'
 import { ImgManager } from 'src/editor/editor/img-manager'
 import { EditorSetting } from 'src/editor/editor/setting'
@@ -7,7 +7,6 @@ import { max } from 'src/editor/math/base'
 import { pointsOnBezierCurves } from 'src/editor/math/bezier/points-of-bezier'
 import { xy_from } from 'src/editor/math/xy'
 import { StageSurface } from 'src/editor/render/surface'
-import { ISplitText } from 'src/editor/render/text-break/text-breaker'
 import { getZoom } from 'src/editor/stage/viewport'
 import { iife, IXY } from 'src/shared/utils/normal'
 import { rgba } from 'src/utils/color'
@@ -82,7 +81,7 @@ class ElemDrawerService {
         const { lineHeight } = node.style
         this.dirtyRects.push(AABB.extend(this.elem.aabb, 0, lineHeight / 2, 0, 0))
 
-        const dirtyHeight = lineHeight * this.splitTexts.length
+        const dirtyHeight = lineHeight * this.elem.splitTexts.length
         this.dirtyRects.push(
           AABB.extend(this.elem.aabb, 0, 0, 0, this.elem.aabb.minY + dirtyHeight),
         )
@@ -170,29 +169,33 @@ class ElemDrawerService {
     })
   }
 
-  private splitTextsCache = createObjCache<ISplitText[]>()
-  private splitTexts!: ISplitText[]
-
   private breakText() {
-    const { content, style, width } = this.node as V1.Text
+    const node = this.node as V1.Text
+    const { content, style, width } = node
     const { fontWeight, fontSize, fontFamily, letterSpacing } = style
 
     this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`
     this.ctx.textBaseline = 'top'
     this.ctx.letterSpacing = `${letterSpacing}px`
 
-    this.splitTexts = this.splitTextsCache.getSet(
-      this.node.id,
+    this.elem.splitTexts = this.elem.memoSplitTexts(
       () => StageSurface.textBreaker.breakText(content, width, style, letterSpacing),
       [content, width, style],
     )
+
+    console.log(this.elem.splitTexts)
+
+    if (width === 0) {
+      node.width = this.elem.textActualBounds.width
+      node.height = this.elem.textActualBounds.height
+    }
   }
 
   private fillOrStrokeText = (op: 'fillText' | 'strokeText') => {
     const { style } = this.node as V1.Text
     const { lineHeight } = style
 
-    this.splitTexts.forEach(({ text, start, width }, i) => {
+    this.elem.splitTexts.forEach(({ text, start, width }, i) => {
       if (EditorSetting.setting.ignoreUnVisible) {
         const visualWidth = width * getZoom()
         const visualHeight = lineHeight * getZoom()
@@ -451,7 +454,7 @@ class ElemDrawerService {
     const collideXys = <IXY[]>[]
     const { lineHeight, fontSize } = (this.node as V1.Text).style
 
-    this.splitTexts.forEach(({ start, width }, i) => {
+    this.elem.splitTexts.forEach(({ start, width }, i) => {
       const y = i * lineHeight + fontSize / 2
       collideXys.push(XY._(start, y), XY._(start + width, y))
     })

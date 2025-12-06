@@ -8,7 +8,7 @@ const ELLIPSIS = '\u2026'
 const LINE_BREAK_REGEX = /^(\r|\n|\r\n)$/
 const MULTIPLE_SPACE_REGEX = new RegExp(`${SPACE}(${SPACE})+`, 'g')
 
-export type ISplitText = {
+export type SplitTextInfo = {
   width: number
   text: string
   start: number
@@ -57,6 +57,8 @@ export class TextBreaker {
 
     if (!text) return []
 
+    maxWidth = maxWidth === 0 ? Infinity : maxWidth
+
     const { fontWeight, fontSize, fontFamily, letterSpacing, align } = style
     const font = `${fontWeight} ${fontSize}px ${fontFamily}`
 
@@ -68,7 +70,7 @@ export class TextBreaker {
     const spaceLength = measureWidth(SPACE)
 
     const lineBreaker = new LineBreaker(this.lineBreakTrie, text)
-    const splitText: ISplitText[] = []
+    const splitText: SplitTextInfo[] = []
 
     let currentLineWidth = 0
     let lineStartIndex = 0
@@ -80,6 +82,7 @@ export class TextBreaker {
     const addCurrentLine = () => {
       if (lineEndIndex > lineStartIndex) {
         const start = iife(() => {
+          if (maxWidth === Infinity) return 0
           if (align === 'left') return 0
           if (align === 'center') return (maxWidth - currentLineWidth) / 2
           if (align === 'right') return maxWidth - currentLineWidth
