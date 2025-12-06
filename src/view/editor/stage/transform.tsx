@@ -348,6 +348,20 @@ const SizeIndicatorComp: FC<{
 }> = observer(({ vertexes }) => {
   const [p0, p1, p2, p3] = vertexes
 
+  const center = XY._()
+  let angle = 0
+
+  iife(() => {
+    const topY = vertexes.sort((a, b) => b.y - a.y)[0].y
+    const remainVertexes = vertexes.filter((v) => v.y !== topY)
+    remainVertexes.sort((a, b) => a.x - b.x)
+    let [p0, p1, p2] = remainVertexes
+    const angle1 = Angle.fromTwoVector(p1, p0)
+    const angle2 = Angle.fromTwoVector(p2, p0)
+    if (angle1 > angle2) p0 = p2
+    angle = angle1 > angle2 ? angle2 : angle1
+  })
+
   const text = SchemaCreator.text({
     id: 'size-indicator-text',
     content: `${twoDecimal(transformOBB.width)}⨯${twoDecimal(transformOBB.height)}`,
@@ -357,9 +371,8 @@ const SizeIndicatorComp: FC<{
     fills: [SchemaCreator.fillColor(COLOR.black)],
     x: p0.x,
     y: p0.y,
+    width: 0,
   })
-  const fontStyle = `${text.style.fontWeight} ${text.style.fontSize}px ${text.style.fontFamily}`
-  text.width = StageSurface.textBreaker.measureWidth(text.content, fontStyle)
 
   return <elem node={text} />
 })
