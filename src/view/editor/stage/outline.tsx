@@ -2,6 +2,7 @@ import { iife } from '@gitborlando/utils'
 import { entries } from 'mobx'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { SchemaHelper } from 'src/editor/schema/helper'
+import { StageMove } from 'src/editor/stage/interact/move'
 import { StageSelect } from 'src/editor/stage/interact/select'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
@@ -18,6 +19,7 @@ type OutlineInfo = {
 export const EditorStageOutlineComp: FC<{}> = observer(({}) => {
   if (StageTransformer.isMoving) return null
   if (StageViewport.isZooming) return null
+  if (StageMove.isMoving) return null
   return <EditorStageOutlineCompInner />
 })
 

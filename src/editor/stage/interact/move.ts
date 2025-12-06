@@ -1,21 +1,20 @@
-import autobind from 'class-autobind-decorator'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { Drag } from 'src/global/event/drag'
 import { StageViewport } from '../viewport'
 
-@autobind
 class StageMoveService {
+  @observable isMoving = false
+
   startInteract() {
     const disposer = Disposer.collect(
       StageSurface.addEvent('mousedown', this.onMoveStage),
+      StageSurface.disablePointEvent(false),
     )
-    StageSurface.disablePointEvent(false)
     StageCursor.setCursor('hand').lock()
 
     return () => {
       disposer()
-      StageSurface.enablePointEvent()
       StageCursor.unlock().setCursor('select', 0)
     }
   }
@@ -23,12 +22,16 @@ class StageMoveService {
   private onMoveStage() {
     Drag.onStart(() => StageCursor.unlock().setCursor('grab').lock())
       .onMove(({ delta }) => {
+        this.isMoving = true
         StageViewport.sceneMatrix = StageViewport.sceneMatrix
           .clone()
           .translate(delta.x, delta.y)
       })
-      .onDestroy(() => StageCursor.unlock().setCursor('hand').lock())
+      .onDestroy(() => {
+        this.isMoving = false
+        StageCursor.unlock().setCursor('hand').lock()
+      })
   }
 }
 
-export const StageMove = new StageMoveService()
+export const StageMove = autoBind(makeObservable(new StageMoveService()))

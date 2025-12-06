@@ -500,9 +500,10 @@ export class StageSurfaceService {
 
   disablePointEvent(setbackOnPointerUp = true) {
     this.isPointerEventNone = true
-    listen('mouseup', { once: true }, () => {
-      if (setbackOnPointerUp) this.enablePointEvent()
-    })
+    if (setbackOnPointerUp) {
+      return listen('mouseup', { once: true }, this.enablePointEvent)
+    }
+    return this.enablePointEvent
   }
 
   enablePointEvent() {

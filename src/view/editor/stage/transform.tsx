@@ -6,6 +6,7 @@ import { StageSurface } from 'src/editor/render/surface'
 import { SchemaCreator } from 'src/editor/schema/creator'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageInteract } from 'src/editor/stage/interact/interact'
+import { StageMove } from 'src/editor/stage/interact/move'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
@@ -17,8 +18,8 @@ let isSelectOnlyLine = false
 
 export const EditorStageTransformComp: FC<{}> = observer(({}) => {
   const selectNodes = useSelectNodes()
-  const { isMoving } = StageTransformer
-  const shouldHidden = isMoving || StageViewport.isZooming
+  const shouldHidden =
+    StageTransformer.isMoving || StageViewport.isZooming || StageMove.isMoving
 
   isSelectOnlyLine = selectNodes.length === 1 && selectNodes[0].type === 'line'
   StageTransformer.isSelectOnlyLine = isSelectOnlyLine
