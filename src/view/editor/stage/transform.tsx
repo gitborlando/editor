@@ -9,6 +9,7 @@ import { StageInteract } from 'src/editor/stage/interact/interact'
 import { StageTransformer } from 'src/editor/stage/tools/transformer'
 import { getZoom, StageViewport } from 'src/editor/stage/viewport'
 import { Drag } from 'src/global/event/drag'
+import { twoDecimal } from 'src/utils/common'
 import { useSelectNodes } from 'src/view/hooks/schema/use-y-state'
 import { themeColor } from 'src/view/styles/color'
 
@@ -57,6 +58,7 @@ export const EditorStageTransformComp: FC<{}> = observer(({}) => {
       <VertexComp type='topRight' xy={p1} />
       <VertexComp type='bottomRight' xy={p2} />
       <VertexComp type='bottomLeft' xy={p3} />
+      <SizeIndicatorComp vertexes={[p0, p1, p2, p3]} />
     </elem>
   )
 })
@@ -340,4 +342,25 @@ const VertexComp: FC<{
       />
     </>
   )
+})
+
+const SizeIndicatorComp: FC<{
+  vertexes: IXY[]
+}> = observer(({ vertexes }) => {
+  const [p0, p1, p2, p3] = vertexes
+
+  const text = SchemaCreator.text({
+    id: 'size-indicator-text',
+    content: `${twoDecimal(transformOBB.width)}⨯${twoDecimal(transformOBB.height)}`,
+    style: {
+      fontSize: 12 / getZoom(),
+    },
+    fills: [SchemaCreator.fillColor(COLOR.black)],
+    x: p0.x,
+    y: p0.y,
+  })
+  const fontStyle = `${text.style.fontWeight} ${text.style.fontSize}px ${text.style.fontFamily}`
+  text.width = StageSurface.textBreaker.measureWidth(text.content, fontStyle)
+
+  return <elem node={text} />
 })
