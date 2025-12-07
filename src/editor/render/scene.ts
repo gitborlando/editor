@@ -12,24 +12,12 @@ class StageSceneService {
 
   sceneRoot!: Elem
   widgetRoot!: Elem
-
   rootElems: Elem[] = []
 
   private disposer = new Disposer()
 
   subscribe() {
-    return Disposer.collect(this.hookRenderNode(), this.dispose)
-  }
-
-  init() {
-    this.setupRootElems()
-  }
-
-  private dispose() {
-    this.elements.clear()
-    this.rootElems.forEach((elem) => elem.destroy())
-    this.rootElems.length = 0
-    this.disposer.dispose()
+    return Disposer.collect(this.setupElems(), this.hookRenderNode())
   }
 
   findElem(id: string) {
@@ -42,12 +30,18 @@ class StageSceneService {
     )
   }
 
-  private setupRootElems() {
+  private setupElems() {
+    this.elements.clear()
     this.sceneRoot = new Elem('sceneRoot', 'sceneElem')
     this.widgetRoot = new Elem('widgetRoot', 'widgetElem')
     this.sceneRoot.hitTest = () => true
     this.widgetRoot.hitTest = () => true
     this.rootElems.push(this.sceneRoot, this.widgetRoot)
+    return () => {
+      this.elements.clear()
+      this.rootElems.forEach((elem) => elem.destroy())
+      this.rootElems.length = 0
+    }
   }
 
   private hookRenderNode() {

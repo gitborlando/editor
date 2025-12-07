@@ -54,8 +54,6 @@ export class EditorService {
     OperateShadow.initHook()
     OperateText.initHook()
 
-    StageScene.init()
-
     StageDrop.initHook()
   }
 
