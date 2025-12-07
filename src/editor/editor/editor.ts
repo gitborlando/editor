@@ -1,5 +1,4 @@
 import { jsonParse } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import JSZip from 'jszip'
 import { EditorCommand } from 'src/editor/editor/command'
 import { mockCollide } from 'src/editor/editor/mock/collide'
@@ -25,7 +24,6 @@ import { StageViewport } from '../stage/viewport'
 
 const jsZip = new JSZip()
 
-@autobind
 export class EditorService {
   inited = Signal.create(false)
   private disposer = new Disposer()
@@ -102,4 +100,4 @@ export class EditorService {
   }
 }
 
-export const Editor = new EditorService()
+export const Editor = autoBind(new EditorService())
