@@ -40,5 +40,7 @@ const cls = classes(css`
     color: inherit;
     background-color: inherit;
     transition: inherit;
+    margin-bottom: 0;
+    font-weight: inherit;
   }
 `)

@@ -16,7 +16,7 @@ export const Text: FC<ComponentPropsWithRef<'div'> & { active?: boolean }> =
 const cls = classes(css`
   align-items: center;
   align-content: center;
-  ${styles.textCommon}
+  ${styles.textLabel}
   &[data-active='true'] {
     ${styles.textActive}
   }

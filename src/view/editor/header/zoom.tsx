@@ -15,6 +15,16 @@ export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
   const zoom = ~~((getZoom() || 0) * 100)
   const [show, setShow] = useState(false)
 
+  const cls = classes(css`
+    width: fit-content;
+    height: 32px;
+    padding: 8px;
+    cursor: pointer;
+    ${styles.bgHoverGray}
+    ${styles.borderRadius}
+    ${styles.textCommon}
+  `)
+
   return (
     <Popover
       isOpen={show}
@@ -30,12 +40,22 @@ export const EditorHeaderZoomComp: FC<{}> = observer(({}) => {
 })
 
 const PanelComp: FC<{}> = observer(({}) => {
+  const cls = classes(css`
+    & .arco-menu-inner {
+      padding: 0;
+    }
+    & .arco-menu-item {
+      padding: 0px;
+    }
+  `)
   return (
     <PopoverCard style={{ padding: 6 }}>
-      <G vertical center className={cls('panel')}>
+      <G vertical center className={cls()}>
         <InputZoomComp />
         <Divider style={{ margin: '6px 0' }} />
         <ZoomingOptionsComp />
+        <Divider style={{ margin: '6px 0' }} />
+        <OtherOptionsComp />
       </G>
     </PopoverCard>
   )
@@ -74,13 +94,8 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
     }
   }
 
-  const handleSnapToGrid = (value: boolean) => {
-    const setting = getEditorSetting()
-    setting.snapToGrid = value
-  }
-
   return (
-    <ArcoMenu className={cls('options')}>
+    <ArcoMenu>
       <MenuItem key='zoomTo100'>
         <CheckableBalanceItem
           label={t('zoom to 100')}
@@ -106,11 +121,21 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
           onChecked={handelSaveSceneMatrix}
         />
       </MenuItem>
+    </ArcoMenu>
+  )
+})
+
+const OtherOptionsComp: FC<{}> = observer(({}) => {
+  return (
+    <ArcoMenu>
       <MenuItem key='snapToGrid'>
         <CheckableBalanceItem
           label={t('snap to grid')}
           checked={getEditorSetting().snapToGrid}
-          onChecked={handleSnapToGrid}
+          onChecked={(value) => {
+            const setting = getEditorSetting()
+            setting.snapToGrid = value
+          }}
         />
       </MenuItem>
     </ArcoMenu>
@@ -145,7 +170,12 @@ const CheckableBalanceItem = forwardRef<
       left={
         <G horizontal='auto 1fr' center gap={2}>
           {onChecked && checked ? (
-            <Lucide icon={Check} size={16} className={cls('checked')} />
+            <Lucide
+              icon={Check}
+              size={16}
+              className={cls('checked')}
+              style={{ transform: 'translateY(1px)' }}
+            />
           ) : (
             <G style={{ width: 16 }} />
           )}
@@ -157,21 +187,3 @@ const CheckableBalanceItem = forwardRef<
     />
   )
 })
-
-const cls = classes(css`
-  width: fit-content;
-  height: 32px;
-  padding: 8px;
-  cursor: pointer;
-  ${styles.bgHoverGray}
-  ${styles.borderRadius}
-  ${styles.textCommon}
-  &-panel {
-    & .arco-menu-inner {
-      padding: 0;
-    }
-    & .arco-menu-item {
-      padding: 0px;
-    }
-  }
-`)
