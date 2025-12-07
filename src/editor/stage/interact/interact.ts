@@ -1,27 +1,25 @@
 import { matchCase, NoopFunc } from '@gitborlando/utils'
-import autobind from 'class-autobind-decorator'
 import { StageCreate } from './create'
 import { StageMove } from './move'
 import { StageSelect } from './select'
 
 export type IStageInteraction = 'select' | 'move' | 'create'
 
-@autobind
 class StageInteractService {
   @observable interaction: IStageInteraction = 'select'
-  private disposer?: NoopFunc
+  private offInteract?: NoopFunc
 
-  init() {
-    this.onInteract()
-  }
-
-  dispose() {
-    this.disposer?.()
+  subscribe() {
+    const dispose = this.onInteract()
+    return () => {
+      dispose()
+      this.offInteract?.()
+    }
   }
 
   private onInteract() {
-    autorun(() => {
-      this.disposer?.()
+    return autorun(() => {
+      this.offInteract?.()
 
       const interact = matchCase(this.interaction, {
         select: () => StageSelect.startInteract(),
@@ -29,9 +27,9 @@ class StageInteractService {
         create: () => StageCreate.startInteract(),
       })
 
-      this.disposer = interact()
+      this.offInteract = interact()
     })
   }
 }
 
-export const StageInteract = makeObservable(new StageInteractService())
+export const StageInteract = autoBind(makeObservable(new StageInteractService()))

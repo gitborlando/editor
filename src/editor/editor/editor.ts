@@ -39,6 +39,7 @@ export class EditorService {
       StageScene.subscribe(),
       StageViewport.subscribe(),
       StageToolGrid.subscribe(),
+      StageInteract.subscribe(),
     )
   }
 
@@ -53,7 +54,7 @@ export class EditorService {
     OperateText.initHook()
 
     StageScene.init()
-    StageInteract.init()
+
     StageDrop.initHook()
     StageCursor.initHook()
   }
@@ -61,8 +62,6 @@ export class EditorService {
   dispose() {
     Editor.inited.value = false
     YState.inited$.value = false
-
-    StageInteract.dispose()
 
     this.disposer.dispose()
   }
