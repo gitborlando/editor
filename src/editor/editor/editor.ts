@@ -9,7 +9,6 @@ import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
 import { StageCursor } from 'src/editor/stage/cursor'
 import { StageToolGrid } from 'src/editor/stage/tools/grid'
-import { YSync } from 'src/editor/y-state/y-sync'
 import { FileService } from 'src/global/service/file'
 import { Disposer } from 'src/utils/disposer'
 import { OperateAlign } from '../operate/align'
@@ -17,7 +16,6 @@ import { OperateFill } from '../operate/fill'
 import { OperateShadow } from '../operate/shadow'
 import { OperateStroke } from '../operate/stroke'
 import { OperateText } from '../operate/text'
-import { Schema } from '../schema/schema'
 import { StageDrop } from '../stage/drop'
 import { StageInteract } from '../stage/interact/interact'
 import { StageViewport } from '../stage/viewport'
@@ -63,15 +61,11 @@ export class EditorService {
   }
 
   initSchema = async (fileId: string, onProgress?: (progress: number) => void) => {
+    let schema: V1.Schema | undefined
+
     if (fileId === 'mock') {
       let mockSchema = mockCollide()
-      if (mockSchema) {
-        // Schema.initSchema(mockSchema)
-        YState.initSchema(fileId, mockSchema as unknown as V1.Schema)
-        this.disposer.add(YClients.init())
-        this.disposer.add(YSync.init(fileId, YState.doc))
-        StageViewport.init()
-      }
+      if (mockSchema) schema = mockSchema
     } else {
       const fileMeta = await FileService.getFileMeta(fileId)
       if (fileMeta) {
@@ -80,14 +74,15 @@ export class EditorService {
         const fileText = await zipFiles
           .file(`${decodeURIComponent(fileMeta.name)}.json`)
           ?.async('text')
-        const schema = jsonParse(fileText) as V1.Schema
-        Schema.initSchema(schema)
-
-        YState.initSchema(fileId, schema as unknown as V1.Schema)
-        this.disposer.add(YClients.init())
-        // this.disposer.add(YSync.init(fileId, YState.doc))
-        StageViewport.init()
+        schema = jsonParse(fileText) as V1.Schema
       }
+    }
+
+    if (schema) {
+      YState.initSchema(fileId, schema)
+      this.disposer.add(YClients.init())
+      // this.disposer.add(YSync.init(fileId, YState.doc))
+      StageViewport.init()
     }
   }
 
