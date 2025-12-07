@@ -64,7 +64,7 @@ const InputZoomComp: FC<{}> = observer(({}) => {
 })
 
 const ZoomingOptionsComp: FC<{}> = observer(({}) => {
-  const { updateZoom } = StageViewport
+  const { updateZoom, handleZoomToFitAll, handleZoomToFitSelection } = StageViewport
 
   const handelSaveSceneMatrix = (shouldSave: boolean) => {
     const setting = getEditorSetting()
@@ -81,10 +81,22 @@ const ZoomingOptionsComp: FC<{}> = observer(({}) => {
 
   return (
     <ArcoMenu className={cls('options')}>
-      <MenuItem key='100%'>
+      <MenuItem key='zoomTo100'>
         <CheckableBalanceItem
           label={t('zoom to 100')}
           onClick={() => updateZoom(1)}
+        />
+      </MenuItem>
+      <MenuItem key='zoomToFitAll'>
+        <CheckableBalanceItem
+          label={t('zoom to fit all')}
+          onClick={handleZoomToFitAll}
+        />
+      </MenuItem>
+      <MenuItem key='zoomToFitSelection'>
+        <CheckableBalanceItem
+          label={t('zoom to fit selection')}
+          onClick={handleZoomToFitSelection}
         />
       </MenuItem>
       <MenuItem key='lock'>

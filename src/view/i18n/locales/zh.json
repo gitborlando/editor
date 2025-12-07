@@ -146,5 +146,7 @@
   "add and select page": "添加并选择页面",
   "delete page": "删除页面",
   "created node": "创建节点",
-  "snap to grid": "吸附到网格"
+  "snap to grid": "吸附到网格",
+  "zoom to fit all": "缩放以适应全部",
+  "zoom to fit selection": "缩放以适应选区"
 }

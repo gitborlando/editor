@@ -1,10 +1,12 @@
 import { listen, WheelUtil } from '@gitborlando/utils/browser'
 import { EditorSetting, getEditorSetting } from 'src/editor/editor/setting'
 import { HandlePage } from 'src/editor/handle/page'
-import { IRect } from 'src/editor/math'
+import { AABB, IRect } from 'src/editor/math'
 import { minMax } from 'src/editor/math/base'
 import { Matrix } from 'src/editor/math/matrix'
+import { StageScene } from 'src/editor/render/scene'
 import { StageSurface } from 'src/editor/render/surface'
+import { getSelectIdList } from 'src/editor/y-state/y-clients'
 
 const createInitBound = () => ({
   left: 240,
@@ -83,17 +85,19 @@ class StageViewportService {
   }
 
   updateZoom(newZoom: number, center?: IXY) {
+    const deltaZoom = this.limitZoom(newZoom) / this.zoom
     const { width, height } = this.bound
     center ||= XY.of(width / 2, height / 2)
-
-    newZoom = minMax(0.015625, 256, newZoom)
-    const deltaZoom = newZoom / this.zoom
 
     this.sceneMatrix = this.sceneMatrix
       .clone()
       .translate(-center.x, -center.y)
       .scale(deltaZoom, deltaZoom)
       .translate(center.x, center.y)
+  }
+
+  private limitZoom(zoom: number) {
+    return minMax(0.015625, 256, zoom)
   }
 
   private deltaYToZoomStep(deltaY: number) {
@@ -123,18 +127,10 @@ class StageViewportService {
 
   private onWheelZoom() {
     this.disposer.add(
-      this.wheeler.beforeWheel.hook(({ e }) => {
-        this.isZooming = true
-      }),
-      this.wheeler.duringWheel.hook(({ e }) => {
-        this.handleWheelZoom(e)
-      }),
-      this.wheeler.afterWheel.hook(({ e }) => {
-        this.isZooming = false
-      }),
-      StageSurface.addEvent('wheel', (e) => {
-        this.wheeler.onWheel(e as WheelEvent)
-      }),
+      this.wheeler.beforeWheel.hook(() => (this.isZooming = true)),
+      this.wheeler.duringWheel.hook(({ e }) => this.handleWheelZoom(e)),
+      this.wheeler.afterWheel.hook(() => (this.isZooming = false)),
+      StageSurface.addEvent('wheel', (e) => this.wheeler.onWheel(e as WheelEvent)),
       listen('wheel', { passive: false, capture: true }, (e) => {
         e.ctrlKey && e.preventDefault()
       }),
@@ -195,6 +191,35 @@ class StageViewportService {
   private DEV_loadSceneMatrix() {
     const { fixedSceneMatrix, sceneMatrix } = getEditorSetting().dev
     if (fixedSceneMatrix) this.sceneMatrix = Matrix.of(...sceneMatrix)
+  }
+
+  handleZoomToFitAll() {
+    this.zoomToFit(StageScene.sceneRoot.children.map((child) => child.aabb))
+  }
+
+  handleZoomToFitSelection() {
+    this.zoomToFit(getSelectIdList().map((id) => StageScene.findElem(id).aabb))
+  }
+
+  private zoomToFit(aabbList: AABB[]) {
+    if (!aabbList.length) return
+
+    let aabb = AABB.merge(aabbList)
+    let rect = AABB.rect(aabb)
+
+    aabb = AABB.extend(aabb, max(rect.width / 10, rect.height / 10))
+    rect = AABB.rect(aabb)
+
+    const zoom = this.limitZoom(
+      min(this.bound.width / rect.width, this.bound.height / rect.height),
+    )
+    const offset = XY.center(rect).minus(
+      XY.of(this.bound.width, this.bound.height).divide(2, zoom),
+    )
+
+    this.sceneMatrix = Matrix.identity()
+      .translate(-offset.x, -offset.y)
+      .scale(zoom, zoom)
   }
 }
 
