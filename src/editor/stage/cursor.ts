@@ -1,10 +1,9 @@
 import { createObjCache } from '@gitborlando/utils'
-import autoBind from 'class-autobind-decorator'
+import { listen } from '@gitborlando/utils/browser'
 import { floor } from 'src/editor/math/base'
 import { StageSurface } from 'src/editor/render/surface'
-import { listen, listenOnce } from 'src/shared/utils/event'
 
-export type IStageCursorType =
+export type StageCursorType =
   | 'select'
   | 'move'
   | 'resize'
@@ -14,18 +13,19 @@ export type IStageCursorType =
   | 'hand'
   | 'grab'
 
-@autoBind
 class StageCursorService {
-  private type: IStageCursorType = 'select'
+  private type: StageCursorType = 'select'
   private rotation = 0
   private locked = false
 
-  initHook() {
-    StageSurface.inited.hook(() => this.setCursor('select'))
-    listen('mouseup', () => (this.locked = false))
+  subscribe() {
+    return Disposer.collect(
+      StageSurface.inited.hook(() => this.setCursor('select')),
+      listen('mouseup', () => (this.locked = false)),
+    )
   }
 
-  setCursor(type: IStageCursorType, rotation = 0) {
+  setCursor(type: StageCursorType, rotation = 0) {
     if (this.locked) return this
 
     this.type = type
@@ -45,7 +45,7 @@ class StageCursorService {
   }
 
   upReset() {
-    listenOnce('mouseup', () => {
+    listen('mouseup', { once: true }, () => {
       this.unlock().setCursor('select', 0)
     })
     return this
@@ -107,4 +107,4 @@ class StageCursorService {
     </svg>`
 }
 
-export const StageCursor = new StageCursorService()
+export const StageCursor = autoBind(new StageCursorService())
