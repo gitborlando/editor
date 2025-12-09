@@ -66,13 +66,14 @@ class ElemDrawerService {
         this.drawEllipse()
         break
 
-      case 'line':
-        this.drawLine(node.points)
-        break
+      // case 'line':
+      //   this.drawLine(node.points)
+      //   break
 
       case 'polygon':
       case 'star':
       case 'irregular':
+      case 'line':
         this.drawPath(node.points)
         break
 
